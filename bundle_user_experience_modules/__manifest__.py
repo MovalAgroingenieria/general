@@ -12,6 +12,7 @@
     'installable': True,
     'depends': [
         'web_chatter_position',
+        'web_responsive',
         # 'disable_odoo_online',
         # 'web_listview_range_select',
         # 'web_sheet_full_width',

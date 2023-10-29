@@ -12,15 +12,15 @@
     'application': False,
     'installable': True,
     'depends': [
-        'web',
+        'web_responsive',
         'fontawesome_ext',
     ],
     'data': [
         'views/webclient_templates.xml'
     ],
     'assets': {
-        'web.assets_qweb': [
-            'moval_corporate_image/static/src/xml/menu.xml',
+        'web.assets_backend': [
+            'moval_corporate_image/static/src/components/apps_menu/apps_menu.xml',
         ],
     },
 }

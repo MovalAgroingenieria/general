@@ -24,7 +24,11 @@
         <field name="name">hr.attendance.tree.inherit.user</field>
         <field name="model">hr.attendance</field>
         <field name="inherit_id" ref="hr_attendance.view_attendance_tree"/>
-        <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance'))]"/>
+        <!--
+            <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance'))]"/>
+            v16: TODO
+            Inherited view cannot have 'Groups' define on the record. Use 'groups' attributes inside the view definition
+        -->
         <field name="arch" type="xml">
             <xpath expr="//field[@name='employee_id']" position="attributes">
                 <attribute name="readonly">1</attribute>
@@ -37,7 +41,11 @@
         <field name="name">hr.attendance.tree.inherit.manager</field>
         <field name="model">hr.attendance</field>
         <field name="inherit_id" ref="hr_attendance.view_attendance_tree"/>
-        <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance_user'))]"/>
+        <!--
+            <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance_user'))]"/>
+            v16: TODO
+            Inherited view cannot have 'Groups' define on the record. Use 'groups' attributes inside the view definition
+        -->
         <field name="arch" type="xml">
             <xpath expr="//field[@name='employee_id']" position="attributes">
                 <attribute name="readonly">0</attribute>
@@ -67,7 +75,11 @@
         <field name="name">hr.attendance.form.inherit</field>
         <field name="model">hr.attendance</field>
         <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
-        <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance'))]"/>
+        <!--
+            <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance'))]"/>
+            v16: TODO
+            Inherited view cannot have 'Groups' define on the record. Use 'groups' attributes inside the view definition
+        -->
         <field name="arch" type="xml">
             <xpath expr="//form" position="attributes">
                 <attribute name="edit">1</attribute>
@@ -83,7 +95,11 @@
         <field name="name">hr.attendance.form.inherit.manager</field>
         <field name="model">hr.attendance</field>
         <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
-        <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance_user'))]"/>
+        <!--
+            <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance_user'))]"/>
+            v16: TODO
+            Inherited view cannot have 'Groups' define on the record. Use 'groups' attributes inside the view definition
+        -->
         <field name="arch" type="xml">
             <xpath expr="//field[@name='employee_id']" position="attributes">
                 <attribute name="readonly">0</attribute>

@@ -17,8 +17,14 @@
     'data': [
     ],
     'assets': {
-        'web.assets_common': [
+        'web.assets_backend': [
             'fontawesome_ext/static/lib/moval_iconset/moval_iconset.css',
+        ],
+        'web.assets_frontend': [
+            'fontawesome_ext/static/lib/moval_iconset/moval_iconset.css',
+        ],
+        'web.report_assets_common': [
+            'fontawesome_ext/static/lib/moval_iconset/moval_report_iconset.css',
         ],
     },
 }

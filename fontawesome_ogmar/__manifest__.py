@@ -17,7 +17,10 @@
     'data': [
     ],
     'assets': {
-        'web.assets_common': [
+        'web.assets_backend': [
+            'fontawesome_ogmar/static/lib/ogmar_iconset/ogmar_iconset.css',
+        ],
+        'web.assets_frontend': [
             'fontawesome_ogmar/static/lib/ogmar_iconset/ogmar_iconset.css',
         ],
     },
