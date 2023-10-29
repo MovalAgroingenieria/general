@@ -1,16 +1,15 @@
-# -*- coding: utf-8 -*-
-# 2022 Moval Agroingeniería
+# 2023 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 {
     "name": "Blogs Add Old Sharing Links Buttons",
-    'category': 'Website/Website',
-    "version": "15.0.1.0.0",
+    "category": "Website/Website",
+    "version": "16.0.1.0.0",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "website": "https://moval.es",
-    "installable": True,
     "application": False,
+    "installable": True,
     "depends": [
         "website_blog",
     ],
@@ -23,5 +22,4 @@
             "/website_blog_sharing_links/static/src/js/website_blog.js",
         ],
     },
-
 }

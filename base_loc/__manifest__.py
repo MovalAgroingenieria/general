@@ -5,12 +5,12 @@
     "name": "Localization Management",
     "summary": "Localization based on a hierarchy of territories "
                "(regions, provinces and municipalities)",
-    "version": "15.0.1.0.0",
+    "version": "16.0.1.0.0",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "category": "Hidden",
-    "installable": True,
     "application": False,
+    "installable": True,
     "depends": [
         "base_gen",
     ],
@@ -24,5 +24,4 @@
             "/base_loc/static/src/css/base_loc.css",
         ],
     },
-
 }

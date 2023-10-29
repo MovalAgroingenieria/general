@@ -4,11 +4,13 @@
 {
     "name": "Picking Comments Extended",
     "summary": "Extends the functionality of the parent module",
-    "version": "15.0.0.0.1",
+    "version": "16.0.0.0.1",
     "license": "AGPL-3",
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",
     "category": "Warehouse Management",
+    "application": False,
+    "installable": True,
     "depends": [
         "stock_picking_comment_template",
     ],
@@ -17,5 +19,4 @@
         "reports/report_picking.xml",
         "reports/report_delivery_document.xml",
     ],
-    "installable": True,
 }

@@ -1,21 +1,23 @@
-# 2022 Moval Agroingeniería
+# 2023 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
+
 {
     "name": "Base-General Module",
     "summary": "General porpuse tools for any module",
-    "version": "15.0.1.0.0",
+    "version": "16.0.1.0.0",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "category": "Hidden",
+    "application": False,
+    "installable": True,
     "depends": [
         "base",
     ],
-    'external_dependencies': {
-        'python': [
-            'Crypto.Cipher',
+    "external_dependencies": {
+        "python": [
+            "Crypto.Cipher",
         ],
     },
-    "data": [],
-    "installable": True,
-    "application": False,
+    "data": [
+    ],
 }

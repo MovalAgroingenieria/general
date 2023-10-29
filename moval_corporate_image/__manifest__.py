@@ -1,17 +1,16 @@
-# -*- coding: utf-8 -*-
-# 2020 Moval Agroingeniería
+# 2023 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 {
     "name": "Moval Corporate Image",
     "summary": """Decorate instances with moval iconography""",
-    "version": "15.0.1.1.0",
+    "version": "16.0.1.1.0",
     "category": "Moval General Addons",
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
-    "installable": False,
     "application": False,
+    "installable": False,
     "depends": [
         "web",
         "fontawesome_ext",

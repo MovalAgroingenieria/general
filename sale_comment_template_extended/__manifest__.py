@@ -4,11 +4,13 @@
 {
     "name": "Sale Comments Extended",
     "summary": "Extends the functionality of the parent module",
-    "version": "15.0.0.0.1",
+    "version": "16.0.0.0.1",
     "license": "AGPL-3",
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",
     "category": "Reporting",
+    "application": False,
+    "installable": True,
     "depends": [
         "sale_comment_template",
     ],
@@ -16,5 +18,4 @@
         "views/sale_order_view.xml",
         "reports/report_saleorder.xml",
     ],
-    "installable": True,
 }

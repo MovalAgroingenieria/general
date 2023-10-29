@@ -4,13 +4,13 @@
 {
     "name": "Board Grafana Integration",
     "summary": "Grafana integration for board module",
-    "version": "15.0.1.0.0",
+    "version": "16.0.1.0.0",
     "category": "Moval General Addons",
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
-    "installable": True,
     "application": False,
+    "installable": True,
     "depends": [
         "board",
     ],
@@ -29,5 +29,4 @@
             "/board_grafana_integration/static/src/iconset/css/board_grafana_integration_iconset.css"
         ],
     },
-
 }

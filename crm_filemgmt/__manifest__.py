@@ -1,18 +1,16 @@
-# -*- coding: utf-8 -*-
 # 2023 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
     "name": "File Management",
     "summary": "Monitoring and file relationships",
-    "version": "15.0.1.0.0",
+    "version": "16.0.1.0.0",
     "category": "Customer Relationship Management",
     "website": "https://www.moval.es",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "application": True,
     "installable": True,
-
     "depends": [
         "base_gen",
         "mail",
