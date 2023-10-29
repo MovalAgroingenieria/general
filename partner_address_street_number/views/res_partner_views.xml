@@ -7,13 +7,12 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='street']" position="attributes">
-                <attribute name="style">display: inline; width: 75%; margin-right: 2%;</attribute>
+                <attribute name="style">width:76%; display:inline-block; margin-right:2%;</attribute>
             </xpath>
             <xpath expr="//field[@name='street']" position="after">
-                <field name="street_num" style="width: 23%;"
+                <field name="street_num" style="width: 22%;"
                     attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"
-                    placeholder="Num..."/>
-                <div style="clear: left;"/>
+                    placeholder="Num..." groups="base.group_no_one"/>
             </xpath>
         </field>
     </record>
@@ -24,13 +23,12 @@
         <field name="inherit_id" ref="base.view_partner_address_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='street']" position="attributes">
-                <attribute name="style">display: inline; width: 75%; margin-right: 2%;</attribute>
+                <attribute name="style">width:76%; display:inline-block; margin-right:2%;</attribute>
             </xpath>
             <xpath expr="//field[@name='street']" position="after">
-                <field name="street_num" style="width: 23%;"
+                <field name="street_num" style="width: 22%;"
                     attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"
-                    placeholder="Num..."/>
-                <div style="clear: left;"/>
+                    placeholder="Num..." groups="base.group_no_one"/>
             </xpath>
         </field>
     </record>

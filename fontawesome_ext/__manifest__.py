@@ -2,23 +2,23 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 {
-    "name": "Fontawesome Extended",
-    "summary": """Add custom fontawesome fonts.""",
-    "version": "16.0.1.0.0",
-    "category": "Moval General Addons",
-    "website": "http://www.moval.es",
-    "author": "Moval Agroingeniería",
-    "license": "AGPL-3",
-    "application": False,
-    "installable": True,
-    "depends": [
-        "web",
+    'name': 'Fontawesome Extended',
+    'summary': 'Add custom fontawesome fonts',
+    'version': '16.0.1.0.0',
+    'category': 'Moval General Addons',
+    'website': 'http://www.moval.es',
+    'author': 'Moval Agroingeniería',
+    'license': 'AGPL-3',
+    'application': False,
+    'installable': True,
+    'depends': [
+        'web',
     ],
-    "data": [
+    'data': [
     ],
-    "assets": {
-        "web.assets_common": [
-            "/fontawesome_ext/static/lib/moval_iconset/moval_iconset.css",
+    'assets': {
+        'web.assets_common': [
+            'fontawesome_ext/static/lib/moval_iconset/moval_iconset.css',
         ],
     },
 }
