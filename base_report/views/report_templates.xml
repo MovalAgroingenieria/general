@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- External layouts styles -->
+
+    <template id="external_layout_striped" inherit_id="web.external_layout_striped">
+        <div t-attf-class="o_company_#{company.id}_layout footer o_background_footer" position="replace">
+            <div t-attf-class="o_company_#{company.id}_layout footer o_background_footer">
+                <div class="text-center">
+                    <ul class="list-inline">
+                        <div t-field="company.report_footer" style="font-size: 8px; margin-top: 2px; text-align: justify;"/>
+                    </ul>
+                    <div t-if="report_type == 'pdf'" class="text-muted text-right" style="font-size: 8px;">
+                        <span class="page"/>
+                        <span>/</span>
+                        <span class="topage"/>
+                    </div>
+                    <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted" style="font-size: 8px;">
+                        <span t-field="o.name"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="external_layout_boxed" inherit_id="web.external_layout_boxed">
+        <div t-attf-class="footer o_boxed_footer o_company_#{company.id}_layout" position="replace">
+            <div t-attf-class="footer o_boxed_footer o_company_#{company.id}_layout">
+                <div>
+                    <div t-field="company.report_footer" style="font-size: 8px;"/>
+                    <div t-if="report_type == 'pdf'" class="text-muted text-right" style="font-size: 8px;">
+                        <span class="page"/>
+                        <span>/</span>
+                        <span class="topage"/>
+                    </div>
+                    <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted" style="font-size: 8px;">
+                        <span t-field="o.name"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="external_layout_bold" inherit_id="web.external_layout_bold">
+        <div t-attf-class="footer o_clean_footer o_company_#{company.id}_layout" position="replace">
+            <div t-attf-class="footer o_clean_footer o_company_#{company.id}_layout">
+                <div class="row">
+                    <div class="col-4">
+                        <span t-field="company.report_footer" style="font-size: 8px;"/>
+                    </div>
+                    <div class="col-4">
+                        <span t-if="company.is_company_details_empty" t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
+                        <span t-else="" t-field="company.company_details"/>
+                    </div>
+                    <div class="col-3">
+                        <div class="mt0 mb0 h5" t-field="company.report_header" style="font-size: 8px;"/>
+                    </div>
+                    <div class="col-1">
+                        <ul t-if="report_type == 'pdf'" class="list-inline pagenumber float-end text-center" style="font-size: 8px;">
+                            <li class="list-inline-item"><strong><span class="page"/></strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="external_layout_standard" inherit_id="web.external_layout_standard">
+        <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout" position="replace">
+            <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
+                <div class="text-center" style="border-top: 1px solid black;">
+                    <ul class="list-inline mb4">
+                        <div t-field="company.report_footer" style="font-size: 8px; margin-top: 2px; text-align: justify;"/>
+                    </ul>
+                    <div t-if="report_type == 'pdf'" class="text-muted text-right" style="font-size: 8px;">
+                        <span class="page"/>
+                        <span>/</span>
+                        <span class="topage"/>
+                    </div>
+                    <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted" style="font-size: 8px;">
+                        <span t-field="o.name"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+</odoo>
