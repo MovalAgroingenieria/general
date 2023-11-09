@@ -2,7 +2,7 @@
 # 2022 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import models, fields
+from odoo import models, fields, api
 
 
 class ResConfigSettings(models.TransientModel):
@@ -16,7 +16,7 @@ class ResConfigSettings(models.TransientModel):
         string="Street type shown",
         required=True,
         default="long",
-        config_parameter='partner_address_street_type.street_type_shown',
+        config_parameter="partner_address_street_type.street_type_shown",
         help="Determine how the street type will be displayed.")
 
     address_format_set = fields.Text(
@@ -47,8 +47,8 @@ class ResConfigSettings(models.TransientModel):
             'tree']]
         return action
 
-    def set_values(self):
-        super(ResConfigSettings, self).set_values()
+    def write(self, vals):
+        res = super(ResConfigSettings, self).write(vals)
         if self.address_format_set:
             company_country_code = self.env['res.country'].search(
                 [('code', '=', self.env.company.country_id.code)],
@@ -58,3 +58,4 @@ class ResConfigSettings(models.TransientModel):
                         SET address_format = '{new_format}'
                         WHERE code = '{company_country_code}';"""
             self.env.cr.execute(query)
+        return res

@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 14.0\n"
+"Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-27 07:12+0000\n"
-"PO-Revision-Date: 2022-04-27 07:12+0000\n"
+"POT-Creation-Date: 2023-11-09 12:23+0000\n"
+"PO-Revision-Date: 2023-11-09 12:23+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -61,6 +61,11 @@ msgid "% (zip)s"
 msgstr ""
 
 #. module: partner_address_street_type
+#: model_terms:ir.ui.view,arch_db:partner_address_street_type.res_config_settings_view_form
+msgid "-&gt;"
+msgstr ""
+
+#. module: partner_address_street_type
 #: model:ir.model.fields,field_description:partner_address_street_type.field_res_street_type__abbreviation
 #: model:ir.model.fields.selection,name:partner_address_street_type.selection__res_config_settings__street_type_shown__short
 #: model_terms:ir.ui.view,arch_db:partner_address_street_type.res_street_type_config_view_search
@@ -71,11 +76,6 @@ msgstr "Abreviatura"
 #: model:ir.model.fields,field_description:partner_address_street_type.field_res_config_settings__address_format_set
 msgid "Address format"
 msgstr "Format de direcció"
-
-#. module: partner_address_street_type
-#: model_terms:ir.ui.view,arch_db:partner_address_street_type.res_config_settings_view_form
-msgid "Cancel"
-msgstr "Cancel"
 
 #. module: partner_address_street_type
 #: model_terms:ir.ui.view,arch_db:partner_address_street_type.res_config_settings_view_form
@@ -90,7 +90,7 @@ msgstr "Configureu el format de la direcció, els tipus de via i com es mostra e
 #. module: partner_address_street_type
 #: model:ir.model,name:partner_address_street_type.model_res_partner
 msgid "Contact"
-msgstr "Contact"
+msgstr "Contacte"
 
 #. module: partner_address_street_type
 #: model_terms:ir.ui.view,arch_db:partner_address_street_type.res_config_settings_view_form
@@ -123,8 +123,6 @@ msgid "Determine how the street type will be displayed."
 msgstr "Determina com es mostrarà el tipus de via."
 
 #. module: partner_address_street_type
-#: model:ir.model.fields,field_description:partner_address_street_type.field_res_config_settings__display_name
-#: model:ir.model.fields,field_description:partner_address_street_type.field_res_partner__display_name
 #: model:ir.model.fields,field_description:partner_address_street_type.field_res_street_type__display_name
 msgid "Display Name"
 msgstr "Mostrar Nom"
@@ -140,15 +138,11 @@ msgid "Group By"
 msgstr ""
 
 #. module: partner_address_street_type
-#: model:ir.model.fields,field_description:partner_address_street_type.field_res_config_settings__id
-#: model:ir.model.fields,field_description:partner_address_street_type.field_res_partner__id
 #: model:ir.model.fields,field_description:partner_address_street_type.field_res_street_type__id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: partner_address_street_type
-#: model:ir.model.fields,field_description:partner_address_street_type.field_res_config_settings____last_update
-#: model:ir.model.fields,field_description:partner_address_street_type.field_res_partner____last_update
 #: model:ir.model.fields,field_description:partner_address_street_type.field_res_street_type____last_update
 msgid "Last Modified on"
 msgstr "Última modificació el "
@@ -172,11 +166,6 @@ msgstr "Tipus de via complet"
 #: model:ir.model.fields.selection,name:partner_address_street_type.selection__res_config_settings__street_type_shown__not_show
 msgid "Not show"
 msgstr "No mostrar"
-
-#. module: partner_address_street_type
-#: model_terms:ir.ui.view,arch_db:partner_address_street_type.res_config_settings_view_form
-msgid "Save"
-msgstr "Desar"
 
 #. module: partner_address_street_type
 #: model:ir.ui.menu,name:partner_address_street_type.street_type_settings_menu
@@ -266,10 +255,12 @@ msgstr "Tipus de via"
 #: model_terms:ir.ui.view,arch_db:partner_address_street_type.res_config_settings_view_form
 msgid ""
 "The address format field can be used to change the address format of printed documents using python-style\n"
-"                            string pattern with address fields (see below). Be careful, there is no error control.<br/><br/>"
+"                    string pattern with address fields (see below).<br/>\n"
+"                    Be careful, there is no error control.<br/><br/>"
 msgstr ""
 "El camp 'Format de direcció' pot ser usat per a donar format a la direcció dels documents impresos usant variables\n"
-"                            python amb els camps de la direcció (veure a baix). Atenció, no hi ha control d'errors.<br/><br/>"
+"                            Python amb els camps de la direcció (veure a baix)..<br/>\n"
+"                    Atenció, no hi ha control d'errors.<br/><br/>"
 
 #. module: partner_address_street_type
 #: model:ir.model.fields,help:partner_address_street_type.field_res_config_settings__address_format_set
@@ -278,7 +269,7 @@ msgid ""
 "This format will be apply to company country.\n"
 "            Errors in the format are not detected."
 msgstr ""
-"Aquest camp mostra el format de direcció de país de la companyia. El format es pot canviar usant variables python amb els camps de la direcció.\n"
+"Aquest camp mostra el format de direcció de país de la companyia. El format es pot canviar usant variables Python amb els camps de la direcció.\n"
 "Aquest format s'aplicarà únicament a país de la companyia.\n"
 "            Els errors en el format no són avaluats."
 

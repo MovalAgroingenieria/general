@@ -48,7 +48,7 @@ class ResPartner(models.Model):
         fields.append('street_type_shown')
         return fields
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals):
         if 'street_type_id' in vals:
             config_type_shown = \

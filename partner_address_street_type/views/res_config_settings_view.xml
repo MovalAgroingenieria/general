@@ -1,175 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- 
-    <record id="config_settings_view_form" model="ir.ui.view">
-         <field name="name">Street type settings</field>
-         <field name="model">res.config.settings</field>
-         <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
-         <field name="arch" type="xml">
-             <xpath expr="//div[@id='contacts_settings']" position="after">
-                 <div id="partner_address_street_type_settings">
-                     <h2>Street type</h2>
-                     <div class="row mt16 o_settings_container" name="partner_address_street_type_setting_container">
-                         <div class="col-xs-12 col-md-6 o_setting_box" id="street_type_settings">
-                             <div class="o_setting_right_pane" id="street_type_shown">
-                                 <label for="street_type_shown"/>
-                                 <div class="text-muted">Determines how the street type will be displayed</div>
-                                 <br/>
-                                 <field name="street_type_shown"/>
-                             </div>
-                         </div>
-                         <div class="col-xs-12 col-md-6 o_setting_box" title="Python format for address field." id="address_format">
-                             <div class="o_setting_right_pane" id="address_format_set_settings">
-                                 <label for="address_format_set"/>
-                                 <div class="text-muted">
-                                     This field can be used to change the address format of printed documents using Python-style string pattern with address fields
-                                 </div>
-                                 <br/>
-                                 <field name="address_format_set"/>
-                                 <br/><br/>
-                                 <div class="text-muted">
-                                     <table style="border-style: hidden; margin-left:8px;padding: 4px 0px;">
-                                        <tr>
-                                            <td>% (street_type_shown)s</td>
-                                            <td style="padding: 0px 4px"> -> </td>
-                                            <td>Street type</td>
-                                        </tr>
-                                        <tr>
-                                            <td>% (street)s</td>
-                                            <td style="padding: 0px 4px"> -> </td>
-                                            <td>Street</td>
-                                        </tr>
-                                        <tr>
-                                            <td>% (street2)s</td>
-                                            <td style="padding: 0px 4px"> -> </td>
-                                            <td>Street second line</td>
-                                        </tr>
-                                        <tr>
-                                            <td>% (city)s</td>
-                                            <td style="padding: 0px 4px"> -> </td>
-                                            <td>City name</td>
-                                        </tr>
-                                        <tr>
-                                            <td>% (zip)s</td>
-                                            <td style="padding: 0px 4px"> -> </td>
-                                            <td>Zip code</td>
-                                        </tr>
-                                        <tr>
-                                            <td>% (state_name)s</td>
-                                            <td style="padding: 0px 4px"> -> </td>
-                                            <td>State name</td>
-                                        </tr>
-                                        <tr>
-                                            <td>% (state_code)s</td>
-                                            <td style="padding: 0px 4px"> -> </td>
-                                            <td>State code</td>
-                                        </tr>
-                                        <tr>
-                                            <td>% (country_name)s</td>
-                                            <td style="padding: 0px 4px"> -> </td>
-                                            <td>Country name</td>
-                                        </tr>
-                                        <tr>
-                                            <td>% (country_code)s</td>
-                                            <td style="padding: 0px 4px"> -> </td>
-                                            <td>Country code</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </xpath>
-        </field>
-    </record>
-     -->
-    
-
-
-
-    <!-- 
-    <record id="action_res_config_settings_view_form" model="ir.actions.act_window">
-        <field name="name">Configure Street type</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="res_model">res.config.settings</field>
-        <field name="view_id" ref="config_settings_view_form"/>
-        <field name="view_mode">form</field>
-        <field name="target">inline</field>
-        <field name="context">{'module' : 'partner_address_street_type'}</field>
-    </record>
-     -->
-     
-
     <record id="res_config_settings_view_form" model="ir.ui.view">
         <field name="name">Street type settings</field>
         <field name="model">res.config.settings</field>
         <field name="arch" type="xml">
-            <form duplicate="0">
-                <header>
-                    <button string="Save" type="object" name="execute" class="oe_highlight"/>
-                    <button string="Cancel" type="object" name="cancel" class="oe_link"/>
-                </header>
+            <form duplicate="0" create="false">
                 <group name="street_type_config" style="width: 50%">
                     <field name="street_type_shown"/>
                     <field name="address_format_set"/>
                 </group>
-                <group>
-                    <group>
-                        <div name="help" style="margin-top: 0px;" class="oe_edit_only">
-                            The address format field can be used to change the address format of printed documents using python-style
-                            string pattern with address fields (see below). Be careful, there is no error control.<br/><br/>
-                            <table style="border-style: hidden; margin-left:8px;padding: 4px 0px;">
-                                <tr>
-                                    <td>% (street_type_shown)s</td>
-                                    <td style="padding: 0px 4px"> -> </td>
-                                    <td>Street type</td>
-                                </tr>
-                                <tr>
-                                    <td>% (street)s</td>
-                                    <td style="padding: 0px 4px"> -> </td>
-                                    <td>Street</td>
-                                </tr>
-                                <tr>
-                                    <td>% (street2)s</td>
-                                    <td style="padding: 0px 4px"> -> </td>
-                                    <td>Street second line</td>
-                                </tr>
-                                <tr>
-                                    <td>% (city)s</td>
-                                    <td style="padding: 0px 4px"> -> </td>
-                                    <td>City name</td>
-                                </tr>
-                                <tr>
-                                    <td>% (zip)s</td>
-                                    <td style="padding: 0px 4px"> -> </td>
-                                    <td>Zip code</td>
-                                </tr>
-                                <tr>
-                                    <td>% (state_name)s</td>
-                                    <td style="padding: 0px 4px"> -> </td>
-                                    <td>State name</td>
-                                </tr>
-                                <tr>
-                                    <td>% (state_code)s</td>
-                                    <td style="padding: 0px 4px"> -> </td>
-                                    <td>State code</td>
-                                </tr>
-                                <tr>
-                                    <td>% (country_name)s</td>
-                                    <td style="padding: 0px 4px"> -> </td>
-                                    <td>Country name</td>
-                                </tr>
-                                <tr>
-                                    <td>% (country_code)s</td>
-                                    <td style="padding: 0px 4px"> -> </td>
-                                    <td>Country code</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </group>
-                </group>
+                <div name="help" class="oe_edit_only">
+                    The address format field can be used to change the address format of printed documents using python-style
+                    string pattern with address fields (see below).<br/>
+                    Be careful, there is no error control.<br/><br/>
+                    <table style="border-style: hidden; margin-left:8px;padding: 4px 0px;">
+                        <tr>
+                            <td>% (street_type_shown)s</td>
+                            <td style="padding: 0px 4px"> -> </td>
+                            <td>Street type</td>
+                        </tr>
+                        <tr>
+                            <td>% (street)s</td>
+                            <td style="padding: 0px 4px"> -> </td>
+                            <td>Street</td>
+                        </tr>
+                        <tr>
+                            <td>% (street2)s</td>
+                            <td style="padding: 0px 4px"> -> </td>
+                            <td>Street second line</td>
+                        </tr>
+                        <tr>
+                            <td>% (city)s</td>
+                            <td style="padding: 0px 4px"> -> </td>
+                            <td>City name</td>
+                        </tr>
+                        <tr>
+                            <td>% (zip)s</td>
+                            <td style="padding: 0px 4px"> -> </td>
+                            <td>Zip code</td>
+                        </tr>
+                        <tr>
+                            <td>% (state_name)s</td>
+                            <td style="padding: 0px 4px"> -> </td>
+                            <td>State name</td>
+                        </tr>
+                        <tr>
+                            <td>% (state_code)s</td>
+                            <td style="padding: 0px 4px"> -> </td>
+                            <td>State code</td>
+                        </tr>
+                        <tr>
+                            <td>% (country_name)s</td>
+                            <td style="padding: 0px 4px"> -> </td>
+                            <td>Country name</td>
+                        </tr>
+                        <tr>
+                            <td>% (country_code)s</td>
+                            <td style="padding: 0px 4px"> -> </td>
+                            <td>Country code</td>
+                        </tr>
+                    </table>
+                </div>
             </form>
         </field>
     </record>
