@@ -26,3 +26,13 @@ Contributors
 
 * Ana Juaristi <anajuaristi@avanzosc.es>
 * Alfredo de la Fuente <alfredodelafuente@avanzosc.es>
+
+* Samuel Fernández <sfernandez@moval.es>
+* Alberto Hernández <ahernandez@moval.es>
+* Eduardo Iniesta <einiesta@moval.es>
+* Miguel Mora <mmora@moval.es>
+* Miguel Ángel Rodríguez <marodriguez@moval.es>
+* Juanu Sandoval <jsandoval@moval.es>
+* Salvador sánchez <ssanchez@moval.es>
+* Jorge Vera <jvera@moval.es>
+
