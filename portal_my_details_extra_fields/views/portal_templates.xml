@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="portal_my_details"
+              inherit_id="portal.portal_my_details">
+        <xpath expr="//input[@name='redirect']" position="before">
+            <div t-attf-class="form-group #{error.get('website') and 'o_has_error' or ''} col-xl-6">
+                <label class="col-form-label label-optional" for="websitepartner">Website</label>
+                <input type="text" name="websitepartner" t-attf-class="form-control #{error.get('website') and 'is-invalid' or ''}" t-att-value="websitepartner or partner.website" />
+            </div>
+            <div t-attf-class="form-group #{error.get('industry_id') and 'o_has_error' or ''} col-xl-6">
+                <label class="col-form-label" for="industry_id">Industry</label>
+                <select name="industry_id" t-attf-class="form-control #{error.get('industry_id') and 'is-invalid' or ''}">
+                    <option value="">Industry...</option>
+                    <t t-foreach="industries or []" t-as="industry">
+                        <option t-att-value="industry.id" t-att-selected="industry.id == int(industry_id) if industry_id else industry.id == partner.industry_id.id">
+                            <t t-out="industry.name" />
+                        </option>
+                    </t>
+                </select>
+            </div>
+            <div t-attf-class="form-group #{error.get('category_id') and 'o_has_error' or ''} col-xl-6">
+                <label class="col-form-label" for="category_id">Products and services</label>
+                <select id="category_id" name="category_id" multiple="" t-attf-class="form-control js_select2 #{error.get('category_id') and 'is-invalid' or ''}">
+                    <t t-foreach="categories or []" t-as="category">
+                        <option t-att-value="category.id" t-att-selected="category.id == int(category_id) if category_id else category.id in [x.id for x in partner.category_id]">
+                            <t t-out="category.name" />
+                        </option>
+                    </t>
+                </select>
+                <input type="hidden" t-attf-class="form-control #{error.get('categories_value_text') and 'is-invalid' or ''}" id="categories_value_text" name="categories_value_text" t-att-value="categories_value_text or categories_text"/>
+            </div>
+        </xpath>
+    </template>
+
+</odoo>
