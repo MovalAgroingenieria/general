@@ -13,8 +13,10 @@
     'depends': [
         'web_chatter_position',
         'web_responsive',
-        'edit_save_button',
+        'web_no_bubble',
+        'moval_corporate_image',
         # 'disable_odoo_online',
+        # 'edit_save_button',
         # 'web_listview_range_select',
         # 'web_sheet_full_width',
         # 'web_tree_dynamic_colored_field',
