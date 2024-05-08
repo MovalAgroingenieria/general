@@ -21,7 +21,7 @@
                                     </th>
                                     <th>
                                         <strong>
-                                            <span>ADDRESSEE:</span>
+                                            <span>ADDRESS:</span>
                                             <br/>
                                             <span t-field="doc.partner_id.name" />
                                             <p class="m-0" t-if="doc.cmr_destination_id">
@@ -38,8 +38,8 @@
                                         </strong>
                                     </th>
                                 </tr>
-                        </thead>
-                    </table>
+                            </thead>
+                        </table>
                     </h2>
                     <div class="row mt32 mb32" id="informations">
                         <div class="col-auto col-3 mw-100 mb-2">
@@ -65,7 +65,7 @@
                             </p>
                         </div>
                         <div class="col-auto col-3 mw-100 mb-2">
-                            <strong>ADDRESSEE:</strong>
+                            <strong>SUPPLIER:</strong>
                             <p class="m-0" >
                                 <span t-field="doc.partner_id.name" />
                                 <span t-if="doc.partner_id.vat" >
@@ -92,10 +92,10 @@
                                         </strong>
                                     </span>
                                 </th>
-                                <th name="th_chassis" class="text-left">
+                                <th name="th_lot" class="text-left">
                                     <span>
                                         <strong>
-                                            CHASSIS NUMBER
+                                            LOT NUMBER
                                         </strong>
                                     </span>
                                 </th>
@@ -111,7 +111,7 @@
                                     <td name="td_product" class="text-left">
                                         <span t-field="line.product_id.name" t-options="{'widget': 'text'}"/>
                                     </td>
-                                    <td name="td_chassis" class="text-left"
+                                    <td name="td_lot" class="text-left"
                                             style="background-color:#FFFFFF !important;">
                                         <span t-if="doc.state=='done' and line.lot_id" t-field="line.lot_id.name" />
                                     </td>
