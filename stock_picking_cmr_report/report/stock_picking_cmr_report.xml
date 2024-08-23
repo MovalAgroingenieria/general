@@ -6,9 +6,9 @@
                 <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
                 <div class="page">
                     <div class="oe_structure"/>
-                    <h2 class="text-center">Transport Delivery Note</h2>
+                    <h2 class="text-center" id="title">Transport Delivery Note</h2>
                     <div class="row mt16 mb32" id="informations">
-                        <div class="col-auto col-3 mw-100 mb-2">
+                        <div class="col-auto col-3 mw-100 mb-2" id="docname">
                             <strong>Num:</strong>
                             <p class="m-0" t-if="doc.name">
                                 <span t-field="doc.name" />
@@ -18,7 +18,7 @@
                             <strong/>
                             <p class="m-0" />
                         </div>
-                        <div class="col-auto col-3 mw-100 mb-2">
+                        <div class="col-auto col-3 mw-100 mb-2" id="loadingdate">
                             <strong>Loading Date:</strong>
                             <p class="m-0" >
                                 <span t-field="doc.scheduled_date" t-options="{'widget': 'date'}"/>
