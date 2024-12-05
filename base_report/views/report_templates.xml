@@ -1,8 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- External layouts styles -->
+    <!-- Paperformat reports -->
+    <record id="paperformat_reports" model="report.paperformat">
+        <field name="name">European A4 Reports</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">32</field>
+        <field name="margin_bottom">18</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">26</field>
+        <field name="dpi">90</field>
+    </record>
 
+    <!-- External layouts styles -->
     <template id="external_layout_striped" inherit_id="web.external_layout_striped">
         <div t-attf-class="o_company_#{company.id}_layout footer o_background_footer" position="replace">
             <div t-attf-class="o_company_#{company.id}_layout footer o_background_footer">
@@ -10,7 +26,7 @@
                     <ul class="list-inline">
                         <div t-field="company.report_footer" style="font-size: 8px; margin-top: 2px; text-align: justify;"/>
                     </ul>
-                    <div t-if="report_type == 'pdf'" class="text-muted text-right" style="font-size: 8px;">
+                    <div t-if="report_type == 'pdf'" class="text-muted text-end" style="font-size: 8px;">
                         <span class="page"/>
                         <span>/</span>
                         <span class="topage"/>
@@ -28,7 +44,7 @@
             <div t-attf-class="footer o_boxed_footer o_company_#{company.id}_layout">
                 <div>
                     <div t-field="company.report_footer" style="font-size: 8px;"/>
-                    <div t-if="report_type == 'pdf'" class="text-muted text-right" style="font-size: 8px;">
+                    <div t-if="report_type == 'pdf'" class="text-muted text-end" style="font-size: 8px;">
                         <span class="page"/>
                         <span>/</span>
                         <span class="topage"/>
@@ -72,7 +88,7 @@
                     <ul class="list-inline mb4">
                         <div t-field="company.report_footer" style="font-size: 8px; margin-top: 2px; text-align: justify;"/>
                     </ul>
-                    <div t-if="report_type == 'pdf'" class="text-muted text-right" style="font-size: 8px;">
+                    <div t-if="report_type == 'pdf'" class="text-muted text-end" style="font-size: 8px;">
                         <span class="page"/>
                         <span>/</span>
                         <span class="topage"/>
