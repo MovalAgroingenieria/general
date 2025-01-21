@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# 2022 Moval Agroingeniería
+# 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import models, fields, api
@@ -10,9 +9,8 @@ class ResPartner(models.Model):
 
     def _default_street_type_id(self):
         resp = 0
-        proposed_street_type_id = \
-            self.env['res.street.type'].search(
-                [('is_default', '=', True), ('show_in_list', '=', True)])
+        proposed_street_type_id = self.env['res.street.type'].search(
+            [('is_default', '=', True), ('show_in_list', '=', True)])
         if proposed_street_type_id:
             resp = proposed_street_type_id[0].id
         return resp

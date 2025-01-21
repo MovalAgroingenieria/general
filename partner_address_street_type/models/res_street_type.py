@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# 2022 Moval Agroingeniería
+# 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import models, fields
@@ -11,13 +10,11 @@ class ResStreetType(models.Model):
 
     name = fields.Char(
         string="Street Type",
-        required=True,
-        translate=True)
+        required=True)
 
     abbreviation = fields.Char(
         string="Abbreviation",
-        required=True,
-        translate=True)
+        required=True)
 
     show_in_list = fields.Boolean(
         string='Show in list',
@@ -40,5 +37,5 @@ class ResStreetType(models.Model):
 
     _sql_constraints = [
         ("unique_street_type", "UNIQUE (name)",
-         "Existing type of street."),
+         "Existing street type."),
         ]

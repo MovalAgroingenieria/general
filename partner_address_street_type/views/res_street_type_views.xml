@@ -53,15 +53,4 @@
         </field>
     </record>
 
-    <record id="action_res_street_type_tree" model="ir.actions.act_window">
-        <field name="name">Street Types</field>
-        <field name="res_model">res.street.type</field>
-        <field name="view_mode">tree,form</field>
-        <field name="view_ids"
-         eval="[(5, 0),
-                (0, 0, {'view_mode': 'tree',
-                        'view_id': ref('res_street_type_config_view_tree')})]"/>
-        <field name="search_view_id" ref="res_street_type_config_view_search"/>
-    </record>
-
 </odoo>

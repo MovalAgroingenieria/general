@@ -1,89 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="res_config_settings_view_form" model="ir.ui.view">
-        <field name="name">Street type settings</field>
-        <field name="model">res.config.settings</field>
-        <field name="arch" type="xml">
-            <form duplicate="0" create="false">
-                <group name="street_type_config" style="width: 50%">
-                    <field name="street_type_shown"/>
-                    <field name="address_format_set"/>
-                </group>
-                <div name="help" class="oe_edit_only">
-                    The address format field can be used to change the address format of printed documents using python-style
-                    string pattern with address fields (see below).<br/>
-                    Be careful, there is no error control.<br/><br/>
-                    <table style="border-style: hidden; margin-left:8px;padding: 4px 0px;">
-                        <tr>
-                            <td>% (street_type_shown)s</td>
-                            <td style="padding: 0px 4px"> -> </td>
-                            <td>Street type</td>
-                        </tr>
-                        <tr>
-                            <td>% (street)s</td>
-                            <td style="padding: 0px 4px"> -> </td>
-                            <td>Street</td>
-                        </tr>
-                        <tr>
-                            <td>% (street2)s</td>
-                            <td style="padding: 0px 4px"> -> </td>
-                            <td>Street second line</td>
-                        </tr>
-                        <tr>
-                            <td>% (city)s</td>
-                            <td style="padding: 0px 4px"> -> </td>
-                            <td>City name</td>
-                        </tr>
-                        <tr>
-                            <td>% (zip)s</td>
-                            <td style="padding: 0px 4px"> -> </td>
-                            <td>Zip code</td>
-                        </tr>
-                        <tr>
-                            <td>% (state_name)s</td>
-                            <td style="padding: 0px 4px"> -> </td>
-                            <td>State name</td>
-                        </tr>
-                        <tr>
-                            <td>% (state_code)s</td>
-                            <td style="padding: 0px 4px"> -> </td>
-                            <td>State code</td>
-                        </tr>
-                        <tr>
-                            <td>% (country_name)s</td>
-                            <td style="padding: 0px 4px"> -> </td>
-                            <td>Country name</td>
-                        </tr>
-                        <tr>
-                            <td>% (country_code)s</td>
-                            <td style="padding: 0px 4px"> -> </td>
-                            <td>Country code</td>
-                        </tr>
-                    </table>
-                </div>
-            </form>
-        </field>
-    </record>
-
     <record id="res_config_settings_view_form_general_settings" model="ir.ui.view">
         <field name="name">Street type General Settings</field>
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[@id='contacts_settings']/div[hasclass('row','mt16','o_settings_container')]" position="inside">
-                <div class="col-12 col-lg-6 o_setting_box">
-                    <div class="o_setting_left_pane"></div>
-                    <div class="o_setting_right_pane" id="street_type_settings">
-                        <div class="o_form_label">Street Type</div>
-                        <div class="text-muted">
-                            Configure address format, street types and how street type is shown
+            <xpath expr="//div[@name='contacts_setting_container']" position="after">
+                <div class="row mt16 o_settings_container" name="street_type_setting_container">
+                    <div class="col-xs-12 col-md-6 o_setting_box" id="street_type">
+                        <div class="o_setting_right_pane" id="street_type_settings">
+                            <div class="o_form_label">Street Type</div>
+                            <div class="text-muted">
+                                Configure how street type is displayed in printed documents
+                            </div>
+                            <div class="mt8">
+                                <field name="street_type_shown"/>
+                            </div>
+                            <div class="mt8">
+                                <button type="action" name="%(action_res_street_type_tree)d" string="Street types"
+                                    icon="fa-arrow-right" class="btn-link"/>
+                            </div>
                         </div>
-                        <div class="mt8">
-                            <button type="object" name="open_street_type_settings"
-                                string="Street type settings" icon="fa-arrow-right" class="btn-link"/>
-                            <button type="object" name="open_street_types"
-                                string="Street types" icon="fa-arrow-right" class="btn-link"/>
+                    </div>
+                    <div class="col-xs-12 col-md-6 o_setting_box" id="address_format">
+                        <div class="o_setting_right_pane" id="address_format_set_settings">
+                            <div class="o_form_label">Address format</div>
+                            <div class="text-muted">
+                                 Configure address format of printed documents using python-style
+                                 string pattern with address fields
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <field name="address_format_set" style="width: 100%;"/>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -91,12 +40,4 @@
         </field>
     </record>
 
-    <record id="action_res_config_settings_view_form" model="ir.actions.act_window">
-        <field name="name">Street type configuration</field>
-        <field name="res_model">res.config.settings</field>
-        <field name="view_id" ref="res_config_settings_view_form"/>
-        <field name="view_mode">form</field>
-        <field name="target">inline</field>
-    </record>
- -->
 </odoo>
