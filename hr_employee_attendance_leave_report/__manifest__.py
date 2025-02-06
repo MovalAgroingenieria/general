@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # 2023 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
@@ -19,6 +20,7 @@
         'security/ir.model.access.csv',
         'wizard/hr_employee_attendance_leave_wizard_views.xml',
         'report/hr_employee_attendance_leave_report_views.xml',
+        'views/resources.xml',
     ],
     'assets': {
         'web.assets_common': [

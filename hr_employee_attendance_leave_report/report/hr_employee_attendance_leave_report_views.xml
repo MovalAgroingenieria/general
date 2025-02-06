@@ -51,13 +51,13 @@
                                             <tr style="background-color: #ffffff;">
                                                 <td><span><strong>From:</strong></span></td>
                                                 <td class="text-right">
-                                                    <span t-out="wizard_data[0]['data'][0]['start_date_show']"/>
+                                                    <span t-esc="wizard_data[0]['data'][0]['start_date_show']"/>
                                                 </td>
                                             </tr>
                                             <tr style="background-color: #ffffff;">
                                                 <td><span><strong>To:</strong></span></td>
                                                 <td class="text-right">
-                                                    <span t-out="wizard_data[0]['data'][0]['end_date_show']"/>
+                                                    <span t-esc="wizard_data[0]['data'][0]['end_date_show']"/>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -86,16 +86,16 @@
                                     </thead>
                                     <tbody>
                                         <tr t-foreach="attendance_data" t-as="attendance">
-                                            <td><span t-out="attendance['check_in']"/></td>
-                                            <td><span t-out="attendance['check_out']"/></td>
-                                            <td name="td_attendance_difference" class="text-right"><span t-out="attendance['difference']"/></td>
+                                            <td><span t-esc="attendance['check_in']"/></td>
+                                            <td><span t-esc="attendance['check_out']"/></td>
+                                            <td name="td_attendance_difference" class="text-right"><span t-esc="attendance['difference']"/></td>
                                         </tr>
                                         <tr class="border-black">
                                             <td><strong>Total working hours</strong></td>
-                                            <td></td>
-                                            <td class="text-right">
+                                            <td name="td_space"/>
+                                            <td name="td_total_hours" class="text-right">
                                                 <t t-set="total_time" t-value="attendance_data[-1]"/>
-                                                <b><span t-out="total_time['total_working_time_show']"/></b>
+                                                <b><span t-esc="total_time['total_working_time_show']"/></b>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -133,17 +133,17 @@
                                                 <t t-set="unvalidated_leaves" t-value="true"/>
                                             </t>
                                             <t t-else="">
-                                                <td><span t-out="leave['type']"/></td>
+                                                <td><span t-esc="leave['type']"/></td>
                                                 <td>
-                                                    <span t-out="leave['from']"/><br/>
-                                                    <span t-out="leave['to']"/>
+                                                    <span t-esc="leave['from']"/><br/>
+                                                    <span t-esc="leave['to']"/>
                                                  </td>
                                                 <td class="text-center">
-                                                    <span t-out="leave['period_num_of_days']"/>
+                                                    <span t-esc="leave['period_num_of_days']"/>
                                                     <span>/</span>
-                                                    <span t-out="leave['total_num_of_days']"/>
+                                                    <span t-esc="leave['total_num_of_days']"/>
                                                 </td>
-                                                <td><span t-out="leave['reason']"/></td>
+                                                <td><span t-esc="leave['reason']"/></td>
                                             </t>
                                         </tr>
                                     </tbody>
@@ -178,8 +178,8 @@
                                     </thead>
                                     <tbody>
                                         <tr t-foreach="public_holidays_data" t-as="public_holiday">
-                                            <td><span t-out="public_holiday['holiday_date']"/></td>
-                                            <td><span t-out="public_holiday['holiday_name']"/></td>
+                                            <td><span t-esc="public_holiday['holiday_date']"/></td>
+                                            <td><span t-esc="public_holiday['holiday_name']"/></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -201,17 +201,17 @@
                             </div>
                             <div name="date_report">
                                 <t t-if="request.env.user.company_id.city">
-                                    <span t-out="request.env.user.company_id.city"/>,
+                                    <span t-esc="request.env.user.company_id.city"/>,
                                 </t>
-                                <t t-else=""><span t-out="str('_' * 20)"/>,</t>
-                                <span t-out="wizard_data[0]['data'][0]['report_date']"/><br/>
+                                <t t-else=""><span t-esc="str('_' * 20)"/>,</t>
+                                <span t-esc="wizard_data[0]['data'][0]['report_date']"/><br/>
                             </div>
                             <div name="signatures" class="row" style="border: 1px solid lightgrey; margin: 2px 1px; page-break-inside: avoid;">
                                 <div class="col-sm-12" style="display: table;">
                                     <div style="border-right: 1px solid lightgrey; width: 50%; display: table-cell;">
                                         <p style="margin-left: -8px; margin-top: 2px; margin-bottom: 0px;">
                                             <t t-if="request.env.user.company_id.city">
-                                                <span t-out="request.env.user.company_id.name"/>
+                                                <span t-esc="request.env.user.company_id.name"/>
                                             </t>
                                         </p>
                                         <p>&amp;nbsp;</p>
