@@ -19,14 +19,6 @@
         'views/res_config_settings_view.xml',
         'views/board_grafana_view.xml',
         'views/base_menu.xml',
+        'views/resources.xml',
     ],
-    'assets': {
-        'web.assets_backend': [
-            'board_grafana_integration/static/src/css/board_grafana_integration.css',
-            'board_grafana_integration/static/src/iconset/css/board_grafana_integration_iconset.css',
-        ],
-        'web.report_assets_common': [
-            'board_grafana_integration/static/src/iconset/css/board_grafana_integration_iconset.css'
-        ],
-    },
 }
