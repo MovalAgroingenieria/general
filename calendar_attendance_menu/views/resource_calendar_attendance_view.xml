@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_resource_calendar_attendance_tree" model="ir.actions.act_window">
+        <field name="name">Resource Calendar Attendance</field>
+        <field name="res_model">resource.calendar.attendance</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="resource.view_resource_calendar_attendance_tree"/>
+    </record>
+
+    <menuitem id="menu_resource_calendar_attendance"
+        parent="resource.menu_resource_config"
+        action="action_resource_calendar_attendance_tree"
+        sequence="1"/>
+</odoo>
