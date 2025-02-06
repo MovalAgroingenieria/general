@@ -1,0 +1,59 @@
+<?xml version ="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sh_project_task_analytic_line_inherit_form_self_view" model="ir.ui.view">
+        <field name="name">project.task.analytic.line.form</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="hr_timesheet.view_task_form2_inherited" />
+        <field name="arch" type="xml">
+            <xpath expr="//page//field[@name='timesheet_ids']//tree//field[@name='unit_amount']" position="after">
+                <field name="tasktime_modificated" invisible="1"/>
+                <field name="tasktime_edited"/>
+                <field name="tasktime_observations"
+                    placeholder="Required if task time is modified by user (Min. 6 chars)"
+                    attrs="{'required': [('tasktime_modificated', '=', True)]}"/>
+                <field name="original_time_line" readonly="1" invisible="1" widget="float_time"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_timesheet_sheet_form_self_edit" model="ir.ui.view">
+        <field name="name">hr_timesheet.sheet.form.self.edit</field>
+        <field name="model">hr_timesheet.sheet</field>
+        <field name="inherit_id" ref="hr_timesheet_sheet.hr_timesheet_sheet_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//page/field/tree/field[@name='user_id']" position="after">
+                <field name="tasktime_modificated" invisible="1"/>
+                <field name="tasktime_edited"/>
+                <field name="tasktime_observations"
+                    placeholder="Required if task time is modified by user (Min. 6 chars)"
+                    attrs="{'required': [('tasktime_modificated', '=', True)]}"/>
+                <field name="original_time_line" readonly="1" invisible="1" widget="float_time"/>
+            </xpath>
+            <xpath expr="//page/field/form/group/field[@name='user_id']" position="after">
+                <field name="tasktime_modificated" invisible="1"/>
+                <field name="tasktime_edited"/>
+                <field name="tasktime_observations"
+                    placeholder="Required if task time is modified by user (Min. 6 chars)"
+                    attrs="{'required': [('tasktime_modificated', '=', True)]}"/>
+                <field name="original_time_line" readonly="1" invisible="1" widget="float_time"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <record id="hr_timesheet_line_tree_inherit" model="ir.ui.view">
+        <field name="name">account.analytic.line.tree.inherit.hr_timesheet</field>
+        <field name="model">account.analytic.line</field>
+        <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='unit_amount']" position="after">
+                <field name="original_time_line" optional="show" readonly="True" widget="timesheet_uom" sum="Total" decoration-danger="original_time_line &gt; 24"/>
+                <field name="tasktime_modificated" invisible="1"/>
+                <field name="tasktime_edited"/>
+                <field name="tasktime_observations"
+                    placeholder="Required if task time is modified by user (Min. 6 chars)"
+                    attrs="{'required': [('tasktime_modificated', '=', True)]}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
