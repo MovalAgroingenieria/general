@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id='fleet_vehicle_odometer_view_form' model='ir.ui.view'>
+        <field name="name">fleet.vehicle.odometer.form</field>
+        <field name="model">fleet.vehicle.odometer</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_odometer_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vehicle_id']" position="attributes">
+                <attribute name="string">Vehicle</attribute>
+            </xpath>
+            <xpath expr="//field[@name='vehicle_id']" position="after">
+                <field name="trip_driver_id"/>
+            </xpath>
+            <xpath expr="//field[@name='value']" position="before">
+                <field name="project_id"/>
+                <field name="initial_value"/>
+            </xpath>
+            <xpath expr="//field[@name='value']" position="after">
+                <field name="quantity"/>
+                <field name="gap_exists_before" invisible="1"/>
+            </xpath>
+       </field>
+    </record>
+
+    <record id='fleet_vehicle_odometer_view_tree' model='ir.ui.view'>
+        <field name="name">fleet.vehicle.odometer.tree</field>
+        <field name="model">fleet.vehicle.odometer</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_odometer_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="decoration-warning">gap_exists_before</attribute>
+                <attribute name="default_order">initial_value desc</attribute>
+            </xpath>
+            <xpath expr="//field[@name='driver_id']" position="attributes">
+                <attribute name="attrs">{'invisible': True}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='vehicle_id']" position="after">
+                <field name="trip_driver_id" widget="many2one_avatar"/>
+            </xpath>
+            <xpath expr="//field[@name='value']" position="before">
+                <field name="project_id"/>
+                <field name="initial_value"/>
+            </xpath>
+            <xpath expr="//field[@name='value']" position="after">
+                <field name="quantity"/>
+                <field name="gap_exists_before" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id='fleet_vehicle_odometer_view_kanban' model='ir.ui.view'>
+        <field name="name">fleet.vehicle.odometer.kanban</field>
+        <field name="model">fleet.vehicle.odometer</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_odometer_view_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='driver_id']/../.." position="replace">
+                <div>
+                    <span><field name="trip_driver_id" widget="res_partner_many2one"/></span>
+                </div>
+                <div t-att-style="'display: flex; flex-direction: column;'">
+                    <span><field name="initial_value"/> Km</span>
+                    <span><field name="value"/> Km</span>
+                    <span><field name="quantity"/> Km</span>
+                    <span><field name="gap_exists_before" invisible="1"/></span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id='fleet_vehicle_odometer_view_search' model='ir.ui.view'>
+        <field name="name">fleet.vehicle.odometer.search</field>
+        <field name="model">fleet.vehicle.odometer</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_odometer_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='value']" position="before">
+                <field name="project_id"/>
+                <field name="initial_value"/>
+            </xpath>
+            <xpath expr="//field[@name='value']" position="after">
+                <field name="quantity"/>
+                <field name="trip_driver_id"/>
+                <field name="gap_exists_before" invisible="1"/>
+            </xpath>
+            <xpath expr="//filter[@name='groupby_vehicle']" position="after">
+                <filter string="Gaps Exist" name="filter_gaps" domain="[('gap_exists_before', '=', True)]"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
