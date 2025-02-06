@@ -16,6 +16,7 @@
     "data": [
         "views/project_view.xml",
     ],
+    "images":  ["static/description/banner.png"],
     "installable": True,
     "application": False,
 }
