@@ -1,4 +1,5 @@
-# 2023 Moval Agroingeniería
+# -*- coding: utf-8 -*-
+# 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 {
@@ -16,6 +17,7 @@
     'data': [
         'views/hr_attendance_view.xml',
         'views/custom_views.xml',
+        'views/assets.xml',
     ],
     'assets': {
         'web.assets_backend': [
