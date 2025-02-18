@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <data noupdate="0">
+
+        <record id="group_cim_restricted" model="res.groups">
+            <field name="name">Restricted User</field>
+            <field name="category_id"
+                ref="base.module_category_complaints_and_infringements_management"/>
+            <field name="implied_ids"
+                eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <record id="group_cim_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id"
+                ref="base.module_category_complaints_and_infringements_management"/>
+            <field name="implied_ids"
+                eval="[(4, ref('group_cim_restricted'))]"/>
+         </record>
+
+         <record id="group_cim_manager" model="res.groups">
+             <field name="name">Manager</field>
+             <field name="category_id"
+                 ref="base.module_category_complaints_and_infringements_management"/>
+             <field name="implied_ids"
+                 eval="[(4, ref('group_cim_user'))]"/>
+         </record>
+
+         <record id="group_cim_settings" model="res.groups">
+             <field name="name">Settings</field>
+             <field name="category_id"
+                 ref="base.module_category_complaints_and_infringements_management"/>
+             <field name="implied_ids"
+                 eval="[(4, ref('group_cim_manager'))]"/>
+         </record>
+
+         <record model="res.groups" id="base.group_system">
+             <field name="implied_ids"
+                 eval="[(4, ref('group_cim_settings'))]"/>
+         </record>
+
+    </data>
+
+</odoo>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="wizard_complainant_data_view_form" model="ir.ui.view">
+        <field name="name">Wizard to enter the complainant data</field>
+        <field name="model">wizard.complainant.data</field>
+        <field name="arch" type="xml">
+            <form string="Data of the complainant">
+                <script>
+                    $(document).ready(function(){
+                        $('.modal-dialog').css({'width': '500px'});
+                    });
+                </script>
+                <div style="text-align:center">
+                    <h3>COMPLAINANT DATA</h3>
+                </div>
+                <hr/>
+                <group name="group_complainant_data">
+                    <field name="complainant_name" string="Name"/>
+                    <field name="complainant_vat" string="VAT"/>
+                    <field name="complainant_email" string="E-mail"/>
+                    <field name="complainant_phone" string="Phone"/>
+                </group>
+
+                <div style="text-align:center">
+                    <h3>WITNESSES</h3>
+                </div>
+                <hr/>
+                <group name="group_witnesses">
+                    <field name="witness_name" colspan="2" nolabel="1"
+                           string="Witnesses"/>
+                </group>
+                <footer>
+                    <button name="set_complainant_data"
+                            type="object"
+                            string="Apply"
+                            class="btn-primary"/>
+                    <button string="Cancel"
+                            class="btn-default"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+</odoo>

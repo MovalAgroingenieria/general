@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="wizard_reject_complaint_view_form" model="ir.ui.view">
+        <field name="name">Wizard to reject a complaint</field>
+        <field name="model">wizard.reject.complaint</field>
+        <field name="arch" type="xml">
+            <form string="Data of a complaint rejection">
+                <script>
+                    $(document).ready(function(){
+                        $('.modal-dialog').css({'width': '500px'});
+                    });
+                </script>
+                <div style="text-align:center">
+                    <h3>CAUSE OF THE REJECTION</h3>
+                </div>
+                <hr/>
+                <group name="group_rejection_data">
+                    <field name="rejection_cause" colspan="2" nolabel="1"
+                           string="Cause"
+                           required="1"/>
+                </group>
+                <footer>
+                    <button name="set_rejected"
+                            type="object"
+                            string="Apply"
+                            class="btn-primary"/>
+                    <button string="Cancel"
+                            class="btn-default"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+</odoo>

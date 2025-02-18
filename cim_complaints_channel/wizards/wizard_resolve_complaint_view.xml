@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="wizard_resolve_complaint_view_form" model="ir.ui.view">
+        <field name="name">Wizard to resolve a complaint</field>
+        <field name="model">wizard.resolve.complaint</field>
+        <field name="arch" type="xml">
+            <form string="Data of a complaint resolution">
+                <script>
+                    $(document).ready(function(){
+                        $('.modal-dialog').css({'width': '500px'});
+                    });
+                </script>
+                <div style="text-align:center">
+                    <h3>RESOLUTION TEXT</h3>
+                </div>
+                <hr/>
+                <group name="group_resolution_data">
+                    <field name="resolution_text" colspan="2" nolabel="1"
+                           string="Resolution"
+                           required="1"/>
+                </group>
+                <footer>
+                    <button name="set_state_to_05_resolved"
+                            type="object"
+                            string="Apply"
+                            class="btn-primary"/>
+                    <button string="Cancel"
+                            class="btn-default"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+</odoo>

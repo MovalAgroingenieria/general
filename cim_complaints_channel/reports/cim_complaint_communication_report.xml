@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="paperformat_portrait_cim_complaint_communication"
+            model="report.paperformat">
+        <field name="name">European A4 Portrait (communication of complaint)</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">33</field>
+        <field name="margin_bottom">20</field>
+        <field name="margin_left">9</field>
+        <field name="margin_right">9</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">22</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <report id="action_cim_complaint_communication_report"
+            string="Communication"
+            model="cim.complaint.communication"
+            report_type="qweb-pdf"
+            name="cim_complaints_channel.report_cim_complaint_communication"
+            paperformat="paperformat_portrait_cim_complaint_communication"
+            groups="cim_complaints_channel.group_cim_manager"/>
+
+    <record model="ir.actions.report" id="action_cim_complaint_communication_report">
+        <field name="print_report_name">(str(object.communication_number)+'-'+object.name+'.pdf')</field>
+    </record>
+
+    <template id="report_cim_complaint_communication">
+        <t t-call="web.external_layout">
+            <t t-call="cim_complaints_channel.report_cim_complaint_communication_external_layout">
+                <div class="page">
+                    <t t-foreach="docs" t-as="o">
+                        <t t-call="cim_complaints_channel.report_cim_complaint_communication_document" t-lang="o.complaint_id.complaint_lang"/>
+                        <p style="page-break-after:always;"></p>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_cim_complaint_communication_document">
+        <t t-set="o" t-value="o.with_context(lang=o.complaint_id.complaint_lang)"/>
+        <div name="global_content">
+            <div class="row" name="section_complaint_data" style="margin-top:20px;">
+                <div name="div_complaint_title" class="col-xs-3">C O M P L A I N T :</div>
+                <div name="div_complaint_name" class="col-xs-2"><span t-field="o.complaint_id.name" style="margin-left:30px"/></div>
+                <div name="div_complaint_issue" class="col-xs-7"><span t-field="o.complaint_id.issue"/></div>
+                <div name="div_issue_title" class="col-xs-3" style="margin-top:10px">I S S U E :</div>
+                <div name="div_issue_name" class="col-xs-9" style="margin-top:10px"><span style="margin-left:30px" t-field="o.issue"/></div>
+                <div name="div_source_title" class="col-xs-3" style="margin-top:10px">S O U R C E :</div>
+                <div name="div_source_date" class="col-xs-2" style="margin-top:10px"><span style="margin-left:30px" t-field="o.communication_date"/></div>
+                <t t-if="o.from_complainant">
+                    <div name="div_source_complaint" class="col-xs-7" style="margin-top:10px">(communication created by the complainant)</div>
+                </t>
+                <t t-else="">
+                    <div name="div_source_processor" class="col-xs-7" style="margin-top:10px">(communication created by the processor)</div>
+                </t>
+            </div>
+            <div name="div_communication_data" class="row" style="margin-top:60px;">
+                <div name="div_communication_title" class="col-xs-12 text-center" style="margin-bottom:40px;">
+                    <h4><u>C O M M U N I C A T I O N</u></h4>
+                </div>
+                <div class="col-xs-12">
+                    <span name="span_description" t-field="o.description"/>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="report_cim_complaint_communication_external_layout">
+        <!-- Multicompany -->
+        <t t-if="not o and doc">
+            <t t-set="o" t-value="doc"/>
+        </t>
+        <t t-if="o and 'company_id' in o">
+            <t t-set="company" t-value="o.company_id"></t>
+        </t>
+        <t t-if="not o or not 'company_id' in o">
+            <t t-set="company" t-value="res_company"></t>
+        </t>
+
+        <t t-call="cim_complaints_channel.report_cim_complaint_communication_external_layout_header"/>
+        <t t-raw="0" />
+        <t t-call="cim_complaints_channel.report_cim_complaint_communication_external_layout_footer"/>
+
+    </template>
+
+    <template id="report_cim_complaint_communication_external_layout_header">
+        <div class="header" name="header_content">
+            <div name="logo_title_header" class="row">
+                <t t-if="company.logo">
+                    <div class="col-xs-1">
+                        <img t-att-src="'data:image/png;base64,%s' % company.logo" style="max-height:75px;max-width:75px;"/>
+                    </div>
+                    <div class="col-xs-7" style="margin-top:30px;">
+                        <span style="margin-left:20px;" t-field="company.name"/>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="col-xs-8" style="margin-top:30px;">
+                        <span t-field="company.name"/>
+                    </div>
+                </t>
+                <div class="col-xs-4 text-right" style="margin-top:30px;">
+                    <span>COMMUNICATION</span>
+                </div>
+            </div>
+            <div class="row zero_min_height">
+                <div class="col-xs-12">
+                    <div style="border-bottom: 1px solid black;"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="report_cim_complaint_communication_external_layout_footer">
+        <div class="footer" name="footer_content" style="font-size:12;">
+            <div class="row" name="pagination">
+                <div class="col-xs-12 text-center single-page" name="pages" style="margin-top:15px;">
+                    <span class="page"/> / <span class="topage"/>
+                </div>
+            </div>
+        </div>
+    </template>
+
+</odoo>

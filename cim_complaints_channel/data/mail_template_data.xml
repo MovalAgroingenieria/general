@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <data noupdate="1">
+
+        <record id="mail_template_tracking_code" model="mail.template">
+            <field name="name">Send tracking code to the complainant</field>
+            <field name="model_id"
+                   ref="cim_complaints_channel.model_cim_complaint"/>
+            <field name="subject">Tracking Code of complaint ${object.name}
+            </field>
+            <field name="email_from">${(user.company_id.email) |safe}</field>
+            <field name="email_to">${(object.decrypted_complainant_email) |safe}</field>
+            <field name="body_html" type="html">
+                <div style="background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;">
+                    <p>Dear user,</p>
+                    <p>The tracking code associated with your compliant is the following: ${object.decrypted_tracking_code}</p>
+                    <p>Please, do not share this information with anyone.</p>
+                    <p>Thank you very much.</p>
+                </div>
+            </field>
+            <field name="report_template"
+                   ref="action_cim_complaint_tracking_code_report"/>
+            <field name="report_name">tracking_code_${object.name}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <record id="mail_template_communication" model="mail.template">
+            <field name="name">Send communication of a complaint</field>
+            <field name="model_id"
+                   ref="cim_complaints_channel.model_cim_complaint_communication"/>
+            <field name="subject">Complaint ${object.complaint_id.name}, communication ${object.name}
+            </field>
+            <field name="email_from">${(user.company_id.email) |safe}</field>
+            <field name="email_to">${(object.complaint_id.decrypted_complainant_email) |safe}</field>
+            <field name="body_html" type="html">
+                <div style="background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;">
+                    <p>Dear user,</p>
+                    <p>The attached document contains a new communication related to the complaint ${object.complaint_id.name} (${object.complaint_id.complaint_type_id.name}).</p>
+                    <p>Best regards.</p>
+                </div>
+            </field>
+            <field name="report_template"
+                   ref="action_cim_complaint_communication_report"/>
+            <field name="report_name">communication_${object.name}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <record id="mail_template_notice" model="mail.template">
+            <field name="name">Send notice related to a communication from the claimant</field>
+            <field name="model_id"
+                   ref="cim_complaints_channel.model_cim_complaint_communication"/>
+            <field name="subject">Complaints Channel, new notice: Communication ${object.name}
+            </field>
+            <field name="email_from">${(user.company_id.email) |safe}</field>
+            <field name="email_to">${(object.complaint_id.param_email_for_notice) |safe}</field>
+            <field name="body_html" type="html">
+                <div style="background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;">
+                    <p>There is a new complaint or a new communication of a pre-existing complaint.</p>
+                    <p>· ISSUE:</p>
+                    <p>${object.issue}</p>
+                </div>
+            </field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+    </data>
+
+</odoo>
