@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="cim_link_type_view_form" model="ir.ui.view">
+        <field name="name">cim.link.type.view.form</field>
+        <field name="model">cim.link.type</field>
+        <field name="arch" type="xml">
+            <form duplicate="0">
+                <field name='is_standard' invisible="1"/>
+                <field name="active" invisible="1"/>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-archive"
+                                confirm="Are you sure you want to toggle visibility?"
+                                groups="cim_complaints_channel.group_cim_manager">
+                                <field name="active"
+                                       widget="boolean_button"
+                                       options='{"terminology": "archive"}'/>
+                        </button>
+                        <button name="action_show_complaints"
+                                type="object" class="oe_stat_button"
+                                icon="fa-cim-complaints-channel-complaint">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="number_of_complaints"/>
+                                </span>
+                                <span class="o_stat_text">complaints</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div name="title">
+                        <label for="name" string="Link Type:"/>
+                        <h1>
+                             <field name="name" style="margin-top:5px"/>
+                        </h1>
+                        <div attrs="{'invisible':[('is_standard','=',False)]}">
+                            <span style="font-weight:bold;">
+                            ( STANDARD TYPE )
+                            </span>
+                        </div>
+                    </div>
+                    <group name="master_data">
+                        <group name="master_data_left">
+                        </group>
+                        <group name="master_data_right">
+                        </group>
+                    </group>
+                    <group name="slave_data">
+                        <notebook name="slave_data_notebook">
+                            <page name="notes" string="Notes">
+                                <field name="notes"/>
+                            </page>
+                        </notebook>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="cim_link_type_view_tree" model="ir.ui.view">
+        <field name="name">cim.link.type.view.tree</field>
+        <field name="model">cim.link.type</field>
+        <field name="arch" type="xml">
+            <tree class="o_cim_complaints_channel_link_type_view_tree">
+                <field name="name"
+                       string="Name"/>
+                <field name="is_standard"
+                       string="Standard"/>
+                <field name="number_of_complaints"
+                       string="N. complaints"/>
+                <field name="notes_text"
+                       string="Notes"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="cim_link_type_view_search" model="ir.ui.view">
+        <field name="name">cim.link.type.view.search</field>
+        <field name="model">cim.link.type</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Name"/>
+                <filter name="inactive"
+                        string="Archived"
+                        domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="cim_link_type_view_kanban" model="ir.ui.view">
+        <field name="name">cim.link.type.view.kanban</field>
+        <field name="model">cim.link.type</field>
+        <field name="arch" type="xml">
+            <kanban class="o_type_kanban_view">
+                <field name="name"/>
+                <field name="number_of_complaints"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                            <div t-attf-class="oe_kanban_color_#{kanban_getcolor(2)} o_type_left">
+                                <div class="o_number_of_items"><t t-esc="record.number_of_complaints.raw_value"/></div>
+                                <div>complaints</div>
+                            </div>
+                            <div class="o_type_right">
+                                <h4><field name="name"/></h4>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="cim_link_type_action"
+            model="ir.actions.act_window">
+        <field name="name">Types of link</field>
+        <field name="res_model">cim.link.type</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_ids"
+         eval="[(5, 0),
+                (0, 0, {'view_mode': 'kanban',
+                        'view_id': ref('cim_link_type_view_kanban')}),
+                (0, 0, {'view_mode': 'tree',
+                        'view_id': ref('cim_link_type_view_tree')}),
+                (0, 0, {'view_mode': 'form',
+                        'view_id': ref('cim_link_type_view_form')})]"/>
+        <field name="search_view_id" ref="cim_link_type_view_search"/>
+    </record>
+
+    <menuitem id="link_type_menu"
+              name="Link Types"
+              parent="configuration_menu"
+              sequence="3"
+              action="cim_link_type_action"/>
+
+</odoo>

@@ -1,0 +1,45 @@
+@font-face {
+  font-family: 'cim_complaints_channel_iconset';
+  src:  url('fonts/cim_complaints_channel_iconset.eot?eoqaeo');
+  src:  url('fonts/cim_complaints_channel_iconset.eot?eoqaeo#iefix') format('embedded-opentype'),
+    url('fonts/cim_complaints_channel_iconset.ttf?eoqaeo') format('truetype'),
+    url('fonts/cim_complaints_channel_iconset.woff?eoqaeo') format('woff'),
+    url('fonts/cim_complaints_channel_iconset.svg?eoqaeo#cim_complaints_channel_iconset') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Simplified fa-moval class (inspired by the native Base Fontawesome module) */
+[class^="fa-cim-complaints-channel-"], [class*=" fa-cim-complaints-channel-"] {
+   display: inline-block;
+   font-family: cim_complaints_channel_iconset;
+   font-style: normal;
+   font-weight: normal;
+   font-variant: normal;
+   text-rendering: auto;
+}
+
+/* Render duotone icons */
+[class*="-duotone"]::before {
+   opacity: 1;
+}
+[class*="-duotone"]::after {
+   opacity: 0.4;
+   margin-left: -1em;
+}
+
+/* Print duotone */
+.duotone-print-white::after {
+  opacity: 1;
+  color: rgba(255, 255, 255, 0.6);
+}
+.duotone-print-color::after {
+  opacity: 1;
+  /* Overwritten by js */
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Icons */
+.fa-cim-complaints-channel-complaint:before {
+  content: "\e900";
+}

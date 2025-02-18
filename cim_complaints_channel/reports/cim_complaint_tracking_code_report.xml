@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="paperformat_portrait_cim_complaint_tracking_code"
+            model="report.paperformat">
+        <field name="name">European A4 Portrait (tracking code of complaint)</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">33</field>
+        <field name="margin_bottom">20</field>
+        <field name="margin_left">9</field>
+        <field name="margin_right">9</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">22</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <report id="action_cim_complaint_tracking_code_report"
+            string="Tracking Code"
+            model="cim.complaint"
+            report_type="qweb-pdf"
+            name="cim_complaints_channel.report_cim_complaint_tracking_code"
+            paperformat="paperformat_portrait_cim_complaint_tracking_code"
+            groups="cim_complaints_channel.group_cim_manager"/>
+
+    <template id="report_cim_complaint_tracking_code">
+        <t t-call="web.external_layout">
+            <t t-call="cim_complaints_channel.report_cim_complaint_tracking_code_external_layout">
+                <main>
+                    <div class="page">
+                        <t t-foreach="docs" t-as="o">
+                            <t t-call="cim_complaints_channel.report_cim_complaint_tracking_code_document" t-lang="o.complaint_lang"/>
+                            <p style="page-break-after:always;"></p>
+                        </t>
+                    </div>
+                </main>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_cim_complaint_tracking_code_document">
+        <t t-set="o" t-value="o.with_context(lang=o.complaint_lang)"/>
+        <div name="global_content">
+            <div class="row" name="section_presentation" style="margin-top:20px;">
+                <div class="col-xs-12">
+                    <p>
+                        In relation to the complaint whose data appears below,
+                        the tracking code shown is the data that you must enter
+                        on the website to know how the investigation of the
+                        complaint is evolving and, if you wish, to be able
+                        to later provide new data or documents.
+                    </p>
+                    <p>
+                        Please, do not reveal this tracking code to anyone,
+                        it is confidential information.
+                    </p>
+                </div>
+            </div>
+            <div class="row" name="section_complaint_data" style="margin-top:30px;">
+                <div name="div_complaint_data_issue_title" class="col-xs-2">I S S U E :</div>
+                <div name="div_complaint_data_issue" class="col-xs-10" ><span t-field="o.issue"/></div>
+                <div name="div_complaint_data_date_title" class="col-xs-2" style="margin-top:10px">D A T E :</div>
+                <div name="div_complaint_data_date" class="col-xs-10" style="margin-top:10px"><span t-field="o.creation_date"/></div>
+            </div>
+            <div class="row text-center" style="margin-top:90px;">
+                <h4><u>Tracking Code</u></h4>
+                <h2><span t-field="o.decrypted_tracking_code"/></h2>
+            </div>
+        </div>
+    </template>
+
+    <template id="report_cim_complaint_tracking_code_external_layout">
+        <!-- Multicompany -->
+        <t t-if="not o and doc">
+            <t t-set="o" t-value="doc"/>
+        </t>
+        <t t-if="o and 'company_id' in o">
+            <t t-set="company" t-value="o.company_id"></t>
+        </t>
+        <t t-if="not o or not 'company_id' in o">
+            <t t-set="company" t-value="res_company"></t>
+        </t>
+
+        <t t-call="cim_complaints_channel.report_cim_complaint_tracking_code_external_layout_header" />
+        <t name="raw_tracking_code_content" t-raw="0"/>
+    </template>
+
+    <template id="report_cim_complaint_tracking_code_external_layout_header">
+        <div class="header" name="header_content">
+            <div name="logo_title_header" class="row">
+                <t t-if="company.logo">
+                    <div class="col-xs-1">
+                        <img t-att-src="'data:image/png;base64,%s' % company.logo" style="max-height:75px;max-width:75px;"/>
+                    </div>
+                    <div class="col-xs-7" style="margin-top:30px;">
+                        <span style="margin-left:20px;" t-field="company.name"/>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="col-xs-8" style="margin-top:30px;">
+                        <span t-field="company.name"/>
+                    </div>
+                </t>
+                <div class="col-xs-4 text-right" style="margin-top:30px;">
+                    <span>TRACKING CODE</span>
+                </div>
+            </div>
+            <div class="row zero_min_height">
+                <div class="col-xs-12">
+                    <div style="border-bottom: 1px solid black;"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+</odoo>

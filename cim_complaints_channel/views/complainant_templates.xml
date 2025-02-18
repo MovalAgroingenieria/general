@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="trackingcode_page" name="📩">
+        <t t-call="website.layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div name="header" style="margin-top:20px">
+                            <span>The following combination of letters and numbers is the tracking code of the new complaint. This code will be necessary to enter new data and to see the state of the complaint. Please remember this code and do not give it to anyone. Thank you.</span>
+                        </div>
+                        <div name="tracking_code" style="margin-top:40px" class="text-center">
+                            <h1><t t-esc="tracking_code"/></h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="trackingcode_form" name="🔑">
+        <t t-call="website.layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div name="header" style="margin-top:20px">
+                            <span>To guarantee the confidentiality of the information related to your complaint, you must prove your identity by then entering the tracking code that you obtained when filing the complaint. Thank you.</span>
+                        </div>
+                        <form class="oe_login_form" role="form" action="/communications" method="post" autocomplete="off">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <div class="form-group">
+                                <label for="trackingcode" class="control-label">Tracking Code</label>
+                                <input type="password" name="trackingcode" t-att-value="(code)" id="trackingcode" class="form-control" required="required"/>
+                            </div>
+                            <div class="clearfix oe_login_buttons">
+                                <button type="submit" class="btn btn-primary pull-left">Accept</button>
+                            </div>
+                        </form>
+                        <div name="error_text" class="text-center">
+                            <span class="text-danger"><t t-esc="error_message"/></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="communications_page" name="📋">
+        <t t-call="website.layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div name="header" style="margin-top:20px">
+                            <strong>Complaint:</strong>
+                            <span t-esc="complaint.name"></span><br/>
+                            <strong>Issue:</strong>
+                            <span t-esc="complaint.issue"></span>
+                        </div>
+                        <hr/>
+                        <center><h4 style="margin-top:30px">COMMUNICATIONS</h4></center>
+                        <center>(click on the number to see details)</center>
+                        <table class="table-striped table" style="margin-top:30px">
+                            <thead>
+                                <tr>
+                                    <th>Order N.</th>
+                                    <th>Issue</th>
+                                    <th class="text-center">Val. Date</th>
+                                    <th>Processor</th>
+                                    <th class="text-right">Number Attach.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                               <t t-foreach="communications" t-as="c">
+                                   <tr>
+                                       <td>
+                                           <t t-if="c.from_complainant">
+                                               <span class="fa fa-arrow-right"/>
+                                           </t>
+                                           <t t-else="">
+                                               <span class="fa fa-arrow-left"/>
+                                           </t>
+                                           <a t-attf-href="/communications/#{c.id}?m=#{encrypted_tracking_code_b64}"><span style="margin-left: 5px;margin-bottom: 1px;" class="badge badge-light" t-esc="c.communication_number"></span></a>
+                                       </td>
+                                       <td><span t-esc="c.issue"></span></td>
+                                       <td class="text-center"><span t-esc="c.communication_date" t-options='{"widget": "date"}'></span></td>
+                                       <td>
+                                           <t t-if="not c.from_complainant">
+                                               <span t-esc="c.processor_user_id.partner_id.name"></span>
+                                           </t>
+                                       </td>
+                                       <td class="text-right"><span t-esc="c.number_of_attachments"></span></td>
+                                   </tr>
+                               </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="communication_form" name="📄">
+        <t t-call="website.layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div name="header" style="margin-top:20px">
+                            <strong>Complaint:</strong>
+                            <span t-esc="communication.complaint_id.name"></span><br/>
+                            <strong>Issue:</strong>
+                            <span t-esc="communication.complaint_id.issue"></span>
+                        </div>
+                        <hr/>
+                        <div name="body" class="container">
+                            <div name="body_content" class="row">
+                                <div name="body_content_left" class="col-lg-6">
+                                    <h2 style="margin-bottom:30px">Communication</h2>
+                                    <strong>Communication:</strong>
+                                    <span t-esc="communication.name"></span><br/>
+                                    <strong>Issue:</strong>
+                                    <span t-esc="communication.issue"></span><br/>
+                                    <strong>Sender:</strong>
+                                    <t t-if="communication.from_complainant">
+                                        <span>Complainant</span>
+                                    </t>
+                                    <t t-else="">
+                                        <t t-if="communication.processor_user_id">
+                                            <span t-esc="communication.processor_user_id.partner_id.name"></span>
+                                        </t>
+                                    </t>
+                                    <br/>
+                                    <strong>Validation:</strong>
+                                    <span t-esc="communication.communication_date" t-options='{"widget": "date"}'></span><br/>
+                                    <t t-if="communication.document_01_name or communication.document_02_name or communication.document_03_name or communication.document_04_name or communication.document_05_name or communication.document_06_name">
+                                        <br/><strong>Attachments:</strong>
+                                    </t>
+                                    <div name="attachments" style="margin-top:20px">
+                                        <t t-if="communication.document_01_name">
+                                            <a t-attf-href="/communications/download/#{communication.id}/1?m=#{encrypted_tracking_code_b64}"><span class="fa fa-download"></span><span style="margin-left: 5px;" t-esc="communication.document_01_name"></span></a><br/>
+                                        </t>
+                                        <t t-if="communication.document_02_name">
+                                            <a t-attf-href="/communications/download/#{communication.id}/2?m=#{encrypted_tracking_code_b64}"><span class="fa fa-download"></span><span style="margin-left: 5px;" t-esc="communication.document_02_name"></span></a><br/>
+                                        </t>
+                                        <t t-if="communication.document_03_name">
+                                            <a t-attf-href="/communications/download/#{communication.id}/3?m=#{encrypted_tracking_code_b64}"><span class="fa fa-download"></span><span style="margin-left: 5px;" t-esc="communication.document_03_name"></span></a><br/>
+                                        </t>
+                                        <t t-if="communication.document_04_name">
+                                            <a t-attf-href="/communications/download/#{communication.id}/4?m=#{encrypted_tracking_code_b64}"><span class="fa fa-download"></span><span style="margin-left: 5px;" t-esc="communication.document_04_name"></span></a><br/>
+                                        </t>
+                                        <t t-if="communication.document_05_name">
+                                            <a t-attf-href="/communications/download/#{communication.id}/5?m=#{encrypted_tracking_code_b64}"><span class="fa fa-download"></span><span style="margin-left: 5px;" t-esc="communication.document_05_name"></span></a><br/>
+                                        </t>
+                                        <t t-if="communication.document_06_name">
+                                            <a t-attf-href="/communications/download/#{communication.id}/6?m=#{encrypted_tracking_code_b64}"><span class="fa fa-download"></span><span style="margin-left: 5px;" t-esc="communication.document_06_name"></span></a><br/>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div name="body_content_right" class="col-lg-6">
+                                    <h2 style="margin-bottom:30px">Message</h2>
+                                    <p><span t-raw="communication.description_as_html"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>
