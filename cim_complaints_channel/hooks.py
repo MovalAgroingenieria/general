@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2024 Moval Agroingeniería
+# 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, SUPERUSER_ID
@@ -15,26 +15,26 @@ def post_init_hook(cr, registry):
     except (Exception, ):
         sequence_coding_code_id = 0
     if sequence_coding_code_id > 0:
-        values.set('res.cim.config.settings',
-                           'sequence_complaint_code_id',
-                           sequence_coding_code_id)
+        env['ir.config_parameter'].set_param(
+            'cim_complaints_channel.sequence_complaint_code_id',
+            sequence_coding_code_id)
     # Initialize the rest of the params.
-    values.set('res.cim.config.settings',
-                       'length_tracking_code', 8)
-    values.set('res.cim.config.settings',
-                       'acknowledgement_period', 7)
-    values.set('res.cim.config.settings',
-                       'automatic_email_state', False)
-    values.set('res.cim.config.settings',
-                       'automatic_email_validate_com', False)
-    values.set('res.cim.config.settings',
-                       'automatic_email_complainant_com', False)
-    values.set('res.cim.config.settings',
-                       'notice_period', 15)
-    values.set('res.cim.config.settings',
-                       'deadline', 3)
-    values.set('res.cim.config.settings',
-                       'deadline_extended', 6)
+    env['ir.config_parameter'].set_param(
+        'cim_complaints_channel.length_tracking_code', 8)
+    env['ir.config_parameter'].set_param(
+        'cim_complaints_channel.acknowledgement_period', 7)
+    env['ir.config_parameter'].set_param(
+        'cim_complaints_channel.automatic_email_state', False)
+    env['ir.config_parameter'].set_param(
+        'cim_complaints_channel.automatic_email_validate_com', False)
+    env['ir.config_parameter'].set_param(
+        'cim_complaints_channel.automatic_email_complainant_com', False)
+    env['ir.config_parameter'].set_param(
+        'cim_complaints_channel.notice_period', 15)
+    env['ir.config_parameter'].set_param(
+        'cim_complaints_channel.deadline', 3)
+    env['ir.config_parameter'].set_param(
+        'cim_complaints_channel.deadline_extended', 6)
     # Set the fields "website_form_access" and "website_form_label" of the
     # "ir.model" model: allow the use of a form on the website to submit
     # complaints.
@@ -61,7 +61,7 @@ def uninstall_hook(cr, registry):
         env.cr.savepoint()
         env.cr.execute("""
             DELETE FROM ir_default
-            WHERE model='res.cim.config.settings'""")
+            WHERE model='res.config.settings'""")
         env.cr.commit()
     except (Exception,):
         env.cr.rollback()

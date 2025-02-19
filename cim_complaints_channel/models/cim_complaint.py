@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2024 Moval Agroingeniería
+# Copyright 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import base64
@@ -34,7 +34,7 @@ class CimComplaint(models.Model):
         characters = string.ascii_uppercase + string.digits
         # String to cipher
         tracking_code_ok = False
-        while (not tracking_code_ok):
+        while not tracking_code_ok:
             tracking_code = ''.join(random.choice(characters)
                                     for _ in range(self._size_tracking_code))
             repeated_complaints = self.search(
@@ -48,7 +48,7 @@ class CimComplaint(models.Model):
     def _default_setted_sequence(self):
         resp = False
         sequence_complaint_code_id = self.env['ir.default'].get(
-            'res.cim.config.settings', 'sequence_complaint_code_id')
+            'res.config.settings', 'sequence_complaint_code_id')
         if sequence_complaint_code_id:
             resp = True
         return resp
@@ -423,7 +423,7 @@ class CimComplaint(models.Model):
 
     def _compute_param_acknowledgement_period(self):
         param_acknowledgement_period = self.env['ir.default'].get(
-            'res.cim.config.settings', 'acknowledgement_period')
+            'res.config.settings', 'acknowledgement_period')
         if not param_acknowledgement_period:
             param_acknowledgement_period = 0
         for record in self:
@@ -431,7 +431,7 @@ class CimComplaint(models.Model):
 
     def _compute_param_notice_period(self):
         param_notice_period = self.env['ir.default'].get(
-            'res.cim.config.settings', 'notice_period')
+            'res.config.settings', 'notice_period')
         if not param_notice_period:
             param_notice_period = 10
         for record in self:
@@ -439,7 +439,7 @@ class CimComplaint(models.Model):
 
     def _compute_param_deadline(self):
         param_deadline = self.env['ir.default'].get(
-            'res.cim.config.settings', 'deadline')
+            'res.config.settings', 'deadline')
         if not param_deadline:
             param_deadline = 1
         for record in self:
@@ -447,7 +447,7 @@ class CimComplaint(models.Model):
 
     def _compute_param_deadline_extended(self):
         param_deadline_extended = self.env['ir.default'].get(
-            'res.cim.config.settings', 'deadline_extended')
+            'res.config.settings', 'deadline_extended')
         if not param_deadline_extended:
             param_deadline_extended = 1
         for record in self:
@@ -455,7 +455,7 @@ class CimComplaint(models.Model):
 
     def _compute_param_email_for_notice(self):
         param_email_for_notice = self.env['ir.default'].get(
-            'res.cim.config.settings', 'email_for_notice')
+            'res.config.settings', 'email_for_notice')
         if not param_email_for_notice:
             param_email_for_notice = ''
         param_email_for_notice = param_email_for_notice.strip()
@@ -480,12 +480,6 @@ class CimComplaint(models.Model):
                 deadline_state = '99_rejected'
             elif record.state != '05_resolved':
                 current_date = datetime.today().strftime('%Y-%m-%d')
-                # Provisional (test: add days to current_date)
-                # current_date = (datetime.strptime(
-                #     current_date, '%Y-%m-%d') + relativedelta(
-                #     days=90)).strftime('%Y-%m-%d')
-                # print(current_date)
-                # Provisional (end of test)
                 months_deadline = record.param_deadline
                 if record.is_extended:
                     months_deadline = record.param_deadline_extended
@@ -527,14 +521,14 @@ class CimComplaint(models.Model):
             record.is_acknowledgement_expired = is_acknowledgement_expired
 
     @api.model
-    def _search_is_acknowledgement_expired(self, operator, value):
+    def _search_is_acknowledgement_expired(self, operator):
         complaint_ids = []
         operator_of_filter = 'in'
         if operator == '!=':
             operator_of_filter = 'not in'
         acknowledgement_period = 0
         param_acknowledgement_period = self.env['ir.default'].get(
-            'res.cim.config.settings', 'acknowledgement_period')
+            'res.config.settings', 'acknowledgement_period')
         if param_acknowledgement_period:
             acknowledgement_period = param_acknowledgement_period
         where_clause = 'is_rejected = false and state = \'01_received\''
@@ -560,7 +554,7 @@ class CimComplaint(models.Model):
 
     def _compute_setted_sequence(self):
         sequence_complaint_code_id = self.env['ir.default'].get(
-            'res.cim.config.settings', 'sequence_complaint_code_id')
+            'res.config.settings', 'sequence_complaint_code_id')
         for record in self:
             setted_sequence = False
             if sequence_complaint_code_id:
@@ -716,7 +710,7 @@ class CimComplaint(models.Model):
 
     def _compute_automatic_email_state(self):
         automatic_email_state = self.env['ir.default'].get(
-            'res.cim.config.settings', 'automatic_email_state')
+            'res.config.settings', 'automatic_email_state')
         for record in self:
             record.automatic_email_state = automatic_email_state
 
@@ -732,7 +726,7 @@ class CimComplaint(models.Model):
     def _check_investigating_user_id(self):
         for record in self:
             if ((not record.investigating_user_id) and
-               (record.state == '04_ready' or record.state == '05_resolved')):
+               (record.state in ('04_ready', '05_resolved'))):
                 raise exceptions.ValidationError(
                     _('If the complaint is ready or resolved, then it is '
                       'mandatory to enter the instructor.'))
@@ -740,8 +734,9 @@ class CimComplaint(models.Model):
     @api.constrains('measures_taken', 'state')
     def _check_measures_taken(self):
         for record in self:
-            if ((record.state == '04_ready' or record.state == '05_resolved') and
-               ((not record.measures_taken) or record.measures_taken == '')):
+            if ((record.state in ('04_ready', '05_resolved'))
+                    and ((not record.measures_taken) or
+                         record.measures_taken == '')):
                 raise exceptions.ValidationError(
                     _('If the complaint is ready or resolved, then it is '
                       'mandatory to enter the measures taken.'))
@@ -765,7 +760,7 @@ class CimComplaint(models.Model):
     @api.model
     def create(self, vals):
         sequence_complaint_code_id = self.env['ir.default'].get(
-            'res.cim.config.settings', 'sequence_complaint_code_id')
+            'res.config.settings', 'sequence_complaint_code_id')
         if sequence_complaint_code_id:
             model_ir_sequence = self.env['ir.sequence'].sudo()
             sequence_complaint_code = \
@@ -1554,13 +1549,13 @@ class CimComplaintCommunication(models.Model):
 
     def _compute_automatic_email_validate_com(self):
         automatic_email_validate_com = self.env['ir.default'].get(
-            'res.cim.config.settings', 'automatic_email_validate_com')
+            'res.config.settings', 'automatic_email_validate_com')
         for record in self:
             record.automatic_email_validate_com = automatic_email_validate_com
 
     def _compute_automatic_email_complainant_com(self):
         automatic_email_complainant_com = self.env['ir.default'].get(
-            'res.cim.config.settings', 'automatic_email_complainant_com')
+            'res.config.settings', 'automatic_email_complainant_com')
         for record in self:
             record.automatic_email_complainant_com = \
                 automatic_email_complainant_com
@@ -1847,8 +1842,7 @@ class CimComplaintCommunication(models.Model):
             if record.state != '01_draft':
                 raise exceptions.UserError(_(
                     'It is not possile to delete a validated communication.'))
-            if (record.complaint_id.state == '04_ready' or
-               record.complaint_id.state == '05_resolved'):
+            if (record.complaint_id.state in ('04_ready', '05_resolved')):
                 raise exceptions.UserError(_(
                     'The complaint has completed its investigation phase, '
                     'so it is no longer possible to delete communications.'))
