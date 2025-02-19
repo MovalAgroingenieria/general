@@ -9,7 +9,7 @@
         <field name="arch" type="xml">
             <xpath expr="//div[hasclass('settings')]" position="inside">
                 <div class="app_settings_block" data-string="Complaints"
-                     string="Complaints" data-key="base_complaints">
+                     string="Complaints" data-key="cim_complaints_channel">
                     <h2>Complaints Channel Management</h2>
                     <div class="row mt16 o_settings_container" name="complaints_settings">
                         <div id="div_sequence_complaint_code"
@@ -167,20 +167,20 @@
         </field>
     </record>
 
-    <record id="res_config_settings_action"
-            model="ir.actions.act_window">
-        <field name="name">Configure complaints-channel management</field>
-        <field name="type">ir.actions.act_window</field>
+    <record id="res_config_settings_action" model="ir.actions.act_window">
+        <field name="name">Settings</field>
         <field name="res_model">res.config.settings</field>
         <field name="view_mode">form</field>
         <field name="target">inline</field>
+        <field name="context">
+            {'module' : 'cim_complaints_channel', }
+        </field>
     </record>
 
     <menuitem id="parameters_menu"
-              name="Parameters"
               parent="configuration_menu"
-              sequence="1"
               action="res_config_settings_action"
+              sequence="1"
               groups="cim_complaints_channel.group_cim_settings"/>
 
 </odoo>
