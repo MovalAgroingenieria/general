@@ -7,7 +7,6 @@ from odoo import api, SUPERUSER_ID
 
 def post_init_hook(cr, registry):
     env = api.Environment(cr, SUPERUSER_ID, {})
-    values = env['ir.default'].sudo()
     # Initialize the "sequence_complaint_code_id" param (Many2one).
     try:
         sequence_coding_code_id = env.ref(
@@ -38,7 +37,7 @@ def post_init_hook(cr, registry):
     # Set the fields "website_form_access" and "website_form_label" of the
     # "ir.model" model: allow the use of a form on the website to submit
     # complaints.
-    models = env['ir.model'].sudo()
+    models = env['ir.model']
     model_complaint = models.search([('model', '=', 'cim.complaint')])
     if model_complaint:
         model_complaint = model_complaint[0]

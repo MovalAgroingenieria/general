@@ -60,7 +60,6 @@ class ResConfigSettings(models.TransientModel):
 
     deadline_extended = fields.Integer(
         string='Extended Deadline (number of months)',
-        digits=(32, 2),
         default=1,
         required=True,
         help='Extended complaint deadline (number of months)',)

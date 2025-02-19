@@ -111,7 +111,7 @@ class WebsiteFormCim(WebsiteForm):
         communication = None
         model_cim_complaint_communication = \
             request.env['cim.complaint.communication'].sudo()
-        if ('m' in kwargs and kwargs['m']):
+        if 'm' in kwargs and kwargs['m']:
             complaint = self._get_complaint_from_encrypted_tracking_code(
                 kwargs['m'])
             if complaint and communication_id:
@@ -166,7 +166,7 @@ class WebsiteFormCim(WebsiteForm):
             request.env['cim.complaint'].sudo()
         model_cim_complaint_communication = \
             request.env['cim.complaint.communication'].sudo()
-        if ('m' in kwargs and kwargs['m']):
+        if 'm' in kwargs and kwargs['m']:
             complaint = self._get_complaint_from_encrypted_tracking_code(
                 kwargs['m'])
             if communication_id:
