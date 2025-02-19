@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2024 Moval Agroingeniería
+# Copyright 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import json
@@ -159,8 +159,7 @@ class WebsiteFormCim(WebsiteForm):
 
     @http.route('/communications/download/<int:communication_id>/<int:n_doc>',
                 type='http', auth='public', website=True)
-    def download_document(self, communication_id=None, n_doc=None,
-                          **kwargs):
+    def download_document(self, communication_id=None, n_doc=None, **kwargs):
         complaint = None
         communication = None
         model_cim_complaint = \

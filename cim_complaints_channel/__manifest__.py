@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2024 Moval Agroingeniería
+# 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 {
@@ -15,8 +15,6 @@
         "mail",
         "html_text",
         "website",
-        # "web_tree_image",
-        # "website_form_builder",
     ],
     "data": [
         "security/security.xml",
@@ -28,7 +26,7 @@
         "wizards/wizard_resolve_complaint_view.xml",
         "wizards/wizard_complainant_data_view.xml",
         "views/cim_complaints_channel_menus.xml",
-        "views/res_cim_config_settings_view.xml",
+        "views/res_config_settings_view.xml",
         "views/cim_complaint_type_view.xml",
         "views/cim_complaint_view.xml",
         "views/cim_link_type_view.xml",
@@ -40,5 +38,5 @@
     "installable": True,
     "post_init_hook": "post_init_hook",
     "uninstall_hook": "uninstall_hook",
-    "application": True,
+    "application": False,
 }

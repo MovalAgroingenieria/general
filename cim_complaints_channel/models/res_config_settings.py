@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-# 2023 Moval Agroingeniería
+# 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import models, fields, api, exceptions, _
 
 
-class ResCimConfigSettings(models.TransientModel):
+class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
-    _name = 'res.cim.config.settings'
-    _description = 'Configuration of the cim_complaints_channel module'
 
     sequence_complaint_code_id = fields.Many2one(
         string='Sequence for the codes of complaints',
@@ -93,36 +91,3 @@ class ResCimConfigSettings(models.TransientModel):
                 raise exceptions.UserError(_(
                     'The extended deadline can not be less than the '
                     'predetermined deadline.'))
-
-    def set_default_values(self):
-        values = self.env['ir.default'].sudo()
-        values.set('res.cim.config.settings',
-                           'sequence_complaint_code_id',
-                           self.sequence_complaint_code_id.id)
-        values.set('res.cim.config.settings',
-                           'length_tracking_code',
-                           self.length_tracking_code)
-        values.set('res.cim.config.settings',
-                           'acknowledgement_period',
-                           self.acknowledgement_period)
-        values.set('res.cim.config.settings',
-                           'automatic_email_state',
-                           self.automatic_email_state)
-        values.set('res.cim.config.settings',
-                           'automatic_email_validate_com',
-                           self.automatic_email_validate_com)
-        values.set('res.cim.config.settings',
-                           'automatic_email_complainant_com',
-                           self.automatic_email_complainant_com)
-        values.set('res.cim.config.settings',
-                           'notice_period',
-                           self.notice_period)
-        values.set('res.cim.config.settings',
-                           'deadline',
-                           self.deadline)
-        values.set('res.cim.config.settings',
-                           'deadline_extended',
-                           self.deadline_extended)
-        values.set('res.cim.config.settings',
-                           'email_for_notice',
-                           self.email_for_notice)

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.base</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="10"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+                <div class="app_settings_block" data-string="Complaints"
+                     string="Complaints" data-key="base_complaints">
+                    <h2>Complaints Channel Management</h2>
+                    <div class="row mt16 o_settings_container" name="complaints_settings">
+                        <div id="div_sequence_complaint_code"
+                             class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="sequence_complaint_code_id"/>
+                                <div class="text-muted">
+                                    Sequence for the codes
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16">
+                                        <field name="sequence_complaint_code_id"
+                                           options="{'no_quick_create':True,'no_create_edit':True}"
+                                           style="width:300px"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="div_length_tracking_code"
+                             class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="length_tracking_code"/>
+                                <div class="text-muted">
+                                    Tracking code length
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16">
+                                        <field name="length_tracking_code"
+                                           options="{'no_quick_create':True,'no_create_edit':True}"
+                                           style="width:100px"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="div_acknowledgement_period"
+                             class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="acknowledgement_period"/>
+                                <div class="text-muted">
+                                    Acknowledgement period (days)
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16">
+                                        <field name="acknowledgement_period"
+                                           style="width:100px"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="div_automatic_email_state"
+                             class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="automatic_email_state"/>
+                                <div class="text-muted">
+                                    Email after change state
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16">
+                                        <field name="automatic_email_state"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="div_automatic_email_validate_com"
+                             class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="automatic_email_validate_com"/>
+                                <div class="text-muted">
+                                    Email after validate communication
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16">
+                                        <field name="automatic_email_validate_com"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="div_automatic_email_complainant_com"
+                             class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="automatic_email_complainant_com"/>
+                                <div class="text-muted">
+                                    Send the complainant a copy of your communications
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16">
+                                        <field name="automatic_email_complainant_com"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="div_notice_period"
+                             class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="notice_period"/>
+                                <div class="text-muted">
+                                    Notice Period (days)
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16">
+                                        <field name="notice_period"
+                                           style="width:100px"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="div_deadline"
+                             class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="deadline"/>
+                                <div class="text-muted">
+                                    Deadline (months)
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16">
+                                        <field name="deadline"
+                                           style="width:100px"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="div_deadline_extended"
+                             class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="deadline_extended"/>
+                                <div class="text-muted">
+                                    Deadline Extended (months)
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16">
+                                        <field name="deadline_extended"
+                                           style="width:100px"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="div_email_for_notice"
+                             class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <label for="email_for_notice"/>
+                                <div class="text-muted">
+                                    E-mail for notice
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16">
+                                        <field name="email_for_notice"
+                                           style="width:400px"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="res_config_settings_action"
+            model="ir.actions.act_window">
+        <field name="name">Configure complaints-channel management</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+    </record>
+
+    <menuitem id="parameters_menu"
+              name="Parameters"
+              parent="configuration_menu"
+              sequence="1"
+              action="res_config_settings_action"
+              groups="cim_complaints_channel.group_cim_settings"/>
+
+</odoo>
