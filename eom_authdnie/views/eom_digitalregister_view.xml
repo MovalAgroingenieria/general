@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eom_digitalregister_view_form" model="ir.ui.view">
+        <field name="name">eom.digitalregister.view.form</field>
+        <field name="model">eom.digitalregister</field>
+        <field name="arch" type="xml">
+            <form duplicate="false" create="false">
+                <field name="editable_notes" invisible="1"/>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_accesses"
+                                type="object" class="oe_stat_button"
+                                icon="fa-sign-in">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="number_of_accesses"/>
+                                </span>
+                                <span class="o_stat_text">accesses</span>
+                            </div>
+                        </button>
+                        <button name="action_requests"
+                                type="object" class="oe_stat_button"
+                                icon="fa-pencil-square-o">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="number_of_requests"/>
+                                </span>
+                                <span class="o_stat_text">requests</span>
+                            </div>
+                        </button>
+                    </div>
+                    <field name="image" widget='image' class="oe_avatar" options='{"size": [90, 90]}'/>
+                    <div class="oe_title">
+                        <h2>
+                            <field name="fullname_html"/>
+                        </h2>
+                    </div>
+                    <group name="master_data">
+                        <group name="master_data_left">
+                            <field name="last_event_time"
+                                   string="Last Access"/>
+                            <field name="name"
+                                   string="VAT"
+                                   readonly="True"/>
+                            <field name="authority"
+                                   string="Authority"
+                                   readonly="True"/>
+                            <field name="partner_id"
+                                   string="Associated Contact"
+                                   readonly="True"
+                                   attrs="{'invisible': [('partner_id', '=', False)]}"/>
+                        </group>
+                        <group name="master_data_right">
+                            <field name="email"
+                                   string="Email"
+                                   readonly="True"
+                                   attrs="{'invisible': [('partner_id', '=', False)]}"/>
+                            <field name="phone"
+                                   string="Phone"
+                                   readonly="True"
+                                   attrs="{'invisible': [('partner_id', '=', False)]}"/>
+                            <field name="mobile"
+                                   string="Mobile"
+                                   readonly="True"
+                                   attrs="{'invisible': [('partner_id', '=', False)]}"/>
+                        </group>
+                    </group>
+                    <group name="slave_data">
+                        <notebook name="slave_data_notebook">
+                            <page name="notes" string="Notes">
+                                <field name="notes"
+                                       attrs="{'readonly': [('editable_notes', '=', False)]}"/>
+                            </page>
+                        </notebook>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="eom_digitalregister_view_tree" model="ir.ui.view">
+        <field name="name">eom.digitalregister.view.tree</field>
+        <field name="model">eom.digitalregister</field>
+        <field name="arch" type="xml">
+            <tree class="o_eom_authdnie_digitalregister_view_tree"
+                  create="false"
+                  default_order="lastname">
+                <field name="name"
+                       string="VAT"/>
+                <field name="lastname"
+                       string="Last Name"/>
+                <field name="firstname"
+                       string="First Name"/>
+                <field name="last_event_time"
+                       string="Last Access"/>
+                <field name="number_of_accesses"
+                       string="Accesses"/>
+                <field name="number_of_requests"
+                       string="Requests"/>
+                <field name="icon_with_contact"
+                       string=""/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eom_digitalregister_view_search" model="ir.ui.view">
+        <field name="name">eom.digitalregister.view.search</field>
+        <field name="model">eom.digitalregister</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="fullname" string="Name"/>
+                <field name="name" string="VAT"/>
+                <filter string="Mapped to contact: yes"
+                        name="with_contact_yes"
+                        domain="[('partner_id', '!=', False)]"/>
+                <filter string="Mapped to contact: no"
+                        name="with_contact_no"
+                        domain="[('partner_id', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Authority"
+                            name="grouped_authority"
+                     context="{'group_by':'authority'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eom_digitalregister_view_kanban" model="ir.ui.view">
+        <field name="name">eom.digitalregister.view.kanban</field>
+        <field name="model">eom.digitalregister</field>
+        <field name="arch" type="xml">
+            <kanban class="o_res_partner_kanban" create="false">
+                <field name="color"/>
+                <field name="fullname_firstname"/>
+                <field name="name"/>
+                <field name="icon_with_contact"/>
+                <field name="last_event_time"/>
+                <field name="image_small"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_res_partner_kanban">
+                            <div class="o_kanban_image">
+                                <t t-if="record.image_small.raw_value">
+                                    <img t-att-src="kanban_image('eom.digitalregister', 'image_small', record.id.value)"/>
+                                </t>
+                                <t t-if="!record.image_small.raw_value">
+                                    <img t-att-src='_s + "/eom_authdnie/static/src/img/avatar.png"'/>
+                                </t>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong class="oe_partner_heading"><field name="fullname_firstname"/></strong>
+                                <ul>
+                                    <li><span t-if="record.icon_with_contact.raw_value" style="margin-right:7px"><field name="icon_with_contact"/></span><field name="name"/></li>
+                                    <li t-if="record.last_event_time.raw_value"><span style="margin-right:5px">Last Access:</span><field name="last_event_time"/></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="eom_digitalregister_action"
+            model="ir.actions.act_window">
+        <field name="name">Digital Certificates</field>
+        <field name="res_model">eom.digitalregister</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_ids"
+         eval="[(5, 0),
+                (0, 0, {'view_mode': 'tree',
+                        'view_id': ref('eom_digitalregister_view_tree')}),
+                (0, 0, {'view_mode': 'form',
+                        'view_id': ref('eom_digitalregister_view_form')}),
+                (0, 0, {'view_mode': 'kanban',
+                        'view_id': ref('eom_digitalregister_view_kanban')})]"/>
+        <field name="search_view_id" ref="eom_digitalregister_view_search"/>
+    </record>
+
+    <menuitem id="digitalregister_menu"
+              name="Digital Certificates"
+              parent="electronicoffice_menu"
+              sequence="1"
+              action="eom_digitalregister_action"/>
+
+    <record id="eom_digitalregister_access_view_form" model="ir.ui.view">
+        <field name="name">eom.digitalregister.access.view.form</field>
+        <field name="model">eom.digitalregister.access</field>
+        <field name="arch" type="xml">
+            <form duplicate="false" create="false">
+                <field name="editable_notes" invisible="1"/>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                    </div>
+                    <field name="image" widget='image' class="oe_avatar" options='{"size": [90, 90]}'/>
+                    <div class="oe_title">
+                        <h2>
+                            <field name="fullname_html"/>
+                        </h2>
+                    </div>
+                    <group name="master_data">
+                        <group name="master_data_left">
+                            <field name="event_time"
+                                   string="Access"/>
+                            <field name="digitalregister_id"
+                                   string="Digital Certificate"
+                                   readonly="True"/>
+                            <field name="authority"
+                                   string="Authority"
+                                   readonly="True"/>
+                            <field name="partner_id"
+                                   string="Associated Contact"
+                                   readonly="True"
+                                   attrs="{'invisible': [('partner_id', '=', False)]}"/>
+                        </group>
+                        <group name="master_data_right">
+                            <field name="summary"
+                                   string="REQUEST"
+                                   readonly="True"
+                                   attrs="{'invisible': [('summary', '=', False)]}"/>
+                            <div name="detail_content"
+                                 colspan="2"
+                                 class="panel-body"
+                                 style="background:#ffffff;border-color:#cccccc white white white;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px;min-height:40px"
+                                 attrs="{'invisible': [('summary', '=', False)]}">
+                                <field name="detail_text" nolabel="1"
+                                       style="min-height:60px"
+                                       readonly="True"/>
+                            </div>
+                        </group>
+                    </group>
+                    <group name="slave_data">
+                        <notebook name="slave_data_notebook">
+                            <page name="notes" string="Notes">
+                                <field name="notes"
+                                       attrs="{'readonly': [('editable_notes', '=', False)]}"/>
+                            </page>
+                        </notebook>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="eom_digitalregister_access_view_tree" model="ir.ui.view">
+        <field name="name">eom.digitalregister.access.view.tree</field>
+        <field name="model">eom.digitalregister.access</field>
+        <field name="arch" type="xml">
+            <tree class="o_eom_authdnie_digitalregister_access_view_tree"
+                  create="false"
+                  default_order="event_time desc">
+                <field name="event_time"
+                       string="Access"/>
+                <field name="digitalregister_id"
+                       string="VAT"/>
+                <field name="lastname"
+                       string="Last Name"/>
+                <field name="firstname"
+                       string="First Name"/>
+                <field name="icon_with_userdata"
+                       string=""/>
+                <field name="icon_with_contact"
+                       string=""/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eom_digitalregister_access_view_search" model="ir.ui.view">
+        <field name="name">eom.digitalregister.access.view.search</field>
+        <field name="model">eom.digitalregister.access</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="fullname" string="Name"/>
+                <field name="digitalregister_id" string="VAT"/>
+                <filter string="Is a request: yes"
+                        name="request_yes"
+                        domain="[('with_userdata', '=', True)]"/>
+                <filter string="Is a request: no"
+                        name="request_no"
+                        domain="[('with_userdata', '=', False)]"/>
+                <separator/>
+                <filter string="Mapped to contact: yes"
+                        name="with_contact_yes"
+                        domain="[('partner_id', '!=', False)]"/>
+                <filter string="Mapped to contact: no"
+                        name="with_contact_no"
+                        domain="[('partner_id', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Digital Certificate"
+                            name="grouped_fullname"
+                     context="{'group_by':'fullname'}"/>
+                    <filter string="Access Time"
+                            name="grouped_event_time"
+                     context="{'group_by':'event_time'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eom_digitalregister_access_view_kanban" model="ir.ui.view">
+        <field name="name">eom.digitalregister.access,view.kanban</field>
+        <field name="model">eom.digitalregister.access</field>
+        <field name="arch" type="xml">
+            <kanban class="o_res_partner_kanban" create="false">
+                <field name="color"/>
+                <field name="fullname_firstname"/>
+                <field name="digitalregister_id"/>
+                <field name="icon_with_contact"/>
+                <field name="icon_with_userdata"/>
+                <field name="event_time"/>
+                <field name="image_small"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_res_partner_kanban">
+                            <div class="o_kanban_image"
+                                 invisible="context.get('hide_image', False)">
+                                <t t-if="record.image_small.raw_value">
+                                    <img t-att-src="kanban_image('eom.digitalregister.access', 'image_small', record.id.value)"/>
+                                </t>
+                                <t t-if="!record.image_small.raw_value">
+                                    <img t-att-src='_s + "/eom_authdnie/static/src/img/avatar.png"'/>
+                                </t>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong class="oe_partner_heading"><field name="fullname_firstname"/></strong>
+                                <ul>
+                                    <li><span t-if="record.icon_with_contact.raw_value" style="margin-right:7px"><field name="icon_with_contact"/></span><field name="digitalregister_id"/></li>
+                                    <li><span t-if="record.icon_with_userdata.raw_value" style="margin-right:7px"><field name="icon_with_userdata"/></span><field name="event_time"/></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="eom_digitalregister_access_action"
+            model="ir.actions.act_window">
+        <field name="name">Accesses</field>
+        <field name="res_model">eom.digitalregister.access</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_ids"
+         eval="[(5, 0),
+                (0, 0, {'view_mode': 'tree',
+                        'view_id': ref('eom_digitalregister_access_view_tree')}),
+                (0, 0, {'view_mode': 'form',
+                        'view_id': ref('eom_digitalregister_access_view_form')}),
+                (0, 0, {'view_mode': 'kanban',
+                        'view_id': ref('eom_digitalregister_access_view_kanban')})]"/>
+        <field name="search_view_id" ref="eom_digitalregister_access_view_search"/>
+        <field name="context">{'reduced_register_id': True}</field>
+    </record>
+
+    <menuitem id="digitalregister_access_menu"
+              name="Accesses"
+              parent="electronicoffice_menu"
+              sequence="2"
+              action="eom_digitalregister_access_action"/>
+
+    <record id="eom_digitalregister_access_with_userdata_action"
+            model="ir.actions.act_window">
+        <field name="name">Requests</field>
+        <field name="res_model">eom.digitalregister.access</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_ids"
+         eval="[(5, 0),
+                (0, 0, {'view_mode': 'tree',
+                        'view_id': ref('eom_digitalregister_access_view_tree')}),
+                (0, 0, {'view_mode': 'form',
+                        'view_id': ref('eom_digitalregister_access_view_form')}),
+                (0, 0, {'view_mode': 'kanban',
+                        'view_id': ref('eom_digitalregister_access_view_kanban')})]"/>
+        <field name="search_view_id" ref="eom_digitalregister_access_view_search"/>
+        <field name="domain">[("with_userdata", "=", True)]</field>
+        <field name="context">{'reduced_register_id': True}</field>
+    </record>
+
+    <menuitem id="digitalregister_access_with_userdata_menu"
+              name="Requests"
+              parent="electronicoffice_menu"
+              sequence="3"
+              action="eom_digitalregister_access_with_userdata_action"/>
+
+</odoo>

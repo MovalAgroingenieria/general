@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="identification_data_page" name="📋">
+        <t t-call="website.layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div style="display: flex;justify-content: space-between; margin-top:22px">
+                            <div name="header">
+                                <strong><span style="margin-right:35px">Electronic Office</span></strong>
+                                <span style="margin-right:7px">🖳</span>
+                                <strong><span t-esc="identif_header"/></strong>
+                            </div>
+                            <div>
+                                <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div name="body" class="container">
+                            <div name="body_content" class="row">
+                                <div name="body_content_left" class="col-sm-6">
+                                    <h4>⸰ Identification</h4>
+                                    <hr/>
+                                    <strong>VAT:</strong>
+                                    <span t-esc="access.digitalregister_id.name"/><br/>
+                                    <strong>Last Name:</strong>
+                                    <span t-esc="access.digitalregister_id.lastname"/><br/>
+                                    <strong>First Name:</strong>
+                                    <span t-esc="access.digitalregister_id.firstname"/><br/>
+                                    <strong>Authority:</strong>
+                                    <span t-esc="access.digitalregister_id.authority"/><br/><br/>
+                                    <t t-if="access.partner_id">
+                                        <t t-if="access.partner_id.image">
+                                            <div class="modal-body row">
+                                                <div class="col-md-4">
+                                                    <img t-att-src="'data:image/png;base64,%s' % access.partner_id.image" width="130" style="border-color:#696969;border-width:1px;border-style:solid;margin-bottom:10px"/>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <span class="fa fa-user"/>
+                                                    <span t-esc="access.partner_id.name"/><br/>
+                                                    <t t-if="access.partner_id.email">
+                                                        <span class="fa fa-envelope"/>
+                                                        <span t-esc="access.partner_id.email"/><br/>
+                                                    </t>
+                                                    <t t-if="access.partner_id.phone">
+                                                        <span class="fa fa-phone"/>
+                                                        <span t-esc="access.partner_id.phone"/><br/>
+                                                    </t>
+                                                    <t t-if="access.partner_id.mobile">
+                                                        <span class="fa fa-phone"/>
+                                                        <span t-esc="access.partner_id.mobile"/><br/>
+                                                    </t>
+                                                </div>
+                                            </div>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="fa fa-user"/>
+                                            <span t-esc="access.partner_id.name"/><br/>
+                                            <t t-if="access.partner_id.email">
+                                                <span class="fa fa-envelope"/>
+                                                <span t-esc="access.partner_id.email"/><br/>
+                                            </t>
+                                            <t t-if="access.partner_id.phone">
+                                                <span class="fa fa-phone"/>
+                                                <span t-esc="access.partner_id.phone"/><br/>
+                                            </t>
+                                            <t t-if="access.partner_id.mobile">
+                                                <span class="fa fa-phone"/>
+                                                <span t-esc="access.partner_id.mobile"/><br/>
+                                            </t>
+                                        </t>
+                                    </t>
+                                    <t t-else="">
+                                        <strong>(there is no associated contact)</strong>
+                                    </t>
+                                </div>
+                                <div name="body_content_right" class="col-sm-6">
+                                    <h4>⸰ New request</h4>
+                                    <hr/>
+                                    <form role="form" action="/confirm" method="post" autocomplete="off">
+                                        <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                        <input type="hidden" name="access_name" t-att-value="access.name"/>
+                                        <div class="form-group">
+                                            <label for="summary" class="control-label">Summary (*)</label>
+                                            <input style="margin-bottom:15px" type="text" name="summary" t-att-value="(summary)" id="summary" class="form-control" required="required"/>
+                                            <label for="detail" class="control-label">Detail</label>
+                                            <textarea type="text" name="detail" rows="4" t-att-value="(detail)" id="detail" class="form-control"/>
+                                        </div>
+                                        <div class="clearfix text-center">
+                                            <button type="submit" class="btn btn-primary">Accept</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="identification_error" name="📋">
+        <t t-call="website.layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div name="header" style="margin-top:22px">
+                            <strong>(no data found)</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="confirmation_message" name="📋">
+        <t t-call="website.layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div style="display: flex;justify-content: space-between; margin-top:22px">
+                            <div name="header">
+                                <t t-if="update_ok">
+                                    <h3>Thank you, the data entered has been successfully registered.</h3>
+                                </t>
+                                <t t-else="">
+                                    <strong><span class="text-danger">Error updating data.</span></strong>
+                                </t>
+                            </div>
+                            <div>
+                                <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>
