@@ -35,6 +35,19 @@
         "reports/cim_complaint_communication_report.xml",
         "data/mail_template_data.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "cim_complaints_channel/static/src/css/cim_complaints_channel.css",
+            "cim_complaints_channel/static/src/scss/cim_complaints_channel.scss",
+            "cim_complaints_channel/static/lib/complaints_channel_iconset/complaints_channel_iconset.css",
+        ],
+        "web.assets_frontend": [
+            "cim_complaints_channel/static/src/js/button_send.js",
+        ],
+        "web.report_assets_common": [
+            "cim_complaints_channel/static/lib/complaints_channel_iconset/complaints_channel_iconset.css",
+        ],
+    },
     "installable": True,
     "post_init_hook": "post_init_hook",
     "uninstall_hook": "uninstall_hook",

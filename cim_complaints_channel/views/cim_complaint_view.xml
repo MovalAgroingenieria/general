@@ -5,7 +5,7 @@
         <field name="name">cim.complaint.view.form</field>
         <field name="model">cim.complaint</field>
         <field name="arch" type="xml">
-            <form duplicate="0">
+            <form duplicate="0" class="o_form_view" string="Complaint">
                 <field name="id" invisible="1"/>
                 <field name="setted_sequence" invisible="1"/>
                 <field name="deadline_state" invisible="1"/>
@@ -86,7 +86,7 @@
                            widget="statusbar"
                            statusbar_visible="01_received,02_admitted,03_in_progress,04_ready,05_resolved"/>
                 </header>
-                <sheet>
+                <sheet class="o_full_width">
                     <div class="oe_button_box" name="button_box">
                         <button name="action_get_communications"
                                 type="object" class="oe_stat_button"
@@ -121,241 +121,240 @@
                     </div>
                     <br/>
                     <br/>
-                    <div name="group_01" class="row" style="margin-top:-10px">
-                        <div class="col-12 col-md-6">
-                            <group name="group_01_left" style="width: 100% !important;">
-                                <div name="group_01_left_inner">
-                                    <div colspan="8">
-                                        <field name="issue" nolabel="1" colspan="8"
-                                               placeholder="Issue"
-                                               attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
-                                    </div>
-                                    <div name="group_01_left_check" colspan="8"
-                                         style="margin-top:14px">
-                                        <field name="is_anonymous"
-                                               nolabel="1"/>
-                                        <span style="margin-left:5px">Anonymous Complaint</span><br/>
-                                        <div style="margin-bottom:8px"/>
-                                        <field name="is_delegated"
-                                               nolabel="1"/>
-                                        <span style="margin-left:5px">Data entered by instructor</span>
-                                    </div>
+
+                    <div name="divgroup1" class="row">
+                        <div name="leftdiv1" class="col-6">
+                            <div colspan="6">
+                                <field name="issue" nolabel="1" style="width: 100%"
+                                       placeholder="Issue"
+                                       attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
+                                <div name="group_01_left_check" colspan="6"
+                                     style="margin-top:14px">
+                                    <field name="is_anonymous"
+                                           nolabel="1"/>
+                                    <span style="margin-left:5px">Anonymous Complaint</span><br/>
+                                    <div style="margin-bottom:8px"/>
+                                    <field name="is_delegated"
+                                           nolabel="1"/>
+                                    <span style="margin-left:5px">Data entered by instructor</span>
                                 </div>
-                            </group>
+                            </div>
                         </div>
-                        <div class="col-12 col-md-6">
-                            <group name="group_01_right">
-                                <group name="group_01_right_inner">
-                                    <group>
-                                        <div name="group_01_right_title" colspan="8"
-                                             class="text-center"
-                                             style="margin-bottom:15px">
-                                            <span style="font-weight:bold"
-                                                  attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '01_on_time')]}">
-                                                INSTRUCTION ON TIME
-                                            </span>
-                                            <span style="padding:5px;font-weight:bold;background-color:#ff8c00;color:#ffffff"
-                                                  attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '02_upcoming_expiration')]}">
-                                                (instruction deadline soon to expire)
-                                            </span>
-                                            <span style="padding:5px;font-weight:bold;background-color:#dc143c;color:#ffffff"
-                                                  attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '03_expirated')]}">
-                                                (instruction period expirated)
-                                            </span>
-                                            <span style="font-weight:bold"
-                                                  attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '04_extended')]}">
-                                                INSTRUCTION ON TIME (EXTENDED)
-                                            </span>
-                                            <span style="padding:5px;font-weight:bold;background-color:#ff8c00;color:#ffffff"
-                                                  attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '05_extended_upcoming_expiration')]}">
-                                                (extended instruction deadline soon to expire)
-                                            </span>
-                                            <span style="padding:5px;font-weight:bold;background-color:#dc143c;color:#ffffff"
-                                                  attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '06_extended_expirated')]}">
-                                                (extended instruction period expirated)
-                                            </span>
-                                            <span style="font-weight:bold"
-                                                  attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '07_finished')]}">
-                                                INSTRUCTION FINISHED
-                                            </span>
-                                            <span style="padding:5px;font-weight:bold;background-color:#2f4f4f;color:#ffffff"
-                                                  attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '99_rejected')]}">
-                                                (instruction rejected)
-                                            </span>
-                                            <span style="font-weight:bold" class="blink_text"
-                                                  attrs="{'invisible': [('is_acknowledgement_expired', '=', False)]}">
-                                                (acknowledgement expirated)
-                                            </span>
-                                        </div>
-                                    </group>
-                                    <group name="group_01_right_datas" colspan="8"
-                                         style="margin-bottom:15px">
-                                        <field name="investigating_user_id"
-                                               string="Instructor"
-                                               options="{'no_quick_create':True,'no_create_edit':True}"
-                                               attrs="{'readonly': [('state', '=', '05_resolved')]}"/>
-                                        <field name="creation_date"
-                                               string="Creation Date"
-                                               attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
-                                        <field name="deadline_date"
-                                               string="Deadline Date"
-                                               attrs="{'invisible': [('state', '=', '05_resolved')]}"/>
-                                        <field name="expected_resolution_date"
-                                               string="Resolution Date"
-                                               attrs="{'invisible': [('state', '!=', '05_resolved')]}"/>
-                                    </group>
+                        <div name="rightdiv1" class="col-6">
+                            <div>
+                                <div name="group_01_right_title" colspan="6"
+                                     class="text-center"
+                                     style="margin-bottom:15px">
+                                    <span style="font-weight:bold"
+                                          attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '01_on_time')]}">
+                                        INSTRUCTION ON TIME
+                                    </span>
+                                    <span style="padding:5px;font-weight:bold;background-color:#ff8c00;color:#ffffff"
+                                          attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '02_upcoming_expiration')]}">
+                                        (instruction deadline soon to expire)
+                                    </span>
+                                    <span style="padding:5px;font-weight:bold;background-color:#dc143c;color:#ffffff"
+                                          attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '03_expirated')]}">
+                                        (instruction period expirated)
+                                    </span>
+                                    <span style="font-weight:bold"
+                                          attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '04_extended')]}">
+                                        INSTRUCTION ON TIME (EXTENDED)
+                                    </span>
+                                    <span style="padding:5px;font-weight:bold;background-color:#ff8c00;color:#ffffff"
+                                          attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '05_extended_upcoming_expiration')]}">
+                                        (extended instruction deadline soon to expire)
+                                    </span>
+                                    <span style="padding:5px;font-weight:bold;background-color:#dc143c;color:#ffffff"
+                                          attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '06_extended_expirated')]}">
+                                        (extended instruction period expirated)
+                                    </span>
+                                    <span style="font-weight:bold"
+                                          attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '07_finished')]}">
+                                        INSTRUCTION FINISHED
+                                    </span>
+                                    <span style="padding:5px;font-weight:bold;background-color:#2f4f4f;color:#ffffff"
+                                          attrs="{'invisible': ['|', ('is_acknowledgement_expired', '=', True), ('deadline_state', '!=', '99_rejected')]}">
+                                        (instruction rejected)
+                                    </span>
+                                    <span style="font-weight:bold" class="blink_text"
+                                          attrs="{'invisible': [('is_acknowledgement_expired', '=', False)]}">
+                                        (acknowledgement expirated)
+                                    </span>
+                                </div>
+                            </div>
+                            <div name="group_01_right_datas" class="col-6"
+                                 style="margin-bottom:15px">
+                                <group>
+                                    <field name="investigating_user_id"
+                                           string="Instructor"
+                                           options="{'no_quick_create':True,'no_create_edit':True}"
+                                           attrs="{'readonly': [('state', '=', '05_resolved')]}"/>
+                                    <field name="creation_date"
+                                           string="Creation Date"
+                                           attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
+                                    <field name="deadline_date"
+                                           string="Deadline Date"
+                                           attrs="{'invisible': [('state', '=', '05_resolved')]}"/>
+                                    <field name="expected_resolution_date"
+                                           string="Resolution Date"
+                                           attrs="{'invisible': [('state', '!=', '05_resolved')]}"/>
                                 </group>
-                            </group>
+                            </div>
                         </div>
                     </div>
-                    <div name="group_02" class="row" style="margin-top:-10px">
-                        <group class="col-12 col-md-6">
-                            <group name="group_02_left">
-                                <group name="group_02_left_inner">
-                                    <div name="group_02_left_inner_title"
-                                         colspan="8"
-                                         style="text-align:center;margin-bottom:5px">
-                                        <span style="font-weight:bold">
-                                        FACTS DENOUNCED
-                                        </span>
-                                    </div>
-                                    <div name="section_description"
-                                         colspan="8"
-                                         class="panel-body"
-                                         style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px;min-height:75px">
-                                        <field name="description" nolabel="1"
-                                               style="margin-top:5px;min-height:55px"
+                    <div name="group_02" class="row">
+                        <div name="group_02_left" class="col-6">
+                            <div name="group_02_left_inner">
+                                <div name="group_02_left_inner_title" colspan="8"
+                                     style="text-align:center;margin-bottom:5px">
+                                    <span style="font-weight:bold">
+                                    FACTS DENOUNCED
+                                    </span>
+                                </div>
+                                <div name="section_description"
+                                     colspan="8"
+                                     class="panel-body"
+                                     style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px;min-height:75px">
+                                    <field name="description" nolabel="1"
+                                           style="margin-top:5px;min-height:55px"
+                                           attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
+                                </div>
+                                <div name="section_fields" colspan="8"
+                                     style="margin-top:10px">
+                                    <group colspan="8">
+                                        <field name="defendant_name"
+                                               string="Defendant"
                                                attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
-                                    </div>
-                                    <div name="section_fields" colspan="8"
-                                         style="margin-top:10px">
-                                        <group colspan="8">
-                                            <field name="defendant_name"
-                                                   string="Defendant"
-                                                   attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
-                                            <field name="complaint_frequency"
-                                                   string="When did it happen?"
-                                                   attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
-                                            <field name="complaint_time"
-                                                   string="Date and Time"
-                                                   attrs="{'invisible': [('complaint_frequency', '!=', '02_specific_day')],
-                                                           'required': [('complaint_frequency', '=', '02_specific_day')],
-                                                           'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
-                                            <field name="infringement_level"
-                                                   string="Infringement Level"
-                                                   attrs="{'readonly': [('state', '=', '05_resolved')]}"/>
-                                            <field name="is_juditial_action"
-                                                   string="With juditial action"
-                                                   attrs="{'readonly': [('state', '=', '05_resolved')]}"/>
-                                            <div name="group_02_left_inner_complainant_data" colspan="8"
-                                                 class="text-center"
-                                                 style="font-weight:bold;margin-top:16px;margin-bottom:16px"
-                                                 groups="cim_complaints_channel.group_cim_user">
-                                                <span>COMPLAINANT DATA</span>
-                                            </div>
-                                            <div name="section_decrypted_complainant_data"
-                                                 colspan="8"
-                                                 class="panel-body"
-                                                 style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px"
-                                                 attrs="{'invisible': ['|', ('id', '=', 0), ('decrypted_complainant_data', '=', False)]}"
-                                                 groups="cim_complaints_channel.group_cim_user">
-                                                <field name="decrypted_complainant_data" nolabel="1"
-                                                       style="margin-top:5px"/>
-                                            </div>
-                                            <field name="complainant_name"
-                                                   string="Name"
-                                                   attrs="{'invisible': [('id', '>', 0)]}"
-                                                   groups="cim_complaints_channel.group_cim_user"/>
-                                            <field name="complainant_vat"
-                                                   string="VAT"
-                                                   attrs="{'invisible': [('id', '>', 0)]}"
-                                                   groups="cim_complaints_channel.group_cim_user"/>
-                                            <field name="complainant_email"
-                                                   string="E-mail"
-                                                   attrs="{'invisible': [('id', '>', 0)]}"
-                                                   groups="cim_complaints_channel.group_cim_user"/>
-                                            <field name="complainant_phone"
-                                                   string="Phone"
-                                                   attrs="{'invisible': [('id', '>', 0)]}"
-                                                   groups="cim_complaints_channel.group_cim_user"/>
-                                            <field name="link_type_id"
-                                                   string="Link Type"
-                                                   options="{'no_quick_create':True,'no_create_edit':True}"
-                                                   required="1"
-                                                   attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"
-                                                   groups="cim_complaints_channel.group_cim_user"/>
-                                            <field name="is_complainant_involved"
-                                                   string="Is involved?"
-                                                   groups="cim_complaints_channel.group_cim_user"
-                                                   attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
-                                            <field name="decrypted_tracking_code"
-                                                   string="Tracking Code"
-                                                   class="oe_read_only"
-                                                   groups="cim_complaints_channel.group_cim_manager"/>
-                                        </group>
-                                    </div>
-                                </group>
-                            </group>
-                        </group>
-                        <group class="col-12 col-md-6">
-                            <group name="group_02_right">
-                                <group name="group_02_right_inner"
-                                       attrs="{'invisible': [('is_rejected', '=', True)]}">
-                                    <div name="group_02_right_inner_title_1"
-                                         colspan="8"
-                                         style="text-align:center;margin-bottom:5px">
-                                        <span style="font-weight:bold">
-                                        MEASURES TAKEN
-                                        </span>
-                                    </div>
-                                    <div name="section_measures_taken"
-                                         colspan="8"
-                                         class="panel-body"
-                                         style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px;min-height:150px">
-                                        <field name="measures_taken" nolabel="1"
-                                               style="margin-top:5px;min-height:170px"
+                                        <field name="complaint_frequency"
+                                               string="When did it happen?"
+                                               attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
+                                        <field name="complaint_time"
+                                               string="Date and Time"
+                                               attrs="{'invisible': [('complaint_frequency', '!=', '02_specific_day')],
+                                                       'required': [('complaint_frequency', '=', '02_specific_day')],
+                                                       'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
+                                        <field name="infringement_level"
+                                               string="Infringement Level"
                                                attrs="{'readonly': [('state', '=', '05_resolved')]}"/>
-                                    </div>
-                                    <div name="group_02_right_inner_title_2"
-                                         colspan="8"
-                                         style="text-align:center;margin-bottom:5px">
-                                        <span style="font-weight:bold">
-                                        WITNESSES
-                                        </span>
-                                    </div>
-                                    <div name="section_witness_name"
-                                         colspan="8"
-                                         class="panel-body"
-                                         style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;min-height:75px">
-                                        <field name="witness_name" nolabel="1"
-                                               style="margin-top:5px;min-height:55px"
-                                               attrs="{'invisible': [('id', '>', 0)]}"
-                                               groups="cim_complaints_channel.group_cim_user"/>
-                                        <field name="decrypted_witness_name" nolabel="1"
-                                               style="margin-top:5px;min-height:55px"
-                                               attrs="{'invisible': [('id', '=', 0)]}"
-                                               groups="cim_complaints_channel.group_cim_user"/>
-                                    </div>
+                                        <field name="is_juditial_action"
+                                               string="With juditial action"
+                                               attrs="{'readonly': [('state', '=', '05_resolved')]}"/>
+                                    </group>
+                                </div>
+                            </div>
+                        </div>
+                        <div name="group_02_right" class="col-6">
+                            <div name="group_02_right_inner">
+                                <div name="group_02_right_inner_title_1"
+                                     colspan="8"
+                                     style="text-align:center;margin-bottom:5px">
+                                    <span style="font-weight:bold">
+                                    MEASURES TAKEN
+                                    </span>
+                                </div>
+                                <div name="section_measures_taken"
+                                     colspan="8"
+                                     class="panel-body"
+                                     style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px;min-height:150px">
+                                    <field name="measures_taken" nolabel="1"
+                                           style="margin-top:5px;min-height:170px"
+                                           attrs="{'readonly': [('state', '=', '05_resolved')]}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div name="group_03" class="row">
+                        <div name="group_03_left" class="col-6">
+                            <div name="group_03_left_inner">
+                                <div name="group_03_left_inner_complainant_data" colspan="2"
+                                     class="text-center"
+                                     style="font-weight:bold;margin-top:16px;margin-bottom:16px"
+                                     groups="cim_complaints_channel.group_cim_user">
+                                    <span>COMPLAINANT DATA</span>
+                                </div>
+                                <div name="section_decrypted_complainant_data"
+                                     colspan="8"
+                                     class="panel-body"
+                                     style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px"
+                                     attrs="{'invisible': ['|', ('id', '=', 0), ('decrypted_complainant_data', '=', False)]}"
+                                     groups="cim_complaints_channel.group_cim_user">
+                                    <field name="decrypted_complainant_data" nolabel="1"
+                                           style="margin-top:5px"/>
+                                </div>
+                                <group>
+                                    <field name="complainant_name"
+                                           string="Name"
+                                           attrs="{'invisible': [('id', '>', 0)]}"
+                                           groups="cim_complaints_channel.group_cim_user"/>
+                                    <field name="complainant_vat"
+                                           string="VAT"
+                                           attrs="{'invisible': [('id', '>', 0)]}"
+                                           groups="cim_complaints_channel.group_cim_user"/>
+                                    <field name="complainant_email"
+                                           string="E-mail"
+                                           attrs="{'invisible': [('id', '>', 0)]}"
+                                           groups="cim_complaints_channel.group_cim_user"/>
+                                    <field name="complainant_phone"
+                                           string="Phone"
+                                           attrs="{'invisible': [('id', '>', 0)]}"
+                                           groups="cim_complaints_channel.group_cim_user"/>
+                                    <field name="link_type_id"
+                                           string="Link Type"
+                                           options="{'no_quick_create':True,'no_create_edit':True}"
+                                           required="1"
+                                           attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"
+                                           groups="cim_complaints_channel.group_cim_user"/>
+                                    <field name="is_complainant_involved"
+                                           string="Is involved?"
+                                           groups="cim_complaints_channel.group_cim_user"
+                                           attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
+                                    <field name="decrypted_tracking_code"
+                                           string="Tracking Code"
+                                           class="oe_read_only"
+                                           groups="cim_complaints_channel.group_cim_manager"/>
                                 </group>
-                                <group name="group_02_right_inner_rejected"
-                                       attrs="{'invisible': [('is_rejected', '=', False)]}">
-                                    <div name="group_02_right_inner_rejected_title_1"
-                                         colspan="8"
-                                         style="text-align:center;margin-bottom:5px">
-                                        <span style="font-weight:bold">
-                                        REJECTION CAUSE
-                                        </span>
-                                    </div>
-                                    <div name="section_rejection_cause"
-                                         colspan="8"
-                                         class="panel-body"
-                                         style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px;min-height:75px">
-                                        <field name="rejection_cause" nolabel="1"
-                                               style="margin-top:5px;min-height:55px"/>
-                                    </div>
-                                </group>
-                            </group>
-                        </group>
+                            </div>
+                        </div>
+                        <div name="group_03_right" class="col-6">
+                            <div name="group_02_right_inner_title_2"
+                                 colspan="8"
+                                 style="text-align:center;margin-bottom:5px">
+                                <span style="font-weight:bold">
+                                WITNESSES
+                                </span>
+                            </div>
+                            <div name="section_witness_name"
+                                 colspan="8"
+                                 class="panel-body"
+                                 style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;min-height:75px">
+                                <field name="witness_name" nolabel="1"
+                                       style="margin-top:5px;min-height:55px"
+                                       attrs="{'invisible': [('id', '>', 0)]}"
+                                       groups="cim_complaints_channel.group_cim_user"/>
+                                <field name="decrypted_witness_name" nolabel="1"
+                                       style="margin-top:5px;min-height:55px"
+                                       attrs="{'invisible': [('id', '=', 0)]}"
+                                       groups="cim_complaints_channel.group_cim_user"/>
+                            </div>
+                            <div name="section_inner_rejected"
+                                   attrs="{'invisible': [('is_rejected', '=', False)]}">
+                                <div name="section_rejected_title_1"
+                                     colspan="8"
+                                     style="text-align:center;margin-bottom:5px">
+                                    <span style="font-weight:bold">
+                                    REJECTION CAUSE
+                                    </span>
+                                </div>
+                                <div name="section_rejection_cause"
+                                     colspan="8"
+                                     class="panel-body"
+                                     style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px;min-height:75px">
+                                    <field name="rejection_cause" nolabel="1"
+                                           style="margin-top:5px;min-height:55px"/>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <notebook>
                         <page name="documents" string="Documents">
@@ -672,10 +671,9 @@
                            statusbar_visible="01_draft,02_validated"/>
                 </header>
                 <sheet>
-                    <group name="group_01">
-                        <group name="group_01_left">
-                            <div name="group_01_left_communication_number"
-                                 colspan="2">
+                    <div class="row" name="div_01">
+                        <div name="div_01_left" class="col-6">
+                            <div name="group_01_left_communication_number">
                                 <span name="field_communication_number_label"
                                       style="font-weight:bold"
                                       attrs="{'invisible': [('id', '=', 0)]}">
@@ -686,8 +684,8 @@
                                        style="font-weight:bold"
                                        attrs="{'invisible': [('id', '=', 0)]}"/>
                             </div>
-                        </group>
-                        <group name="group_01_right">
+                        </div>
+                        <div name="group_01_right" class="col-6">
                             <div name="group_01_right_is_sent"
                                  colspan="2">
                                 <span style="padding:5px;font-weight:bold;background-color:#dc143c;color:#ffffff"
@@ -699,39 +697,44 @@
                                     COMMUNICATION SENT
                                 </span>
                             </div>
-                        </group>
-                    </group>
-                    <group name="group_02">
-                        <group name="group_02_left">
-                            <field name="issue" string="Issue"
-                                   attrs="{'readonly': ['|', ('from_complainant', '=', True), ('state', '=', '02_validated')]}"/>
-                        </group>
-                        <group name="group_02_right">
-                            <field name="from_complainant_as_text"
-                                   string="Complaint Source"/>
-                            <field name="communication_date"
-                                   string="Validation Date"/>
-                            <field name="complaint_id"
-                                   string="Complaint" readonly="1"/>
-                        </group>
-                    </group>
-                    <group name="group_03" colspan="2">
+                        </div>
+                    </div>
+                    <br/>
+                    <br/>
+                    <div name="div_02" class="row">
+                        <div name="div_02_left" class="col-6">
+                            <group>
+                                <field name="issue" string="Issue"
+                                       attrs="{'readonly': ['|', ('from_complainant', '=', True), ('state', '=', '02_validated')]}"/>
+                            </group>
+                        </div>
+                        <div name="div_02_right" class="col-6">
+                            <group>
+                                <field name="from_complainant_as_text"
+                                       string="Complaint Source"/>
+                                <field name="communication_date"
+                                       string="Validation Date"/>
+                                <field name="complaint_id"
+                                       string="Complaint" readonly="1"/>
+                            </group>
+                        </div>
+                    </div>
+                    <div name="div_03" class="row">
                         <div name="section_description_title"
-                             colspan="2"
+                             class="col-12"
                              style="text-align:center;margin-bottom:5px">
                             <span style="font-weight:bold">
                                 COMMUNICATION DATA
                             </span>
                         </div>
                         <div name="section_description"
-                             colspan="2"
-                             class="panel-body"
+                             class="col-12 panel-body"
                              style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px;min-height:75px">
                             <field name="description" nolabel="1"
                                    style="margin-top:5px;min-height:55px"
                                    attrs="{'readonly': ['|', ('from_complainant', '=', True), ('state', '=', '02_validated')]}"/>
                         </div>
-                    </group>
+                    </div>
                     <notebook>
                         <page name="documents" string="Documents">
                             <group name="documents">
@@ -785,7 +788,7 @@
         <field name="model">cim.complaint.communication</field>
         <field name="arch" type="xml">
             <tree class="o_cim_complaints_channel_complaint_communication_view_tree"
-                  default_order="name">
+                  default_order="name desc">
                 <field name="icon_inputoutput"
                        widget="image" string=" "/>
                 <field name="communication_number"

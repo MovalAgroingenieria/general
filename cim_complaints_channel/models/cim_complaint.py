@@ -433,6 +433,7 @@ class CimComplaint(models.Model):
             record.param_acknowledgement_period = param_acknowledgement_period
 
     def _compute_param_notice_period(self):
+        config = self.env['ir.config_parameter'].sudo()
         param_notice_period = config.get_param(
             'cim_complaints_channel.notice_period', False)
         if not param_notice_period:
@@ -473,10 +474,8 @@ class CimComplaint(models.Model):
             instruction_months = record.param_deadline
             if record.is_extended:
                 instruction_months = record.param_deadline_extended
-            deadline_date = (datetime.strptime(
-                str(record.creation_date), '%Y-%m-%d') +
-                             relativedelta(months=instruction_months) +
-                             relativedelta(days=-1)).strftime('%Y-%m-%d')
+            deadline_date = (record.creation_date +
+                             relativedelta(months=instruction_months, days=-1)).strftime('%Y-%m-%d')
             record.deadline_date = deadline_date
 
     def _compute_deadline_state(self):
@@ -489,10 +488,8 @@ class CimComplaint(models.Model):
                 months_deadline = record.param_deadline
                 if record.is_extended:
                     months_deadline = record.param_deadline_extended
-                deadline_date = \
-                    ((datetime.strptime(str(record.creation_date), '%Y-%m-%d') +
-                      relativedelta(months=months_deadline) +
-                      relativedelta(days=-1)).strftime('%Y-%m-%d'))
+                deadline_date = (record.creation_date +
+                      relativedelta(months=months_deadline, days=-1)).strftime('%Y-%m-%d')
                 if current_date <= deadline_date:
                     deadline_state = '01_on_time'
                     if record.is_extended:
@@ -515,12 +512,8 @@ class CimComplaint(models.Model):
         for record in self:
             is_acknowledgement_expired = False
             if not record.is_rejected and record.state == '01_received':
-                deadline_acknowledgement = \
-                    ((datetime.strptime(
-                        str(record.creation_date), '%Y-%m-%d') +
-                        relativedelta(
-                            days=record.param_acknowledgement_period - 1)).
-                        strftime('%Y-%m-%d'))
+                deadline_acknowledgement = (record.creation_date +
+                        relativedelta(days=record.param_acknowledgement_period - 1)).strftime('%Y-%m-%d')
                 current_date = datetime.today().strftime('%Y-%m-%d')
                 if current_date > deadline_acknowledgement:
                     is_acknowledgement_expired = True
@@ -775,7 +768,7 @@ class CimComplaint(models.Model):
             if sequence_complaint_code_id:
                 model_ir_sequence = self.env['ir.sequence'].sudo()
                 sequence_complaint_code = \
-                    model_ir_sequence.browse(sequence_complaint_code_id)
+                    model_ir_sequence.browse(int(sequence_complaint_code_id))
                 if sequence_complaint_code:
                     new_code = model_ir_sequence.next_by_code(
                         sequence_complaint_code.code)
@@ -1277,7 +1270,8 @@ class CimComplaint(models.Model):
         try:
             if is_english:
                 locale.setlocale(locale.LC_TIME, 'en_US.utf8')
-            resp = datetime.strptime(raw_date, '%Y-%m-%d').strftime('%x')
+            resp = datetime.strptime(
+                str(raw_date), '%Y-%m-%d').strftime('%x')
         finally:
             locale.setlocale(locale.LC_TIME, default_locale)
         return resp

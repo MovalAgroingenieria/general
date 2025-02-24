@@ -18,17 +18,19 @@
         <field name="dpi">96</field>
     </record>
 
-    <report id="action_cim_complaint_communication_report"
-            string="Communication"
-            model="cim.complaint.communication"
-            report_type="qweb-pdf"
-            name="cim_complaints_channel.report_cim_complaint_communication"
-            paperformat="paperformat_portrait_cim_complaint_communication"
-            groups="cim_complaints_channel.group_cim_manager"/>
-
-    <record model="ir.actions.report" id="action_cim_complaint_communication_report">
-        <field name="print_report_name">(str(object.communication_number)+'-'+object.name+'.pdf')</field>
+    <record id="action_cim_complaint_communication_report" model="ir.actions.report">
+            <field name="name">Communication</field>
+            <field name="model">cim.complaint.communication</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">cim_complaints_channel.report_cim_complaint_communication</field>
+            <field name="paperformat_id" ref="paperformat_portrait_cim_complaint_communication"/>
+            <field name="groups_id" eval="[(4, ref('cim_complaints_channel.group_cim_manager'))]"/>
+            <field name="print_report_name">(str(object.communication_number)+'-'+object.name+'.pdf')</field>
     </record>
+
+<!--    <record model="ir.actions.report" id="action_cim_complaint_communication_report">-->
+<!--        <field name="print_report_name">(str(object.communication_number)+'-'+object.name+'.pdf')</field>-->
+<!--    </record>-->
 
     <template id="report_cim_complaint_communication">
         <t t-call="web.external_layout">
