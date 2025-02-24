@@ -18,13 +18,14 @@
         <field name="dpi">96</field>
     </record>
 
-    <report id="action_cim_complaint_tracking_code_report"
-            string="Tracking Code"
-            model="cim.complaint"
-            report_type="qweb-pdf"
-            name="cim_complaints_channel.report_cim_complaint_tracking_code"
-            paperformat="paperformat_portrait_cim_complaint_tracking_code"
-            groups="cim_complaints_channel.group_cim_manager"/>
+    <record id="action_cim_complaint_tracking_code_report" model="ir.actions.report">
+            <field name="name">Tracking Code</field>
+            <field name="model">cim.complaint</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">cim_complaints_channel.report_cim_complaint_tracking_code</field>
+            <field name="paperformat_id" ref="paperformat_portrait_cim_complaint_tracking_code"/>
+            <field name="groups_id" eval="[(4, ref('cim_complaints_channel.group_cim_manager'))]"/>
+    </record>
 
     <template id="report_cim_complaint_tracking_code">
         <t t-call="web.external_layout">
