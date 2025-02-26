@@ -22,7 +22,7 @@
         "views/eom_digitalregister_templates.xml",
         "views/res_partner_view.xml",
         "views/eom_authdnie_menus.xml",
-        "views/res_eom_config_settings_view.xml",
+        "views/res_config_settings_view.xml",
         "views/eom_digitalregister_view.xml",
     ],
     'assets': {

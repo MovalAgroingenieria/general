@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="identification_data_page"
+              inherit_id="eom_authdnie.identification_data_page">
+        <xpath expr="//t[@t-else=''][1]" position="after">
+            <h4>⸰ Queries</h4>
+            <hr/>
+            <h4>
+                <form id="efiles" role="form" action="/efiles" method="post">
+                      <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                      <span style="margin-right:10px">📁</span><a href="#" onclick="document.getElementById('efiles').submit();">List of electronic files processed</a>
+                      <h6><span>Click here to access your previous requests. You will be able to review their content and add new data and/or files.</span></h6>
+                </form>
+                <br/>
+                <form id="getdocument" role="form" action="/getdocument" method="post">
+                      <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                      <span style="margin-right:10px">🔎</span><a href="#" onclick="document.getElementById('getdocument').submit();">Get document from a CSV code</a>
+                      <h6><span>Select this option to obtain any of the documents sent to you from this office. You will need to enter the CSV code of the document.</span></h6>
+                </form>
+            </h4>
+        </xpath>
+        <xpath expr="//div[@name='body_content_right']" position="replace"/>
+        <xpath expr="//div[@name='body_content_left']" position="after">
+            <div name="body_content_right" class="col-sm-6">
+                <h4>⸰ List of procedures</h4>
+                <hr/>
+                <h4>
+                    <form id="genericinstance" role="form" action="/genericinstance" method="post">
+                        <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                        <span style="margin-right:10px">➀</span><a href="#" onclick="document.getElementById('genericinstance').submit();">Generic instance for any procedure</a>
+                          <h6><span>This procedure will allow you to submit any generic request, of any type. If you are unsure, choose this option.</span></h6>
+                    </form>
+                    <br/>
+                    <form id="suggestion" role="form" action="/suggestion" method="post">
+                        <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                        <span style="margin-right:10px">➁</span><a href="#" onclick="document.getElementById('suggestion').submit();">Suggestion Box (general improvements)</a>
+                        <h6><span>If you would like to make any suggestions for general improvements, please choose this option.</span></h6>
+                    </form>
+                </h4>
+                <br/>
+                <h4>⸰ Mailing address</h4>
+                <hr/>
+                <t t-if="access.digitalregister_id.postal_notification">
+                    <span class="fa fa-home"/>
+                    <span t-esc="access.digitalregister_id.notification_address"/>
+                </t>
+                <t t-else="">
+                    <span class="fa fa-envelope"/>
+                    <span t-esc="access.digitalregister_id.notification_email"/>
+                </t>
+                <br/><br/>
+                <h4>
+                    <form id="setaddress" role="form" action="/setaddress" method="post">
+                          <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                          <span style="margin-right:10px">🖉</span><a href="#" onclick="document.getElementById('setaddress').submit();">Change the postal or email address</a>
+                          <h6><span>Click here if you wish to change the address to which notifications should be sent. You can choose between a postal address or an email address.</span></h6>
+                    </form>
+                </h4>
+            </div>
+        </xpath>
+    </template>
+
+</odoo>

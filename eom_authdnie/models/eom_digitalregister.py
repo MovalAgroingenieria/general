@@ -124,7 +124,7 @@ class EomDigitalregister(models.Model):
 
     def _compute_editable_notes(self):
         editable_notes = self.env['ir.default'].get(
-            'res.eom.config.settings', 'editable_notes')
+            'res.config.settings', 'editable_notes')
         for record in self:
             record.editable_notes = editable_notes
 
@@ -214,14 +214,14 @@ class EomDigitalregister(models.Model):
         for record in self:
             image = None
             if record.partner_id:
-                image = record.partner_id.image_medium
+                image = record.partner_id.image_1920
             record.image = image
 
     def _compute_image_small(self):
         for record in self:
             image_small = None
             if record.partner_id:
-                image_small = record.partner_id.image_small
+                image_small = record.partner_id.image_128
             record.image_small = image_small
 
     def name_get(self):
@@ -365,7 +365,6 @@ class EomDigitalregister(models.Model):
             'type': 'ir.actions.act_window',
             'name': _('Accesses'),
             'res_model': 'eom.digitalregister.access',
-            'view_type': 'form',
             'view_mode': 'kanban,form,tree',
             'views': [(id_kanban_view, 'kanban'), (id_tree_view, 'tree'),
                       (id_form_view, 'form')],
@@ -395,7 +394,6 @@ class EomDigitalregister(models.Model):
             'type': 'ir.actions.act_window',
             'name': _('Requests'),
             'res_model': 'eom.digitalregister.access',
-            'view_type': 'form',
             'view_mode': 'kanban,form,tree',
             'views': [(id_kanban_view, 'kanban'), (id_tree_view, 'tree'),
                       (id_form_view, 'form')],
@@ -551,7 +549,7 @@ class EomDigitalregisterAccess(models.Model):
 
     def _compute_editable_notes(self):
         editable_notes = self.env['ir.default'].get(
-            'res.eom.config.settings', 'editable_notes')
+            'res.config.settings', 'editable_notes')
         for record in self:
             record.editable_notes = editable_notes
 
@@ -631,14 +629,14 @@ class EomDigitalregisterAccess(models.Model):
         for record in self:
             image = None
             if record.partner_id:
-                image = record.partner_id.image_medium
+                image = record.partner_id.image_1920
             record.image = image
 
     def _compute_image_small(self):
         for record in self:
             image_small = None
             if record.partner_id:
-                image_small = record.partner_id.image_small
+                image_small = record.partner_id.image_128
             record.image_small = image_small
 
     def name_get(self):

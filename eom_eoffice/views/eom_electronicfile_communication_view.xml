@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+    <record id="eom_electronicfile_communication_view_form" model="ir.ui.view">
+        <field name="name">eom.electronicfile.communication.view.form</field>
+        <field name="model">eom.electronicfile.communication</field>
+        <field name="arch" type="xml">
+            <form duplicate="false">
+                <field name="id" invisible="1"/>
+                <field name="show_expired_deadline" invisible="1"/>
+                <field name="is_notification" invisible="1"/>
+                <header>
+                    <button name="action_go_to_state_02_validated" type="object"
+                            string="Validate" style="width: 125px;" icon="fa-check"
+                            attrs="{'invisible': ['|', ('state','!=','01_draft'), ('is_notification','=', False)]}"
+                            groups="eom_authdnie.group_eom_manager"/>
+                    <button name="action_return_to_state_01_draft" type="object"
+                            string="Restart" style="width: 125px;" icon="fa-undo"
+                            attrs="{'invisible': ['|', ('state','!=','02_validated'), ('is_notification','=', False)]}"
+                            groups="eom_authdnie.group_eom_manager"/>
+                    <button name="action_mark_as_readed" type="object"
+                            string="Mark as readed" style="width: 160px;" icon="fa-eye"
+                            attrs="{'invisible': ['|', '|', ('state','!=','02_validated'), ('expired_deadline', '=', True), ('is_notification','=', True)]}"
+                            groups="eom_authdnie.group_eom_manager"/>
+                    <button name="action_mark_as_rejected" type="object"
+                            string="Mark as rejected" style="width: 160px;" icon="fa-close"
+                            attrs="{'invisible': ['|', '|', ('state','!=','02_validated'),('expired_deadline', '=', False), ('is_notification','=', False)]}"
+                            groups="eom_authdnie.group_eom_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="01_draft,02_validated,03_readed,04_rejected"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"></div>
+                    <field name="icon_notification_or_entry" widget='image' style="float:right;max-width:48px;"/>
+                    <h1 attrs="{'invisible': [('id', '=', False)]}"><field name="name"/></h1>
+                    <div name="communication_number" attrs="{'invisible': [('id', '=', False)]}">
+                        <span style="margin-right: 10px;">Num.</span>
+                        <field name="communication_number"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="issue" attrs="{'readonly':['|', ('state', '=', '03_readed'), ('state', '=', '04_rejected')]}"/>
+                            <field name="csv_code" attrs="{'invisible': [('is_notification','=', False)]}"/>
+                            <field name="document_name" invisible="1"/>
+                            <field name="document" attrs="{'invisible': [('is_notification','=', False)]}" filename="document_name"/>
+                            <field name="number_of_attachments"/>
+                            <field name="email"/>
+                            <field name="mobile"/>
+                        </group>
+                        <group>
+                            <field name="validation_time"/>
+                            <field name="reading_time"/>
+                            <field name="rejection_time"/>
+                            <field name="notification_deadline" attrs="{'invisible': ['|', ('state', 'in', ['01_draft', '03_readed']), ('is_notification','=', False)],
+                                                                             'readonly':['|', ('state', '=', '03_readed'), ('state', '=', '04_rejected')]}"/>
+                            <field name="notification_deadline_date" attrs="{'invisible': ['|', ('state', 'in', ['01_draft', '03_readed']), ('is_notification','=', False)]}"/>
+                            <field name="expired_deadline"/>
+                        </group>
+                    </group>
+                    <notebook name="slave_data_notebook">
+                        <page name="communication_text" string="Text">
+                            <field name="communication_text" attrs="{'readonly':['|', ('state', '=', '03_readed'), ('state', '=', '04_rejected')]}"/>
+                        </page>
+                        <page name="notes" string="Notes">
+                            <field name="notes"/> <!--attrs="{'readonly':['|', ('state', '=', '03_readed'), ('state', '=', '04_rejected')]}"-->
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"
+                           widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids"
+                           widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="eom_electronicfile_communication_view_tree" model="ir.ui.view">
+        <field name="name">eom.electronicfile.communication.view.tree</field>
+        <field name="model">eom.electronicfile.communication</field>
+        <field name="arch" type="xml">
+            <tree class="o_eom_electronicfile_communication_view_tree"
+                  decoration-muted="show_expired_deadline"
+                  string="electronicfile communication view tree">
+                <field name="icon_notification_or_entry" widget="image" string=" " class="text-center"/>
+                <field name="communication_number" string="Num."/>
+                <field name="issue"/>
+                <field name="validation_time"/>
+                <field name="number_of_attachments"/>
+                <field name="state"/>
+                <field name="show_expired_deadline" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eom_electronicfile_communication_view_search" model="ir.ui.view">
+        <field name="name">eom.electronicfile.communication.view.search</field>
+        <field name="model">eom.electronicfile.communication</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="issue"/>
+                <filter string="Entries" name="is_notifiacion_no"
+                        domain="[('is_notification', '=', False)]"/>
+                <filter string="Notifications" name="is_notifiacion_yes"
+                        domain="[('is_notification', '!=', True)]"/>
+                <separator/>
+                <filter string="Expired: yes" name="expired_yes"
+                        domain="[('expired_deadline', '=', True)]"/>
+                <filter string="Expired: no" name="expired_no"
+                        domain="[('expired_deadline', '!=', True)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="State" name="grouped_by_state" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eom_electronicfile_communication_view_kanban" model="ir.ui.view">
+        <field name="name">eom.electronicfile.communication.view.kanban</field>
+        <field name="model">eom.electronicfile.communication</field>
+        <field name="arch" type="xml">
+            <kanban class="o_res_partner_kanban" create="false">
+                <field name="icon_notification_or_entry" widget="image"/>
+                <field name="issue"/>
+                <field name="validation_time"/>
+                <field name="number_of_attachments"/>
+                <field name="state"/>
+                <field name="csv_code"/>
+                <field name="id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_res_partner_kanban">
+                            <div class="oe_kanban_details">
+                                <div style="float:right; margin-right:6px;">
+                                    <img t-att-src="kanban_image('eom.electronicfile.communication', 'icon_notification_or_entry', record.id.raw_value)"
+                                        style="max-width:24px;" alt="Image"/>
+                                </div>
+                                <strong class="oe_partner_heading"><field name="name"/></strong>
+                                <ul style="margin-top:2%;">
+                                    <li t-if="record.issue.raw_value">
+                                        <b><field name="issue"/></b>
+                                    </li>
+                                    <li t-if="record.state.raw_value">
+                                        <span class="fa fa-cog" title="State"/>
+                                        <field name="state"/>
+                                    </li>
+                                    <li t-if="record.validation_time.raw_value">
+                                        <span class="fa fa-clock-o" title="Validation Time"/>
+                                        <field name="validation_time"/>
+                                    </li>
+                                    <li t-if="record.reading_time.raw_value">
+                                        <span class="fa fa-eye" title="Reading Time"/>
+                                        <field name="reading_time"/>
+                                    </li>
+                                    <li t-if="record.csv_code.raw_value">
+                                        <span class="fa fa-eye" title="Reading Time"/>
+                                        <field name="reading_time"/>
+                                    </li>
+                                    <li t-if="record.number_of_attachments.raw_value">
+                                        <span class="fa fa-paperclip" title="Num. Attachments"/>
+                                        <field name="number_of_attachments"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="eom_electronicfile_communication_action" model="ir.actions.act_window">
+        <field name="name">Electronic File Communications</field>
+        <field name="res_model">eom.electronicfile.communication</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_ids"
+         eval="[(5, 0),
+                (0, 0, {'view_mode': 'tree',
+                        'view_id': ref('eom_electronicfile_communication_view_tree')}),
+                (0, 0, {'view_mode': 'form',
+                        'view_id': ref('eom_electronicfile_communication_view_form')}),
+                (0, 0, {'view_mode': 'kanban',
+                        'view_id': ref('eom_electronicfile_communication_view_kanban')})]"/>
+        <field name="search_view_id" ref="eom_electronicfile_communication_view_search"/>
+    </record>
+    </data>
+</odoo>

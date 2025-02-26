@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="set_notification_as_rejected_cron" model="ir.cron">
+            <field name="name">Set notification as Rejected</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="model_id" ref="eom_eoffice.model_eom_electronicfile_communication"/>
+            <field name="code">_set_notification_as_rejected_cron</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

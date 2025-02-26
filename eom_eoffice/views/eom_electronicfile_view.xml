@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="eom_electronicfile_view_form" model="ir.ui.view">
+        <field name="name">eom.electronicfile.view.form</field>
+        <field name="model">eom.electronicfile</field>
+        <field name="arch" type="xml">
+            <form duplicate="false" create="false">
+                <field name="id" invisible="1"/>
+                <field name="editable_notes" invisible="1"/>
+                <header>
+                    <button name="action_go_to_state_02_in_progress" type="object"
+                            string="Process" style="width: 125px;" icon="fa-cogs"
+                            attrs="{'invisible': [('state','!=','01_received')]}"
+                            groups="eom_authdnie.group_eom_manager"/>
+                    <button name="action_return_to_state_01_received" type="object"
+                            string="Restart" style="width: 125px;" icon="fa-undo"
+                            attrs="{'invisible': [('state','!=','02_in_progress')]}"
+                            groups="eom_authdnie.group_eom_manager"/>
+                    <button name="action_go_to_state_03_resolved" type="object"
+                            string="Resolve" style="width: 125px;" icon="fa-check"
+                            attrs="{'invisible': [('state','!=','02_in_progress')]}"
+                            confirm="Are you sure you have resolved the File? (Can only be undone by admin)"
+                            groups="eom_authdnie.group_eom_manager"/>
+                    <button name="action_return_to_state_02_in_progress" type="object"
+                            string="Reopen" style="width: 125px;" icon="fa-folder-open"
+                            attrs="{'invisible': [('state','!=','03_resolved')]}"
+                            groups="eom_authdnie.group_eom_settings"/>
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="01_received,02_in_progress,03_resolved"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_communications" class="oe_stat_button" type="object" icon="fa-comments" style="width: 150px !important;">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="number_of_communications"/>
+                                </span>
+                                <span class="o_stat_text">communications</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div name="div_code" class="oe_title">
+                        <h1><field name="name" style="width:100px" readonly="True"/></h1>
+                    </div>
+                    <group name="group_01" style="margin-top:-10px">
+                        <group name="group_01_left" col="50">
+                            <div colspan="49">
+                                <group name="group_01_left_inner">
+                                    <field name="digitalregister_id" readonly="True" colspan="2"/>
+                                    <field name="partner_id" string="Associated Contact" readonly="True" colspan="2"
+                                        attrs="{'invisible': [('partner_id', '=', False)]}"/>
+                                    <field name="technician_id" colspan="2"
+                                         attrs="{'readonly': [('state', '!=', '02_in_progress')]}"/>
+                                </group>
+                            </div>
+                            <div colspan="1"/>
+                        </group>
+                        <group name="group_01_right" col="50">
+                            <div colspan="1"/>
+                            <div colspan="49">
+                                <group name="group_01_right_inner">
+                                    <field name="type" colspan="2" attrs="{'readonly': [('state', '=', '03_resolved')]}"/>
+                                    <field name="event_time" string="Access" colspan="2"/>
+                                    <field name="deadline_date" colspan="2"/>
+                                </group>
+                            </div>
+                        </group>
+                    </group>
+                    <div class="row" style="margin-top:-10px;">
+                        <div class="col-6">
+                            <div class="panel" style="background:#fbfbfb; border:1px solid #cccccc; margin-bottom:20px; min-height:75px;">
+                            <div class="panel-heading text-center" style="font-weight:bold; margin-bottom:5px;">
+                                EXPOSITION
+                            </div>
+                            <div class="panel-body" style="margin-top:5px; min-height:55px; white-space: normal; word-wrap: break-word; overflow-wrap: break-word; overflow: auto;">
+                                <field name="exposition" readonly="1" nolabel="1"/>
+                            </div>
+                            </div>
+                            <div class="panel" style="background:#fbfbfb; border:1px solid #cccccc; margin-bottom:20px; min-height:75px;">
+                            <div class="panel-heading text-center" style="font-weight:bold; margin-bottom:5px;">
+                                SUGGESTION
+                            </div>
+                            <div class="panel-body" style="margin-top:5px; min-height:55px; white-space: normal; word-wrap: break-word; overflow-wrap: break-word; overflow: auto;">
+                                <field name="suggestion" readonly="1" nolabel="1"/>
+                            </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="panel" style="background:#fbfbfb; border:1px solid #cccccc; min-height:264px;">
+                            <div class="panel-heading text-center" style="font-weight:bold; margin-bottom:5px;">
+                                RESOLUTION
+                            </div>
+                            <div class="panel-body" style="margin-top:5px; white-space: normal; word-wrap: break-word; overflow-wrap: break-word; overflow: auto;">
+                                <field name="resolution" nolabel="1" attrs="{'readonly': [('state', '=', '03_resolved')]}"/>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                    <group name="slave_data">
+                        <notebook name="slave_data_notebook">
+                            <page name="notes" string="Notes">
+                                <field name="notes" attrs="{'readonly': [('editable_notes', '=', False)]}"/>
+                            </page>
+                        </notebook>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"
+                        widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids"
+                        widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="eom_electronicfile_view_tree" model="ir.ui.view">
+        <field name="name">eom.electronicfile.view.tree</field>
+        <field name="model">eom.electronicfile</field>
+        <field name="arch" type="xml">
+            <tree class="o_eom_eoffice_electronicfile_view_tree"
+                  create="false"
+                  string="electronicfile view tree">
+                <field name="name"/>
+                <field name="event_time" string="Access"/>
+                <field name="digitalregister_id" string="VAT"/>
+                <field name="type"/>
+                <field name="technician_id"/>
+                <field name="deadline_date" string="Deadline"/>
+                <field name="state"/>
+                <field name="icon_warning_expired_deadline" widget="image" options="{'size': [16,16]}" string=" "/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="eom_electronicfile_view_search" model="ir.ui.view">
+        <field name="name">eom.electronicfile.view.search</field>
+        <field name="model">eom.electronicfile</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Code"/>
+                <field name="fullname" string="Name"/>
+                <field name="digitalregister_id" string="VAT"/>
+                <field name="resolution"/>
+                <filter string="Mapped to contact: yes"
+                        name="with_contact_yes"
+                        domain="[('partner_id', '!=', False)]"/>
+                <filter string="Mapped to contact: no"
+                        name="with_contact_no"
+                        domain="[('partner_id', '=', False)]"/>
+                <separator/>
+                <filter string="Expired: yes" name="expired_yes"
+                        domain="[('expired_deadline', '=', True)]"/>
+                <filter string="Expired: no" name="expired_no"
+                        domain="[('expired_deadline', '!=', True)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Type" name="grouped_type" context="{'group_by':'type'}"/>
+                    <filter string="Digital Certificate" name="grouped_fullname" context="{'group_by':'fullname'}"/>
+                    <filter string="Access Time" name="grouped_event_time" context="{'group_by':'event_time'}"/>
+                    <filter string="State" name="grouped_by_state" context="{'group_by':'state'}"/>
+                    <filter string="Technician" name="grouped_by_technician_id" context="{'group_by':'technician_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="eom_electronicfile_view_kanban" model="ir.ui.view">
+        <field name="name">eom.electronicfile.view.kanban</field>
+        <field name="model">eom.electronicfile</field>
+        <field name="arch" type="xml">
+            <kanban class="o_res_partner_kanban" create="false">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="event_time"/>
+                <field name="digitalregister_id"/>
+                <field name="type"/>
+                <field name="icon_warning_expired_deadline"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_res_partner_kanban">
+                            <div class="oe_kanban_details">
+                                <div style="display:inline;"><b><field name="name"/></b></div>
+                                <div style="display:inline;float:right;">
+                                    <img t-att-src="kanban_image('eom.electronicfile', 'icon_warning_expired_deadline', record.id.value)"
+                                        style="max-width:16px;" alt="Image" />
+                                </div>
+                                <ul style="margin-top:2%;">
+                                    <li t-if="record.digitalregister_id.raw_value">
+                                        <span class="fa fa-certificate" title="Digital Certificate"/>
+                                        <a name="action_show_digitalregister_id" type="object">
+                                            <field name="digitalregister_id"/>
+                                        </a>
+                                    </li>
+                                    <li t-if="record.partner_id.raw_value">
+                                        <span class="fa fa-user" title="Partner"/>
+                                        <a name="action_show_partner_id" type="object">
+                                            <field name="partner_id"/>
+                                        </a>
+                                    </li>
+                                    <li t-if="record.event_time.raw_value">
+                                        <span class="fa fa-clock-o" title="Time"/>
+                                        <field name="event_time"/>
+                                    </li>
+                                    <li t-if="record.type.raw_value">
+                                        <span class="fa fa-file-text-o" title="Type"/>
+                                        <field name="type"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="eom_electronicfile_action"
+            model="ir.actions.act_window">
+        <field name="name">Electronic Files</field>
+        <field name="res_model">eom.electronicfile</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_ids"
+         eval="[(5, 0),
+                (0, 0, {'view_mode': 'tree',
+                        'view_id': ref('eom_electronicfile_view_tree')}),
+                (0, 0, {'view_mode': 'form',
+                        'view_id': ref('eom_electronicfile_view_form')}),
+                (0, 0, {'view_mode': 'kanban',
+                        'view_id': ref('eom_electronicfile_view_kanban')})]"/>
+        <field name="search_view_id" ref="eom_electronicfile_view_search"/>
+    </record>
+
+    <menuitem id="electronicfile_menu"
+              name="Electronic Files"
+              parent="eom_authdnie.electronicoffice_menu"
+              sequence="0"
+              action="eom_electronicfile_action"/>
+
+    <record model="ir.ui.menu" id="eom_authdnie.digitalregister_access_with_userdata_menu">
+        <field name="action" eval="False"/>
+    </record>
+
+</odoo>

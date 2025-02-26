@@ -1,0 +1,665 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="electronic_files_page" name="📋">
+        <t t-call="web.external_layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div style="display: flex;justify-content: space-between; margin-top:22px">
+                            <div name="header">
+                                <strong><span style="margin-right:35px">Electronic Office</span></strong>
+                                <span style="margin-right:7px">🖳</span>
+                                <strong><span t-esc="identif_header"/></strong>
+                                <form id="electronic_office" role="form" style="display: inline; margin-left: 10px;" action="/eoffice" method="post">
+                                    <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                    <input type="hidden" name="same_access" value="1"/>
+                                    <a href="#" onclick="document.getElementById('electronic_office').submit();">
+                                        <span class="fa fa-arrow-left"></span> Go Back
+                                    </a>
+                                </form>
+                            </div>
+                            <div>
+                                <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div name="body" class="container">
+                            <t t-if="digitalregister">
+                                <div name="body_content">
+                                    <h4>⸰ Electronic Files</h4>
+                                    <hr/>
+                                    <br/><br/>
+                                    <t t-if="efiles">
+                                        <div class="table-efiles">
+                                            <div class="table-efiles-row table-efiles-header">
+                                                <div class="table-efiles-cell"><strong>Code</strong></div>
+                                                <div class="table-efiles-cell"><strong>Creation Date</strong></div>
+                                                <div class="table-efiles-cell"><strong>Type</strong></div>
+                                                <div class="table-efiles-cell"><strong>State</strong></div>
+                                                <div class="table-efiles-cell"><strong>Action</strong></div>
+                                            </div>
+                                            <t t-foreach="efiles" t-as="efile">
+                                                <form method="post" action="/efile" class="table-efiles-row">
+                                                    <input type="hidden" name="efile_id" t-att-value="efile['id']"/>
+                                                    <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                                    <div class="table-efiles-cell" t-esc="efile['name']"></div>
+                                                    <div class="table-efiles-cell" t-esc="efile['event_time']"></div>
+                                                    <div class="table-efiles-cell" t-esc="efile['type']"></div>
+                                                    <div class="table-efiles-cell" t-esc="efile['state']"></div>
+                                                    <div class="table-efiles-cell">
+                                                        <button type="submit" class="btn btn-primary btn-sm">View Efile</button>
+                                                    </div>
+                                                </form>
+                                            </t>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="text-warning">No electronic files available.</span>
+                                    </t>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <strong><span class="text-danger">Digital register not found.</span></strong>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="electronic_file_page" name="📋">
+        <t t-call="web.external_layout">
+            <div name="wrap" class="container">
+                <div class="oe_structure">
+                    <div style="display: flex;justify-content: space-between; margin-top:22px">
+                        <div name="header">
+                            <strong><span style="margin-right:35px">Electronic Office</span></strong>
+                            <span style="margin-right:7px">🖳</span>
+                            <strong><span t-esc="identif_header"/></strong>
+                            <form id="electronic_files" role="form" style="display: inline; margin-left: 10px;" action="/efiles" method="post">
+                                <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                <input type="hidden" name="same_access" value="1"/>
+                                <a href="#" onclick="document.getElementById('electronic_files').submit();">
+                                    <span class="fa fa-arrow-left"></span> Go Back
+                                </a>
+                            </form>
+                        </div>
+                        <div>
+                            <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
+                        </div>
+                    </div>
+                    <hr/>
+                    <div name="body" class="container">
+                        <t t-if="digitalregister">
+                            <div name="body_content">
+                                <t t-if="efile">
+                                    <h2>⸰ Electronic File: <span t-esc="efile['name']"/></h2>
+                                    <p>
+                                        <strong>⸰ Type:</strong> <span t-esc="efile['type']"></span>
+                                        <strong style="margin-left: 15px;">⸰ State:</strong> <span t-esc="efile['state']"></span>
+                                    </p>
+                                    <hr/>
+                                    <t t-if="efile['type_key'] == '01_generic_instance'">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label for="exposition" class="control-label">EXPOSES</label>
+                                                <textarea style="background-color: unset;" name="exposition" rows="5" id="exposition" class="form-control" disabled="1" t-esc="efile['exposition']"></textarea>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="request" class="control-label">REQUESTS</label>
+                                                <textarea style="background-color: unset;" name="request" rows="5" id="request" class="form-control" disabled="1" t-esc="efile['request']"></textarea>
+                                            </div>
+                                        </div>
+                                    </t>
+                                    <t t-elif="efile['type_key'] == '02_suggestion'">
+                                        <div class="form-group">
+                                            <label for="suggestion" class="control-label">PROPOSES</label>
+                                            <textarea style="background-color: unset;" name="suggestion" rows="7" id="suggestion" class="form-control" disabled="1" t-esc="efile['suggestion']"></textarea>
+                                        </div>
+                                    </t>
+                                    <h4>⸰ Communications</h4>
+                                    <t t-if="efile['communications']">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead class="thead-light">
+                                                    <tr>
+                                                        <th>Type</th>
+                                                        <th>Issue</th>
+                                                        <th>State</th>
+                                                        <th>Validation Date</th>
+                                                        <th>Reading Time</th>
+                                                        <th>Notification Deadline Date</th>
+                                                        <th>Rejection Time</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-foreach="efile['communications']" t-as="comm">
+                                                        <tr>
+                                                            <td>
+                                                                <t t-if="comm['is_notification']">
+                                                                    <span>Notification</span>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span>Input</span>
+                                                                </t>
+                                                            </td>
+                                                            <td t-esc="comm['issue']"></td>
+                                                            <td t-esc="comm['state']"></td>
+                                                            <td t-esc="comm['validation_time'] or ' '"></td>
+                                                            <td t-esc="comm['reading_time'] or ' '"></td>
+                                                            <td t-esc="comm['notification_deadline_date'] or ' '"></td>
+                                                            <td t-esc="comm['rejection_time'] or ' '"></td>
+                                                            <td>
+                                                                <form method="post" action="/communication" class="d-inline">
+                                                                    <input type="hidden" name="communication_id" t-att-value="comm['id']"/>
+                                                                    <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                                                    <t t-if="not comm['is_notification']">
+                                                                        <button type="submit" name="action" value="view" class="btn btn-primary btn-sm">
+                                                                            View
+                                                                        </button>
+                                                                    </t>
+                                                                    <t t-if="comm['state_key'] not in ['04_rejected'] and comm['is_notification']">
+                                                                        <button type="submit" name="action" value="read" class="btn btn-success btn-sm">
+                                                                            Read N.
+                                                                        </button>
+                                                                    </t>
+                                                                    <t t-if="comm['state_key'] not in ['03_readed', '04_rejected'] and comm['is_notification']">
+                                                                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
+                                                                            Reject
+                                                                        </button>
+                                                                    </t>
+                                                                </form>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="text-warning">No communications available for this electronic file.</span>
+                                    </t>
+                                    <br/>
+                                    <t t-if="efile['state_key'] != '03_resolved'">
+                                        <button type="button" class="btn btn-success" onclick="document.getElementById('communication_add_dialog').showModal()">Add New Communication</button>
+                                    </t>
+                                    <t t-if="efile['attachments']">
+                                        <hr/>
+                                        <h4>⸰ Attachments:</h4>
+                                        <div class="list-group">
+                                            <t t-foreach="efile['attachments']" t-as="att">
+                                                <form action="/efile_attachment" method="post" class="list-group-item list-group-item-action">
+                                                    <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                                    <input type="hidden" name="efile_id" t-att-value="efile['id']"/>
+                                                    <input type="hidden" name="attachment_id" t-att-value="att['id']"/>
+                                                    <button class="btn btn-link" type="submit">
+                                                        <span class="fa fa-download" style="margin-right: 5px;"></span> <t t-esc="att['name']"/>
+                                                    </button>
+                                                </form>
+                                            </t>
+                                        </div>
+                                    </t>
+                                </t>
+                                <t t-else="">
+                                    <strong><span class="text-danger">Electronic File not found.</span></strong>
+                                </t>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <strong><span class="text-danger">Digital register not found.</span></strong>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+        <dialog id="communication_add_dialog" style="width: 100%; max-width: 600px; padding: 20px; border-radius: 5px;">
+            <h3>New Communication</h3>
+            <form method="post" action="/addcommunication" enctype="multipart/form-data">
+                <input type="hidden" name="efile_id" t-att-value="efile['id']"/>
+                <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                <div class="form-group">
+                    <label for="issue">Issue:</label>
+                    <input type="text" name="issue" id="issue" class="form-control" required="1"/>
+                </div>
+                <div class="form-group">
+                    <label for="communication_text">Body of Notification:</label>
+                    <textarea name="communication_text" id="communication_text" rows="5" class="form-control" required="1"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="attachments">Attachments:</label>
+                    <input type="file" name="attachments" id="attachments" class="form-control" multiple="true"/>
+                </div>
+                <div class="text-right">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('communication_add_dialog').close()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </dialog>
+    </template>
+
+
+    <template id="electronic_file_communication_page" name="📋">
+        <t t-call="web.external_layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div style="display: flex;justify-content: space-between; margin-top:22px">
+                            <div name="header">
+                                <strong><span style="margin-right:35px">Electronic Office</span></strong>
+                                <span style="margin-right:7px">🖳</span>
+                                <strong><span t-esc="identif_header"/></strong>
+                                <form id="electronic_file" role="form" style="display: inline; margin-left: 10px;" action="/efile" method="post">
+                                    <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                    <input type="hidden" name="same_access" value="1"/>
+                                    <input type="hidden" name="efile_id" t-att-value="communication['electronicfile_id']"/>
+                                    <a href="#" onclick="document.getElementById('electronic_file').submit();">
+                                        <span class="fa fa-arrow-left"></span> Go Back
+                                    </a>
+                                </form>
+                            </div>
+                            <div>
+                                <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div name="body" class="container">
+                            <t t-if="digitalregister">
+                                <div name="body_content">
+                                    <t t-if="communication">
+                                        <h4>⸰ Communication: <span t-esc="communication['name']"/></h4>
+                                        <div class="form-group">
+                                            <label for="issue">Issue:</label>
+                                            <input style="background-color: unset;" type="text" t-att-value="communication['issue']" class="form-control" disabled="1"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="communication_text">Body of Notification:</label>
+                                            <textarea style="background-color: unset;" rows="5" t-esc="communication['communication_text']" name="communication_text" id="communication_text" class="form-control" disabled="1"/>
+                                        </div>
+                                        <t t-if="communication['attachments']">
+                                            <hr/>
+                                            <h4>⸰ Attachments:</h4>
+                                            <div class="list-group">
+                                                <t t-foreach="communication['attachments']" t-as="att">
+                                                    <form action="/communication_attachment" method="post" class="list-group-item list-group-item-action">
+                                                        <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                                        <input type="hidden" name="efile_id" t-att-value="communication['electronicfile_id']"/>
+                                                        <input type="hidden" name="communication_id" t-att-value="communication['id']"/>
+                                                        <input type="hidden" name="attachment_id" t-att-value="att['id']"/>
+                                                        <button class="btn btn-link" type="submit"><span class="fa fa-download" style="margin-right: 5px;"></span><t t-esc="att['name']"/></button>
+                                                    </form>
+                                                </t>
+                                            </div>
+                                        </t>
+                                    </t>
+                                    <t t-else="">
+                                        <strong><span class="text-danger">Communication Not found.</span></strong>
+                                    </t>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <strong><span class="text-danger">Digital register not found.</span></strong>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="csv_code_form" name="🔑">
+        <t t-call="web.external_layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div style="display: flex;justify-content: space-between; margin-top:22px">
+                            <div name="header">
+                                <strong><span style="margin-right:35px">Electronic Office</span></strong>
+                                <span style="margin-right:7px">🖳</span>
+                                <strong><span t-esc="identif_header"/></strong>
+                                <form id="electronic_office" role="form" style="display: inline; margin-left: 10px;" action="/eoffice" method="post">
+                                    <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                    <input type="hidden" name="same_access" value="1"/>
+                                    <a href="#" onclick="document.getElementById('electronic_office').submit();">
+                                        <span class="fa fa-arrow-left"></span> Go Back
+                                    </a>
+                                </form>
+                            </div>
+                            <div>
+                                <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div name="body" class="container">
+                            <t t-if="digitalregister">
+                                <span>To ensure the confidentiality and integrity of your data and files, you must enter the CSV code of the signed document you wish to access. Thank you very much.</span>
+                                <form class="oe_login_form" role="form" action="/document" method="post" autocomplete="off">
+                                    <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                    <div class="form-group">
+                                        <label for="csvcode" class="control-label">CSV Code</label>
+                                        <input name="csvcode" t-att-value="(CSV)" id="csvcode" class="form-control" required="required"/>
+                                    </div>
+                                    <div class="clearfix oe_login_buttons">
+                                        <button type="submit" class="btn btn-primary pull-left">Accept</button>
+                                    </div>
+                                </form>
+                                <div name="error_text" class="text-center">
+                                    <span class="text-danger"><t t-esc="error_message"/></span>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <strong><span class="text-danger">Digital register not found.</span></strong>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="notification_address_form">
+        <t t-call="web.external_layout">
+            <div class="container" style="margin-top: 22px;">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div style="display: flex;justify-content: space-between; margin-top:22px">
+                            <div name="header">
+                                <strong><span style="margin-right:35px">Electronic Office</span></strong>
+                                <span style="margin-right:7px">🖳</span>
+                                <strong><span t-esc="identif_header"/></strong>
+                                <form id="electronic_office" role="form" style="display: inline; margin-left: 10px;" action="/eoffice" method="post">
+                                    <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                    <input type="hidden" name="same_access" value="1"/>
+                                    <a href="#" onclick="document.getElementById('electronic_office').submit();">
+                                        <span class="fa fa-arrow-left"></span> Go Back
+                                    </a>
+                                </form>
+                            </div>
+                            <div>
+                                <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div name="body">
+                            <t t-if="digitalregister">
+                                <p>Please select your preferred method of contact and the address where you wish to receive notifications.</p>
+                                <form role="form" action="/confirmaddress" method="post" autocomplete="off">
+                                    <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                    <div class="form-group">
+                                        <label for="notification_method">Notification Method</label>
+                                        <select id="notification_method" name="postal_notification" class="form-control" onchange="this.selectedOptions[0].value === 'True' ? document.getElementById('postal_address_field').style.display = ''  : document.getElementById('postal_address_field').style.display = 'none';">
+                                            <option value="False" t-att-selected="not digitalregister.postal_notification and 'selected'">Electronic Notification</option>
+                                            <option value="True" t-att-selected="digitalregister.postal_notification and 'selected'">Postal Notification</option>
+                                        </select>
+                                    </div>
+                                    <div id="postal_address_field" class="form-group" t-att-style="digitalregister.postal_notification and 'display: unset;' or 'display: none;'">
+                                        <label for="notification_address">Address</label>
+                                        <input type="text" id="notification_address" name="notification_address" class="form-control" placeholder="Enter your notification address" t-att-value="digitalregister.notification_address or ''"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="notification_email">Email</label>
+                                        <input type="email" id="notification_email" name="notification_email" class="form-control" placeholder="Enter your email" t-att-value="digitalregister.notification_email or ''"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="notification_phone">Phone</label>
+                                        <input type="text" id="notification_phone" name="notification_phone" class="form-control" placeholder="Enter your phone number" t-att-value="digitalregister.notification_phone or ''"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="notification_mobile">Mobile</label>
+                                        <input type="text" id="notification_mobile" name="notification_mobile" class="form-control" placeholder="Enter your mobile number" t-att-value="digitalregister.notification_mobile or ''"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-primary">Accept</button>
+                                    </div>
+                                </form>
+                                <div name="error_text" class="text-center">
+                                    <span class="text-danger"><t t-esc="error_message"/></span>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <strong><span class="text-danger">Digital register not found.</span></strong>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="confirm_notification_address" name="📋">
+        <t t-call="web.external_layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div style="display: flex;justify-content: space-between; margin-top:22px">
+                            <div name="header">
+                                <strong><span style="margin-right:35px">Electronic Office</span></strong>
+                                <span style="margin-right:7px">🖳</span>
+                                <strong><span t-esc="identif_header"/></strong>
+                            </div>
+                            <div>
+                                <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div name="body" class="container">
+                            <t t-if="digitalregister">
+                                <h3>Thank you, the data entered has been successfully registered.</h3>
+                                <h4>
+                                    <form id="eoffice" role="form" action="/eoffice" method="post">
+                                          <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                          <input type="hidden" name="same_access" value="1"/>
+                                          <span style="margin-right:10px">Click</span><a href="#" onclick="document.getElementById('eoffice').submit();">here</a><span style="margin-left:10px">to return to the home page.</span>
+                                    </form>
+                                </h4>
+                            </t>
+                            <t t-else="">
+                                <strong><span class="text-danger">Error updating data.</span></strong>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="generic_instance_form" name="📋">
+        <t t-call="web.external_layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div style="display: flex;justify-content: space-between; margin-top:22px">
+                            <div name="header">
+                                <strong><span style="margin-right:35px">Electronic Office</span></strong>
+                                <span style="margin-right:7px">🖳</span>
+                                <strong><span t-esc="identif_header"/></strong>
+                                <form id="electronic_office" role="form" style="display: inline; margin-left: 10px;" action="/eoffice" method="post">
+                                    <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                    <input type="hidden" name="same_access" value="1"/>
+                                    <a href="#" onclick="document.getElementById('electronic_office').submit();">
+                                        <span class="fa fa-arrow-left"></span> Go Back
+                                    </a>
+                                </form>
+                            </div>
+                            <div>
+                                <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div name="body" class="container">
+                            <t t-if="digitalregister">
+                                <div name="body_content" class="col-sm-12">
+                                    <h4>⸰ Generic instance for any procedure</h4>
+                                    <hr/>
+                                    <form role="form" action="/confirmation" method="post" autocomplete="off" enctype="multipart/form-data">
+                                        <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                        <input type="hidden" name="electronicfile_type" value="01_generic_instance"/>
+                                        <div class="form-group">
+                                            <label for="exposition" class="control-label">EXPOSES</label>
+                                            <textarea type="text" name="exposition" rows="5" id="exposition" class="form-control" required="required"/>
+                                            <br/>
+                                            <label for="request" class="control-label">REQUESTS</label>
+                                            <textarea type="text" name="request" rows="5" id="request" class="form-control" required="required"/>
+                                            <br/>
+                                            <input type="file" name="attachments" multiple="true"/>
+                                        </div>
+                                        <div class="clearfix text-center">
+                                            <button type="submit" confirm="When clicking the Accept and Submit button the request will be definitively sent to the office. Please review the information you have entered, as it cannot be deleted or modified once it has been submitted." class="btn btn-primary">Accept and Submit</button>
+                                            <p style="color: red; font-weight: bold;">* When clicking the "Accept and Submit" button, the request will be definitively sent to the office. Please review the information you have entered, as it cannot be deleted or modified once it has been submitted.</p>
+                                        </div>
+                                    </form>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <strong><span class="text-danger">Digital register not found.</span></strong>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="suggestion_form" name="📋">
+        <t t-call="web.external_layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div style="display: flex;justify-content: space-between; margin-top:22px">
+                            <div name="header">
+                                <strong><span style="margin-right:35px">Electronic Office</span></strong>
+                                <span style="margin-right:7px">🖳</span>
+                                <strong><span t-esc="identif_header"/></strong>
+                                <form id="electronic_office" role="form" style="display: inline; margin-left: 10px;" action="/eoffice" method="post">
+                                    <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                    <input type="hidden" name="same_access" value="1"/>
+                                    <a href="#" onclick="document.getElementById('electronic_office').submit();">
+                                        <span class="fa fa-arrow-left"></span> Go Back
+                                    </a>
+                                </form>
+                            </div>
+                            <div>
+                                <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div name="body" class="container">
+                            <t t-if="digitalregister">
+                                <div name="body_content" class="col-sm-12">
+                                    <h4>⸰ Suggestion Box (general improvements)</h4>
+                                    <hr/>
+                                    <form role="form" action="/confirmation" method="post" autocomplete="off" enctype="multipart/form-data">
+                                        <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                        <input type="hidden" name="electronicfile_type" value="02_suggestion"/>
+                                        <div class="form-group">
+                                            <label for="suggestion" class="control-label">PROPOSES</label>
+                                            <textarea type="text" name="suggestion" rows="7" id="suggestion" class="form-control" required="required"/>
+                                            <br/>
+                                            <input type="file" name="attachments" multiple="true"/>
+                                        </div>
+                                        <div class="clearfix text-center">
+                                            <button type="submit" class="btn btn-primary">Accept and Submit</button>
+                                            <p style="color: red; font-weight: bold;">* When clicking the "Accept and Submit" button, the request will be definitively sent to the office. Please review the information you have entered, as it cannot be deleted or modified once it has been submitted.</p>
+                                        </div>
+                                    </form>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <strong><span class="text-danger">Digital register not found.</span></strong>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="confirmation_and_home" name="📋">
+        <t t-call="web.external_layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div style="display: flex;justify-content: space-between; margin-top:22px">
+                            <div name="header">
+                                <strong><span style="margin-right:35px">Electronic Office</span></strong>
+                                <span style="margin-right:7px">🖳</span>
+                                <strong><span t-esc="identif_header"/></strong>
+                            </div>
+                            <div>
+                                <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div name="body" class="container">
+                            <t t-if="digitalregister">
+                                <h3>Thank you, the data entered has been successfully registered.</h3>
+                                <h4>Code of the generated file:<strong><span style="margin-left:10px" t-esc="electronicfile_code"/></strong></h4>
+                                <br/>
+                                <h4>
+                                    <form role="form" action="/document" method="post" autocomplete="off">
+                                        <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                        <input type="hidden" name="csvcode" t-att-value="csv_code" id="csvcode"/>
+                                        <span>You can download the following attachment as acknowledgment of receipt: <button type="submit" class="btn btn-link" t-esc="electronicfile_code + '.pdf'"></button></span>
+                                    </form>
+                                </h4>
+                                <h4>
+                                    <form id="eoffice" role="form" action="/eoffice" method="post">
+                                          <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                          <input type="hidden" name="same_access" value="1"/>
+                                          <span style="margin-right:10px">Click</span><a href="#" onclick="document.getElementById('eoffice').submit();">here</a><span style="margin-left:10px">to return to the home page.</span>
+                                    </form>
+                                </h4>
+                            </t>
+                            <t t-else="">
+                                <strong><span class="text-danger">Error updating data.</span></strong>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="error_max_size_attachments" name="📋">
+        <t t-call="web.external_layout">
+            <div name="wrap">
+                <div class="oe_structure">
+                    <div class="container">
+                        <div style="display: flex;justify-content: space-between; margin-top:22px">
+                            <div name="header">
+                                <strong><span style="margin-right:35px">Electronic Office</span></strong>
+                                <span style="margin-right:7px">🖳</span>
+                                <strong><span t-esc="identif_header"/></strong>
+                            </div>
+                            <div>
+                                <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div name="body" class="container">
+                            <div style="display: inline; float:right;">
+                                <form id="eoffice" role="form" action="/eoffice" method="post">
+                                    <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                    <input type="hidden" name="same_access" value="1"/>
+                                    <span style="margin-right:10px">Click</span><a href="#" onclick="document.getElementById('eoffice').submit();">here</a><span style="margin-left:10px">to return to the home page.</span>
+                                </form>
+                            </div>
+                            <h4 style="display: inline;"><strong><span class="text-danger">Error uploading attachments.</span></strong></h4>
+                            <br/>
+                            <h4>
+                                The size of attachments is: <strong><span t-esc="'%.2f' % (total_attachments_size)"/> MB</strong>
+                                and the maximum size allowed is <strong><span t-esc="'%.2f' % (max_size_attachments)"/> MB</strong>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

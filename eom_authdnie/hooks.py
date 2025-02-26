@@ -8,8 +8,8 @@ from odoo import api, SUPERUSER_ID
 def post_init_hook(cr, registry):
     env = api.Environment(cr, SUPERUSER_ID, {})
     values = env['ir.default'].sudo()
-    values.set('res.eom.config.settings',
-                       'editable_notes', True)
+    values.set('res.config.settings',
+               'editable_notes', True)
 
 
 def uninstall_hook(cr, registry):
@@ -18,7 +18,7 @@ def uninstall_hook(cr, registry):
         env.cr.savepoint()
         env.cr.execute("""
             DELETE FROM ir_values
-            WHERE model='res.eom.config.settings'""")
+            WHERE model='res.config.settings'""")
         env.cr.commit()
     except (Exception,):
         env.cr.rollback()

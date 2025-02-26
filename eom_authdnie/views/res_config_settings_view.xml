@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_inherit" model="ir.ui.view">
+    <field name="name">Electronic-Office Settings Inherit</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+        <xpath expr="//div[contains(@class, 'settings')]" position="inside">
+        <div class="app_settings_block" data-string="Electronic office"
+                     string="Electronic office" data-key="eom_authdnie">
+            <div style="margin: 0 0 16px 20px;">
+                <group string="Electronic-Office Management" name="electronic_office_management_configuration_group">
+                    <div style="display: inline-flex; align-items: center; margin-left:20px; margin-bottom:16px;">
+                        <span class="o_form_label" style="margin-right:10px;">Editable Notes (y/n)</span>
+                        <field name="editable_notes" nolabel="1"/>
+                    </div>
+                </group>
+            </div>
+        </div>
+        </xpath>
+    </field>
+</record>
+
+    <record id="res_config_settings_action" model="ir.actions.act_window">
+        <field name="name">Configure electronic office management</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+    </record>
+</odoo>

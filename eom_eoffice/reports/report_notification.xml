@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <report id="action_eom_eoffice_notification_report"
+            string="Electronic File Communication"
+            model="eom.electronicfile.communication"
+            report_type="qweb-pdf"
+            name="eom_eoffice.notification_report"
+            menu="False"/>
+
+    <record model="ir.actions.report" id="action_eom_eoffice_notification_report">
+        <field name="print_report_name">(object.name.replace('/', '_') + '.pdf')</field>
+    </record>
+
+    <template id="notification_report">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <t t-foreach="docs" t-as="o">
+                        <t t-call="eom_eoffice.notification_report_document"/>
+                        <p style="page-break-after:always;"></p>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="notification_report_document">
+        <t t-set="user_lang" t-value="o.env.user.lang"/>
+        <t t-set="partner_lang" t-value="o.electronicfile_id.digitalregister_id.partner_id.lang"/>
+        <t t-if="partner_lang"><t t-set="doc_lang" t-value="partner_lang"/></t>
+        <t t-elif="user_lang"><t t-set="doc_lang" t-value="user_lang"/></t>
+        <t t-else=""><t t-set="doc_lang" t-value="'en_US'"/></t>
+        <t t-set="o" t-value="o.with_context(lang=doc_lang)"/>
+
+        <div name="notification_title" style="border-bottom: 1px solid black;">
+            <span><b>N O T I F I C A T I O N</b></span>
+            <div style="float: right; display: inline;"><b><span t-field="o.name"/></b></div>
+        </div>
+
+        <div name="notification_data" class="col-xs-12" style="display:table; margin-top:8px; margin-bottom:24px;">
+            <div style="width: 50%; display: table-cell; border-right: 1px solid black; padding-right: 32px;">
+                <table style="width: 100%;">
+                    <tbody>
+                        <tr name="tr_communication_number">
+                            <td><b>Num.</b></td>
+                            <td class="text-right"><span t-field="o.communication_number"/></td>
+                        </tr>
+                        <!--
+                        <tr name="tr_state">
+                            <td><b>State</b></td>
+                            <td class="text-right"><span t-field="o.state"/></td>
+                        </tr>
+                        -->
+                        <tr name="tr_csv_code">
+                            <td><b>CSV Code</b></td>
+                            <td class="text-right"><span t-field="o.csv_code"/></td>
+                        </tr>
+                        <t t-if="o.number_of_attachments > 0">
+                            <tr name="tr_number_of_attachments">
+                                <td><b>Number of attachments</b></td>
+                                <td class="text-right"><span t-field="o.number_of_attachments"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+            <div style="display: table-cell; padding-left: 32px;">
+                <table style="width: 100%;">
+                    <tbody>
+                        <tr name="tr_validation_time">
+                            <td><b>Validation Time</b></td>
+                            <td class="text-right"><span t-field="o.validation_time"/></td>
+                        </tr>
+                        <t t-if="o.email">
+                            <tr name="tr_email">
+                                <td><b>Email</b></td>
+                                <td class="text-right"><span t-field="o.email"/></td>
+                            </tr>
+                        </t>
+                        <t t-if="o.mobile">
+                            <tr name="tr_mobile">
+                                <td><b>Mobile</b></td>
+                                <td class="text-right"><span t-field="o.mobile"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div name="issue_title" style="border-bottom: 1px solid black;">
+            <div><b>I S S U E</b></div>
+        </div>
+        <div name="issue_data" style="margin: 4 8 0 8;">
+            <span t-field="o.issue"/>
+        </div>
+
+        <div name="text_title" style="margin-top:24px;; border-bottom: 1px solid black;">
+            <div><b>T E X T</b></div>
+        </div>
+        <div name="text_data" style="margin: 4 8 0 8;">
+            <span t-field="o.communication_text"/>
+        </div>
+
+    </template>
+
+</odoo>
