@@ -1,0 +1,49 @@
+@font-face {
+  font-family: 'filemgmt_iconset';
+  src:  url('fonts/filemgmt_iconset.eot?1tomhh');
+  src:  url('fonts/filemgmt_iconset.eot?1tomhh#iefix') format('embedded-opentype'),
+    url('fonts/filemgmt_iconset.ttf?1tomhh') format('truetype'),
+    url('fonts/filemgmt_iconset.woff?1tomhh') format('woff'),
+    url('fonts/filemgmt_iconset.svg?1tomhh#filemgmt_iconset') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Simplified fafilemgmt class (inspired by the native Base Fontawesome module) */
+[class^="fa-filemgmt-"], [class*=" fa-filemgmt-"] {
+   display: inline-block;
+   font-family: filemgmt_iconset;
+   font-style: normal;
+   font-weight: normal;
+   font-variant: normal;
+   text-rendering: auto;
+}
+
+/* Render duotone icons */
+[class*="-duotone"]::before {
+   opacity: 1;
+}
+[class*="-duotone"]::after {
+   opacity: 0.4;
+   margin-left: -1em;
+}
+
+/* Icons */
+.fa-filemgmt-files:before {
+  content: "\e900";
+}
+.fa-filemgmt-files-duotone::before {
+  content: "\e901";
+}
+.fa-filemgmt-files-duotone::after {
+  content: "\e902";
+}
+.fa-filemgmt-files-register:before {
+  content: "\e903";
+}
+.fa-filemgmt-files-register-duotone::before {
+  content: "\e904";
+}
+.fa-filemgmt-files-register-duotone::after {
+  content: "\e905";
+}

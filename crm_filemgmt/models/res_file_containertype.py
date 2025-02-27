@@ -8,13 +8,14 @@ from odoo import models, fields
 class ResFileContainerType(models.Model):
     _name = 'res.file.containertype'
     _description = "Type of containers"
-    _inherit = 'simple.model'
 
-    _size_name = 30
-    _size_description = 100
-    _set_num_code = False
-
-    alphanum_code = fields.Char(
+    name = fields.Char(
         string='Name',
         required=True,
         index=True,)
+
+    description = fields.Char(
+        string='Description',)
+
+    notes = fields.Html(
+        string='Notes')

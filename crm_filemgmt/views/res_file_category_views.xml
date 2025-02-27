@@ -7,32 +7,34 @@
         <field name="arch" type="xml">
             <form duplicate="0">
                 <field name="is_readonly" invisible="1"/>
-                <header></header>
+                <header/>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_get_files" class="oe_stat_button"
-                            type="object" icon="fa-filemgmt-files">
-                            <field name="number_of_files" string="Files" widget="statinfo"/>
+                        <button name="action_get_files"
+                                type="object" class="oe_stat_button"
+                                icon="fa-filemgmt-files"
+                                attrs="{'invisible': [('number_of_files','=', 0)]}">
+                            <div class="o_form_field o_stat_info">
+                                <field name="number_of_files"/>
+                                <span attrs="{'invisible': [('number_of_files','>', 1)]}"> file</span>
+                                <span attrs="{'invisible': [('number_of_files','=', 1)]}"> files</span>
+                            </div>
                         </button>
                     </div>
                     <div class="oe_title">
-                        <label for="name" class="oe_edit_only" string="Category Name"/>
-                        <field name="name"/>
+                        <label class="oe_edit_only" for="name" string="Category Name"/>
                         <h1>
-                            <field name="alphanum_code" placeholder="Category Name"
+                            <field name="name" placeholder="Category Name"
                                    attrs="{'readonly': [('is_readonly','=',True)]}"/>
                         </h1>
                         <field name="parent_id" attrs="{'readonly': [('is_readonly','=',True)]}"/>
                     </div>
-                    <group name="master_data">
-                    </group>
-                    <group name="slave_data">
-                        <notebook name="slave_data_notebook">
-                            <page name="notes_page" string="Notes">
-                                <field name="notes"/>
-                            </page>
-                        </notebook>
-                    </group>
+                    <group name="master_data"/>
+                    <notebook name="slave_data_notebook" colspan="4">
+                        <page name="notes_page" string="Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -42,9 +44,9 @@
         <field name="name">File Category (tree view)</field>
         <field name="model">res.file.category</field>
         <field name="arch" type="xml">
-            <tree class="res_file_category">
-                <field name="alphanum_code" class="align-middle"/>
-                <field name="number_of_files" class="align-middle res_file_category_number_of_files"/>
+            <tree string="Categories" class="res_file_category">
+                <field name="name"/>
+                <field name="number_of_files"/>
             </tree>
         </field>
     </record>
@@ -54,7 +56,7 @@
         <field name="model">res.file.category</field>
         <field name="arch" type="xml">
             <search>
-                <field name="alphanum_code"/>
+                <field name="name"/>
             </search>
         </field>
     </record>
@@ -71,7 +73,7 @@
                         'view_id': ref('res_file_category_view_form')})]"/>
         <field name="search_view_id" ref="res_file_category_view_search"/>
         <field name="help" type="html">
-             <p class="o_view_nocontent_smiling_face">
+            <p class="oe_view_nocontent_create">
                 Click to add a new file category
             </p>
         </field>
@@ -80,7 +82,7 @@
     <menuitem id="menu_file_category"
               name="Categories"
               parent="menu_config_general_data"
-              sequence="10"
+              sequence="20"
               action="res_file_category_action"/>
 
 </odoo>

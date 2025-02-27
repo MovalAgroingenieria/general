@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# 2021 Moval Agroingeniería
+# 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import models, fields, api, _
@@ -8,19 +7,13 @@ from odoo import models, fields, api, _
 class ResFileContainer(models.Model):
     _name = 'res.file.container'
     _description = "Container of Files"
-    _inherit = 'simple.model'
 
-    _size_name = 6
-    _size_description = 100
-    _set_num_code = True
-
-    num_code = fields.Integer(
-        string='Code',
+    name = fields.Char(
+        string='Name',
         required=True,)
 
-    long_name = fields.Char(
-        string='Name',
-        size=100,
+    description = fields.Char(
+        string='Description',
         required=True,
         index=True,)
 
@@ -49,6 +42,9 @@ class ResFileContainer(models.Model):
         comodel_name='res.file.containertype',
         index=True,
         ondelete='restrict',)
+
+    notes = fields.Html(
+        string='Notes')
 
     @api.depends('file_ids')
     def _compute_number_of_files(self):
@@ -80,13 +76,13 @@ class ResFileContainer(models.Model):
     def name_get(self):
         resp = []
         for record in self:
-            name = record.long_name + \
-                ' [' + str(record.num_code) + ']'
+            name = record.description + \
+                ' [' + str(record.name) + ']'
             if self.env.context.get('show_container_data', False):
                 name += _(' [location: ') + \
-                    record.location_id.long_name + ']'
+                    record.location_id.description + ']'
                 if record.containertype_id:
                     name += _(' [type: ') + \
-                        record.containertype_id.alphanum_code + ']'
+                        record.containertype_id.name + ']'
             resp.append((record.id, name))
         return resp

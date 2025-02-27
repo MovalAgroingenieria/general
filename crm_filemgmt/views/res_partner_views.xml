@@ -7,9 +7,19 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[@name='button_box']" position="inside">
-                <button name="action_get_files" class="oe_stat_button"
-                    type="object" icon="fa-filemgmt-files">
-                    <field name="number_of_files" string="Files" widget="statinfo"/>
+                <button name="action_get_files"
+                        type="object" class="oe_stat_button"
+                        icon="fa-filemgmt-files"
+                        attrs="{'invisible': [('number_of_files','=', 0)]}">
+                    <div class="o_form_field o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="number_of_files"/>
+                        </span>
+                        <span class="o_stat_text">
+                            <span attrs="{'invisible': [('number_of_files','>', 1)]}"> file</span>
+                            <span attrs="{'invisible': [('number_of_files','=', 1)]}"> files</span>
+                        </span>
+                    </div>
                 </button>
             </xpath>
         </field>

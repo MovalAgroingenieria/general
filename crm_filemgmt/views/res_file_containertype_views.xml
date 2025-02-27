@@ -6,20 +6,36 @@
         <field name="model">res.file.containertype</field>
         <field name="arch" type="xml">
             <form duplicate="0">
+                <header/>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <!--
+                        <button name="action_get_containers"
+                                type="object" class="oe_stat_button"
+                                icon="fa-archive"
+                                attrs="{'invisible': [('number_of_containers','=', 0)]}">
+                            <div class="o_form_field o_stat_info">
+                                <field name="number_of_containers"/>
+                                <span attrs="{'invisible': [('number_of_containers','>', 1)]}"> file</span>
+                                <span attrs="{'invisible': [('number_of_containers','=', 1)]}"> files</span>
+                            </div>
+                        </button>
+                        -->
+                    </div>
+                    <div class="oe_title">
+                        <label class="oe_edit_only" for="name" string="Container type"/>
+                        <h1>
+                            <field name="name" placeholder="Container type"/>
+                        </h1>
+                    </div>
                     <group name="master_data">
-                        <group name="master_data_image" colspan="3">
-                            <field name="alphanum_code"/>
-                            <field name="description"/>
-                        </group>
+                        <field name="description"/>
                     </group>
-                    <group name="slave_data">
-                        <notebook name="slave_data_notebook">
-                            <page name="notes_page" string="Notes">
-                                <field name="notes"/>
-                            </page>
-                        </notebook>
-                    </group>
+                    <notebook name="slave_data_notebook" colspan="4">
+                        <page name="notes_page" string="Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -30,7 +46,7 @@
         <field name="model">res.file.containertype</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="alphanum_code"/>
+                <field name="name"/>
                 <field name="description"/>
             </tree>
         </field>
@@ -41,7 +57,7 @@
         <field name="model">res.file.containertype</field>
         <field name="arch" type="xml">
             <search>
-                <field name="alphanum_code"/>
+                <field name="name"/>
                 <field name="description"/>
             </search>
         </field>
@@ -67,7 +83,7 @@
 
     <menuitem id="menu_files_containertype" name="Containers Type"
               parent="menu_config_general_data"
-              sequence="30"
+              sequence="50"
               action="res_file_containertype_action"/>
 
 </odoo>

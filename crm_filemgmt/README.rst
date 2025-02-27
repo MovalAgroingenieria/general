@@ -6,13 +6,8 @@
 File Management
 ===============
 
-Using this module you can track files and create file relationships and categories.
-
-Although they are not strictly necessary, it is advisable to install these modules:
-
-* app_dynamic_list: module to show/hide columns on the tree view
-
-* web_tree_image: module to show images in tree views
+This module allows you to manage files in a structured way, associating them with any object in the system.
+It is possible to create categories and relationships between files, as well as to define the access permissions to the files.
 
 
 Credits
@@ -20,17 +15,23 @@ Credits
 
 * Moval Agroingeniería S.L.
 
-* The iconset has been generated using `Fontello <http://fontello.com/>`_ web service.
+* The iconset has been generated using `IcoMoon <https://icomoon.io/>`_ web service. Solid and duotone icons are available.
+
 
 Contributors
 ------------
 
+* Guillermo Amante <gamante@moval.es>
+* Samuel Fernández Verdú <sfernandez@moval.es>
 * Alberto Hernández <ahernandez@moval.es>
 * Eduardo Iniesta <einiesta@moval.es>
+* Jesús Martínez <jmartinez@moval.es>
 * Miguel Mora <mmora@moval.es>
+* Miguel Ángel Rodríguez <marodriguez@moval.es>
 * Juanu Sandoval <jsandoval@moval.es>
 * Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
+
 
 Maintainer
 ----------

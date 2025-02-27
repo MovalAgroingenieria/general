@@ -5,126 +5,126 @@
         <field name="name">Files (form view)</field>
         <field name="model">res.file</field>
         <field name="arch" type="xml">
-            <form string="Files" duplicate="0">
+            <form duplicate="0">
                 <field name="id" invisible="1"/>
-                <field name="is_cancelled" invisible="1"/>
+                <field name="active" invisible="1"/>
                 <field name="is_blocked" invisible="1"/>
+                <field name="is_closing_stage" invisible="1"/>
                 <header>
-                    <button name="action_validate_file" class="oe_highlight"
-                            type="object" string="Validate"
-                            icon="fa-check"
-                            style="width: 105px;"
-                            attrs="{'invisible':['|',('state','!=','01_draft'),
-                                                     ('is_blocked','=',True)]}"
+                    <button name="toggle_active"
+                            type="object" string="Archive"
+                            icon="fa-archive"
+                            confirm="Are you sure you want to archive this file?"
+                            attrs="{'invisible':[('active','=',False)]}"
                             groups="crm_filemgmt.group_file_manager"/>
-                    <button name="action_close_file" class="oe_highlight"
-                            type="object" string="Close"
-                            icon="fa-times-circle"
-                            style="width: 105px;"
-                            attrs="{'invisible':['|',('state','!=','02_inprogress'),
-                                                     ('is_blocked','=',True)]}"
+                    <button name="toggle_active"
+                            type="object" string="Unarchive"
+                            icon="fa-archive"
+                            confirm="Are you sure you want to unarchive this file?"
+                            attrs="{'invisible':[('active','=',True)]}"
                             groups="crm_filemgmt.group_file_manager"/>
-                    <button name="action_block_file" class="oe_highlight"
+                    <button name="action_block_file"
                             type="object" string="Block"
                             icon="fa-lock"
                             style="width: 105px;"
-                            attrs="{'invisible':['|',('state','=','03_closed'),
+                            attrs="{'invisible':['|',('is_closing_stage','=', True),
                                                      ('is_blocked','=',True)]}"
                             groups="crm_filemgmt.group_file_manager"/>
-                    <button name="action_unblock_file" class="oe_highlight"
+                    <button name="action_unblock_file"
                             type="object" string="Unblock"
                             icon="fa-unlock"
-                            style="width: 115px;"
-                            attrs="{'invisible':['|',('state','=','03_closed'),
+                            style="width: 125px;"
+                            attrs="{'invisible':['|',('is_closing_stage','=', True),
                                                      ('is_blocked','=',False)]}"
                             groups="crm_filemgmt.group_file_manager"/>
-                    <button name="action_cancel_file" class="oe_highlight"
-                            type="object" string="Cancel"
-                            icon="fa-ban"
-                            style="width: 105px;"
-                            attrs="{'invisible':['|','|',('state','=','03_closed'),
-                                                         ('is_cancelled','=',True),
-                                                         ('is_blocked','=',True)]}"
-                            groups="crm_filemgmt.group_file_manager"/>
-                    <button name="action_reactive_file" class="oe_highlight"
-                            type="object" string="Reactive"
-                            icon="fa-arrow-left"
-                            style="width: 105px;"
-                            attrs="{'invisible':['|','|',('state','=','03_closed'),
-                                                         ('is_cancelled','=',False),
-                                                         ('is_blocked','=',True)]}"
-                            groups="crm_filemgmt.group_file_manager"/>
-                    <button name="action_reactive_file_to_draft" class="oe_highlight"
-                            type="object" string="Revert"
-                            icon="fa-undo"
-                            style="width: 105px;"
-                            attrs="{'invisible':['|',('state','!=','02_inprogress'),
-                                                     ('is_blocked','=',True)]}"
-                            groups="crm_filemgmt.group_file_manager"/>
-                    <button name="action_reactive_file_to_inprogress" class="oe_highlight"
-                            type="object" string="Revert"
-                            icon="fa-undo"
-                            style="width: 105px;"
-                            attrs="{'invisible':['|',('state','!=','03_closed'),
-                                                     ('is_blocked','=',True)]}"
-                            confirm="Are you sure you want to do this operation? The file closing date will be deleted."
-                            groups="crm_filemgmt.group_file_manager"/>
-                    <field name="state" widget="statusbar"/>
+                    <button name="action_print_selected_report"
+                            type="object" string="Print"
+                            icon="fa-print"
+                            style="width: 105px;"/>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': True, 'fold_field': 'fold'}"
+                        attrs="{'invisible':['|',('active','=',False),('is_blocked','=',True)]}"/>
                 </header>
                 <sheet>
-                    <div name="cancelled_file"
-                         style="display: inline-block;color:red;padding-top:10px;"
-                         attrs="{'invisible':[('is_cancelled','=',False)]}">
-                         C A N C E L L E D
+                    <div name="info_block" class="text-end">
+                        <div name="blocked_file" style="display:inline-block;color:red;"
+                            attrs="{'invisible':[('is_blocked','=',False)]}">
+                            <span class="fa fa-lock" style="font-size: 200%;" title="Blocked"/>
+                        </div>
+                        <div name="archived_file" style="display: inline-block;color:red;margin-left:20px;font-weight:bold;"
+                           attrs="{'invisible':[('active','=',True)]}"> A R C H I V E D
+                        </div>
                     </div>
-                    <div name="blocked_file" style="float: right; display: inline-block;color:red;"
-                         attrs="{'invisible':[('is_blocked','=',False)]}">
-                        <span class="fa fa-lock" title="lock" style="font-size: 300%;"/>
-                    </div>
-                    <div name="buttons" class="oe_button_box"/>
-                    <widget name="web_ribbon" title="In progress" bg_color="bg-warning"
-                        attrs="{'invisible': [
-                            '|',('state','!=','02_inprogress'),
-                            '|',('is_blocked','=',True),('is_cancelled', '=',True)]}"/>
-                    <widget name="web_ribbon" title="Closed" bg_color="bg-success"
-                        attrs="{'invisible': [
-                            '|',('state','!=','03_closed'),
-                            '|',('is_blocked','=',True),('is_cancelled', '=',True)]}"/>
+                    <div name="buttons" class="oe_button_box"></div>
                     <group name="master_data" col="12">
                         <group name="master_data_left" colspan="2">
-                            <!--<label for="image"/>-->
                             <field name="image" widget="image" nolabel="1" colspan="2"/>
                         </group>
                         <group name="master_data_center" colspan="5">
                             <field name="alphanum_code" attrs="{'readonly': [('id', '>', 0)]}"/>
-                            <field name="subject" attrs="{'readonly':['|',('state','=','03_closed'),('is_blocked','=',True)]}"/>
-                            <field name="category_id" attrs="{'readonly':['|',('state','=','03_closed'),('is_blocked','=',True)]}"/>
+                            <field name="subject" attrs="{'readonly':['|',('is_closing_stage', '=', True),('is_blocked','=',True)]}"/>
+                            <field name="category_id" attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"/>
+                            <field name="file_report_id" attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"/>
                         </group>
                         <group  name="master_data_right" colspan="5">
-                            <field name="date_file" attrs="{'readonly':['|',('state','=','03_closed'),('is_blocked','=',True)]}"/>
-                            <field name="container_id" attrs="{'readonly':['|',('state','=','03_closed'),('is_blocked','=',True)]}"
+                            <field name="date_file"
+                                   attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=', True)]}"/>
+                            <field name="container_id"
+                                   attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=', True)]}"
                                    context="{'show_container_data': True}"/>
-                            <field name="tag_ids" widget="many2many_tags"
-                                   options="{'color_field': 'color', 'no_quick_create': True, 'no_create_edit': True}"
-                                   attrs="{'readonly':['|',('state','=','03_closed'),('is_blocked','=',True)]}"
-                                   placeholder="Tags..."/>
-                            <field name="closing_date" attrs="{'invisible':[('state','!=','03_closed')]}"/>
+                            <field name="technician_id"
+                                   attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=', True)]}"
+                                   context="{'show_container_data': True}"/>
+                            <field name="tag_ids" widget="many2many_tags" placeholder="Tags..."
+                                   attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=', True)]}"/>
+                            <field name="closing_date" attrs="{'invisible':[('is_closing_stage','=', False)]}"/>
                         </group>
                     </group>
                     <notebook name="slave_data_notebook" colspan="4">
                         <page name="partnerlinks_page" string="Partner Links">
                             <field name="partnerlink_ids"
-                                    attrs="{'readonly':['|',('state','=','03_closed'),('is_blocked','=',True)]}"
+                                    attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"
                                     context="{'tree_view_ref': 'crm_filemgmt.res_file_partnerlink_view_tree'}"/>
                         </page>
                         <page name="filelinks_page" string="File Links">
                             <field name="filelink_ids"
-                                    attrs="{'readonly':['|',('state','=','03_closed'),('is_blocked','=',True)]}"
+                                    attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"
                                     context="{'tree_view_ref': 'crm_filemgmt.res_file_filelink_view_tree'}"/>
                         </page>
+                        <page name="file_comments" string="Comments" >
+                            <group string="Top Comments">
+                                <field name="file_top_comment_template_id" string="Load a template"
+                                    domain="[('position','=','before_lines')]" context="{'default_position': 'before_lines'}"/>
+                                <field name="file_top_comment" nolabel="1" colspan="2"/>
+                            </group>
+                            <group string="Bottom Comments">
+                                <field name="file_bottom_comment_template_id" string="Load a template"
+                                    context="{'default_position': 'after_lines'}" domain="[('position','=','after_lines')]"/>
+                                <field name="file_bottom_comment" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+                        <page name="start_template_page" string="Template start">
+                            <field name="template_start" attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"/>
+                            <div class="text-end oe_edit_only">
+                                <button name="action_get_start_template" type="object" class="btn btn-link text-end oe_edit_only"
+                                    attrs="{'invisible': ['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"
+                                    string="Refresh" icon="fa-retweet" style="margin-top:2px; margin-bottom:2px;"
+                                    help="Copy start template from selected report."
+                                    groups="crm_filemgmt.group_file_manager"/>
+                            </div>
+                        </page>
+                        <page name="end_template_page" string="Template end">
+                            <field name="template_end" attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"/>
+                            <div class="text-end oe_edit_only">
+                                <button name="action_get_end_template" type="object" class="btn btn-link"
+                                    attrs="{'invisible': ['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"
+                                    string="Refresh" icon="fa-retweet" style="margin-top:2px; margin-bottom:2px;"
+                                    help="Copy end template from selected report."
+                                    groups="crm_filemgmt.group_file_manager"/>
+                            </div>
+                        </page>
                         <page name="attachments" string="Attachments">
-                            <field name="file_attachment_ids" attrs="{'readonly':['|',('state','=','03_closed'),('is_blocked','=',True)]}">
-                                <tree create="false">
+                            <field name="file_attachment_ids">
+                                <tree string="Attachments" editable="top">
                                     <field name="name"/>
                                     <field name="mimetype"/>
                                     <field name="datas"/>
@@ -133,7 +133,8 @@
                             </field>
                         </page>
                         <page name="notes_page" string="Notes">
-                            <field name="notes" attrs="{'readonly':['|',('state','=','03_closed'),('is_blocked','=',True)]}"/>
+                            <field name="notes"
+                                    attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"/>
                         </page>
                     </notebook>
                 </sheet>
@@ -149,16 +150,16 @@
         <field name="name">Files (tree view)</field>
         <field name="model">res.file</field>
         <field name="arch" type="xml">
-            <tree class="o_res_file" decoration-danger="is_cancelled == True">
+            <tree string="Files" class="o_res_file" default_order="name desc">
                 <field name="image" widget="image" optional="hide" class="o_res_file_image"/>
-                <field name="alphanum_code" class="align-middle o_res_file_alphanum_code"/>
+                <field name="alphanum_code" class="align-middle"/>
                 <field name="partner_id" optional="show" class="align-middle"/>
                 <field name="date_file" optional="show" class="align-middle o_res_file_date_file"/>
                 <field name="subject" optional="show" class="align-middle border-right"/>
-                <field name="is_blocked" optional="show" class="align-middle o_res_file_is_blocked"/>
-                <field name="is_cancelled" optional="show" class="align-middle o_res_file_is_cancelled"/>
-                <field name="state" optional="show" class="align-middle border-right o_res_file_state"/>
+                <field name="stage_id" string="Stage" optional="show" class="align-middle o_res_file_stage_id"/>
+                <field name="technician_id" optional="show" class="align-middle"/>
                 <field name="category_id" optional="hide" class="align-middle o_res_file_category_id"/>
+                <field name="is_blocked" optional="show" class="align-middle o_res_file_is_blocked"/>
                 <field name="tag_ids" widget="many2many_tags" optional="hide" class="align-middle"/>
             </tree>
         </field>
@@ -168,15 +169,15 @@
         <field name="name">Files (tree related view)</field>
         <field name="model">res.file</field>
         <field name="arch" type="xml">
-            <tree class="o_res_file" decoration-danger="is_cancelled == True"
-                create="false" edit="false">
-                <field name="alphanum_code" class="align-middle o_res_file_alphanum_code"/>
+            <tree string="Files" create="false" edit="false" default_order="name desc">
+                <field name="active" invisible="1"/>
+                <field name="alphanum_code" class="align-middle"/>
                 <field name="partner_id" optional="show" class="align-middle"/>
                 <field name="date_file" optional="show" class="align-middle o_res_file_date_file"/>
+                <field name="category_id" optional="hide" class="align-middle o_res_file_category_id"/>
                 <field name="subject" optional="show" class="align-middle border-right"/>
+                <field name="technician_id" optional="show" class="align-middle"/>
                 <field name="is_blocked" optional="show" class="align-middle o_res_file_is_blocked"/>
-                <field name="is_cancelled" optional="show" class="align-middle o_res_file_is_cancelled"/>
-                <field name="state" optional="show" class="align-middle border-right o_res_file_state"/>
             </tree>
         </field>
     </record>
@@ -186,24 +187,28 @@
         <field name="model">res.file</field>
         <field name="arch" type="xml">
             <search>
-                <field name="name"/>
                 <field name="alphanum_code"/>
                 <field name="partner_id"/>
                 <field name="date_file"/>
                 <field name="subject"/>
                 <field name="category_id"/>
-                <filter string="Draft" name="state_draft" domain="[('state','=','01_draft')]"/>
-                <filter string="In progress" name="state_inprogress" domain="[('state','=','02_inprogress')]"/>
-                <filter string="Closed" name="state_closed" domain="[('state','=','03_closed')]"/>
+                <field name="technician_id"/>
+                <field name="stage_id"/>
+                <field name="active"/>
+                <filter string="In closed stage" name="closed_stage" domain="[('is_closing_stage','=', True)]"/>
                 <separator/>
                 <filter string="Blocked: Yes" name="blocked_yes" domain="[('is_blocked','=',True)]"/>
                 <filter string="Blocked: No" name="blocked_no" domain="[('is_blocked','=',False)]"/>
                 <separator/>
-                <filter string="Cancelled: Yes" name="cancelled_yes" domain="[('is_cancelled','=',True)]"/>
-                <filter string="Cancelled: No" name="cancelled_no" domain="[('is_cancelled','=',False)]"/>
+                <filter string="Archived: Yes" name="archived_yes" domain="[('active','=',False)]"/>
+                <filter string="Archived: No" name="archived_no" domain="[('active','=',True)]"/>
+                <separator/>
+                <filter string="With technician: Yes" name="technician_yes" domain="[('with_technician','=',True)]"/>
+                <filter string="With technician: No" name="technician_no" domain="[('with_technician','=',False)]"/>
                 <group expand="0" string="Group By">
                     <filter string="Partner" name="groupby_partner" context="{'group_by':'partner_id'}"/>
-                    <filter string="State" name="groupby_state" context="{'group_by':'state'}"/>
+                    <filter string="Technician" name="groupby_technician" context="{'group_by':'technician_id'}"/>
+                    <filter string="Stage" name="groupby_stage" context="{'group_by':'stage_id'}"/>
                     <filter string="Category" name="groupby_category" context="{'group_by':'category_id'}"/>
                     <filter string="Container" name="groupby_container" context="{'group_by':'container_id'}"/>
                  </group>
@@ -215,19 +220,19 @@
         <field name="name">Files (kanban view)</field>
         <field name="model">res.file</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="state">
+            <kanban default_group_by="stage_id">
                 <field name="id"/>
+                <field name="active"/>
                 <field name="alphanum_code"/>
                 <field name="partner_id"/>
                 <field name="date_file"/>
                 <field name="subject"/>
-                <field name="state"/>
+                <field name="stage_id"/>
                 <field name="tag_ids"/>
                 <field name="image"/>
                 <field name="color"/>
                 <field name="closing_date"/>
                 <field name="is_blocked"/>
-                <field name="is_cancelled"/>
                 <field name="has_filelinks"/>
                 <field name="has_attachments"/>
                 <templates>
@@ -251,9 +256,12 @@
                                 </div>
                             </div>
                             <div class="oe_kanban_details">
-                                <div name="cancelled">
-                                    <t t-if="record.is_cancelled.raw_value">
-                                        <span style="color:red; float:right; margin-right:3%; font-size:10px;">C A N C E L L E D</span>
+                                <div name="archived">
+                                    <t t-if="record.active.raw_value">
+                                        <span></span>
+                                    </t>
+                                    <t t-else="">
+                                        <span style="color:red; float:right; margin-right:3%; font-size:10px;">A R C H I V E D</span>
                                     </t>
                                 </div>
                                 <div style="clear:both;"></div>
@@ -278,7 +286,6 @@
                                     <li t-if="record.subject.raw_value" class="o_text_overflow">
                                         Subject: <field name="subject"/>
                                      </li>
-                                    <li>State: <field name="state"/></li>
                                     <li t-if="record.closing_date.raw_value">
                                         Closing date: <field name="closing_date"/>
                                     </li>
@@ -304,7 +311,7 @@
             <calendar string="Files" date_start="date_file"
                 color="category_id" mode="month">
                 <field name="subject"/>
-                <field name="state"/>
+                <field name="stage_id"/>
                 <field name="partner_id"/>
             </calendar>
         </field>
@@ -321,9 +328,8 @@
                 (0, 0, {'view_mode': 'form',
                         'view_id': ref('res_file_view_form')})]"/>
         <field name="search_view_id" ref="res_file_view_search"/>
-        <field name="context">{'is_cancelled': False}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p class="oe_view_nocontent_create">
                 Click to add a new file
             </p>
         </field>
@@ -337,6 +343,7 @@
                 <sheet>
                     <group name="master_data">
                         <field name="file_id"/>
+                        <field name="category_id"/>
                         <field name="partner_id"/>
                         <field name="is_main"/>
                     </group>
@@ -349,7 +356,7 @@
         <field name="name">File Partnerlink (tree view)</field>
         <field name="model">res.file.partnerlink</field>
         <field name="arch" type="xml">
-            <tree class="o_res_file_partnerlink" editable="bottom">
+            <tree string="Partnerlinks" editable="bottom" class="o_res_file_partnerlink">
                 <field name="partner_id" class="align-middle"/>
                 <field name="is_main" class="align-middle o_res_file_partnerlink_is_main"/>
             </tree>
@@ -360,11 +367,10 @@
         <field name="name">File Partnerlink of partner (tree view)</field>
         <field name="model">res.file.partnerlink</field>
         <field name="arch" type="xml">
-            <tree create="false" edit="false" delete="false" 
-                  class="o_res_file_partnerlink_of_partner">
+            <tree string="Partnerlinks" create="false" edit="false" delete="false" class="o_res_file_partnerlink">
                 <field name="date_file" class="align-middle o_res_file_partnerlink_of_partner_date_file"/>
                 <field name="file_id" class="align-middle"/>
-                <field name="state" class="align-middle o_res_file_partnerlink_of_partner_state"/>
+                <field name="stage_id" class="align-middle o_res_file_partnerlink_of_partner_stage_id"/>
                 <field name="is_main" class="align-middle o_res_file_partnerlink_of_partner_is_main"/>
             </tree>
         </field>
@@ -389,6 +395,7 @@
                     <group name="master_data">
                         <field name="file_id"/>
                         <field name="related_file_id"/>
+                        <field name="related_file_category_id"/>
                         <field name="related_file_subject"/>
                     </group>
                 </sheet>
@@ -400,8 +407,11 @@
         <field name="name">File filelink (tree view)</field>
         <field name="model">res.file.filelink</field>
         <field name="arch" type="xml">
-            <tree class="o_res_file_filelink" editable="bottom">
+            <tree class="o_res_file_filelink" editable="bottom"
+                  default_order="related_file_id desc">
+                <field name="related_file_category_id" readonly="1"/>
                 <field name="related_file_id"/>
+                <field name="related_file_subject"/>
             </tree>
         </field>
     </record>

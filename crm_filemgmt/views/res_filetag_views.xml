@@ -7,15 +7,14 @@
         <field name="arch" type="xml">
             <form duplicate="0">
                 <group name="master_data">
-                    <field name="alphanum_code" style="width:200px;"/>
+                    <field name="name" style="width:200px"/>
+                    <field name="color"  style="width:200px"/>
                 </group>
-                <group name="slave_data">
-                    <notebook name="slave_data_notebook">
-                        <page name="notes_page" string="Notes">
-                            <field name="notes"/>
-                        </page>
-                    </notebook>
-                </group>
+                <notebook name="slave_data_notebook" colspan="4">
+                    <page name="notes_page" string="Notes">
+                        <field name="notes"/>
+                    </page>
+                </notebook>
             </form>
         </field>
     </record>
@@ -24,8 +23,9 @@
         <field name="name">File Tags (tree view)</field>
         <field name="model">res.filetag</field>
         <field name="arch" type="xml">
-            <tree>
-                <field name="alphanum_code"/>
+            <tree string="Tags">
+                <field name="name"/>
+                <field name="color"/>
             </tree>
         </field>
     </record>
@@ -35,7 +35,7 @@
         <field name="model">res.filetag</field>
         <field name="arch" type="xml">
             <search>
-                <field name="alphanum_code"/>
+                <field name="name"/>
             </search>
         </field>
     </record>
@@ -44,15 +44,10 @@
         <field name="name">File Tags</field>
         <field name="res_model">res.filetag</field>
         <field name="view_mode">tree,form</field>
-        <field name="view_ids"
-         eval="[(5, 0),
-                (0, 0, {'view_mode': 'tree',
-                        'view_id': ref('res_filetag_view_tree')}),
-                (0, 0, {'view_mode': 'form',
-                        'view_id': ref('res_filetag_view_form')})]"/>
+        <field name="view_id" ref="res_filetag_view_tree"/>
         <field name="search_view_id" ref="res_filetag_view_search"/>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
+            <p class="oe_view_nocontent_create">
                 Click to add a new file tag
             </p>
         </field>

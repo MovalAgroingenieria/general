@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# 2021 Moval Agroingeniería
+# 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import models, fields, api, exceptions, _
@@ -8,50 +7,52 @@ from odoo import models, fields, api, exceptions, _
 class ResFileCategory(models.Model):
     _name = 'res.file.category'
     _description = "Categories of Files"
-    _inherit = 'simple.model'
 
-    _size_name = 30
-    _set_num_code = False
-    _set_alphanum_code_to_lowercase = False
-    _set_alphanum_code_to_uppercase = False
-
-    alphanum_code = fields.Char(
+    name = fields.Char(
         string='Category Name',
+        size=50,
         required=True,
         translate=True,
-        index=True,)
+        index=True)
 
     is_readonly = fields.Boolean(
         string='Read-only Category',
-        default=False,)
+        default=False)
 
     parent_id = fields.Many2one(
         string='Parent Category',
-        comodel_name='res.file.category',)
+        comodel_name='res.file.category')
+
+    notes = fields.Html(
+        string='Notes')
 
     file_ids = fields.One2many(
         string='Associated Files',
         comodel_name='res.file',
-        inverse_name='category_id',)
+        inverse_name='category_id')
 
     number_of_files = fields.Integer(
         string='Files',
         store=True,
-        compute='_compute_number_of_files',)
+        compute='_compute_number_of_files')
 
-    @api.depends('file_ids')
-    def _compute_number_of_files(self):
-        for record in self:
-            if record.file_ids:
-                record.number_of_files = len(record.file_ids)
+    _sql_constraints = [
+        ('unique_name', 'UNIQUE (name)', 'Existing category name.'),
+    ]
 
     def unlink(self):
         for record in self:
             if record.is_readonly:
                 raise exceptions.UserError(
                     _('The read only categories cannot be removed.'))
-        res = super(ResFileCategory, self).unlink()
+        res = super().unlink()
         return res
+
+    @api.depends('file_ids')
+    def _compute_number_of_files(self):
+        for record in self:
+            if record.file_ids:
+                record.number_of_files = len(record.file_ids)
 
     def action_get_files(self):
         self.ensure_one()
@@ -64,7 +65,6 @@ class ResFileCategory(models.Model):
                 'type': 'ir.actions.act_window',
                 'name': _('Files'),
                 'res_model': 'res.file',
-                'view_type': 'form',
                 'view_mode': 'tree',
                 'views': [(id_tree_view, 'tree'),
                           (id_form_view, 'form')],

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_file_stage_view_form" model="ir.ui.view">
+        <field name="name">Files Stage (form view)</field>
+        <field name="model">res.file.stage</field>
+        <field name="arch" type="xml">
+            <form string="File Stage">
+                <group>
+                    <group>
+                        <field name="name"/>
+                        <field name="sequence"/>
+                    </group>
+                    <group>
+                        <field name="fold"/>
+                        <field name="is_closing_stage"/>
+                    </group>
+                </group>
+                <notebook name="notebook" colspan="4">
+                    <page name="files_page" string="Files">
+                        <field name="file_ids"/>
+                    </page>
+                </notebook>
+            </form>
+        </field>
+    </record>
+
+    <record id="res_file_stage_view_tree" model="ir.ui.view">
+        <field name="name">Files Stage (tree view)</field>
+        <field name="model">res.file.stage</field>
+        <field name="arch" type="xml">
+            <tree string="File Stages" class="res_file_stage">
+                <field name="name"/>
+                <field name="sequence"/>
+                <field name="fold" class="o_res_file_stage_fold"/>
+                <field name="is_closing_stage" class="o_res_file_stage_is_closing_stage"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="res_file_stage_view_search" model="ir.ui.view">
+        <field name="name">Files Stage (search view)</field>
+        <field name="model">res.file.stage</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="res_file_stage_action" model="ir.actions.act_window">
+        <field name="name">File Stage</field>
+        <field name="res_model">res.file.stage</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids"
+         eval="[(5, 0),
+                (0, 0, {'view_mode': 'tree',
+                        'view_id': ref('res_file_stage_view_tree')}),
+                (0, 0, {'view_mode': 'form',
+                        'view_id': ref('res_file_stage_view_form')})]"/>
+        <field name="search_view_id" ref="res_file_stage_view_search"/>
+        <field name="help" type="html">
+             <p class="o_view_nocontent_smiling_face">
+                Click to add a new file stage
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_res_file_stage"
+              name="File Stages"
+              parent="menu_config_general_data"
+              sequence="10"
+              action="res_file_stage_action"/>
+
+</odoo>
