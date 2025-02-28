@@ -16,31 +16,13 @@
                     attrs="{'required': [('attendance_modificated', '=', True)]}"/>
                 <field name="attendance_edited" class="text-center"/>
             </xpath>
-        </field>
-    </record>
-
-    <!-- Block edition of employee field for group_hr_attendance -->
-    <record id="view_attendance_tree_inherit_user" model="ir.ui.view">
-        <field name="name">hr.attendance.tree.inherit.user</field>
-        <field name="model">hr.attendance</field>
-        <field name="inherit_id" ref="hr_attendance.view_attendance_tree"/>
-        <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance'))]"/>
-        <field name="arch" type="xml">
             <xpath expr="//field[@name='employee_id']" position="attributes">
                 <attribute name="readonly">1</attribute>
+                <attribute name="groups">hr_attendance.group_hr_attendance</attribute>
             </xpath>
-        </field>
-    </record>
-
-    <!-- Allow edition of employee field for group_hr_attendance_user -->
-    <record id="view_attendance_tree_inherit_manager" model="ir.ui.view">
-        <field name="name">hr.attendance.tree.inherit.manager</field>
-        <field name="model">hr.attendance</field>
-        <field name="inherit_id" ref="hr_attendance.view_attendance_tree"/>
-        <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance_user'))]"/>
-        <field name="arch" type="xml">
             <xpath expr="//field[@name='employee_id']" position="attributes">
                 <attribute name="readonly">0</attribute>
+                <attribute name="groups">hr_attendance.group_hr_attendance_user</attribute>
             </xpath>
         </field>
     </record>
@@ -67,8 +49,11 @@
         <field name="name">hr.attendance.form.inherit</field>
         <field name="model">hr.attendance</field>
         <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
-        <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance'))]"/>
+<!--        <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance'))]"/>-->
         <field name="arch" type="xml">
+            <xpath expr="//form" position="attributes">
+                <attribute name="groups">hr_attendance.group_hr_attendance</attribute>
+            </xpath>
             <xpath expr="//form" position="attributes">
                 <attribute name="edit">1</attribute>
             </xpath>
@@ -83,8 +68,11 @@
         <field name="name">hr.attendance.form.inherit.manager</field>
         <field name="model">hr.attendance</field>
         <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
-        <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance_user'))]"/>
+<!--        <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance_user'))]"/>-->
         <field name="arch" type="xml">
+            <xpath expr="//form" position="attributes">
+                <attribute name="groups">hr_attendance.group_hr_attendance</attribute>
+            </xpath>
             <xpath expr="//field[@name='employee_id']" position="attributes">
                 <attribute name="readonly">0</attribute>
             </xpath>
