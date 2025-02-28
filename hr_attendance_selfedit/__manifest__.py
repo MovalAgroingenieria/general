@@ -17,7 +17,6 @@
     'data': [
         'views/hr_attendance_view.xml',
         'views/custom_views.xml',
-        'views/assets.xml',
     ],
     'assets': {
         'web.assets_backend': [
