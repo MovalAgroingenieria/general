@@ -20,7 +20,7 @@
         'security/ir.model.access.csv',
         'wizard/hr_employee_attendance_leave_wizard_views.xml',
         'report/hr_employee_attendance_leave_report_views.xml',
-        'views/resources.xml',
+        # 'views/resources.xml',
     ],
     'assets': {
         'web.assets_common': [
