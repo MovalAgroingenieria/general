@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="wizard_create_forum_post_from_task_view_form" model="ir.ui.view">
+        <field name="name">Wizard to create forum post from task</field>
+        <field name="model">wizard.create.forum.post.from.task</field>
+        <field name="arch" type="xml">
+            <form string="Data of the task">
+                <div style="text-align:center">
+                    <h4 class="mb-3">Create the post</h4>
+                </div>
+                <group name="group_parcel_code_data">
+                    <field name="forum_id" options="{'no_create': True}" context="{'default_active': True}"/>
+                    <field name="title"/>
+                    <field name="publication_date"/>
+                    <field name="tag_ids" widget="many2many_tags"/>
+                    <field name="content"/>
+                </group>
+                <footer>
+                    <button name="action_confirm"
+                            type="object"
+                            string="Apply"
+                            class="btn-primary"/>
+                    <button string="Cancel"
+                            class="btn-default"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

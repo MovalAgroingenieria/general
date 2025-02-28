@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="config_settings_view_form" model="ir.ui.view">
+        <field name="name">Knowledge Parameters</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="document_knowledge.view_knowledge_configuration"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='maintenance_mode_setting']" position="after">
+                    <div id="moval_tldv_settings">
+                        <h2>TLDV Configuration</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_right_pane">
+                                <span class="o_form_label">Tldv Api Key</span>
+                                <div class="text-muted">
+                                    API key for tldv conection
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16 row">
+                                        <label for="api_key" string="Api key" class="col-3 col-lg-3 o_light_label"/>
+                                        <field name="api_key"/>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_right_pane">
+                                <span class="o_form_label">TLDV Url</span>
+                                <div class="text-muted">
+                                    TLDV URL for meetings
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16 row">
+                                        <label for="tldv_url" string="TLDV url" class="col-3 col-lg-3 o_light_label"/>
+                                        <field name="tldv_url"/>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_right_pane">
+                                <span class="o_form_label">TLDV Default Project</span>
+                                <div class="content-group">
+                                    <div class="mt16 row">
+                                        <label for="tldv_default_project_id" string="Project" class="col-3 col-lg-3 o_light_label"/>
+                                        <field name="tldv_default_project_id"/>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="row mt16 o_settings_container">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_right_pane">
+                                <span class="o_form_label">TLDV Default Category</span>
+                                <div class="content-group">
+                                    <div class="mt16 row">
+                                        <label for="tldv_default_category_id" string="Category" class="col-3 col-lg-3 o_light_label"/>
+                                        <field name="tldv_default_category_id"/>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_right_pane">
+                                <span class="o_form_label">TLDV Start Date</span>
+                                <div class="text-muted">
+                                    Default Start Date for TLDV retrieval
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16 row">
+                                        <label for="tldv_default_start_date" string="Start Day" class="col-3 col-lg-3 o_light_label"/>
+                                        <field name="tldv_default_start_date" placeholder='DD-MM-YYYY'/>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="configuration_action" model="ir.actions.act_window">
+        <field name="name">Portal Wiki TLDV</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_id" ref="config_settings_view_form"/>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'project_portal_wiki_tldv'}</field>
+    </record>
+
+</odoo>

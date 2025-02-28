@@ -1,0 +1,126 @@
+<?xml version ="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sh_project_task_time_account_line_form_view" model="ir.ui.view">
+        <field name="name">task.time.account.line</field>
+        <field name="model">task.time.account.line</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" />
+                            <field name="company_id" invisible="1" />
+                            <field name="start_date" />
+                        </group>
+                        <group>
+                            <field name="duration" widget="float_time" />
+                            <field name="end_date" />
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="End Task" name="end_task" type="object" default_focus="1" class="btn-primary" />
+                    <button string="Cancel" class="btn-default" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="sh_project_task_time_inherit_form_view" model="ir.ui.view">
+        <field name="name">project.task.time.form</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2" />
+        <field name="arch" type="xml">
+            <field name="user_ids" position="after">
+                <field name="start_time" invisible="1" />
+                <label for="duration" />
+                <div>
+                    <button style="pointer-events: none;" class="oe_inline badge badge-secondary">
+                        <field name="duration" widget="task_time_counter" />
+                    </button>
+                </div>
+            </field>
+            <xpath expr="//header" position="inside">
+                <button name="action_task_start" string="Start Task" attrs="{'invisible': ['|',('start_time','!=',False),('project_id','=',False)]}" type="object" class="oe_highlight" />
+                <button name="action_task_end" string="End Task" attrs="{'invisible': ['|',('start_time','=', False),('project_id','=',False)]}" type="object" class="oe_highlight" />
+            </xpath>
+        </field>
+    </record>
+    <record id="sh_project_task_time_inherit_search_view" model="ir.ui.view">
+        <field name="name">project.task.time.search</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_search_form" />
+        <field name="arch" type="xml">
+            <field name="user_ids" position="after">
+                <field name="start_time" invisible="1" />
+                <field name="task_running" />
+            </field>
+            <xpath expr="//filter[@name='low_priority']" position="after">
+                <filter name="group_start_task" string="Running Task" domain="[('task_running','=',True)]" />
+            </xpath>
+        </field>
+    </record>
+    <record id="project.action_view_all_task" model="ir.actions.act_window">
+        <field name="name">Tasks</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">kanban,tree,form,calendar,pivot,graph,activity</field>
+        <field name="context">{'search_default_my_tasks': 1,'search_default_group_start_task':1, 'all_task': 0}</field>
+        <field name="search_view_id" ref="project.view_task_search_form"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No tasks found. Let's create one!
+            </p><p>
+                 To get things done, use activities and status on tasks.<br/>
+                Chat in real time or by email to collaborate efficiently.
+            </p>
+        </field>
+    </record>
+    <record id="sh_project_task_time_inherit_kanban_view" model="ir.ui.view">
+        <field name="name">project.task.time.kanban</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_kanban" />
+        <field name="arch" type="xml">
+            <field name="user_ids" position="after">
+                <field name="start_time" />
+                <field name="task_running" />
+            </field>
+            <xpath expr="//field[@name='project_id']" position="after">
+                <t t-if="record.start_time.raw_value">
+                    <br />
+                    <span>Start Time: </span><field name="start_time" />
+                </t>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_kanban_bottom_right')]" position="before">
+            	<t t-if="record.start_time.raw_value" name="duration_t">
+                    <label for="duration" />
+                    <div>
+                        <button style="pointer-events: none;" class="oe_inline badge badge-secondary" id="timer_kanban_button">
+                            <field name="duration" widget="task_time_counter" style="font-size: 18px;" />
+                        </button>
+                    </div>
+                </t>
+                <div style="padding-right: 20px;" name="start_stop_div">
+                    <button name="action_task_start" string="Start Task" attrs="{'invisible': ['|',('start_time','!=',False),('project_id','=',False)]}" type="object" class="o_follow_btn o_following btn btn-xs btn-primary">
+                        <span class="o_unfollow">Start</span>
+                    </button>
+                    <button name="action_task_end" string="End Task" attrs="{'invisible': ['|',('start_time','=', False),('project_id','=',False)]}" type="object" class="o_follow_btn o_following btn btn-xs btn-primary">
+                        <span class="o_unfollow">End</span>
+                    </button>
+                </div>
+            </xpath>
+        </field>
+    </record>
+    <record id="sh_project_task_analytic_line_inherit_form_view" model="ir.ui.view">
+        <field name="name">project.task.analytic.line.form</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="hr_timesheet.view_task_form2_inherited" />
+        <field name="arch" type="xml">
+            <xpath expr="//page//field[@name='timesheet_ids']//tree//field[@name='date']" position="after">
+                <field name="start_date" />
+                <field name="end_date" />
+            </xpath>
+            <field name="unit_amount" position="attributes">
+                <attribute name="widget">float_time</attribute>
+            </field>
+        </field>
+    </record>
+</odoo>
