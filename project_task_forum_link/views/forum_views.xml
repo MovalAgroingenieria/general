@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_forum_post_form_inherit_task" model="ir.ui.view">
+        <field name="name">forum.post.form.inherit.task</field>
+        <field name="model">forum.post</field>
+        <field name="inherit_id" ref="website_forum.view_forum_post_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='forum_id']" position="after">
+                <field name="task_id" string="Related Task"/>
+            </xpath>
+            <xpath expr="//field[@name='create_date']" position="after">
+                <field name="publication_date"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_forum_forum_form_inherit_task" model="ir.ui.view">
+            <field name="name">forum.forum.form.inherit.task</field>
+            <field name="model">forum.forum</field>
+            <field name="inherit_id" ref="website_forum.view_forum_forum_form"/>
+            <field name="arch" type="xml">
+            <xpath expr="//field[@name='privacy']" position="after">
+                <field name="visible_from_tasks"/>
+                <field name="default_user_from_tasks"/>
+                <field name="tags_to_avoid"/>
+                <field name="tags_prefix"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

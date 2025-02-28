@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="portal_layout"
+              name="Portal layout: document page menu entry"
+              inherit_id="portal.portal_breadcrumbs"
+              priority="20">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'document_page' or document_page" class="col-lg-2" t-attf-class="breadcrumb-item #{'active ' if not document_page else ''}">
+                <a t-if="document_page" t-attf-href="/my/document_pages?{{ keep_query() }}">Document Pages</a>
+                <t t-else="">Document Pages</t>
+            </li>
+            <li t-if="document_page" class="breadcrumb-item active text-truncate col-8 col-lg-10">
+                <t t-esc="document_page.name"/>
+            </li>
+        </xpath>
+    </template>
+
+    <template id="portal_my_home"
+              name="Show Document Pages"
+              customize_show="True"
+              inherit_id="portal.portal_my_home"
+              priority="20">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Document Pages</t>
+                <t t-set="url" t-value="'/my/document_pages'"/>
+                <t t-set="placeholder_count" t-value="'document_page_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_document_pages" name="My Document Pages">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Document Pages</t>
+            </t>
+            <t t-if="not document_pages">
+                <div class="alert alert-warning mt8" role="alert">
+                    There are no document pages.
+                </div>
+            </t>
+            <t t-if="document_pages">
+                <t t-call="portal.portal_table">
+                    <t t-foreach="document_pages" t-as="pages">
+                        <thead>
+                            <tr t-attf-class="{{ 'thead-light' if groupby != 'none' else '' }}">
+                                <th class="text-left">Title</th>
+                                <th t-if="groupby == 'none' or groupby == 'parent_id'">Project</th>
+                                <th t-if="groupby == 'none' or groupby == 'project_id'">Category</th>
+                                <th t-if="groupby == 'parent_id'">
+                                    <em class="font-weight-normal text-muted">Documents in category:</em>
+                                    <span t-field="pages[0].sudo().parent_id.name"/>
+                                </th>
+                                <th t-if="groupby == 'project_id'">
+                                    <em class="font-weight-normal text-muted">Documents in project:</em>
+                                    <span t-field="pages[0].sudo().project_id.name"/>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="pages" t-as="document_page">
+                                <tr>
+                                    <td t-att-colspan="'' if groupby == 'none' else 2">
+                                        <a t-attf-href="/my/document_page/#{document_page.id}?{{ keep_query() }}">
+                                            <span t-field="document_page.name"/>
+                                        </a>
+                                    </td>
+                                    <td t-if="groupby == 'none' or groupby == 'parent_id'">
+                                        <span t-field="document_page.sudo().project_id.name"/>
+                                    </td>
+                                    <td t-if="groupby == 'none' or groupby == 'project_id'">
+                                        <span t-field="document_page.sudo().parent_id.name"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </t>
+                </t>
+            </t>
+        </t>
+    </template>
+
+
+
+    <template id="portal_my_document_page" name="My Document Page">
+        <t t-call="portal.portal_layout">
+            <t t-set="o_portal_fullwidth_alert" groups="base.group_user">
+                <t t-call="portal.portal_back_in_edit_mode">
+                    <t t-set="backend_url" t-value="'/web#model=document_page.document_page&amp;id=%s&amp;view_type=form' % (document_page.id)"/>
+                </t>
+            </t>
+            <t t-call="portal.portal_record_layout">
+                <t t-set="card_header">
+                    <div class="row no-gutters">
+                        <div class="col-12">
+                            <h5 class="d-flex mb-1 mb-md-0 row">
+                                <span t-field="document_page.name" class="col-9 text-truncate"/>
+                            </h5>
+                        </div>
+                    </div>
+                </t>
+                <t t-set="card_body">
+                    <div class="row">
+                        <div class="col-md-12 col-12" t-field="document_page.content"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

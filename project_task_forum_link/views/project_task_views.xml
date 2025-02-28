@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_task_form_forum_link" model="ir.ui.view">
+        <field name="name">project.task.form.limited.access</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_open_wizard_create_forum_from_task"
+                        string="Create Forum Post"
+                        attrs="{'invisible': [('forum_post_id','!=',False)]}"
+                        type="object"
+                        class="oe_highlight"/>
+            </xpath>
+            <xpath expr="//field[@name='user_ids']" position="after">
+                <field name="forum_post_id" string="Related Post"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

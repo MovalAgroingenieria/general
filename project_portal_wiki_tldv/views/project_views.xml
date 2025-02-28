@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="edit_project" model="ir.ui.view">
+        <field name="name">project.project.form</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="komodo_private_folder_urls" widget="url"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_project_kanban">
+        <field name="name">project.project.kanban</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='analytic_account_id']" position="after">
+                <field name="komodo_private_folder_urls"/>
+            </xpath>
+            <xpath expr="//div[@t-if='record.alias_name.value and record.alias_domain.value']" position="after">
+                <div t-if="record.komodo_private_folder_urls.value">
+                    <t t-set="urls" t-value="record.komodo_private_folder_urls.value.split(',')"></t>
+                    <t t-foreach="urls" t-as="url">
+                        <div>
+                            <i class="fa fa-video-camera" role="img" aria-label="URLs" title="URLs"></i>
+                            <a target="_blank" t-att-href="url">Komodo Folder</a>
+                        </div>
+                    </t>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+
+</odoo>
