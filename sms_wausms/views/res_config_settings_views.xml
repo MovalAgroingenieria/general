@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">WauSMS settings</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+                <div id="sms_wausms_settings" class="app_settings_block" data-string="WauSMS"
+                    string="WauSMS" data-key="sms_wausms" groups="base.group_system">
+                    <h2>Settings</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <div class="content-group">
+                                    <div class="mt16 row">
+                                        <label for="wausms_website"/>
+                                        <field name="wausms_website" widget="url"/>
+                                    </div>
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16 row">
+                                        <label for="wausms_service_url"/>
+                                        <field name="wausms_service_url" style="width:80%;"/>
+                                    </div>
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16 row">
+                                        <label for="wausms_service_api_user"/>
+                                        <field name="wausms_service_api_user"/>
+                                    </div>
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16 row">
+                                        <label for="wausms_service_api_passwd"/>
+                                        <field name="wausms_service_api_passwd" password="True"/>
+                                    </div>
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16 row">
+                                        <label for="wausms_service_sender"/>
+                                        <field name="wausms_service_sender"/>
+                                    </div>
+                                    <div class="text-muted">Limit to 15 numbers or 11 alphanumeric characters</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
