@@ -21,7 +21,7 @@ class SmsApi(models.AbstractModel):
         sms_service_set = self.env['ir.config_parameter'].sudo().get_param(
             'sms_alternatives.sms_service')
         if sms_service_set == 'odoo_service':
-            service_api = self._contact_iap('/iap/message_send', params)
+            service_api = super()._send_sms(numbers, message)
         elif sms_service_set == 'wausms_service':
             service_api = self._contact_wausms(send_mode, params)
         else:
@@ -36,7 +36,7 @@ class SmsApi(models.AbstractModel):
         sms_service_set = self.env['ir.config_parameter'].sudo().get_param(
             'sms_alternatives.sms_service')
         if sms_service_set == 'odoo_service':
-            service_api = self._contact_iap('/iap/sms/2/send', params)
+            service_api = super()._send_sms_batch(messages)
         elif sms_service_set == 'wausms_service':
             service_api = self._contact_wausms(send_mode, params)
         else:
