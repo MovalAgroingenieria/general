@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
@@ -68,7 +67,7 @@ class ResPartner(models.Model):
         for record in self:
             record.total_res_registry_ids = \
                 (record.recipient_res_registry_ids |
-                record.sender_res_registry_ids)
+                    record.sender_res_registry_ids)
 
     def action_get_registers(self):
         self.ensure_one()
