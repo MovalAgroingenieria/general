@@ -45,6 +45,7 @@
                         attrs="{'invisible':['|',('active','=',False),('is_blocked','=',True)]}"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box"></div>
                     <div name="info_block" class="text-end">
                         <div name="blocked_file" style="display:inline-block;color:red;"
                             attrs="{'invisible':[('is_blocked','=',False)]}">
@@ -54,7 +55,6 @@
                            attrs="{'invisible':[('active','=',True)]}"> A R C H I V E D
                         </div>
                     </div>
-                    <div name="buttons" class="oe_button_box"></div>
                     <group name="master_data" col="12">
                         <group name="master_data_left" colspan="2">
                             <field name="image" widget="image" nolabel="1" colspan="2"/>
