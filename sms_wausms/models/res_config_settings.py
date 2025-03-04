@@ -1,7 +1,7 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import models, fields, api, exceptions, _
+from odoo import models, fields, exceptions, _
 
 
 class ResConfigSettings(models.TransientModel):
@@ -39,10 +39,7 @@ class ResConfigSettings(models.TransientModel):
         param_obj = self.env['ir.config_parameter'].sudo()
         sender = param_obj.get_param(
             'sms_wausms.wausms_service_sender', default='')
-
         if sender and (sender.isdigit() and len(sender) > 15):
             raise exceptions.ValidationError(
                 _('Sender size is limited to 15 numbers or 11 alphanumeric '
                   'characters.'))
-
-
