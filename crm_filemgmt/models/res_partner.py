@@ -51,10 +51,14 @@ class ResPartner(models.Model):
             return act_window
 
     @api.model
-    def _get_view(self, view_id=None, view_type='form', toolbar=False,
-                  submenu=False):
-        res = super()._get_view(view_id=view_id, view_type=view_type,
-                                toolbar=toolbar, submenu=submenu)
+    def fields_view_get(self, view_id=None, view_type='form', toolbar=False,
+                        submenu=False):
+        res = super().fields_view_get(
+            view_id=view_id,
+            view_type=view_type,
+            toolbar=toolbar,
+            submenu=submenu,
+        )
         access_file_filemgmt = \
             self.env['res.file']._check_access_file_filemgmt()
         if view_type == 'form':

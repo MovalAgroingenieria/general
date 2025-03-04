@@ -3,7 +3,6 @@
 
 import datetime
 from jinja2 import Template, TemplateError
-from lxml import etree
 from odoo import models, fields, api, SUPERUSER_ID, exceptions, _
 
 
@@ -21,7 +20,12 @@ class ResFile(models.Model):
     def _default_file_code(self):
         current_year = datetime.datetime.now().year
         file_prefix = self.env['ir.config_parameter'].sudo().get_param(
-            f"crm_filemgmt.file_prefix_{self.env.company.id}").strip()
+            f"crm_filemgmt.file_prefix_{self.env.company.id}")
+        if not file_prefix:
+            raise exceptions.UserError(
+                _('The file prefix parameter is not set. '
+                  'Go to configuration and set a value for the parameter'))
+        file_prefix = file_prefix.strip()
         file_prefix += '-'
         full_prefix = file_prefix + str(current_year).zfill(4) + '/'
         resp = full_prefix + '1'.zfill(self.SIZE_ANNUALSEQ_CODE)
@@ -288,14 +292,12 @@ class ResFile(models.Model):
         return new_file
 
     def _check_filecode_format(self, filecode):
-        current_year = datetime.datetime.now().year
         file_prefix = self.env['ir.config_parameter'].sudo().get_param(
             f"crm_filemgmt.file_prefix_{self.env.company.id}").strip()
         file_prefix += '-'
-        full_prefix = file_prefix + str(current_year).zfill(4) + '/'
 
         # Check prefix is separated by a hyphen
-        after_prefix = filecode[len(file_prefix):]
+        after_prefix = filecode[len(file_prefix)-1:]
         if not after_prefix.startswith('-'):
             raise exceptions.UserError(
                 _('The prefix must be separated from the rest of the file '
