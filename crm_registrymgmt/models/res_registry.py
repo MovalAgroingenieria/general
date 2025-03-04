@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import datetime
 import json
-from lxml import etree
 from odoo import models, fields, api
 
 
@@ -31,7 +29,7 @@ class ResRegistry(models.Model):
     state = fields.Selection(
         [('draft', 'Draft'),
          ('validated', 'Validated'),
-        ],
+         ],
         default='draft',
         readonly=True,
         copy=False,
@@ -130,12 +128,10 @@ class ResRegistry(models.Model):
         comodel_name="ir.attachment",
         compute="_compute_res_registry_attachment_ids")
 
-
     def _compute_res_registry_attachment_ids(self):
         self.res_registry_attachment_ids = \
             self.env['ir.attachment'].search(
                 [('res_model', '=', self._name), ('res_id', '=', self.id)])
-
 
     def write(self, vals):
         if 'date' in vals and str(vals['date']) != fields.Date.today():
@@ -184,7 +180,7 @@ class ResRegistry(models.Model):
                         if date_from <= date_obj <= date_to:
                             next_num = \
                                 str(date_range.number_next_actual).zfill(
-                                sequence_obj.padding)
+                                    sequence_obj.padding)
                             increased_seq_num = \
                                 date_range.number_next_actual + 1
                             date_range.sudo().write(
@@ -194,7 +190,8 @@ class ResRegistry(models.Model):
                 prefix = self._recompute_prefix(prefix_raw, date_obj)
                 number = prefix + next_num
                 vals['number'] = number
-            elif ('number' not in vals) or (vals.get('number') in ('/', False)):
+            elif ('number' not in vals) or (
+                    vals.get('number') in ('/', False)):
                 sequence = self.env['ir.sequence']
                 move_type_context = \
                     self.env.context.get('default_move') or \
@@ -232,7 +229,6 @@ class ResRegistry(models.Model):
                     node.set("modifiers", json.dumps(modifiers))
 
         return arch, view
-
 
     def _recompute_prefix(self, prefix_raw, date_obj):
         prefix = prefix_raw.replace(
