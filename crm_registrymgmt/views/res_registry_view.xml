@@ -55,9 +55,9 @@
             <field name="arch" type="xml">
                 <form>
                     <header>
-                        <button name="action_validate" string="Validate" type="object" class="oe_highlight"/>
-                        <button name="action_draft" string="Draft" type="object" class="oe_highlight"/>
-                        <button name="%(action_res_registry_mail_wizard)d" string="Send Email" type="action"/>
+                        <button name="action_validate" string="Validate" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                        <button name="action_draft" string="Draft" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'validate')]}"/>
+                        <button name="%(action_res_registry_mail_wizard)d" string="Send Email" type="action" attrs="{'invisible': [('state', '!=', 'validate')]}"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,validate"/>
                     </header>
                     <sheet>
