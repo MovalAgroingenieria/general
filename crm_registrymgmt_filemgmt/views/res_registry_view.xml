@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+        <record id="res_registry_form_view" model="ir.ui.view">
+            <field name="name">res.registry.form.inherit</field>
+            <field name="model">res.registry</field>
+            <field name="inherit_id" ref="crm_registrymgmt.res_registry_form_view"/>
+            <field name="arch" type="xml">
+            <xpath expr="//field[@name='track_ref']" position="after">
+                <field name="file_id" attrs="{'readonly': [('state', 'not in', ['draft'])]}"/>
+            </xpath>
+            </field>
+        </record>
+</odoo>
