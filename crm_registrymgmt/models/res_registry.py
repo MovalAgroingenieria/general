@@ -211,7 +211,7 @@ class ResRegistry(models.Model):
             config = self.env['ir.config_parameter'].sudo()
             allow_number_edition = \
                 config.get_param(
-                    'res_registry_config.allow_number_edition', 'False')
+                    'res_registry_config.allow_number_edition', False)
 
             for node in arch.xpath("//field[@name='number']"):
                 if allow_number_edition:
