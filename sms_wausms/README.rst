@@ -18,7 +18,7 @@ SMS WauSMS
 Description
 ===========
 
-This module allows you to use the WauSMS service to send SMS.
+This module allows you to use the WauSMS service to send SMS's.
 
 
 Credits
