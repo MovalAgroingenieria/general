@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="res_registry_report_document" inherit_id="crm_registrymgmt.res_registry_report_document">
+        <xpath expr="//tr[@t-if='o.track_ref']" position="after">
+            <t t-if="o.file_id" name="file_field_in_main_data">
+                <tr t-if="o.file_id.name">
+                    <td><b>File</b></td>
+                    <td class="text-right"><span t-field="o.file_id.name"/></td>
+                </tr>
+            </t>
+        </xpath>
+        <xpath expr="//t[@t-if='o.note']" position="after">
+            <t t-if="o.file_id" name="file_details">
+                <div name="file_title" style="border-bottom: 1px solid black;">
+                    <span><b>F I L E</b></span>
+                </div>
+                <div name="issue" t-if="o.name" style="margin-top:16px;">
+                    <span><b>Issue: </b></span><span t-field="o.file_id.subject"/>
+                </div>
+                <div name="file_data" class="col-12" style="display:table; margin-top:8px; margin-bottom:24px;">
+                    <div style="width: 50%; display: table-cell; border-right: 1px solid black; padding-right: 24px;">
+                        <table style="width: 100%;">
+                            <tbody>
+                                <tr t-if="o.file_id.name">
+                                    <td><b>Code</b></td>
+                                    <td class="text-right"><span t-field="o.file_id.name"/></td>
+                                </tr>
+                                <tr t-if="o.file_id.stage_id">
+                                    <td><b>Stage</b></td>
+                                    <td class="text-right"><span t-field="o.file_id.stage_id"/></td>
+                                </tr>
+                                <tr t-if="o.file_id.category_id">
+                                    <td><b>Category</b></td>
+                                    <td class="text-right"><span t-field="o.file_id.category_id"/></td>
+                                </tr>
+                                 <tr t-if="o.file_id.technician_id">
+                                    <td><b>Technician</b></td>
+                                    <td class="text-right"><span t-field="o.file_id.technician_id"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="display: table-cell; padding-left: 24px;">
+                        <table style="width: 100%;">
+                            <tbody>
+                                <tr t-if="o.file_id.date_file">
+                                    <td><b>File Date</b></td>
+                                    <td class="text-right"><span t-field="o.file_id.date_file"/></td>
+                                </tr>
+                                <tr t-if="o.file_id.date_file">
+                                    <td><b>Closing Date</b></td>
+                                    <td class="text-right"><span t-field="o.file_id.closing_date"/></td>
+                                </tr>
+                                <tr t-if="o.file_id.container_id">
+                                    <td><b>Container</b></td>
+                                    <td class="text-right"><span t-field="o.file_id.container_id"/></td>
+                                </tr>
+                                 <tr t-if="o.file_id.file_attachment_ids">
+                                    <t t-set="num_file_attachment_ids" t-value="len(o.file_id.file_attachment_ids)"/>
+                                    <td><b>Attachments</b></td>
+                                    <td class="text-right"><span t-esc="num_file_attachment_ids"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+
+    </template>
+
+</odoo>

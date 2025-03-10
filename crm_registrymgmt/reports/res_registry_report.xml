@@ -26,16 +26,16 @@
                 <div name="title" style="text-align: center; margin-bottom: 24px;">
                     <strong>
                         <span>R E G I S T R Y</span>
-                        <span> </span>
+                        <span> &#160;&#160;&#160;&#160;</span>
                         <t t-if="o.move == 'out'"><span>O U T</span></t>
                         <t t-if="o.move == 'in'"><span>I N</span></t>
-                        <span> </span>
+                        <span> &#160;&#160;&#160;&#160;</span>
                         <span t-field="o.number"/>
                     </strong>
                 </div>
 
                 <div name="registry_main_data_title" style="border-bottom: 1px solid black;">
-                    <b>M A I N   D A T A</b>
+                    <b>M A I N &#160;&#160;&#160;&#160; D A T A</b>
                 </div>
                 <div name="issue" t-if="o.name" style="margin-top:16px;">
                     <b>Issue: </b><span t-field="o.name"/>
@@ -93,7 +93,7 @@
 
                 <t t-if="o.type_id or o.orig_ref or o.document_date or o.snd_date or o.rec_date or o.expeditor_ref">
                     <div name="registry_additional_data_title" style="border-bottom: 1px solid black;">
-                        <b>A D D I T I O N A L   D A T A</b>
+                        <b>A D D I T I O N A L &#160;&#160;&#160;&#160; D A T A</b>
                     </div>
                     <div name="registry_additional_data" class="col-12" style="display:table; margin-top:8px; margin-bottom:24px;">
                         <div style="width: 50%; display: table-cell; border-right: 1px solid black; padding-right: 24px;">
@@ -145,6 +145,34 @@
                             </table>
                         </div>
                     </div>
+                </t>
+
+                <t t-if="o.res_registry_attachment_ids" style="margin-bottom:16px;">
+                    <div name="attachments_title" style="border-bottom: 1px solid black;">
+                        <span><b>A T T A C H M E N T S</b></span>
+                    </div>
+                    <table style="width: 100%; margin-top: 8px; margin-bottom: 24px;">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Creation Date</th>
+                                <th>Mime Type</th>
+                                <th>Checksum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="o.res_registry_attachment_ids" t-as="attachment">
+                                <tr>
+                                    <td><span t-field="attachment.name"/></td>
+                                    <td><span t-field="attachment.create_date"/></td>
+                                    <td><span t-field="attachment.mimetype"/></td>
+                                    <td>
+                                        <t t-set="hash_value" t-esc="attachment._compute_checksum(attachment.datas)"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
                 </t>
 
                 <t t-if="o.note">

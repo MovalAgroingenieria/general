@@ -16,7 +16,7 @@
     'data': [
         'views/res_registry_view.xml',
         'views/res_file_views.xml',
-        'security/ir.model.access.csv',
+        'reports/res_registry_report.xml',
     ],
     'application': False,
     'installable': True,
