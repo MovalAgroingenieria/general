@@ -11,12 +11,6 @@ class ResConfigSettings(models.TransientModel):
 
     editable_notes = fields.Boolean(
         string='Editable Notes (y/n)',
-        default=True,
         required=True,
-        help='Ability to edit internal annotations',)
-
-    def set_default_values(self):
-        values = self.env['ir.default'].sudo()
-        values.set('res.config.settings',
-                   'editable_notes',
-                   self.editable_notes)
+        help='Ability to edit internal annotations',
+        config_parameter='eom_authdnie.editable_notes')

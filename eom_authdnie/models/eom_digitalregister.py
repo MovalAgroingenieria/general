@@ -123,8 +123,8 @@ class EomDigitalregister(models.Model):
         ]
 
     def _compute_editable_notes(self):
-        editable_notes = self.env['ir.default'].get(
-            'res.config.settings', 'editable_notes')
+        editable_notes = self.env['ir.config_parameter'].sudo().get_param(
+            'eom_authdnie.editable_notes')
         for record in self:
             record.editable_notes = editable_notes
 
@@ -548,8 +548,8 @@ class EomDigitalregisterAccess(models.Model):
             record.detail_text = record.detail
 
     def _compute_editable_notes(self):
-        editable_notes = self.env['ir.default'].get(
-            'res.config.settings', 'editable_notes')
+        editable_notes = self.env['ir.config_parameter'].sudo().get_param(
+            'eom_authdnie.editable_notes')
         for record in self:
             record.editable_notes = editable_notes
 

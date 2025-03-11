@@ -66,14 +66,12 @@
                                    attrs="{'invisible': [('partner_id', '=', False)]}"/>
                         </group>
                     </group>
-                    <group name="slave_data">
-                        <notebook name="slave_data_notebook">
-                            <page name="notes" string="Notes">
-                                <field name="notes"
-                                       attrs="{'readonly': [('editable_notes', '=', False)]}"/>
-                            </page>
-                        </notebook>
-                    </group>
+                    <notebook name="slave_data_notebook">
+                        <page name="notes" string="Notes" colspan="4">
+                            <field name="notes"
+                                   attrs="{'readonly': [('editable_notes', '=', False)]}"/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -99,7 +97,7 @@
                 <field name="number_of_requests"
                        string="Requests"/>
                 <field name="icon_with_contact"
-                       string=""/>
+                       string="" nolabel="1" class="o_icon_column"/>
             </tree>
         </field>
     </record>
@@ -136,16 +134,17 @@
                 <field name="name"/>
                 <field name="icon_with_contact"/>
                 <field name="last_event_time"/>
-                <field name="image_small"/>
+                <field name="image"/>
+                <field name="id"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click o_res_partner_kanban">
                             <div class="o_kanban_image">
-                                <t t-if="record.image_small.raw_value">
-                                    <img t-att-src="kanban_image('eom.digitalregister', 'image_small', record.id.value)" alt="Register"/>
+                                <t t-if="record.image.raw_value">
+                                    <img t-att-src="kanban_image('eom.digitalregister', 'image', record.id.raw_value)" alt="Register"/>
                                 </t>
-                                <t t-if="!record.image_small.raw_value">
-                                    <img t-att-src='_s + "/eom_authdnie/static/src/img/avatar.png"' alt="Default"/>
+                                <t t-if="!record.image.raw_value">
+                                    <img t-att-src='"/eom_authdnie/static/src/img/avatar.png"' alt="Default"/>
                                 </t>
                             </div>
                             <div class="oe_kanban_details">
@@ -158,10 +157,6 @@
                                             <field name="icon_with_contact"/>
                                         </span>
                                         <field name="name"/>
-                                    </li>
-                                    <li t-if="record.last_event_time.raw_value">
-                                        <span style="margin-right:5px">Last Access:</span>
-                                        <field name="last_event_time"/>
                                     </li>
                                 </ul>
                             </div>
@@ -240,14 +235,12 @@
                             </div>
                         </group>
                     </group>
-                    <group name="slave_data">
-                        <notebook name="slave_data_notebook">
-                            <page name="notes" string="Notes">
-                                <field name="notes"
-                                       attrs="{'readonly': [('editable_notes', '=', False)]}"/>
-                            </page>
-                        </notebook>
-                    </group>
+                    <notebook name="slave_data_notebook">
+                        <page name="notes" string="Notes" colspan="4">
+                            <field name="notes"
+                                   attrs="{'readonly': [('editable_notes', '=', False)]}"/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -269,9 +262,9 @@
                 <field name="firstname"
                        string="First Name"/>
                 <field name="icon_with_userdata"
-                       string=""/>
+                       string="" nolabel="1" class="o_icon_column"/>
                 <field name="icon_with_contact"
-                       string=""/>
+                       string="" nolabel="1" class="o_icon_column"/>
             </tree>
         </field>
     </record>
@@ -319,17 +312,18 @@
                 <field name="icon_with_contact"/>
                 <field name="icon_with_userdata"/>
                 <field name="event_time"/>
-                <field name="image_small"/>
+                <field name="image"/>
+                <field name="id"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click o_res_partner_kanban">
                             <div class="o_kanban_image"
                                  invisible="context.get('hide_image', False)">
-                                <t t-if="record.image_small.raw_value">
-                                    <img t-att-src="kanban_image('eom.digitalregister.access', 'image_small', record.id.value)" alt="Access image"/>
+                                <t t-if="record.image.raw_value">
+                                    <img t-att-src="kanban_image('eom.digitalregister.access', 'image', record.id.raw_value)" alt="Access image"/>
                                 </t>
-                                <t t-if="!record.image_small.raw_value">
-                                    <img t-att-src='_s + "/eom_authdnie/static/src/img/avatar.png"' alt="Default avatar for access"/>
+                                <t t-if="!record.image.raw_value">
+                                    <img t-att-src='"/eom_authdnie/static/src/img/avatar.png"' alt="Default avatar for access"/>
                                 </t>
                             </div>
                             <div class="oe_kanban_details">
