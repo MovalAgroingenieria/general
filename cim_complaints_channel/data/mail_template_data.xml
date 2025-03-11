@@ -5,10 +5,8 @@
 
         <record id="mail_template_tracking_code" model="mail.template">
             <field name="name">Send tracking code to the complainant</field>
-            <field name="model_id"
-                   ref="cim_complaints_channel.model_cim_complaint"/>
-            <field name="subject">Tracking Code of complaint ${object.name}
-            </field>
+            <field name="model_id" ref="cim_complaints_channel.model_cim_complaint"/>
+            <field name="subject">Tracking Code of complaint ${object.name}</field>
             <field name="email_from">${(user.company_id.email) |safe}</field>
             <field name="email_to">${(object.decrypted_complainant_email) |safe}</field>
             <field name="body_html" type="html">
@@ -27,10 +25,8 @@
 
         <record id="mail_template_communication" model="mail.template">
             <field name="name">Send communication of a complaint</field>
-            <field name="model_id"
-                   ref="cim_complaints_channel.model_cim_complaint_communication"/>
-            <field name="subject">Complaint ${object.complaint_id.name}, communication ${object.name}
-            </field>
+            <field name="model_id" ref="cim_complaints_channel.model_cim_complaint_communication"/>
+            <field name="subject">Complaint ${object.complaint_id.name}, communication ${object.name}</field>
             <field name="email_from">${(user.company_id.email) |safe}</field>
             <field name="email_to">${(object.complaint_id.decrypted_complainant_email) |safe}</field>
             <field name="body_html" type="html">
@@ -48,10 +44,8 @@
 
         <record id="mail_template_notice" model="mail.template">
             <field name="name">Send notice related to a communication from the claimant</field>
-            <field name="model_id"
-                   ref="cim_complaints_channel.model_cim_complaint_communication"/>
-            <field name="subject">Complaints Channel, new notice: Communication ${object.name}
-            </field>
+            <field name="model_id" ref="cim_complaints_channel.model_cim_complaint_communication"/>
+            <field name="subject">Complaints Channel, new notice: Communication ${object.name}</field>
             <field name="email_from">${(user.company_id.email) |safe}</field>
             <field name="email_to">${(object.complaint_id.param_email_for_notice) |safe}</field>
             <field name="body_html" type="html">
