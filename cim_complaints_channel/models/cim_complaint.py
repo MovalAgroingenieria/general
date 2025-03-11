@@ -489,7 +489,8 @@ class CimComplaint(models.Model):
                 if record.is_extended:
                     months_deadline = record.param_deadline_extended
                 deadline_date = (record.creation_date +
-                      relativedelta(months=months_deadline, days=-1)).strftime('%Y-%m-%d')
+                      relativedelta(months=months_deadline, days=-1)).strftime(
+                    '%Y-%m-%d')
                 if current_date <= deadline_date:
                     deadline_state = '01_on_time'
                     if record.is_extended:
@@ -513,7 +514,9 @@ class CimComplaint(models.Model):
             is_acknowledgement_expired = False
             if not record.is_rejected and record.state == '01_received':
                 deadline_acknowledgement = (record.creation_date +
-                        relativedelta(days=record.param_acknowledgement_period - 1)).strftime('%Y-%m-%d')
+                        relativedelta(
+                            days=record.param_acknowledgement_period - 1)
+                                            ).strftime('%Y-%m-%d')
                 current_date = datetime.today().strftime('%Y-%m-%d')
                 if current_date > deadline_acknowledgement:
                     is_acknowledgement_expired = True
@@ -1655,8 +1658,7 @@ class CimComplaintCommunication(models.Model):
         for vals in vals_list:
             vals = self._test_tracking_code(vals)
             vals = self._process_vals(vals, is_create=True)
-        new_communications = super(CimComplaintCommunication, self).create(
-            vals_list)
+        new_communications = super().create(vals_list)
         for new_communication in new_communications:
             if new_communication.from_complainant:
                 if new_communication.automatic_email_complainant_com:

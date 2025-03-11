@@ -123,7 +123,7 @@
                     <br/>
 
                     <div name="divgroup1" class="row">
-                        <div name="leftdiv1" class="col-6">
+                        <div name="leftdiv1" class="col-12 col-md-6">
                             <div colspan="6">
                                 <field name="issue" nolabel="1" style="width: 100%"
                                        placeholder="Issue"
@@ -140,7 +140,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div name="rightdiv1" class="col-6">
+                        <div name="rightdiv1" class="col-12 col-md-6">
                             <div>
                                 <div name="group_01_right_title" colspan="6"
                                      class="text-center"
@@ -183,7 +183,7 @@
                                     </span>
                                 </div>
                             </div>
-                            <div name="group_01_right_datas" class="col-6"
+                            <div name="group_01_right_datas" class="col-12 col-md-6"
                                  style="margin-bottom:15px">
                                 <group>
                                     <field name="investigating_user_id"
@@ -204,13 +204,12 @@
                         </div>
                     </div>
                     <div name="group_02" class="row">
-                        <div name="group_02_left" class="col-6">
+                        <div name="group_02_left" class="col-12 col-md-6">
                             <div name="group_02_left_inner">
                                 <div name="group_02_left_inner_title" colspan="8"
-                                     style="text-align:center;margin-bottom:5px">
-                                    <span style="font-weight:bold">
-                                    FACTS DENOUNCED
-                                    </span>
+                                     class="text-center"
+                                     style="font-weight:bold;margin-top:16px;margin-bottom:16px">
+                                    <span>FACTS DENOUNCED</span>
                                 </div>
                                 <div name="section_description"
                                      colspan="8"
@@ -244,14 +243,13 @@
                                 </div>
                             </div>
                         </div>
-                        <div name="group_02_right" class="col-6">
+                        <div name="group_02_right" class="col-12 col-md-6">
                             <div name="group_02_right_inner">
                                 <div name="group_02_right_inner_title_1"
                                      colspan="8"
-                                     style="text-align:center;margin-bottom:5px">
-                                    <span style="font-weight:bold">
-                                    MEASURES TAKEN
-                                    </span>
+                                     class="text-center"
+                                     style="font-weight:bold;margin-top:16px;margin-bottom:16px">
+                                    <span>MEASURES TAKEN</span>
                                 </div>
                                 <div name="section_measures_taken"
                                      colspan="8"
@@ -265,22 +263,13 @@
                         </div>
                     </div>
                     <div name="group_03" class="row">
-                        <div name="group_03_left" class="col-6">
+                        <div name="group_03_left" class="col-12 col-md-6">
                             <div name="group_03_left_inner">
                                 <div name="group_03_left_inner_complainant_data" colspan="2"
                                      class="text-center"
                                      style="font-weight:bold;margin-top:16px;margin-bottom:16px"
                                      groups="cim_complaints_channel.group_cim_user">
                                     <span>COMPLAINANT DATA</span>
-                                </div>
-                                <div name="section_decrypted_complainant_data"
-                                     colspan="8"
-                                     class="panel-body"
-                                     style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px"
-                                     attrs="{'invisible': ['|', ('id', '=', 0), ('decrypted_complainant_data', '=', False)]}"
-                                     groups="cim_complaints_channel.group_cim_user">
-                                    <field name="decrypted_complainant_data" nolabel="1"
-                                           style="margin-top:5px"/>
                                 </div>
                                 <group>
                                     <field name="complainant_name"
@@ -311,18 +300,16 @@
                                            attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
                                     <field name="decrypted_tracking_code"
                                            string="Tracking Code"
-                                           class="oe_read_only"
                                            groups="cim_complaints_channel.group_cim_manager"/>
                                 </group>
                             </div>
                         </div>
-                        <div name="group_03_right" class="col-6">
+                        <div name="group_03_right" class="col-12 col-md-6">
                             <div name="group_02_right_inner_title_2"
                                  colspan="8"
-                                 style="text-align:center;margin-bottom:5px">
-                                <span style="font-weight:bold">
-                                WITNESSES
-                                </span>
+                                     class="text-center"
+                                     style="font-weight:bold;margin-top:16px;margin-bottom:16px">
+                                <span>WITNESSES</span>
                             </div>
                             <div name="section_witness_name"
                                  colspan="8"
@@ -342,9 +329,7 @@
                                 <div name="section_rejected_title_1"
                                      colspan="8"
                                      style="text-align:center;margin-bottom:5px">
-                                    <span style="font-weight:bold">
-                                    REJECTION CAUSE
-                                    </span>
+                                    <span>REJECTION CAUSE</span>
                                 </div>
                                 <div name="section_rejection_cause"
                                      colspan="8"
@@ -672,7 +657,7 @@
                 </header>
                 <sheet>
                     <div class="row" name="div_01">
-                        <div name="div_01_left" class="col-6">
+                        <div name="div_01_left" class="col-12 col-md-6">
                             <div name="group_01_left_communication_number">
                                 <span name="field_communication_number_label"
                                       style="font-weight:bold"
@@ -685,7 +670,7 @@
                                        attrs="{'invisible': [('id', '=', 0)]}"/>
                             </div>
                         </div>
-                        <div name="group_01_right" class="col-6">
+                        <div name="group_01_right" class="col-12 col-md-6">
                             <div name="group_01_right_is_sent"
                                  colspan="2">
                                 <span style="padding:5px;font-weight:bold;background-color:#dc143c;color:#ffffff"
@@ -702,13 +687,13 @@
                     <br/>
                     <br/>
                     <div name="div_02" class="row">
-                        <div name="div_02_left" class="col-6">
+                        <div name="div_02_left" class="col-12 col-md-6">
                             <group>
                                 <field name="issue" string="Issue"
                                        attrs="{'readonly': ['|', ('from_complainant', '=', True), ('state', '=', '02_validated')]}"/>
                             </group>
                         </div>
-                        <div name="div_02_right" class="col-6">
+                        <div name="div_02_right" class="col-12 col-md-6">
                             <group>
                                 <field name="from_complainant_as_text"
                                        string="Complaint Source"/>

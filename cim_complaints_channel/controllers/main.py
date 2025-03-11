@@ -78,7 +78,7 @@ class WebsiteFormCim(WebsiteForm):
                 decrypted_tracking_code_of_complaint = \
                     model_cim_complaint.decrypt_data(
                         complaint.tracking_code,
-                        model_cim_complaint._cipher_key)
+                        model_cim_complaint._cipher_key).decode('utf-8')
                 if (entered_tracking_code ==
                    decrypted_tracking_code_of_complaint):
                     entered_complaint = complaint
