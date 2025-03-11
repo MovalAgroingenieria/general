@@ -7,9 +7,8 @@ from odoo import api, SUPERUSER_ID
 
 def post_init_hook(cr, registry):
     env = api.Environment(cr, SUPERUSER_ID, {})
-    values = env['ir.default'].sudo()
-    values.set('res.config.settings',
-               'editable_notes', True)
+    env['ir.config_parameter'].set_param(
+        'eom_authdnie.editable_notes', True)
 
 
 def uninstall_hook(cr, registry):
@@ -17,8 +16,8 @@ def uninstall_hook(cr, registry):
     try:
         env.cr.savepoint()
         env.cr.execute("""
-            DELETE FROM ir_values
-            WHERE model='res.config.settings'""")
+            DELETE FROM ir_config_parameter
+            WHERE key LIKE 'eom_authdnie.%'""")
         env.cr.commit()
     except (Exception,):
         env.cr.rollback()

@@ -24,6 +24,7 @@
         "views/eom_authdnie_menus.xml",
         "views/res_config_settings_view.xml",
         "views/eom_digitalregister_view.xml",
+        "views/res_eom_config_settings.xml",
     ],
     'assets': {
         'web.assets_backend': [

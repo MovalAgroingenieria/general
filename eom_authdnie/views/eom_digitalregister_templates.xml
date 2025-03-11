@@ -34,7 +34,8 @@
                                         <t t-if="access.partner_id.image_1920">
                                             <div class="modal-body row">
                                                 <div class="col-md-4">
-                                                    <img t-att-src="'data:image/png;base64,%s' % access.partner_id.image_1920" width="130" style="border-color:#696969;border-width:1px;border-style:solid;margin-bottom:10px"/>
+                                                    <img t-att-src="'data:image/png;base64,%s' % (access.partner_id.image_1920.decode('utf-8') if access.partner_id.image_1920 else '')"
+                                                    width="130" style="border-color:#696969;border-width:1px;border-style:solid;margin-bottom:10px"/>
                                                 </div>
                                                 <div class="col-md-8">
                                                     <span class="fa fa-user"/>
@@ -88,7 +89,7 @@
                                             <textarea type="text" name="detail" rows="4" t-att-value="(detail)" id="detail" class="form-control"/>
                                         </div>
                                         <div class="clearfix text-center">
-                                            <button type="submit" class="btn btn-primary">Accept</button>
+                                            <button type="submit" class="btn btn-primary" style="margin-top: 2px;">Accept</button>
                                         </div>
                                     </form>
                                 </div>

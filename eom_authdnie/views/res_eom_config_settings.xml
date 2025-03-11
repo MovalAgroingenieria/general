@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_eom_config_settings_action_redirect" model="ir.actions.act_window">
+    <field name="name">Electronic-Office Settings</field>
+    <field name="res_model">res.config.settings</field>
+    <field name="view_mode">form</field>
+    <field name="target">current</field>
+    <field name="context">
+        {'module' : 'eom_authdnie', }
+    </field>
+</record>
+
+<menuitem id="parameters_menu"
+          name="Parameters"
+          parent="configuration_menu"
+          sequence="1"
+          action="res_eom_config_settings_action_redirect"
+          groups="eom_authdnie.group_eom_settings"/>
+</odoo>
