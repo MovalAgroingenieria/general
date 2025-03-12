@@ -5,7 +5,7 @@
 from odoo import http, _, fields, tools
 from odoo.http import request
 from odoo.addons.eom_authdnie.controllers.main import WebsiteEom
-from io import StringIO, BytesIO
+from io import BytesIO
 import pytz
 import base64
 
@@ -540,7 +540,7 @@ class WebsiteEOffice(WebsiteEom):
                     file_content = BytesIO(base64.b64decode(attachment.datas))
                     response = http.send_file(
                         file_content,
-                        filename=attachment.name,  # Se elimina .encode('utf-8')
+                        filename=attachment.name,
                         as_attachment=True)
         return response
 
