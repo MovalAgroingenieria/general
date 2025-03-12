@@ -35,12 +35,14 @@
     <template id="report_cim_complaint_communication">
         <t t-call="web.external_layout">
             <t t-call="cim_complaints_channel.report_cim_complaint_communication_external_layout">
-                <div class="page">
-                    <t t-foreach="docs" t-as="o">
-                        <t t-call="cim_complaints_channel.report_cim_complaint_communication_document" t-lang="o.complaint_id.complaint_lang"/>
-                        <p style="page-break-after:always;"></p>
-                    </t>
-                </div>
+                <main>
+                    <div class="page">
+                        <t t-foreach="docs" t-as="o">
+                            <t t-call="cim_complaints_channel.report_cim_complaint_communication_document" t-lang="o.complaint_id.complaint_lang"/>
+                            <p style="page-break-after:always;"></p>
+                        </t>
+                    </div>
+                </main>
             </t>
         </t>
     </template>
@@ -48,26 +50,32 @@
     <template id="report_cim_complaint_communication_document">
         <t t-set="o" t-value="o.with_context(lang=o.complaint_id.complaint_lang)"/>
         <div name="global_content">
-            <div class="row" name="section_complaint_data" style="margin-top:20px;">
-                <div name="div_complaint_title" class="col-xs-3">C O M P L A I N T :</div>
-                <div name="div_complaint_name" class="col-xs-2"><span t-field="o.complaint_id.name" style="margin-left:30px"/></div>
-                <div name="div_complaint_issue" class="col-xs-7"><span t-field="o.complaint_id.issue"/></div>
-                <div name="div_issue_title" class="col-xs-3" style="margin-top:10px">I S S U E :</div>
-                <div name="div_issue_name" class="col-xs-9" style="margin-top:10px"><span style="margin-left:30px" t-field="o.issue"/></div>
-                <div name="div_source_title" class="col-xs-3" style="margin-top:10px">S O U R C E :</div>
-                <div name="div_source_date" class="col-xs-2" style="margin-top:10px"><span style="margin-left:30px" t-field="o.communication_date"/></div>
+            <div class="row" name="section_complaint_data_complaint" style="margin-top:20px;">
+                <div name="div_complaint_title" class="col-3">C O M P L A I N T :</div>
+                <div name="div_complaint_name" class="col-2"><span t-field="o.complaint_id.name" style="margin-left:30px"/></div>
+                <div name="div_complaint_issue" class="col-7"><span t-field="o.complaint_id.issue"/></div>
+            </div>
+            <div class="row" name="section_complaint_data_issue" style="margin-top:20px;">
+                <div name="div_issue_title" class="col-3" style="margin-top:10px">I S S U E :</div>
+                <div name="div_issue_name" class="col-9" style="margin-top:10px"><span style="margin-left:30px" t-field="o.issue"/></div>
+            </div>
+            <div class="row" name="section_complaint_data_source" style="margin-top:20px;">
+                <div name="div_source_title" class="col-3" style="margin-top:10px">S O U R C E :</div>
+                <div name="div_source_date" class="col-2" style="margin-top:10px"><span style="margin-left:30px" t-field="o.communication_date"/></div>
                 <t t-if="o.from_complainant">
-                    <div name="div_source_complaint" class="col-xs-7" style="margin-top:10px">(communication created by the complainant)</div>
+                    <div name="div_source_complaint" class="col-7" style="margin-top:10px">(communication created by the complainant)</div>
                 </t>
                 <t t-else="">
-                    <div name="div_source_processor" class="col-xs-7" style="margin-top:10px">(communication created by the processor)</div>
+                    <div name="div_source_processor" class="col-7" style="margin-top:10px">(communication created by the processor)</div>
                 </t>
             </div>
-            <div name="div_communication_data" class="row" style="margin-top:60px;">
-                <div name="div_communication_title" class="col-xs-12 text-center" style="margin-bottom:40px;">
+            <div name="div_communication_data_title" class="row" style="margin-top:60px;">
+                <div name="div_communication_title" class="col-12 text-center" style="margin-bottom:40px;">
                     <h4><u>C O M M U N I C A T I O N</u></h4>
                 </div>
-                <div class="col-xs-12">
+            </div>
+            <div name="div_communication_data_desc" class="row" style="margin-top:60px;">
+                <div class="col-12">
                     <span name="span_description" t-field="o.description"/>
                 </div>
             </div>
