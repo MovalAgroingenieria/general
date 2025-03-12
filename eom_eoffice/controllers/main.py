@@ -5,7 +5,7 @@
 from odoo import http, _, fields, tools
 from odoo.http import request
 from odoo.addons.eom_authdnie.controllers.main import WebsiteEom
-from io import StringIO
+from io import StringIO, BytesIO
 import pytz
 import base64
 
@@ -424,10 +424,10 @@ class WebsiteEOffice(WebsiteEom):
                     electronicfile = model_electronicfile.create(vals)
                     electronicfile_code = electronicfile.name
                     if uploaded_files:
-                        max_size_attachments = \
-                            request.env['ir.default'].sudo().get(
-                                'res.config.settings',
-                                'max_size_attachments')
+                        max_size_attachments = request.env[
+                            'ir.config_parameter'].sudo().get_param(
+                            'eom_eoffice.max_size_attachments')
+                        max_size_attachments = float(max_size_attachments)
                         total_attachments_size_bytes = 0.0
                         for file in uploaded_files:
                             file.stream.seek(0, 2)
@@ -453,7 +453,6 @@ class WebsiteEOffice(WebsiteEom):
                                 request.env['ir.attachment'].sudo().create({
                                     'name': name,
                                     'datas': datas,
-                                    'name': name,
                                     'type': 'binary',
                                     'res_name': electronicfile.name,
                                     'res_model': 'eom.electronicfile',
@@ -509,8 +508,7 @@ class WebsiteEOffice(WebsiteEom):
                         ('res_model', '=', 'eom.electronicfile'),
                         ('res_id', '=', efile.id),
                     ], limit=1)
-                    file_content = StringIO(base64.b64decode(
-                        attachment.datas))
+                    file_content = BytesIO(base64.b64decode(attachment.datas))
                     response = http.send_file(
                         file_content,
                         filename=attachment.name or attachment.name,
@@ -532,20 +530,17 @@ class WebsiteEOffice(WebsiteEom):
                         ('id', '=', int(communication_id)),
                         ('electronicfile_id.digitalregister_id', '=',
                          digitalregister.id),
-                    ], limit=1)
+                            ], limit=1)
                 if communication:
                     attachment = request.env['ir.attachment'].sudo().search([
                         ('id', '=', int(attachment_id)),
-                        ('res_model', '=',
-                         'eom.electronicfile.communication'),
+                        ('res_model', '=', 'eom.electronicfile.communication'),
                         ('res_id', '=', communication.id),
                     ], limit=1)
-                    file_content = StringIO(
-                        base64.b64decode(attachment.datas))
+                    file_content = BytesIO(base64.b64decode(attachment.datas))
                     response = http.send_file(
                         file_content,
-                        filename=(attachment.name or attachment.name).
-                        encode('utf-8'),
+                        filename=attachment.name,  # Se elimina .encode('utf-8')
                         as_attachment=True)
         return response
 
@@ -594,8 +589,8 @@ class WebsiteEOffice(WebsiteEom):
                         }
                         response = request.render(template, context)
                     elif button_action == 'read':
-                        file_content = StringIO(base64.b64decode(
-                            communication_obj.document))
+                        file_content = BytesIO(
+                            base64.b64decode(communication_obj.document))
                         response = http.send_file(
                             file_content,
                             filename=communication_obj.document_name,
@@ -669,7 +664,6 @@ class WebsiteEOffice(WebsiteEom):
                                 request.env['ir.attachment'].sudo().create({
                                     'name': name,
                                     'datas': datas,
-                                    'name': name,
                                     'type': 'binary',
                                     'res_name': communication.name,
                                     'res_model':
@@ -688,8 +682,10 @@ class WebsiteEOffice(WebsiteEom):
 
     def check_upload_files_size(self, uploaded_files):
         max_size_reached = False
-        max_size_attachments = request.env['ir.default'].sudo().get(
-            'res.config.settings', 'max_size_attachments') or 0.0
+        max_size_attachments = request.env[
+            'ir.config_parameter'].sudo().get_param(
+            'eom_eoffice.max_size_attachments') or 0.0
+        max_size_attachments = float(max_size_attachments)
         total_attachments_size_bytes = 0.0
         for file in uploaded_files:
             file.stream.seek(0, 2)

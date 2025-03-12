@@ -7,7 +7,6 @@ from odoo import api, SUPERUSER_ID
 
 def post_init_hook(cr, registry):
     env = api.Environment(cr, SUPERUSER_ID, {})
-    values = env['ir.default'].sudo()
     # Initialize the "sequence_complaint_code_id" param (Many2one).
     try:
         sequence_coding_code_id = env.ref(
@@ -15,13 +14,16 @@ def post_init_hook(cr, registry):
     except (Exception, ):
         sequence_coding_code_id = 0
     if sequence_coding_code_id > 0:
-        values.set('res.config.settings',
-                   'sequence_electronicfile_code_id',
-                   sequence_coding_code_id)
+        env['ir.config_parameter'].set_param(
+            'eom_eoffice.sequence_electronicfile_code_id',
+            sequence_coding_code_id)
     # Set default config params
-    values.set('res.config.settings', 'deadline', 3)
-    values.set('res.config.settings', 'notification_deadline', 10)
-    values.set('res.config.settings', 'max_size_attachments', 20)
+    env['ir.config_parameter'].set_param(
+        'eom_eoffice.deadline', 3)
+    env['ir.config_parameter'].set_param(
+        'eom_eoffice.notification_deadline', 10)
+    env['ir.config_parameter'].set_param(
+        'eom_eoffice.max_size_attachments', 20)
 
 
 def uninstall_hook(cr, registry):
@@ -29,9 +31,8 @@ def uninstall_hook(cr, registry):
     try:
         env.cr.savepoint()
         env.cr.execute("""
-            DELETE FROM ir_values
-            WHERE model='res.config.settings'
-            AND name != 'editable_notes'""")
+            DELETE FROM ir_config_parameter
+            WHERE key LIKE 'eom_eoffice.%'""")
         env.cr.commit()
     except (Exception,):
         env.cr.rollback()

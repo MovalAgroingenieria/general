@@ -11,42 +11,30 @@ class ResConfigSettings(models.TransientModel):
     sequence_electronicfile_code_id = fields.Many2one(
         string='Sequence for the codes of electronic files',
         comodel_name='ir.sequence',
-        help='Default values of the electronic file codes',)
+        help='Default values of the electronic file codes',
+        config_parameter='eom_eoffice.sequence_electronicfile_code_id')
 
     deadline = fields.Integer(
         string='Deadline (months)',
-        help='Number of months for resolution within the deadline.')
+        help='Number of months for resolution within the deadline.',
+        config_parameter='eom_eoffice.deadline')
 
     max_size_attachments = fields.Integer(
         string='Max. size attachments (MB)',
-        help='The maximal size of attachments (in Megabytes).')
+        help='The maximal size of attachments (in Megabytes).',
+        config_parameter='eom_eoffice.max_size_attachments')
 
     notification_deadline = fields.Integer(
         string='Notification Deadline (days)',
-        help='Number of days to read a notification.')
+        help='Number of days to read a notification.',
+        config_parameter='eom_eoffice.notification_deadline')
 
     sign_certificate_path = fields.Char(
         string="Certificate file path",
-        help="Path to PKCS#12 certificate file")
+        help="Path to PKCS#12 certificate file",
+        config_parameter='eom_eoffice.sign_certificate_path')
 
     sign_certificate_password_path = fields.Char(
         string="Password file path",
-        help="Path to certificate password file")
-
-    def set_default_values(self):
-        super().set_default_values()
-        values = self.env['ir.default'].sudo()
-        values.set('res.config.settings',
-                   'sequence_electronicfile_code_id',
-                   self.sequence_electronicfile_code_id.id)
-        values.set('res.config.settings',
-                   'deadline', self.deadline)
-        values.set('res.config.settings',
-                   'max_size_attachments', self.max_size_attachments)
-        values.set('res.config.settings',
-                   'notification_deadline', self.notification_deadline)
-        values.set('res.config.settings',
-                   'sign_certificate_path', self.sign_certificate_path)
-        values.set('res.config.settings',
-                   'sign_certificate_password_path',
-                   self.sign_certificate_password_path)
+        help="Path to certificate password file",
+        config_parameter='eom_eoffice.sign_certificate_password_path')

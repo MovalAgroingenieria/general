@@ -19,8 +19,9 @@ class EomElectronicfileCommunication(models.Model):
     SIZE_CSV_CODE = 16
 
     def _get_default_notification_deadline(self):
-        notification_deadline_days = self.env['ir.default'].get(
-            'res.config.settings', 'notification_deadline')
+        notification_deadline_days = self.env[
+            'ir.config_parameter'].sudo().get_param(
+                'eom_eoffice.notification_deadline')
         return notification_deadline_days
 
     electronicfile_id = fields.Many2one(
@@ -176,8 +177,9 @@ class EomElectronicfileCommunication(models.Model):
             record.number_of_attachments = len(attachments)
 
     def _compute_notification_deadline(self):
-        notification_deadline_days = self.env['ir.default'].get(
-            'res.config.settings', 'notification_deadline')
+        notification_deadline_days = self.env[
+            'ir.config_parameter'].sudo().get_param(
+                'eom_eoffice.notification_deadline')
         for record in self:
             record.notification_deadline = notification_deadline_days
 
@@ -219,7 +221,8 @@ class EomElectronicfileCommunication(models.Model):
                     else:
                         doc_lang = 'en_US'
                     mail_template_communication_state.with_context(
-                        lang=doc_lang).send_mail(self.id, force_send=True)
+                        lang=doc_lang).send_mail(
+                            self.id, force_send=True)
 
     def action_return_to_state_01_draft(self):
         self.ensure_one()
@@ -265,8 +268,9 @@ class EomElectronicfileCommunication(models.Model):
 
     def _compute_expired_deadline(self):
         date_now = fields.Datetime.now()
-        deadline_days = self.env['ir.default'].get(
-            'res.config.settings', 'notification_deadline')
+        deadline_days = self.env[
+            'ir.config_parameter'].sudo().get_param(
+                'eom_eoffice.notification_deadline')
         if not deadline_days:
             raise exceptions.ValidationError(
                 _('Notification deadline parameter has not been set.'))

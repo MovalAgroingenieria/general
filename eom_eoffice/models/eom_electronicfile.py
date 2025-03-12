@@ -17,9 +17,12 @@ class EomElectronicfile(models.Model):
 
     def _default_name(self):
         resp = None
-        sequence_electronicfile_code_id = self.env['ir.default'].get(
-            'res.config.settings', 'sequence_electronicfile_code_id')
+        sequence_electronicfile_code_id = self.env[
+            'ir.config_parameter'].sudo().get_param(
+                'eom_eoffice.sequence_electronicfile_code_id')
         if sequence_electronicfile_code_id:
+            sequence_electronicfile_code_id = int(
+                sequence_electronicfile_code_id)
             model_ir_sequence = self.env['ir.sequence'].sudo()
             sequence_electronicfile_code = \
                 model_ir_sequence.browse(sequence_electronicfile_code_id)
@@ -201,8 +204,8 @@ class EomElectronicfile(models.Model):
             record.fullname = fullname
 
     def _compute_editable_notes(self):
-        editable_notes = self.env['ir.default'].get(
-            'res.config.settings', 'editable_notes')
+        editable_notes = self.env['ir.config_parameter'].sudo().get_param(
+                'eom_authdnie.editable_notes')
         for record in self:
             record.editable_notes = editable_notes
 
@@ -259,8 +262,8 @@ class EomElectronicfile(models.Model):
     @api.model
     def _search_expired_deadline(self, operator, value):
         electronicfile_ids = []
-        deadline_months = self.env['ir.default'].get(
-            'res.config.settings', 'deadline')
+        deadline_months = self.env['ir.config_parameter'].sudo().get_param(
+                'eom_eoffice.deadline')
         operator_of_filter = 'in'
         if operator == '!=':
             operator_of_filter = 'not in'
@@ -413,11 +416,12 @@ class EomElectronicfile(models.Model):
         return super().unlink()
 
     def _get_deadline_date(self, event_time):
-        deadline_months = self.env['ir.default'].get(
-            'res.config.settings', 'deadline')
+        deadline_months = self.env[
+            'ir.config_parameter'].sudo().get_param('eom_eoffice.deadline')
         if not deadline_months:
             raise exceptions.ValidationError(
                 _('Deadline parameter has not been set.'))
+        deadline_months = int(deadline_months)
         if isinstance(event_time, str):
             event_time_obj = datetime.strptime(event_time, '%Y-%m-%d %H:%M:%S')
         else:

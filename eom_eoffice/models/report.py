@@ -159,9 +159,10 @@ class Report(models.Model):
     def _check_sign_certificate(self):
         sign_certicate_ok = False
         sign_certificate_path = self.env['ir.default'].get(
-            'res.config.settings', 'sign_certificate_path')
+            'res.config.settings', 'eom_eoffice.sign_certificate_path')
         sign_certificate_password_path = self.env['ir.default'].get(
-            'res.config.settings', 'sign_certificate_password_path')
+            'res.config.settings',
+            'eom_eoffice.sign_certificate_password_path')
         if sign_certificate_path and sign_certificate_password_path:
             p12_file_ok = os.access(
                 _normalize_filepath(sign_certificate_path), os.R_OK)
@@ -174,9 +175,10 @@ class Report(models.Model):
     def _get_sign_certificate(self):
         p12_file = passwd_file = False
         sign_certificate_path = self.env['ir.default'].get(
-            'res.config.settings', 'sign_certificate_path')
+            'res.config.settings', 'eom_eoffice.sign_certificate_path')
         sign_certificate_password_path = self.env['ir.default'].get(
-            'res.config.settings', 'sign_certificate_password_path')
+            'res.config.settings',
+            'eom_eoffice.sign_certificate_password_path')
         if sign_certificate_path and sign_certificate_password_path:
             p12_file = _normalize_filepath(sign_certificate_path)
             passwd_file = _normalize_filepath(sign_certificate_password_path)
