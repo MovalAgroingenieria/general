@@ -67,39 +67,40 @@ class EomDigitalregister(models.Model):
         return act_window
 
     @api.model_create_multi
-    def create(self, vals):
-        if 'partner_id' in vals:
-            partner = self.env['res.partner'].browse(vals['partner_id'])
-            # Address
-            address_data = ""
-            if partner.street:
-                address_data += partner.street
-            if partner.street2:
-                address_data += ' ' + partner.street2
-            address_data += '. '
-            if partner.zip:
-                address_data += partner.zip
-            address_data += ' - '
-            if partner.city:
-                address_data += partner.city
-            if partner.state_id:
-                state = partner.state_id.name + ', '
-            else:
-                state = ''
-            if partner.country_id:
-                country = partner.country_id.name
-            address_data += ' (' + state + country + ')'
-            vals['notification_address'] = address_data
-            # Phone
-            if partner.phone:
-                vals['notification_phone'] = partner.phone
-            # Mobile
-            if partner.mobile:
-                vals['notification_mobile'] = partner.mobile
-            # Email
-            if partner.email:
-                vals['notification_email'] = partner.email
-                vals['postal_notification'] = False
-            else:
-                vals['postal_notification'] = True
-        return super().create(vals)
+    def create(self, vals_list):
+        for vals in vals_list:
+            if 'partner_id' in vals:
+                partner = self.env['res.partner'].browse(vals['partner_id'])
+                # Address
+                address_data = ""
+                if partner.street:
+                    address_data += partner.street
+                if partner.street2:
+                    address_data += ' ' + partner.street2
+                address_data += '. '
+                if partner.zip:
+                    address_data += partner.zip
+                address_data += ' - '
+                if partner.city:
+                    address_data += partner.city
+                if partner.state_id:
+                    state = partner.state_id.name + ', '
+                else:
+                    state = ''
+                if partner.country_id:
+                    country = partner.country_id.name
+                address_data += ' (' + state + country + ')'
+                vals['notification_address'] = address_data
+                # Phone
+                if partner.phone:
+                    vals['notification_phone'] = partner.phone
+                # Mobile
+                if partner.mobile:
+                    vals['notification_mobile'] = partner.mobile
+                # Email
+                if partner.email:
+                    vals['notification_email'] = partner.email
+                    vals['postal_notification'] = False
+                else:
+                    vals['postal_notification'] = True
+        return super().create(vals_list)

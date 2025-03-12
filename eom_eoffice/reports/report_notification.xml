@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <report id="action_eom_eoffice_notification_report"
-            string="Electronic File Communication"
-            model="eom.electronicfile.communication"
-            report_type="qweb-pdf"
-            name="eom_eoffice.notification_report"
-            menu="False"/>
-
-    <record model="ir.actions.report" id="action_eom_eoffice_notification_report">
-        <field name="print_report_name">(object.name.replace('/', '_') + '.pdf')</field>
-    </record>
-
+    <data>
+        <record id="action_eom_eoffice_notification_report" model="ir.actions.report">
+            <field name="report_type">qweb-pdf</field>
+            <field name="name">eom_eoffice.notification_report</field>
+            <field name="model">eom.electronicfile.communication</field>
+            <field name="print_report_name">(object.name.replace('/', '_') + '.pdf')</field>
+        </record>
+    </data>
     <template id="notification_report">
         <t t-call="web.html_container">
             <t t-call="web.external_layout">
@@ -72,10 +68,10 @@
                             <td><b>Validation Time</b></td>
                             <td class="text-right"><span t-field="o.validation_time"/></td>
                         </tr>
-                        <t t-if="o.email">
+                        <t t-if="o.electronicfile_id.partner_id.email">
                             <tr name="tr_email">
                                 <td><b>Email</b></td>
-                                <td class="text-right"><span t-field="o.email"/></td>
+                                <td class="text-right"><span t-field="o.electronicfile_id.partner_id.email"/></td>
                             </tr>
                         </t>
                         <t t-if="o.mobile">

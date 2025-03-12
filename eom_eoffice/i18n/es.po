@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-26 13:45+0000\n"
-"PO-Revision-Date: 2025-02-26 13:45+0000\n"
+"POT-Creation-Date: 2025-03-12 07:58+0000\n"
+"PO-Revision-Date: 2025-03-12 07:58+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -77,13 +77,21 @@ msgstr "<b>Instante de validación</b>"
 msgid ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 6px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
 "                    <p>Dear user,</p>\n"
-"                    <p>You have received a new communication <b>${object.name}</b> for the Electronic File <b>${object.electronicfile_id.name}</b>.</p>\n"
+"                    <p>You have received a new communication <b><t t-out=\"object.display_name\"></t></b> for the Electronic File <b><t t-out=\"object.electronicfile_id.name\"></t></b>.</p>\n"
 "                    <br>\n"
 "                    <p>Visit our Electronic Office to review this communication and the status of the File.</p>\n"
 "                    <p>Thank you.</p>\n"
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"background:#F0F0F0;color:#515166;padding:10px 6px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
+"                    <p style=\"margin:0px 0 12px 0;box-sizing:border-box;\">Estimado usuario,</p>\n"
+"                    <p style=\"margin:0px 0 12px 0;box-sizing:border-box;\">Ha recibido una nueva notificación <b style=\"box-sizing:border-box;font-weight:bolder;\"><t t-out=\"object.display_name\"></t></b> para el expediente <b style=\"box-sizing:border-box;font-weight:bolder;\"><t t-out=\"object.electronicfile_id.name\"></t></b>.</p>\n"
+"                    <br>\n"
+"                    <p style=\"margin:0px 0 12px 0;box-sizing:border-box;\">Visite nuestra Oficina Electrónica para revisar esta notificación y el estado del expediente.</p>\n"
+"                    <p style=\"margin:0px 0 12px 0;box-sizing:border-box;\">Gracias.</p>\n"
+"                </div>\n"
+"            "
 
 #. module: eom_eoffice
 #: model_terms:ir.ui.view,arch_db:eom_eoffice.csv_code_form
@@ -666,8 +674,8 @@ msgstr "Notificación de archivo electrónico"
 
 #. module: eom_eoffice
 #: model:mail.template,subject:eom_eoffice.mail_template_notification_validated
-msgid "Electronic File Notification ${object.name}"
-msgstr "Notificación ${object.name}"
+msgid "Electronic File Notification {{object.display_name}}"
+msgstr "Notificación {{object.display_name}}"
 
 #. module: eom_eoffice
 #: model:ir.actions.act_window,name:eom_eoffice.eom_electronicfile_action
