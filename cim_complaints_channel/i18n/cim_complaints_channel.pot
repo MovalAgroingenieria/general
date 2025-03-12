@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-10 09:49+0000\n"
-"PO-Revision-Date: 2025-03-10 09:49+0000\n"
+"POT-Creation-Date: 2025-03-12 09:21+0000\n"
+"PO-Revision-Date: 2025-03-12 09:21+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -81,7 +81,7 @@ msgstr ""
 msgid ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
 "                    <p>Dear user,</p>\n"
-"                    <p>The attached document contains a new communication related to the complaint ${object.complaint_id.name} (${object.complaint_id.complaint_type_id.name}).</p>\n"
+"                    <p>The attached document contains a new communication related to the complaint <t t-out=\"object.complaint_id.name\"></t> <t t-out=\"object.complaint_id.complaint_type_id.name\"></t></p>\n"
 "                    <p>Best regards.</p>\n"
 "                </div>\n"
 "            "
@@ -92,7 +92,7 @@ msgstr ""
 msgid ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
 "                    <p>Dear user,</p>\n"
-"                    <p>The tracking code associated with your compliant is the following: ${object.decrypted_tracking_code}</p>\n"
+"                    <p>The tracking code associated with your compliant is the following: <t t-out=\"object.decrypted_tracking_code\"></t></p>\n"
 "                    <p>Please, do not share this information with anyone.</p>\n"
 "                    <p>Thank you very much.</p>\n"
 "                </div>\n"
@@ -105,7 +105,7 @@ msgid ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
 "                    <p>There is a new complaint or a new communication of a pre-existing complaint.</p>\n"
 "                    <p>· ISSUE:</p>\n"
-"                    <p>${object.issue}</p>\n"
+"                    <p><t t-out=\"object.issue\"></t></p>\n"
 "                </div>\n"
 "            "
 msgstr ""
@@ -649,13 +649,6 @@ msgid "Complaint"
 msgstr ""
 
 #. module: cim_complaints_channel
-#: model:mail.template,subject:cim_complaints_channel.mail_template_communication
-msgid ""
-"Complaint ${object.complaint_id.name}, communication ${object.name}\n"
-"            "
-msgstr ""
-
-#. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint__complaint_date
 msgid "Complaint Date"
 msgstr ""
@@ -713,6 +706,11 @@ msgid "Complaint rejected"
 msgstr ""
 
 #. module: cim_complaints_channel
+#: model:mail.template,subject:cim_complaints_channel.mail_template_communication
+msgid "Complaint {{object.complaint_id.name}}, communication {{object.name}}"
+msgstr ""
+
+#. module: cim_complaints_channel
 #. odoo-python
 #: code:addons/cim_complaints_channel/models/cim_complaint_type.py:0
 #: code:addons/cim_complaints_channel/models/cim_link_type.py:0
@@ -734,9 +732,7 @@ msgstr ""
 
 #. module: cim_complaints_channel
 #: model:mail.template,subject:cim_complaints_channel.mail_template_notice
-msgid ""
-"Complaints Channel, new notice: Communication ${object.name}\n"
-"            "
+msgid "Complaints Channel, new notice: Communication {{object.name}}"
 msgstr ""
 
 #. module: cim_complaints_channel
@@ -1738,6 +1734,13 @@ msgid "Phone"
 msgstr ""
 
 #. module: cim_complaints_channel
+#. odoo-javascript
+#: code:addons/cim_complaints_channel/static/src/js/button_send.js:0
+#, python-format
+msgid "Please fill in the form correctly."
+msgstr ""
+
+#. module: cim_complaints_channel
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.report_cim_complaint_tracking_code_document
 msgid ""
 "Please, do not reveal this tracking code to anyone,\n"
@@ -1892,12 +1895,8 @@ msgstr ""
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,help:cim_complaints_channel.field_res_config_settings__automatic_email_state
-msgid "Send e-mail to complainant after change the state of the complaint"
-msgstr ""
-
-#. module: cim_complaints_channel
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.res_config_settings_view_form
-msgid "Send e-mail to complainant after change the state of the complaint'"
+msgid "Send e-mail to complainant after change the state of the complaint"
 msgstr ""
 
 #. module: cim_complaints_channel
@@ -2113,9 +2112,7 @@ msgstr ""
 
 #. module: cim_complaints_channel
 #: model:mail.template,subject:cim_complaints_channel.mail_template_tracking_code
-msgid ""
-"Tracking Code of complaint ${object.name}\n"
-"            "
+msgid "Tracking Code of complaint {{object.name}}"
 msgstr ""
 
 #. module: cim_complaints_channel
@@ -2149,6 +2146,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_communication_view_form
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_view_form
 msgid "Undo"
+msgstr ""
+
+#. module: cim_complaints_channel
+#. odoo-javascript
+#: code:addons/cim_complaints_channel/static/src/js/button_send.js:0
+#, python-format
+msgid "Uploaded file is too large."
 msgstr ""
 
 #. module: cim_complaints_channel
@@ -2283,7 +2287,7 @@ msgstr ""
 
 #. module: cim_complaints_channel
 #: model:mail.template,report_name:cim_complaints_channel.mail_template_communication
-msgid "communication_${object.name}"
+msgid "communication_{{object.name}}"
 msgstr ""
 
 #. module: cim_complaints_channel

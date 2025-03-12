@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-10 08:34+0000\n"
-"PO-Revision-Date: 2025-03-10 08:34+0000\n"
+"POT-Creation-Date: 2025-03-12 09:24+0000\n"
+"PO-Revision-Date: 2025-03-12 09:24+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -90,19 +90,14 @@ msgstr "<br/><strong>Adjuntos:</strong>"
 msgid ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
 "                    <p>Dear user,</p>\n"
-"                    <p>The attached document contains a new communication related to the complaint ${object.complaint_id.name} (${object.complaint_id.complaint_type_id.name}).</p>\n"
+"                    <p>The attached document contains a new communication related to the complaint <t t-out=\"object.complaint_id.name\"></t> <t t-out=\"object.complaint_id.complaint_type_id.name\"></t></p>\n"
 "                    <p>Best regards.</p>\n"
 "                </div>\n"
 "            "
 msgstr ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
 "                    <p>Estimado usuario/a,</p>\n"
-"                    <p>El documento adjunto contiene una nueva comunicación relacionada con la denuncia ${object.complaint_id.name} (${object.complaint_id.complaint_type_id.name}).</p>\n"
-"                    <p>Un cordial saludo.</p>\n"
-"                </div>\n"
-"            <div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
-"                    <p>Estimado usuario/a,</p>\n"
-"                    <p>El documento adjunto contiene una nueva comunicación sobre la denuncia ${object.complaint_id.name} (${object.complaint_id.complaint_type_id.name}).</p>\n"
+"                    <p>El documento adjunto contiene una nueva comunicación relacionada con la denuncia <t t-out=\"object.complaint_id.name\"></t> <t t-out=\"object.complaint_id.complaint_type_id.name\"></t>.</p>\n"
 "                    <p>Un cordial saludo.</p>\n"
 "                </div>\n"
 "            "
@@ -112,7 +107,7 @@ msgstr ""
 msgid ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
 "                    <p>Dear user,</p>\n"
-"                    <p>The tracking code associated with your compliant is the following: ${object.decrypted_tracking_code}</p>\n"
+"                    <p>The tracking code associated with your compliant is the following:<t t-out=\"object.decrypted_tracking_code\"></t></p>\n"
 "                    <p>Please, do not share this information with anyone.</p>\n"
 "                    <p>Thank you very much.</p>\n"
 "                </div>\n"
@@ -120,7 +115,7 @@ msgid ""
 msgstr ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
 "                    <p>Estimado usuario/a,</p>\n"
-"                    <p>El código de seguimiento de su denuncia es el siguiente: ${object.decrypted_tracking_code}. Este código tendrá que introducirlo en la web si más adelante desea conocer el estado de su denuncia, o si quiere aportar nuevos datos o documentos.</p>\n"
+"                    <p>El código de seguimiento de su denuncia es el siguiente: <t t-out=\"object.decrypted_tracking_code\"></t>. Este código tendrá que introducirlo en la web si más adelante desea conocer el estado de su denuncia, o si quiere aportar nuevos datos o documentos.</p>\n"
 "                    <p>El código de seguimiento es confidencial. Por favor, no lo comparta con nadie.</p>\n"
 "                    <p>Muchas gracias.</p>\n"
 "                </div>\n"
@@ -132,14 +127,14 @@ msgid ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
 "                    <p>There is a new complaint or a new communication of a pre-existing complaint.</p>\n"
 "                    <p>· ISSUE:</p>\n"
-"                    <p>${object.issue}</p>\n"
+"                    <p><t t-out=\"object.issue\"></t></p>\n"
 "                </div>\n"
 "            "
 msgstr ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
 "                    <p>Hay una nueva denuncia o una nueva comunicación de una denuncia preexistente.</p>\n"
 "                    <p>· ASUNTO:</p>\n"
-"                    <p>${object.issue}</p>\n"
+"                    <p><t t-out=\"object.issue\"></t></p>\n"
 "                </div>\n"
 "            "
 
@@ -597,7 +592,7 @@ msgstr "Colaborador"
 #. module: cim_complaints_channel
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_communication_view_tree
 msgid "Com. #"
-msgstr ""
+msgstr "Nº"
 
 #. module: cim_complaints_channel
 #: model:ir.actions.report,name:cim_complaints_channel.action_cim_complaint_communication_report
@@ -736,15 +731,6 @@ msgid "Complaint"
 msgstr "Denuncia"
 
 #. module: cim_complaints_channel
-#: model:mail.template,subject:cim_complaints_channel.mail_template_communication
-msgid ""
-"Complaint ${object.complaint_id.name}, communication ${object.name}\n"
-"            "
-msgstr ""
-"Denuncia ${object.complaint_id.name}, comunicación ${object.name}\n"
-"            "
-
-#. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint__complaint_date
 msgid "Complaint Date"
 msgstr "Fecha de denuncia"
@@ -802,6 +788,11 @@ msgid "Complaint rejected"
 msgstr "Denuncia rechazada"
 
 #. module: cim_complaints_channel
+#: model:mail.template,subject:cim_complaints_channel.mail_template_communication
+msgid "Complaint {{object.complaint_id.name}}, communication {{object.name}}"
+msgstr "Denuncia {{object.complaint_id.name}}, communicación {{object.name}}"
+
+#. module: cim_complaints_channel
 #. odoo-python
 #: code:addons/cim_complaints_channel/models/cim_complaint_type.py:0
 #: code:addons/cim_complaints_channel/models/cim_link_type.py:0
@@ -823,12 +814,8 @@ msgstr "Gestión del canal de denuncias"
 
 #. module: cim_complaints_channel
 #: model:mail.template,subject:cim_complaints_channel.mail_template_notice
-msgid ""
-"Complaints Channel, new notice: Communication ${object.name}\n"
-"            "
-msgstr ""
-"Canal de denuncias, aviso entrante: comunicación ${object.name}\n"
-"            "
+msgid "Complaints Channel, new notice: Communication {{object.name}}"
+msgstr "Canal de denuncias, aviso entrante: comunicación {{object.name}}"
 
 #. module: cim_complaints_channel
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_view_search
@@ -1135,7 +1122,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_view_form
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.wizard_complainant_data_view_form
 msgid "E-mail"
-msgstr ""
+msgstr "Email"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint__param_email_for_notice
@@ -1847,6 +1834,13 @@ msgid "Phone"
 msgstr "Teléfono"
 
 #. module: cim_complaints_channel
+#. odoo-javascript
+#: code:addons/cim_complaints_channel/static/src/js/button_send.js:0
+#, python-format
+msgid "Please fill in the form correctly."
+msgstr "Por favor, rellene el formulario correctamente."
+
+#. module: cim_complaints_channel
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.report_cim_complaint_tracking_code_document
 msgid ""
 "Please, do not reveal this tracking code to anyone,\n"
@@ -2003,9 +1997,9 @@ msgstr "Enviar e-mail al denunciante una copia de sus comunicaciones"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,help:cim_complaints_channel.field_res_config_settings__automatic_email_state
+#: model_terms:ir.ui.view,arch_db:cim_complaints_channel.res_config_settings_view_form
 msgid "Send e-mail to complainant after change the state of the complaint"
-msgstr ""
-"Enviar e-mail al denunciante después de cambiar el estado de la denuncia"
+msgstr "Enviar e-mail al denunciante después de cambiar el estado de la denuncia"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,help:cim_complaints_channel.field_res_config_settings__automatic_email_validate_com
@@ -2226,12 +2220,8 @@ msgstr "Código de seguimiento"
 
 #. module: cim_complaints_channel
 #: model:mail.template,subject:cim_complaints_channel.mail_template_tracking_code
-msgid ""
-"Tracking Code of complaint ${object.name}\n"
-"            "
-msgstr ""
-"Código de seguimiento de la denuncia ${object.name}\n"
-"            "
+msgid "Tracking Code of complaint {{object.name}}"
+msgstr "Código de seguimiento de la denuncia {{object.name}}"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,help:cim_complaints_channel.field_res_config_settings__length_tracking_code
@@ -2266,7 +2256,14 @@ msgstr "Tipos de vinculación"
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_communication_view_form
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_view_form
 msgid "Undo"
-msgstr ""
+msgstr "Revertir"
+
+#. module: cim_complaints_channel
+#. odoo-javascript
+#: code:addons/cim_complaints_channel/static/src/js/button_send.js:0
+#, python-format
+msgid "Uploaded file is too large."
+msgstr "Archivo subido es demasiado grande."
 
 #. module: cim_complaints_channel
 #: model:res.groups,name:cim_complaints_channel.group_cim_user
@@ -2277,7 +2274,7 @@ msgstr "Usuario"
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_view_form
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.wizard_complainant_data_view_form
 msgid "VAT"
-msgstr ""
+msgstr "DNI"
 
 #. module: cim_complaints_channel
 #. odoo-python
@@ -2404,8 +2401,8 @@ msgstr "comunicación nº"
 
 #. module: cim_complaints_channel
 #: model:mail.template,report_name:cim_complaints_channel.mail_template_communication
-msgid "communication_${object.name}"
-msgstr ""
+msgid "communication_{{object.name}}"
+msgstr "comunicación_{{object.name}}"
 
 #. module: cim_complaints_channel
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_type_view_kanban
@@ -2415,5 +2412,5 @@ msgstr "denuncias"
 
 #. module: cim_complaints_channel
 #: model:mail.template,report_name:cim_complaints_channel.mail_template_tracking_code
-msgid "tracking_code_${object.name}"
-msgstr ""
+msgid "tracking_code_{{object.name}}"
+msgstr "código_de_seguimiento_{{object.name}}"
