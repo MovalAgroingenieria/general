@@ -1894,11 +1894,11 @@ class CimComplaintCommunication(models.Model):
                 mail_ok = self._send_communication(record)
                 if mail_ok:
                     record.is_sent = True
-                    record.message_post(text_for_log_ok + ' ' +
-                                        complainant_email)
+                    message_ok = text_for_log_ok + ' ' + complainant_email
+                    record.message_post(body=message_ok)
                 else:
-                    record.message_post(text_for_log_fail + ' ' +
-                                        complainant_email)
+                    message_fail = text_for_log_fail + ' ' + complainant_email
+                    record.message_post(body=message_fail)
 
     @api.model
     def _send_communication(self, communication):
