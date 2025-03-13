@@ -429,7 +429,8 @@
                 <field name="state"
                        string="State"/>
                 <field name="icon_warning"
-                       widget="image" string=" "/>
+                       widget="image" string=" "
+                       class="o_icon_warning"/>
             </tree>
         </field>
     </record>
@@ -607,8 +608,10 @@
         <field name="name">Send e-mail</field>
         <field name="model_id" ref="cim_complaints_channel.model_cim_complaint_communication"/>
         <field name="code">
-            if context.get('active_id'):
-                action = env['cim.complaint.communication'].action_send_mail(context['active_id'])
+            <![CDATA[
+            if context.get('default_complaint_id'):
+                action = env['cim.complaint.communication'].action_send_mail(context['default_complaint_id'])
+            ]]>
         </field>
     </record>
 
@@ -630,7 +633,7 @@
                 <field name="with_email" invisible="1"/>
                 <field name="automatic_email_validate_com" invisible="1"/>
                 <header>
-                    <button name="%(cim_complaint_go_to_state_02_validated)d" type="action"
+                    <button name="action_go_to_state_02_validated" type="object"
                             string="Validate"
                             style="width: 125px;"
                             icon="fa-check-circle"
@@ -644,7 +647,7 @@
                             attrs="{'invisible': ['|', ('state','=','01_draft'), ('from_complainant', '=', True)]}"
                             groups="cim_complaints_channel.group_cim_manager"
                             confirm="This action will change to the 'Draft' state. Proceed?"/>
-                    <button name="%(cim_complaint_send_mail)d" type="action"
+                    <button name="action_send_mail" type="object"
                             string="Send e-mail"
                             style="width: 125px;"
                             icon="fa-envelope-o"
