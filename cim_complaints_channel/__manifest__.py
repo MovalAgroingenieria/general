@@ -38,7 +38,6 @@
     "assets": {
         "web.assets_backend": [
             "cim_complaints_channel/static/src/css/cim_complaints_channel.css",
-            "cim_complaints_channel/static/src/scss/cim_complaints_channel.scss",
             "cim_complaints_channel/static/lib/complaints_channel_iconset/complaints_channel_iconset.css",
         ],
         "web.assets_frontend": [

@@ -10,16 +10,6 @@
                 <field name="active" invisible="1"/>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="toggle_active"
-                                type="object"
-                                class="oe_stat_button"
-                                icon="fa-archive"
-                                confirm="Are you sure you want to toggle visibility?"
-                                groups="cim_complaints_channel.group_cim_manager">
-                                <field name="active"
-                                       widget="boolean_button"
-                                       options='{"terminology": "archive"}'/>
-                        </button>
                         <button name="action_show_complaints"
                                 type="object" class="oe_stat_button"
                                 icon="fa-cim-complaints-channel-complaint">
@@ -31,7 +21,11 @@
                             </div>
                         </button>
                     </div>
-                    <div name="title">
+                    <widget name="web_ribbon" title="Archived"
+                            bg_color="bg-danger"
+                            attrs="{'invisible':
+                                    [('active', '=', True)]}"/>
+                    <div name="title" class="row">
                         <label for="name" string="Link Type:"/>
                         <h1>
                              <field name="name" style="margin-top:5px"/>
@@ -68,7 +62,8 @@
                 <field name="name"
                        string="Name"/>
                 <field name="is_standard"
-                       string="Standard"/>
+                       string="Standard"
+                       class="text-center"/>
                 <field name="number_of_complaints"
                        string="N. complaints"/>
                 <field name="notes_text"
@@ -94,18 +89,21 @@
         <field name="name">cim.link.type.view.kanban</field>
         <field name="model">cim.link.type</field>
         <field name="arch" type="xml">
-            <kanban class="o_type_kanban_view">
+            <kanban group_create="false"
+                    group_delete="false"
+                    default_order="name"
+                    records_draggable="false"
+                    class="o_kanban_dashboard">
                 <field name="name"/>
                 <field name="number_of_complaints"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div t-attf-class="oe_kanban_card oe_kanban_global_click">
-                            <div t-attf-class="oe_kanban_color_#{kanban_getcolor(2)} o_type_left">
-                                <div class="o_number_of_items"><t t-esc="record.number_of_complaints.raw_value"/></div>
-                                <div>complaints</div>
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div>
+                                <div><h2><t t-esc="record.number_of_complaints.raw_value"/><span class="ms-3">complaints</span></h2></div>
                             </div>
                             <div class="o_type_right">
-                                <h4><field name="name"/></h4>
+                                <h5><field name="name"/></h5>
                             </div>
                         </div>
                     </t>
