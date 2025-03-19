@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-12 09:21+0000\n"
-"PO-Revision-Date: 2025-03-12 09:21+0000\n"
+"POT-Creation-Date: 2025-03-18 18:47+0000\n"
+"PO-Revision-Date: 2025-03-18 18:47+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -81,7 +81,7 @@ msgstr ""
 msgid ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
 "                    <p>Dear user,</p>\n"
-"                    <p>The attached document contains a new communication related to the complaint <t t-out=\"object.complaint_id.name\"></t> <t t-out=\"object.complaint_id.complaint_type_id.name\"></t></p>\n"
+"                    <p>The attached document contains a new communication related to the complaint ${object.complaint_id.name} (${object.complaint_id.complaint_type_id.name}).</p>\n"
 "                    <p>Best regards.</p>\n"
 "                </div>\n"
 "            "
@@ -92,7 +92,7 @@ msgstr ""
 msgid ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
 "                    <p>Dear user,</p>\n"
-"                    <p>The tracking code associated with your compliant is the following: <t t-out=\"object.decrypted_tracking_code\"></t></p>\n"
+"                    <p>The tracking code associated with your compliant is the following: ${object.decrypted_tracking_code}</p>\n"
 "                    <p>Please, do not share this information with anyone.</p>\n"
 "                    <p>Thank you very much.</p>\n"
 "                </div>\n"
@@ -105,9 +105,15 @@ msgid ""
 "<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
 "                    <p>There is a new complaint or a new communication of a pre-existing complaint.</p>\n"
 "                    <p>· ISSUE:</p>\n"
-"                    <p><t t-out=\"object.issue\"></t></p>\n"
+"                    <p>${object.issue}</p>\n"
 "                </div>\n"
 "            "
+msgstr ""
+
+#. module: cim_complaints_channel
+#: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_type_view_kanban
+#: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_link_type_view_kanban
+msgid "<span class=\"ms-3\">complaints</span>"
 msgstr ""
 
 #. module: cim_complaints_channel
@@ -132,7 +138,7 @@ msgstr ""
 #. module: cim_complaints_channel
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_communication_view_form
 msgid ""
-"<span name=\"field_communication_number_label\" style=\"font-weight:bold\" attrs=\"{'invisible': [('id', '=', 0)]}\">\n"
+"<span name=\"field_communication_number_label\" style=\"font-weight:bold\" attrs=\"{'invisible': [('id', '=', False)]}\">\n"
 "                                    Communication #\n"
 "                                </span>"
 msgstr ""
@@ -188,12 +194,12 @@ msgstr ""
 
 #. module: cim_complaints_channel
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_view_form
-msgid "<span style=\"margin-left:5px\">Anonymous Complaint</span><br/>"
+msgid "<span style=\"margin-left:3px\">Anonymous Complaint</span><br/>"
 msgstr ""
 
 #. module: cim_complaints_channel
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_view_form
-msgid "<span style=\"margin-left:5px\">Data entered by instructor</span>"
+msgid "<span style=\"margin-left:3px\">Data entered by instructor</span>"
 msgstr ""
 
 #. module: cim_complaints_channel
@@ -371,7 +377,9 @@ msgid "Apply"
 msgstr ""
 
 #. module: cim_complaints_channel
+#: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_type_view_form
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_type_view_search
+#: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_link_type_view_form
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_link_type_view_search
 msgid "Archived"
 msgstr ""
@@ -384,12 +392,6 @@ msgstr ""
 #. module: cim_complaints_channel
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_communication_view_form
 msgid "Are you sure you want to send the communication to the complainant?"
-msgstr ""
-
-#. module: cim_complaints_channel
-#: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_type_view_form
-#: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_link_type_view_form
-msgid "Are you sure you want to toggle visibility?"
 msgstr ""
 
 #. module: cim_complaints_channel
@@ -649,6 +651,13 @@ msgid "Complaint"
 msgstr ""
 
 #. module: cim_complaints_channel
+#: model:mail.template,subject:cim_complaints_channel.mail_template_communication
+msgid ""
+"Complaint ${object.complaint_id.name}, communication ${object.name}\n"
+"            "
+msgstr ""
+
+#. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint__complaint_date
 msgid "Complaint Date"
 msgstr ""
@@ -706,11 +715,6 @@ msgid "Complaint rejected"
 msgstr ""
 
 #. module: cim_complaints_channel
-#: model:mail.template,subject:cim_complaints_channel.mail_template_communication
-msgid "Complaint {{object.complaint_id.name}}, communication {{object.name}}"
-msgstr ""
-
-#. module: cim_complaints_channel
 #. odoo-python
 #: code:addons/cim_complaints_channel/models/cim_complaint_type.py:0
 #: code:addons/cim_complaints_channel/models/cim_link_type.py:0
@@ -732,7 +736,9 @@ msgstr ""
 
 #. module: cim_complaints_channel
 #: model:mail.template,subject:cim_complaints_channel.mail_template_notice
-msgid "Complaints Channel, new notice: Communication {{object.name}}"
+msgid ""
+"Complaints Channel, new notice: Communication ${object.name}\n"
+"            "
 msgstr ""
 
 #. module: cim_complaints_channel
@@ -1794,8 +1800,7 @@ msgid "Received"
 msgstr ""
 
 #. module: cim_complaints_channel
-#: model:ir.actions.server,name:cim_complaints_channel.cim_complaint_reject_complaints
-#: model:ir.actions.server,name:cim_complaints_channel.cim_complaint_reject_complaints_action
+#: model:ir.actions.server,name:cim_complaints_channel.cim_complaint_reject_complaints_serveraction
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_view_form
 msgid "Reject"
 msgstr ""
@@ -1882,7 +1887,6 @@ msgid "Send communication of a complaint"
 msgstr ""
 
 #. module: cim_complaints_channel
-#: model:ir.actions.server,name:cim_complaints_channel.cim_complaint_send_mail
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_communication_view_form
 msgid "Send e-mail"
 msgstr ""
@@ -2112,7 +2116,9 @@ msgstr ""
 
 #. module: cim_complaints_channel
 #: model:mail.template,subject:cim_complaints_channel.mail_template_tracking_code
-msgid "Tracking Code of complaint {{object.name}}"
+msgid ""
+"Tracking Code of complaint ${object.name}\n"
+"            "
 msgstr ""
 
 #. module: cim_complaints_channel
@@ -2182,11 +2188,6 @@ msgstr ""
 #. module: cim_complaints_channel
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_communication_view_form
 msgid "Validate"
-msgstr ""
-
-#. module: cim_complaints_channel
-#: model:ir.actions.server,name:cim_complaints_channel.cim_complaint_go_to_state_02_validated
-msgid "Validate communication"
 msgstr ""
 
 #. module: cim_complaints_channel
@@ -2262,7 +2263,6 @@ msgstr ""
 #. module: cim_complaints_channel
 #. odoo-python
 #: code:addons/cim_complaints_channel/models/cim_complaint.py:0
-#: code:addons/cim_complaints_channel/models/cim_complaint.py:0
 #, python-format
 msgid "You do not have permission to execute this action."
 msgstr ""
@@ -2287,13 +2287,7 @@ msgstr ""
 
 #. module: cim_complaints_channel
 #: model:mail.template,report_name:cim_complaints_channel.mail_template_communication
-msgid "communication_{{object.name}}"
-msgstr ""
-
-#. module: cim_complaints_channel
-#: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_type_view_kanban
-#: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_link_type_view_kanban
-msgid "complaints"
+msgid "communication_${object.name}"
 msgstr ""
 
 #. module: cim_complaints_channel

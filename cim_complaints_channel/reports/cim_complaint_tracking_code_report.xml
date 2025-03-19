@@ -34,7 +34,7 @@
                     <div class="page">
                         <t t-foreach="docs" t-as="o">
                             <t t-call="cim_complaints_channel.report_cim_complaint_tracking_code_document" t-lang="o.complaint_lang"/>
-                            <p style="page-break-after:always;"></p>
+                            <p style="page-break-after:always;"/>
                         </t>
                     </div>
                 </main>
@@ -84,10 +84,10 @@
             <t t-set="o" t-value="doc"/>
         </t>
         <t t-if="o and 'company_id' in o">
-            <t t-set="company" t-value="o.company_id"></t>
+            <t t-set="company" t-value="o.company_id"/>
         </t>
         <t t-if="not o or not 'company_id' in o">
-            <t t-set="company" t-value="res_company"></t>
+            <t t-set="company" t-value="res_company"/>
         </t>
 
         <t t-call="cim_complaints_channel.report_cim_complaint_tracking_code_external_layout_header" />
@@ -116,7 +116,7 @@
             </div>
             <div class="row zero_min_height">
                 <div class="col-xs-12">
-                    <div style="border-bottom: 1px solid black;"></div>
+                    <div style="border-bottom: 1px solid black;"/>
                 </div>
             </div>
         </div>

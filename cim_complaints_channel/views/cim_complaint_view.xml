@@ -119,30 +119,27 @@
                                    attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
                         </div>
                     </div>
-                    <br/>
-                    <br/>
-
-                    <div name="divgroup1" class="row">
+                    <div name="divgroup1" class="row mt-3">
                         <div name="leftdiv1" class="col-12 col-md-6">
-                            <div colspan="6">
+                            <div>
                                 <field name="issue" nolabel="1" style="width: 100%"
                                        placeholder="Issue"
                                        attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
-                                <div name="group_01_left_check" colspan="6"
+                                <div name="group_01_left_check"
                                      style="margin-top:14px">
                                     <field name="is_anonymous"
                                            nolabel="1"/>
-                                    <span style="margin-left:5px">Anonymous Complaint</span><br/>
+                                    <span style="margin-left:3px">Anonymous Complaint</span><br/>
                                     <div style="margin-bottom:8px"/>
                                     <field name="is_delegated"
                                            nolabel="1"/>
-                                    <span style="margin-left:5px">Data entered by instructor</span>
+                                    <span style="margin-left:3px">Data entered by instructor</span>
                                 </div>
                             </div>
                         </div>
                         <div name="rightdiv1" class="col-12 col-md-6">
                             <div>
-                                <div name="group_01_right_title" colspan="6"
+                                <div name="group_01_right_title"
                                      class="text-center"
                                      style="margin-bottom:15px">
                                     <span style="font-weight:bold"
@@ -183,8 +180,7 @@
                                     </span>
                                 </div>
                             </div>
-                            <div name="group_01_right_datas" class="col-12 col-md-6"
-                                 style="margin-bottom:15px">
+                            <div name="group_01_right_datas" style="margin-bottom:15px">
                                 <group>
                                     <field name="investigating_user_id"
                                            string="Instructor"
@@ -203,25 +199,24 @@
                             </div>
                         </div>
                     </div>
-                    <div name="group_02" class="row">
+                    <div name="group_02" class="row mt-2">
                         <div name="group_02_left" class="col-12 col-md-6">
                             <div name="group_02_left_inner">
-                                <div name="group_02_left_inner_title" colspan="8"
+                                <div name="group_02_left_inner_title"
                                      class="text-center"
-                                     style="font-weight:bold;margin-top:16px;margin-bottom:16px">
+                                     style="font-weight:bold;margin-bottom:8px">
                                     <span>FACTS DENOUNCED</span>
                                 </div>
                                 <div name="section_description"
-                                     colspan="8"
                                      class="panel-body"
                                      style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px;min-height:75px">
                                     <field name="description" nolabel="1"
-                                           style="margin-top:5px;min-height:55px"
+                                           style="margin-left:8px;margin-top:5px;padding-right:10px;min-height:55px"
                                            attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
                                 </div>
-                                <div name="section_fields" colspan="8"
+                                <div name="section_fields"
                                      style="margin-top:10px">
-                                    <group colspan="8">
+                                    <group>
                                         <field name="defendant_name"
                                                string="Defendant"
                                                attrs="{'readonly': [('id', '>', 0), '|', '|', ('state', '=', '05_resolved'), ('is_delegated', '=', False), ('user_in_group_cim_settings', '=', False)]}"/>
@@ -246,32 +241,38 @@
                         <div name="group_02_right" class="col-12 col-md-6">
                             <div name="group_02_right_inner">
                                 <div name="group_02_right_inner_title_1"
-                                     colspan="8"
                                      class="text-center"
-                                     style="font-weight:bold;margin-top:16px;margin-bottom:16px">
+                                     style="font-weight:bold;margin-bottom:8px">
                                     <span>MEASURES TAKEN</span>
                                 </div>
                                 <div name="section_measures_taken"
-                                     colspan="8"
                                      class="panel-body"
-                                     style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px;min-height:150px">
+                                     style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px;min-height:170px">
                                     <field name="measures_taken" nolabel="1"
-                                           style="margin-top:5px;min-height:170px"
+                                           style="margin-left:5px;margin-top:5px;padding-right:10px;min-height:190px"
                                            attrs="{'readonly': [('state', '=', '05_resolved')]}"/>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div name="group_03" class="row">
+                    <div name="group_03" class="row mt-2">
                         <div name="group_03_left" class="col-12 col-md-6">
                             <div name="group_03_left_inner">
-                                <div name="group_03_left_inner_complainant_data" colspan="2"
+                                <div name="group_03_left_inner_complainant_data"
                                      class="text-center"
-                                     style="font-weight:bold;margin-top:16px;margin-bottom:16px"
+                                     style="font-weight:bold;margin-bottom:8px"
                                      groups="cim_complaints_channel.group_cim_user">
                                     <span>COMPLAINANT DATA</span>
                                 </div>
-                                <group>
+                                <div name="section_decrypted_complainant_data"
+                                     class="panel-body"
+                                     style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px"
+                                     attrs="{'invisible': ['|', ('id', '=', False), ('decrypted_complainant_data', '=', '')]}"
+                                     groups="cim_complaints_channel.group_cim_user">
+                                    <field name="decrypted_complainant_data" nolabel="1"
+                                           style="margin-left:8px;margin-top:5px;padding-right:10px"/>
+                                </div>
+                                <group style="margin-top:20px">
                                     <field name="complainant_name"
                                            string="Name"
                                            attrs="{'invisible': [('id', '>', 0)]}"
@@ -306,37 +307,34 @@
                         </div>
                         <div name="group_03_right" class="col-12 col-md-6">
                             <div name="group_02_right_inner_title_2"
-                                 colspan="8"
-                                     class="text-center"
-                                     style="font-weight:bold;margin-top:16px;margin-bottom:16px">
+                                 class="text-center"
+                                 style="font-weight:bold;margin-bottom:8px">
                                 <span>WITNESSES</span>
                             </div>
                             <div name="section_witness_name"
-                                 colspan="8"
                                  class="panel-body"
                                  style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;min-height:75px">
                                 <field name="witness_name" nolabel="1"
-                                       style="margin-top:5px;min-height:55px"
+                                       style="margin-left:5px;margin-top:5px;padding-right:10px;min-height:55px"
                                        attrs="{'invisible': [('id', '>', 0)]}"
                                        groups="cim_complaints_channel.group_cim_user"/>
                                 <field name="decrypted_witness_name" nolabel="1"
-                                       style="margin-top:5px;min-height:55px"
-                                       attrs="{'invisible': [('id', '=', 0)]}"
+                                       style="margin-left:5px;margin-top:5px;padding-right:10px;min-height:55px"
+                                       attrs="{'invisible': [('id', '=', False)]}"
                                        groups="cim_complaints_channel.group_cim_user"/>
                             </div>
-                            <div name="section_inner_rejected"
+                            <div name="section_inner_rejected" class="mt-4"
                                    attrs="{'invisible': [('is_rejected', '=', False)]}">
                                 <div name="section_rejected_title_1"
-                                     colspan="8"
-                                     style="text-align:center;margin-bottom:5px">
+                                     class="text-center"
+                                     style="font-weight:bold;margin-bottom:8px">
                                     <span>REJECTION CAUSE</span>
                                 </div>
                                 <div name="section_rejection_cause"
-                                     colspan="8"
                                      class="panel-body"
                                      style="background:#fbfbfb;border-color:#cccccc;border-width:1px;border-style:solid;margin:0 auto;margin-bottom:20px;min-height:75px">
                                     <field name="rejection_cause" nolabel="1"
-                                           style="margin-top:5px;min-height:55px"/>
+                                           style="margin-left:5px;margin-top:5px;padding-right:10px;min-height:55px"/>
                                 </div>
                             </div>
                         </div>
@@ -376,10 +374,8 @@
                         </page>
                         <page name="resolution" string="Resolution"
                               attrs="{'invisible': [('is_rejected', '=', True)]}">
-                            <group name="group_resolution">
-                                <field name="resolution_text" nolabel="1"
-                                       attrs="{'readonly': [('state', '=', '05_resolved')]}"/>
-                            </group>
+                            <field name="resolution_text" nolabel="1"
+                                   attrs="{'readonly': [('state', '=', '05_resolved')]}"/>
                         </page>
                         <page name="notes" string="Notes">
                             <field name="notes"/>
@@ -415,11 +411,13 @@
                 <field name="issue"
                        string="Issue"/>
                 <field name="resolution_date"
-                       string="Res. Date"/>
+                       string="Res. Date"
+                       class="text-center"/>
                 <field name="defendant_name"
                        string="Defendant"/>
                 <field name="deadline_date"
-                       string="Dead. Date"/>
+                       string="Dead. Date"
+                       class="text-center"/>
                 <field name="investigating_user_id"
                        string="Instructor"/>
                 <field name="number_of_attachments"
@@ -430,7 +428,8 @@
                        string="State"/>
                 <field name="icon_warning"
                        widget="image" string=" "
-                       class="o_icon_warning"/>
+                       class="o_icon_warning text-center"
+                       attrs="{'invisible': [('icon_warning', '=', False)]}"/>
             </tree>
         </field>
     </record>
@@ -553,22 +552,15 @@
         </field>
     </record>
 
-    <record id="cim_complaint_reject_complaints" model="ir.actions.server">
+    <record id="cim_complaint_reject_complaints_serveraction" model="ir.actions.server">
         <field name="name">Reject</field>
+        <field name="type">ir.actions.server</field>
         <field name="model_id" ref="model_cim_complaint"/>
+        <field name="binding_model_id" ref="model_cim_complaint"/>
+        <field name='groups_id' eval="[(4, ref('cim_complaints_channel.group_cim_manager'))]"/>
         <field name="state">code</field>
         <field name="code">
-            if context.get('active_ids'):
-                action = env['cim.complaint'].action_reject_multiple(context['active_ids'])
-        </field>
-    </record>
-
-    <record id="cim_complaint_reject_complaints_action" model="ir.actions.server">
-        <field name="name">Reject</field>
-        <field name="model_id" ref="model_cim_complaint"/>
-        <field name="state">code</field>
-        <field name="code">
-            action = records.reject_complaint()
+            records.reject_multiple()
         </field>
     </record>
 
@@ -594,26 +586,6 @@
               parent="complaint_menu"
               sequence="1"
               action="cim_complaint_action"/>
-
-    <record id="cim_complaint_go_to_state_02_validated" model="ir.actions.server">
-        <field name="name">Validate communication</field>
-        <field name="model_id" ref="cim_complaints_channel.model_cim_complaint_communication"/>
-        <field name="code">
-            if context.get('active_id'):
-                action = env['cim.complaint.communication'].action_go_to_state_02_validated(context['active_id'])
-        </field>
-    </record>
-
-    <record id="cim_complaint_send_mail" model="ir.actions.server">
-        <field name="name">Send e-mail</field>
-        <field name="model_id" ref="cim_complaints_channel.model_cim_complaint_communication"/>
-        <field name="code">
-            <![CDATA[
-            if context.get('default_complaint_id'):
-                action = env['cim.complaint.communication'].action_send_mail(context['default_complaint_id'])
-            ]]>
-        </field>
-    </record>
 
     <record id="cim_complaint_communication_view_form" model="ir.ui.view">
         <field name="name">cim.complaint.communication.view.form</field>
@@ -664,13 +636,13 @@
                             <div name="group_01_left_communication_number">
                                 <span name="field_communication_number_label"
                                       style="font-weight:bold"
-                                      attrs="{'invisible': [('id', '=', 0)]}">
+                                      attrs="{'invisible': [('id', '=', False)]}">
                                     Communication #
                                 </span>
                                 <field name="communication_number"
                                        nolabel="1" readonly="1"
                                        style="font-weight:bold"
-                                       attrs="{'invisible': [('id', '=', 0)]}"/>
+                                       attrs="{'invisible': [('id', '=', False)]}"/>
                             </div>
                         </div>
                         <div name="group_01_right" class="col-12 col-md-6">
@@ -687,9 +659,7 @@
                             </div>
                         </div>
                     </div>
-                    <br/>
-                    <br/>
-                    <div name="div_02" class="row">
+                    <div name="div_02" class="row mt-3">
                         <div name="div_02_left" class="col-12 col-md-6">
                             <group>
                                 <field name="issue" string="Issue"
@@ -707,7 +677,7 @@
                             </group>
                         </div>
                     </div>
-                    <div name="div_03" class="row">
+                    <div name="div_03" class="row mt-3">
                         <div name="section_description_title"
                              class="col-12"
                              style="text-align:center;margin-bottom:5px">
@@ -778,13 +748,17 @@
             <tree class="o_cim_complaints_channel_complaint_communication_view_tree"
                   default_order="name desc">
                 <field name="icon_inputoutput"
-                       widget="image" string=" "/>
+                       widget="image" string=" "
+                       class="o_icon_inputoutput text-center"
+                       attrs="{'invisible': [('icon_inputoutput', '=', False)]}"/>
                 <field name="communication_number"
-                       string="Com. #"/>
+                       string="Com. #"
+                       class="text-center"/>
                 <field name="issue"
                        string="Issue"/>
                 <field name="communication_date"
-                       string="Val. Date"/>
+                       string="Val. Date"
+                       class="text-center"/>
                 <field name="processor_user_id"
                        string="Processor"/>
                 <field name="number_of_attachments"
@@ -814,7 +788,7 @@
                         domain="[('is_sent', '=', True)]"/>
                 <filter string="Communications pending sending"
                         name="is_sent_no"
-                        domain="[('is_sent', '=', False)]"/>
+                        domain="[('is_sent', '=', False), ('from_complainant', '=', False)]"/>
                 <separator/>
                 <group expand="0" string="Group By">
                     <filter string="State"

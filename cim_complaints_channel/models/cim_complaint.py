@@ -488,9 +488,8 @@ class CimComplaint(models.Model):
                 months_deadline = record.param_deadline
                 if record.is_extended:
                     months_deadline = record.param_deadline_extended
-                deadline_date = (record.creation_date +
-                      relativedelta(months=months_deadline, days=-1)).strftime(
-                    '%Y-%m-%d')
+                deadline_date = (record.creation_date + relativedelta(
+                    months=months_deadline, days=-1)).strftime('%Y-%m-%d')
                 if current_date <= deadline_date:
                     deadline_state = '01_on_time'
                     if record.is_extended:
@@ -513,27 +512,26 @@ class CimComplaint(models.Model):
         for record in self:
             is_acknowledgement_expired = False
             if not record.is_rejected and record.state == '01_received':
-                deadline_acknowledgement = (record.creation_date +
-                        relativedelta(
-                            days=record.param_acknowledgement_period - 1)
-                                            ).strftime('%Y-%m-%d')
+                deadline_acknowledgement = (record.creation_date + relativedelta(
+                    days=record.param_acknowledgement_period - 1)).strftime('%Y-%m-%d')
                 current_date = datetime.today().strftime('%Y-%m-%d')
                 if current_date > deadline_acknowledgement:
                     is_acknowledgement_expired = True
             record.is_acknowledgement_expired = is_acknowledgement_expired
 
-    @api.model
-    def _search_is_acknowledgement_expired(self, operator):
+    def _search_is_acknowledgement_expired(self, operator, value):
         complaint_ids = []
         operator_of_filter = 'in'
-        if operator == '!=':
+        is_acknowledgement_expired = ((operator == '=' and value) or
+                                      (operator == '!=' and not value))
+        if not is_acknowledgement_expired:
             operator_of_filter = 'not in'
         acknowledgement_period = 0
         config = self.env['ir.config_parameter'].sudo()
         param_acknowledgement_period = config.get_param(
             'cim_complaints_channel.acknowledgement_period', False)
         if param_acknowledgement_period:
-            acknowledgement_period = param_acknowledgement_period
+            acknowledgement_period = int(param_acknowledgement_period)
         where_clause = 'is_rejected = false and state = \'01_received\''
         if acknowledgement_period >= 0:
             where_clause = where_clause + ' and current_date - ' + \
@@ -998,26 +996,21 @@ class CimComplaint(models.Model):
         return vals
 
     @api.model
-    def fields_view_get(self, view_id=None, view_type='form', toolbar=False,
-                        submenu=False):
-        res = super().fields_view_get(
-            view_id=view_id, view_type=view_type,
-            toolbar=toolbar, submenu=submenu)
-        if (not self.env.user.has_group(
-                'cim_complaints_channel.group_cim_settings')):
-            if view_type == 'tree':
-                doc = etree.XML(res['arch'])
-                nodes = doc.xpath('//tree')
-                for node in nodes:
-                    node.set('create', '0')
-                res['arch'] = etree.tostring(doc)
-            if view_type == 'form':
-                doc = etree.XML(res['arch'])
-                nodes = doc.xpath('//form')
-                for node in nodes:
-                    node.set('create', '0')
-                res['arch'] = etree.tostring(doc)
-        return res
+    def _get_view(self, view_id=None, view_type='form', **options):
+        self.env['ir.ui.view'].clear_caches()
+        arch, view = super()._get_view(view_id, view_type, **options)
+        if view_type in ['form', 'tree']:
+            if (not self.env.user.has_group(
+               'cim_complaints_channel.group_cim_settings')):
+                if view_type == 'tree':
+                    nodes = arch.xpath('//tree')
+                    for node in nodes:
+                        node.set('create', '0')
+                else:
+                    nodes = arch.xpath('//form')
+                    for node in nodes:
+                        node.set('create', '0')
+        return arch, view
 
     @api.model
     def fields_get(self, *args, **kwargs):
@@ -1097,26 +1090,18 @@ class CimComplaint(models.Model):
         if self.is_rejected:
             self.is_rejected = False
 
-    @api.model
-    def action_reject_multiple(self, complaints_to_reject_ids):
-        user_is_manager = self.env.user.has_group(
-            'cim_complaints_channel.group_cim_manager')
-        if not user_is_manager:
-            raise exceptions.UserError(_(
-                'You do not have permission to execute this action.'))
-        if complaints_to_reject_ids:
-            complaints_to_reject = self.browse(complaints_to_reject_ids)
-            for complaint in (complaints_to_reject or []):
-                if not complaint.is_rejected:
-                    if complaint.state != '01_received':
-                        raise exceptions.UserError(_(
-                            'It is only possible to reject complaints '
-                            'in the \'RECEIVED\' state.'))
-                    complaint.write({
-                        'is_rejected': True,
-                        'rejection_cause': _('Incomplete information.'),
-                        })
-                    complaint._create_communication()
+    def reject_multiple(self):
+        for complaint in self:
+            if not complaint.is_rejected:
+                if complaint.state != '01_received':
+                    raise exceptions.UserError(_(
+                        'It is only possible to reject complaints '
+                        'in the \'RECEIVED\' state.'))
+                complaint.write({
+                    'is_rejected': True,
+                    'rejection_cause': _('Incomplete information.'),
+                    })
+                complaint._create_communication()
 
     def action_go_to_state_03_in_progress(self):
         self.ensure_one()
@@ -1265,18 +1250,13 @@ class CimComplaint(models.Model):
             new_communication.send_mails()
 
     def _get_date_str(self, raw_date):
-        resp = raw_date
-        default_locale = locale.setlocale(locale.LC_TIME)
-        is_english = True
-        if self.env.context and 'lang' in self.env.context:
-            is_english = self.env.context['lang'] == 'en_US'
-        try:
-            if is_english:
-                locale.setlocale(locale.LC_TIME, 'en_US.utf8')
-            resp = datetime.strptime(
-                str(raw_date), '%Y-%m-%d').strftime('%x')
-        finally:
-            locale.setlocale(locale.LC_TIME, default_locale)
+        resp = str(raw_date)
+        lang = 'es_ES'
+        if 'lang' in self.env.context and self.env.context['lang']:
+            lang = self.env.context['lang']
+        lang_model = self.env['res.lang'].search([('code', '=', lang)])
+        if lang_model:
+            resp = raw_date.strftime(lang_model.date_format)
         return resp
 
     def create_initial_communication(self):
@@ -1861,28 +1841,25 @@ class CimComplaintCommunication(models.Model):
                     'so it is no longer possible to delete communications.'))
         return super().unlink()
 
-    # NOTE: if api.multi, problem with send_mail
-    @api.model
-    def action_go_to_state_02_validated(self, communication_id):
-        if communication_id:
-            communication = self.browse(communication_id)
-            if communication and communication.state == '01_draft':
-                communication.state = '02_validated'
-                if communication.automatic_email_validate_com:
-                    communication.send_mails()
+    def action_go_to_state_02_validated(self):
+        self.ensure_one()
+        communication = self
+        if communication.state == '01_draft':
+            communication.state = '02_validated'
+            if communication.automatic_email_validate_com:
+                communication.send_mails()
 
     def action_undo(self):
         self.ensure_one()
         if self.state == '02_validated':
             self.state = '01_draft'
 
-    @api.model
-    def action_send_mail(self, communication_id):
-        if communication_id:
-            communication = self.browse(communication_id)
-            if (communication and communication.state == '02_validated' and
-               communication.with_email):
-                communication.send_mails()
+    def action_send_mail(self):
+        self.ensure_one()
+        communication = self
+        if (communication and communication.state == '02_validated' and
+           communication.with_email):
+            communication.send_mails()
 
     def send_mails(self):
         for record in self:
