@@ -1667,7 +1667,7 @@ class CimComplaintCommunication(models.Model):
                             complaint.tracking_code,
                             model_cim_complaint._cipher_key)
                     if (vals['decrypted_tracking_code'] ==
-                       decrypted_tracking_code_of_complaint):
+                            decrypted_tracking_code_of_complaint.decode()):
                         vals['complaint_id'] = complaint.id
                         vals['decrypted_tracking_code'] = \
                             self.EMPTY_TRACKING_CODE
