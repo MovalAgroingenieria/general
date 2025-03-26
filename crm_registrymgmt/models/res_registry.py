@@ -81,8 +81,8 @@ class ResRegistry(models.Model):
         default=default_sender,
     )
 
-    note = fields.Text(
-        string='Delivery Notes',
+    notes = fields.Html(
+        string='Notes',
     )
 
     channel_id = fields.Many2one(
