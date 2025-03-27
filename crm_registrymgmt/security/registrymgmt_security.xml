@@ -2,30 +2,27 @@
 <odoo>
     <data noupdate="1">
 
-        <!-- Categoría del módulo -->
-        <record id="res_registrymgmt_module_category" model="ir.module.category">
-            <field name="name">Letter Management</field>
+        <record id="module_category_registrymgmt" model="ir.module.category">
+            <field name="name">Registry Management</field>
             <field name="sequence">10</field>
         </record>
 
-        <!-- Grupo Portal -->
-        <record id="res_registrymgmt_group_portal" model="res.groups">
+        <record id="group_registry_portal" model="res.groups">
             <field name="name">Portal</field>
-            <field name="category_id" ref="res_registrymgmt_module_category"/>
-            <field name="users" eval="[(4, ref('base.user_demo'))]"/>
+            <field name="category_id" ref="module_category_registrymgmt"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
         </record>
 
-        <!-- Grupo Usuario -->
-        <record id="res_registrymgmt_group_user" model="res.groups">
+        <record id="group_registry_user" model="res.groups">
             <field name="name">User</field>
-            <field name="category_id" ref="res_registrymgmt_module_category"/>
+            <field name="category_id" ref="module_category_registrymgmt"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
         </record>
 
-        <!-- Grupo Administrador -->
-        <record id="res_registrymgmt_group_manager" model="res.groups">
+        <record id="group_registry_manager" model="res.groups">
             <field name="name">Manager</field>
-            <field name="category_id" ref="res_registrymgmt_module_category"/>
-            <field name="implied_ids" eval="[(4, ref('res_registrymgmt_group_user'))]"/>
+            <field name="category_id" ref="module_category_registrymgmt"/>
+            <field name="implied_ids" eval="[(4, ref('group_registry_user'))]"/>
             <field name="users" eval="[(4, ref('base.user_admin'))]"/>
         </record>
 
