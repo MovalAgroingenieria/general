@@ -51,7 +51,7 @@
                                     <field name="partner_id" string="Associated Contact" readonly="True" colspan="2"
                                         attrs="{'invisible': [('partner_id', '=', False)]}"/>
                                     <field name="technician_id" colspan="2"
-                                         attrs="{'readonly': [('state', '!=', '02_in_progress')]}"/>
+                                        attrs="{'readonly': [('state', '!=', '02_in_progress')]}"/>
                                 </group>
                             </div>
                             <div colspan="1"/>
@@ -67,41 +67,52 @@
                             </div>
                         </group>
                     </group>
-                    <div class="row" style="margin-top:-10px;">
+                   <div class="row" style="margin-top:-10px;">
                         <div class="col-6">
-                            <div class="panel" style="background:#fbfbfb; border:1px solid #cccccc; margin-bottom:20px; min-height:75px;">
-                            <div class="panel-heading text-center" style="font-weight:bold; margin-bottom:5px;">
-                                EXPOSITION
+                            <div class="panel" style="background:#fbfbfb; border:1px solid #cccccc; margin-bottom:20px; min-height:75px; margin-left:10px; margin-right:10px;"
+                                attrs="{'invisible': [('type', '!=', '01_generic_instance')]}">
+                                <div class="panel-heading text-center" style="font-weight:bold; margin-bottom:5px;">
+                                    EXPOSITION
+                                </div>
+                                <div class="panel-body" style="margin-top:5px; margin-left:10px; margin-right:10px; min-height:55px; white-space: normal; word-wrap: break-word; overflow: auto;">
+                                    <field name="exposition" readonly="1" nolabel="1"/>
+                                </div>
                             </div>
-                            <div class="panel-body" style="margin-top:5px; min-height:55px; white-space: normal; word-wrap: break-word; overflow-wrap: break-word; overflow: auto;">
-                                <field name="exposition" readonly="1" nolabel="1"/>
+                            <div class="panel" style="background:#fbfbfb; border:1px solid #cccccc; margin-bottom:20px; min-height:75px; margin-left:10px; margin-right:10px;"
+                                attrs="{'invisible': [('type', '!=', '01_generic_instance')]}">
+                                <div class="panel-heading text-center" style="font-weight:bold; margin-bottom:5px;">
+                                    REQUEST
+                                </div>
+                                <div class="panel-body" style="margin-top:5px; margin-left:10px; margin-right:10px; min-height:55px; white-space: normal; word-wrap: break-word; overflow: auto;">
+                                    <field name="request" readonly="1" nolabel="1"/>
+                                </div>
                             </div>
-                            </div>
-                            <div class="panel" style="background:#fbfbfb; border:1px solid #cccccc; margin-bottom:20px; min-height:75px;">
-                            <div class="panel-heading text-center" style="font-weight:bold; margin-bottom:5px;">
-                                SUGGESTION
-                            </div>
-                            <div class="panel-body" style="margin-top:5px; min-height:55px; white-space: normal; word-wrap: break-word; overflow-wrap: break-word; overflow: auto;">
-                                <field name="suggestion" readonly="1" nolabel="1"/>
-                            </div>
+                            <div class="panel" style="background:#fbfbfb; border:1px solid #cccccc; min-height:264px; margin-left:10px; margin-right:10px;"
+                                attrs="{'invisible': [('type', '!=', '02_suggestion')]}">
+                                <div class="panel-heading text-center" style="font-weight:bold; margin-bottom:5px;">
+                                    SUGGESTION
+                                </div>
+                                <div class="panel-body" style="margin-top:5px; margin-left:10px; margin-right:10px; white-space: normal; word-wrap: break-word; overflow: auto;">
+                                    <field name="suggestion" readonly="1" nolabel="1"/>
+                                </div>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="panel" style="background:#fbfbfb; border:1px solid #cccccc; min-height:264px;">
-                            <div class="panel-heading text-center" style="font-weight:bold; margin-bottom:5px;">
-                                RESOLUTION
-                            </div>
-                            <div class="panel-body" style="margin-top:5px; white-space: normal; word-wrap: break-word; overflow-wrap: break-word; overflow: auto;">
-                                <field name="resolution" nolabel="1" attrs="{'readonly': [('state', '=', '03_resolved')]}"/>
-                            </div>
+                            <div class="panel" style="background:#fbfbfb; border:1px solid #cccccc; min-height:264px; margin-left:10px; margin-right:10px;">
+                                <div class="panel-heading text-center" style="font-weight:bold; margin-bottom:5px;">
+                                    RESOLUTION
+                                </div>
+                                <div class="panel-body" style="margin-top:5px; margin-left:10px; margin-right:10px; white-space: normal; word-wrap: break-word; overflow: auto;">
+                                    <field name="resolution" nolabel="1" attrs="{'readonly': [('state', '=', '03_resolved')]}"/>
+                                </div>
                             </div>
                         </div>
                     </div>
-                        <notebook name="slave_data_notebook">
-                            <page name="notes" string="Notes">
-                                <field name="notes" attrs="{'readonly': [('editable_notes', '=', False)]}"/>
-                            </page>
-                        </notebook>
+                    <notebook name="slave_data_notebook">
+                        <page name="notes" string="Notes">
+                            <field name="notes" attrs="{'readonly': [('editable_notes', '=', False)]}"/>
+                        </page>
+                    </notebook>
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids"
@@ -127,7 +138,8 @@
                 <field name="technician_id"/>
                 <field name="deadline_date" string="Deadline"/>
                 <field name="state"/>
-                <field name="icon_warning_expired_deadline" widget="image" options="{'size': [16,16]}" string=" "/>
+                <field name="icon_warning_expired_deadline" widget="image" options="{'size': [16,16]}" string=" "
+                       attrs="{'invisible': [('icon_warning_expired_deadline', '=', False)]}"/>
             </tree>
         </field>
     </record>
@@ -186,23 +198,23 @@
                                 </div>
                                 <ul style="margin-top:2%;">
                                     <li t-if="record.digitalregister_id.raw_value">
-                                        <span class="fa fa-certificate" title="Digital Certificate"/>
+                                        <span class="fa fa-certificate" title="Digital Certificate" style="margin-right:5px;"/>
                                         <a name="action_show_digitalregister_id" type="object">
                                             <field name="digitalregister_id"/>
                                         </a>
                                     </li>
                                     <li t-if="record.partner_id.raw_value">
-                                        <span class="fa fa-user" title="Partner"/>
+                                        <span class="fa fa-user" title="Partner" style="margin-right:5px;"/>
                                         <a name="action_show_partner_id" type="object">
                                             <field name="partner_id"/>
                                         </a>
                                     </li>
                                     <li t-if="record.event_time.raw_value">
-                                        <span class="fa fa-clock-o" title="Time"/>
+                                        <span class="fa fa-clock-o" title="Time" style="margin-right:5px;"/>
                                         <field name="event_time"/>
                                     </li>
                                     <li t-if="record.type.raw_value">
-                                        <span class="fa fa-file-text-o" title="Type"/>
+                                        <span class="fa fa-file-text-o" title="Type" style="margin-right:5px;"/>
                                         <field name="type"/>
                                     </li>
                                 </ul>

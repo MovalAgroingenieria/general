@@ -37,23 +37,22 @@ class Report(models.Model):
         call_parent_method = True
         report = self._get_report_from_name(report_name)
         if report and report.model == 'eom.electronicfile.communication':
-            sign_certicate_ok = self._check_sign_certificate()
-            if sign_certicate_ok:
+            sign_certificate_ok = self._check_sign_certificate()
+            if sign_certificate_ok:
                 call_parent_method = False
         if call_parent_method:
-            resp = report._render_qweb_pdf(
-                report_name, docids, data=data)
+            # Extraemos el contenido del tuple retornado
+            content, _ = report._render_qweb_pdf(report.xml_id, docids, data)
+            resp = content
         else:
-            content = report._render_qweb_pdf(
-                self, report_name, docids, data=data)
+            content, _ = report._render_qweb_pdf(report.xml_id, docids, data)
             p12_file, passwd_file = self._get_sign_certificate()
             signature_parameters = self._get_signature_parameters()
 
             pdf_fd, pdf = tempfile.mkstemp(suffix='.pdf', prefix='report.tmp.')
-            with closing(os.fdopen(pdf_fd, 'w')) as pf:
+            with closing(os.fdopen(pdf_fd, 'wb')) as pf:
                 pf.write(content)
-            signed = self.pdf_sign_with_visible_signature(
-                pdf, p12_file, passwd_file, signature_parameters)
+            signed = self.pdf_sign_with_visible_signature(pdf, p12_file, passwd_file, signature_parameters)
             if os.path.exists(signed):
                 with open(signed, 'rb') as pf:
                     content = pf.read()
@@ -62,18 +61,18 @@ class Report(models.Model):
                     os.unlink(fname)
                 except Exception:
                     pass
-                resp = content
+            resp = content
         return resp
 
     def pdf_sign_with_visible_signature(
             self, pdf, p12_file, passwd_file, signature_parameters):
         with open(passwd_file, 'rb') as pf:
-            passwd = pf.readline().rstrip()
+            passwd = pf.readline().rstrip().decode()
         # Vars
         background_img = self._get_background_img(os.path.dirname(p12_file))
         current_dir = os.path.dirname(__file__)
-        jar_path = current_dir + '/../static/jar'
-        jar_file = jar_path + '/JSignPdf.jar'
+        jar_path = os.path.normpath(os.path.join(current_dir, '..', 'static', 'jar'))
+        jar_file = os.path.join(jar_path, 'JSignPdf.jar')
         output_dir = os.path.dirname(pdf)
         # Parameters
         page_of_signature = signature_parameters['page_of_signature']
@@ -93,12 +92,14 @@ class Report(models.Model):
         pdf_name = os.path.splitext(pdf)[0]
         pdf_signed = pdf_name + '_signed.pdf'
         # Call the jar file
-        exec_line = 'java -Djsignpdf.home=' + jar_path + \
-            ' -jar ' + jar_file + \
-            ' -ksf ' + p12_file + \
-            ' -ksp ' + passwd + \
-            ' ' + pdf + \
-            ' -d ' + output_dir + \
+        exec_line = 'java -Xmx512m -Djsignpdf.home="' + jar_path + '"' + \
+            ' -Djsignpdf.conf.dir="' + os.path.join(jar_path, 'conf') + '"' + \
+            ' -Djsignpdf.conf.file="conf.properties"' + \
+            ' -jar "' + jar_file + '"' + \
+            ' -ksf "' + p12_file + '"' + \
+            ' -ksp "' + passwd + '"' + \
+            ' "' + pdf + '"' + \
+            ' -d "' + output_dir + '"' + \
             ' -q' + \
             ' -pg ' + str(page_of_signature) + \
             ' -V' + \
@@ -158,11 +159,10 @@ class Report(models.Model):
 
     def _check_sign_certificate(self):
         sign_certicate_ok = False
-        sign_certificate_path = self.env['ir.default'].get(
-            'res.config.settings', 'eom_eoffice.sign_certificate_path')
-        sign_certificate_password_path = self.env['ir.default'].get(
-            'res.config.settings',
-            'eom_eoffice.sign_certificate_password_path')
+        sign_certificate_path = self.env['ir.config_parameter']\
+            .sudo().get_param('eom_eoffice.sign_certificate_path')
+        sign_certificate_password_path = self.env['ir.config_parameter']\
+            .sudo().get_param('eom_eoffice.sign_certificate_password_path')
         if sign_certificate_path and sign_certificate_password_path:
             p12_file_ok = os.access(
                 _normalize_filepath(sign_certificate_path), os.R_OK)
@@ -174,11 +174,10 @@ class Report(models.Model):
 
     def _get_sign_certificate(self):
         p12_file = passwd_file = False
-        sign_certificate_path = self.env['ir.default'].get(
-            'res.config.settings', 'eom_eoffice.sign_certificate_path')
-        sign_certificate_password_path = self.env['ir.default'].get(
-            'res.config.settings',
-            'eom_eoffice.sign_certificate_password_path')
+        sign_certificate_path = self.env['ir.config_parameter']\
+            .sudo().get_param('eom_eoffice.sign_certificate_path')
+        sign_certificate_password_path = self.env['ir.config_parameter']\
+            .sudo().get_param('eom_eoffice.sign_certificate_password_path')
         if sign_certificate_path and sign_certificate_password_path:
             p12_file = _normalize_filepath(sign_certificate_path)
             passwd_file = _normalize_filepath(sign_certificate_password_path)

@@ -189,8 +189,7 @@ class EomElectronicfileCommunication(models.Model):
         if self.state == '01_draft':
             self.state = '02_validated'
             report_name = 'eom_eoffice.notification_report'
-            pdf, _ = self.env['ir.actions.report'].get_pdf([self.id],
-                                                           report_name)
+            pdf = self.env['ir.actions.report'].get_pdf([self.id], report_name)
             if pdf:
                 document_name = self.name.replace('/', '_') + '.pdf'
                 self.write({

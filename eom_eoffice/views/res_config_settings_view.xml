@@ -1,42 +1,91 @@
-<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <record id="config_settings_view_form" model="ir.ui.view">
-         <field name="name">res.config.settings.view.form.inherit.eom</field>
+    <record id="res_config_settings_view_form_inherit_eom" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.eom</field>
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="base.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[@data-key='eom_authdnie']" position="inside">
-                <group string="Electronic Office" style="display: block; margin-left:20px;">
-                    <div style="margin: 0 0 16px 20px;">
-                        <label for="sequence_electronicfile_code_id"/>
-                        <field name="sequence_electronicfile_code_id"
-                            string="Sequence for code"
-                            options="{'no_quick_create':True,'no_create_edit':True}"
-                            style="width:300px"
-                            required="1"/>
+                <div class="row mt16 o_settings_container">
+                    <div id="div_sequence_electronicfile_code_id" class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_right_pane">
+                            <label for="sequence_electronicfile_code_id">Sequence for code</label>
+                            <div class="text-muted">
+                                Indicates the sequence for the code.
+                            </div>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <field name="sequence_electronicfile_code_id" style="width:250px"
+                                           options="{'no_quick_create': True, 'no_create_edit': True}" required="1"/>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div style="margin: 0 0 16px 20px; width:400px;">
-                        <label for="deadline" style="float:left;"/>
-                        <field name="deadline" required="1" style="width:150px; float:right;"/>
+                    <div id="div_deadline" class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_right_pane">
+                            <label for="deadline">Deadline</label>
+                            <div class="text-muted">
+                                Specify the required timeframe.
+                            </div>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <field name="deadline" style="width:90px" required="1"/>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div style="margin: 0 0 16px 20px; width:400px;">
-                        <label for="notification_deadline" style="float:left;"/>
-                        <field name="notification_deadline" required="1" style="width:150px; float:right;"/>
+                    <div id="div_notification_deadline" class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_right_pane">
+                            <label for="notification_deadline">Notification deadline</label>
+                            <div class="text-muted">
+                                Defines the deadline for notifications.
+                            </div>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <field name="notification_deadline" style="width:90px" required="1"/>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div style="margin: 0 0 16px 20px; width:400px;">
-                        <label for="max_size_attachments" style="float:left;"/>
-                        <field name="max_size_attachments" required="1" style="width:150px; float:right;"/>
+                    <div id="div_max_size_attachments" class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_right_pane">
+                            <label for="max_size_attachments">Maximum size for attachments</label>
+                            <div class="text-muted">
+                                Specifies the maximum size allowed for attachments.
+                            </div>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <field name="max_size_attachments" style="width:90px" required="1"/>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div style="margin: 0 0 16px 20px; width:400px;">
-                        <label for="sign_certificate_path" style="float:left;"/>
-                        <field name="sign_certificate_path" style="width:150px; float:right;"/>
+                    <div id="div_sign_certificate_path" class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_right_pane">
+                            <label for="sign_certificate_path">Signature certificate path</label>
+                            <div class="text-muted">
+                                Specifies the path of the signing certificate.
+                            </div>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <field name="sign_certificate_path" style="width:300px"/>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div style="margin: 0 0 16px 20px; width:400px;">
-                        <label for="sign_certificate_password_path" style="float:left;"/>
-                        <field name="sign_certificate_password_path" style="width:150px; float:right;"/>
+                    <div id="div_sign_certificate_password_path" class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_right_pane">
+                            <label for="sign_certificate_password_path">Signature certificate password path</label>
+                            <div class="text-muted">
+                                Specifies the path to the signing certificate password.
+                            </div>
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <field name="sign_certificate_password_path" style="width:300px"/>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </group>
+                </div>
             </xpath>
         </field>
     </record>
