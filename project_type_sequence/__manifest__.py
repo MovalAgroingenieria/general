@@ -11,7 +11,7 @@
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "depends": [
-        "project_category",
+        "project_type",
     ],
     "data": [
         "views/project_type_views.xml",
