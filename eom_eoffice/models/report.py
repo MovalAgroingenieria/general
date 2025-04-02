@@ -41,7 +41,6 @@ class Report(models.Model):
             if sign_certificate_ok:
                 call_parent_method = False
         if call_parent_method:
-            # Extraemos el contenido del tuple retornado
             content, _ = report._render_qweb_pdf(report.xml_id, docids, data)
             resp = content
         else:
@@ -52,7 +51,9 @@ class Report(models.Model):
             pdf_fd, pdf = tempfile.mkstemp(suffix='.pdf', prefix='report.tmp.')
             with closing(os.fdopen(pdf_fd, 'wb')) as pf:
                 pf.write(content)
-            signed = self.pdf_sign_with_visible_signature(pdf, p12_file, passwd_file, signature_parameters)
+            signed = self.pdf_sign_with_visible_signature(pdf, p12_file,
+                                                          passwd_file,
+                                                          signature_parameters)
             if os.path.exists(signed):
                 with open(signed, 'rb') as pf:
                     content = pf.read()
@@ -71,7 +72,8 @@ class Report(models.Model):
         # Vars
         background_img = self._get_background_img(os.path.dirname(p12_file))
         current_dir = os.path.dirname(__file__)
-        jar_path = os.path.normpath(os.path.join(current_dir, '..', 'static', 'jar'))
+        jar_path = os.path.normpath(os.path.join(current_dir, '..', 'static',
+                                                 'jar'))
         jar_file = os.path.join(jar_path, 'JSignPdf.jar')
         output_dir = os.path.dirname(pdf)
         # Parameters
