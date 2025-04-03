@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
     <record id="eom_electronicfile_communication_view_form" model="ir.ui.view">
         <field name="name">eom.electronicfile.communication.view.form</field>
         <field name="model">eom.electronicfile.communication</field>
@@ -142,23 +141,23 @@
                                         <b><field name="issue"/></b>
                                     </li>
                                     <li t-if="record.state.raw_value">
-                                        <span class="fa fa-cog" title="State"/>
+                                        <span class="fa fa-cog" title="State" style="margin-right:5px;"/>
                                         <field name="state"/>
                                     </li>
                                     <li t-if="record.validation_time.raw_value">
-                                        <span class="fa fa-clock-o" title="Validation Time"/>
+                                        <span class="fa fa-clock-o" title="Validation Time" style="margin-right:5px;"/>
                                         <field name="validation_time"/>
                                     </li>
                                     <li t-if="record.reading_time.raw_value">
-                                        <span class="fa fa-eye" title="Reading Time"/>
+                                        <span class="fa fa-eye" title="Reading Time" style="margin-right:5px;"/>
                                         <field name="reading_time"/>
                                     </li>
                                     <li t-if="record.csv_code.raw_value">
-                                        <span class="fa fa-eye" title="Reading Time"/>
+                                        <span class="fa fa-eye" title="Reading Time" style="margin-right:5px;"/>
                                         <field name="reading_time"/>
                                     </li>
                                     <li t-if="record.number_of_attachments.raw_value">
-                                        <span class="fa fa-paperclip" title="Num. Attachments"/>
+                                        <span class="fa fa-paperclip" title="Num. Attachments" style="margin-right:5px;"/>
                                         <field name="number_of_attachments"/>
                                     </li>
                                 </ul>
@@ -184,5 +183,4 @@
                         'view_id': ref('eom_electronicfile_communication_view_kanban')})]"/>
         <field name="search_view_id" ref="eom_electronicfile_communication_view_search"/>
     </record>
-    </data>
 </odoo>
