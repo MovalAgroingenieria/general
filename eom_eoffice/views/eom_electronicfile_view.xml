@@ -194,7 +194,7 @@
                                 <div style="display:inline;"><b><field name="name"/></b></div>
                                 <div style="display:inline;float:right;">
                                     <img t-att-src="kanban_image('eom.electronicfile', 'icon_warning_expired_deadline', record.id.value)"
-                                        style="max-width:16px;" alt="Image" />
+                                        style="max-width:16px;" alt="Image" attrs="{'invisible': [('icon_warning_expired_deadline', '=', False)]}"/>
                                 </div>
                                 <ul style="margin-top:2%;">
                                     <li t-if="record.digitalregister_id.raw_value">
