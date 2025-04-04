@@ -1863,18 +1863,25 @@ class CimComplaintCommunication(models.Model):
 
     def send_mails(self):
         for record in self:
-            complainant_email = record.complaint_id.decrypted_complainant_email
-            if record.state == '02_validated' and complainant_email:
+            decrypted_complainant_email = ''
+            if record.complaint_id.complainant_email:
+                decrypted_complainant_email = record.complaint_id.decrypt_data(
+                    record.complaint_id.complainant_email,
+                    record.complaint_id._cipher_key).decode('utf-8')
+            decrypted_complainant_email
+            if record.state == '02_validated' and decrypted_complainant_email:
                 text_for_log_ok = _('Email sent. Destination:')
                 text_for_log_fail = _('ERROR, the email could not be sent. '
                                       'Destination:')
                 mail_ok = self._send_communication(record)
                 if mail_ok:
                     record.is_sent = True
-                    message_ok = text_for_log_ok + ' ' + complainant_email
+                    message_ok = (text_for_log_ok + ' ' +
+                                  decrypted_complainant_email)
                     record.message_post(body=message_ok)
                 else:
-                    message_fail = text_for_log_fail + ' ' + complainant_email
+                    message_fail = (text_for_log_fail + ' ' +
+                                    decrypted_complainant_email)
                     record.message_post(body=message_fail)
 
     @api.model
@@ -1930,5 +1937,5 @@ class CimComplaintCommunication(models.Model):
         html = ''
         if text:
             html = text.replace('\n', '<br/>')
-            html = '<span>' + html + '</span>'
+            # html = '<span>' + html + '</span>'
         return html
