@@ -89,7 +89,7 @@
                                                <span t-esc="c.processor_user_id.partner_id.name"/>
                                            </t>
                                        </td>
-                                       <td class="text-right"><span t-esc="c.number_of_attachments"/></td>
+                                       <td class="text-end"><span t-esc="c.number_of_attachments"/></td>
                                    </tr>
                                </t>
                             </tbody>
@@ -158,7 +158,7 @@
                                 </div>
                                 <div name="body_content_right" class="col-lg-6">
                                     <h2 style="margin-bottom:30px">Message</h2>
-                                    <p><span t-out="communication.description_as_html"/></p>
+                                    <p><span t-raw="communication.description_as_html"/></p>
                                 </div>
                             </div>
                         </div>
