@@ -138,14 +138,15 @@
         </record>
 
         <!-- Menus -->
-        <menuitem id="res_registry_log_menu" name="Registry Management" sequence="1"/>
+        <menuitem id="res_registry_main_menu" name="Registry Management"
+                  web_icon="crm_registrymgmt,static/description/icon.png"/>
 
-        <menuitem id="res_registry_menu" name="Registries" parent="res_registry_log_menu" sequence="1"/>
+        <menuitem id="res_registry_menu" name="Registries" parent="res_registry_main_menu" sequence="1"/>
 
         <menuitem id="res_registry_out_menu" name="Outbound Registries" parent="res_registry_menu" action="action_res_registry_out_tree_view"/>
 
         <menuitem id="res_registry_in_menu" name="Inbound Registries" parent="res_registry_menu" action="action_res_registry_in_tree_view"/>
 
-        <menuitem id="registry_log_config_menu" name="Configuration" parent="res_registry_log_menu"/>
+        <menuitem id="registry_log_config_menu" name="Configuration" parent="res_registry_main_menu"/>
     </data>
 </odoo>
