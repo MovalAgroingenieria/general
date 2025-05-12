@@ -6,12 +6,15 @@ from odoo import SUPERUSER_ID, api
 
 def post_init_hook(cr, registry):
     env = api.Environment(cr, SUPERUSER_ID, {})
-    env['ir.config_parameter'].set_param(
-        'partner_address_street_type.street_type_shown', 'long')
+    env["ir.config_parameter"].set_param(
+        "partner_address_street_type.street_type_shown", "long"
+    )
     company_country_code = False
-    company_country_code = env['res.country'].search(
-        [('code', '=', env.company.country_id.code)],
-        limit=1).code
+    company_country_code = (
+        env["res.country"]
+        .search([("code", "=", env.company.country_id.code)], limit=1)
+        .code
+    )
     if not company_country_code:
         company_country_code = "ES"
     # Add street type to address format of company country

@@ -4,7 +4,10 @@
     <record id="res_config_settings_view_form_general_settings" model="ir.ui.view">
         <field name="name">Street type General Settings</field>
         <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field
+            name="inherit_id"
+            ref="base_setup.res_config_settings_view_form"
+        />
         <field name="arch" type="xml">
             <xpath expr="//div[@name='contacts_setting_container']" position="after">
                 <div class="row mt16 o_settings_container" name="street_type_setting_container">
@@ -31,7 +34,10 @@
                                  string pattern with address fields
                             </div>
                             <div style="margin-top: 8px;">
-                                <field name="address_format_set" style="width: 100%;"/>
+                                <field
+                                    name="address_format_set"
+                                    style="width: 100%;"
+                                />
                             </div>
                         </div>
                     </div>
