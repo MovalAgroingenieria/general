@@ -10,18 +10,17 @@
         />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='street']" position="attributes">
-                <attribute name="style">width:70%; display:inline-block; margin-left:2%;</attribute>
+                <attribute name="style">width:88%; display:inline-block; margin-left:2%;</attribute>
             </xpath>
             <xpath expr="//field[@name='street']" position="before">
                 <field
                     name="street_type_id"
-                    placeholder="Street type..."
                     attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"
                     context="{'in_combo': True}"
                     domain="[('show_in_list', '=', True)]"
                     groups="base.group_no_one"
                     options="{'no_open': True, 'no_quick_create':True, 'no_create_edit':True}"
-                    style="width:28%;"
+                    style="width:10%;"
                 />
             </xpath>
         </field>
@@ -36,19 +35,17 @@
         />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='street']" position="attributes">
-                <attribute name="style">width:70%; display:inline-block; margin-left:2%;</attribute>
+                <attribute name="style">width:88%; display:inline-block; margin-left:2%;</attribute>
             </xpath>
             <xpath expr="//field[@name='street']" position="before">
                 <field
                     name="street_type_id"
-                    class="oe_edit_only"
-                    placeholder="Street type..."
                     attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"
                     context="{'in_combo': True}"
                     domain="[('show_in_list', '=', True)]"
                     groups="base.group_no_one"
                     options="{'no_open': True, 'no_quick_create':True, 'no_create_edit':True}"
-                    style="width:28%;"
+                    style="width:10%;"
                 />
             </xpath>
         </field>

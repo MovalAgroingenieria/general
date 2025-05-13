@@ -36,7 +36,7 @@ class ResStreetType(models.Model):
                     (record.id, record.abbreviation + " - " + record.name))
         else:
             for record in self:
-                result.append((record.id, record.name))
+                result.append((record.id, record.abbreviation))
         return result
 
     _sql_constraints = [
