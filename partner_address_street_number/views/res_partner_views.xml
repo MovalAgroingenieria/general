@@ -4,15 +4,22 @@
     <record id="view_partner_form" model="ir.ui.view">
         <field name="name">Add separate field for street number</field>
         <field name="model">res.partner</field>
-        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field
+            name="inherit_id"
+            ref="base.view_partner_form"
+        />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='street']" position="attributes">
-                <attribute name="style">width:74%; display:inline-block; margin-right:2%;</attribute>
+                <attribute name="style">width:76%; display:inline-block; margin-right:2%;</attribute>
             </xpath>
             <xpath expr="//field[@name='street']" position="after">
-                <field name="street_num" style="width: 16%;"
+                <field
+                    name="street_num"
+                    style="width: 10%;"
                     attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"
-                    placeholder="Num..." groups="base.group_no_one"/>
+                    placeholder="Num."
+                    groups="base.group_no_one"
+                />
             </xpath>
         </field>
     </record>
@@ -20,15 +27,22 @@
     <record id="view_partner_address_form" model="ir.ui.view">
         <field name="name">Add separate field for street number (edition form)</field>
         <field name="model">res.partner</field>
-        <field name="inherit_id" ref="base.view_partner_address_form"/>
+        <field
+            name="inherit_id"
+            ref="base.view_partner_address_form"
+        />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='street']" position="attributes">
-                <attribute name="style">width:74%; display:inline-block; margin-right:2%;</attribute>
+                <attribute name="style">width:76%; display:inline-block; margin-right:2%;</attribute>
             </xpath>
             <xpath expr="//field[@name='street']" position="after">
-                <field name="street_num" style="width: 16%;"
+                <field
+                    name="street_num"
+                    style="width: 10%;"
                     attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"
-                    placeholder="Num..." groups="base.group_no_one"/>
+                    placeholder="Num."
+                    groups="base.group_no_one"
+                />
             </xpath>
         </field>
     </record>

@@ -12,8 +12,6 @@ class ResConfigSettings(models.TransientModel):
         [("not_show", "Not show"), ("short", "Abbreviation"), ("long", "Name")],
         string="Street type shown",
         config_parameter="partner_address_street_type.street_type_shown",
-        help="Determine how the street type will be displayed in printed "
-             "documents.",
     )
 
     address_format_set = fields.Text(
@@ -21,10 +19,6 @@ class ResConfigSettings(models.TransientModel):
         default=lambda self: self.env["res.country"]
         .search([("code", "=", self.env.company.country_id.code)], limit=1)
         .address_format,
-        help="This field shows the current address format for company country.\
-            You can change it with the python-style string pattern with all \
-            address fields.\nThis format will be apply to company country.\n\
-            Errors in the format are not detected.",
     )
 
     def set_values(self):
