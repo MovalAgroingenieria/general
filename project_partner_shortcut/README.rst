@@ -7,7 +7,7 @@
 
 
 ========================
-Partner Project Shortcut
+Project Partner Shortcut
 ========================
 
 **Table of contents**
