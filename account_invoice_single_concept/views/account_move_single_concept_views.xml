@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+        <record id="account_move_single_concept_view_tree" model="ir.ui.view">
+            <field name="name">account.move.singleconcept.tree</field>
+            <field name="model">account.move.singleconcept</field>
+            <field name="arch" type="xml">
+                <tree string="Single Concepts" editable="bottom" class="o_account_move_single_concept_view_tree">
+                    <field name="name"/>
+                    <field name="extra_field" class="text-end"/>
+                    <field name="default"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="account_move_single_concept_view_form" model="ir.ui.view">
+            <field name="name">account.move.singleconcept.form</field>
+            <field name="model">account.move.singleconcept</field>
+            <field name="arch" type="xml">
+                <form string="Single Concept">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="extra_field"/>
+                            <field name="default"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="account_move_single_concept_view_search" model="ir.ui.view">
+            <field name="name">account.move.singleconcept.search</field>
+            <field name="model">account.move.singleconcept</field>
+            <field name="arch" type="xml">
+                <search string="Single Concepts">
+                    <field name="name"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_account_move_single_concept" model="ir.actions.act_window">
+            <field name="name">Single Concepts</field>
+            <field name="res_model">account.move.singleconcept</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">Create a new single concept</p>
+                <p>Single concepts are used in Invoice without details reports</p>
+            </field>
+        </record>
+
+        <menuitem
+            id="menu_action_single_concept"
+            action="action_account_move_single_concept"
+            parent="account.account_invoicing_menu"
+            groups="account.group_account_manager"
+        />
+
+</odoo>
