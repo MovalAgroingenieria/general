@@ -4,9 +4,9 @@
     <template id="invoice_document_without_details" inherit_id="account.report_invoice_document">
         <xpath expr="//table[@name='invoice_line_table']" position="replace">
 
-            <t t-set="show_extrafield" t-value="o.invoice_fixed_concept_has_extrafield"/>
-            <t t-set="default_fixed_concept"
-               t-value="env['account.move.fixedconcept'].search([('default', '=', True)], limit=1)"/>
+            <t t-set="show_extrafield" t-value="o.invoice_single_concept_has_extrafield"/>
+            <t t-set="default_single_concept"
+               t-value="env['account.move.singleconcept'].search([('default', '=', True)], limit=1)"/>
 
             <table class="table table-sm o_main_table table-borderless" name="invoice_line_table">
                 <thead>
@@ -26,17 +26,17 @@
                         <t t-set="current_subtotal" t-value="current_subtotal + line.price_total"
                            groups="account.group_show_line_subtotals_tax_included"/>
                     </t>
-                    <td name="fixed_concept">
-                        <t t-if="o.invoice_fixed_concept_id">
-                            <span t-field="o.invoice_fixed_concept_id"/>
+                    <td name="single_concept">
+                        <t t-if="o.invoice_single_concept_id">
+                            <span t-field="o.invoice_single_concept_id"/>
                         </t>
                         <t t-else="">
-                            <t t-if="default_fixed_concept">
-                                <span t-esc="default_fixed_concept.name"/>
+                            <t t-if="default_single_concept">
+                                <span t-esc="default_single_concept.name"/>
                             </t>
                         </t>
                         <t t-if="show_extrafield">
-                            <span t-field="o.invoice_fixed_concept_extrafield"/>
+                            <span t-field="o.invoice_single_concept_extrafield"/>
                         </t>
                     </td>
                     <td class="text-end">1 Unit</td>
@@ -54,7 +54,7 @@
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-set="lang" t-value="o.partner_id.lang"/>
-                <t t-call="account_invoice_fixed_concept.invoice_document_without_details" t-lang="lang"/>
+                <t t-call="account_invoice_single_concept.invoice_document_without_details" t-lang="lang"/>
             </t>
         </t>
     </template>
@@ -63,8 +63,8 @@
         <field name="name">Invoice without details</field>
         <field name="model">account.move</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">account_invoice_fixed_concept.report_invoice_without_details</field>
-        <field name="report_file">account_invoice_fixed_concept.report_invoice_without_details</field>
+        <field name="report_name">account_invoice_single_concept.report_invoice_without_details</field>
+        <field name="report_file">account_invoice_single_concept.report_invoice_without_details</field>
         <field name="print_report_name">object._get_report_base_filename()</field>
         <field name="binding_model_id" ref="account.model_account_move"/>
         <field name="binding_type">report</field>

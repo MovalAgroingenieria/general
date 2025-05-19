@@ -7,13 +7,13 @@
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='quick_encoding_vals']" position="after">
-                    <field name="invoice_fixed_concept_has_extrafield" invisible="1"/>
+                    <field name="invoice_single_concept_has_extrafield" invisible="1"/>
                 </xpath>
                 <xpath expr="//group[@name='accounting_info_group']" position="after">
-                    <group string="Fixed Concept" name="fixed_concept_group">
-                        <field name="invoice_fixed_concept_id"/>
-                        <field name="invoice_fixed_concept_extrafield"
-                               attrs="{'invisible': [('invoice_fixed_concept_has_extrafield', '=', False)]}"/>,
+                    <group string="Single Concept" name="single_concept_group">
+                        <field name="invoice_single_concept_id"/>
+                        <field name="invoice_single_concept_extrafield"
+                               attrs="{'invisible': [('invoice_single_concept_has_extrafield', '=', False)]}"/>,
                      </group>
                 </xpath>
             </field>
@@ -25,12 +25,12 @@
             <field name="inherit_id" ref="account.view_account_invoice_filter"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='line_ids']" position="after">
-                    <field name="invoice_fixed_concept_extrafield"/>
+                    <field name="invoice_single_concept_extrafield"/>
                 </xpath>
                 <xpath expr="//filter[@name='group_by_sequence_prefix']" position="after">
-                    <filter string="Fixed Concept"
-                            name="invoice_fixed_concept_id"
-                            context="{'group_by': 'invoice_fixed_concept_id'}"/>
+                    <filter string="Single Concept"
+                            name="invoice_single_concept_id"
+                            context="{'group_by': 'invoice_single_concept_id'}"/>
                 </xpath>
             </field>
         </record>

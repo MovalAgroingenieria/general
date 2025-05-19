@@ -5,9 +5,9 @@ from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError
 
 
-class AccountInvoiceFixedconcept(models.Model):
-    _name = "account.move.fixedconcept"
-    _description = "Fixed Concept"
+class AccountInvoiceSingleconcept(models.Model):
+    _name = "account.move.singleconcept"
+    _description = "Single Concept"
 
     name = fields.Char(
         string="Concept",
@@ -35,5 +35,5 @@ class AccountInvoiceFixedconcept(models.Model):
                 ])
                 if existing_default:
                     raise ValidationError(_(
-                        "Only one fixed concept can be set as the default."
+                        "Only one single concept can be set as the default."
                     ))
