@@ -11,7 +11,7 @@
     "application": False,
     "installable": True,
     "depends": [
-        "bundle_common_accounting _modules",
+        "bundle_common_accounting_modules",
         "analytic",
         "mis_builder",
         "mis_builder_budget",
