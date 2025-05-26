@@ -13,16 +13,16 @@
     "installable": True,
     "depends": [
         "base_technical_user",
-        "disable_odoo_online"
-        # "edit_save_button"
-        "moval_corporate_image"
-        "web_advanced_search"
-        "web_chatter_position"
-        "web_listview_range_select"
-        "web_no_bubble"
-        "web_responsive"
-        "web_sheet_full_width"
-        "web_tree_dynamic_colored_field"
+        "disable_odoo_online",
+        # "edit_save_button",
+        "moval_corporate_image",
+        "web_advanced_search",
+        "web_chatter_position",
+        "web_listview_range_select",
+        "web_no_bubble",
+        "web_responsive",
+        "web_sheet_full_width",
+        "web_tree_dynamic_colored_field",
     ],
     "data": [
     ],
