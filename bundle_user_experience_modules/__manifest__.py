@@ -16,6 +16,7 @@
         "disable_odoo_online",
         # "edit_save_button",
         "moval_corporate_image",
+        "report_xml",
         "web_advanced_search",
         "web_chatter_position",
         "web_listview_range_select",
