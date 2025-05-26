@@ -12,6 +12,7 @@
     "application": False,
     "installable": True,
     "depends": [
+        "base_technical_user",
         "disable_odoo_online"
         # "edit_save_button"
         "moval_corporate_image"
