@@ -4,11 +4,11 @@
 
 |badge1|
 
-|
-
 ==============================
 Bundle user experience modules
 ==============================
+
+Install at once all common modules related to the user experience.
 
 **Table of contents**
 
@@ -21,11 +21,8 @@ Description
 This module has as dependencies modules related to the User Experience, which
 are normally installed but are not a dependency of any base module.
 
-|
-
 Credits
 =======
-
 
 Authors
 ~~~~~~~
@@ -35,14 +32,16 @@ Authors
 Contributors
 ~~~~~~~~~~~~
 
+* Guillermo Amante <gamante@moval.es>
+* Samuel Fernández Verdú <sfernandez@moval.es>
 * Alberto Hernández <ahernandez@moval.es>
 * Eduardo Iniesta <einiesta@moval.es>
+* Jesús Martínez <jmartinez@moval.es>
 * Miguel Mora <mmora@moval.es>
+* Miguel Ángel Rodríguez <marodriguez@moval.es>
 * Juanu Sandoval <jsandoval@moval.es>
 * Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
-
-|
 
 Maintainer
 ~~~~~~~~~~
