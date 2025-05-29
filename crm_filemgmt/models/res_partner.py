@@ -20,15 +20,15 @@ class ResPartner(models.Model):
     def _compute_number_of_files(self):
         access_file_filemgmt = \
             self.env['res.file']._check_access_file_filemgmt()
-        if access_file_filemgmt:
-            for record in self:
-                number_of_files = 0
+        for record in self:
+            number_of_files = 0
+            if access_file_filemgmt:
                 partnerlinks_of_partner = \
                     self.env['res.file.partnerlink'].search(
                         [('partner_id', '=', record.id)])
                 if partnerlinks_of_partner:
                     number_of_files = len(partnerlinks_of_partner)
-                record.number_of_files = number_of_files
+            record.number_of_files = number_of_files
 
     def action_get_files(self):
         self.ensure_one()
@@ -50,7 +50,6 @@ class ResPartner(models.Model):
                 }
             return act_window
 
-    @api.model
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False,
                         submenu=False):
         res = super().fields_view_get(
