@@ -18,6 +18,7 @@
     'data': [
         'security/hr_role_assignment_security.xml',
         'security/ir.model.access.csv',
+        'views/res_users_view.xml',
         'views/hr_role_assignment_view.xml',
         'views/hr_role_view.xml',
         'views/hr_role_menus.xml',

@@ -5,7 +5,7 @@ from odoo.exceptions import ValidationError
 class HrRoleAssignment(models.Model):
     _name = "hr.role.assignment"
     _description = "Employee Role Assignment"
-    _inherit = ["mail.thread", "mail.activity.mixin"]
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = "date_start desc"
 
     role_id = fields.Many2one(
@@ -13,16 +13,19 @@ class HrRoleAssignment(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
+        tracking=True,
     )
     employee_id = fields.Many2one(
         "hr.employee",
         required=True,
         ondelete="cascade",
         index=True,
+        tracking=True,
     )
     date_start = fields.Date(
         required=True,
         default=fields.Date.context_today,
+        tracking=True,
     )
     state = fields.Selection(
         [
