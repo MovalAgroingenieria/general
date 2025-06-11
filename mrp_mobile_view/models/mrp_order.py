@@ -6,6 +6,19 @@ from datetime import date
 
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
+    
+    product_drying_id = fields.Many2one(
+        'product.product', 'Product',
+        domain="""[
+                ('type', 'in', ['product', 'consu']),
+                '|',
+                    ('company_id', '=', False),
+                    ('company_id', '=', company_id)
+            ]
+            """,
+        compute='_compute_product_id', store=True, copy=True, precompute=True,
+        readonly=True, required=True, check_company=True,
+        states={'draft': [('readonly', False)]})
 
     def generate_automatic_production_lot(self):
         today = date.today()
