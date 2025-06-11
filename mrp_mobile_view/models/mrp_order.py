@@ -6,7 +6,7 @@ from datetime import date
 
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
-    
+
     product_drying_id = fields.Many2one(
         'product.product', 'Product',
         domain="""[
@@ -42,4 +42,8 @@ class MrpProduction(models.Model):
             })
             move.lot_id = lot_id
         return True
-            
+
+    @api.onchange('product_drying_id')
+    def _onchange_product_drying_id(self):
+        if self.product_drying_id:
+            self.product_id = self.product_drying_id
