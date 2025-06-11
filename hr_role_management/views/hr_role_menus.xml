@@ -1,39 +1,44 @@
 <odoo>
 
-        <record id="action_hr_role" model="ir.actions.act_window">
-            <field name="name">Roles</field>
-            <field name="res_model">hr.role</field>
-            <field name="view_mode">tree,kanban,form</field>
-            <field name="target">current</field>
-        </record>
+    <record id="action_hr_role" model="ir.actions.act_window">
+        <field name="name">Roles</field>
+        <field name="res_model">hr.role</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="target">current</field>
+        <field name="groups_id" eval="[(4, ref('hr_role_management.group_hr_role_assignment_readonly')), (4, ref('hr_role_management.group_hr_role_assignment_full_access'))]"/>
+    </record>
 
-        <record id="action_hr_role_assignment" model="ir.actions.act_window">
-            <field name="name">Role Assignments</field>
-            <field name="res_model">hr.role.assignment</field>
-            <field name="view_mode">tree,kanban,form</field>
-            <field name="search_view_id" ref="view_hr_role_assignment_search"/>
-            <field name="context">{"search_default_group_by_role": 1}</field>
+    <record id="action_hr_role_assignment" model="ir.actions.act_window">
+        <field name="name">Role Assignments</field>
+        <field name="res_model">hr.role.assignment</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="search_view_id" ref="view_hr_role_assignment_search"/>
+        <field name="context">{"search_default_group_by_role": 1}</field>
+        <field name="target">current</field>
+        <field name="groups_id" eval="[(4, ref('hr_role_management.group_hr_role_assignment_readonly')), (4, ref('hr_role_management.group_hr_role_assignment_full_access'))]"/>
+    </record>
 
-            <field name="target">current</field>
-        </record>
+    <menuitem
+        id="menu_hr_roles"
+        name="Roles"
+        parent="hr.menu_hr_root"
+        sequence="15"
+        groups="hr_role_management.group_hr_role_assignment_readonly,hr_role_management.group_hr_role_assignment_full_access"/>
 
-        <menuitem
-            id="menu_hr_roles"
-            name="Roles"
-            parent="hr.menu_hr_root"
-            sequence="15"/>
+    <menuitem
+        id="menu_hr_role"
+        name="Roles"
+        parent="menu_hr_roles"
+        action="action_hr_role"
+        sequence="10"
+        groups="hr_role_management.group_hr_role_assignment_readonly,hr_role_management.group_hr_role_assignment_full_access"/>
 
-        <menuitem
-            id="menu_hr_role"
-            name="Roles"
-            parent="menu_hr_roles"
-            action="action_hr_role"
-            sequence="10"/>
+    <menuitem
+        id="menu_hr_role_assignment"
+        name="Role Assignments"
+        parent="menu_hr_roles"
+        action="action_hr_role_assignment"
+        sequence="20"
+        groups="hr_role_management.group_hr_role_assignment_readonly,hr_role_management.group_hr_role_assignment_full_access"/>
 
-        <menuitem
-            id="menu_hr_role_assignment"
-            name="Role Assignments"
-            parent="menu_hr_roles"
-            action="action_hr_role_assignment"
-            sequence="20"/>
 </odoo>
