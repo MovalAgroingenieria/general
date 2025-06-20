@@ -12,7 +12,7 @@ from odoo.osv import expression
 class FleetVehicleOdometer(models.Model):
     _inherit = 'fleet.vehicle.odometer'
     _description = 'Odometer log for a vehicle'
- 
+
     initial_value = fields.Float(
         string='Initial Odometer Value',
         group_operator="max")
@@ -46,10 +46,6 @@ class FleetVehicleOdometer(models.Model):
     def _compute_qty_odometer_kms(self):
         for record in self:
             record.quantity = record.value - record.initial_value
-    #quiero un metodo compute _compute_gap_exists_before que mire todos los regidtros, y me diga si hay un gap entre el campo value del registro anterior al actual y el campo initial_value de este registro
-    #si hay un gap, entonces el campo gap_exists_before de este registro debe ser True, si no hay gap, entonces el campo gap_exists_before de este registro debe ser False.
-    #para esto, debo buscar el registro anterior al actual, y comparar el campo value de ese registro con el campo initial_value de este registro, pero se identifica como registro anterior por el valor que tiene el campo value
-
 
     def _compute_gap_exists_before(self):
         for record in self:
@@ -58,15 +54,16 @@ class FleetVehicleOdometer(models.Model):
                 ('initial_value', '<', record.initial_value)
             ], order='initial_value desc', limit=1)
             if previous_record:
-                record.gap_exists_before = previous_record.value != record.initial_value
+                record.gap_exists_before = previous_record.value != \
+                    record.initial_value
             else:
                 record.gap_exists_before = False
-            
+
     @api.onchange('trip_driver_id')
     def _onchange_trip_driver_id(self):
         for record in self:
             record.initial_value = record.vehicle_id.odometer
- 
+
     @api.model
     def _search_gap_exists_before(self, operator, value):
         if operator not in ['=', '!=']:
@@ -80,9 +77,5 @@ class FleetVehicleOdometer(models.Model):
             ], order='initial_value desc', limit=1)
             if prev_record and prev_record.value != record.initial_value:
                 matching_ids.append(record.id)
-            
             return [('id', 'in', matching_ids)] if operator == '=' else [
                 ('id', 'not in', matching_ids)]
-
-            
-    

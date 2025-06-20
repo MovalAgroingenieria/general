@@ -56,9 +56,9 @@ class ResPartner(models.Model):
     def create(self, vals):
         if "street_type_id" in vals:
             config_type_shown = (
-                self.env["ir.config_parameter"]
-                .sudo()
-                .get_param("partner_address_street_type.street_type_shown")
+                self.env["ir.config_parameter"].sudo().get_param(
+                    "partner_address_street_type.street_type_shown"
+                )
             )
             street_type_id = vals.get("street_type_id")
             street_type = self.env["res.street.type"].browse(street_type_id)
@@ -73,9 +73,9 @@ class ResPartner(models.Model):
     def write(self, vals):
         if "street_type_id" in vals:
             config_type_shown = (
-                self.env["ir.config_parameter"]
-                .sudo()
-                .get_param("partner_address_street_type.street_type_shown")
+                self.env["ir.config_parameter"].sudo().get_param(
+                    "partner_address_street_type.street_type_shown"
+                )
             )
             street_type_id = vals.get("street_type_id")
             street_type = self.env["res.street.type"].browse(street_type_id)
