@@ -1,8 +1,10 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import models, fields, api
 from datetime import date
+
+from odoo import api, fields, models
+
 
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
@@ -47,3 +49,8 @@ class MrpProduction(models.Model):
     def _onchange_product_drying_id(self):
         if self.product_drying_id:
             self.product_id = self.product_drying_id
+            
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        if self.product_id:
+            self.product_drying_id = self.product_id
