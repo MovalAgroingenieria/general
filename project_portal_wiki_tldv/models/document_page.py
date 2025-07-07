@@ -2,21 +2,22 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import models, fields, api
-import requests
 from datetime import datetime
+
+import requests
 from dateutil import parser
+from odoo import api, fields, models
 
 
 class DocumentPage(models.Model):
     _inherit = 'document.page'
 
-    allowed_portal_user_ids = fields.Many2many(
+    message_follower_ids = fields.Many2many(
         comodel_name='res.users',
-        string='Visible to',
-        relation='document_page_allowed_user_rel',
-        column1='document_page_id',
+        relation='document_page_message_follower_rel',
+        column1='page_id',
         column2='user_id',
+        string='Visible to',
         store=True,
         readonly=False,
         copy=False,
@@ -50,20 +51,27 @@ class DocumentPage(models.Model):
             if project_id:
                 project = self.env['project.project'].browse(project_id)
                 if project.privacy_visibility == 'portal':
-                    vals['allowed_portal_user_ids'] = [
-                        (6, 0, project.allowed_portal_user_ids.ids)]
+                    existing_followers = self.env['res.users'].browse(
+                        project.message_follower_ids.ids).exists().ids
+                    if existing_followers:
+                        vals['message_follower_ids'] = [(6, 0, existing_followers)]
+                    else:
+                        vals.pop('message_follower_ids', None)
         return super().create(vals_list)
 
     def write(self, vals):
-        if 'project_id' in vals or 'allowed_portal_user_ids' not in vals:
+        if 'project_id' in vals or 'message_follower_ids' not in vals:
             for record in self:
                 project = record.project_id
                 if vals.get('project_id'):
-                    project = self.env['project.project'].browse(
-                        vals['project_id'])
+                    project = self.env['project.project'].browse(vals['project_id'])
                 if project and project.privacy_visibility == 'portal':
-                    vals['allowed_portal_user_ids'] = [
-                        (6, 0, project.allowed_portal_user_ids.ids)]
+                    existing_followers = self.env['res.users'].browse(
+                        project.message_follower_ids.ids).exists().ids
+                    if existing_followers:
+                        vals['message_follower_ids'] = [(6, 0, existing_followers)]
+                    else:
+                        vals.pop('message_follower_ids', None)
         return super().write(vals)
 
     def generate_highlights_html(self, data, url):

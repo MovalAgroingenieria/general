@@ -2,7 +2,7 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class Project(models.Model):
@@ -14,11 +14,11 @@ class Project(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        if 'allowed_portal_user_ids' in vals:
+        if 'mail_follower_ids' in vals:
             for project in self:
                 if project.privacy_visibility == 'portal':
                     project.document_page_ids.write({
-                        'allowed_portal_user_ids': [
-                            (6, 0, project.allowed_portal_user_ids.ids)]
+                        'mail_follower_ids': [
+                            (6, 0, project.mail_follower_ids.ids)]
                     })
         return res
