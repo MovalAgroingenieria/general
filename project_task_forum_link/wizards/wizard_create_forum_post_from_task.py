@@ -113,8 +113,8 @@ class WizardCreateForumPostFromTask(models.TransientModel):
             'tag_ids': [(6, 0, tags)],
         }
         if (self.forum_id.default_user_from_tasks):
-            forum_post = self.env['forum.post'].sudo(
-                self.forum_id.default_user_from_tasks).create(forum_vals)
+            forum_post = self.env['forum.post'].with_user(
+                self.forum_id.default_user_from_tasks).sudo().create(forum_vals)
         else:
             forum_post = self.env['forum.post'].create(forum_vals)
         self.task_id.forum_post_id = forum_post
