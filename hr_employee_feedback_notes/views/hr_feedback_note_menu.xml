@@ -1,0 +1,21 @@
+<odoo>
+  <record id="action_hr_employee_feedback_note" model="ir.actions.act_window">
+    <field name="name">Feedback Notes</field>
+    <field name="res_model">hr.employee.feedback.note</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+
+  <menuitem id="menu_hr_feedback_root"
+          name="Employee Feedback"
+          parent="hr.menu_hr_root"
+          sequence="90"
+          groups="hr_employee_feedback_notes.group_hr_feedback_manager"/>
+
+  <menuitem id="menu_hr_feedback_note"
+          name="Notes"
+          parent="menu_hr_feedback_root"
+          action="hr_employee_feedback_notes.action_hr_employee_feedback_note"
+          sequence="91"
+          groups="hr_employee_feedback_notes.group_hr_feedback_manager"/>
+
+</odoo>
