@@ -14,17 +14,6 @@ _logger = logging.getLogger(__name__)
 class DocumentPage(models.Model):
     _inherit = 'document.page'
 
-    message_follower_ids = fields.Many2many(
-        comodel_name='res.users',
-        relation='document_page_message_follower_rel',
-        column1='page_id',
-        column2='user_id',
-        string='Visible to',
-        store=True,
-        readonly=False,
-        copy=False,
-    )
-
     tldv_meeting_id = fields.Char(
         string="TLDV Meeting ID"
     )
@@ -45,36 +34,6 @@ class DocumentPage(models.Model):
     def _onchange_name(self):
         if self.name:
             self.draft_summary = self.name
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            project_id = vals.get('project_id')
-            if project_id:
-                project = self.env['project.project'].browse(project_id)
-                if project.privacy_visibility == 'portal':
-                    existing_followers = self.env['res.users'].browse(
-                        project.message_follower_ids.ids).exists().ids
-                    if existing_followers:
-                        vals['message_follower_ids'] = [(6, 0, existing_followers)]
-                    else:
-                        vals.pop('message_follower_ids', None)
-        return super().create(vals_list)
-
-    def write(self, vals):
-        if 'project_id' in vals or 'message_follower_ids' not in vals:
-            for record in self:
-                project = record.project_id
-                if vals.get('project_id'):
-                    project = self.env['project.project'].browse(vals['project_id'])
-                if project and project.privacy_visibility == 'portal':
-                    existing_followers = self.env['res.users'].browse(
-                        project.message_follower_ids.ids).exists().ids
-                    if existing_followers:
-                        vals['message_follower_ids'] = [(6, 0, existing_followers)]
-                    else:
-                        vals.pop('message_follower_ids', None)
-        return super().write(vals)
 
     def generate_highlights_html(self, data, url):
         html = []

@@ -11,14 +11,3 @@ class Project(models.Model):
     komodo_private_folder_urls = fields.Text(
         string='Komodo Private Folder URLs',
     )
-
-    def write(self, vals):
-        res = super().write(vals)
-        if 'mail_follower_ids' in vals:
-            for project in self:
-                if project.privacy_visibility == 'portal':
-                    project.document_page_ids.write({
-                        'mail_follower_ids': [
-                            (6, 0, project.mail_follower_ids.ids)]
-                    })
-        return res
