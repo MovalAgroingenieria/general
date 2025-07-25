@@ -12,9 +12,12 @@
             <xpath expr="//field[last()]" position="after">
                 <field name="attendance_modificated" invisible="1"/>
                 <field name="attendance_observations"
-                    placeholder="Required if attendance is modified by user (Min. 6 chars)"
-                    attrs="{'required': [('attendance_modificated', '=', True)]}"/>
-                <field name="attendance_edited" class="text-center"/>
+                       placeholder="Required if attendance is modified by user (Min. 6 chars)"
+                       attrs="{'required': [('attendance_modificated', '=', True)]}"
+                />
+                <field name="attendance_edited"
+                       class="text-center"
+                />
             </xpath>
             <xpath expr="//field[@name='employee_id']" position="attributes">
                 <attribute name="readonly">1</attribute>
@@ -37,8 +40,9 @@
                     <field name="attendance_modificated" invisible="1"/>
                     <field name="attendance_edited"/>
                     <field name="attendance_observations"
-                        placeholder="Required if attendance is modified by user (Min. 6 chars)"
-                        attrs="{'required': [('attendance_modificated', '=', True)]}"/>
+                           placeholder="Required if attendance is modified by user (Min. 6 chars)"
+                           attrs="{'required': [('attendance_modificated', '=', True)]}"
+                    />
                 </group>
             </xpath>
         </field>
@@ -49,7 +53,6 @@
         <field name="name">hr.attendance.form.inherit</field>
         <field name="model">hr.attendance</field>
         <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
-<!--        <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance'))]"/>-->
         <field name="arch" type="xml">
             <xpath expr="//form" position="attributes">
                 <attribute name="groups">hr_attendance.group_hr_attendance</attribute>
@@ -68,7 +71,6 @@
         <field name="name">hr.attendance.form.inherit.manager</field>
         <field name="model">hr.attendance</field>
         <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
-<!--        <field name="groups_id" eval="[(4, ref('hr_attendance.group_hr_attendance_user'))]"/>-->
         <field name="arch" type="xml">
             <xpath expr="//form" position="attributes">
                 <attribute name="groups">hr_attendance.group_hr_attendance</attribute>
@@ -89,7 +91,9 @@
             </xpath>
             <xpath expr="//span[@class='o_kanban_record_title']" position="after">
                 <span style="float: right;" title="Indicates if the attendance has been edited">
-                    <field name="attendance_edited" widget="checkbox"/>
+                    <field name="attendance_edited"
+                           widget="checkbox"
+                    />
                 </span>
             </xpath>
         </field>
@@ -101,12 +105,24 @@
         <field name="inherit_id" ref="hr_attendance.hr_attendance_view_filter"/>
         <field name="arch" type="xml">
             <xpath expr="//filter[@name='nocheckout']" position="after">
-                <filter string="Edited" name="attendance_edited_filter" domain="[('attendance_edited', '=', True)]"/>
-                <filter string="Modificated" name="attendance_modificated_filter" domain="[('attendance_modificated', '=', True)]"/>
+                <filter string="Edited"
+                        name="attendance_edited_filter"
+                        domain="[('attendance_edited', '=', True)]"
+                />
+                <filter string="Modificated"
+                        name="attendance_modificated_filter"
+                        domain="[('attendance_modificated', '=', True)]"
+                />
             </xpath>
             <xpath expr="//filter[@name='groupby_check_out']" position="after">
-                <filter string="Edited" name="attendance_edited_groupby" context="{'group_by': 'attendance_edited'}"/>
-                <filter string="Modificated" name="attendance_modificated_groupby" context="{'group_by': 'attendance_modificated'}"/>
+                <filter string="Edited"
+                        name="attendance_edited_groupby"
+                        context="{'group_by': 'attendance_edited'}"
+                />
+                <filter string="Modificated"
+                        name="attendance_modificated_groupby"
+                        context="{'group_by': 'attendance_modificated'}"
+                />
             </xpath>
         </field>
     </record>
@@ -119,11 +135,8 @@
         <field name="search_view_id" ref="hr_attendance.hr_attendance_view_filter"/>
         <field name="domain">[('employee_id.user_id', '=', uid)]</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
-                No attendance records found
-            </p><p>
-                Your attendance records will be displayed here.
-            </p>
+            <p class="o_view_nocontent_empty_folder">No attendance records found</p>
+            <p>Your attendance records will be displayed here.</p>
         </field>
     </record>
 
@@ -133,34 +146,36 @@
         <field name="view_mode">tree,kanban,form</field>
         <field name="context">{"search_default_today":1}</field>
         <field name="search_view_id" ref="hr_attendance.hr_attendance_view_filter"/>
-        <field name="domain">['|', ('employee_id.user_id', '=', uid), ('employee_id.parent_id.user_id', '=', uid)]</field>
+        <field name="domain">
+            ['|', ('employee_id.user_id', '=', uid), ('employee_id.parent_id.user_id', '=', uid)]
+        </field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
-                No attendance records found
-            </p><p>
-                Your attendance records will be displayed here.
-            </p>
+            <p class="o_view_nocontent_empty_folder">No attendance records found</p>
+            <p>Your attendance records will be displayed here.</p>
         </field>
     </record>
 
     <menuitem id="hr_attendance.menu_hr_attendance_manage_attendances"
-        name="Manager"
-        parent="hr_attendance.menu_hr_attendance_root"
-        sequence="20"
-        groups="hr_attendance.group_hr_attendance"/>
+              name="Manager"
+              parent="hr_attendance.menu_hr_attendance_root"
+              sequence="20"
+              groups="hr_attendance.group_hr_attendance"
+    />
 
     <menuitem id="menu_hr_attendance_view_user_attendances"
-        name="Employee attendances"
-        parent="hr_attendance.menu_hr_attendance_manage_attendances"
-        sequence="11"
-        groups="hr_attendance.group_hr_attendance"
-        action="hr_attendance_employee_action"/>
+              name="Employee attendances"
+              parent="hr_attendance.menu_hr_attendance_manage_attendances"
+              sequence="11"
+              groups="hr_attendance.group_hr_attendance"
+              action="hr_attendance_employee_action"
+    />
 
     <menuitem id="menu_hr_attendance_view_group_attendances"
-        name="Group employee attendances"
-        parent="hr_attendance.menu_hr_attendance_manage_attendances"
-        sequence="12"
-        groups="hr_attendance.group_hr_attendance"
-        action="hr_attendance_group_attendances_action"/>
+              name="Group employee attendances"
+              parent="hr_attendance.menu_hr_attendance_manage_attendances"
+              sequence="12"
+              groups="hr_attendance.group_hr_attendance"
+              action="hr_attendance_group_attendances_action"
+    />
 
 </odoo>
