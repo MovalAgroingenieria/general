@@ -17,8 +17,8 @@
     'data': [
         'security/ir.model.access.csv',
         'views/res_config_settings_view.xml',
-        'views/board_grafana_view.xml',
         'views/base_menu.xml',
+        'views/board_grafana_view.xml',
     ],
     'assets': {
         'web.assets_backend': [
