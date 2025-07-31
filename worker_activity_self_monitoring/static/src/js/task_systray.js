@@ -43,31 +43,27 @@ export class TaskIcon extends Component {
     }
 
     navigateToTask() {
-        // Limpiar historial de navegación y ir al panel de tareas
-        window.history.replaceState({}, '', '/web');
-
-        this.action.doAction('project.action_view_task', {
-            clearBreadcrumbs: true,
-            stackPosition: 'replaceCurrentAction'
-        }).then(() => {
-            // Si hay una tarea activa, navegar a ella después
-            if (this.state.taskRunning && this.state.taskId && this.state.projectId) {
-                setTimeout(() => {
-                    this.action.doAction({
-                        type: 'ir.actions.act_window',
-                        res_model: 'project.task',
-                        res_id: this.state.taskId,
-                        views: [[false, 'form']],
-                        target: 'current',
-                        context: {
-                            'default_project_id': this.state.projectId,
-                            'search_default_project_id': this.state.projectId
-                        },
-                        clearBreadcrumbs: false
-                    });
-                }, 100);
-            }
-        });
+        if (this.state.taskRunning && this.state.taskId) {
+            // Cuando hay tarea activa: crear breadcrumb vista_actual -> panel_tareas -> tarea_especifica
+            this.action.doAction('project.action_view_task', {
+                stackPosition: 'new'  // Añadir al stack en lugar de reemplazar
+            }).then(() => {
+                // Navegar a la tarea específica manteniendo el breadcrumb
+                this.action.doAction({
+                    type: 'ir.actions.act_window',
+                    res_model: 'project.task',
+                    res_id: this.state.taskId,
+                    views: [[false, 'form']],
+                    target: 'current',
+                    stackPosition: 'new'  // Añadir al stack para mantener navegación
+                });
+            });
+        } else {
+            // Cuando no hay tarea activa: ir al panel de tareas manteniendo vista previa
+            this.action.doAction('project.action_view_task', {
+                stackPosition: 'new'  // Añadir al stack para mantener la vista anterior
+            });
+        }
     }
 }
 
