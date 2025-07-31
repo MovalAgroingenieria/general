@@ -12,7 +12,8 @@ export class TaskIcon extends Component {
         this.state = useState({
             taskRunning: false,
             taskId: null,
-            taskName: ""
+            taskName: "",
+            projectId: null
         });
 
         onMounted(() => this.loadTaskData());
@@ -24,35 +25,49 @@ export class TaskIcon extends Component {
             const tasks = await this.orm.searchRead("project.task", [
                 ["starter_user_id", "=", currentUserId],
                 ["task_running", "=", true]
-            ], ["id", "name"], { limit: 1 });
+            ], ["id", "name", "project_id"], { limit: 1 });
 
             if (tasks && tasks.length > 0) {
                 this.state.taskRunning = true;
                 this.state.taskId = tasks[0].id;
                 this.state.taskName = tasks[0].name;
+                this.state.projectId = tasks[0].project_id[0]; // Guardamos el ID del proyecto
             } else {
                 this.state.taskRunning = false;
                 this.state.taskId = null;
                 this.state.taskName = "";
+                this.state.projectId = null;
             }
         } catch (error) {
-            console.error("Error cargando datos de tarea:", error);
         }
     }
 
     navigateToTask() {
-        console.log("Navegando a tareas...");
-        if (this.state.taskRunning && this.state.taskId) {
-            this.action.doAction({
-                type: 'ir.actions.act_window',
-                res_model: 'project.task',
-                res_id: this.state.taskId,
-                views: [[false, 'form']],
-                target: 'current'
-            });
-        } else {
-            this.action.doAction('project.action_view_task');
-        }
+        // Limpiar historial de navegación y ir al panel de tareas
+        window.history.replaceState({}, '', '/web');
+
+        this.action.doAction('project.action_view_task', {
+            clearBreadcrumbs: true,
+            stackPosition: 'replaceCurrentAction'
+        }).then(() => {
+            // Si hay una tarea activa, navegar a ella después
+            if (this.state.taskRunning && this.state.taskId && this.state.projectId) {
+                setTimeout(() => {
+                    this.action.doAction({
+                        type: 'ir.actions.act_window',
+                        res_model: 'project.task',
+                        res_id: this.state.taskId,
+                        views: [[false, 'form']],
+                        target: 'current',
+                        context: {
+                            'default_project_id': this.state.projectId,
+                            'search_default_project_id': this.state.projectId
+                        },
+                        clearBreadcrumbs: false
+                    });
+                }, 100);
+            }
+        });
     }
 }
 
