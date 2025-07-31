@@ -31,19 +31,24 @@
         </field>
     </record>
 
-    <menuitem id="menu_board_grafana_root"
+    <menuitem id="menu_grafana_main"
+        name="Grafana"
+        action="login_into_grafana_action"
+        web_icon="grafana_integration,static/description/icon.png"
+        sequence="7"/>
+
+    <menuitem id="menu_grafana_parameters"
         name="Parameters"
-        parent="board_grafana_integration.menu_board_grafana_sidebar"
+        parent="grafana_integration.menu_grafana_main"
         sequence="10"/>
 
-    <menuitem id="menu_board_grafana_config"
-        parent="board_grafana_integration.menu_board_grafana_root"
-        action="action_res_config_settings_board_grafana"
-        sequence="1"/>
+    <!-- <menuitem id="menu_grafana_config" -->
 
-    <menuitem id="menu_board_grafana_server"
-        parent="board_grafana_integration.menu_board_grafana_root"
+    <menuitem id="menu_grafana_server"
+        parent="grafana_integration.menu_grafana_parameters"
         action="grafana_server_action"
-        sequence="2"/>
+        sequence="20"/>
+
+    <!-- <menuitem id="menu_grafana_dashboard_storage" -->
 
 </odoo>

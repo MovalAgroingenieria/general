@@ -5,12 +5,12 @@
 |badge1|
 
 
-=========================
-Board Grafana integration
-=========================
+===================
+Grafana integration
+===================
 
-Integration with Grafana for Odoo board module. This module enhance Odoo Board
-module with Grafana.
+Integration with Grafana for Odoo. This module allows you to connect to a Grafana server and use its features to
+extract metrics, analyze data, or create dashboards.
 
 **Table of contents**
 
@@ -21,14 +21,9 @@ module with Grafana.
 Description
 ===========
 
-This module allows you to connect to an Organization on a Grafana server
-through proxy authentication for a user attached to that organization. In
-addition, that organization must have a data source configured to connect to
-the PostgreSQL database of your Odoo instance.
-
-After the configuration you will be able to transparently connect to this
-server and use the features of Grafana to extract metrics, analyze data or
-create dashboards and panels.
+This module allows you to connect to a Grafana. Once connected, you need to configure a datasource to connect to the
+PostgreSQL database of your Odoo instance. After this configuration, you will be able to use the features of Grafana
+to extract metrics, analyze data, or create dashboards.
 
 
 Credits
@@ -44,11 +39,16 @@ Authors
 Contributors
 ~~~~~~~~~~~~
 
+* Guillermo Amante <gamante@moval.es>
+* Samuel Fernández <sfernandez@moval.es>
+* Pablo García <pgarcia@moval.es>
 * Alberto Hernández <ahernandez@moval.es>
 * Eduardo Iniesta <einiesta@moval.es>
+* Jesús Martínez <jmartinez@moval.es>
 * Miguel Mora <mmora@moval.es>
-* Salvador Sánchez <ssanchez@moval.es>
+* Miguel Ángel Rodríguez <marodriguez@moval.es>
 * Juanu Sandoval <jsandoval@moval.es>
+* Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
 
 Maintainers
@@ -59,4 +59,4 @@ This module is maintained by Moval Agroingeniería.
 .. image:: https://services.moval.es/static/images/logo_moval_small.png
    :alt: Moval Agroingeniería
    :target: http://moval.es
-  
+

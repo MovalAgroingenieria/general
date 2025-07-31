@@ -1,0 +1,32 @@
+# 2023 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
+{
+    "name": "Grafana Integration",
+    "summary": "Grafana integration for Odoo",
+    "version": "16.0.1.0.0",
+    "category": "Moval General Addons",
+    "website": "http://www.moval.es",
+    "author": "Moval Agroingeniería",
+    "license": "AGPL-3",
+    "application": False,
+    "installable": True,
+    "depends": [
+        "board",
+    ],
+    "data": [
+        "security/ir.model.access.csv",
+        "views/board_grafana_view.xml",
+        "views/res_config_settings_view.xml",
+        "views/grafana_dashboard_storage_view.xml",
+    ],
+    "assets": {
+        "web.assets_backend": [
+            "grafana_integration/static/src/css/grafana_integration.css",
+            "grafana_integration/static/src/lib/iconset/iconset.css",
+        ],
+        "web.report_assets_common": [
+            "grafana_integration/static/src/lib/iconset/iconset.css",
+        ],
+    },
+}

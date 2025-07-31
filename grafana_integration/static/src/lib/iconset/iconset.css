@@ -1,0 +1,51 @@
+@font-face {
+  font-family: 'grafana_iconset';
+  src:  url('fonts/grafana_iconset.eot?brlbrg');
+  src:  url('fonts/grafana_iconset.eot?brlbrg#iefix') format('embedded-opentype'),
+    url('fonts/grafana_iconset.ttf?brlbrg') format('truetype'),
+    url('fonts/grafana_iconset.woff?brlbrg') format('woff'),
+    url('fonts/grafana_iconset.svg?brlbrg#grafana_iconset') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Simplified fa-grafana class (inspired by the native Base Fontawesome module) */
+[class^="fa-grafana-"], [class*=" fa-grafana-"] {
+   display: inline-block;
+   font-family: grafana_iconset;
+   font-style: normal;
+   font-weight: normal;
+   font-variant: normal;
+   text-rendering: auto;
+}
+
+/* Render duotone icons */
+[class*="-duotone"]::before {
+   opacity: 1;
+}
+[class*="-duotone"]::after {
+   opacity: 0.4;
+   margin-left: -1em;
+}
+
+/* Print duotone */
+.duotone-print-white::after {
+  opacity: 1;
+  color: rgba(255, 255, 255, 0.6);
+}
+.duotone-print-color::after {
+  opacity: 1;
+  /* Overwritten by js */
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Icons */
+.fa-grafana-logo:before {
+  content: "\e900";
+}
+.fa-grafana-logo-duotone::before {
+  content: "\e901";
+}
+.fa-grafana-logo-duotone::after {
+  content: "\e902";
+}

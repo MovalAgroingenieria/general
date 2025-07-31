@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="base.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[hasclass('settings')]" position="inside">
-                <div id="board_grafana_settings" class="app_settings_block" data-string="Grafana" string="Grafana" data-key="board_grafana_integration">
+                <div id="board_grafana_settings" class="app_settings_block" data-string="Grafana" string="Grafana" data-key="grafana_integration">
                     <h2>Grafana</h2>
                     <div class="row mt16 o_settings_container">
                         <div class="col-12 col-lg-6 o_setting_box">
@@ -18,6 +18,10 @@
                                         <label for="grafana_url_raw"/>
                                         <field name="grafana_url_raw"/>
                                         <field name="grafana_url" invisible="1"/>
+                                        <label for="grafana_api_key"/>
+                                        <field name="grafana_api_key" password="True"/>
+                                        <label for="grafana_default_datasource"/>
+                                        <field name="grafana_default_datasource"/>
                                         <label for="grafana_force_theme"/>
                                         <field name="grafana_force_theme"/>
                                     </div>
@@ -47,13 +51,18 @@
     </record>
 
     <record id="action_res_config_settings_board_grafana" model="ir.actions.act_window">
-        <field name="name">Configure Board Grafana</field>
+        <field name="name">Configure Grafana</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">res.config.settings</field>
         <field name="view_id" ref="config_settings_view_form"/>
         <field name="view_mode">form</field>
         <field name="target">inline</field>
-        <field name="context">{'module' : 'board_grafana_integration'}</field>
+        <field name="context">{'module' : 'grafana_integration'}</field>
     </record>
+
+    <menuitem id="menu_grafana_config"
+        parent="grafana_integration.menu_grafana_parameters"
+        action="action_res_config_settings_board_grafana"
+        sequence="10"/>
 
 </odoo>
