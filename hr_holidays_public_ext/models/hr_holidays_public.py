@@ -16,16 +16,18 @@ class HrHolidaysPublic(models.Model):
         :param partner_id: ID of the partner
         :return: bool
         """
-        # Avoid warning when both employee_id and partner_id are provided
-        if employee_id and partner_id:
-            employee_id = None
-        partner = self._get_partner_deprecated_employee(partner_id, employee_id)
+        partner = self._get_partner_deprecated_employee(
+            partner_id, employee_id
+        )
         partner_id = partner.id if partner else None
+        # Only pass partner_id to avoid the warning
         holidays_lines = self.get_holidays_list(
-            year=selected_date.year, partner_id=partner_id, employee_id=employee_id
+            year=selected_date.year, partner_id=partner_id
         )
         if holidays_lines:
-            hol_date = holidays_lines.filtered(lambda r: r.date == selected_date)
+            hol_date = holidays_lines.filtered(
+                lambda r: r.date == selected_date
+            )
             if hol_date.ids:
                 return True
         return False
