@@ -8,15 +8,18 @@
             <field name="sequence">18</field>
         </record>
 
-        <record id="group_hr_role_assignment_readonly" model="res.groups">
-            <field name="name">Role Assignment User</field>
+        <record id="group_hr_role_management_user" model="res.groups">
+            <field name="name">Role Management User</field>
             <field name="category_id" ref="hr_role_management.module_category_hr_role_management"/>
-            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
         </record>
 
-        <record id="group_hr_role_assignment_full_access" model="res.groups">
-            <field name="name">Role Assignment Manager</field>
+        <record id="group_hr_role_management_manager" model="res.groups">
+            <field name="name">Role Management Manager</field>
             <field name="category_id" ref="hr_role_management.module_category_hr_role_management"/>
+        </record>
+
+        <record id="base.group_user" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('hr_role_management.group_hr_role_management_user'))]"/>
         </record>
 
     </data>

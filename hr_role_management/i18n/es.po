@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-11 13:32+0000\n"
-"PO-Revision-Date: 2025-06-11 13:32+0000\n"
+"POT-Creation-Date: 2025-07-23 12:54+0000\n"
+"PO-Revision-Date: 2025-07-23 12:54+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -47,6 +47,14 @@ msgid "A role with the same name, level, and department already exists."
 msgstr "Un rol con el mismo nombre, nivel y departamento ya existe."
 
 #. module: hr_role_management
+#. odoo-python
+#: code:addons/hr_role_management/models/hr_role_assignment.py:0
+#: model:ir.model.fields.selection,name:hr_role_management.selection__hr_role_assignment__state__assigned
+#, python-format
+msgid "Achieved/In Progress"
+msgstr "Alcanzado/En progreso"
+
+#. module: hr_role_management
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role__message_needaction
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role_assignment__message_needaction
 msgid "Action Needed"
@@ -77,11 +85,7 @@ msgid "Activity Type Icon"
 msgstr "Icono de tipo de actividad"
 
 #. module: hr_role_management
-#. odoo-python
-#: code:addons/hr_role_management/models/hr_role_assignment.py:0
-#: model:ir.model.fields.selection,name:hr_role_management.selection__hr_role_assignment__state__assigned
 #: model_terms:ir.ui.view,arch_db:hr_role_management.view_hr_role_assignment_search
-#, python-format
 msgid "Assigned"
 msgstr "Asignado"
 
@@ -110,17 +114,14 @@ msgid "Attachment Count"
 msgstr "Recuento de adjuntos"
 
 #. module: hr_role_management
-#: model_terms:ir.actions.act_window,help:hr_role_management.action_hr_role
-msgid "Create and manage employee roles."
-msgstr "Crear y gestionar roles de empleado"
-
-#. module: hr_role_management
+#: model:ir.model.fields,field_description:hr_role_management.field_hr_level__create_uid
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role__create_uid
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role_assignment__create_uid
 msgid "Created by"
 msgstr "Creado por"
 
 #. module: hr_role_management
+#: model:ir.model.fields,field_description:hr_role_management.field_hr_level__create_date
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role__create_date
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role_assignment__create_date
 msgid "Created on"
@@ -138,11 +139,13 @@ msgid "Department"
 msgstr "Departamento"
 
 #. module: hr_role_management
+#: model_terms:ir.ui.view,arch_db:hr_role_management.view_hr_level_form
 #: model_terms:ir.ui.view,arch_db:hr_role_management.view_hr_role_form
 msgid "Description"
 msgstr "Descripción"
 
 #. module: hr_role_management
+#: model:ir.model.fields,field_description:hr_role_management.field_hr_level__display_name
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role__display_name
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role_assignment__display_name
 msgid "Display Name"
@@ -193,6 +196,7 @@ msgid "Font awesome icon e.g. fa-tasks"
 msgstr "Icono de Font Awesome, por ejemplo, fa-tasks"
 
 #. module: hr_role_management
+#: model:ir.model.fields,field_description:hr_role_management.field_hr_level__description
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role__description
 msgid "General Description"
 msgstr "Descripción general"
@@ -210,6 +214,7 @@ msgid "Has Message"
 msgstr "Tiene mensaje"
 
 #. module: hr_role_management
+#: model:ir.model.fields,field_description:hr_role_management.field_hr_level__id
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role__id
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role_assignment__id
 msgid "ID"
@@ -246,57 +251,56 @@ msgid "Is Follower"
 msgstr "Es seguidor"
 
 #. module: hr_role_management
-#. odoo-python
-#: code:addons/hr_role_management/models/hr_role.py:0
-#: model:ir.model.fields.selection,name:hr_role_management.selection__hr_role__level__junior
 #: model_terms:ir.ui.view,arch_db:hr_role_management.view_hr_role_search
-#, python-format
 msgid "Junior"
 msgstr ""
 
 #. module: hr_role_management
+#: model:ir.model.fields,field_description:hr_role_management.field_hr_level____last_update
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role____last_update
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role_assignment____last_update
 msgid "Last Modified on"
 msgstr "Última modificación el"
 
 #. module: hr_role_management
+#: model:ir.model.fields,field_description:hr_role_management.field_hr_level__write_uid
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role__write_uid
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role_assignment__write_uid
 msgid "Last Updated by"
 msgstr "Última actualización por"
 
 #. module: hr_role_management
+#: model:ir.model.fields,field_description:hr_role_management.field_hr_level__write_date
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role__write_date
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role_assignment__write_date
 msgid "Last Updated on"
 msgstr "Última actualización el"
 
 #. module: hr_role_management
-#. odoo-python
-#: code:addons/hr_role_management/models/hr_role.py:0
-#: model:ir.model.fields.selection,name:hr_role_management.selection__hr_role__level__lead
 #: model_terms:ir.ui.view,arch_db:hr_role_management.view_hr_role_search
-#, python-format
 msgid "Lead"
 msgstr "Líder"
 
 #. module: hr_role_management
-#: model:ir.model.fields,field_description:hr_role_management.field_hr_role__level
+#: model:ir.model,name:hr_role_management.model_hr_level
+#: model:ir.model.fields,field_description:hr_role_management.field_hr_role__level_id
+#: model_terms:ir.ui.view,arch_db:hr_role_management.view_hr_level_form
 #: model_terms:ir.ui.view,arch_db:hr_role_management.view_hr_role_search
 msgid "Level"
 msgstr "Nivel"
+
+#. module: hr_role_management
+#: model:ir.actions.act_window,name:hr_role_management.action_hr_level
+#: model:ir.ui.menu,name:hr_role_management.menu_hr_level
+#: model_terms:ir.ui.view,arch_db:hr_role_management.view_hr_level_tree
+msgid "Levels"
+msgstr "Niveles"
 
 #. module: hr_role_management
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role__message_main_attachment_id
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role_assignment__message_main_attachment_id
 msgid "Main Attachment"
 msgstr "Adjunto principal"
-
-#. module: hr_role_management
-#: model_terms:ir.actions.act_window,help:hr_role_management.action_hr_role_assignment
-msgid "Manage assignments of roles to employees."
-msgstr "Gestiona la asignación de roles a los empleados."
 
 #. module: hr_role_management
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role__message_has_error
@@ -317,6 +321,7 @@ msgid "My Activity Deadline"
 msgstr "Fecha límite de mi actividad"
 
 #. module: hr_role_management
+#: model:ir.model.fields,field_description:hr_role_management.field_hr_level__name
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_role__name
 msgid "Name"
 msgstr "Nombre"
@@ -400,16 +405,6 @@ msgid "Role Assignment"
 msgstr "Asignación de rol"
 
 #. module: hr_role_management
-#: model:res.groups,name:hr_role_management.group_hr_role_assignment_full_access
-msgid "Role Assignment Manager"
-msgstr "Gestor asignación roles"
-
-#. module: hr_role_management
-#: model:res.groups,name:hr_role_management.group_hr_role_assignment_readonly
-msgid "Role Assignment User"
-msgstr "Lector asignación roles"
-
-#. module: hr_role_management
 #: model:ir.actions.act_window,name:hr_role_management.action_hr_role_assignment
 #: model:ir.model.fields,field_description:hr_role_management.field_hr_employee__role_assignment_ids
 #: model:ir.model.fields,field_description:hr_role_management.field_res_users__employee_role_assignment_ids
@@ -430,6 +425,16 @@ msgid "Role Management"
 msgstr "Gestión de roles"
 
 #. module: hr_role_management
+#: model:res.groups,name:hr_role_management.group_hr_role_management_manager
+msgid "Role Management Manager"
+msgstr "Administrador de Gestión de Roles"
+
+#. module: hr_role_management
+#: model:res.groups,name:hr_role_management.group_hr_role_management_user
+msgid "Role Management User"
+msgstr "Usuario de Gestión de Roles"
+
+#. module: hr_role_management
 #: model_terms:ir.ui.view,arch_db:hr_role_management.view_hr_role_search
 msgid "Role Name"
 msgstr "Nombre del rol"
@@ -448,16 +453,13 @@ msgstr "Rol con departamento"
 #: model:ir.actions.act_window,name:hr_role_management.action_hr_role
 #: model:ir.ui.menu,name:hr_role_management.menu_hr_role
 #: model:ir.ui.menu,name:hr_role_management.menu_hr_roles
+#: model_terms:ir.ui.view,arch_db:hr_role_management.view_employee_form_inherit_hr_role
 #: model_terms:ir.ui.view,arch_db:hr_role_management.view_hr_role_tree
 msgid "Roles"
 msgstr ""
 
 #. module: hr_role_management
-#. odoo-python
-#: code:addons/hr_role_management/models/hr_role.py:0
-#: model:ir.model.fields.selection,name:hr_role_management.selection__hr_role__level__senior
 #: model_terms:ir.ui.view,arch_db:hr_role_management.view_hr_role_search
-#, python-format
 msgid "Senior"
 msgstr ""
 

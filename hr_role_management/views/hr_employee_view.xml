@@ -1,0 +1,12 @@
+<odoo>
+    <record id="view_employee_form_inherit_hr_role" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.hr.role</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="open_hr_roles" type="object" class="oe_stat_button" icon="fa-users" string="Roles"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

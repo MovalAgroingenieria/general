@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+# 2025 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
@@ -15,6 +19,7 @@ class HrRoleAssignment(models.Model):
         index=True,
         tracking=True,
     )
+
     employee_id = fields.Many2one(
         "hr.employee",
         required=True,
@@ -22,20 +27,23 @@ class HrRoleAssignment(models.Model):
         index=True,
         tracking=True,
     )
+
     date_start = fields.Date(
         required=True,
         default=fields.Date.context_today,
         tracking=True,
     )
+
     state = fields.Selection(
         [
             ("draft", _("Draft")),
             ("validated", _("Validated")),
-            ("assigned", _("Assigned")),
+            ("assigned", _("Achieved/In Progress")),
         ],
         default="draft",
         tracking=True,
     )
+
     note = fields.Html(
         string="Notes",
     )

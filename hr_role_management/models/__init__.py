@@ -5,3 +5,4 @@ from . import hr_role
 from . import hr_role_assignment
 from . import res_users
 from . import hr_employee
+from . import hr_level

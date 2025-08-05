@@ -1,11 +1,15 @@
-from odoo import models, fields, api, _
+# -*- coding: utf-8 -*-
+# 2025 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
+from odoo import models, fields, api
 
 
 class HrRole(models.Model):
     _name = "hr.role"
     _description = "Role"
     _inherit = ["mail.thread", "mail.activity.mixin"]
-    _order = "department_id, level, name"
+    _order = "department_id, level_id, name"
 
     name = fields.Char(
         required=True,
@@ -23,15 +27,12 @@ class HrRole(models.Model):
         tracking=True,
     )
 
-    level = fields.Selection(
-        [
-            ("junior", _("Junior")),
-            ("senior", _("Senior")),
-            ("lead", _("Lead")),
-        ],
+    level_id = fields.Many2one(
+        "hr.level",
+        string="Level",
         required=True,
-        default="junior",
         tracking=True,
+        ondelete="restrict",
     )
 
     tasks_desc = fields.Html(
@@ -57,7 +58,7 @@ class HrRole(models.Model):
     _sql_constraints = [
         (
             "name_department_uniq",
-            "unique(name, department_id, level)",
+            "unique(name, department_id, level_id)",
             "A role with the same name, level, and department already exists.",
         ),
     ]

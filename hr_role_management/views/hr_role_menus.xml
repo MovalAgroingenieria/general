@@ -5,7 +5,7 @@
         <field name="res_model">hr.role</field>
         <field name="view_mode">tree,kanban,form</field>
         <field name="target">current</field>
-        <field name="groups_id" eval="[(4, ref('hr_role_management.group_hr_role_assignment_readonly')), (4, ref('hr_role_management.group_hr_role_assignment_full_access'))]"/>
+        <field name="groups_id" eval="[(4, ref('hr_role_management.group_hr_role_management_user')), (4, ref('hr_role_management.group_hr_role_management_manager'))]"/>
     </record>
 
     <record id="action_hr_role_assignment" model="ir.actions.act_window">
@@ -15,7 +15,15 @@
         <field name="search_view_id" ref="view_hr_role_assignment_search"/>
         <field name="context">{"search_default_group_by_role": 1}</field>
         <field name="target">current</field>
-        <field name="groups_id" eval="[(4, ref('hr_role_management.group_hr_role_assignment_readonly')), (4, ref('hr_role_management.group_hr_role_assignment_full_access'))]"/>
+        <field name="groups_id" eval="[(4, ref('hr_role_management.group_hr_role_management_user')), (4, ref('hr_role_management.group_hr_role_management_manager'))]"/>
+    </record>
+
+    <record id="action_hr_level" model="ir.actions.act_window">
+        <field name="name">Levels</field>
+        <field name="res_model">hr.level</field>
+        <field name="view_mode">tree,form</field>
+        <field name="target">current</field>
+        <field name="groups_id" eval="[(4, ref('hr_role_management.group_hr_role_management_user')), (4, ref('hr_role_management.group_hr_role_management_manager'))]"/>
     </record>
 
     <menuitem
@@ -23,7 +31,7 @@
         name="Roles"
         parent="hr.menu_hr_root"
         sequence="15"
-        groups="hr_role_management.group_hr_role_assignment_readonly,hr_role_management.group_hr_role_assignment_full_access"/>
+        groups="hr_role_management.group_hr_role_management_user,hr_role_management.group_hr_role_management_manager"/>
 
     <menuitem
         id="menu_hr_role"
@@ -31,7 +39,7 @@
         parent="menu_hr_roles"
         action="action_hr_role"
         sequence="10"
-        groups="hr_role_management.group_hr_role_assignment_readonly,hr_role_management.group_hr_role_assignment_full_access"/>
+        groups="hr_role_management.group_hr_role_management_user,hr_role_management.group_hr_role_management_manager"/>
 
     <menuitem
         id="menu_hr_role_assignment"
@@ -39,6 +47,14 @@
         parent="menu_hr_roles"
         action="action_hr_role_assignment"
         sequence="20"
-        groups="hr_role_management.group_hr_role_assignment_readonly,hr_role_management.group_hr_role_assignment_full_access"/>
+        groups="hr_role_management.group_hr_role_management_user,hr_role_management.group_hr_role_management_manager"/>
+
+    <menuitem
+        id="menu_hr_level"
+        name="Levels"
+        parent="menu_hr_roles"
+        action="action_hr_level"
+        sequence="30"
+        groups="hr_role_management.group_hr_role_management_user,hr_role_management.group_hr_role_management_manager"/>
 
 </odoo>
