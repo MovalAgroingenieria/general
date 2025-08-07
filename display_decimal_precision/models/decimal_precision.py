@@ -1,4 +1,4 @@
-# 2023 Moval Agroingeniería
+# 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, fields, models, tools
@@ -18,7 +18,7 @@ class DecimalPrecision(models.Model):
         return super(DecimalPrecision, self).create(vals)
 
     @staticmethod
-    # @tools.ormcache('application') Add in case of performace issues 15/2/2024
+    # @tools.ormcache('application') Add in case of performance issues 15/2/2024
     def get_display_precision(env, application):
         res = 2
         dp = env['decimal.precision']
