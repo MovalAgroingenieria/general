@@ -10,17 +10,30 @@ native_get_description = Field.get_description
 
 def new_get_description(self, env, **kwargs):
     desc = native_get_description(self, env, **kwargs)
-    module_is_installed = False
-    display_decimal_precision_ref = env['ir.module.module'].search(
-        [('name', '=', 'display_decimal_precision'),
-         ('state', '=', 'installed')])
-    if display_decimal_precision_ref:
-        module_is_installed = True
-    if (module_is_installed and hasattr(self, '_related__digits') and
+    if (hasattr(self, '_related__digits') and
        isinstance(self._related__digits, str)):
-        application = self._related__digits
-        desc['digits'] = DecimalPrecision.get_display_precision(
-            env, application)
+        #
+        # IMPORTANT (EIS Note):
+        #
+        # 1. The display_decimal_precision module remains loaded in memory
+        # when a database that has it installed is selected. If you switch
+        # to another database without restarting the instance, the related
+        # code continues to execute.
+        #
+        # 2. To address this issue, a control has been added to prevent the
+        # code from running if display_decimal_precision is not installed.
+        # This control must be implemented with great care, since the
+        # new_get_description method is executed every time a record with
+        # float fields is processed, which can have a significant impact
+        # on performance.
+        #
+        env.cr.execute("""SELECT COUNT(*) FROM ir_module_module
+        WHERE name = 'display_decimal_precision' AND state = 'installed'""")
+        query_results = env.cr.dictfetchall()
+        if query_results and query_results[0].get('count') == 1:
+            application = self._related__digits
+            desc['digits'] = DecimalPrecision.get_display_precision(
+                env, application)
     return desc
 
 
