@@ -3,8 +3,7 @@
 
 {
     "name": "Bundle user experience modules",
-    "summary": "Install at once all common modules related to the user "
-               "experience",
+    "summary": "Install at once all common modules related to the user experience",
     "version": "16.0.1.0.0",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
@@ -21,12 +20,23 @@
         "partner_address_street_number",
         "report_xml",
         "web_advanced_search",
+        "web_company_color",
+        "web_copy_confirm",
+        "web_dark_mode",
+        "web_disable_export_group",
+        "web_group_expand",
         "web_chatter_position",
         "web_listview_range_select",
         "web_no_bubble",
+        "web_pivot_computed_measure",
+        "web_refresher",
+        "web_remember_tree_column_width",
         "web_responsive",
+        "web_send_message_popup",
         "web_sheet_full_width",
         "web_tree_dynamic_colored_field",
+        "web_widget_image_download",
+        "web_widget_one2many_tree_line_duplicate",
     ],
     "data": [
     ],
