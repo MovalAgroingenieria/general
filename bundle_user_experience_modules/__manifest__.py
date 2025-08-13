@@ -13,7 +13,6 @@
     "depends": [
         "base_technical_user",
         "disable_odoo_online",
-        # "edit_save_button",
         "moval_corporate_image",
         "partner_address_street_type",
         "l10n_es_partner_address_street_type",
@@ -23,7 +22,6 @@
         "web_company_color",
         "web_copy_confirm",
         "web_dark_mode",
-        "web_disable_export_group",
         "web_group_expand",
         "web_chatter_position",
         "web_listview_range_select",
@@ -37,6 +35,7 @@
         "web_tree_dynamic_colored_field",
         "web_widget_image_download",
         "web_widget_one2many_tree_line_duplicate",
+        # "web_disable_export_group", # Install later all
     ],
     "data": [
     ],
