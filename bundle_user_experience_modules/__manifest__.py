@@ -12,6 +12,7 @@
     "installable": True,
     "depends": [
         "base_technical_user",
+        "base_fontawesome",
         "disable_odoo_online",
         "moval_corporate_image",
         "partner_address_street_type",
