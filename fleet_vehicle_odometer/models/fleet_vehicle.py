@@ -10,19 +10,22 @@ from odoo.osv import expression
 
 
 class FleetVehicleOdometer(models.Model):
-    _inherit = 'fleet.vehicle.odometer'
+    _inherit = ['mail.thread', 'fleet.vehicle.odometer']
     _description = 'Odometer log for a vehicle'
 
     initial_value = fields.Float(
         string='Initial Odometer Value',
         group_operator="max")
+
     project_id = fields.Many2one(
         comodel_name='project.project',
         string='Project',
         required=True)
+
     quantity = fields.Float(
         string='Quantity',
         compute='_compute_qty_odometer_kms')
+
     trip_driver_id = fields.Many2one(
         comodel_name='res.partner',
         string='Trip Driver',
@@ -31,6 +34,7 @@ class FleetVehicleOdometer(models.Model):
         copy=False,
         default=lambda self: self._default_driver_id()
     )
+
     gap_exists_before = fields.Boolean(
         string='Gap Exists Before',
         compute='_compute_gap_exists_before',
