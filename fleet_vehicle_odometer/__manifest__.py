@@ -12,6 +12,7 @@
     "depends": [
         'project',
         'fleet',
+        'mail',
     ],
     "data": [
         'views/fleet_vehicle_views.xml',

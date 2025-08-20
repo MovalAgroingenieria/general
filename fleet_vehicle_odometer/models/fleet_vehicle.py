@@ -2,17 +2,19 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from dateutil.relativedelta import relativedelta
-
-from odoo import api, fields, models, _
-from odoo.osv import expression
+from odoo import api, fields, models
 
 
+class FleetVehicleOdometerMoval(models.Model):
+    _inherit = 'fleet.vehicle.odometer'
 
-class FleetVehicleOdometer(models.Model):
-    _inherit = ['mail.thread', 'fleet.vehicle.odometer']
-    _description = 'Odometer log for a vehicle'
-    _name = 'fleet.vehicle.odometer.moval'
+    # Override the field parameter validation to allow tracking
+    @api.model
+    def _valid_field_parameter(self, field, name):
+        # Allow tracking parameter even if mail.thread is not inherited
+        if name == 'tracking':
+            return True
+        return super()._valid_field_parameter(field, name)
 
     initial_value = fields.Float(
         string='Initial Odometer Value',
