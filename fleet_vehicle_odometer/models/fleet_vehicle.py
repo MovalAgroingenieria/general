@@ -12,7 +12,7 @@ from odoo.osv import expression
 class FleetVehicleOdometer(models.Model):
     _inherit = ['mail.thread', 'fleet.vehicle.odometer']
     _description = 'Odometer log for a vehicle'
-    _name = 'fleet.vehicle.odometer'
+    _name = 'fleet.vehicle.odometer.moval'
 
     initial_value = fields.Float(
         string='Initial Odometer Value',
