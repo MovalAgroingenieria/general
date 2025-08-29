@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Remote form -->
+    <record id="view_remotecontrol_form" model="ir.ui.view">
+        <field name="name">remotecontrol.form</field>
+        <field name="model">remotecontrol</field>
+        <field name="arch" type="xml">
+        <form string="Remote Control">
+            <sheet>
+            <div name="buttons" class="oe_button_box">
+                <field name="action_count" invisible="1"/>
+                <button name="action_view_actions"
+                                type="object"
+                                class="oe_stat_button"
+                                string="Actions"
+                                icon="fa-cubes"/>
+                <button name="action_view_procedures"
+                                type="object"
+                                class="oe_stat_button"
+                                string="Procedures"
+                                icon="fa-list-ol"/>
+            </div>
+            <group>
+                <field name="name"/>
+                <field name="remotecontrol_type"/>
+                <field name="base_url" attrs="{'invisible':[('remotecontrol_type','!=','rest')]}"/>
+                <field name="timeout"/>
+                <field name="verify_ssl"/>
+                <field name="rate_limit_seconds"/>
+                <field name="max_retries"/>
+                <field name="backoff"/>
+            </group>
+            <notebook>
+                <page string="Connection Parameters">
+                    <field name="connection_params"
+                    placeholder='REST: {"username":"...","password":"..."}  |  SQLA: {"dsn":"postgresql://user:pass@host/db"}'
+                    widget="ace"
+                    options="{'mode': 'json', 'theme': 'monokai'}"
+                    nolabel="1"/>
+                </page>
+                <page string="General Help">
+                    <div style="padding: 20px;">
+                        <h2>Remote Control Action Code Examples</h2>
+
+                        <h3>📋 Available Variables</h3>
+                        <p>When writing action code, you have access to these variables:</p>
+                        <ul>
+                            <li><strong>env</strong> - Odoo environment for database operations</li>
+                            <li><strong>self</strong> - Current action record</li>
+                            <li><strong>bag</strong> - Dictionary to store/share data between actions</li>
+                            <li><strong>base_url</strong> - Base URL from remote control configuration</li>
+                            <li><strong>timeout</strong> - Timeout setting from remote control</li>
+                            <li><strong>fields</strong> - Odoo fields module for field operations</li>
+                            <li><strong>json</strong> - JSON library for data serialization</li>
+                            <li><strong>base64</strong> - For encoding/decoding base64 data</li>
+                            <li><strong>pytz</strong> - Python timezone library</li>
+                            <li><strong>request_retry</strong> - Function for HTTP requests with retry logic</li>
+                            <li><strong>upsert</strong> - Helper function to create or update records</li>
+                        </ul>
+
+                        <h3>🌐 HTTP Requests Examples</h3>
+                        <h4>Basic GET Request:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Simple GET request
+response = request_retry('GET', base_url + '/api/data')
+bag['response_data'] = response.json()
+                        </pre>
+
+                        <h4>GET with Query Parameters:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# GET with query parameters
+params = {
+    'search': 'keyword',
+    'page': 1,
+    'limit': 100
+}
+response = request_retry('GET', base_url + '/api/search', params=params)
+bag['search_results'] = response.json()
+                        </pre>
+
+                        <h4>POST Request with JSON:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# POST with JSON payload
+payload = {'name': 'example', 'value': 123}
+response = request_retry('POST', base_url + '/api/create',
+                        json=payload,
+                        headers={'Content-Type': 'application/json'})
+bag['created_id'] = response.json().get('id')
+                        </pre>
+
+                        <h4>PUT Request for Update:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# PUT request to update a resource
+item_id = 42
+payload = {'status': 'completed', 'updated_at': '2025-08-27'}
+response = request_retry('PUT', f'{base_url}/api/items/{item_id}',
+                        json=payload)
+bag['update_success'] = response.status_code == 200
+                        </pre>
+
+                        <h4>Request with Custom Headers:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Request with authentication headers
+headers = {
+    'Authorization': 'Bearer your-token-here',
+    'Accept': 'application/json',
+    'X-Custom-Header': 'custom-value'
+}
+response = request_retry('GET', base_url + '/api/protected',
+                        headers=headers)
+bag['protected_data'] = response.json()
+                        </pre>
+
+                        <h4>Handling Authentication:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Basic authentication example
+from requests.auth import HTTPBasicAuth
+
+# Get credentials from connection_params
+conn_params = json.loads(self.remote_id.connection_params or '{}')
+username = conn_params.get('username', '')
+password = conn_params.get('password', '')
+
+response = request_retry('GET', base_url + '/api/secure',
+                        auth=HTTPBasicAuth(username, password))
+bag['auth_response'] = response.json()
+                        </pre>
+
+                        <h3>🗄️ Database Operations</h3>
+                        <h4>Create Records:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Create a new record
+partner = env['res.partner'].create({
+    'name': 'API Customer',
+    'email': 'api@example.com',
+    'is_company': True
+})
+bag['partner_id'] = partner.id
+                        </pre>
+
+                        <h4>Search and Update Records:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Find and update records
+partners = env['res.partner'].search([('email', '=', 'api@example.com')])
+if partners:
+    partners.write({'phone': '+1234567890'})
+bag['updated_count'] = len(partners)
+                        </pre>
+
+                        <h4>Advanced Search with Domain:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Complex domain search
+domain = [
+    '&amp;',
+    ('is_company', '=', True),
+    '|',
+    ('country_id.code', '=', 'ES'),
+    ('country_id.code', '=', 'FR')
+]
+companies = env['res.partner'].search(domain, limit=50)
+bag['found_companies'] = len(companies)
+                        </pre>
+
+                        <h4>Using the Upsert Helper:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Create or update a record based on unique fields
+result = upsert(
+    'res.partner',
+    {'email': 'api@example.com'},  # Key fields to identify existing record
+    {'name': 'API Customer', 'phone': '+1234567890'}  # Other fields to update
+)
+bag['partner_id'] = result.id
+                        </pre>
+
+                        <h3>🔄 Data Processing Examples</h3>
+                        <h4>Process API Response:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Fetch and process API data
+response = request_retry('GET', base_url + '/api/users')
+users = response.json()
+
+processed_users = []
+for user in users:
+    if user.get('active', False):
+        processed_users.append({
+            'name': user['name'],
+            'email': user['email'],
+            'external_id': user['id']
+        })
+
+bag['processed_users'] = processed_users
+bag['total_active'] = len(processed_users)
+                        </pre>
+
+                        <h4>Transforming Data Formats:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Convert between data formats
+import csv
+from io import StringIO
+
+# Get CSV data from API
+response = request_retry('GET', base_url + '/api/export')
+csv_data = response.text
+
+# Parse CSV
+csv_file = StringIO(csv_data)
+reader = csv.DictReader(csv_file)
+records = list(reader)
+
+# Transform to Odoo format
+odoo_records = []
+for record in records:
+    odoo_records.append({
+        'name': record['Name'],
+        'amount': float(record['Amount']),
+        'date': record['Date']
+    })
+bag['transformed_records'] = odoo_records
+                        </pre>
+
+                        <h4>Error Handling:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Safe API call with error handling
+try:
+    response = request_retry('GET', base_url + '/api/risky-endpoint')
+    if response.status_code == 200:
+        bag['success'] = True
+        bag['data'] = response.json()
+    else:
+        bag['success'] = False
+        bag['error'] = "HTTP " + str(response.status_code) + ": " + response.text
+except Exception as e:
+    bag['success'] = False
+    bag['error'] = str(e)
+                        </pre>
+
+                        <h4>Using Data from Previous Actions:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Use data from previous action in procedure
+if 'partner_id' in bag:
+    partner = env['res.partner'].browse(bag['partner_id'])
+
+    # Create related record
+    contact = env['res.partner'].create({
+        'name': 'Contact Person',
+        'parent_id': partner.id,
+        'email': 'contact@example.com'
+    })
+bag['contact_id'] = contact.id
+                        </pre>
+
+                        <h3>🚀 Advanced Examples</h3>
+                        <h4>Custom Retry Parameters:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Override retry settings for specific request
+response = request_retry('GET', base_url + '/api/unstable',
+                        max_retries=5,
+                        backoff=2.0,
+                        timeout=30)
+                        </pre>
+
+                        <h4>Working with Files:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Upload file via API
+import tempfile
+import os
+
+# Create a temporary file
+temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.csv')
+try:
+    # Write data to file
+    with open(temp_file.name, 'w') as f:
+        f.write('id,name,value1,test,1232,test2,456')
+
+    # Upload file
+    with open(temp_file.name, 'rb') as f:
+        files = {'file': ('data.csv', f, 'text/csv')}
+        response = request_retry('POST', base_url + '/api/upload',
+                                files=files)
+bag['upload_result'] = response.json()
+finally:
+    # Clean up
+    os.unlink(temp_file.name)
+                        </pre>
+
+                        <h4>Date and Time Handling:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Working with timezones
+from datetime import datetime, timedelta
+
+# Get current time in user's timezone
+user_tz = pytz.timezone(self.env.user.tz or 'UTC')
+now_utc = datetime.now(pytz.UTC)
+now_user_tz = now_utc.astimezone(user_tz)
+
+# Format for display or API
+formatted_date = now_user_tz.strftime('%Y-%m-%d %H:%M:%S')
+bag['current_time'] = formatted_date
+
+# Date calculations
+tomorrow = now_utc + timedelta(days=1)
+bag['tomorrow'] = tomorrow.strftime('%Y-%m-%d')
+                        </pre>
+
+                        <h4>Batch Processing:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Process records in batches to avoid memory issues
+record_ids = env['product.product'].search([('active', '=', True)]).ids
+batch_size = 100
+total = len(record_ids)
+processed = 0
+
+for i in range(0, total, batch_size):
+    batch_ids = record_ids[i:i+batch_size]
+    products = env['product.product'].browse(batch_ids)
+
+    # Process batch
+    for product in products:
+        # Do something with each product
+        pass
+
+    processed += len(batch_ids)
+bag['progress'] = str(processed) + "/" + str(total)
+
+bag['completed'] = True
+                        </pre>
+
+                        <h4>Working with XML:</h4>
+                        <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+# Parse and generate XML
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
+
+# Parse XML response
+response = request_retry('GET', base_url + '/api/xml-data')
+root = ET.fromstring(response.text)
+
+# Extract data
+items = []
+for item in root.findall('./item'):
+    items.append({
+        'id': item.get('id'),
+        'name': item.find('name').text,
+        'value': float(item.find('value').text)
+    })
+bag['xml_items'] = items
+
+# Generate XML
+new_root = ET.Element('request')
+data = ET.SubElement(new_root, 'data')
+ET.SubElement(data, 'type').text = 'update'
+ET.SubElement(data, 'id').text = '12345'
+
+# Convert to string with pretty formatting
+xml_str = minidom.parseString(ET.tostring(new_root)).toprettyxml(indent="  ")
+bag['generated_xml'] = xml_str
+                        </pre>
+                    </div>
+                </page>
+                <page string="Remotecontrol Help">
+                    <field name="remotecontrol_help"/>
+                </page>
+            </notebook>
+            </sheet>
+            <div class="oe_chatter">
+                <field name="message_follower_ids"
+                        widget="mail_followers" groups="base.group_user"/>
+                <field name="message_ids"
+                        widget="mail_thread"/>
+            </div>
+        </form>
+        </field>
+    </record>
+
+    <!-- Remote tree -->
+    <record id="view_remotecontrol_tree" model="ir.ui.view">
+        <field name="name">remotecontrol.tree</field>
+        <field name="model">remotecontrol</field>
+        <field name="arch" type="xml">
+        <tree string="Remote Controls">
+            <field name="name"/>
+            <field name="remotecontrol_type"/>
+            <field name="base_url"/>
+            <field name="rate_limit_seconds"/>
+            <field name="timeout"/>
+        </tree>
+        </field>
+    </record>
+
+    <!-- Action form -->
+    <record id="view_remotecontrol_action_form" model="ir.ui.view">
+        <field name="name">remotecontrol.action.form</field>
+        <field name="model">remotecontrol.action</field>
+        <field name="arch" type="xml">
+        <form string="Action">
+            <header>
+                <button name="test_execute" type="object" string="Test Execute"
+                        class="oe_highlight" attrs="{'invisible':[('active','=',False)]}"/>
+            </header>
+            <sheet>
+            <group>
+                <field name="name"/>
+                <field name="remote_id"/>
+                <field name="active"/>
+            </group>
+            <group string="Runtime">
+                <field name="rate_limit_seconds"/>
+                <field name="max_retries"/>
+                <field name="backoff"/>
+            </group>
+            <group string="Code">
+                <field name="code" widget="ace" options="{'mode': 'python'}"
+                    placeholder="# Use env, bag, client/engine, request_retry, base_url, timeout, rate_limit_seconds"/>
+            </group>
+            </sheet>
+            <div class="oe_chatter">
+                <field name="message_follower_ids"
+                        widget="mail_followers" groups="base.group_user"/>
+                <field name="message_ids"
+                        widget="mail_thread"/>
+            </div>
+        </form>
+        </field>
+    </record>
+
+    <!-- Action tree -->
+    <record id="view_remotecontrol_action_tree" model="ir.ui.view">
+        <field name="name">remotecontrol.action.tree</field>
+        <field name="model">remotecontrol.action</field>
+        <field name="arch" type="xml">
+        <tree string="Actions">
+            <field name="name"/>
+            <field name="remote_id"/>
+            <field name="active"/>
+            <field name="rate_limit_seconds"/>
+            <field name="max_retries"/>
+            <field name="backoff"/>
+        </tree>
+        </field>
+    </record>
+
+    <!-- Procedure form -->
+    <record id="view_remotecontrol_procedure_form" model="ir.ui.view">
+        <field name="name">remotecontrol.procedure.form</field>
+        <field name="model">remotecontrol.procedure</field>
+        <field name="arch" type="xml">
+        <form string="Procedure">
+            <header>
+            <button name="run" type="object" string="Run Now" class="oe_highlight"
+                    attrs="{'invisible':[('active','=',False)]}"/>
+            <button name="test_run" type="object" string="Test Run"
+                    attrs="{'invisible':[('active','=',False)]}"/>
+            <button name="action_create_update_cron" type="object"
+                string="Save Cron" class="oe_highlight"/>
+            </header>
+            <sheet>
+                 <group>
+                    <group string="General">
+                        <field name="name"/>
+                        <field name="remote_id"/>
+                        <field name="active"/>
+                    </group>
+                    <group string="Cron Data">
+                        <field name="interval_number"/>
+                        <field name="interval_type"/>
+                        <field name="nextcall"/>
+                        <field name="numbercall"/>
+                        <field name="cron_id" readonly="1"/>
+                    </group>
+                </group>
+                <group string="Steps">
+                    <field name="step_ids">
+                    <tree editable="bottom">
+                        <field name="sequence"/>
+                        <field name="name"/>
+                        <field name="action_id"/>
+                    </tree>
+                    <form string="Step">
+                        <group>
+                            <field name="sequence" widget="handle"/>
+                            <field name="name"/>
+                            <field name="action_id"/>
+                        </group>
+                    </form>
+                    </field>
+                </group>
+            </sheet>
+            <div class="oe_chatter">
+                <field name="message_follower_ids"
+                        widget="mail_followers" groups="base.group_user"/>
+                <field name="message_ids"
+                        widget="mail_thread"/>
+            </div>
+        </form>
+        </field>
+    </record>
+
+    <!-- Procedure tree -->
+    <record id="view_remotecontrol_procedure_tree" model="ir.ui.view">
+        <field name="name">remotecontrol.procedure.tree</field>
+        <field name="model">remotecontrol.procedure</field>
+        <field name="arch" type="xml">
+        <tree string="Procedures">
+            <field name="name"/>
+            <field name="remote_id"/>
+            <field name="active"/>
+        </tree>
+        </field>
+    </record>
+
+
+    <record id="action_remotecontrol" model="ir.actions.act_window">
+        <field name="name">Remote Controls</field>
+        <field name="res_model">remotecontrol</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+        <p>Create remote controls to connect to REST or SQL sources.</p>
+        </field>
+    </record>
+
+    <record id="action_remotecontrol_action" model="ir.actions.act_window">
+        <field name="name">Actions</field>
+        <field name="res_model">remotecontrol.action</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_remotecontrol_procedure" model="ir.actions.act_window">
+        <field name="name">Procedures</field>
+        <field name="res_model">remotecontrol.procedure</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <menuitem
+        id="menu_remotecontrol"
+        name="Remotes"
+        parent="remotecontrol_root_menu"
+        action="action_remotecontrol"
+        sequence="10"
+    />
+
+    <menuitem
+        id="menu_remotecontrol_actions"
+        name="Actions"
+        parent="remotecontrol_root_menu"
+        action="action_remotecontrol_action"
+        sequence="20"
+    />
+
+    <menuitem
+        id="menu_remotecontrol_procedures"
+        name="Procedures"
+        parent="remotecontrol_root_menu"
+        action="action_remotecontrol_procedure"
+        sequence="30"
+    />
+
+</odoo>
