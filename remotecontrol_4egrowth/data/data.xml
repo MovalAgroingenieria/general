@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_4egrowth" model="remotecontrol">
+            <field name="name">4egrowth</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://panel.4egrowth.com</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="is_4egrowth">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "username": "",
+  "password": ""
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>4eGrowth · Odoo Integration Help</h2>
+<p><strong>Official API docs:</strong> <a href="https://panel.4egrowth.com/api-doc" target="_blank" rel="noopener">https://panel.4egrowth.com/api-doc</a></p>
+
+<hr/>
+
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code> · Base URL: <code>https://panel.4egrowth.com</code></p>
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+  "username": "user@example.com",
+  "password": "*******"
+}</pre>
+<ul>
+  <li><em>Get Token</em> calls <code>/api/login/</code> and stores <code>bag["token"]</code> (JWT <code>access</code>).</li>
+  <li><em>Get devices (plan)</em> and <em>Get readings</em> send <code>Authorization: Bearer &lt;token&gt;</code>.</li>
+</ul>
+
+<h3>2) Default Procedure</h3>
+<ol>
+  <li><strong>Get Token</strong> → obtain JWT and store it in the bag.</li>
+  <li><strong>Get devices (plan)</strong> → build <code>bag["sensors_plan"]</code> from device/sensor config.</li>
+  <li><strong>Get readings</strong> → call <code>/api/data_device/{growth_id}/all_data/</code> with filters and upsert readings.</li>
+</ol>
+
+<h3>3) Device Configuration</h3>
+<p>In each <strong>Device</strong> (<code>mdm.measurement.device</code>) set <em>remotecontrol_params</em>:</p>
+<pre>{
+  "growth_id": "DEVICE_ID_FROM_4EGROWTH",
+  "start_date": "2025-01-01"   // optional fallback if the sensor doesn't define it and no prior readings exist
+}</pre>
+
+<h3>4) Sensor Configuration</h3>
+<p>In each <strong>Sensor</strong> (<code>mdm.measurement.device.sensor</code>) set <em>remotecontrol_params</em>:</p>
+<pre>{
+  "parameter": "humedad",           // query filter name (see list below)
+  "parameter_value": 30,            // depth or selector (e.g., 30 cm)
+  "group": "Humedad suelo",         // payload group
+  "key": "Humedad suelo 30 cm",     // entry under the group with a "data" array
+  "start_date": "2025-01-01"        // optional; else device.start_date; else Jan 1 of current year
+}</pre>
+<p><strong>Notes</strong></p>
+<ul>
+  <li><code>parameter_value</code> may be <em>0</em> and is considered valid.</li>
+  <li><code>group</code> and <code>key</code> must match exactly what the endpoint returns in <code>all_data</code>.</li>
+</ul>
+
+<h3>5) Time Window</h3>
+<ul>
+  <li><em>Get devices (plan)</em> computes <code>initial_date</code> per sensor: last stored reading date → else <code>sensor.start_date</code> → else <code>device.start_date</code> → else Jan 1 of current year.</li>
+  <li><em>Get readings</em> uses <code>initial_date</code> → <code>final_date = today</code> and filters points by <code>YYYY-MM-DD HH:MM:SS</code>.</li>
+  <li>Timestamps are treated as provided by the API (UTC strings) and stored likewise.</li>
+</ul>
+
+<hr/>
+
+<h3>Available query parameters (for <code>/api/data_device/{device_id}/all_data/</code>)</h3>
+<p>Use exactly one of these in the sensors <code>parameter</code> field, and set the corresponding <code>parameter_value</code>:</p>
+<ul>
+  <li><code>humedad</code> (Soil moisture): depth selector. Example values: <code>20</code>, <code>30</code>, <code>40</code>, <code>all</code>, or comma separated (API accepts lists).</li>
+  <li><code>temperatura</code> (Soil temperature): depth selector, similar semantics to <em>humedad</em>.</li>
+  <li><code>potencial</code> (Matric potential): depth selector, similar semantics.</li>
+  <li><code>clima</code> (Weather): variable selector, e.g. <code>eto</code>, <code>temperatura</code>, or <code>all</code>.</li>
+</ul>
+
+<h4>Mapping examples (group/key)</h4>
+<ul>
+  <li>For <strong>Soil moisture</strong> at 30 cm:
+    <ul>
+      <li><code>parameter</code>: <code>humedad</code></li>
+      <li><code>parameter_value</code>: <code>30</code></li>
+      <li><code>group</code>: <code>Humedad suelo</code></li>
+      <li><code>key</code>: <code>Humedad suelo 30 cm</code></li>
+    </ul>
+  </li>
+  <li>For <strong>Soil temperature</strong> at 20 cm:
+    <ul>
+      <li><code>parameter</code>: <code>temperatura</code></li>
+      <li><code>parameter_value</code>: <code>20</code></li>
+      <li><code>group</code>: <code>Temperatura suelo</code></li>
+      <li><code>key</code>: <code>Temperatura suelo 20 cm</code></li>
+    </ul>
+  </li>
+  <li>For <strong>Matric potential</strong> at 20 cm:
+    <ul>
+      <li><code>parameter</code>: <code>potencial</code></li>
+      <li><code>parameter_value</code>: <code>20</code></li>
+      <li><code>group</code>: <code>Potencial matricial</code></li>
+      <li><code>key</code>: <code>Potencial matricial 20 cm</code></li>
+    </ul>
+  </li>
+  <li>For a <strong>Weather</strong> variable:
+    <ul>
+      <li><code>parameter</code>: <code>clima</code></li>
+      <li><code>parameter_value</code>: <code>eto</code> (or <code>all</code>)</li>
+      <li><code>group</code>: <code>Clima</code></li>
+      <li><code>key</code>: <code>eto</code> (or the exact variable name returned by the API)</li>
+    </ul>
+  </li>
+</ul>]]>
+            </field>
+        </record>
+
+        <record id="remotecontrol_4egrowth_action_get_token" model="remotecontrol.action">
+            <field name="name">4eGrowth: Get Token</field>
+            <field name="remote_id" ref="remotecontrol_4egrowth"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Read auth parameter keys from remote.connection_params JSON
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+username = (cfg.get('username') or '').strip()
+password = (cfg.get('password') or '').strip()
+if not username or not password:
+    raise Exception("Missing 4eGrowth credentials: set username/password in connection_params.")
+url = (base_url or '').rstrip('/') + '/api/login/'
+resp = request_retry('POST', url, json={'username': username, 'password': password})
+if resp.status_code >= 400:
+    raise Exception("Login failed: %s %s" % (resp.status_code, resp.text))
+j = resp.json() or {}
+token = j.get('access') or ''
+if not token:
+    raise Exception("Login OK but no 'access' token in response.")
+bag['token'] = token
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_4egrowth_action_get_devices" model="remotecontrol.action">
+            <field name="name">4eGrowth: Get devices (plan)</field>
+            <field name="remote_id" ref="remotecontrol_4egrowth"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Action A: build sensors plan (robust JSON parsing)
+import json
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+sensors = Sensor.search([
+    ('remotecontrol_params','!=',False),
+    ('device_id','!=',False),
+])
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+    parameter = (sensor_cfg.get('parameter') or '').strip()
+    parameter_value = sensor_cfg.get('parameter_value')
+    parameter_group = (sensor_cfg.get('group') or '').strip()
+    parameter_key = (sensor_cfg.get('key') or '').strip()
+    if parameter and parameter_value not in (None,'') and parameter_group and parameter_key:
+        try:
+            device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+        except Exception:
+            device_cfg = {}
+        growth_id = (device_cfg.get('growth_id') or '').strip()
+        if growth_id:
+            last = Reading.search([('sensor_id','=',sensor.id)], order='measurement_time desc', limit=1)
+            if last and last.measurement_time:
+                last_dt = fields.Datetime.from_string(last.measurement_time)
+                initial_date = fields.Date.to_string(last_dt.date())
+            else:
+                start_cfg = (sensor_cfg.get('start_date') or device_cfg.get('start_date'))
+                if start_cfg:
+                    initial_date = start_cfg[:10]
+                else:
+                    year_str = today_str[:4]
+                    initial_date = '%s-01-01' % year_str
+            plan.append({
+                'sensor_id': sensor.id,
+                'device_id': device.id,
+                'growth_id': growth_id,
+                'parameter': parameter,
+                'parameter_value': parameter_value,
+                'parameter_group': parameter_group,
+                'parameter_key': parameter_key,
+                'initial_date': initial_date,
+            })
+bag['sensors_plan'] = plan
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_4egrowth_action_get_readings" model="remotecontrol.action">
+            <field name="name">4eGrowth: Get readings</field>
+            <field name="remote_id" ref="remotecontrol_4egrowth"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Action C: fetch readings by group/key, upsert (generic), and attach audit
+import json, base64
+Remote = self.remote_id
+SensorModel = env['mdm.measurement.device.sensor']
+plan = bag.get('sensors_plan') or []
+token = bag.get('token')
+if not token:
+    raise Exception("Missing token in bag")
+headers = {'Authorization': 'Bearer %s' % token, 'Accept': 'application/json'}
+final_date = fields.Date.today()
+window_start_suffix = ' 00:00:00'
+window_end_suffix   = ' 23:59:59'
+total_upserts = 0
+total_errors = 0
+items = []
+for sensor_plan in plan:
+    sensor_id       = sensor_plan['sensor_id']
+    device_id       = sensor_plan['device_id']
+    growth_id       = sensor_plan['growth_id']
+    parameter       = sensor_plan['parameter']
+    parameter_value = sensor_plan['parameter_value']
+    parameter_group = sensor_plan['parameter_group']
+    parameter_key   = sensor_plan['parameter_key']
+    initial_date    = sensor_plan['initial_date']
+    sensor_record = SensorModel.browse(sensor_id)
+    base = (base_url or '').rstrip('/') + '/api/data_device/%s/all_data/' % growth_id
+    params = {'initial_date': initial_date, 'final_date': final_date, parameter: str(parameter_value)}
+    try:
+        resp = request_retry('GET', base, headers=headers, timeout=timeout, params=params)
+        code = resp.status_code
+        full_url = getattr(resp, 'url', base)
+        if code < 400:
+            payload = resp.json() or {}
+            data_list = payload[parameter_group][parameter_key]['data'] or []
+            window_start = initial_date + window_start_suffix
+            window_end   = final_date   + window_end_suffix
+            upserts = 0
+            errs = 0
+            readings_summary = []
+            for reading in data_list:
+                ts_s = reading['ts']
+                valf = float(reading['value'])
+                if (ts_s >= window_start) and (ts_s <= window_end):
+                    try:
+                        Remote.upsert(
+                            'mdm.measurement.device.sensor.reading',
+                            {'sensor_id': sensor_record.id, 'measurement_time': ts_s},
+                            {'value': valf, 'remotecontrol_origin_id': Remote.id}
+                        )
+                        upserts += 1
+                        readings_summary.append({'ts': ts_s, 'value': valf})
+                    except Exception as e:
+                        errs += 1
+                        readings_summary.append({'ts': ts_s, 'value': valf, 'error': str(e)})
+            total_upserts += upserts
+            total_errors  += errs
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'growth_id': growth_id,
+                'status': 200,
+                'url': full_url,
+                'points_found': len(data_list),
+                'upserts': upserts,
+                'errors': errs,
+                'group': parameter_group,
+                'key': parameter_key,
+                'readings': readings_summary,
+            })
+        else:
+            items.append({'sensor_id': sensor_id, 'device_id': device_id, 'growth_id': growth_id, 'status': code, 'error': (resp.text or '')[:400], 'url': full_url})
+    except Exception as e:
+        items.append({'sensor_id': sensor_id, 'device_id': device_id, 'growth_id': growth_id, 'status': -1, 'error': str(e)})
+audit = {'executed_at': fields.Datetime.now(), 'final_date': final_date, 'total_upserts': total_upserts, 'total_errors': total_errors, 'items': items}
+b64 = base64.b64encode(json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
+fname = 'readings_fetch_%s.json' % fields.Datetime.now().replace(':','').replace('-','').replace(' ','_')
+att = env['ir.attachment'].create({'name': fname, 'datas_fname': fname, 'datas': b64, 'mimetype': 'application/json', 'res_model': 'remotecontrol', 'res_id': Remote.id})
+Remote.message_post(body=u"[Readings] upserts=%s errors=%s" % (total_upserts, total_errors), attachment_ids=[att.id])
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_4egrowth_procedure" model="remotecontrol.procedure">
+            <field name="name">4eGrowth: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_4egrowth"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_4egrowth_step_10_token" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_4egrowth_procedure"/>
+            <field name="action_id" ref="remotecontrol_4egrowth_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_4egrowth_step_20_devices" model="remotecontrol.step">
+            <field name="name">Get devices (plan)</field>
+            <field name="procedure_id" ref="remotecontrol_4egrowth_procedure"/>
+            <field name="action_id" ref="remotecontrol_4egrowth_action_get_devices"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_4egrowth_step_30_readings" model="remotecontrol.step">
+            <field name="name">Get readings</field>
+            <field name="procedure_id" ref="remotecontrol_4egrowth_procedure"/>
+            <field name="action_id" ref="remotecontrol_4egrowth_action_get_readings"/>
+            <field name="sequence">30</field>
+        </record>
+
+    </data>
+</odoo>
