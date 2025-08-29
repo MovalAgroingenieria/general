@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="mdm_reading_view_form" model="ir.ui.view">
+        <field name="name">Sensor Reading Form</field>
+        <field name="model">mdm.measurement.device.sensor.reading</field>
+        <field name="inherit_id" ref="mdm_sensor_management.mdm_reading_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='measurement_time']" position="after">
+                <field name="remotecontrol_origin_id" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='value']" position="attributes">
+                <attribute name="attrs">{'readonly': [('remotecontrol_origin_id', '!=', False)]}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

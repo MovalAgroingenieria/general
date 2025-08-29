@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="mdm_sensor_view_form" model="ir.ui.view">
+        <field name="name">Device Sensor Form</field>
+        <field name="model">mdm.measurement.device.sensor</field>
+        <field name="inherit_id" ref="mdm_sensor_management.mdm_sensor_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='uom_id']" position="after">
+                <field name="remotecontrol_id"/>
+                <field name="remotecontrol_params" widget="ace" options="{'mode': 'json', 'theme': 'monokai'}" placeholder="{'sensor_id': 1234}" attrs="{'invisible': [('remotecontrol_id', '=', False)]}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="mdm_sensor_view_tree" model="ir.ui.view">
+        <field name="name">Device Sensor Tree</field>
+        <field name="model">mdm.measurement.device.sensor</field>
+        <field name="inherit_id" ref="mdm_sensor_management.mdm_sensor_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='uom_id']" position="after">
+                <field name="remotecontrol_id"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
