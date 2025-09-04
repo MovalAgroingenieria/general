@@ -5,7 +5,6 @@
 import base64
 import string
 import random
-import locale
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from lxml import etree
@@ -56,7 +55,7 @@ class CimComplaint(models.Model):
     @api.model
     def _lang_get(self):
         return self.env['res.lang'].get_installed()
-    
+
     @api.model
     def _default_company_id(self):
         companies = self.env['res.company'].search([])
@@ -418,7 +417,7 @@ class CimComplaint(models.Model):
         store=False,
         default=True,
         readonly=False)
-    
+
     @api.depends('complaint_time')
     def _compute_complaint_date(self):
         for record in self:
@@ -426,7 +425,7 @@ class CimComplaint(models.Model):
             if record.complaint_time:
                 complaint_date = record.complaint_time
             record.complaint_date = complaint_date
-            
+
     @api.depends()
     def _compute_choose_company(self):
         param_choose_company = self.env['ir.values'].get_default(
@@ -1334,16 +1333,14 @@ class CimComplaint(models.Model):
 
     def _get_date_str(self, raw_date):
         resp = raw_date
-        default_locale = locale.setlocale(locale.LC_TIME)
-        is_english = True
-        if (self.env.context and 'lang' in self.env.context):
-            is_english = self.env.context['lang'] == 'en_US'
-        try:
-            if is_english:
-                locale.setlocale(locale.LC_TIME, 'en_US.utf8')
-            resp = datetime.strptime(raw_date, '%Y-%m-%d').strftime('%x')
-        finally:
-            locale.setlocale(locale.LC_TIME, default_locale)
+        lang = 'es_ES'
+        if ('lang' in self.env.context and self.env.context['lang']):
+            lang = self.env.context['lang']
+        lang_model = self.env['res.lang'].search([('code', '=', lang)])
+        date_parsed = datetime.datetime.strptime(raw_date, '%Y-%m-%d')
+        resp = str(date_parsed)
+        if (lang_model):
+            resp = date_parsed.strftime(lang_model.date_format)
         return resp
 
     @api.multi
