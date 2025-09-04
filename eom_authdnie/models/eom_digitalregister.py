@@ -700,6 +700,10 @@ class EomDigitalregisterAccess(models.Model):
         result = []
         reduced_access_id = \
             self.env.context.get('reduced_access_id', False)
+        lang = 'es_ES'
+        if ('lang' in self.env.context and self.env.context['lang']):
+            lang = self.env.context['lang']
+        lang_model = self.env['res.lang'].search([('code', '=', lang)])
         for record in self:
             event_time = \
                 fields.Datetime.from_string(record.event_time)
@@ -710,8 +714,12 @@ class EomDigitalregisterAccess(models.Model):
             event_time_str = str(event_time)
             date_str = event_time_str[:10]
             hour_str = event_time_str[-8:]
-            name = datetime.datetime.strptime(
-                date_str, '%Y-%m-%d').strftime('%x') + ' ' + hour_str
+            date_parsed = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+            formated_date_str = str(date_parsed)
+            if (lang_model):
+                formated_date_str = date_parsed.strftime(
+                    lang_model.date_format)
+            name = formated_date_str + ' ' + hour_str
             if not reduced_access_id:
                 name = record.digitalregister_id.name + ' (' + \
                     record.digitalregister_id.fullname_firstname + ')' + \
