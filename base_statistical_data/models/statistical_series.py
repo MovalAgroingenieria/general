@@ -123,18 +123,18 @@ class StatisticalSeries(models.AbstractModel):
     @api.multi
     def name_get(self):
         result = []
-        default_locale = locale.setlocale(locale.LC_TIME)
-        is_english = ('lang' in self.env.context and
-                      self.env.context['lang'] == 'en_US')
+        lang = 'es_ES'
+        if ('lang' in self.env.context and self.env.context['lang']):
+            lang = self.env.context['lang']
+        lang_model = self.env['res.lang'].search([('code', '=', lang)])
         for record in self:
             data_date = ''
-            try:
-                if is_english:
-                    locale.setlocale(locale.LC_TIME, 'en_US.utf8')
-                data_date = datetime.datetime.strptime(
-                    record.data_date, '%Y-%m-%d').strftime('%x')
-            finally:
-                locale.setlocale(locale.LC_TIME, default_locale)
+            date_parsed = datetime.datetime.strptime(
+                record.data_date, '%Y-%m-%d')
+            data_date = str(date_parsed)
+            if (lang_model):
+                data_date = date_parsed.strftime(
+                    lang_model.date_format)
             masterrecord_name = record.masterrecord_name
             name = masterrecord_name + ', ' + data_date
             if self._date_first:
