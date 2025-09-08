@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Paperformat reports -->
-    <record id="paperformat_reports" model="report.paperformat">
+    <!-- Paperformats for reports -->
+    <record id="paperformat_euro_reports" model="report.paperformat">
         <field name="name">European A4 Reports</field>
         <field name="default" eval="True"/>
         <field name="format">A4</field>
@@ -18,12 +18,29 @@
         <field name="dpi">90</field>
     </record>
 
+    <record id="paperformat_euro_reports_max" model="report.paperformat">
+        <field name="name">European A4 Reports Max</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">29</field>
+        <field name="margin_bottom">40</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">25</field>
+        <field name="dpi">90</field>
+    </record>
+
     <!-- External layouts styles -->
-    <template id="external_layout_striped" inherit_id="web.external_layout_striped">
-        <div t-attf-class="o_company_#{company.id}_layout footer o_background_footer" position="replace">
-            <div t-attf-class="o_company_#{company.id}_layout footer o_background_footer">
-                <div class="text-center">
-                    <ul class="list-inline">
+    <template id="external_layout_standard" inherit_id="web.external_layout_standard">
+        <!-- Footer -->
+        <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout" position="replace">
+            <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
+                <div class="text-center" style="border-top: 1px solid black;">
+                    <ul class="list-inline mb4">
                         <div t-field="company.report_footer" style="font-size: 8px; margin-top: 2px; text-align: justify;"/>
                     </ul>
                     <div t-if="report_type == 'pdf'" class="text-muted text-end" style="font-size: 8px;">
@@ -40,6 +57,7 @@
     </template>
 
     <template id="external_layout_boxed" inherit_id="web.external_layout_boxed">
+        <!-- Footer -->
         <div t-attf-class="footer o_boxed_footer o_company_#{company.id}_layout" position="replace">
             <div t-attf-class="footer o_boxed_footer o_company_#{company.id}_layout">
                 <div>
@@ -58,6 +76,7 @@
     </template>
 
     <template id="external_layout_bold" inherit_id="web.external_layout_bold">
+        <!-- Footer -->
         <div t-attf-class="footer o_clean_footer o_company_#{company.id}_layout" position="replace">
             <div t-attf-class="footer o_clean_footer o_company_#{company.id}_layout">
                 <div class="row">
@@ -81,11 +100,12 @@
         </div>
     </template>
 
-    <template id="external_layout_standard" inherit_id="web.external_layout_standard">
-        <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout" position="replace">
-            <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
-                <div class="text-center" style="border-top: 1px solid black;">
-                    <ul class="list-inline mb4">
+    <template id="external_layout_striped" inherit_id="web.external_layout_striped">
+        <!-- Footer -->
+        <div t-attf-class="o_company_#{company.id}_layout footer o_background_footer" position="replace">
+            <div t-attf-class="o_company_#{company.id}_layout footer o_background_footer">
+                <div class="text-center">
+                    <ul class="list-inline">
                         <div t-field="company.report_footer" style="font-size: 8px; margin-top: 2px; text-align: justify;"/>
                     </ul>
                     <div t-if="report_type == 'pdf'" class="text-muted text-end" style="font-size: 8px;">
