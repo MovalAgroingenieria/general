@@ -1,57 +1,68 @@
 .. |badge1| image:: https://img.shields.io/badge/licence-AGPL--3-blue.png
-    :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
-    :alt: License: AGPL-3
+  :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
+  :alt: License: AGPL-3
 
 |badge1|
 
 
 # Account Analytic Distribution Simple
 
-Este módulo reemplaza el widget complejo de distribución analítica con un campo **many2one nativo** que permite seleccionar CUALQUIER cuenta analítica directamente, con el estilo y funcionalidad exacta de los campos nativos de Odoo.
+This module replaces the complex analytic distribution widget with a **native many2one field** that allows selecting ANY analytic account directly, with the exact style and functionality of Odoo's native fields.
 
-## Funcionalidad
+## Supported Models
 
-- **Campo many2one nativo**: Usa el widget estándar de Odoo con todas sus características
-- **Autocompletado y búsqueda**: Funcionalidad completa de búsqueda y filtrado
-- **Estilo idéntico**: Exactamente igual a otros campos many2one del sistema
-- **Una sola cuenta**: Selección de una cuenta analítica al 100%
-- **Sincronización automática**: El campo original `analytic_distribution` se mantiene sincronizado
-- **Vista readonly integrada**: Muestra el nombre de la cuenta cuando es de solo lectura
+- **Account Move Lines** (invoice lines, journal entry lines)
 
-## Ventajas sobre el widget original
+## Functionality
 
-1. **Sin limitaciones de plan**: Acceso a todas las cuentas analíticas sin restricciones
-2. **Interfaz nativa**: Misma experiencia que otros campos del sistema
-3. **Búsqueda avanzada**: Autocompletado, filtros, y todas las características many2one
-4. **Mejor rendimiento**: Usa los componentes optimizados de Odoo
-5. **Integración perfecta**: No requiere JavaScript personalizado ni assets adicionales
+- **Native many2one field**: Uses Odoo's standard widget with all its features
+- **Autocomplete and search**: Full search and filtering functionality
+- **Identical style**: Exactly the same as other many2one fields in the system
+- **Single account**: Selection of one analytic account only
+- **Automatic synchronization**: The original `analytic_distribution` field remains synchronized
+- **Integrated readonly view**: Displays the account name when in readonly mode
 
-## Implementación técnica
+## Advantages over the original widget
 
-- **Campo computado**: `analytic_account_single` como Many2one hacia `account.analytic.account`
-- **Sincronización bidireccional**:
-  - `_compute_analytic_account_single()`: Convierte JSON → Many2one
-  - `_inverse_analytic_account_single()`: Convierte Many2one → JSON (100%)
-- **Herencia de vistas**: Oculta el campo original y muestra el nuevo campo inline
+1. **No plan limitations**: Access to all analytic accounts without restrictions
+2. **Native interface**: Same experience as other system fields
+3. **Advanced search**: Autocomplete, filters, and all many2one features
+4. **Better performance**: Uses Odoo's optimized components
+5. **Seamless integration**: No custom JavaScript or additional assets required
 
-## Instalación
+## Technical Implementation
 
-1. Coloca el módulo en tu directorio de addons
-2. Actualiza la lista de módulos
-3. Instala el módulo `account_analytic_distribution_ungrouped`
-4. Recarga la página del navegador (Ctrl+F5) para cargar los nuevos assets
+- **Computed field**: `analytic_account_single` as Many2one pointing to `account.analytic.account`
+- **Bidirectional synchronization**:
+  - `_compute_analytic_account_single()`: Converts JSON → Many2one
+  - `_inverse_analytic_account_single()`: Converts Many2one → JSON (100%)
+- **View inheritance**:
+  - `account.move.line`: Hides original field in invoice and journal entry forms
+- **Models extended**:
+  - `AccountMoveLine` for invoice lines and journal entries
 
-## Uso
+## Installation
 
-Una vez instalado, el campo de distribución analítica en las líneas de factura se mostrará como una tabla donde puedes:
+1. Place the module in your addons directory
+2. Update the module list
+3. Install the `account_analytic_distribution_ungrouped` module
+4. Reload the browser page (Ctrl+F5) to load the new assets
 
-1. Seleccionar cualquier cuenta analítica del dropdown
-2. Establecer el porcentaje deseado
-3. Agregar múltiples líneas de distribución
-4. Ver el total en tiempo real
-5. Eliminar líneas no deseadas
+## Usage
 
-## Compatibilidad
+Once installed, the analytic distribution field will be displayed as a simple many2one field in:
+
+### Invoice Lines
+In invoice lines and journal entry lines you can:
+1. Select any analytic account from the dropdown
+2. The selected account will be automatically assigned 100%
+3. View the account name when in readonly mode
+
+## Future Enhancements
+
+Support for bank statement lines is planned for future versions when used in conjunction with OCA reconciliation modules.
+
+## Compatibility
 
 - Odoo 16.0
-- Requiere los módulos `account` y `analytic`
+- Requires the `account` and `analytic` modules

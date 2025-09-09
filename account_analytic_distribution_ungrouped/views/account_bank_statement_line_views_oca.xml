@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- This view will only be loaded if account_reconcile_oca is installed -->
+        <record id="view_bank_statement_line_form_analytic_simple" model="ir.ui.view">
+            <field name="name">account.bank.statement.line.form.analytic.simple</field>
+            <field name="model">account.bank.statement.line</field>
+            <field name="inherit_id" ref="account_reconcile_oca.view_bank_statement_line_form_reconcile"/>
+            <field name="arch" type="xml">
+                <!-- Replace the analytic_distribution widget with our simple many2one field -->
+                <xpath expr="//field[@name='analytic_distribution']" position="replace">
+                    <field name="analytic_account_single"
+                           string="Analytic Account"
+                           context="{'search_default_active': 1}"
+                           options="{'no_create': False, 'no_create_edit': False}"
+                           attrs="{'invisible': ['|', ('manual_kind', '=', 'liquidity'), ('manual_reference', '=', False)], 'readonly': [('is_reconciled', '=', True)]}"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
