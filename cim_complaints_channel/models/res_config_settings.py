@@ -78,6 +78,14 @@ class ResConfigSettings(models.TransientModel):
         string='E-mail for notice',
         config_parameter="cim_complaints_channel.email_for_notice",)
 
+    choose_company = fields.Boolean(
+        string='Choose company',
+        help='If checked, the user will be able to choose the company on'
+        ' suggestions and instances.',
+        default=False,
+        config_parameter="cim_complaints_channel.choose_company",
+    )
+
     _sql_constraints = [
         ('valid_length_tracking_code',
          'CHECK (length_tracking_code > 0)',

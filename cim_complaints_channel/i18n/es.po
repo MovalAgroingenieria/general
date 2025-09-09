@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-21 09:23+0000\n"
-"PO-Revision-Date: 2025-03-21 09:23+0000\n"
+"POT-Creation-Date: 2025-09-08 10:39+0000\n"
+"PO-Revision-Date: 2025-09-08 10:39+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -406,11 +406,13 @@ msgstr "Plazo de acuse de recibo (número de días)"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_res_config_settings__acknowledgement_period
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_res_registry_config_settings__acknowledgement_period
 msgid "Acknowledgement period for the complaint admission"
 msgstr "Plazo de acuse de recibo para la admisión de la denuncia"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,help:cim_complaints_channel.field_res_config_settings__acknowledgement_period
+#: model:ir.model.fields,help:cim_complaints_channel.field_res_registry_config_settings__acknowledgement_period
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.res_config_settings_view_form
 msgid "Acknowledgement period for the complaint admission (number of days)"
 msgstr ""
@@ -576,6 +578,17 @@ msgid "Cause of the rejection"
 msgstr "Motivo del rechazo"
 
 #. module: cim_complaints_channel
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint__choose_company
+msgid "Choose Company"
+msgstr "Seleccionar Compañía"
+
+#. module: cim_complaints_channel
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_res_config_settings__choose_company
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_res_registry_config_settings__choose_company
+msgid "Choose company"
+msgstr "Seleccionar compañía"
+
+#. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint__name
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_wizard_complainant_data__name
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_wizard_reject_complaint__name
@@ -672,6 +685,12 @@ msgstr "Comunicaciones enviadas"
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_communication_view_search
 msgid "Communications submitted from the website"
 msgstr "Comunicaciones enviadas desde la web"
+
+#. module: cim_complaints_channel
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint__company_id
+#: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_view_form
+msgid "Company"
+msgstr "Compañía"
 
 #. module: cim_complaints_channel
 #. odoo-python
@@ -870,6 +889,11 @@ msgid "Configuration"
 msgstr "Configuración"
 
 #. module: cim_complaints_channel
+#: model:ir.model,name:cim_complaints_channel.model_res_config_settings
+msgid "Configuration of the electronic office"
+msgstr "Ajustes de configuración"
+
+#. module: cim_complaints_channel
 #: model:cim.complaint.type,name:cim_complaints_channel.cim_complaint_type_conflict_interests
 msgid "Conflict of interests"
 msgstr "Conflicto de intereses"
@@ -950,6 +974,12 @@ msgid "Dead. Date"
 msgstr "Fecha límite"
 
 #. module: cim_complaints_channel
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_res_config_settings__deadline
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_res_registry_config_settings__deadline
+msgid "Deadline (months)"
+msgstr "Plazo (meses)"
+
+#. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint__param_deadline
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_res_config_settings__deadline
 msgid "Deadline (number of months)"
@@ -1004,6 +1034,7 @@ msgstr "Nombre del testigo descifrado"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,help:cim_complaints_channel.field_res_config_settings__sequence_complaint_code_id
+#: model:ir.model.fields,help:cim_complaints_channel.field_res_registry_config_settings__sequence_complaint_code_id
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.res_config_settings_view_form
 msgid "Default values of the complaint codes"
 msgstr "Valores por defecto de los códigos de denuncia"
@@ -1129,12 +1160,14 @@ msgstr "Email"
 #. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint__param_email_for_notice
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_res_config_settings__email_for_notice
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_res_registry_config_settings__email_for_notice
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.res_config_settings_view_form
 msgid "E-mail for notice"
 msgstr "E-mail para aviso"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_res_config_settings__automatic_email_state
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_res_registry_config_settings__automatic_email_state
 msgid "E-mail to complainant after change state of complaint (y/n)"
 msgstr ""
 "E-mail al denunciante después de cambiar el estado de la denuncia (s/n)"
@@ -1148,6 +1181,7 @@ msgstr ""
 #. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint_communication__automatic_email_validate_com
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_res_config_settings__automatic_email_validate_com
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_res_registry_config_settings__automatic_email_validate_com
 msgid "E-mail to complainant after validate communication (y/n)"
 msgstr "E-mail al denunciante después de validar la comunicación (s/n)"
 
@@ -1203,11 +1237,13 @@ msgstr "Extender"
 #. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint__param_deadline_extended
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_res_config_settings__deadline_extended
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_res_registry_config_settings__deadline_extended
 msgid "Extended Deadline (number of months)"
 msgstr "Fecha límite prorrogada (número de meses)"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,help:cim_complaints_channel.field_res_config_settings__deadline_extended
+#: model:ir.model.fields,help:cim_complaints_channel.field_res_registry_config_settings__deadline_extended
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.res_config_settings_view_form
 msgid "Extended complaint deadline (number of months)"
 msgstr "Denuncia prorrogada (número de meses)"
@@ -1320,9 +1356,21 @@ msgstr "Si está marcado, los nuevos mensajes requieren su atención."
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,help:cim_complaints_channel.field_cim_complaint__message_has_error
+#: model:ir.model.fields,help:cim_complaints_channel.field_cim_complaint__message_has_sms_error
 #: model:ir.model.fields,help:cim_complaints_channel.field_cim_complaint_communication__message_has_error
+#: model:ir.model.fields,help:cim_complaints_channel.field_cim_complaint_communication__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr "Si está marcado, algunos mensajes tienen un error de entrega."
+
+#. module: cim_complaints_channel
+#: model:ir.model.fields,help:cim_complaints_channel.field_res_config_settings__choose_company
+#: model:ir.model.fields,help:cim_complaints_channel.field_res_registry_config_settings__choose_company
+msgid ""
+"If checked, the user will be able to choose the company on suggestions and "
+"instances."
+msgstr ""
+"Si está marcado, el usuario podrá elegir la empresa en los escritos y "
+"sugerencias."
 
 #. module: cim_complaints_channel
 #. odoo-python
@@ -1386,6 +1434,11 @@ msgstr ""
 #, python-format
 msgid "Incomplete information."
 msgstr "Información incompleta."
+
+#. module: cim_complaints_channel
+#: model_terms:ir.ui.view,arch_db:cim_complaints_channel.res_config_settings_view_form
+msgid "Indicate Company"
+msgstr "Indicar empresa"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint__infringement_level
@@ -1582,6 +1635,7 @@ msgstr "Ultima actualización"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_res_config_settings__length_tracking_code
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_res_registry_config_settings__length_tracking_code
 msgid "Length of the tracking code (number of characters)"
 msgstr "Tamaño del código de seguimiento (número de caracteres)"
 
@@ -1722,6 +1776,20 @@ msgid "New complaint:"
 msgstr "Alta de denuncia:"
 
 #. module: cim_complaints_channel
+#. odoo-python
+#: code:addons/cim_complaints_channel/models/cim_complaint.py:0
+#, python-format
+msgid "No company found."
+msgstr "Compañía no encontrada."
+
+#. module: cim_complaints_channel
+#. odoo-python
+#: code:addons/cim_complaints_channel/models/cim_complaint.py:0
+#, python-format
+msgid "No root company found."
+msgstr "Compañía matriz no encontrada."
+
+#. module: cim_complaints_channel
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.cim_complaint_view_search
 msgid "Non-Anonymous complaints"
 msgstr "No anónimas"
@@ -1759,11 +1827,13 @@ msgstr "Notas (como texto)"
 #. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint__param_notice_period
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_res_config_settings__notice_period
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_res_registry_config_settings__notice_period
 msgid "Notice Period (number of days)"
 msgstr "Aviso previo (número de días)"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,help:cim_complaints_channel.field_res_config_settings__notice_period
+#: model:ir.model.fields,help:cim_complaints_channel.field_res_registry_config_settings__notice_period
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.res_config_settings_view_form
 msgid "Notice period before the complaint deadline (number of days)"
 msgstr "Aviso previo al vencimiento de la denuncia (número de días)"
@@ -1813,6 +1883,12 @@ msgstr "Número de mensajes que requieren acción"
 #: model:ir.model.fields,help:cim_complaints_channel.field_cim_complaint_communication__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr "Número de mensajes con error de entrega"
+
+#. module: cim_complaints_channel
+#: model:ir.model.fields,help:cim_complaints_channel.field_res_config_settings__deadline
+#: model:ir.model.fields,help:cim_complaints_channel.field_res_registry_config_settings__deadline
+msgid "Number of months for resolution within the deadline."
+msgstr "Nº de meses para un resolver dentro del plazo."
 
 #. module: cim_complaints_channel
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.communications_page
@@ -1975,6 +2051,12 @@ msgid "SERIOUS"
 msgstr "GRAVE"
 
 #. module: cim_complaints_channel
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint__message_has_sms_error
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint_communication__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Error de entrega SMS"
+
+#. module: cim_complaints_channel
 #: model:cim.link.type,name:cim_complaints_channel.cim_link_type_self_employed
 msgid "Self-Employed person"
 msgstr "Autónomo"
@@ -1991,12 +2073,14 @@ msgstr "Enviar e-mail"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,help:cim_complaints_channel.field_res_config_settings__automatic_email_complainant_com
+#: model:ir.model.fields,help:cim_complaints_channel.field_res_registry_config_settings__automatic_email_complainant_com
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.res_config_settings_view_form
 msgid "Send e-mail to complainant a copy of your communications"
 msgstr "Enviar e-mail al denunciante una copia de sus comunicaciones"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,help:cim_complaints_channel.field_res_config_settings__automatic_email_state
+#: model:ir.model.fields,help:cim_complaints_channel.field_res_registry_config_settings__automatic_email_state
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.res_config_settings_view_form
 msgid "Send e-mail to complainant after change the state of the complaint"
 msgstr ""
@@ -2004,6 +2088,7 @@ msgstr ""
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,help:cim_complaints_channel.field_res_config_settings__automatic_email_validate_com
+#: model:ir.model.fields,help:cim_complaints_channel.field_res_registry_config_settings__automatic_email_validate_com
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.res_config_settings_view_form
 msgid "Send e-mail to complainant after validate the communication"
 msgstr "Enviar e-mail al denunciante después de validar la comunicación"
@@ -2016,6 +2101,7 @@ msgstr "Enviar aviso relacionado con una comunicación del denunciante"
 #. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_cim_complaint_communication__automatic_email_complainant_com
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_res_config_settings__automatic_email_complainant_com
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_res_registry_config_settings__automatic_email_complainant_com
 msgid "Send the complainant a copy of your communications (y/n)"
 msgstr "Enviar al denunciante una copia de sus comunicaciones (s/n)"
 
@@ -2026,6 +2112,7 @@ msgstr "Enviar código de seguimiento al denunciante"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,field_description:cim_complaints_channel.field_res_config_settings__sequence_complaint_code_id
+#: model:ir.model.fields,field_description:cim_complaints_channel.field_res_registry_config_settings__sequence_complaint_code_id
 msgid "Sequence for the codes of complaints"
 msgstr "Secuencia para los códigos de denuncia"
 
@@ -2145,6 +2232,7 @@ msgstr ""
 
 #. module: cim_complaints_channel
 #: model:ir.model.constraint,message:cim_complaints_channel.constraint_res_config_settings_valid_deadline
+#: model:ir.model.constraint,message:cim_complaints_channel.constraint_res_registry_config_settings_valid_deadline
 msgid "The deadline must be a positive value."
 msgstr "La fecha límite debe ser un valor positivo."
 
@@ -2157,16 +2245,19 @@ msgstr "El plazo extendido no puede ser inferior al plazo normal."
 
 #. module: cim_complaints_channel
 #: model:ir.model.constraint,message:cim_complaints_channel.constraint_res_config_settings_valid_deadline_extended
+#: model:ir.model.constraint,message:cim_complaints_channel.constraint_res_registry_config_settings_valid_deadline_extended
 msgid "The extended deadline must be a positive value."
 msgstr "El plazo extendido debe ser un valor positivo."
 
 #. module: cim_complaints_channel
 #: model:ir.model.constraint,message:cim_complaints_channel.constraint_res_config_settings_valid_length_tracking_code
+#: model:ir.model.constraint,message:cim_complaints_channel.constraint_res_registry_config_settings_valid_length_tracking_code
 msgid "The length of tracking code must be a positive value."
 msgstr "El tamaño del código de seguimiento debe ser un valor positivo."
 
 #. module: cim_complaints_channel
 #: model:ir.model.constraint,message:cim_complaints_channel.constraint_res_config_settings_valid_notice_period
+#: model:ir.model.constraint,message:cim_complaints_channel.constraint_res_registry_config_settings_valid_notice_period
 msgid "The notice period cannot have a negative value."
 msgstr "El plazo de aviso no puede ser negativo."
 
@@ -2226,6 +2317,7 @@ msgstr "Código de seguimiento de la denuncia {{object.name}}"
 
 #. module: cim_complaints_channel
 #: model:ir.model.fields,help:cim_complaints_channel.field_res_config_settings__length_tracking_code
+#: model:ir.model.fields,help:cim_complaints_channel.field_res_registry_config_settings__length_tracking_code
 #: model_terms:ir.ui.view,arch_db:cim_complaints_channel.res_config_settings_view_form
 msgid "Tracking code length to identify complainants (number of characters)"
 msgstr ""
@@ -2401,5 +2493,5 @@ msgstr "comunicación_{{object.name}}"
 
 #. module: cim_complaints_channel
 #: model:mail.template,report_name:cim_complaints_channel.mail_template_tracking_code
-msgid "tracking_code_${{object.name}}"
-msgstr "codigo_seguimiento_${{object.name}}"
+msgid "tracking_code_{{object.name}}"
+msgstr "codigo_seguimiento_{{object.name}}"

@@ -3,15 +3,16 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import base64
-import string
-import random
 import locale
+import random
+import string
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
-from lxml import etree
+
 from Crypto import Random
 from Crypto.Cipher import AES
-from odoo import models, fields, api, modules, exceptions, _
+from dateutil.relativedelta import relativedelta
+from lxml import etree
+from odoo import _, api, exceptions, fields, models, modules
 
 
 class CimComplaint(models.Model):
@@ -59,6 +60,25 @@ class CimComplaint(models.Model):
     def _lang_get(self):
         return self.env['res.lang'].get_installed()
 
+    @api.model
+    def _default_company_id(self):
+        companies = self.env['res.company'].search([])
+        if not companies:
+            raise exceptions.ValidationError(_('No company found.'))
+        if len(companies) == 1:
+            return companies.id
+        else:
+            root_company = self.env['res.company'].search([('parent_id', '=',
+                                                            False)], limit=1)
+            if not root_company:
+                raise exceptions.ValidationError(_('No root company found.'))
+            return root_company.id
+
+    def _get_choose_company(self):
+        param_choose_company = self.env['ir.config_parameter'].get_param(
+            'cim_complaints_channel.choose_company', default='False')
+        return (param_choose_company == 'True')
+    
     name = fields.Char(
         string='Code',
         size=SIZE_SMALL,
@@ -392,6 +412,21 @@ class CimComplaint(models.Model):
         string='E-mail to complainant after complaint change state (y/n)',
         compute='_compute_automatic_email_state',)
 
+    company_id = fields.Many2one(
+        string='Company',
+        comodel_name='res.company',
+        required=False,
+        index=True,
+        default=lambda self: self._default_company_id(),
+    )
+
+    choose_company = fields.Boolean(
+        compute='_compute_choose_company',
+        string='Choose Company',
+        store=False,
+        default=_get_choose_company,
+        readonly=False)
+
     @api.depends('complaint_time')
     def _compute_complaint_date(self):
         for record in self:
@@ -518,6 +553,13 @@ class CimComplaint(models.Model):
                 if current_date > deadline_acknowledgement:
                     is_acknowledgement_expired = True
             record.is_acknowledgement_expired = is_acknowledgement_expired
+
+    def _compute_choose_company(self):
+        param_choose_company = self.env['ir.config_parameter'].get_param(
+            'cim_complaints_channel.choose_company', default='0')
+        flag = (param_choose_company == 'True')
+        for rec in self:
+            rec.choose_company = flag
 
     def _search_is_acknowledgement_expired(self, operator, value):
         complaint_ids = []

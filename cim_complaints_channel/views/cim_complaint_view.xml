@@ -195,6 +195,12 @@
                                     <field name="expected_resolution_date"
                                            string="Resolution Date"
                                            attrs="{'invisible': [('state', '!=', '05_resolved')]}"/>
+                                    <field name="choose_company"
+                                           invisible="1"/>
+                                    <field name="company_id"
+                                           string="Company"
+                                           attrs="{'invisible': [('choose_company', '!=', True)],
+                                           'readonly': [('id', '>', 0)]}"/>
                                 </group>
                             </div>
                         </div>
