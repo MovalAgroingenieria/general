@@ -25,7 +25,9 @@ class AccountPaymentOrder(models.Model):
             ["grouped_payment_order_id"],
         )
         mapped_data = {
-            x["grouped_payment_order_id"][0]: x["grouped_payment_order_id_count"]
+            x["grouped_payment_order_id"][0]: x[
+                "grouped_payment_order_id_count"
+            ]
             for x in rg_res
         }
         for order in self:
@@ -48,7 +50,8 @@ class AccountPaymentOrder(models.Model):
                 order.generate_move()
 
     def generate_move(self):
-        """Create the moves that pay off the move lines from the payment/debit order."""
+        """Create the moves that pay off the move lines """
+        """from the payment/debit order."""
         self.ensure_one()
         trfmoves = self._prepare_trf_moves()
         for hashcode, plines in trfmoves.items():
@@ -77,16 +80,18 @@ class AccountPaymentOrder(models.Model):
     def reconcile_grouped_payments(self, move, payments):
         lines_to_rec = move.line_ids[:-1]
         for payment in payments:
+            journal = payment.journal_id
+            outstanding_accounts = (
+                journal._get_journal_inbound_outstanding_payment_accounts()
+                + journal._get_journal_outbound_outstanding_payment_accounts()
+            )
             lines_to_rec += payment.move_id.line_ids.filtered(
-                lambda x: x.account_id
-                in (
-                    payment.journal_id.payment_debit_account_id,
-                    payment.journal_id.payment_credit_account_id,
-                )
+                lambda x: x.account_id in outstanding_accounts
             )
         lines_to_rec.reconcile()
 
     def _prepare_move(self, payments=None):
+        trfmoves = {}
         if self.payment_type == "outbound":
             ref = _("Payment order %s") % self.name
         else:
@@ -94,13 +99,18 @@ class AccountPaymentOrder(models.Model):
         if payments and len(payments) == 1:
             ref += " - " + payments.name
         vals = {
-            "date": payments[0].date,
+            "date": (
+                payments[0].date if payments and len(payments) > 0
+                else fields.Date.today()
+            ),
             "journal_id": self.journal_id.id,
             "ref": ref,
             "grouped_payment_order_id": self.id,
             "line_ids": [],
         }
         total_company_currency = total_payment_currency = 0
+        if not payments:
+            return trfmoves
         for pline in payments:
             amount_company_currency = abs(pline.move_id.line_ids[0].balance)
             total_company_currency += amount_company_currency
@@ -113,11 +123,22 @@ class AccountPaymentOrder(models.Model):
         vals["line_ids"].append((0, 0, trf_ml_vals))
         return vals
 
-    def _prepare_move_line_partner_account(self, payment):
-        if self.payment_type == "inbound":
-            account = payment.journal_id.payment_debit_account_id
+    def _get_payment_account(self, payment):
+        domain = [
+            ("journal_id", "=", self.journal_id.id),
+            ("payment_method_id", "=", payment.payment_method_id.id),
+            ("payment_type", "=", self.payment_type),
+        ]
+        apml = self.env["account.payment.method.line"].search(domain)
+        if apml.payment_account_id:
+            return apml.payment_account_id
+        elif self.payment_type == "inbound":
+            return payment.company_id.account_journal_payment_debit_account_id
         else:
-            account = payment.journal_id.payment_credit_account_id
+            return payment.company_id.account_journal_payment_credit_account_id
+
+    def _prepare_move_line_partner_account(self, payment):
+        account = self._get_payment_account(payment)
         if self.payment_type == "outbound":
             name = _("Payment bank line %s") % payment.name
         else:
@@ -129,10 +150,12 @@ class AccountPaymentOrder(models.Model):
             "partner_id": payment.partner_id.id,
             "account_id": account.id,
             "credit": (
-                self.payment_type == "inbound" and amount_company_currency or 0.0
+                self.payment_type == "inbound" and
+                amount_company_currency or 0.0
             ),
             "debit": (
-                self.payment_type == "outbound" and amount_company_currency or 0.0
+                self.payment_type == "outbound" and
+                amount_company_currency or 0.0
             ),
             "currency_id": payment.currency_id.id,
             "amount_currency": payment.amount * sign,
@@ -144,10 +167,9 @@ class AccountPaymentOrder(models.Model):
     ):
         if self.payment_type == "outbound":
             name = _("Payment order %s") % self.name
-            account = self.journal_id.payment_credit_account_id
         else:
             name = _("Debit order %s") % self.name
-            account = self.journal_id.payment_debit_account_id
+        account = self._get_payment_account(payments[0])
         partner = self.env["res.partner"]
         for index, payment in enumerate(payments):
             if index == 0:
@@ -162,10 +184,12 @@ class AccountPaymentOrder(models.Model):
             "partner_id": partner.id,
             "account_id": account.id,
             "credit": (
-                self.payment_type == "outbound" and amount_company_currency or 0.0
+                self.payment_type == "outbound" and
+                amount_company_currency or 0.0
             ),
             "debit": (
-                self.payment_type == "inbound" and amount_company_currency or 0.0
+                self.payment_type == "inbound" and
+                amount_company_currency or 0.0
             ),
             "currency_id": payments[0].currency_id.id,
             "amount_currency": amount_payment_currency * sign,
