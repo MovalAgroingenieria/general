@@ -69,6 +69,11 @@ class CimComplaint(models.Model):
             if not root_company:
                 raise exceptions.ValidationError(_('No root company found.'))
             return root_company.id
+        
+    def _get_choose_company(self):
+        param_choose_company = self.env['ir.values'].get_default(
+            'res.cim.config.settings', 'choose_company')
+        return param_choose_company == True
 
     name = fields.Char(
         string='Code',
@@ -415,7 +420,7 @@ class CimComplaint(models.Model):
         compute='_compute_choose_company',
         string='Choose Company',
         store=False,
-        default=True,
+        default=_get_choose_company,
         readonly=False)
 
     @api.depends('complaint_time')
