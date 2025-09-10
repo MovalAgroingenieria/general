@@ -10,12 +10,13 @@
         This module replaces the complex analytic distribution widget with a
         simple many2one field that allows selecting any analytic account
         directly. The selected account is automatically assigned 100%.
-        
+
         Currently supported:
         - Account Move Lines (invoice lines, journal entries)
     """,
     'author': 'Moval',
     'website': 'https://www.moval.es',
+    'license': 'AGPL-3',
     'depends': ['account', 'analytic', 'account_reconcile_oca'],
     'auto_install': False,
     'application': False,
