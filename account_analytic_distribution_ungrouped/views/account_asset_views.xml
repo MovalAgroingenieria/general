@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Account Asset Form View - Replace analytic_distribution with simple field -->
+        <record id="view_account_asset_form_analytic_simple" model="ir.ui.view">
+            <field name="name">account.asset.form.analytic.simple</field>
+            <field name="model">account.asset</field>
+            <field name="inherit_id" ref="account_asset_management.account_asset_view_form"/>
+            <field name="arch" type="xml">
+                <!-- Hide the complex analytic_distribution field if present -->
+                <xpath expr="//field[@name='analytic_distribution']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <!-- Add our simple many2one field after the analytic_distribution or at a good location -->
+                <xpath expr="//field[@name='date_start']" position="after">
+                    <field name="analytic_account_single"
+                           string="Analytic Account"
+                           context="{'search_default_active': 1}"
+                           options="{'no_create': False, 'no_create_edit': False}"
+                           groups="analytic.group_analytic_accounting"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
