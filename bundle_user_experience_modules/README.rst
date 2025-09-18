@@ -4,8 +4,6 @@
 
 |badge1|
 
-|
-
 ==============================
 Bundle user experience modules
 ==============================
@@ -21,11 +19,9 @@ Description
 This module has as dependencies modules related to the User Experience, which
 are normally installed but are not a dependency of any base module.
 
-|
 
 Credits
 =======
-
 
 Authors
 ~~~~~~~
@@ -41,8 +37,6 @@ Contributors
 * Juanu Sandoval <jsandoval@moval.es>
 * Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
-
-|
 
 Maintainer
 ~~~~~~~~~~
