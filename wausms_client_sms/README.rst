@@ -6,6 +6,7 @@
 WauSMS client SMS
 =================
 
+
 Description
 ===========
 Send SMS message to one or several partners using WauSMS services and keep a
