@@ -638,7 +638,7 @@ class WebsiteEOffice(WebsiteEom):
                     communication = self.format_communication(
                         communication_obj, digitalregister)
                     efile = self.format_efile(efile_obj, digitalregister)
-                    if button_action == 'view':
+                    if button_action in ['view', 'attachments']:
                         template = \
                             'eom_eoffice.electronic_file_communication_page'
                         context = {

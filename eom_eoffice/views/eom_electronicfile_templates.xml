@@ -156,6 +156,11 @@
                                                                 <form method="post" action="/communication" class="d-inline">
                                                                     <input type="hidden" name="communication_id" t-att-value="comm['id']"/>
                                                                     <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                                                    <t t-if="comm['state_key'] == '03_readed' and comm['is_notification']">
+                                                                        <button type="submit" name="action" value="attachments" class="btn btn-primary btn-sm">
+                                                                            View
+                                                                        </button>
+                                                                    </t>
                                                                     <t t-if="not comm['is_notification']">
                                                                         <button type="submit" name="action" value="view" class="btn btn-primary btn-sm">
                                                                             View
