@@ -6,14 +6,49 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-04 08:25+0000\n"
-"PO-Revision-Date: 2025-07-04 08:25+0000\n"
+"POT-Creation-Date: 2025-09-24 11:45+0000\n"
+"PO-Revision-Date: 2025-09-24 14:42+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
+"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.7\n"
+
+#. module: ecoembes
+#: model:ir.actions.report,print_report_name:ecoembes.action_report_scrap_annual
+msgid "'SCRAP annual report - %s' % (object.year)"
+msgstr "'Informe anual SCRAP - %s' % (object.year)"
+
+#. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
+msgid "<strong>Calculation:</strong> Weight (kg) * Official fee per kg = Contribution amount"
+msgstr "<strong>Cálculo:</strong> Peso (kg) * Tasa oficial por kg = Importe de la cotización"
+
+#. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
+msgid "<strong>No data found</strong>"
+msgstr "<strong>No se han encontrado datos</strong>"
+
+#. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
+#, fuzzy
+msgid ""
+"<strong>Note:</strong> This report shows the SCRAP (Extended Producer Responsibility System) contributions\n"
+"                           calculated based on the packaging materials used in products sold during the selected year."
+msgstr ""
+"<strong>Nota:</strong> Este informe muestra las contribuciones SCRAP (Sistema de Responsabilidad Ampliada del "
+"Productor)\n"
+"                           calculadas a partir de los materiales de envasado utilizados en los productos vendidos "
+"durante el año seleccionado."
+
+#. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
+#, fuzzy
+msgid "<strong>TOTAL GENERAL:</strong>"
+msgstr "<strong>TOTAL GENERAL:</strong>"
 
 #. module: ecoembes
 #: model:product.submaterial,name:ecoembes.submat_aluminum
@@ -36,13 +71,17 @@ msgid "CERAMIC"
 msgstr "CERÁMICA"
 
 #. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_scrap_annual_report_wizard_form
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: ecoembes
 #: model:product.submaterial,name:ecoembes.submat_carton_beverages
 msgid "Cardboard for drinks and food"
 msgstr "Cartón para bebidas y alimentos"
 
 #. module: ecoembes
-#: model:product.submaterial,name:ecoembes.submat_ceramic
-#: model:submaterial.type,name:ecoembes.type_ceramic
+#: model:product.submaterial,name:ecoembes.submat_ceramic model:submaterial.type,name:ecoembes.type_ceramic
 msgid "Ceramic"
 msgstr "Cerámica"
 
@@ -66,9 +105,15 @@ msgid "Compostable packaging"
 msgstr "Envase compostable"
 
 #. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
+msgid "Contribution (€)"
+msgstr "Contribución (€)"
+
+#. module: ecoembes
 #: model:ir.model.fields,field_description:ecoembes.field_material_component_line__create_uid
 #: model:ir.model.fields,field_description:ecoembes.field_product_material__create_uid
 #: model:ir.model.fields,field_description:ecoembes.field_product_submaterial__create_uid
+#: model:ir.model.fields,field_description:ecoembes.field_scrap_annual_report_wizard__create_uid
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__create_uid
 msgid "Created by"
 msgstr "Creado por"
@@ -77,6 +122,7 @@ msgstr "Creado por"
 #: model:ir.model.fields,field_description:ecoembes.field_material_component_line__create_date
 #: model:ir.model.fields,field_description:ecoembes.field_product_material__create_date
 #: model:ir.model.fields,field_description:ecoembes.field_product_submaterial__create_date
+#: model:ir.model.fields,field_description:ecoembes.field_scrap_annual_report_wizard__create_date
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__create_date
 msgid "Created on"
 msgstr "Creado el"
@@ -87,9 +133,10 @@ msgstr "Creado el"
 #: model:ir.model.fields,field_description:ecoembes.field_product_material__display_name
 #: model:ir.model.fields,field_description:ecoembes.field_product_submaterial__display_name
 #: model:ir.model.fields,field_description:ecoembes.field_product_template__display_name
+#: model:ir.model.fields,field_description:ecoembes.field_scrap_annual_report_wizard__display_name
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__display_name
 msgid "Display Name"
-msgstr "Nombre mostrado"
+msgstr "Mostrar nombre"
 
 #. module: ecoembes
 #: model:submaterial.type,name:ecoembes.type_aluminum_drink_cans
@@ -98,8 +145,9 @@ msgid "Drink cans"
 msgstr "Latas de bebidas"
 
 #. module: ecoembes
-#: model:ir.ui.menu,name:ecoembes.menu_product_main
+#: model:ir.ui.menu,name:ecoembes.menu_ecoembes_reports model:ir.ui.menu,name:ecoembes.menu_product_main
 #: model_terms:ir.ui.view,arch_db:ecoembes.nan_product_pack_form
+#, fuzzy
 msgid "Ecoembes"
 msgstr "Ecoembes"
 
@@ -107,6 +155,12 @@ msgstr "Ecoembes"
 #: model:res.groups,name:ecoembes.group_ecoembes_manager
 msgid "Ecoembes Manager"
 msgstr "Responsable de Ecoembes"
+
+#. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
+#, fuzzy
+msgid "Fee (€/kg)"
+msgstr "Tasa (€/kg)"
 
 #. module: ecoembes
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__fee_per_kg
@@ -134,13 +188,18 @@ msgid "GLASS"
 msgstr "VIDRIO"
 
 #. module: ecoembes
-#: model:product.submaterial,name:ecoembes.submat_glass
-#: model:submaterial.type,name:ecoembes.type_glass
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_scrap_annual_report_wizard_form
+msgid "Generate Report"
+msgstr "Generar informe"
+
+#. module: ecoembes
+#: model:product.submaterial,name:ecoembes.submat_glass model:submaterial.type,name:ecoembes.type_glass
 msgid "Glass"
 msgstr "Vidrio"
 
 #. module: ecoembes
 #: model:product.submaterial,name:ecoembes.submat_hdpe
+#, fuzzy
 msgid "HDPE"
 msgstr "HDPE"
 
@@ -150,9 +209,10 @@ msgstr "HDPE"
 #: model:ir.model.fields,field_description:ecoembes.field_product_material__id
 #: model:ir.model.fields,field_description:ecoembes.field_product_submaterial__id
 #: model:ir.model.fields,field_description:ecoembes.field_product_template__id
+#: model:ir.model.fields,field_description:ecoembes.field_scrap_annual_report_wizard__id
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__id
 msgid "ID"
-msgstr "ID"
+msgstr "Identificación"
 
 #. module: ecoembes
 #: model:ir.model.fields,field_description:ecoembes.field_product_product__is_manufactured
@@ -163,7 +223,7 @@ msgstr "Es fabricado"
 #. module: ecoembes
 #: model:ir.model,name:ecoembes.model_account_move
 msgid "Journal Entry"
-msgstr "Asiento contable"
+msgstr "Entrada de Diario"
 
 #. module: ecoembes
 #: model:ir.model.fields,field_description:ecoembes.field_account_move____last_update
@@ -171,6 +231,7 @@ msgstr "Asiento contable"
 #: model:ir.model.fields,field_description:ecoembes.field_product_material____last_update
 #: model:ir.model.fields,field_description:ecoembes.field_product_submaterial____last_update
 #: model:ir.model.fields,field_description:ecoembes.field_product_template____last_update
+#: model:ir.model.fields,field_description:ecoembes.field_scrap_annual_report_wizard____last_update
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type____last_update
 msgid "Last Modified on"
 msgstr "Última modificación el"
@@ -179,6 +240,7 @@ msgstr "Última modificación el"
 #: model:ir.model.fields,field_description:ecoembes.field_material_component_line__write_uid
 #: model:ir.model.fields,field_description:ecoembes.field_product_material__write_uid
 #: model:ir.model.fields,field_description:ecoembes.field_product_submaterial__write_uid
+#: model:ir.model.fields,field_description:ecoembes.field_scrap_annual_report_wizard__write_uid
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__write_uid
 msgid "Last Updated by"
 msgstr "Última actualización por"
@@ -187,6 +249,7 @@ msgstr "Última actualización por"
 #: model:ir.model.fields,field_description:ecoembes.field_material_component_line__write_date
 #: model:ir.model.fields,field_description:ecoembes.field_product_material__write_date
 #: model:ir.model.fields,field_description:ecoembes.field_product_submaterial__write_date
+#: model:ir.model.fields,field_description:ecoembes.field_scrap_annual_report_wizard__write_date
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__write_date
 msgid "Last Updated on"
 msgstr "Última actualización el"
@@ -204,6 +267,12 @@ msgstr "METALES"
 #: model_terms:ir.ui.view,arch_db:ecoembes.view_product_material_search
 msgid "Material"
 msgstr "Material"
+
+#. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
+#, fuzzy
+msgid "Material / Submaterial / Type"
+msgstr "Material / Submaterial / Tipo"
 
 #. module: ecoembes
 #: model:ir.model,name:ecoembes.model_material_component_line
@@ -225,6 +294,36 @@ msgstr "Materiales"
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__name
 msgid "Name"
 msgstr "Nombre"
+
+#. module: ecoembes
+#: code:addons/ecoembes/wizard/scrap_annual_report_wizard.py:0
+#, fuzzy, python-format
+msgid "No SCRAP contributions found for year %s."
+msgstr "No se han encontrado contribuciones SCRAP para el año %s."
+
+#. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
+#, fuzzy
+msgid "No SCRAP contributions were found for the selected year. This could be because:"
+msgstr "No se han encontrado contribuciones SCRAP para el año seleccionado. Esto puede deberse a que:"
+
+#. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
+#, fuzzy
+msgid "No invoices exist for the selected year"
+msgstr "No existen facturas para el año seleccionado"
+
+#. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
+#, fuzzy
+msgid "No products are marked as \"Is Manufactured\""
+msgstr "Ningún producto está marcado como \"Se fabrica\""
+
+#. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
+#, fuzzy
+msgid "No products with material components were sold"
+msgstr "No se vendieron productos con componentes materiales"
 
 #. module: ecoembes
 #: model:submaterial.type,name:ecoembes.type_carton_non_sup
@@ -276,6 +375,7 @@ msgstr "PAPEL/CARTÓN"
 
 #. module: ecoembes
 #: model:product.submaterial,name:ecoembes.submat_pet
+#, fuzzy
 msgid "PET"
 msgstr "PET"
 
@@ -321,8 +421,28 @@ msgid "Rigid plastics SUP"
 msgstr "Plásticos rígidos SUP"
 
 #. module: ecoembes
-#: model:submaterial.type,name:ecoembes.type_carton_sup
-#: model:submaterial.type,name:ecoembes.type_compostable_sup
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
+#, fuzzy
+msgid "SCRAP Annual Contribution Report"
+msgstr "SCRAP Informe anual de contribuciones"
+
+#. module: ecoembes
+#: model:ir.actions.act_window,name:ecoembes.action_scrap_annual_report_wizard
+#: model:ir.actions.report,name:ecoembes.action_report_scrap_annual
+#: model:ir.ui.menu,name:ecoembes.menu_scrap_annual_report
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_scrap_annual_report_wizard_form
+#, fuzzy
+msgid "SCRAP Annual Report"
+msgstr "Informe anual de chatarra"
+
+#. module: ecoembes
+#: model:ir.model,name:ecoembes.model_scrap_annual_report_wizard
+#, fuzzy
+msgid "SCRAP Annual Report Wizard"
+msgstr "Asistente del informe anual SCRAP"
+
+#. module: ecoembes
+#: model:submaterial.type,name:ecoembes.type_carton_sup model:submaterial.type,name:ecoembes.type_compostable_sup
 msgid "SUP Packaging"
 msgstr "Envases SUP"
 
@@ -337,6 +457,12 @@ msgid "Search productMaterial"
 msgstr "Buscar material del producto"
 
 #. module: ecoembes
+#: model:ir.model.fields,help:ecoembes.field_scrap_annual_report_wizard__year
+#, fuzzy
+msgid "Select the year for the SCRAP contribution report"
+msgstr "Seleccione el año para el informe de contribución SCRAP"
+
+#. module: ecoembes
 #: model:product.submaterial,name:ecoembes.submat_steel
 msgid "Steel"
 msgstr "Acero"
@@ -348,6 +474,7 @@ msgstr "Acero"
 #: model:ir.model.fields,field_description:ecoembes.field_product_submaterial__name
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__submaterial_id
 #: model_terms:ir.ui.view,arch_db:ecoembes.view_product_submaterial_search
+#, fuzzy
 msgid "Submaterial"
 msgstr "Submaterial"
 
@@ -370,6 +497,7 @@ msgstr "Submateriales"
 
 #. module: ecoembes
 #: model:ir.model.fields,help:ecoembes.field_submaterial_type__fee_per_kg
+#, fuzzy
 msgid "Tarifa oficial de contribución al SCRAP por kilogramo"
 msgstr "Tarifa oficial de contribución al SCRAP por kilogramo"
 
@@ -406,7 +534,17 @@ msgid "Weight (g)"
 msgstr "Peso (g)"
 
 #. module: ecoembes
-#: model:product.submaterial,name:ecoembes.submat_wood_cork
-#: model:submaterial.type,name:ecoembes.type_wood_cork
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
+msgid "Weight (kg)"
+msgstr "Peso (kg)"
+
+#. module: ecoembes
+#: model:product.submaterial,name:ecoembes.submat_wood_cork model:submaterial.type,name:ecoembes.type_wood_cork
 msgid "Wood and cork"
 msgstr "Madera y corcho"
+
+#. module: ecoembes
+#: model:ir.model.fields,field_description:ecoembes.field_scrap_annual_report_wizard__year
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
+msgid "Year"
+msgstr "Año"
