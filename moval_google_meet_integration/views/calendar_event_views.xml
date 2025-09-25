@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extender la vista del formulario de eventos de calendario -->
+    <record id="view_calendar_event_form_google_meet" model="ir.ui.view">
+        <field name="name">calendar.event.form.google_meet</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Agregar campos de Google Meet después del campo location -->
+            <field name="location" position="after">
+                <field name="google_meet_url" widget="url" string="Google Meet URL" readonly="1"
+                       attrs="{'invisible': [('google_meet_url', '=', False)]}"/>
+                <field name="google_event_id" invisible="1"/>
+                <field name="google_meet_generated" invisible="1"/>
+            </field>
+
+        </field>
+    </record>
+
+    <!-- Extender la vista de lista para mostrar si tiene Google Meet -->
+    <record id="view_calendar_event_tree_google_meet" model="ir.ui.view">
+        <field name="name">calendar.event.tree.google_meet</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_tree"/>
+        <field name="arch" type="xml">
+            <field name="partner_ids" position="after">
+                <field name="google_meet_url" string="Google Meet" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

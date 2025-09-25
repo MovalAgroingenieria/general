@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Add Google Meet settings to General Settings -->
+        <record id="view_general_configuration_google_meet" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit.google.meet</field>
+            <field name="model">res.config.settings</field>
+            <field name="priority">60</field>
+            <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[hasclass('settings')]" position="inside">
+                    <div class="app_settings_block" data-string="Google Meet Integration"
+                         string="Google Meet Integration" data-key="google_meet">
+
+                        <h2>Google Meet Integration</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                    <field name="google_meet_enabled"/>
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <label for="google_meet_enabled"/>
+                                    <div class="text-muted">
+                                        Automatically generate Google Meet links for appointment bookings
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt16 o_settings_container"
+                             attrs="{'invisible': [('google_meet_enabled', '=', False)]}">
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <label for="google_meet_account_email"/>
+                                    <field name="google_meet_account_email"
+                                           string="Google Account Email"
+                                           placeholder="movalagroingenieria@gmail.com"/>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <label for="google_meet_client_id"/>
+                                    <field name="google_meet_client_id" string="Client ID"/>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <label for="google_meet_client_secret"/>
+                                    <field name="google_meet_client_secret"
+                                           string="Client Secret" password="True"/>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <label for="google_meet_calendar_id"/>
+                                    <field name="google_meet_calendar_id"
+                                           string="Calendar ID"
+                                           placeholder="primary"/>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Authorization Section -->
+                        <div class="row mt16 o_settings_container"
+                             attrs="{'invisible': [('google_meet_enabled', '=', False)]}">
+
+                            <div class="col-12 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <div class="o_form_label">Authorization</div>
+                                    <div class="mt8">
+                                        <button name="action_google_meet_authorize"
+                                                string="Authorize Google Meet"
+                                                type="object"
+                                                class="btn btn-primary"
+                                                attrs="{'invisible': [('google_meet_refresh_token', '!=', False)]}"/>
+                                        <button name="action_google_meet_test_connection"
+                                                string="Test Connection"
+                                                type="object"
+                                                class="btn btn-secondary ml8"
+                                                attrs="{'invisible': [('google_meet_refresh_token', '=', False)]}"/>
+                                    </div>
+                                    <field name="google_meet_refresh_token" invisible="1"/>
+                                    <div class="text-muted mt8">
+                                        <span attrs="{'invisible': [('google_meet_refresh_token', '!=', False)]}">
+                                            Click 'Authorize Google Meet' to connect with your Google account
+                                        </span>
+                                        <span attrs="{'invisible': [('google_meet_refresh_token', '=', False)]}"
+                                              class="text-success">
+                                            ✓ Google Meet integration is authorized
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Add Google Meet fields to Booking Type form -->
+        <record id="view_calendar_booking_type_form_google_meet" model="ir.ui.view">
+            <field name="name">calendar.booking.type.form.inherit.google.meet</field>
+            <field name="model">calendar.booking.type</field>
+            <field name="inherit_id" ref="appointment_booking_ce.calendar_booking_type_view_form"/>
+            <field name="arch" type="xml">
+
+                <!-- Add Google Meet section after location field -->
+                <field name="location" position="after">
+
+                    <separator string="Video Conference Settings" colspan="2"/>
+
+                    <group colspan="2" col="2">
+                        <field name="use_google_meet" widget="boolean_toggle"/>
+                        <field name="google_meet_auto_record"
+                               attrs="{'invisible': [('use_google_meet', '=', False)]}"/>
+                    </group>
+
+                    <!-- Meeting URL field - hide when Google Meet is enabled -->
+                    <field name="meeting_base_url"
+                           attrs="{'invisible': [('use_google_meet', '=', True)]}"
+                           string="Custom Meeting URL (when not using Google Meet)"/>
+
+                </field>
+
+                <!-- Add Google Meet template in a notebook page -->
+                <notebook position="inside">
+                    <page string="Google Meet Settings"
+                          attrs="{'invisible': [('use_google_meet', '=', False)]}">
+
+                        <group>
+                            <field name="google_meet_description_template"
+                                   widget="text"
+                                   nolabel="1"
+                                   placeholder="Enter the description template for Google Meet events..."/>
+                        </group>
+
+                        <div class="alert alert-info mt16" role="alert">
+                            <h4>Available Template Variables:</h4>
+                            <ul>
+                                <li><strong>{name}</strong> - Appointment name</li>
+                                <li><strong>{partner_name}</strong> - Client name</li>
+                                <li><strong>{start_date}</strong> - Meeting date and time</li>
+                                <li><strong>{duration}</strong> - Meeting duration in hours</li>
+                                <li><strong>{meet_link}</strong> - Google Meet link (auto-generated)</li>
+                            </ul>
+                        </div>
+
+                    </page>
+                </notebook>
+
+            </field>
+        </record>
+
+        <!-- Add Google Meet indicator to tree view -->
+        <record id="view_calendar_booking_type_tree_google_meet" model="ir.ui.view">
+            <field name="name">calendar.booking.type.tree.inherit.google.meet</field>
+            <field name="model">calendar.booking.type</field>
+            <field name="inherit_id" ref="appointment_booking_ce.calendar_booking_type_view_tree"/>
+            <field name="arch" type="xml">
+
+                <field name="location" position="after">
+                    <field name="use_google_meet" widget="boolean_toggle" optional="show"/>
+                </field>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>
