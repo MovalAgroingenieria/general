@@ -3,7 +3,6 @@
 
 import logging
 
-
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
@@ -30,23 +29,33 @@ class CalendarEvent(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        """Override create to generate Google Meet links for appointment bookings"""
+        """Override create to generate Meet links for appointment bookings"""
         events = super().create(vals_list)
 
         for event in events:
-            # Only process events from appointment booking with Google Meet enabled
-            if (event.booking_type_id and
-                event.booking_type_id._should_use_google_meet() and
-                not event.google_meet_generated):
+            # Only process events from appointment booking with Google Meet
+            if event.booking_type_id:
+                _logger.info(
+                    f"Event has booking type: {event.booking_type_id.name}"
+                )
+                should_use = event.booking_type_id._should_use_google_meet()
+                _logger.info(f"Should use Google Meet: {should_use}")
 
-                try:
-                    event._generate_google_meet_link()
-                except Exception as e:
-                    _logger.error(
-                        f"Failed to generate Google Meet for event {event.id}: {e}"
-                    )
-                    # Continue without Google Meet if generation fails
-                    pass
+                if should_use and not event.google_meet_generated:
+                    try:
+                        _logger.info(
+                            f"Attempting to generate Google Meet for event "
+                            f"{event.id}"
+                        )
+                        event._generate_google_meet_link()
+                    except Exception as e:
+                        _logger.error(
+                            f"Failed to generate Google Meet for event "
+                            f"{event.id}: {e}",
+                            exc_info=True
+                        )
+                        # Continue without Google Meet if generation fails
+                        pass
 
         return events
 
@@ -59,13 +68,14 @@ class CalendarEvent(models.Model):
             for event in self:
                 if (event.google_event_id and
                     event.booking_type_id and
-                    event.booking_type_id._should_use_google_meet()):
+                        event.booking_type_id._should_use_google_meet()):
 
                     try:
                         event._update_google_meet_event()
                     except Exception as e:
                         _logger.error(
-                            f"Failed to update Google Meet event {event.id}: {e}"
+                            f"Failed to update Google Meet event {event.id}:"
+                            f" {e}"
                         )
 
         return result
@@ -85,7 +95,8 @@ class CalendarEvent(models.Model):
 
     def _generate_google_meet_link(self):
         """Generate Google Meet link for this event"""
-        if not self.booking_type_id or not self.booking_type_id._should_use_google_meet():
+        if (not self.booking_type_id or
+                not self.booking_type_id._should_use_google_meet()):
             return False
 
         google_service = self.env['google.meet.service']
@@ -116,7 +127,7 @@ class CalendarEvent(models.Model):
                     'google_meet_url': result['meet_link'],
                     'google_event_id': result['google_event_id'],
                     'google_meet_generated': True,
-                    'meeting_url': result['meet_link'],  # Override Zehntech field
+                    'meeting_url': result['meet_link'],
                 })
 
                 _logger.info(
@@ -128,7 +139,8 @@ class CalendarEvent(models.Model):
                 raise UserError(_("Failed to generate Google Meet link"))
 
         except Exception as e:
-            _logger.error(f"Error generating Google Meet for event {self.id}: {e}")
+            _logger.error(f"Error generating Google Meet for event {self.id}:"
+                          f" {e}")
             raise UserError(_(
                 "Could not generate Google Meet link: %s"
             ) % str(e))
@@ -187,21 +199,27 @@ class CalendarEvent(models.Model):
 
         # Format template with available data
         try:
-            return template.format(
-                name=self.name or "Appointment",
-                partner_name=partner_name,
-                start_date=self.start.strftime("%Y-%m-%d %H:%M") if self.start else "",
-                duration=self.booking_type_id.booking_duration or 1,
-                meet_link=self.google_meet_url or "To be generated"
-            )
+            format_data = {
+                'name': self.name or "Appointment",
+                'partner_name': partner_name,
+                'start_date': (
+                    self.start.strftime("%Y-%m-%d %H:%M") if self.start else ""
+                ),
+                'duration': self.booking_type_id.booking_duration or 1,
+                'meet_link': self.google_meet_url or "To be generated"
+            }
+            return template.format(**format_data)
         except (KeyError, ValueError):
             # Fallback if template formatting fails
-            return self.description or f"Appointment: {self.name or 'Meeting'}"
+            return (
+                self.description or f"Appointment: {self.name or 'Meeting'}"
+            )
 
     def action_regenerate_google_meet(self):
         """Manual action to regenerate Google Meet link"""
         for event in self:
-            if not event.booking_type_id or not event.booking_type_id._should_use_google_meet():
+            if (not event.booking_type_id or
+                    not event.booking_type_id._should_use_google_meet()):
                 raise UserError(_(
                     "Google Meet is not enabled for this booking type"
                 ))

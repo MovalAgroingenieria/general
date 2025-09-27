@@ -56,7 +56,7 @@ class GoogleMeetService(models.AbstractModel):
         base_url = self.env['ir.config_parameter'].sudo().get_param(
             'web.base.url'
         )
-        return f"{base_url}/google_meet/oauth/callback"
+        return f"{base_url}/google_meet_authentication"
 
     @api.model
     def exchange_code_for_token(self, code, client_id, client_secret):

@@ -59,52 +59,56 @@ class GoogleMeetWebsiteCalendar(WebsiteCalendar):
 
         return result
 
-    @http.route('/google_meet/oauth/callback', type='http', auth='public')
+    @http.route('/google_meet_authentication', type='http', auth='public',
+                website=True)
     def google_meet_oauth_callback(self, **kwargs):
         """Handle Google OAuth callback for Meet integration"""
         code = kwargs.get('code')
         error = kwargs.get('error')
 
         if error:
-            return request.render('web.login', {
-                'error': f"Google authorization failed: {error}"
-            })
+            return request.redirect('/web#action=base.action_res_config_settings&error=authorization_failed')
 
         if not code:
-            return request.render('web.login', {
-                'error': "No authorization code received from Google"
-            })
+            return request.redirect('/web#action=base.action_res_config_settings&error=no_code')
 
         try:
             # Exchange code for tokens
-            config = request.env['res.config.settings'].get_google_meet_config()
-            google_service = request.env['google.meet.service']
+            data = {
+                'code': code,
+                'client_id': request.env['ir.config_parameter'].sudo().get_param('google_meet.client_id'),
+                'client_secret': request.env['ir.config_parameter'].sudo().get_param('google_meet.client_secret'),
+                'redirect_uri': self._get_redirect_uri(),
+                'grant_type': 'authorization_code'
+            }
 
-            refresh_token = google_service.exchange_code_for_token(
-                code,
-                config['client_id'],
-                config['client_secret']
+            import requests
+            response = requests.post(
+                'https://oauth2.googleapis.com/token',
+                data=data,
+                headers={'content-type': 'application/x-www-form-urlencoded'},
+                timeout=30
             )
 
-            if refresh_token:
-                # Test the connection
-                if google_service.test_connection():
-                    message = "Google Meet integration authorized successfully!"
-                    success = True
+            if response.status_code == 200:
+                token_data = response.json()
+                if token_data.get('refresh_token'):
+                    # Save refresh token
+                    request.env['ir.config_parameter'].sudo().set_param(
+                        'google_meet.refresh_token',
+                        token_data['refresh_token']
+                    )
+                    return request.redirect('/web#action=base.action_res_config_settings&success=authorized')
                 else:
-                    message = "Authorization successful but connection test failed"
-                    success = False
+                    return request.redirect('/web#action=base.action_res_config_settings&error=no_refresh_token')
             else:
-                message = "Failed to obtain refresh token"
-                success = False
+                return request.redirect('/web#action=base.action_res_config_settings&error=token_exchange_failed')
 
         except Exception as e:
             _logger.error(f"OAuth callback error: {e}")
-            message = f"Authorization failed: {str(e)}"
-            success = False
+            return request.redirect('/web#action=base.action_res_config_settings&error=exception')
 
-        # Redirect back to settings with result
-        return request.redirect(
-            f'/web#action=base.action_res_config_settings'
-            f'&message={message}&success={success}'
-        )
+    def _get_redirect_uri(self):
+        """Get OAuth redirect URI"""
+        base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        return f"{base_url}/google_meet_authentication"
