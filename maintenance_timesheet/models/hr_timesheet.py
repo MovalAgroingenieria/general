@@ -22,11 +22,17 @@ class AccountAnalyticLine(models.Model):
         store=True,
     )
 
+    name = fields.Char(
+        default='/',
+    )
+
     @api.onchange('maintenance_request_id')
     def onchange_maintenance_request_id(self):
-        if self.maintenance_request_id and not self.project_id:
-            self.project_id = self.maintenance_request_id.project_id
-            self.task_id = self.maintenance_request_id.task_id
+        if self.maintenance_request_id:
+            self.name = self.maintenance_request_id.name
+            if not self.project_id:
+                self.project_id = self.maintenance_request_id.project_id
+                self.task_id = self.maintenance_request_id.task_id
 
     @api.depends('maintenance_request_id',
                  'maintenance_request_id.equipment_id')
