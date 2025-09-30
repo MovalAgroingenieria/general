@@ -20,6 +20,7 @@
     'data': [
         'views/maintenance_equipment_views.xml',
         'views/maintenance_request_views.xml',
+        'views/maintenance_settings_view.xml',
         'views/stock_move_views.xml',
         'views/stock_picking_views.xml',
     ],

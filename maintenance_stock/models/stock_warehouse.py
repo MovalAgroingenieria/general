@@ -17,7 +17,7 @@ class StockWarehouse(models.Model):
 
     cons_type_id = fields.Many2one(
         "stock.picking.type",
-        "Consumption Type"
+        "Consumption Type",
     )
 
     def _create_or_update_sequences_and_picking_types(self):
