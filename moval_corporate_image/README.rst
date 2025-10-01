@@ -6,7 +6,6 @@
 Moval Corporate Image
 =====================
 
-
 Description
 ===========
 
