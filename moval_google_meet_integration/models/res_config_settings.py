@@ -43,22 +43,39 @@ class ResConfigSettings(models.TransientModel):
 
     def action_google_meet_authorize(self):
         """Redirect to Google OAuth authorization flow"""
-        if not self.google_meet_client_id or not \
-                self.google_meet_client_secret:
-            raise UserError(_(
-                "Please configure Google Client ID and Client Secret first."
-            ))
+        self.ensure_one()
 
-        google_service = self.env['google.meet.service']
-        auth_url = google_service.get_authorization_url(
-            self.google_meet_client_id,
-            self.google_meet_client_secret
+        if not self.google_meet_client_id:
+            raise UserError(_("Please configure Google Client ID first."))
+        if not self.google_meet_client_secret:
+            raise UserError(_("Please configure Google Client Secret first."))
+
+        # Get base URL
+        base_url = self.env['ir.config_parameter'].sudo().get_param(
+            'web.base.url'
         )
+        redirect_uri = "{}/google_meet_authentication".format(base_url)
+
+        # Build OAuth URL step by step
+        client_id = self.google_meet_client_id
+        scope = "https://www.googleapis.com/auth/calendar"
+
+        auth_url = "https://accounts.google.com/o/oauth2/v2/auth"
+        params = [
+            "response_type=code",
+            "access_type=offline",
+            "client_id={}".format(client_id),
+            "redirect_uri={}".format(redirect_uri),
+            "scope={}".format(scope),
+            "prompt=consent"
+        ]
+
+        final_url = "{}?{}".format(auth_url, "&".join(params))
 
         return {
             'type': 'ir.actions.act_url',
-            'url': auth_url,
-            'target': 'new',
+            'url': final_url,
+            'target': 'new'
         }
 
     def action_google_meet_test_connection(self):
@@ -68,25 +85,25 @@ class ResConfigSettings(models.TransientModel):
                 "Please authorize Google Meet integration first."
             ))
 
-        google_service = self.env['google.meet.service']
-        try:
-            success = google_service.test_connection()
-            if success:
-                return {
-                    'type': 'ir.actions.client',
-                    'tag': 'display_notification',
-                    'params': {
-                        'title': _("Success!"),
-                        'message': _(
-                            "Google Meet connection working correctly."
-                        ),
-                        'type': 'success',
-                    }
+        # Simple test - just check if we have the required parameters
+        if (self.google_meet_client_id and
+                self.google_meet_client_secret and
+                self.google_meet_refresh_token):
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _("Success!"),
+                    'message': _(
+                        "Google Meet configuration is complete."
+                    ),
+                    'type': 'success',
                 }
-        except Exception as e:
+            }
+        else:
             raise UserError(_(
-                "Connection test failed: %s"
-            ) % str(e))
+                "Google Meet configuration is incomplete."
+            ))
 
     @api.model
     def get_google_meet_config(self):

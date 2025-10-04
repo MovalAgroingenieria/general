@@ -30,6 +30,9 @@ class CalendarEvent(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         """Override create to generate Meet links for appointment bookings"""
+        _logger.info("Creating calendar events...")
+
+        # First create the events
         events = super().create(vals_list)
 
         for event in events:
@@ -47,7 +50,24 @@ class CalendarEvent(models.Model):
                             f"Attempting to generate Google Meet for event "
                             f"{event.id}"
                         )
-                        event._generate_google_meet_link()
+                        meet_link = event._generate_google_meet_link()
+
+                        if meet_link:
+                            # Immediately update meeting_url to override Odoo's
+                            # This happens BEFORE any email notifications
+                            _logger.info(
+                                f"Updating meeting_url with Google Meet: "
+                                f"{meet_link}"
+                            )
+                            # Use SQL to update directly, avoid ORM recursion
+                            self.env.cr.execute(
+                                "UPDATE calendar_event SET meeting_url = %s "
+                                "WHERE id = %s",
+                                (meet_link, event.id)
+                            )
+                            # Update the record in memory too
+                            event.meeting_url = meet_link
+
                     except Exception as e:
                         _logger.error(
                             f"Failed to generate Google Meet for event "
