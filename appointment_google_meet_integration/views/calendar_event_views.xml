@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_calendar_event_form_google_meet" model="ir.ui.view">
+        <field name="name">calendar.event.form.google_meet</field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+            <field name="meeting_url" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="location" position="after">
+                <field name="google_event_id" invisible="1"/>
+                <field name="google_meet_generated" invisible="1"/>
+                <field name="google_meet_url" invisible="1"/>
+            </field>
+        </field>
+    </record>
+</odoo>

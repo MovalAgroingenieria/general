@@ -1,5 +1,5 @@
-# Copyright 2025 Moval Agroingeniería
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
+# 2025 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
@@ -8,7 +8,6 @@ from odoo.exceptions import UserError
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    # Google Meet API Configuration
     google_meet_enabled = fields.Boolean(
         string="Enable Google Meet Integration",
         config_parameter='google_meet.enabled',
@@ -50,13 +49,11 @@ class ResConfigSettings(models.TransientModel):
         if not self.google_meet_client_secret:
             raise UserError(_("Please configure Google Client Secret first."))
 
-        # Get base URL
         base_url = self.env['ir.config_parameter'].sudo().get_param(
             'web.base.url'
         )
         redirect_uri = "{}/google_meet_authentication".format(base_url)
 
-        # Build OAuth URL step by step
         client_id = self.google_meet_client_id
         scope = "https://www.googleapis.com/auth/calendar"
 
@@ -85,7 +82,6 @@ class ResConfigSettings(models.TransientModel):
                 "Please authorize Google Meet integration first."
             ))
 
-        # Simple test - just check if we have the required parameters
         if (self.google_meet_client_id and
                 self.google_meet_client_secret and
                 self.google_meet_refresh_token):

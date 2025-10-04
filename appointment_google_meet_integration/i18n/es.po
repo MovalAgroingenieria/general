@@ -1,0 +1,695 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* appointment_google_meet_integration
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-04 15:02+0000\n"
+"PO-Revision-Date: 2025-10-04 17:11+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.7\n"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+msgid ", your appointment has been successfully booked!"
+msgstr ", su cita ha sido reservada con éxito."
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+#, fuzzy
+msgid ""
+"<br/>\n"
+"                                            <i class=\"fa fa-globe me-1\"/"
+">\n"
+"                                            Timezone:"
+msgstr ""
+"<br/>\n"
+"                                            <i class=\"fa fa-globe me-1\"/"
+">\n"
+"                                            Zona horaria:"
+
+#. module: appointment_google_meet_integration
+#: model:mail.template,body_html:appointment_google_meet_integration.google_meet_appointment_booking_confirmation_mail_template
+msgid ""
+"<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 "
+"auto;\">\n"
+"                    <h2 style=\"color: #2E7D32;\">Appointment Confirmation</"
+"h2>\n"
+"\n"
+"                    <p>\n"
+"                        <t t-if=\"object.partner_ids\" t-"
+"esc=\"object.partner_ids[0].name\"></t>\n"
+"                        <t t-else=\"\">Valued Client</t>,\n"
+"                    </p>\n"
+"\n"
+"                    <p><strong>Your appointment has been successfully "
+"booked!</strong></p>\n"
+"\n"
+"                    <div style=\"background-color: #f5f5f5; padding: 20px; "
+"border-radius: 8px; margin: 20px 0;\">\n"
+"                        <h3 style=\"margin-top: 0; color: "
+"#1976D2;\">Appointment Details</h3>\n"
+"\n"
+"                        <table style=\"width: 100%; border-collapse: "
+"collapse;\">\n"
+"                            <tr>\n"
+"                                <td style=\"padding: 8px 0; font-weight: "
+"bold; width: 120px;\">Event:</td>\n"
+"                                <td style=\"padding: 8px 0;\"><t t-"
+"esc=\"object.name\"></t></td>\n"
+"                            </tr>\n"
+"                            <tr t-if=\"object.partner_ids\">\n"
+"                                <td style=\"padding: 8px 0; font-weight: "
+"bold;\">Attendee:</td>\n"
+"                                <td style=\"padding: 8px 0;\"><t t-"
+"esc=\"object.partner_ids[0].name\"></t></td>\n"
+"                            </tr>\n"
+"                            <tr>\n"
+"                                <td style=\"padding: 8px 0; font-weight: "
+"bold;\">When:</td>\n"
+"                                <td style=\"padding: 8px 0;\">\n"
+"                                    <t t-"
+"esc=\"object._format_meet_description().split('Date &amp; Time: ')"
+"[1].split('Duration:')[0]\" t-if=\"'Date &amp; Time:' in "
+"object._format_meet_description()\"></t>\n"
+"                                    <t t-else=\"\" t-esc=\"object.start\"></"
+"t>\n"
+"                                    <br>\n"
+"                                    <small style=\"color: #666;\">\n"
+"                                        Duration: <t t-"
+"esc=\"object.booking_type_id.booking_duration or 1\"></t> hour(s)\n"
+"                                    </small>\n"
+"                                </td>\n"
+"                            </tr>\n"
+"                            <tr t-if=\"object.booking_type_id.location\">\n"
+"                                <td style=\"padding: 8px 0; font-weight: "
+"bold;\">Location:</td>\n"
+"                                <td style=\"padding: 8px 0;\"><t t-"
+"esc=\"object.booking_type_id.location\"></t></td>\n"
+"                            </tr>\n"
+"                            <tr t-if=\"object.google_meet_url\">\n"
+"                                <td style=\"padding: 8px 0; font-weight: "
+"bold;\">Google Meet:</td>\n"
+"                                <td style=\"padding: 8px 0;\">\n"
+"                                    <a t-att-"
+"href=\"object.google_meet_url\" style=\"color: #1976D2; text-decoration: "
+"none; background-color: #e3f2fd; padding: 8px 16px; border-radius: 4px; "
+"display: inline-block;\">\n"
+"                                        Join Meeting\n"
+"                                    </a>\n"
+"                                    <br>\n"
+"                                    <small style=\"color: #666; font-size: "
+"11px;\">\n"
+"                                        Link: <t t-"
+"esc=\"object.google_meet_url\"></t>\n"
+"                                    </small>\n"
+"                                </td>\n"
+"                            </tr>\n"
+"                        </table>\n"
+"                    </div>\n"
+"\n"
+"                    <div t-if=\"object.description\" style=\"margin: 20px "
+"0;\">\n"
+"                        <h4>Additional Information:</h4>\n"
+"                        <div style=\"background-color: #fafafa; padding: "
+"15px; border-left: 4px solid #2E7D32;\">\n"
+"                            <t t-esc=\"object.description\"></t>\n"
+"                        </div>\n"
+"                    </div>\n"
+"                </div>\n"
+"            "
+msgstr ""
+"<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 "
+"auto;\">\n"
+"                    <h2 style=\"color: #2E7D32;\">Confirmación de la cita</"
+"h2>\n"
+"\n"
+"                    <p>\n"
+"                       <t t-if=\"object.partner_ids\" t-"
+"esc=\"object.partner_ids[0].name\"></t>\n"
+"                       <t t-else=\"\">Estimado cliente</t>,\n"
+"                    </p>\n"
+"\n"
+"                    <p><strong>¡Su cita ha sido reservada con éxito!</"
+"strong></p>\n"
+"\n"
+"                    <div style=\"background-color: #f5f5f5; padding: 20px; "
+"border-radius: 8px; margin: 20px 0;\">\n"
+"                        <h3 style=\"margin-top: 0; color: "
+"#1976D2;\">Detalles de la cita</h3>\n"
+"\n"
+"                        <table style=\"width: 100%; border-collapse: "
+"collapse;\">\n"
+"                            <tr>\n"
+"                                <td style=\"padding: 8px 0; font-weight: "
+"bold; width: 120px;\">Evento:</td>\n"
+"                                <td style=\"padding: 8px 0;\"><t t-"
+"esc=\"object.name\"></t></td>\n"
+"                            </tr>\n"
+"                            <tr t-if=\"object.partner_ids\">\n"
+"                                <td style=\"padding: 8px 0; font-weight: "
+"bold;\">Asistente:</td>\n"
+"                                <td style=\"padding: 8px 0;\"><t t-"
+"esc=\"object.partner_ids[0].name\"></t></td>\n"
+"                            </tr>\n"
+"                            <tr>\n"
+"                                <td style=\"padding: 8px 0; font-weight: "
+"bold;\">Cuándo:</td>\n"
+"                                <td style=\"padding: 8px 0;\">\n"
+"                                    <t t-"
+"esc=\"object._format_meet_description().split('Date &amp; Time: ')"
+"[1].split('Duration:')[0]\" t-if=\"'Date &amp; Time:' in "
+"object._format_meet_description()\"></t>\n"
+"                                    <t t-else=\"\" t-esc=\"object.start\"></"
+"t>\n"
+"                                    <br>\n"
+"                                    <small style=\"color: #666;\">\n"
+"                                        Duración: <t t-"
+"esc=\"object.booking_type_id.booking_duration or 1\"></t> hora(s)\n"
+"                                    </small>\n"
+"                                </td>\n"
+"                            </tr>\n"
+"                            <tr t-if=\"object.booking_type_id.location\">\n"
+"                                <td style=\"padding: 8px 0; font-weight: "
+"bold;\">Lugar:</td>\n"
+"                                <td style=\"padding: 8px 0;\"><t t-"
+"esc=\"object.booking_type_id.location\"></t></td>\n"
+"                            </tr>\n"
+"                            <tr t-if=\"object.google_meet_url\">\n"
+"                                <td style=\"padding: 8px 0; font-weight: "
+"bold;\">Google Meet:</td>\n"
+"                                <td style=\"padding: 8px 0;\">\n"
+"                                    <a t-att-"
+"href=\"object.google_meet_url\" style=\"color: #1976D2; text-decoration: "
+"none; background-color: #e3f2fd; padding: 8px 16px; border-radius: 4px; "
+"display: inline-block;\">\n"
+"                                        Unirse a la reunión\n"
+"                                    </a>\n"
+"                                    <br>\n"
+"                                    <small style=\"color: #666; font-size: "
+"11px;\">\n"
+"                                        Enlace: <t t-"
+"esc=\"object.google_meet_url\"></t>\n"
+"                                    </small>\n"
+"                                </td>\n"
+"                            </tr>\n"
+"                        </table>\n"
+"                    </div>\n"
+"\n"
+"                    <div t-if=\"object.description\" style=\"margin: 20px "
+"0;\">\n"
+"                        <h4>Información adicional:</h4>\n"
+"                        <div style=\"background-color: #fafafa; padding: "
+"15px; border-left: 4px solid #2E7D32;\">\n"
+"                            <t t-esc=\"object.description\"></t>\n"
+"                        </div>\n"
+"                    </div>\n"
+"                </div>\n"
+"            "
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+#, fuzzy
+msgid "<i class=\"fa fa-calendar me-2\"/>Appointment Details"
+msgstr "<i class=\"fa fa-calendar me-2\"/>Detalles de la cita"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+#, fuzzy
+msgid "<i class=\"fa fa-calendar-plus-o me-1\"/>Add to Google Calendar"
+msgstr "<i class=\"fa fa-calendar-plus-o me-1\"/>Añadir a Google Calendar"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+#, fuzzy
+msgid "<i class=\"fa fa-check-circle me-2\"/>Appointment Confirmation"
+msgstr "<i class=\"fa fa-check-circle me-2\"/>Confirmación de la cita"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+#, fuzzy
+msgid ""
+"<i class=\"fa fa-clock-o me-1\"/>\n"
+"                                            Duration:"
+msgstr ""
+"<i class=\"fa fa-clock-o me-1\"/>\n"
+"                                            Duración:"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+#, fuzzy
+msgid "<i class=\"fa fa-download me-1\"/>Download .ics"
+msgstr "<i class=\"fa fa-download me-1\"/>Descargar .ics"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+#, fuzzy
+msgid "<i class=\"fa fa-video-camera me-1\"/>Join Meeting"
+msgstr "<i class=\"fa fa-video-camera me-1\"/>Unirse a la reunión"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_general_configuration_google_meet
+#, fuzzy
+msgid ""
+"<span attrs=\"{'invisible': [('google_meet_refresh_token', '!=', False)]}"
+"\">\n"
+"                                            Click 'Authorize Google Meet' "
+"to connect with your Google account\n"
+"                                        </span>\n"
+"                                        <span attrs=\"{'invisible': "
+"[('google_meet_refresh_token', '=', False)]}\" class=\"text-success\">\n"
+"                                            ✓ Google Meet integration is "
+"authorized\n"
+"                                        </span>"
+msgstr ""
+"<span attrs=\"{'invisible': [('google_meet_refresh_token', '!=', False)]}"
+"\">\n"
+"                                            Haga clic en \"Autorizar Google "
+"Meet\" para conectarse con su cuenta de Google\n"
+"                                        </span>\n"
+"                                        <span attrs=\"{'invisible': "
+"[('google_meet_refresh_token', '=', False)]}\" class=\"text-success\">\n"
+"                                            ✓ La integración de Google Meet "
+"está autorizada\n"
+"                                        </span>"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+#, fuzzy
+msgid "<strong>Attendee:</strong>"
+msgstr "<strong>Asistente:</strong>"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+#, fuzzy
+msgid "<strong>Event:</strong>"
+msgstr "<strong>Evento:</strong>"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+#, fuzzy
+msgid "<strong>Google Meet:</strong>"
+msgstr "<strong>Google Meet:</strong>"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+msgid "<strong>Location:</strong>"
+msgstr "<strong>Ubicación:</strong>"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+msgid "<strong>Notes:</strong>"
+msgstr "<strong>Notas:</strong>"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+msgid "<strong>When:</strong>"
+msgstr "<strong>Cuándo:</strong>"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_calendar_booking_type_form_google_meet
+#, fuzzy
+msgid "<strong>{duration}</strong> - Meeting duration in hours"
+msgstr "<strong>{duration}</strong> - Duración de la reunión en horas"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_calendar_booking_type_form_google_meet
+#, fuzzy
+msgid "<strong>{meet_link}</strong> - Google Meet link (auto-generated)"
+msgstr "<strong>{meet_link}</strong> - Enlace Google Meet (autogenerado)"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_calendar_booking_type_form_google_meet
+#, fuzzy
+msgid "<strong>{name}</strong> - Appointment name"
+msgstr "<strong>{name}</strong> - Nombre de la cita"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_calendar_booking_type_form_google_meet
+#, fuzzy
+msgid "<strong>{partner_name}</strong> - Client name"
+msgstr "<strong>{partner_name}</strong> - Nombre del cliente"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_calendar_booking_type_form_google_meet
+#, fuzzy
+msgid "<strong>{start_date}</strong> - Meeting date and time"
+msgstr "<strong>{start_date}</strong> - Fecha y hora de la reunión"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_general_configuration_google_meet
+msgid "Authorization"
+msgstr "Autorización"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_general_configuration_google_meet
+#, fuzzy
+msgid "Authorize Google Meet"
+msgstr "Autorizar Google Meet"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_general_configuration_google_meet
+#, fuzzy
+msgid "Automatically generate Google Meet links for appointment bookings"
+msgstr ""
+"Genere automáticamente enlaces de Google Meet para las reservas de citas"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_calendar_booking_type_form_google_meet
+#, fuzzy
+msgid "Available Template Variables:"
+msgstr "Variables de plantilla disponibles:"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model,name:appointment_google_meet_integration.model_calendar_event
+msgid "Calendar Event"
+msgstr "Evento del calendario"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_general_configuration_google_meet
+msgid "Calendar ID"
+msgstr "ID de Calendario"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_general_configuration_google_meet
+msgid "Client ID"
+msgstr "ID de cliente"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_general_configuration_google_meet
+msgid "Client Secret"
+msgstr "Client Secret"
+
+#. module: appointment_google_meet_integration
+#. odoo-python
+#: code:addons/appointment_google_meet_integration/models/google_meet_service.py:0
+#, fuzzy, python-format
+msgid "Connection test failed: %s"
+msgstr "Fallo en la prueba de conexión: %s"
+
+#. module: appointment_google_meet_integration
+#. odoo-python
+#: code:addons/appointment_google_meet_integration/models/calendar_event.py:0
+#, fuzzy, python-format
+msgid "Could not generate Google Meet link: %s"
+msgstr "No se ha podido generar el enlace Google Meet: %s"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_calendar_booking_type_form_google_meet
+#, fuzzy
+msgid "Custom Meeting URL (when not using Google Meet)"
+msgstr "URL de reunión personalizada (cuando no utilice Google Meet)"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model,name:appointment_google_meet_integration.model_mail_template
+msgid "Email Templates"
+msgstr "Plantillas de correo electrónico"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,help:appointment_google_meet_integration.field_res_config_settings__google_meet_account_email
+#, fuzzy
+msgid "Email of the Google account that will host the meetings"
+msgstr "Correo electrónico de la cuenta de Google que albergará las reuniones"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,field_description:appointment_google_meet_integration.field_res_config_settings__google_meet_enabled
+#, fuzzy
+msgid "Enable Google Meet Integration"
+msgstr "Habilitar la integración de Google Meet"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,help:appointment_google_meet_integration.field_res_config_settings__google_meet_enabled
+#, fuzzy
+msgid "Enable automatic Google Meet link generation for appointments"
+msgstr ""
+"Activar la generación automática de enlaces de Google Meet para las citas"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_calendar_booking_type_form_google_meet
+#, fuzzy
+msgid "Enter the description template for Google Meet events..."
+msgstr ""
+"Introduzca la plantilla de descripción de los eventos de Google Meet..."
+
+#. module: appointment_google_meet_integration
+#. odoo-python
+#: code:addons/appointment_google_meet_integration/models/google_meet_service.py:0
+#, fuzzy, python-format
+msgid "Failed to create Google Meet event: %s"
+msgstr "Error al crear el evento Google Meet: %s"
+
+#. module: appointment_google_meet_integration
+#. odoo-python
+#: code:addons/appointment_google_meet_integration/models/calendar_event.py:0
+#, fuzzy, python-format
+msgid "Failed to generate Google Meet link"
+msgstr "Fallo al generar el enlace Google Meet"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,help:appointment_google_meet_integration.field_calendar_booking_type__use_google_meet
+#, fuzzy
+msgid "Generate Google Meet links automatically for this booking type"
+msgstr "Generar enlaces Google Meet automáticamente para este tipo de reserva"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,help:appointment_google_meet_integration.field_calendar_event__google_meet_url
+#, fuzzy
+msgid "Generated Google Meet link for this event"
+msgstr "Enlace Google Meet generado para este evento"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,field_description:appointment_google_meet_integration.field_res_config_settings__google_meet_account_email
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_general_configuration_google_meet
+#, fuzzy
+msgid "Google Account Email"
+msgstr "Correo electrónico de la cuenta de Google"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,field_description:appointment_google_meet_integration.field_res_config_settings__google_meet_calendar_id
+msgid "Google Calendar ID"
+msgstr "ID de Google Calendar"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,help:appointment_google_meet_integration.field_res_config_settings__google_meet_calendar_id
+#, fuzzy
+msgid "Google Calendar ID for events (primary by default)"
+msgstr "ID de Google Calendar para eventos (principal por defecto)"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,field_description:appointment_google_meet_integration.field_res_config_settings__google_meet_client_id
+msgid "Google Client ID"
+msgstr "Google Client ID"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,field_description:appointment_google_meet_integration.field_res_config_settings__google_meet_client_secret
+msgid "Google Client Secret"
+msgstr "Cliente secreto de Google"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,field_description:appointment_google_meet_integration.field_calendar_event__google_event_id
+msgid "Google Event ID"
+msgstr "ID de evento de Google"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model,name:appointment_google_meet_integration.model_google_meet_service
+#, fuzzy
+msgid "Google Meet API Service"
+msgstr "Servicio API Google Meet"
+
+#. module: appointment_google_meet_integration
+#: model:mail.template,name:appointment_google_meet_integration.google_meet_appointment_booking_confirmation_mail_template
+#, fuzzy
+msgid "Google Meet Appointment Booking Confirmation Email Template"
+msgstr ""
+"Plantilla de correo electrónico de confirmación de reserva de cita de "
+"Google Meet"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,field_description:appointment_google_meet_integration.field_calendar_event__google_meet_generated
+#, fuzzy
+msgid "Google Meet Generated"
+msgstr "Google Meet Generado"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_general_configuration_google_meet
+#, fuzzy
+msgid "Google Meet Integration"
+msgstr "Integración de Google Meet"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,field_description:appointment_google_meet_integration.field_calendar_event__google_meet_url
+msgid "Google Meet Link"
+msgstr "Enlace de Google Meet"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_calendar_booking_type_form_google_meet
+#, fuzzy
+msgid "Google Meet Settings"
+msgstr "Ajustes de Google Meet"
+
+#. module: appointment_google_meet_integration
+#. odoo-python
+#: code:addons/appointment_google_meet_integration/models/res_config_settings.py:0
+#, fuzzy, python-format
+msgid "Google Meet configuration is complete."
+msgstr "La configuración de Google Meet está completa."
+
+#. module: appointment_google_meet_integration
+#. odoo-python
+#: code:addons/appointment_google_meet_integration/models/res_config_settings.py:0
+#, fuzzy, python-format
+msgid "Google Meet configuration is incomplete."
+msgstr "La configuración de Google Meet está incompleta."
+
+#. module: appointment_google_meet_integration
+#. odoo-python
+#: code:addons/appointment_google_meet_integration/models/google_meet_service.py:0
+#, fuzzy, python-format
+msgid ""
+"Google Meet integration not properly configured. Please complete the OAuth "
+"setup."
+msgstr ""
+"La integración de Google Meet no está configurada correctamente. Por favor, "
+"complete la configuración OAuth."
+
+#. module: appointment_google_meet_integration
+#. odoo-python
+#: code:addons/appointment_google_meet_integration/models/calendar_event.py:0
+#, fuzzy, python-format
+msgid "Google Meet is not enabled for this booking type"
+msgstr "Google Meet no está habilitado para este tipo de reserva"
+
+#. module: appointment_google_meet_integration
+#. odoo-python
+#: code:addons/appointment_google_meet_integration/models/calendar_event.py:0
+#, python-format
+msgid "Google Meet link has been regenerated."
+msgstr "El enlace de Google Meet ha sido regenerado."
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,help:appointment_google_meet_integration.field_res_config_settings__google_meet_client_id
+#, fuzzy
+msgid "Google OAuth Client ID for API access"
+msgstr "ID de cliente OAuth de Google para el acceso a la API"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,help:appointment_google_meet_integration.field_res_config_settings__google_meet_client_secret
+#, fuzzy
+msgid "Google OAuth Client Secret for API access"
+msgstr "Secreto del cliente Google OAuth para el acceso a la API"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,field_description:appointment_google_meet_integration.field_res_config_settings__google_meet_refresh_token
+#, fuzzy
+msgid "Google Refresh Token"
+msgstr "Google Refresh Token"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,help:appointment_google_meet_integration.field_calendar_event__google_event_id
+#, fuzzy
+msgid "ID of the event in Google Calendar"
+msgstr "ID del evento en Google Calendar"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,help:appointment_google_meet_integration.field_calendar_event__google_meet_generated
+#, fuzzy
+msgid "Indicates if Google Meet link has been generated"
+msgstr "Indica si se ha generado el enlace Google Meet"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+msgid "Link:"
+msgstr "Enlace:"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,help:appointment_google_meet_integration.field_res_config_settings__google_meet_refresh_token
+#, fuzzy
+msgid "OAuth Refresh Token (auto-generated after authorization)"
+msgstr "Token de actualización de OAuth (autogenerado tras la autorización)"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model,name:appointment_google_meet_integration.model_calendar_booking_type
+msgid "Online Booking Type"
+msgstr "Tipo de reserva en línea"
+
+#. module: appointment_google_meet_integration
+#. odoo-python
+#: code:addons/appointment_google_meet_integration/models/res_config_settings.py:0
+#, fuzzy, python-format
+msgid "Please authorize Google Meet integration first."
+msgstr "Por favor, autorice primero la integración de Google Meet."
+
+#. module: appointment_google_meet_integration
+#. odoo-python
+#: code:addons/appointment_google_meet_integration/models/res_config_settings.py:0
+#, fuzzy, python-format
+msgid "Please configure Google Client ID first."
+msgstr "Por favor, configure primero el ID de cliente de Google."
+
+#. module: appointment_google_meet_integration
+#. odoo-python
+#: code:addons/appointment_google_meet_integration/models/res_config_settings.py:0
+#, fuzzy, python-format
+msgid "Please configure Google Client Secret first."
+msgstr "Por favor, configure primero Google Client Secret."
+
+#. module: appointment_google_meet_integration
+#. odoo-python
+#: code:addons/appointment_google_meet_integration/models/calendar_event.py:0
+#: code:addons/appointment_google_meet_integration/models/res_config_settings.py:0
+#, python-format
+msgid "Success!"
+msgstr "Correcto!"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_general_configuration_google_meet
+msgid "Test Connection"
+msgstr "Conexión de prueba"
+
+#. module: appointment_google_meet_integration
+#: model:ir.model.fields,field_description:appointment_google_meet_integration.field_calendar_booking_type__use_google_meet
+#, fuzzy
+msgid "Use Google Meet"
+msgstr "Utilice Google Meet"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+#, fuzzy
+msgid "Valued Client"
+msgstr "Cliente valioso"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_calendar_booking_type_form_google_meet
+#, fuzzy
+msgid "Video Conference Settings"
+msgstr "Configuración de la videoconferencia"
+
+#. module: appointment_google_meet_integration
+#: model:mail.template,subject:appointment_google_meet_integration.google_meet_appointment_booking_confirmation_mail_template
+#, fuzzy
+msgid "Your appointment booked successfully"
+msgstr "Su cita reservada con éxito"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.booking_validated_custom_template
+msgid "hour"
+msgstr "hora"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_general_configuration_google_meet
+#, fuzzy
+msgid "movalagroingenieria@gmail.com"
+msgstr "movalagroingenieria@gmail.com"
+
+#. module: appointment_google_meet_integration
+#: model_terms:ir.ui.view,arch_db:appointment_google_meet_integration.view_general_configuration_google_meet
+msgid "primary"
+msgstr "primary"

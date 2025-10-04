@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="google_meet_appointment_booking_confirmation_mail_template" model="mail.template">
+            <field name="name">Google Meet Appointment Booking Confirmation Email Template</field>
+            <field name="model_id" ref="calendar.model_calendar_event"/>
+            <field name="subject">Your appointment booked successfully</field>
+            <field name="email_from">{{ object.booking_type_id.appointment_user_id.email }}</field>
+            <field name="email_to">{{ ', '.join(object.attendee_ids.mapped('email')) }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #2E7D32;">Appointment Confirmation</h2>
+
+                    <p>
+                        <t t-if="object.partner_ids" t-esc="object.partner_ids[0].name"/>
+                        <t t-else="">Valued Client</t>,
+                    </p>
+
+                    <p><strong>Your appointment has been successfully booked!</strong></p>
+
+                    <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #1976D2;">Appointment Details</h3>
+
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 8px 0; font-weight: bold; width: 120px;">Event:</td>
+                                <td style="padding: 8px 0;"><t t-esc="object.name"/></td>
+                            </tr>
+                            <tr t-if="object.partner_ids">
+                                <td style="padding: 8px 0; font-weight: bold;">Attendee:</td>
+                                <td style="padding: 8px 0;"><t t-esc="object.partner_ids[0].name"/></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0; font-weight: bold;">When:</td>
+                                <td style="padding: 8px 0;">
+                                    <t t-esc="object._get_formatted_datetime()"/>
+                                    <br/>
+                                    <small style="color: #666;">
+                                        Duration: <t t-esc="object.booking_type_id.booking_duration or 1"/> hour(s)
+                                    </small>
+                                </td>
+                            </tr>
+                            <tr t-if="object.booking_type_id.location">
+                                <td style="padding: 8px 0; font-weight: bold;">Location:</td>
+                                <td style="padding: 8px 0;"><t t-esc="object.booking_type_id.location"/></td>
+                            </tr>
+                            <tr t-if="object.google_meet_url">
+                                <td style="padding: 8px 0; font-weight: bold;">Google Meet:</td>
+                                <td style="padding: 8px 0;">
+                                    <a t-att-href="object.google_meet_url"
+                                       style="color: #1976D2; text-decoration: none; background-color: #e3f2fd; padding: 8px 16px; border-radius: 4px; display: inline-block;">
+                                        Join Meeting
+                                    </a>
+                                    <br/>
+                                    <small style="color: #666; font-size: 11px;">
+                                        Link: <t t-esc="object.google_meet_url"/>
+                                    </small>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div t-if="object.description" style="margin: 20px 0;">
+                        <h4>Additional Information:</h4>
+                        <div style="background-color: #fafafa; padding: 15px; border-left: 4px solid #2E7D32;">
+                            <t t-esc="object.description"/>
+                        </div>
+                    </div>
+                </div>
+            </field>
+        </record>
+
+        <record id="google_meet_appointment_booking_confirmation_mail_template_es" model="mail.template">
+            <field name="name">Google Meet Appointment Booking Confirmation Email Template (Spanish)</field>
+            <field name="model_id" ref="calendar.model_calendar_event"/>
+            <field name="subject">Su cita ha sido reservada con éxito</field>
+            <field name="email_from">{{ object.booking_type_id.appointment_user_id.email }}</field>
+            <field name="email_to">{{ ', '.join(object.attendee_ids.mapped('email')) }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #2E7D32;">Confirmación de la cita</h2>
+
+                    <p>
+                        <t t-if="object.partner_ids" t-esc="object.partner_ids[0].name"/>
+                        <t t-else="">Estimado cliente</t>,
+                    </p>
+
+                    <p><strong>¡Su cita ha sido reservada con éxito!</strong></p>
+
+                    <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h3 style="margin-top: 0; color: #1976D2;">Detalles de la cita</h3>
+
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 8px 0; font-weight: bold; width: 120px;">Evento:</td>
+                                <td style="padding: 8px 0;"><t t-esc="object.name"/></td>
+                            </tr>
+                            <tr t-if="object.partner_ids">
+                                <td style="padding: 8px 0; font-weight: bold;">Asistente:</td>
+                                <td style="padding: 8px 0;"><t t-esc="object.partner_ids[0].name"/></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0; font-weight: bold;">Cuándo:</td>
+                                <td style="padding: 8px 0;">
+                                    <t t-esc="object._get_formatted_datetime()"/>
+                                    <br/>
+                                    <small style="color: #666;">
+                                        Duración: <t t-esc="object.booking_type_id.booking_duration or 1"/> hora(s)
+                                    </small>
+                                </td>
+                            </tr>
+                            <tr t-if="object.booking_type_id.location">
+                                <td style="padding: 8px 0; font-weight: bold;">Lugar:</td>
+                                <td style="padding: 8px 0;"><t t-esc="object.booking_type_id.location"/></td>
+                            </tr>
+                            <tr t-if="object.google_meet_url">
+                                <td style="padding: 8px 0; font-weight: bold;">Google Meet:</td>
+                                <td style="padding: 8px 0;">
+                                    <a t-att-href="object.google_meet_url"
+                                       style="color: #1976D2; text-decoration: none; background-color: #e3f2fd; padding: 8px 16px; border-radius: 4px; display: inline-block;">
+                                        Unirse a la reunión
+                                    </a>
+                                    <br/>
+                                    <small style="color: #666; font-size: 11px;">
+                                        Enlace: <t t-esc="object.google_meet_url"/>
+                                    </small>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div t-if="object.description" style="margin: 20px 0;">
+                        <h4>Información adicional:</h4>
+                        <div style="background-color: #fafafa; padding: 15px; border-left: 4px solid #2E7D32;">
+                            <t t-esc="object.description"/>
+                        </div>
+                    </div>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>

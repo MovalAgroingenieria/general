@@ -1,30 +1,24 @@
-# Copyright 2025 Moval Agroingeniería
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
+# 2025 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import logging
 from datetime import datetime
 
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
+
 from odoo import api, models, _
 from odoo.exceptions import UserError
-
-try:
-    from google.auth.transport.requests import Request
-    from google.oauth2.credentials import Credentials
-    from google_auth_oauthlib.flow import Flow
-    from googleapiclient.discovery import build
-except ImportError:
-    logging.getLogger(__name__).warning(
-        "Google APIs not installed. Run: pip install "
-        "google-auth google-auth-oauthlib google-auth-httplib2 "
-        "google-api-python-client"
-    )
 
 _logger = logging.getLogger(__name__)
 
 
-class GoogleMeetService(models.AbstractModel):
+class GoogleMeetService(models.Model):
     _name = 'google.meet.service'
     _description = 'Google Meet API Service'
+    _rec_name = 'id'
 
     @api.model
     def get_authorization_url(self, client_id, client_secret):
@@ -78,7 +72,6 @@ class GoogleMeetService(models.AbstractModel):
         flow.fetch_token(code=code)
         credentials = flow.credentials
 
-        # Store refresh token
         self.env['ir.config_parameter'].sudo().set_param(
             'google_meet.refresh_token',
             credentials.refresh_token
@@ -110,7 +103,6 @@ class GoogleMeetService(models.AbstractModel):
             scopes=['https://www.googleapis.com/auth/calendar']
         )
 
-        # Refresh the token if needed
         if not credentials.valid:
             credentials.refresh(Request())
 
@@ -123,15 +115,11 @@ class GoogleMeetService(models.AbstractModel):
             credentials = self._get_credentials()
             service = build('calendar', 'v3', credentials=credentials)
 
-            # Simple API call to test connection
             service.calendarList().list(maxResults=1).execute()
             return True
 
-        except Exception as e:
-            _logger.error(f"Google Meet connection test failed: {e}")
-            raise UserError(_(
-                "Connection test failed: %s"
-            ) % str(e))
+        except Exception:
+            raise UserError(_("Connection test failed"))
 
     @api.model
     def create_meet_event(self, event_data):
@@ -149,24 +137,27 @@ class GoogleMeetService(models.AbstractModel):
         Returns:
             dict: Event data including meet link
         """
+        _logger.info("create_meet_event called with data: %s", event_data)
         try:
+            _logger.info("Getting Google credentials")
             credentials = self._get_credentials()
+            _logger.info("Building Google Calendar service")
             service = build('calendar', 'v3', credentials=credentials)
 
-            # Get calendar ID (default to primary)
             calendar_id = event_data.get('calendar_id', 'primary')
 
-            # Prepare event body
+            timezone = 'UTC'
+
             event_body = {
                 'summary': event_data.get('summary', 'Appointment'),
                 'description': event_data.get('description', ''),
                 'start': {
                     'dateTime': event_data['start_datetime'],
-                    'timeZone': 'UTC',
+                    'timeZone': timezone,
                 },
                 'end': {
                     'dateTime': event_data['end_datetime'],
-                    'timeZone': 'UTC',
+                    'timeZone': timezone,
                 },
                 'conferenceData': {
                     'createRequest': {
@@ -183,54 +174,62 @@ class GoogleMeetService(models.AbstractModel):
                 'reminders': {
                     'useDefault': False,
                     'overrides': [
-                        {'method': 'email', 'minutes': 24 * 60},  # 1 day
-                        {'method': 'popup', 'minutes': 30},       # 30 min
+                        {'method': 'email', 'minutes': 24 * 60},
+                        {'method': 'popup', 'minutes': 30},
                     ],
                 },
             }
 
-            # Create the event
+            _logger.info("Inserting event into Google Calendar")
             created_event = service.events().insert(
                 calendarId=calendar_id,
                 body=event_body,
                 conferenceDataVersion=1,
-                sendUpdates='none'  # Don't send Google invitations
+                sendUpdates='none'
             ).execute()
 
-            # Extract Meet link
+            _logger.info("Event created: %s", created_event.get('id'))
+
             meet_link = None
             if 'conferenceData' in created_event:
                 meet_link = created_event['conferenceData'].get(
                     'entryPoints', [{}]
                 )[0].get('uri')
+                _logger.info("Meet link extracted: %s", meet_link)
+            else:
+                _logger.warning("No conferenceData in created event")
 
-            return {
+            result = {
                 'google_event_id': created_event['id'],
                 'meet_link': meet_link,
                 'event_url': created_event.get('htmlLink'),
                 'success': True
             }
+            _logger.info("Returning result: %s", result)
+            return result
 
         except Exception as e:
-            _logger.error(f"Failed to create Google Meet event: {e}")
-            raise UserError(_(
-                "Failed to create Google Meet event: %s"
-            ) % str(e))
+            _logger.error("Exception in create_meet_event: %s", str(e))
+            raise UserError(
+                _("Failed to create Google Meet event: %s") % str(e)
+            )
 
     @api.model
-    def update_meet_event(self, google_event_id, event_data, calendar_id='primary'):
+    def update_meet_event(
+        self, google_event_id, event_data, calendar_id='primary'
+    ):
         """Update existing Google Calendar event"""
         try:
             credentials = self._get_credentials()
             service = build('calendar', 'v3', credentials=credentials)
 
-            # Get existing event
             existing_event = service.events().get(
                 calendarId=calendar_id,
                 eventId=google_event_id
             ).execute()
 
-            # Update fields
+            timezone = 'UTC'
+
             if 'summary' in event_data:
                 existing_event['summary'] = event_data['summary']
             if 'description' in event_data:
@@ -238,15 +237,14 @@ class GoogleMeetService(models.AbstractModel):
             if 'start_datetime' in event_data:
                 existing_event['start'] = {
                     'dateTime': event_data['start_datetime'],
-                    'timeZone': 'UTC'
+                    'timeZone': timezone
                 }
             if 'end_datetime' in event_data:
                 existing_event['end'] = {
                     'dateTime': event_data['end_datetime'],
-                    'timeZone': 'UTC'
+                    'timeZone': timezone
                 }
 
-            # Update the event
             updated_event = service.events().update(
                 calendarId=calendar_id,
                 eventId=google_event_id,
@@ -259,9 +257,8 @@ class GoogleMeetService(models.AbstractModel):
                 'event_url': updated_event.get('htmlLink')
             }
 
-        except Exception as e:
-            _logger.error(f"Failed to update Google Meet event: {e}")
-            return {'success': False, 'error': str(e)}
+        except Exception:
+            return {'success': False}
 
     @api.model
     def delete_meet_event(self, google_event_id, calendar_id='primary'):
@@ -278,6 +275,5 @@ class GoogleMeetService(models.AbstractModel):
 
             return {'success': True}
 
-        except Exception as e:
-            _logger.error(f"Failed to delete Google Meet event: {e}")
-            return {'success': False, 'error': str(e)}
+        except Exception:
+            return {'success': False}
