@@ -58,7 +58,7 @@ class GoogleMeetWebsiteCalendar(WebsiteCalendar):
                         'videocall_location': meet_link,
                     })
 
-                    event.refresh()
+                    event.invalidate_recordset()
                     _logger.info(
                         "After write - videocall_location: %s",
                         event.videocall_location
@@ -194,6 +194,9 @@ class GoogleMeetWebsiteCalendar(WebsiteCalendar):
                                 'meeting_url': event.google_meet_url,
                             })
 
+                        # Send our custom email
+                        self._send_appointment_confirmation_email(event)
+
                 except Exception:
                     pass
 
@@ -206,32 +209,38 @@ class GoogleMeetWebsiteCalendar(WebsiteCalendar):
         """Send appointment confirmation email with custom template"""
 
         if (event.booking_type_id and
-                event.booking_type_id._should_use_google_meet() and
-                hasattr(event, 'google_meet_url') and event.google_meet_url):
+                event.booking_type_id._should_use_google_meet()):
 
             try:
-                module = 'appointment_google_meet_integration'
-                template_name = (
-                    'google_meet_appointment_booking_'
-                    'confirmation_mail_template'
-                )
-                template_ref = f'{module}.{template_name}'
-                template = event.env.ref(template_ref)
-                template.send_mail(event.id, force_send=True)
-                return True
-            except Exception:
+                # Determine language
+                lang = request.env.context.get('lang', 'en_US')
+                is_spanish = lang.startswith('es')
 
+                module = 'appointment_google_meet_integration'
+                if is_spanish:
+                    template_name = (
+                        'google_meet_appointment_booking_confirmation_mail_'
+                        'template_es'
+                    )
+                else:
+                    template_name = (
+                        'google_meet_appointment_booking_confirmation_mail_'
+                        'template'
+                    )
+
+                template_ref = f'{module}.{template_name}'
+                template = event.env.ref(
+                    template_ref, raise_if_not_found=False
+                )
+
+                if template:
+                    template.send_mail(event.id, force_send=True)
+                    return True
+            except Exception:
                 pass
 
-        try:
-            template = event.env.ref(
-                'appointment_booking_ce.'
-                'appointment_booking_confirmation_mail_template'
-            )
-            template.send_mail(event.id, force_send=True)
-            return True
-        except Exception:
-            return False
+        # Fallback (should not be reached if interceptor works)
+        return False
 
     @http.route('/google_meet_authentication', type='http', auth='public',
                 website=True)

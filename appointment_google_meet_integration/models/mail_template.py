@@ -11,6 +11,7 @@ class MailTemplate(models.Model):
                   email_values=None, email_layout_xmlid=None):
         """Intercept email sending for Google Meet appointments"""
 
+        # Check if this is the base appointment booking template
         zehntech_ref = (
             'appointment_booking_ce.'
             'appointment_booking_confirmation_mail_template'
@@ -22,36 +23,13 @@ class MailTemplate(models.Model):
         if zehntech_template and self.id == zehntech_template.id:
             event = self.env['calendar.event'].browse(res_id)
 
+            # If event should use Google Meet, don't send the base template
             if (event.booking_type_id and
                     event.booking_type_id._should_use_google_meet()):
 
-                lang = self.env.context.get('lang', 'en_US')
-                is_spanish = lang.startswith('es')
-
-                module = 'appointment_google_meet_integration'
-                if is_spanish:
-                    template_name = (
-                        'google_meet_appointment_booking_confirmation_mail_'
-                        'template_es'
-                    )
-                else:
-                    template_name = (
-                        'google_meet_appointment_booking_confirmation_mail_'
-                        'template'
-                    )
-
-                custom_ref = f'{module}.{template_name}'
-                custom_template = self.env.ref(
-                    custom_ref, raise_if_not_found=False
-                )
-
-                if custom_template:
-                    return custom_template.send_mail(
-                        res_id, force_send=force_send,
-                        raise_exception=raise_exception,
-                        email_values=email_values,
-                        email_layout_xmlid=email_layout_xmlid
-                    )
+                # Block the email - return False to prevent sending
+                # The correct email was already sent by our controller
+                return False
 
         return super().send_mail(
             res_id, force_send=force_send,
