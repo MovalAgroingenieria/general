@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="mail_template_purchase_notification" model="mail.template">
+            <field name="name">Purchase Follow-up Notification</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="subject">Customer Follow-up: ${object.name} - No recent purchases</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p>Dear ${ctx.get('recipient_user').name or 'User'},</p>
+
+                    <p>We inform you that the customer <strong>${object.name}</strong> has not made any purchases recently.</p>
+
+                    <table style="border-collapse: collapse; width: 100%; margin: 20px 0;">
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;"><strong>Customer:</strong></td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${object.name}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;"><strong>Last purchase:</strong></td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">
+                                % if object.last_purchase_date:
+                                    ${object.last_purchase_date.strftime('%d/%m/%Y')}
+                                % else:
+                                    No purchases recorded
+                                % endif
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;"><strong>Days without purchase:</strong></td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${object.days_since_last_purchase} days</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;"><strong>Configured limit:</strong></td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${object.days_without_purchase_limit} days</td>
+                        </tr>
+                    </table>
+
+                    <p>We recommend contacting this customer to evaluate their current needs and offer products or services that may interest them.</p>
+
+                    % if object.email:
+                    <p><strong>Customer email:</strong> <a href="mailto:${object.email}">${object.email}</a></p>
+                    % endif
+
+                    % if object.phone:
+                    <p><strong>Customer phone:</strong> ${object.phone}</p>
+                    % endif
+
+                    <p>Best regards,<br/>
+                    Customer Follow-up System</p>
+                </div>
+            </field>
+            <field name="lang">${object.lang}</field>
+            <field name="auto_delete">True</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,422 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* customer_purchase_follow_up
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 14.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-05 10:10+0000\n"
+"PO-Revision-Date: 2025-10-05 10:10+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: customer_purchase_follow_up
+#: model:mail.template,body_html:customer_purchase_follow_up.mail_template_purchase_notification
+msgid ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p>Dear ${ctx.get('recipient_user').name or 'User'},</p>\n"
+"\n"
+"                    <p>We inform you that the customer <strong>${object.name}</strong> has not made any purchases recently.</p>\n"
+"\n"
+"                    <table style=\"border-collapse: collapse; width: 100%; margin: 20px 0;\">\n"
+"                        <tr>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;\"><strong>Customer:</strong></td>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px;\">${object.name}</td>\n"
+"                        </tr>\n"
+"                        <tr>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;\"><strong>Last purchase:</strong></td>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px;\">\n"
+"                                % if object.last_purchase_date:\n"
+"                                    ${object.last_purchase_date.strftime('%d/%m/%Y')}\n"
+"                                % else:\n"
+"                                    No purchases recorded\n"
+"                                % endif\n"
+"                            </td>\n"
+"                        </tr>\n"
+"                        <tr>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;\"><strong>Days without purchase:</strong></td>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px;\">${object.days_since_last_purchase} days</td>\n"
+"                        </tr>\n"
+"                        <tr>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;\"><strong>Configured limit:</strong></td>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px;\">${object.days_without_purchase_limit} days</td>\n"
+"                        </tr>\n"
+"                    </table>\n"
+"\n"
+"                    <p>We recommend contacting this customer to evaluate their current needs and offer products or services that may interest them.</p>\n"
+"\n"
+"                    % if object.email:\n"
+"                    <p><strong>Customer email:</strong> <a href=\"mailto:${object.email}\">${object.email}</a></p>\n"
+"                    % endif\n"
+"\n"
+"                    % if object.phone:\n"
+"                    <p><strong>Customer phone:</strong> ${object.phone}</p>\n"
+"                    % endif\n"
+"\n"
+"                    <p>Best regards,<br/>\n"
+"                    Customer Follow-up System</p>\n"
+"                </div>\n"
+"            "
+msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p>Estimado/a ${ctx.get('recipient_user').name or 'Usuario'},</p>\n"
+"\n"
+"                    <p>Le informamos que el cliente <strong>${object.name}</strong> "
+"no ha realizado compras recientemente.</p>\n"
+"\n"
+"                    <table style=\"border-collapse: collapse; width: 100%; margin: "
+"20px 0;\">\n"
+"                        <tr>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px; "
+"background-color: #f2f2f2;\"><strong>Cliente:</strong></td>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px;\">$"
+"{object.name}</td>\n"
+"                        </tr>\n"
+"                        <tr>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px; "
+"background-color: #f2f2f2;\"><strong>Última compra:</strong></td>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px;\">\n"
+"                                % if object.last_purchase_date:\n"
+"                                    ${object.last_purchase_date.strftime('%d/%m/%Y')}\n"
+"                                % else:\n"
+"                                    No hay compras registradas\n"
+"                                % endif\n"
+"                            </td>\n"
+"                        </tr>\n"
+"                        <tr>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px; "
+"background-color: #f2f2f2;\"><strong>Días sin comprar:</strong></td>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px;\">$"
+"{object.days_since_last_purchase} días</td>\n"
+"                        </tr>\n"
+"                        <tr>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px; "
+"background-color: #f2f2f2;\"><strong>Límite configurado:</strong></td>\n"
+"                            <td style=\"border: 1px solid #ddd; padding: 8px;\">$"
+"{object.days_without_purchase_limit} días</td>\n"
+"                        </tr>\n"
+"                    </table>\n"
+"\n"
+"                    <p>Se recomienda contactar con este cliente para evaluar sus "
+"necesidades actuales y ofrecerle productos o servicios que puedan interesarle.</p>\n"
+"\n"
+"                    % if object.email:\n"
+"                    <p><strong>Email del cliente:</strong> <a href=\"mailto:$"
+"{object.email}\">${object.email}</a></p>\n"
+"                    % endif\n"
+"\n"
+"                    % if object.phone:\n"
+"                    <p><strong>Teléfono del cliente:</strong> ${object.phone}</p>\n"
+"                    % endif\n"
+"\n"
+"                    <p>Saludos cordiales,<br/>\n"
+"                    Sistema de Seguimiento de Clientes</p>\n"
+"                </div>\n"
+"            "
+
+#. module: customer_purchase_follow_up
+#: model_terms:ir.ui.view,arch_db:customer_purchase_follow_up.view_partner_form_purchase_followup
+msgid ""
+"<span class=\"o_stat_text\">Reset</span>\n"
+"                                    <span class=\"o_stat_text\">Status</span>"
+msgstr ""
+"<span class=\"o_stat_text\">Restablecer</span>\n"
+"                                    <span class=\"o_stat_text\">Estado</span>"
+
+#. module: customer_purchase_follow_up
+#: model_terms:ir.ui.view,arch_db:customer_purchase_follow_up.view_partner_form_purchase_followup
+msgid ""
+"<span class=\"o_stat_text\">Send</span>\n"
+"                                    <span class=\"o_stat_text\">Notification</span>"
+msgstr ""
+"<span class=\"o_stat_text\">Enviar</span>\n"
+"                                    <span class=\"o_stat_text\">Notificación</span>"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_partner__purchase_notifications_enabled
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_users__purchase_notifications_enabled
+msgid ""
+"Activate to receive notifications when this customer hasn't purchased in a "
+"while"
+msgstr ""
+"Activar para recibir notificaciones cuando este cliente lleve tiempo sin "
+"comprar"
+
+#. module: customer_purchase_follow_up
+#: model_terms:ir.ui.view,arch_db:customer_purchase_follow_up.view_partner_form_purchase_followup
+msgid "Are you sure you want to send a notification for this customer?"
+msgstr "¿Está seguro de que desea enviar una notificación para este cliente?"
+
+#. module: customer_purchase_follow_up
+#: model:ir.actions.server,name:customer_purchase_follow_up.ir_cron_check_purchase_notifications_ir_actions_server
+#: model:ir.cron,cron_name:customer_purchase_follow_up.ir_cron_check_purchase_notifications
+#: model:ir.cron,name:customer_purchase_follow_up.ir_cron_check_purchase_notifications
+msgid "Check Purchase Notifications"
+msgstr "Verificar Notificaciones de Compra"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__client_notified
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_users__client_notified
+msgid "Client Notified"
+msgstr "Cliente notificado"
+
+#. module: customer_purchase_follow_up
+#: model_terms:ir.ui.view,arch_db:customer_purchase_follow_up.view_partner_form_purchase_followup
+msgid "Configuration"
+msgstr "Configuración"
+
+#. module: customer_purchase_follow_up
+#: model_terms:ir.actions.act_window,help:customer_purchase_follow_up.action_partner_purchase_followup
+msgid "Configure customers for purchase follow-up notifications"
+msgstr ""
+"Configure los clientes para las notificaciones de seguimiento de las compras"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model,name:customer_purchase_follow_up.model_res_partner
+msgid "Contact"
+msgstr "Contacto"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__create_crm_opportunity
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_users__create_crm_opportunity
+msgid "Create CRM Opportunity"
+msgstr "Crear oportunidad CRM"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_partner__create_crm_opportunity
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_users__create_crm_opportunity
+msgid "Create an opportunity in CRM when notification is triggered"
+msgstr "Crear una oportunidad en CRM cuando se envíe la notificación"
+
+#. module: customer_purchase_follow_up
+#: model:mail.template,subject:customer_purchase_follow_up.mail_template_purchase_notification
+msgid "Customer Follow-up: ${object.name} - No recent purchases"
+msgstr "Seguimiento de clientes: ${object.name} - Sin compras recientes"
+
+#. module: customer_purchase_follow_up
+#: model:ir.actions.act_window,name:customer_purchase_follow_up.action_partner_needs_notification
+#: model:ir.ui.menu,name:customer_purchase_follow_up.menu_partner_needs_notification
+msgid "Customers Needing Follow-up"
+msgstr "Clientes que necesitan seguimiento"
+
+#. module: customer_purchase_follow_up
+#: model:ir.ui.menu,name:customer_purchase_follow_up.menu_partner_purchase_followup
+msgid "Customers with Follow-up"
+msgstr "Clientes con seguimiento"
+
+#. module: customer_purchase_follow_up
+#: model:ir.actions.act_window,name:customer_purchase_follow_up.action_partner_purchase_followup
+msgid "Customers with Purchase Follow-up"
+msgstr "Clientes con seguimiento de compra"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_partner__last_purchase_date
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_users__last_purchase_date
+msgid "Date of the last confirmed purchase order"
+msgstr "Fecha de la última orden de compra confirmada"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_partner__last_notification_date
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_users__last_notification_date
+msgid "Date when the last notification was sent"
+msgstr "Fecha en la que se envió la última notificación"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__days_since_last_purchase
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_users__days_since_last_purchase
+msgid "Days Since Last Purchase"
+msgstr "Días desde la última compra"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__days_without_purchase_limit
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_users__days_without_purchase_limit
+msgid "Days Without Purchase Limit"
+msgstr "Límite de días sin compra"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__display_name
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_sale_order__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__purchase_notifications_enabled
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_users__purchase_notifications_enabled
+msgid "Enable Purchase Notifications"
+msgstr "Activar las notificaciones de compra"
+
+#. module: customer_purchase_follow_up
+#: model_terms:ir.actions.act_window,help:customer_purchase_follow_up.action_partner_purchase_followup
+msgid ""
+"Enable purchase notifications for customers to receive alerts when they "
+"haven't purchased in a while."
+msgstr ""
+"Habilite las notificaciones de compra para que los clientes reciban alertas "
+"cuando lleven tiempo sin comprar."
+
+#. module: customer_purchase_follow_up
+#: code:addons/customer_purchase_follow_up/models/res_partner.py:0
+#, python-format
+msgid "Follow-up: Customer without recent purchases - %s"
+msgstr "Seguimiento: Cliente sin compras recientes - %s"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__id
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_sale_order__id
+msgid "ID"
+msgstr "ID"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_partner__client_notified
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_users__client_notified
+msgid ""
+"Indicates if the client has already been notified about lack of recent "
+"purchases"
+msgstr ""
+"Indica si el cliente ya ha sido notificado sobre la falta de compras "
+"recientes"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner____last_update
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_sale_order____last_update
+msgid "Last Modified on"
+msgstr "Última modificación el"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__last_notification_date
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_users__last_notification_date
+msgid "Last Notification Date"
+msgstr "Última fecha de notificación"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__last_purchase_date
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_users__last_purchase_date
+msgid "Last Purchase Date"
+msgstr "Última fecha de compra"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_partner__days_without_purchase_limit
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_users__days_without_purchase_limit
+msgid "Maximum days without purchase before sending notification"
+msgstr "Máximo de días sin compra antes de enviar la notificación"
+
+#. module: customer_purchase_follow_up
+#: code:addons/customer_purchase_follow_up/models/res_partner.py:0
+#, python-format
+msgid "Never"
+msgstr "Nunca"
+
+#. module: customer_purchase_follow_up
+#: model_terms:ir.actions.act_window,help:customer_purchase_follow_up.action_partner_needs_notification
+msgid "No customers need follow-up notifications right now"
+msgstr "Ningún cliente necesita notificaciones de seguimiento en este momento"
+
+#. module: customer_purchase_follow_up
+#: model_terms:ir.ui.view,arch_db:customer_purchase_follow_up.view_partner_form_purchase_followup
+msgid "Notification Options"
+msgstr "Opciones de Notificación"
+
+#. module: customer_purchase_follow_up
+#: model_terms:ir.ui.view,arch_db:customer_purchase_follow_up.view_partner_form_purchase_followup
+msgid "Notification Status"
+msgstr "Estado de la notificación"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__notification_users
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_users__notification_users
+msgid "Notification Users"
+msgstr "Usuarios de Notificación"
+
+#. module: customer_purchase_follow_up
+#: code:addons/customer_purchase_follow_up/models/res_partner.py:0
+#, python-format
+msgid "Notification sent successfully."
+msgstr "Notificación enviada con éxito."
+
+#. module: customer_purchase_follow_up
+#: code:addons/customer_purchase_follow_up/models/res_partner.py:0
+#, python-format
+msgid "Notification status reset successfully."
+msgstr "Estado de notificación restablecido con éxito."
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_partner__days_since_last_purchase
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_users__days_since_last_purchase
+msgid "Number of days since the last purchase"
+msgstr "Número de días transcurridos desde la última compra"
+
+#. module: customer_purchase_follow_up
+#: model:ir.ui.menu,name:customer_purchase_follow_up.menu_purchase_followup_root
+#: model_terms:ir.ui.view,arch_db:customer_purchase_follow_up.view_partner_form_purchase_followup
+msgid "Purchase Follow-up"
+msgstr "Seguimiento de la compra"
+
+#. module: customer_purchase_follow_up
+#: model_terms:ir.ui.view,arch_db:customer_purchase_follow_up.view_partner_form_purchase_followup
+msgid "Purchase Information"
+msgstr "Información de compra"
+
+#. module: customer_purchase_follow_up
+#: code:addons/customer_purchase_follow_up/models/res_partner.py:0
+#, python-format
+msgid "Purchase notifications are not enabled for this customer."
+msgstr "Las notificaciones de compra no están habilitadas para este cliente."
+
+#. module: customer_purchase_follow_up
+#: model:ir.model,name:customer_purchase_follow_up.model_sale_order
+msgid "Sales Order"
+msgstr "Pedido de venta"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__send_email_notification
+#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_users__send_email_notification
+msgid "Send Email Notification"
+msgstr "Enviar notificación por correo electrónico"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_partner__send_email_notification
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_users__send_email_notification
+msgid "Send notification by email"
+msgstr "Enviar notificación por correo electrónico"
+
+#. module: customer_purchase_follow_up
+#: model_terms:ir.actions.act_window,help:customer_purchase_follow_up.action_partner_needs_notification
+msgid ""
+"This list shows customers who have purchase notifications enabled\n"
+"                    but haven't been notified yet about their lack of recent purchases."
+msgstr ""
+"Esta lista muestra los clientes que tienen activadas las notificaciones de compra\n"
+"                    pero que aún no han recibido ninguna notificación sobre sus compras recientes."
+
+#. module: customer_purchase_follow_up
+#: code:addons/customer_purchase_follow_up/models/res_partner.py:0
+#, python-format
+msgid ""
+"This opportunity was created automatically because the customer has not made"
+" purchases for %d days. Last purchase date: %s"
+msgstr ""
+"Esta oportunidad se creó automáticamente porque el cliente no ha realizado "
+"compras durante %d días. Fecha de la última compra: %s"
+
+#. module: customer_purchase_follow_up
+#: model_terms:ir.ui.view,arch_db:customer_purchase_follow_up.view_partner_form_purchase_followup
+msgid "This will reset the notification status. Continue?"
+msgstr "Esto restablecerá el estado de la notificación. ¿Continuar?"
+
+#. module: customer_purchase_follow_up
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_partner__notification_users
+#: model:ir.model.fields,help:customer_purchase_follow_up.field_res_users__notification_users
+msgid "Users who will receive notifications for this customer"
+msgstr "Usuarios que recibirán notificaciones para este cliente"
+
+#. module: customer_purchase_follow_up
+#: code:addons/customer_purchase_follow_up/models/res_partner.py:0
+#, python-format
+msgid "Warning"
+msgstr "Advertencia"
