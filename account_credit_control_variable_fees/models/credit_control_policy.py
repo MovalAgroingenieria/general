@@ -24,6 +24,16 @@ class CreditControlPolicyLevel(models.Model):
         string="Print summary table",
         default=True,)
 
+    show_invoiced_amount_column = fields.Boolean(
+        string="Show invoiced amount column",
+        default=True,
+        help="Show the invoiced amount column in the summary table")
+
+    show_fees_column = fields.Boolean(
+        string="Show fees column",
+        default=True,
+        help="Show the fees column in the summary table")
+
     _sql_constraints = [
         ('valid_variable_fees_percentage',
          'CHECK (variable_fees_percentage >= 0)',
@@ -83,6 +93,14 @@ class CreditCommunication(models.TransientModel):
         compute="_compute_print_summary_table",
         default=True,)
 
+    show_invoiced_amount_column = fields.Boolean(
+        compute="_compute_show_invoiced_amount_column",
+        default=True,)
+
+    show_fees_column = fields.Boolean(
+        compute="_compute_show_fees_column",
+        default=True,)
+
     @api.multi
     def _compute_variable_fees_percentage(self):
         for record in self:
@@ -94,3 +112,15 @@ class CreditCommunication(models.TransientModel):
         for record in self:
             record.print_summary_table = \
                 record.current_policy_level.print_summary_table
+
+    @api.multi
+    def _compute_show_invoiced_amount_column(self):
+        for record in self:
+            record.show_invoiced_amount_column = \
+                record.current_policy_level.show_invoiced_amount_column
+
+    @api.multi
+    def _compute_show_fees_column(self):
+        for record in self:
+            record.show_fees_column = \
+                record.current_policy_level.show_fees_column

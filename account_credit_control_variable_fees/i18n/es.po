@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-16 09:02+0000\n"
-"PO-Revision-Date: 2023-11-16 09:02+0000\n"
+"POT-Creation-Date: 2025-10-08 10:29+0000\n"
+"PO-Revision-Date: 2025-10-08 10:29+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -23,7 +23,7 @@ msgstr "<strong>Total recargo</strong>"
 #. module: account_credit_control_variable_fees
 #: model:ir.ui.view,arch_db:account_credit_control_variable_fees.report_credit_control_summary_document_variable_fees
 msgid "<strong>Total due</strong>"
-msgstr "<strong>Total deuda</strong>"
+msgstr "<strong>Total pendiente</strong>"
 
 #. module: account_credit_control_variable_fees
 #: model:ir.model,name:account_credit_control_variable_fees.model_credit_control_line
@@ -33,7 +33,7 @@ msgstr "Línea de control de deuda"
 #. module: account_credit_control_variable_fees
 #: model:ir.model,name:account_credit_control_variable_fees.model_credit_control_policy_level
 msgid "A credit control policy level"
-msgstr "Un nivel de política de control de crédito"
+msgstr "Un nivel de política de control del crédito"
 
 #. module: account_credit_control_variable_fees
 #: model:ir.model.fields,field_description:account_credit_control_variable_fees.field_account_journal_apply_variable_fees
@@ -47,8 +47,18 @@ msgstr "Mensaje personalizado después del porcentaje de recargo"
 
 #. module: account_credit_control_variable_fees
 #: model:ir.ui.view,arch_db:account_credit_control_variable_fees.report_credit_control_summary_document_variable_fees
+msgid "Date due"
+msgstr "Fecha vencimiento"
+
+#. module: account_credit_control_variable_fees
+#: model:ir.ui.view,arch_db:account_credit_control_variable_fees.report_credit_control_summary_document_variable_fees
 msgid "Debt amount"
 msgstr "Importe deuda"
+
+#. module: account_credit_control_variable_fees
+#: model:ir.ui.view,arch_db:account_credit_control_variable_fees.report_credit_control_summary_document_variable_fees
+msgid "Fees"
+msgstr "Tasas"
 
 #. module: account_credit_control_variable_fees
 #: model:ir.ui.view,arch_db:account_credit_control_variable_fees.report_credit_control_summary_document_variable_fees
@@ -57,8 +67,18 @@ msgstr "Recargo ("
 
 #. module: account_credit_control_variable_fees
 #: model:ir.ui.view,arch_db:account_credit_control_variable_fees.report_credit_control_summary_document_variable_fees
+msgid "Invoice date"
+msgstr "Fecha factura"
+
+#. module: account_credit_control_variable_fees
+#: model:ir.ui.view,arch_db:account_credit_control_variable_fees.report_credit_control_summary_document_variable_fees
 msgid "Invoice number"
 msgstr "Nº. factura"
+
+#. module: account_credit_control_variable_fees
+#: model:ir.ui.view,arch_db:account_credit_control_variable_fees.report_credit_control_summary_document_variable_fees
+msgid "Invoiced amount"
+msgstr "Importe facturado"
 
 #. module: account_credit_control_variable_fees
 #: model:ir.model,name:account_credit_control_variable_fees.model_account_journal
@@ -66,15 +86,37 @@ msgid "Journal"
 msgstr "Diario"
 
 #. module: account_credit_control_variable_fees
-#: model:ir.model,name:account_credit_control_variable_fees.model_credit_control_printer
-msgid "Mass printer"
-msgstr "Impresión masiva"
+#: model:ir.ui.view,arch_db:account_credit_control_variable_fees.report_credit_control_summary_document_variable_fees
+msgid "Outstanding amount"
+msgstr "Importe Pendiente"
 
 #. module: account_credit_control_variable_fees
 #: model:ir.model.fields,field_description:account_credit_control_variable_fees.field_credit_control_communication_print_summary_table
 #: model:ir.model.fields,field_description:account_credit_control_variable_fees.field_credit_control_policy_level_print_summary_table
 msgid "Print summary table"
 msgstr "Impresión en tabla resumen"
+
+#. module: account_credit_control_variable_fees
+#: model:ir.model.fields,field_description:account_credit_control_variable_fees.field_credit_control_communication_show_fees_column
+#: model:ir.model.fields,field_description:account_credit_control_variable_fees.field_credit_control_policy_level_show_fees_column
+msgid "Show fees column"
+msgstr "Mostrar columna Tasas"
+
+#. module: account_credit_control_variable_fees
+#: model:ir.model.fields,field_description:account_credit_control_variable_fees.field_credit_control_communication_show_invoiced_amount_column
+#: model:ir.model.fields,field_description:account_credit_control_variable_fees.field_credit_control_policy_level_show_invoiced_amount_column
+msgid "Show invoiced amount column"
+msgstr "Mostrar columna importe facturado"
+
+#. module: account_credit_control_variable_fees
+#: model:ir.model.fields,help:account_credit_control_variable_fees.field_credit_control_policy_level_show_fees_column
+msgid "Show the fees column in the summary table"
+msgstr "Muestra la columna tasas en la tabla de sumario"
+
+#. module: account_credit_control_variable_fees
+#: model:ir.model.fields,help:account_credit_control_variable_fees.field_credit_control_policy_level_show_invoiced_amount_column
+msgid "Show the invoiced amount column in the summary table"
+msgstr "Muestra la columna importe facturado en la tabla sumario"
 
 #. module: account_credit_control_variable_fees
 #: model:ir.model.fields,help:account_credit_control_variable_fees.field_credit_control_policy_level_custom_text_after_variable_fees
@@ -121,5 +163,5 @@ msgstr "Porcentaje recargo"
 #. module: account_credit_control_variable_fees
 #: model:ir.model,name:account_credit_control_variable_fees.model_credit_control_communication
 msgid "credit control communication"
-msgstr "Comunicación control de crédito"
+msgstr "comunicación control de créditos"
 
