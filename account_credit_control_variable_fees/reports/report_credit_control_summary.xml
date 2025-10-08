@@ -4,7 +4,7 @@
     <template id="report_credit_control_summary_document_variable_fees"
         inherit_id="account_credit_control.report_credit_control_summary_document">
 
-        <!-- Modificar cabeceras de la tabla original -->
+        <!-- Modify headers of the original table -->
         <xpath id="modify_summary_table_headers" expr="//table[@id='summary_table']/thead/tr" position="replace">
             <tr>
                 <th>Invoice number</th>
@@ -18,7 +18,7 @@
             </tr>
         </xpath>
 
-        <!-- Modificar filas de la tabla original -->
+        <!-- Modify rows in the original table -->
         <xpath id="modify_summary_table_rows" expr="//table[@id='summary_table']/tbody/tr" position="replace">
             <tr t-foreach="doc.credit_control_line_ids" t-as="l">
                 <t t-if="l.invoice_id">
@@ -54,7 +54,7 @@
             </tr>
         </xpath>
 
-        <!-- Eliminar la fila "Total Invoiced" de los totales originales -->
+        <!-- Remove the "Total Invoiced" row from the original totals -->
         <xpath expr="//div[@class='row']/div[@class='col-xs-4 pull-right']/table/tr[1]" position="replace">
         </xpath>
 
