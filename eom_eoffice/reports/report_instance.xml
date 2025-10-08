@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <report
+      id="action_report_electronic_file_form"
+      string="Electronic File Report"
+      model="eom.electronicfile"
+      report_type="qweb-pdf"
+      name="eom_eoffice.report_electronic_file_form"
+      menu="True"
+  />
+
+  <template id="report_electronic_file_form">
+    <t t-call="report.html_container">
+      <t t-call="report.external_layout">
+        <div class="page">
+          <t t-foreach="docs" t-as="o">
+            <t t-call="eom_eoffice.report_electronic_file_form_document"/>
+            <p style="page-break-after:always;"></p>
+          </t>
+        </div>
+      </t>
+    </t>
+  </template>
+
+  <template id="report_electronic_file_form_document">
+
+    <div class="row" style="margin-top:8px;">
+      <div class="col-12 text-left">
+        <strong>Electronic File:</strong>
+        <strong><span t-esc="o.name"/></strong>
+      </div>
+    </div>
+    <hr style="border:0; border-top:1px solid black; margin-top:4px; margin-bottom:8px;"/>
+
+    <t t-if="o.digitalregister_id">
+      <table style="width:100%; margin-top:12px; border-collapse:collapse;">
+        <tr>
+          <td style="width:50%; padding-right:20px; border-right:1px solid #000; vertical-align:top;">
+            <p><strong>Partner:</strong> <span t-field="o.partner_id"/></p>
+            <p><strong>Digital Register:</strong> <span t-esc="o.digitalregister_id.name"/></p>
+          </td>
+          <td style="width:50%; padding-left:20px; vertical-align:top;">
+            <p><strong>Type:</strong> <span t-field="o.type"/></p>
+            <p><strong>Deadline:</strong> <span t-field="o.deadline_date"/></p>
+          </td>
+        </tr>
+      </table>
+    </t>
+    <t t-else="">
+      <strong><span class="text-danger">Digital register not found.</span></strong>
+    </t>
+
+    <div style="margin-top:8px;">
+
+      <t t-if="o.type == '01_generic_instance'">
+        <div style="margin-top:12px;">
+          <strong>E X P O S I T I O N</strong>
+          <hr style="border:0; border-top:1px solid black; margin:2px 0 6px 0;"/>
+          <p><span t-esc="o.exposition"/></p>
+        </div>
+
+        <div style="margin-top:12px;">
+          <strong>R E Q U E S T</strong>
+          <hr style="border:0; border-top:1px solid black; margin:2px 0 6px 0;"/>
+          <p><span t-esc="o.request"/></p>
+        </div>
+      </t>
+
+      <t t-else="">
+        <div style="margin-top:12px;">
+          <strong>S U G G E S T I O N</strong>
+          <hr style="border:0; border-top:1px solid black; margin:2px 0 6px 0;"/>
+          <p><span t-esc="o.suggestion"/></p>
+        </div>
+      </t>
+
+      <t t-if="o.resolution">
+        <div style="margin-top:12px;">
+          <strong>R E S O L U T I O N</strong>
+          <hr style="border:0; border-top:1px solid black; margin:2px 0 6px 0;"/>
+          <p><span t-esc="o.resolution"/></p>
+        </div>
+      </t>
+
+    </div>
+
+  </template>
+</odoo>

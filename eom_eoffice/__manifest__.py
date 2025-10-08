@@ -29,6 +29,7 @@
         "views/eom_electronicfile_communication_view.xml",
         "reports/report_notification.xml",
         "data/mail_template_data.xml",
+        "reports/report_instance.xml",
     ],
     "installable": True,
     "post_init_hook": "post_init_hook",
