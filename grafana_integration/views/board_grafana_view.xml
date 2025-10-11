@@ -5,10 +5,8 @@
         <field name="name">Grafana (from view)</field>
         <field name="model">board.grafana</field>
         <field name="arch" type="xml">
-            <form create="false" class="o_board_grafana_form_view">
-                <div class="text-center">
-                    <field name="grafana_frame" widget="html"/>
-                </div>
+            <form create="false" edit="false" delete="false" class="o_board_grafana_form_view">
+                <field name="grafana_frame" widget="html"/>
             </form>
         </field>
     </record>
@@ -20,6 +18,7 @@
         <field name="view_mode">form</field>
         <field name="view_id" ref="board_grafana_home"/>
         <field name="target">inline</field>
+        <field name="context">{'no_breadcrumbs': True, 'search_view_ref': False}</field>
     </record>
 
     <record id="grafana_server_action" model="ir.actions.server">
@@ -42,13 +41,9 @@
         parent="grafana_integration.menu_grafana_main"
         sequence="10"/>
 
-    <!-- <menuitem id="menu_grafana_config" -->
-
     <menuitem id="menu_grafana_server"
         parent="grafana_integration.menu_grafana_parameters"
         action="grafana_server_action"
         sequence="20"/>
-
-    <!-- <menuitem id="menu_grafana_dashboard_storage" -->
 
 </odoo>

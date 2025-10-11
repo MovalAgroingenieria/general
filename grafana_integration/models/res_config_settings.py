@@ -10,7 +10,7 @@ class BoardGrafanaConfiguration(models.TransientModel):
     DEFAULT_DASHBOARD_HEIGHT = 800
 
     grafana_url_raw = fields.Char(
-        string='URL',
+        string='Grafana URL',
         config_parameter='grafana_integration.grafana_url_raw',
         help='The URL of grafana host.',
     )
