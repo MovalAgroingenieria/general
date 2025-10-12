@@ -20,6 +20,7 @@
         'views/measurement_device_views.xml',
         'views/measurement_device_sensor_views.xml',
         'views/measurement_device_sensor_reading_views.xml',
+        'views/remotecontrol_views.xml',
     ],
     'application': False,
     'installable': True,

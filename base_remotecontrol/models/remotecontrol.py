@@ -222,7 +222,7 @@ class RemoteControlAction(models.Model):
         default=False,
     )
 
-    def execute(self, bag=None):
+    def execute(self, bag=None, selected_device_id=None):
         self.ensure_one()
         bag = dict(bag or {})
         remote_control = self.remote_id
@@ -231,6 +231,7 @@ class RemoteControlAction(models.Model):
             'env': self.env,
             'self': self,
             'bag': bag,
+            'selected_device_id': selected_device_id,
             'base_url': remote_control.base_url or '',
             'timeout': remote_control.timeout,
             'fields': fields,
@@ -395,7 +396,7 @@ class RemoteControlProcedure(models.Model):
         default=False,
     )
 
-    def run(self, procedure_id=None):
+    def run(self, procedure_id=None, selected_device_id=None):
         procedures = []
         if self:
             procedures = self
@@ -404,7 +405,8 @@ class RemoteControlProcedure(models.Model):
         for procedure in procedures:
             bag = {}
             for step in procedure.step_ids.sorted(key=lambda s: s.sequence):
-                bag = step.action_id.execute(bag=bag)
+                bag = step.action_id.execute(
+                    bag=bag, selected_device_id=selected_device_id)
             procedure.remote_id.message_log(
                 u"Procedure '%s' finished OK." % procedure.name)
         return True
