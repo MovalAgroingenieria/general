@@ -225,7 +225,6 @@ bag['sensors_plan'] = plan
             <field name="readonly">True</field>
             <field name="code"><![CDATA[
 # Action C: fetch readings by group/key, upsert (generic), and attach audit
-import json, base64
 Remote = self.remote_id
 SensorModel = env['mdm.measurement.device.sensor']
 plan = bag.get('sensors_plan') or []
@@ -298,7 +297,15 @@ for sensor_plan in plan:
     except Exception as e:
         items.append({'sensor_id': sensor_id, 'device_id': device_id, 'growth_id': growth_id, 'status': -1, 'error': str(e)})
 audit = {'executed_at': fields.Datetime.now(), 'final_date': final_date, 'total_upserts': total_upserts, 'total_errors': total_errors, 'items': items}
-b64 = base64.b64encode(json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
+try:
+    # Added ensure_asccii to avoid issues with special chars in JSON
+    audit_json = json.dumps(audit, ensure_ascii=True, indent=2, default=str)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+except Exception as json_error:
+    # Fallback: create a simplified audit if there are issues
+    simple_audit = {'executed_at': str(fields.Datetime.now()), 'total_upserts': total_upserts, 'total_errors': total_errors, 'error': str(json_error)}
+    audit_json = json.dumps(simple_audit, ensure_ascii=True, indent=2)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
 fname = 'readings_fetch_%s.json' % fields.Datetime.now().replace(':','').replace('-','').replace(' ','_')
 att = env['ir.attachment'].create({'name': fname, 'datas_fname': fname, 'datas': b64, 'mimetype': 'application/json', 'res_model': 'remotecontrol', 'res_id': Remote.id})
 Remote.message_post(body=u"[Readings] upserts=%s errors=%s" % (total_upserts, total_errors), attachment_ids=[att.id])
