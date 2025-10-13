@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <template id="hr_telework_tracking_site_capacity.schedule">
+    <t t-call="web.html_container">
+      <t t-call="web.external_layout">
+        <div class="page" style="page-break-after: always;">
+
+          <!-- Report header -->
+          <div class="row mb-3">
+            <div class="col-12">
+              <div class="text-center">
+                <h3>Telework Assignments - All Offices</h3>
+                <p><strong>Period:</strong>
+                   <span t-esc="date_from" t-options="{'widget': 'date'}"/> -
+                   <span t-esc="date_to" t-options="{'widget': 'date'}"/>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unified Assignments table - All employees, all offices -->
+          <div class="row">
+            <div class="col-12">
+              <table class="table table-bordered table-sm">
+                <thead>
+                  <tr class="table-primary">
+                    <th style="width: 20%;">Employee</th>
+                    <th style="width: 15%;">Department</th>
+                    <t t-foreach="dates" t-as="date">
+                      <th class="text-center" style="width: 13%;">
+                        <div t-esc="date.strftime('%a %d/%m')"/>
+                      </th>
+                    </t>
+                  </tr>
+                </thead>
+                <tbody>
+                  <t t-foreach="employee_data" t-as="emp_data">
+                    <tr>
+                    <td style="background-color: #f8f9fa;"><strong t-esc="emp_data['employee'].name"/></td>
+                    <td style="background-color: #f8f9fa;" t-esc="emp_data['employee'].department_id.name or ''"/>
+                    <t t-foreach="dates" t-as="date">
+                      <td class="text-center">
+                      <t t-set="day_data" t-value="emp_data['schedule'].get(date, {})"/>
+                      <t t-if="day_data.get('mode') == 'onsite'">
+                        <t t-set="workstation" t-value="day_data.get('workstation', 'Not assigned')"/>
+                        <!-- Show workstation in green or "Not assigned" in red -->
+                        <t t-if="workstation == 'Not assigned'">
+                          <span class="badge badge-danger" style="background-color: #dc3545; color: white; font-size: 14px;" t-esc="workstation"/>
+                        </t>
+                        <t t-else="">
+                          <span class="badge badge-success" style="background-color: #28a745; color: white; font-size: 14px;" t-esc="workstation"/>
+                        </t>
+                      </t>
+                      <t t-elif="day_data.get('mode') == 'remote'">
+                        <span class="badge badge-secondary" style="background-color: #6c757d; color: white; font-size: 14px;">Remote</span>
+                      </t>
+                      <t t-else="">
+                        <span class="text-muted">-</span>
+                      </t>
+                      </td>
+                    </t>
+                    </tr>
+                  </t>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistical summary on new page -->
+        <div class="page">
+          <div class="row">
+            <div class="col-12">
+              <h3 class="text-center mb-4">Daily Summary</h3>
+
+              <!-- Office Occupancy Table -->
+              <h4 class="mt-4 mb-3">Office Occupancy by Day</h4>
+              <table class="table table-bordered table-sm">
+                <thead>
+                  <tr class="table-info">
+                    <th style="width: 25%;">Office</th>
+                    <t t-foreach="dates" t-as="date">
+                      <th class="text-center" style="width: 15%;">
+                        <div t-esc="date.strftime('%a %d/%m')"/>
+                      </th>
+                    </t>
+                  </tr>
+                </thead>
+                <tbody>
+                  <t t-foreach="offices" t-as="office">
+                    <tr>
+                      <td><strong t-esc="office.name"/></td>
+                      <t t-foreach="dates" t-as="date">
+                        <t t-set="occ_data" t-value="office_occupancy[office][date]"/>
+                        <td class="text-center">
+                          <div>
+                            <span t-esc="occ_data['assigned']"/> / <span t-esc="occ_data['total']"/>
+                          </div>
+                          <div class="text-muted" style="font-size: 11px;">
+                            (<span t-esc="'%.0f' % occ_data['percentage']"/>% occupied)
+                          </div>
+                          <t t-if="occ_data['available'] == 0">
+                            <span class="badge badge-danger" style="background-color: #dc3545; color: white; font-size: 10px;">Full</span>
+                          </t>
+                          <t t-elif="occ_data['percentage'] &gt;= 80">
+                            <span class="badge badge-warning" style="background-color: #ffc107; color: black; font-size: 10px;">High</span>
+                          </t>
+                          <t t-else="">
+                            <span class="badge badge-success" style="background-color: #28a745; color: white; font-size: 10px;">OK</span>
+                          </t>
+                        </td>
+                      </t>
+                    </tr>
+                  </t>
+                </tbody>
+              </table>
+
+              <!-- Global Summary -->
+              <h4 class="mt-5 mb-3">Global Summary</h4>
+              <table class="table table-bordered table-sm">
+                <thead>
+                  <tr class="table-primary">
+                    <th style="width: 25%;">Date</th>
+                    <th class="text-center" style="width: 25%;">On-site</th>
+                    <th class="text-center" style="width: 25%;">Remote</th>
+                    <th class="text-center" style="width: 25%;">Total Available</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <t t-foreach="dates" t-as="date">
+                    <t t-set="onsite_count" t-value="len(all_declarations.filtered(lambda d: d.date == date and d.mode == 'onsite'))"/>
+                    <t t-set="remote_count" t-value="len(all_declarations.filtered(lambda d: d.date == date and d.mode == 'remote'))"/>
+                    <t t-set="total_capacity" t-value="sum([len(o.workstation_ids) for o in offices])"/>
+                    <t t-set="available_count" t-value="total_capacity - onsite_count"/>
+                    <tr>
+                      <td><strong t-esc="date.strftime('%A %d/%m/%Y')"/></td>
+                      <td class="text-center">
+                        <span class="badge" style="background-color: #28a745; color: white; font-size: 14px;" t-esc="onsite_count"/>
+                      </td>
+                      <td class="text-center">
+                        <span class="badge" style="background-color: #6c757d; color: white; font-size: 14px;" t-esc="remote_count"/>
+                      </td>
+                      <td class="text-center">
+                        <span class="badge" style="background-color: #17a2b8; color: white; font-size: 14px;" t-esc="available_count"/>
+                        <span class="text-muted" style="font-size: 11px;"> / <span t-esc="total_capacity"/></span>
+                      </td>
+                    </tr>
+                  </t>
+                </tbody>
+              </table>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Page break before office images section -->
+        <div style="page-break-before: always;"></div>
+
+        <!-- Office Images - One page per office -->
+        <t t-foreach="offices" t-as="office">
+          <t t-if="office.image">
+            <div class="page" style="page-break-after: always;">
+              <div class="row">
+                <div class="col-12">
+                  <!-- Office header -->
+                  <div class="text-center mb-3">
+                    <h3 t-esc="office.name"/>
+                    <p class="text-muted">
+                      <strong>Total Workstations:</strong> <span t-esc="len(office.workstation_ids)"/>
+                    </p>
+                  </div>
+
+                  <!-- Office floor plan/image -->
+                  <div class="text-center" style="margin-top: 30px;">
+                    <img t-att-src="'data:image/png;base64,%s' % office.image.decode('utf-8')"
+                         style="max-width: 100%; max-height: 800px; width: auto; height: auto; object-fit: contain;"
+                         alt="Office Layout"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </t>
+        </t>
+
+      </t>
+    </t>
+  </template>
+
+  <!-- Report definition -->
+  <record id="action_report_telework_schedule" model="ir.actions.report">
+    <field name="name">Telework Assignments Report</field>
+    <field name="model">telework.report.wizard</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">hr_telework_tracking_site_capacity.schedule</field>
+    <field name="report_file">hr_telework_tracking_site_capacity.schedule</field>
+    <field name="binding_model_id" ref="model_telework_report_wizard"/>
+    <field name="binding_type">report</field>
+  </record>
+
+</odoo>

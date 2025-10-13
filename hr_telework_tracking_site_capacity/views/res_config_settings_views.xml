@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- This is onwards controlled from the cronjobs and the application itself automatically -->
+
+  <record id="view_telework_config_form" model="ir.ui.view">
+    <field name="name">Telework Configuration Settings</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="hr.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[@name='employee_rights_setting_container']" position="after">
+        <!-- <h2>Telework</h2>
+        <div class="row mt16 o_settings_container" name="telework_setting_container">
+          <div class="col-12 col-lg-6 o_setting_box">
+            <div class="o_setting_right_pane">
+            <field name="capacity_policy"/>
+            <br/>
+            <label for="capacity_policy" string="Capacity Policy"/>
+            <div class="text-muted">
+              Define how capacity overflow is handled
+            </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6 o_setting_box">
+            <div class="o_setting_right_pane">
+            <div class="row">
+              <div class="col-6">
+              <field name="cutoff_weekday"/>
+              <br/>
+              <label for="cutoff_weekday" string="Cutoff Day"/>
+              </div>
+              <div class="col-6">
+              <field name="cutoff_time" widget="float_time"/>
+              <br/>
+              <label for="cutoff_time" string="Cutoff Time"/>
+              </div>
+            </div>
+            <div class="text-muted">
+              Day and time limit to create declarations for the target week
+            </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6 o_setting_box">
+            <div class="o_setting_right_pane">
+            <div class="row">
+              <div class="col-6">
+              <field name="auto_confirm_weekday"/>
+              <br/>
+              <label for="auto_confirm_weekday" string="Confirmation Day"/>
+              </div>
+              <div class="col-6">
+              <field name="auto_confirm_time" widget="float_time"/>
+              <br/>
+              <label for="auto_confirm_time" string="Confirmation Time"/>
+              </div>
+            </div>
+            <div class="text-muted">
+              Day and time for automatic confirmation of declarations
+            </div>
+            </div>
+          </div>
+          </div> -->
+
+      </xpath>
+    </field>
+  </record>
+
+</odoo>

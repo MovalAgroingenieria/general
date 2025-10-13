@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Main menu for telework -->
+  <menuitem
+      id="menu_telework_root"
+      name="Teletrabajo"
+      parent="hr.menu_hr_root"
+      sequence="40"
+      groups="group_telework_user"/>
+
+  <!-- Daily declarations - All users -->
+  <menuitem
+      id="menu_telework_day"
+      name="Daily Declarations"
+      parent="menu_telework_root"
+      action="action_telework_day"
+      sequence="10"
+      groups="group_telework_user"/>
+
+  <!-- Office Locations - Managers only -->
+  <menuitem
+      id="menu_office_location"
+      name="Office Locations"
+      parent="menu_telework_root"
+      action="action_office_location"
+      sequence="19"
+      groups="group_telework_manager"/>
+
+  <!-- Workstations - Managers only -->
+  <menuitem
+      id="menu_office_workstation"
+      name="Workstations"
+      parent="menu_telework_root"
+      action="action_office_workstation"
+      sequence="20"
+      groups="group_telework_manager"/>
+
+  <!-- Employee Preferences - Managers only -->
+  <menuitem
+      id="menu_hr_employee_preferences"
+      name="Employee Preferences"
+      parent="menu_telework_root"
+      action="action_hr_employee_preferences"
+      sequence="21"
+      groups="group_telework_manager"/>
+
+  <!-- Weekly Declaration - All users -->
+  <menuitem
+      id="menu_weekly_declaration"
+      name="Weekly Declaration"
+      parent="menu_telework_root"
+      action="action_weekly_telework_declaration"
+      groups="group_telework_user"/>
+
+  <!-- Mass tools - Managers only -->
+  <menuitem
+      id="menu_weekly_generation_wizard"
+      name="Weekly Generation Wizard"
+      parent="menu_telework_root"
+      action="action_weekly_generation_wizard"
+      sequence="30"
+      groups="group_telework_manager"/>
+
+  <!-- Reports - Managers only -->
+  <menuitem
+      id="menu_telework_report"
+      name="Telework Report"
+      parent="menu_telework_root"
+      action="action_telework_report_wizard"
+      sequence="50"
+      groups="group_telework_manager"/>
+
+</odoo>

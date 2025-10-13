@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-name="hr_telework_tracking_site_capacity.TeleworkModeField" owl="1">
+        <div class="d-flex align-items-center">
+            <i t-if="modeIcon"
+               t-att-class="'fa ' + modeIcon"
+               t-att-style="'color: ' + modeColor + '; font-size: 16px; margin-right: 8px;'"/>
+            <select t-if="!props.readonly"
+                    t-att-value="props.value"
+                    t-on-change="onModeChange"
+                    class="form-control">
+                <option value="">Seleccionar...</option>
+                <option value="remote">Teletrabajo</option>
+                <option value="onsite">Presencial</option>
+            </select>
+            <span t-if="props.readonly" t-esc="modeLabel" style="color: #495057;"/>
+        </div>
+    </t>
+</templates>
