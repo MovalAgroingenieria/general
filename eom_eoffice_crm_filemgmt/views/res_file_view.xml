@@ -16,6 +16,18 @@
         </field>
     </record>
 
+    <!-- Prueba -->
+    <record id="res_file_view_tree_inherit_company" model="ir.ui.view">
+        <field name="name">res.file.tree.inherit.company</field>
+        <field name="model">res.file</field>
+        <field name="inherit_id" ref="crm_filemgmt.res_file_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="company_id"/>
+            </xpath>
+        </field>
+    </record>
+
     <record id="res_file_view_form_inherit_company" model="ir.ui.view">
         <field name="name">res.file.form.inherit.company</field>
         <field name="model">res.file</field>
