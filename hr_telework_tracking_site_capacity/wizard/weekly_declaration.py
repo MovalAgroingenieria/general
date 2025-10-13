@@ -1,5 +1,5 @@
-# Copyright 2025 Moval Agroingeniería
-# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+# 2025 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from datetime import timedelta
 from odoo import api, fields, models, _
@@ -11,38 +11,62 @@ class WeeklyTeleworkDeclaration(models.TransientModel):
     _description = 'Wizard for weekly telework declarations'
 
     employee_id = fields.Many2one(
-        'hr.employee', string='Employee', required=True,
-        default=lambda self: self.env.user.employee_id)
-    week_start_date = fields.Date(
-        string='Week Monday', required=True,
-        default=lambda self: self._get_monday())
+        comodel_name='hr.employee',
+        string='Employee',
+        required=True,
+        default=lambda self: self.env.user.employee_id,
+    )
 
-    # Fields for each weekday
+    week_start_date = fields.Date(
+        string='Week Monday',
+        required=True,
+        default=lambda self: self._get_monday()
+    )
+
     monday_mode = fields.Selection([
-        ('remote', 'Remote Work'),
-        ('onsite', 'On-site'),
-        ('no_work', 'No Work'),
-    ], string='Monday', default='onsite')
+            ('remote', 'Remote Work'),
+            ('onsite', 'On-site'),
+            ('no_work', 'No Work'),
+        ],
+        string='Monday',
+        default='onsite',
+    )
+
     tuesday_mode = fields.Selection([
-        ('remote', 'Remote Work'),
-        ('onsite', 'On-site'),
-        ('no_work', 'No Work'),
-    ], string='Tuesday', default='onsite')
+            ('remote', 'Remote Work'),
+            ('onsite', 'On-site'),
+            ('no_work', 'No Work'),
+        ],
+        string='Tuesday',
+        default='onsite',
+    )
+
     wednesday_mode = fields.Selection([
-        ('remote', 'Remote Work'),
-        ('onsite', 'On-site'),
-        ('no_work', 'No Work'),
-    ], string='Wednesday', default='onsite')
+            ('remote', 'Remote Work'),
+            ('onsite', 'On-site'),
+            ('no_work', 'No Work'),
+        ],
+        string='Wednesday',
+        default='onsite',
+    )
+
     thursday_mode = fields.Selection([
-        ('remote', 'Remote Work'),
-        ('onsite', 'On-site'),
-        ('no_work', 'No Work'),
-    ], string='Thursday', default='onsite')
+            ('remote', 'Remote Work'),
+            ('onsite', 'On-site'),
+            ('no_work', 'No Work'),
+        ],
+        string='Thursday',
+        default='onsite',
+    )
+
     friday_mode = fields.Selection([
-        ('remote', 'Remote Work'),
-        ('onsite', 'On-site'),
-        ('no_work', 'No Work'),
-    ], string='Friday', default='onsite')
+            ('remote', 'Remote Work'),
+            ('onsite', 'On-site'),
+            ('no_work', 'No Work'),
+        ],
+        string='Friday',
+        default='onsite',
+    )
 
     @api.model
     def _get_monday(self):
@@ -54,7 +78,7 @@ class WeeklyTeleworkDeclaration(models.TransientModel):
     def _map_preference_to_mode(self, preference):
         """Convert preference to mode, flexible becomes on-site"""
         if preference == 'flexible':
-            return 'onsite'  # Flexible → on-site by default
+            return 'onsite'
         return preference or 'onsite'
 
     @api.model
@@ -62,12 +86,10 @@ class WeeklyTeleworkDeclaration(models.TransientModel):
         """Load user preferences by default"""
         res = super().default_get(fields_list)
 
-        # Get current employee
         employee = self.env.user.employee_id
         if employee:
             res['employee_id'] = employee.id
 
-            # Load preferences if they exist
             preference_mapping = {
                 'monday_mode': self._map_preference_to_mode(
                     employee.monday_preference),
@@ -81,7 +103,6 @@ class WeeklyTeleworkDeclaration(models.TransientModel):
                     employee.friday_preference),
             }
 
-            # Only update fields that are in fields_list
             for field_name, preference_value in preference_mapping.items():
                 if field_name in fields_list:
                     res[field_name] = preference_value
@@ -92,7 +113,6 @@ class WeeklyTeleworkDeclaration(models.TransientModel):
     def _onchange_employee_id(self):
         """Update preferences when employee changes"""
         if self.employee_id:
-            # Load selected employee preferences
             emp = self.employee_id
             self.monday_mode = self._map_preference_to_mode(
                 emp.monday_preference)
@@ -105,7 +125,6 @@ class WeeklyTeleworkDeclaration(models.TransientModel):
             self.friday_mode = self._map_preference_to_mode(
                 emp.friday_preference)
         else:
-            # If no employee, reset to on-site
             self.monday_mode = 'onsite'
             self.tuesday_mode = 'onsite'
             self.wednesday_mode = 'onsite'
@@ -121,7 +140,6 @@ class WeeklyTeleworkDeclaration(models.TransientModel):
 
         TeleworkDay = self.env['hr.telework.day']
 
-        # Day configuration (0=Monday, 4=Friday)
         days_config = [
             (0, self.monday_mode),
             (1, self.tuesday_mode),
@@ -135,25 +153,21 @@ class WeeklyTeleworkDeclaration(models.TransientModel):
         for day_offset, day_mode in days_config:
             current_date = self.week_start_date + timedelta(days=day_offset)
 
-            # Check if declaration already exists for this day
             existing = TeleworkDay.search([
                 ('employee_id', '=', self.employee_id.id),
                 ('date', '=', current_date),
             ])
 
             if day_mode == 'no_work':
-                # If no work, remove existing draft declaration
                 if existing and existing.state == 'draft':
                     existing.unlink()
                 continue
 
             if existing:
-                # Update existing only if in draft state
                 if existing.state == 'draft':
                     existing.mode = day_mode
                     created_declarations.append(existing)
             else:
-                # Create new declaration
                 declaration = TeleworkDay.create({
                     'employee_id': self.employee_id.id,
                     'date': current_date,
@@ -162,7 +176,6 @@ class WeeklyTeleworkDeclaration(models.TransientModel):
                 })
                 created_declarations.append(declaration)
 
-        # Invalidate cache and show notification
         if created_declarations:
             message = _(
                 '%d declarations have been processed for week of %s') % (
@@ -170,7 +183,6 @@ class WeeklyTeleworkDeclaration(models.TransientModel):
                 self.week_start_date.strftime('%d/%m/%Y')
             )
 
-            # Check if there are overbookings
             overbooked_count = len([
                 d for d in created_declarations if d.overbooked])
             if overbooked_count:
@@ -178,7 +190,6 @@ class WeeklyTeleworkDeclaration(models.TransientModel):
                     '\n⚠️ %d declarations with overbooking detected.'
                 ) % overbooked_count
 
-            # Invalidate cache to update views
             self.env['hr.telework.day'].invalidate_cache()
 
             return {

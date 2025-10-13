@@ -3,6 +3,7 @@
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { Component } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
 
 export class TeleworkModeField extends Component {
     static template = "hr_telework_tracking_site_capacity.TeleworkModeField";
@@ -21,18 +22,18 @@ export class TeleworkModeField extends Component {
 
     get modeLabel() {
         if (this.props.value === 'remote') {
-            return 'Teletrabajo';
+            return _t('Telework');
         } else if (this.props.value === 'onsite') {
-            return 'Presencial';
+            return _t('On-site');
         }
         return '';
     }
 
     get modeColor() {
         if (this.props.value === 'remote') {
-            return '#28a745'; // Verde
+            return '#28a745';
         } else if (this.props.value === 'onsite') {
-            return '#007bff'; // Azul
+            return '#007bff';
         }
         return '#6c757d';
     }

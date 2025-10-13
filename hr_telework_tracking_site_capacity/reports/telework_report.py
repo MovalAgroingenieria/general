@@ -1,13 +1,10 @@
-# Copyright 2025 Moval Agroingeniería
+# 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 import re
 from datetime import timedelta
 
-from odoo import api, models, fields
-import logging
-
-_logger = logging.getLogger(__name__)
+from odoo import api, models, fields, _
 
 
 class TeleworkReport(models.AbstractModel):
@@ -17,17 +14,7 @@ class TeleworkReport(models.AbstractModel):
     @api.model
     def _get_report_values(self, docids, data=None):
         """Get values for the report - unified table for all employees"""
-        _logger.info("=== TELEWORK REPORT DEBUG ===")
-        _logger.info(f"docids: {docids}")
-        _logger.info(f"data: {data}")
-
         wizard = self.env['telework.report.wizard'].browse(docids)
-        _logger.info(f"wizard: {wizard}")
-        if wizard:
-            _logger.info(f"wizard.date_from: {wizard.date_from}")
-            _logger.info(f"wizard.date_to: {wizard.date_to}")
-        else:
-            _logger.info("NO WIZARD FOUND")
 
         if not data:
             data = {}
@@ -103,14 +90,14 @@ class TeleworkReport(models.AbstractModel):
                         }
                     elif decl.mode == 'remote':
                         employee_schedule[date] = {
-                            'workstation': 'Remote',
+                            'workstation': _('Remote'),
                             'mode': decl.mode,
                             'state': decl.state,
                         }
                     else:
                         # No workstation assigned
                         employee_schedule[date] = {
-                            'workstation': 'Not assigned',
+                            'workstation': False,
                             'mode': decl.mode,
                             'state': decl.state,
                         }
@@ -125,12 +112,6 @@ class TeleworkReport(models.AbstractModel):
                 'employee': employee,
                 'schedule': employee_schedule,
             })
-
-        _logger.info(f"Total declarations found: {len(all_declarations)}")
-        _logger.info(f"Total employees found: {len(employees)}")
-        _logger.info(f"Total dates: {len(dates)}")
-        _logger.info(f"Employee data entries: {len(employee_data)}")
-        _logger.info("=== END TELEWORK REPORT DEBUG ===")
 
         # Calculate office occupancy per day
         # Get all offices with workstations
@@ -173,7 +154,10 @@ class TeleworkReport(models.AbstractModel):
             'employee_data': employee_data,
             'offices': offices,
             'office_occupancy': office_occupancy,
-            'weekdays': [
-                'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
-            ],
+            'format_date': self._format_date_localized,
         }
+
+    def _format_date_localized(self, date_obj, format_str):
+        """Format date with localization"""
+        from odoo.tools import format_date
+        return format_date(self.env, date_obj, date_format=format_str)

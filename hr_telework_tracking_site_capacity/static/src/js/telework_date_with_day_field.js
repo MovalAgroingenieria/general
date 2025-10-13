@@ -19,7 +19,7 @@ export class TeleworkDateWithDayField extends Component {
     get weekdayDisplay() {
         if (!this.props.value) return '';
         const date = new Date(this.props.value);
-        const weekdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         return weekdays[date.getDay()];
     }
 

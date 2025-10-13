@@ -8,8 +8,8 @@ class HrDepartment(models.Model):
     _inherit = 'hr.department'
 
     default_capacity_full_day = fields.Integer(
-        string='Default Capacity (Full Day)',
+        string='Default Capacity',
         help='If there is no specific rule or weekly pattern, '
              'this capacity is used.',
-        default=30
+        default=0
     )

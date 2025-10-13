@@ -1,0 +1,1864 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* hr_telework_tracking_site_capacity
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-13 15:12+0000\n"
+"PO-Revision-Date: 2025-10-13 15:12+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: hr_telework_tracking_site_capacity
+#: model:mail.template,body_html:hr_telework_tracking_site_capacity.mail_employee_weekly_assignments
+msgid ""
+"\n"
+"        <div style=\"font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;\">\n"
+"          <h2 style=\"color: #2c3e50;\">Asignaciones Confirmadas</h2>\n"
+"          <p>Hola <strong>${employee_name}</strong>,</p>\n"
+"          <p>Se han confirmado tus asignaciones de teletrabajo para la semana del <strong>${week_start}</strong> al <strong>${week_end}</strong>.</p>\n"
+"          \n"
+"          <h3 style=\"color: #34495e; margin-top: 20px;\">Tu planificación semanal:</h3>\n"
+"          <table style=\"width: 100%; border-collapse: collapse; margin: 20px 0;\">\n"
+"            <thead>\n"
+"              <tr style=\"background-color: #3498db; color: white;\">\n"
+"                <th style=\"padding: 12px; text-align: left; border: 1px solid #ddd;\">Fecha</th>\n"
+"                <th style=\"padding: 12px; text-align: left; border: 1px solid #ddd;\">Día</th>\n"
+"                <th style=\"padding: 12px; text-align: left; border: 1px solid #ddd;\">Modo</th>\n"
+"                <th style=\"padding: 12px; text-align: left; border: 1px solid #ddd;\">Puesto</th>\n"
+"              </tr>\n"
+"            </thead>\n"
+"            <tbody>\n"
+"              ${assignments_table}\n"
+"            </tbody>\n"
+"          </table>\n"
+"          \n"
+"          <p style=\"margin-top: 20px;\">Adjunto encontrarás el informe completo de asignaciones de la oficina.</p>\n"
+"          \n"
+"          <p style=\"margin-top: 30px; color: #7f8c8d; font-size: 12px;\">\n"
+"            Si tienes alguna duda o necesitas realizar cambios, contacta con tu responsable o el departamento de RRHH.\n"
+"          </p>\n"
+"        </div>\n"
+"      "
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:mail.template,body_html:hr_telework_tracking_site_capacity.mail_reminder_undeclared
+msgid ""
+"\n"
+"        <p>Hola,</p>\n"
+"        <p>Recuerda declarar tu modo de trabajo para mañana antes de la hora de corte.</p>\n"
+"      "
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:mail.template,body_html:hr_telework_tracking_site_capacity.mail_daily_summary
+msgid ""
+"\n"
+"        <p>Resumen de ocupación por departamento para hoy disponible en el dashboard de Odoo.</p>\n"
+"      "
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:mail.template,body_html:hr_telework_tracking_site_capacity.mail_telework_overbooked
+msgid ""
+"\n"
+"        <p>Se ha confirmado un registro <b>presencial</b> que supera la capacidad configurada.</p>\n"
+"        <ul>\n"
+"          <li>Empleado: ${object.employee_id.name}</li>\n"
+"          <li>Departamento: ${object.department_id.name}</li>\n"
+"          <li>Fecha: ${format_date(object.date)}</li>\n"
+"        </ul>\n"
+"        <p>Revise la ocupación para tomar medidas si procede.</p>\n"
+"      "
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/wizard/weekly_declaration.py:0
+#, python-format
+msgid ""
+"\n"
+"⚠️ %d declarations with overbooking detected."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid "% occupied)"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/wizard/weekly_declaration.py:0
+#, python-format
+msgid "%d declarations have been processed for week of %s"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/office.py:0
+#, python-format
+msgid "%d workstations have been created successfully."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "%s declarations generated (%s remote, %s on-site)"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "%s declarations pending review"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "%s employees affected"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "%s workstations assigned (%s on waiting list)"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid ""
+"<p><strong>Auto-confirmation executed for week %s to "
+"%s</strong></p><ul><li>%s declarations confirmed (%s remote, %s on-"
+"site)</li><li>%s declarations pending with waiting list</li><li>%s issues "
+"detected</li></ul>"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid ""
+"<span class=\"badge badge-danger\" style=\"background-color: #dc3545; color:"
+" white; font-size: 10px;\">Full</span>"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid ""
+"<span class=\"badge badge-danger\" style=\"background-color: #dc3545; color:"
+" white; font-size: 14px;\">Not assigned</span>"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid ""
+"<span class=\"badge badge-secondary\" style=\"background-color: #6c757d; "
+"color: white; font-size: 14px;\">Remote</span>"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid ""
+"<span class=\"badge badge-success\" style=\"background-color: #28a745; "
+"color: white; font-size: 10px;\">OK</span>"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid ""
+"<span class=\"badge badge-warning\" style=\"background-color: #ffc107; "
+"color: black; font-size: 10px;\">High</span>"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid "<span class=\"text-muted\">-</span>"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_form
+msgid ""
+"<strong>  WORKSTATION CONFLICT:</strong> This workstation is already "
+"occupied by other declarations on the same date."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid "<strong>Period:</strong>"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid "<strong>Total Workstations:</strong>"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_generation_wizard_form
+msgid "<strong>Warning!</strong> You have checked \"Override Existing\"."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_form
+msgid ""
+"<strong>⚠️ WARNING:</strong> The total company capacity is exceeded for this"
+" day."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.constraint,message:hr_telework_tracking_site_capacity.constraint_hr_telework_day_uniq_emp_date
+msgid "A declaration already exists for this employee and date."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:res.groups,comment:hr_telework_tracking_site_capacity.group_telework_manager
+msgid ""
+"Acceso completo al módulo de teletrabajo, incluyendo configuración y gestión"
+" de todos los usuarios"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__message_needaction
+msgid "Action Needed"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_location__active
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_workstation__active
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_workstation_search
+msgid "Active"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__activity_ids
+msgid "Activities"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__activity_state
+msgid "Activity State"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__activity_type_icon
+msgid "Activity Type Icon"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_bulk_preferences_wizard_form
+msgid "Apply and Generate"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_location_form
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_workstation_form
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_workstation_search
+msgid "Archived"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:mail.template,name:hr_telework_tracking_site_capacity.mail_employee_weekly_assignments
+msgid "Asignaciones Semanales Confirmadas - Empleado"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_workstation__department_id
+msgid "Assigned Department"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.act_window,name:hr_telework_tracking_site_capacity.action_telework_report_wizard
+msgid "Assignments Report"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__message_attachment_count
+msgid "Attachment Count"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "Attention! Capacity Exceeded"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.server,name:hr_telework_tracking_site_capacity.action_server_auto_assign_workstations
+msgid "Auto Assign Workstations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.server,name:hr_telework_tracking_site_capacity.ir_cron_auto_confirm_weekly_declarations_ir_actions_server
+#: model:ir.cron,cron_name:hr_telework_tracking_site_capacity.ir_cron_auto_confirm_weekly_declarations
+msgid "Auto Confirm Weekly Telework Declarations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_res_config_settings__auto_confirm_weekday
+msgid "Auto-Confirmation Day"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_res_config_settings__auto_confirm_time
+msgid "Auto-Confirmation Time"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_employee_telework_preferences_form
+msgid "Automatic Configuration"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_day__source__auto_rule
+msgid "Automatic Rule"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "Automatic schedule generated for week %s to %s"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.server,name:hr_telework_tracking_site_capacity.cron_auto_generate_weekly_schedule_ir_actions_server
+msgid "Automatically Generate Weekly Schedules"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_employee__auto_generate_week
+msgid "Automatically generate weekly declarations based on preferences"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_tree
+msgid "Availability"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__office_availability
+msgid "Availability by Office"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/workstation.py:0
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_day__total_status_color__green
+#, python-format
+msgid "Available"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model,name:hr_telework_tracking_site_capacity.model_hr_telework_bulk_preferences_wizard
+msgid "Bulk Telework Preferences Configuration"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model,name:hr_telework_tracking_site_capacity.model_hr_telework_weekly_generation_wizard
+msgid "Bulk Weekly Schedule Generation"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_bulk_preferences_wizard_form
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_telework_report_wizard_form
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_generation_wizard_form
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_telework_declaration_form
+msgid "Cancel"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid ""
+"Cannot confirm declaration: the workstation is already occupied by another "
+"declaration on the same date."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_res_config_settings__capacity_policy
+msgid "Capacity Policy"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "Capacity exceeded for %s (%s)."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model,name:hr_telework_tracking_site_capacity.model_res_config_settings
+msgid "Configuration of Moval Odoo Management"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.act_window,name:hr_telework_tracking_site_capacity.action_bulk_preferences_wizard
+msgid "Configure Mass Preferences"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.actions.act_window,help:hr_telework_tracking_site_capacity.action_employees_telework_preferences
+#: model_terms:ir.actions.act_window,help:hr_telework_tracking_site_capacity.action_hr_employee_preferences
+msgid "Configure employee telework preferences"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_form
+msgid "Confirm"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.server,name:hr_telework_tracking_site_capacity.action_server_mass_confirm
+msgid "Confirm Selected"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_day__state__confirmed
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+msgid "Confirmed"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__conflicting_declaration_ids
+msgid "Conflicting Declarations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_telework_declaration_form
+msgid "Create Declarations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_location_form
+msgid "Create Workstations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.actions.act_window,help:hr_telework_tracking_site_capacity.action_office_location
+msgid "Create a new office"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_conflicting_declarations_tree
+msgid "Created"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__create_uid
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__create_uid
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_weekly_generation_wizard__create_uid
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_location__create_uid
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_workstation__create_uid
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_telework_report_wizard__create_uid
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_weekly_telework_declaration__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__create_date
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_weekly_generation_wizard__create_date
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_location__create_date
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_workstation__create_date
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_telework_report_wizard__create_date
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_weekly_telework_declaration__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__create_date
+msgid "Creation Date"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_res_config_settings__cutoff_weekday
+msgid "Cutoff Day"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_res_config_settings__cutoff_time
+msgid "Cutoff Time"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.act_window,name:hr_telework_tracking_site_capacity.action_telework_day
+#: model:ir.ui.menu,name:hr_telework_tracking_site_capacity.menu_telework_day
+msgid "Daily Declarations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_bulk_preferences_wizard_form
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_employee_telework_preferences_form
+msgid "Daily Preferences"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid "Daily Summary"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__date
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_form
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_tree
+msgid "Date"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__date_display
+msgid "Date Display"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__create_date
+msgid "Date and time when the declaration was created"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model,name:hr_telework_tracking_site_capacity.model_hr_telework_day
+msgid "Day Declaration"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_telework_declaration_form
+msgid "Days"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "Declaration modified by user: %s"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/workstation.py:0
+#, python-format
+msgid "Declarations for %s"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_department__default_capacity_full_day
+msgid "Default Capacity"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_employee__primary_workstation_id
+msgid "Default primary workstation"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model,name:hr_telework_tracking_site_capacity.model_hr_department
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__department_id
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_tree
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_workstation_search
+msgid "Department"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_office_workstation__department_id
+msgid "Department this workstation belongs to (optional)"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__office_availability
+msgid "Detailed availability information by office"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__display_name
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__display_name
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_weekly_generation_wizard__display_name
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_location__display_name
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_workstation__display_name
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_telework_report_wizard__display_name
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_weekly_telework_declaration__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_day__state__draft
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+msgid "Draft"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.actions.act_window,help:hr_telework_tracking_site_capacity.action_office_workstation
+msgid ""
+"Each workstation can be assigned to a specific department\n"
+"                and have employees with preferences towards it."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_conflicting_declarations_tree
+msgid "Edit"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model,name:hr_telework_tracking_site_capacity.model_hr_employee
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__employee_id
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_weekly_telework_declaration__employee_id
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_day__source__self
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_conflicting_declarations_tree
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_tree
+msgid "Employee"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.act_window,name:hr_telework_tracking_site_capacity.action_hr_employee_preferences
+#: model:ir.ui.menu,name:hr_telework_tracking_site_capacity.menu_hr_employee_preferences
+msgid "Employee Preferences"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.act_window,name:hr_telework_tracking_site_capacity.action_employees_telework_preferences
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_employee_telework_preferences_tree
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_employee_telework_tree
+msgid "Employee Telework Preferences"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__employee_ids
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_weekly_generation_wizard__employee_ids
+msgid "Employees"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_generation_wizard_form
+msgid "Employees (empty = all with auto-generation)"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_office_location__reviewer_ids
+msgid ""
+"Employees who will receive notifications about pending assignments in this "
+"office"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__auto_generate_week
+msgid "Enable Auto Generation"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_employee__auto_generate_week
+msgid "Enable automatic generation"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__failed_message_ids
+msgid "Failed Messages"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_telework_report_wizard_form
+msgid "Filters"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__friday_preference__flexible
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__monday_preference__flexible
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__thursday_preference__flexible
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__tuesday_preference__flexible
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__wednesday_preference__flexible
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__friday_preference__flexible
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__monday_preference__flexible
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__thursday_preference__flexible
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__tuesday_preference__flexible
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__wednesday_preference__flexible
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__capacity_policy__flexible
+#, python-format
+msgid "Flexible"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__message_follower_ids
+msgid "Followers"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__message_partner_ids
+msgid "Followers (Partners)"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_employee__friday_preference
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__friday_preference
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_weekly_telework_declaration__friday_mode
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__auto_confirm_weekday__4
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__cutoff_weekday__4
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_telework_declaration_form
+msgid "Friday"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_telework_report_wizard__date_from
+msgid "From"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_day__total_status_color__yellow
+msgid "Full"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_bulk_preferences_wizard_form
+msgid "General Configuration"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_generation_wizard_form
+msgid "Generate"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_telework_report_wizard_form
+msgid "Generate Report"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.act_window,name:hr_telework_tracking_site_capacity.action_weekly_generation_wizard
+msgid "Generate Weekly Schedules"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.server,name:hr_telework_tracking_site_capacity.ir_cron_generate_weekly_declarations_ir_actions_server
+#: model:ir.cron,cron_name:hr_telework_tracking_site_capacity.ir_cron_generate_weekly_declarations
+msgid "Generate Weekly Telework Declarations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__generate_current_week
+msgid "Generate current week too"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__generate_current_week
+msgid "Generate schedule for current week in addition to next week"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_generation_wizard_form
+msgid "Generation Configuration"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_bulk_preferences_wizard_form
+msgid "Generation Options"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.module.category,description:hr_telework_tracking_site_capacity.module_category_telework
+msgid "Gestión de teletrabajo y asignación de puestos"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:res.groups,name:hr_telework_tracking_site_capacity.group_telework_manager
+msgid "Gestor"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid "Global Summary"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_workstation_search
+msgid "Group By"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__has_message
+msgid "Has Message"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__has_workstation_conflict
+msgid "Has Workstation Conflict"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.actions.act_window,help:hr_telework_tracking_site_capacity.action_hr_employee_preferences
+msgid ""
+"Here you can view and configure the telework preferences of all employees.\n"
+"        Preferences are used to automatically generate the weekly schedule."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.actions.act_window,help:hr_telework_tracking_site_capacity.action_employees_telework_preferences
+msgid ""
+"Here you can view and configure your team's telework preferences.\n"
+"        Preferences are used to automatically generate the weekly schedule."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__id
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__id
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_weekly_generation_wizard__id
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_location__id
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_workstation__id
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_telework_report_wizard__id
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_weekly_telework_declaration__id
+msgid "ID"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__activity_exception_icon
+msgid "Icon"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__message_has_error
+msgid "If checked, some messages have a delivery error."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_department__default_capacity_full_day
+msgid "If there is no specific rule or weekly pattern, this capacity is used."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_office_location__image
+msgid "Image of the floor plan or layout of the office"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__message_is_follower
+msgid "Is Follower"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard____last_update
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day____last_update
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_weekly_generation_wizard____last_update
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_location____last_update
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_workstation____last_update
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_telework_report_wizard____last_update
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_weekly_telework_declaration____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__write_uid
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__write_uid
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_weekly_generation_wizard__write_uid
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_location__write_uid
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_workstation__write_uid
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_telework_report_wizard__write_uid
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_weekly_telework_declaration__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__write_date
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__write_date
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_weekly_generation_wizard__write_date
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_location__write_date
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_workstation__write_date
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_telework_report_wizard__write_date
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_weekly_telework_declaration__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__message_main_attachment_id
+msgid "Main Attachment"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_day__source__manager
+msgid "Manager"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__overbooked
+msgid "Marked if confirmation exceeds capacity (flexible mode)."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_generation_wizard_form
+msgid "Mass Weekly Generation"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__message_content
+msgid "Message Content"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__message_has_error
+msgid "Message Delivery error"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__message_search
+msgid "Message Search"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__message_content
+msgid "Message content, to be used only in searches"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__message_search
+msgid "Message search, to be used only in searches"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__message_ids
+msgid "Messages"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__mode
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+msgid "Mode"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__mode_icon
+msgid "Mode Icon"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_employee__monday_preference
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__monday_preference
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_weekly_telework_declaration__monday_mode
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__auto_confirm_weekday__0
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__cutoff_weekday__0
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_telework_declaration_form
+msgid "Monday"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+msgid "Month"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+msgid "My Declarations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.act_window,name:hr_telework_tracking_site_capacity.action_my_telework_preferences
+#: model:ir.ui.menu,name:hr_telework_tracking_site_capacity.menu_my_telework_preferences
+msgid "My Telework Preferences"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__name
+msgid "Name"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+msgid "Needs Workstation"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__activity_summary
+msgid "Next Activity Summary"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__activity_type_id
+msgid "Next Activity Type"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__is_next_week
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+msgid "Next Week"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__friday_mode__no_work
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__monday_mode__no_work
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__thursday_mode__no_work
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__tuesday_mode__no_work
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__wednesday_mode__no_work
+msgid "No Work"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "No date"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "No department"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "No employee"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/office.py:0
+#, python-format
+msgid "No workstations pending creation"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__note
+msgid "Note"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_form
+msgid "Notes about this declaration..."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__message_needaction_counter
+msgid "Number of Actions"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_weekly_generation_wizard__weeks_count
+msgid "Number of Weeks"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__message_has_error_counter
+msgid "Number of errors"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/workstation.py:0
+#, python-format
+msgid "OCCUPIED"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_office_workstation__occupation_status
+msgid "Occupation status for the context date"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_workstation__is_occupied
+msgid "Occupied"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model,name:hr_telework_tracking_site_capacity.model_office_location
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_workstation__office_id
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_workstation_search
+msgid "Office"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_form
+msgid "Office Capacity"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_location__image
+msgid "Office Image"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid "Office Layout"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_location_form
+msgid "Office Location"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.ui.menu,name:hr_telework_tracking_site_capacity.menu_office_location
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_location_tree
+msgid "Office Locations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_location__name
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_workstation__office_name
+msgid "Office Name"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid "Office Occupancy by Day"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model,name:hr_telework_tracking_site_capacity.model_office_workstation
+msgid "Office Workstation"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/office.py:0
+#, python-format
+msgid "Office: %s"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.act_window,name:hr_telework_tracking_site_capacity.action_office_location
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_telework_report_wizard__office_ids
+msgid "Offices"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.actions.act_window,help:hr_telework_tracking_site_capacity.action_office_location
+msgid ""
+"Offices contain workstations for employees.\n"
+"                Define the total capacity of workstations that can be created."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-javascript
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/static/src/js/telework_mode_field.js:0
+#: code:addons/hr_telework_tracking_site_capacity/static/src/xml/telework_mode_field.xml:0
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__friday_preference__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__monday_preference__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__thursday_preference__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__tuesday_preference__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__wednesday_preference__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__friday_preference__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__monday_preference__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__thursday_preference__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__tuesday_preference__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__wednesday_preference__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_day__mode__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__friday_mode__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__monday_mode__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__thursday_mode__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__tuesday_mode__onsite
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__wednesday_mode__onsite
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+#, python-format
+msgid "On-site"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_bulk_preferences_wizard_form
+msgid "Only Save Preferences"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "Only managers can change the state of declarations."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "Only managers can confirm telework declarations."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+msgid "Onsite"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__conflicting_declaration_ids
+msgid "Other declarations using the same workstation on the same date"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__overbooked
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_day__total_status_color__red
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+msgid "Overbooked"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_weekly_generation_wizard__override_existing
+msgid "Override Existing"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_weekly_generation_wizard__override_existing
+msgid "Override existing schedules"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_day__state__pending_review
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+msgid "Pending Review"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "Pending review declarations:"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_telework_report_wizard_form
+msgid "Period"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_bulk_preferences_wizard_form
+msgid "Preferences massive configuration"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_employee__preferred_workstation_ids
+msgid "Preferred Workstations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_employee__primary_workstation_id
+msgid "Primary Workstation"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:res.groups,comment:hr_telework_tracking_site_capacity.group_telework_user
+msgid "Puede ver y editar sus propias declaraciones de teletrabajo"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:mail.template,name:hr_telework_tracking_site_capacity.mail_reminder_undeclared
+msgid "Recordatorio Declaración D-1"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:mail.template,subject:hr_telework_tracking_site_capacity.mail_reminder_undeclared
+msgid "Recordatorio: declara tu modo para mañana"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.server,name:hr_telework_tracking_site_capacity.action_server_refresh_availability
+msgid "Refresh Availability"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__user_id
+msgid "Related user name for the resource to manage its access."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/reports/telework_report.py:0
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+#, python-format
+msgid "Remote"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: code:addons/hr_telework_tracking_site_capacity/wizard/bulk_preferences_wizard.py:0
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__friday_preference__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__monday_preference__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__thursday_preference__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__tuesday_preference__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_employee__wednesday_preference__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__friday_preference__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__monday_preference__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__thursday_preference__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__tuesday_preference__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_bulk_preferences_wizard__wednesday_preference__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__hr_telework_day__mode__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__friday_mode__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__monday_mode__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__thursday_mode__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__tuesday_mode__remote
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__weekly_telework_declaration__wednesday_mode__remote
+#, python-format
+msgid "Remote Work"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__activity_user_id
+msgid "Responsible User"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:mail.template,name:hr_telework_tracking_site_capacity.mail_daily_summary
+msgid "Resumen Diario Ocupación"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:mail.template,subject:hr_telework_tracking_site_capacity.mail_daily_summary
+msgid "Resumen ocupación por departamento para hoy"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_location_form
+msgid ""
+"Reviewers will receive email notifications when there are\n"
+"                                pending telework assignments for review in this office."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__auto_confirm_weekday__5
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__cutoff_weekday__5
+msgid "Saturday"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_bulk_preferences_wizard_form
+msgid "Save preferences and generate schedules"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_bulk_preferences_wizard_form
+msgid "Save preferences without generating schedules"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_telework_declaration_form
+msgid "Select employee..."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_bulk_preferences_wizard_form
+msgid "Select employees..."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_location_form
+msgid "Select reviewer employees..."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-javascript
+#: code:addons/hr_telework_tracking_site_capacity/static/src/xml/telework_mode_field.xml:0
+#, python-format
+msgid "Select..."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.server,name:hr_telework_tracking_site_capacity.action_server_mass_draft
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_form
+msgid "Set to Draft"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__source
+msgid "Source"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_weekly_generation_wizard__start_date
+msgid "Start Date"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__state
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_conflicting_declarations_tree
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_tree
+msgid "State"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_workstation__occupation_status
+msgid "Status"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__capacity_policy__strict
+msgid "Strict"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__auto_confirm_weekday__6
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__cutoff_weekday__6
+msgid "Sunday"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.ui.menu,name:hr_telework_tracking_site_capacity.menu_employees_telework_preferences
+msgid "Team Preferences"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.module.category,name:hr_telework_tracking_site_capacity.module_category_telework
+msgid "Teletrabajo"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-javascript
+#: code:addons/hr_telework_tracking_site_capacity/static/src/js/telework_mode_field.js:0
+#: code:addons/hr_telework_tracking_site_capacity/static/src/xml/telework_mode_field.xml:0
+#: model:ir.ui.menu,name:hr_telework_tracking_site_capacity.menu_telework_root
+#, python-format
+msgid "Telework"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_graph
+msgid "Telework Analysis"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid "Telework Assignments - All Offices"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.report,name:hr_telework_tracking_site_capacity.action_report_telework_schedule
+#: model:ir.model,name:hr_telework_tracking_site_capacity.model_report_hr_telework_tracking_site_capacity_schedule
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_telework_report_wizard_form
+msgid "Telework Assignments Report"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_calendar
+msgid "Telework Calendar"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_department_form_inherit_capacity
+msgid "Telework Configuration"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.server,name:hr_telework_tracking_site_capacity.ir_cron_telework_reminder_ir_actions_server
+#: model:ir.cron,cron_name:hr_telework_tracking_site_capacity.ir_cron_telework_reminder
+msgid "Telework D-1 Reminder"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.server,name:hr_telework_tracking_site_capacity.ir_cron_telework_daily_summary_ir_actions_server
+#: model:ir.cron,cron_name:hr_telework_tracking_site_capacity.ir_cron_telework_daily_summary
+msgid "Telework Daily Summary"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_employee__telework_day_ids
+msgid "Telework Days"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:mail.template,name:hr_telework_tracking_site_capacity.mail_telework_overbooked
+msgid "Telework Overbooked Notice"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__percentage_telework
+msgid "Telework Percentage"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_employee_telework_preferences_form
+msgid "Telework Preferences"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.ui.menu,name:hr_telework_tracking_site_capacity.menu_telework_report
+msgid "Telework Report"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model,name:hr_telework_tracking_site_capacity.model_telework_report_wizard
+msgid "Telework Report Wizard"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_location__reviewer_ids
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_location_form
+msgid "Telework Reviewers"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_pivot
+msgid "Telework Table"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__percentage_telework
+msgid "Telework percentage (100 if remote, 0 if on-site)"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid ""
+"The capacity of department %s for %s has been exceeded. It is recommended to"
+" review the assignments."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__is_this_week
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+msgid "This Week"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/office.py:0
+#, python-format
+msgid "This office already has all workstations created (%d/%d)"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_generation_wizard_form
+msgid ""
+"This will delete existing schedules and replace them with new ones based on "
+"the current preferences."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_employee__thursday_preference
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__thursday_preference
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_weekly_telework_declaration__thursday_mode
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__auto_confirm_weekday__3
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__cutoff_weekday__3
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_telework_declaration_form
+msgid "Thursday"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_res_config_settings__cutoff_time
+msgid "Time deadline for creating declarations (24h format)"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_res_config_settings__auto_confirm_time
+msgid "Time for automatic confirmation (24h format)"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_telework_report_wizard__date_to
+msgid "To"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+msgid "Today"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__total_availability
+msgid "Total Avail."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.schedule
+msgid "Total Available"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_location__capacity
+msgid "Total Capacity"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__total_status_color
+msgid "Total Color"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__total_overbooked
+msgid "Total Overbooked"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__total_availability
+msgid "Total company availability"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__total_overbooked
+msgid "Total company capacity exceeded"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_office_location__capacity
+msgid "Total number of workstations that can be created in this office"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__has_workstation_conflict
+msgid "True if this workstation is occupied by other declarations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_employee__tuesday_preference
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__tuesday_preference
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_weekly_telework_declaration__tuesday_mode
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__auto_confirm_weekday__1
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__cutoff_weekday__1
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_telework_declaration_form
+msgid "Tuesday"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__user_id
+msgid "User"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:res.groups,name:hr_telework_tracking_site_capacity.group_telework_user
+msgid "Usuario"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_workstation_form
+msgid "View Declarations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_location_form
+msgid "View Workstations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_employee__wednesday_preference
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_bulk_preferences_wizard__wednesday_preference
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_weekly_telework_declaration__wednesday_mode
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__auto_confirm_weekday__2
+#: model:ir.model.fields.selection,name:hr_telework_tracking_site_capacity.selection__res_config_settings__cutoff_weekday__2
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_telework_declaration_form
+msgid "Wednesday"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_search
+msgid "Week"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_weekly_telework_declaration__week_start_date
+msgid "Week Monday"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_telework_declaration_form
+msgid "Week of"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_res_config_settings__cutoff_weekday
+msgid "Weekday deadline for creating declarations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_res_config_settings__auto_confirm_weekday
+msgid "Weekday for automatic confirmation"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.act_window,name:hr_telework_tracking_site_capacity.action_weekly_telework_declaration
+#: model:ir.ui.menu,name:hr_telework_tracking_site_capacity.menu_weekly_declaration
+msgid "Weekly Declaration"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.ui.menu,name:hr_telework_tracking_site_capacity.menu_weekly_generation_wizard
+msgid "Weekly Generation Wizard"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_weekly_telework_declaration_form
+msgid "Weekly Telework Declaration"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_office_workstation__is_occupied
+msgid "Whether this workstation is occupied on the context date"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model,name:hr_telework_tracking_site_capacity.model_weekly_telework_declaration
+msgid "Wizard for weekly telework declarations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_form
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_tree
+msgid "Work Mode"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_form
+msgid "Work Mode Declaration"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_hr_telework_day__workstation_id
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_form
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_telework_day_tree
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_workstation_form
+msgid "Workstation"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_workstation__name
+msgid "Workstation Name"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_hr_employee_telework_preferences_form
+msgid "Workstation Preferences"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_telework_day__workstation_id
+msgid "Workstation assigned for this day"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.actions.act_window,name:hr_telework_tracking_site_capacity.action_office_workstation
+#: model:ir.model.fields,field_description:hr_telework_tracking_site_capacity.field_office_location__workstation_ids
+#: model:ir.ui.menu,name:hr_telework_tracking_site_capacity.menu_office_workstation
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_location_form
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_workstation_search
+#: model_terms:ir.ui.view,arch_db:hr_telework_tracking_site_capacity.view_office_workstation_tree
+msgid "Workstations"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model_terms:ir.actions.act_window,help:hr_telework_tracking_site_capacity.action_office_workstation
+msgid "Workstations are automatically created from offices"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/office.py:0
+#, python-format
+msgid "Workstations of %s"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:ir.model.fields,help:hr_telework_tracking_site_capacity.field_hr_employee__preferred_workstation_ids
+msgid "Workstations preferred by the employee"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/wizard/weekly_declaration.py:0
+#, python-format
+msgid "You must select an employee"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:mail.template,subject:hr_telework_tracking_site_capacity.mail_telework_overbooked
+msgid ""
+"[Aviso] Sobrepaso de capacidad en ${object.department_id.name} para "
+"${format_date(object.date)}"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#: model:mail.template,subject:hr_telework_tracking_site_capacity.mail_employee_weekly_assignments
+msgid "[Teletrabajo] Tus asignaciones para la semana del ${week_start}"
+msgstr ""
+
+#. module: hr_telework_tracking_site_capacity
+#. odoo-python
+#: code:addons/hr_telework_tracking_site_capacity/models/telework_day.py:0
+#, python-format
+msgid "[Telework] Your assignments for the week of %s"
+msgstr ""

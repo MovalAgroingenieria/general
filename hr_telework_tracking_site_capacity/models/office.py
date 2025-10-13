@@ -10,27 +10,37 @@ class Office(models.Model):
     _description = 'Office'
     _order = 'name'
 
-    name = fields.Char(string='Office Name', required=True)
+    name = fields.Char(
+        string='Office Name',
+        required=True,
+        translate=True,
+    )
+
     capacity = fields.Integer(
         string='Total Capacity', required=True, default=1,
-        help='Total number of workstations that can be created in this office')
+        help='Total number of workstations that can be created in this office',
+    )
 
     image = fields.Binary(
         string='Office Image',
-        help='Image of the floor plan or layout of the office')
+        help='Image of the floor plan or layout of the office',
+    )
 
     workstation_ids = fields.One2many(
-        'office.workstation', 'office_id', string='Workstations')
+        comodel_name='office.workstation',
+        inverse_name='office_id',
+        string='Workstations',
+    )
 
-    # Reviewers for pending assignment notifications
     reviewer_ids = fields.Many2many(
-        'hr.employee',
-        'office_reviewer_rel',
-        'office_id',
-        'employee_id',
+        comodel_name='hr.employee',
+        relation='office_reviewer_rel',
+        column1='office_id',
+        column2='employee_id',
         string='Telework Reviewers',
         help='Employees who will receive notifications about '
-             'pending assignments in this office')
+             'pending assignments in this office',
+    )
 
     active = fields.Boolean(default=True)
 
@@ -44,20 +54,17 @@ class Office(models.Model):
                 'This office already has all workstations created (%d/%d)'
             ) % (current_count, self.capacity))
 
-        # Calculate how many workstations to create
         to_create = self.capacity - current_count
 
         if not to_create:
             raise UserError(_('No workstations pending creation'))
 
-        # Get the next number
         existing_numbers = [
             int(ws.name.split('-')[-1]) for ws in self.workstation_ids
             if ws.name and '-' in ws.name and ws.name.split('-')[-1].isdigit()
         ]
         next_number = max(existing_numbers) + 1 if existing_numbers else 1
 
-        # Create the workstations
         created_workstations = []
         for i in range(to_create):
             workstation = self.env['office.workstation'].create({
@@ -66,7 +73,6 @@ class Office(models.Model):
             })
             created_workstations.append(workstation)
 
-        # Invalidate cache so the view is updated
         self.invalidate_recordset(['workstation_ids'])
 
         return {

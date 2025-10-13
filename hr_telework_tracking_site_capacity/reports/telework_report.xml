@@ -6,7 +6,6 @@
       <t t-call="web.external_layout">
         <div class="page" style="page-break-after: always;">
 
-          <!-- Report header -->
           <div class="row mb-3">
             <div class="col-12">
               <div class="text-center">
@@ -19,7 +18,6 @@
             </div>
           </div>
 
-          <!-- Unified Assignments table - All employees, all offices -->
           <div class="row">
             <div class="col-12">
               <table class="table table-bordered table-sm">
@@ -29,7 +27,10 @@
                     <th style="width: 15%;">Department</th>
                     <t t-foreach="dates" t-as="date">
                       <th class="text-center" style="width: 13%;">
-                        <div t-esc="date.strftime('%a %d/%m')"/>
+                        <div>
+                          <t t-esc="format_date(date, 'EEE').capitalize()"/>
+                          <t t-esc="date.strftime(' %d/%m')"/>
+                        </div>
                       </th>
                     </t>
                   </tr>
@@ -43,10 +44,9 @@
                       <td class="text-center">
                       <t t-set="day_data" t-value="emp_data['schedule'].get(date, {})"/>
                       <t t-if="day_data.get('mode') == 'onsite'">
-                        <t t-set="workstation" t-value="day_data.get('workstation', 'Not assigned')"/>
-                        <!-- Show workstation in green or "Not assigned" in red -->
-                        <t t-if="workstation == 'Not assigned'">
-                          <span class="badge badge-danger" style="background-color: #dc3545; color: white; font-size: 14px;" t-esc="workstation"/>
+                        <t t-set="workstation" t-value="day_data.get('workstation', False)"/>
+                        <t t-if="not workstation">
+                          <span class="badge badge-danger" style="background-color: #dc3545; color: white; font-size: 14px;">Not assigned</span>
                         </t>
                         <t t-else="">
                           <span class="badge badge-success" style="background-color: #28a745; color: white; font-size: 14px;" t-esc="workstation"/>
@@ -68,13 +68,11 @@
           </div>
         </div>
 
-        <!-- Statistical summary on new page -->
         <div class="page">
           <div class="row">
             <div class="col-12">
               <h3 class="text-center mb-4">Daily Summary</h3>
 
-              <!-- Office Occupancy Table -->
               <h4 class="mt-4 mb-3">Office Occupancy by Day</h4>
               <table class="table table-bordered table-sm">
                 <thead>
@@ -82,7 +80,10 @@
                     <th style="width: 25%;">Office</th>
                     <t t-foreach="dates" t-as="date">
                       <th class="text-center" style="width: 15%;">
-                        <div t-esc="date.strftime('%a %d/%m')"/>
+                        <div>
+                          <t t-esc="format_date(date, 'EEE').capitalize()"/>
+                          <t t-esc="date.strftime(' %d/%m')"/>
+                        </div>
                       </th>
                     </t>
                   </tr>
@@ -116,7 +117,6 @@
                 </tbody>
               </table>
 
-              <!-- Global Summary -->
               <h4 class="mt-5 mb-3">Global Summary</h4>
               <table class="table table-bordered table-sm">
                 <thead>
@@ -134,7 +134,7 @@
                     <t t-set="total_capacity" t-value="sum([len(o.workstation_ids) for o in offices])"/>
                     <t t-set="available_count" t-value="total_capacity - onsite_count"/>
                     <tr>
-                      <td><strong t-esc="date.strftime('%A %d/%m/%Y')"/></td>
+                      <td><strong><t t-esc="format_date(date, 'EEEE').capitalize()"/><t t-esc="date.strftime(' %d/%m/%Y')"/></strong></td>
                       <td class="text-center">
                         <span class="badge" style="background-color: #28a745; color: white; font-size: 14px;" t-esc="onsite_count"/>
                       </td>
@@ -154,16 +154,13 @@
           </div>
         </div>
 
-        <!-- Page break before office images section -->
         <div style="page-break-before: always;"></div>
 
-        <!-- Office Images - One page per office -->
         <t t-foreach="offices" t-as="office">
           <t t-if="office.image">
             <div class="page" style="page-break-after: always;">
               <div class="row">
                 <div class="col-12">
-                  <!-- Office header -->
                   <div class="text-center mb-3">
                     <h3 t-esc="office.name"/>
                     <p class="text-muted">
@@ -171,7 +168,6 @@
                     </p>
                   </div>
 
-                  <!-- Office floor plan/image -->
                   <div class="text-center" style="margin-top: 30px;">
                     <img t-att-src="'data:image/png;base64,%s' % office.image.decode('utf-8')"
                          style="max-width: 100%; max-height: 800px; width: auto; height: auto; object-fit: contain;"
@@ -187,7 +183,6 @@
     </t>
   </template>
 
-  <!-- Report definition -->
   <record id="action_report_telework_schedule" model="ir.actions.report">
     <field name="name">Telework Assignments Report</field>
     <field name="model">telework.report.wizard</field>

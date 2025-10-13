@@ -7,6 +7,9 @@ from odoo import api, fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    # This model is NOT used, but it allows adding
+    # configuration fields for a near future
+
     capacity_policy = fields.Selection([
             ('flexible', 'Flexible'),
             ('strict', 'Strict'),
@@ -14,49 +17,55 @@ class ResConfigSettings(models.TransientModel):
         string='Capacity Policy',
         config_parameter='hr_telework_tracking_site_capacity.capacity_policy',
         default='flexible',
-        required=True)
+        required=True,
+    )
 
     cutoff_weekday = fields.Selection([
-        ('0', 'Monday'),
-        ('1', 'Tuesday'),
-        ('2', 'Wednesday'),
-        ('3', 'Thursday'),
-        ('4', 'Friday'),
-        ('5', 'Saturday'),
-        ('6', 'Sunday'),
-    ], string='Cutoff Day',
+            ('0', 'Monday'),
+            ('1', 'Tuesday'),
+            ('2', 'Wednesday'),
+            ('3', 'Thursday'),
+            ('4', 'Friday'),
+            ('5', 'Saturday'),
+            ('6', 'Sunday'),
+        ],
+        string='Cutoff Day',
         config_parameter='hr_telework_tracking_site_capacity.cutoff_weekday',
         default='3',
-        help='Weekday deadline for creating declarations')
+        help='Weekday deadline for creating declarations',
+    )
 
     cutoff_time = fields.Float(
         string='Cutoff Time',
         config_parameter='hr_telework_tracking_site_capacity.cutoff_time',
         default=18.0,
-        help='Time deadline for creating declarations (24h format)')
+        help='Time deadline for creating declarations (24h format)',
+    )
 
     auto_confirm_weekday = fields.Selection([
-        ('0', 'Monday'),
-        ('1', 'Tuesday'),
-        ('2', 'Wednesday'),
-        ('3', 'Thursday'),
-        ('4', 'Friday'),
-        ('5', 'Saturday'),
-        ('6', 'Sunday'),
-    ], string='Auto-Confirmation Day',
+            ('0', 'Monday'),
+            ('1', 'Tuesday'),
+            ('2', 'Wednesday'),
+            ('3', 'Thursday'),
+            ('4', 'Friday'),
+            ('5', 'Saturday'),
+            ('6', 'Sunday'),
+        ],
+        string='Auto-Confirmation Day',
         config_parameter='hr_telework_tracking_site_capacity.'
                          'auto_confirm_weekday',
         default='4',
-        help='Weekday for automatic confirmation')
+        help='Weekday for automatic confirmation',
+    )
 
     auto_confirm_time = fields.Float(
         string='Auto-Confirmation Time',
         config_parameter='hr_telework_tracking_site_capacity.'
                          'auto_confirm_time',
         default=8.0,
-        help='Time for automatic confirmation (24h format)')
+        help='Time for automatic confirmation (24h format)',
+    )
 
-    # Simplified method for employee preferences
     def action_open_employee_preferences(self):
         """Open employee preferences tree view"""
         return {
@@ -89,24 +98,21 @@ class ResConfigSettings(models.TransientModel):
             .get_param('hr_telework_tracking_site_capacity.cutoff_time')
 
         if not cutoff_weekday_param:
-            return True  # If no cutoff day configured, allow
+            return True
 
         try:
             from datetime import datetime, timedelta
 
-            cutoff_weekday = int(cutoff_weekday_param)  # 0=Monday, 6=Sunday
+            cutoff_weekday = int(cutoff_weekday_param)
             cutoff_time = float(cutoff_time_param or 18.0)
 
-            # Calculate this week's cutoff day
             now = datetime.now()
-            days_since_monday = now.weekday()  # 0=Monday, 6=Sunday
+            days_since_monday = now.weekday()
 
-            # Calculate days until cutoff day
             days_to_cutoff = cutoff_weekday - days_since_monday
             if days_to_cutoff < 0:
-                days_to_cutoff += 7  # If already passed this week, go to next
+                days_to_cutoff += 7
 
-            # Create cutoff datetime
             cutoff_hour = int(cutoff_time)
             cutoff_minute = int((cutoff_time - cutoff_hour) * 60)
 
@@ -117,12 +123,10 @@ class ResConfigSettings(models.TransientModel):
                 microsecond=0
             ) + timedelta(days=days_to_cutoff)
 
-            # If we haven't passed the cutoff day/time, allow
             if now <= cutoff_dt:
                 return True
 
-            # If we've passed the cutoff day/time, only allow managers
             return self.env.user.has_group('hr.group_hr_manager')
 
         except (ValueError, TypeError):
-            return True  # If there's an error, allow by default
+            return True

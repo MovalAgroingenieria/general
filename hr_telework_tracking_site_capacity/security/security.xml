@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright 2025 Moval Agroingeniería -->
-<!-- License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
 <odoo>
   <data noupdate="1">
+
     <!-- Category for telework with unique selection -->
     <record id="module_category_telework" model="ir.module.category">
       <field name="name">Telework</field>
@@ -81,25 +80,25 @@
       <field name="perm_unlink" eval="False"/>
     </record>
 
-    <!-- Reglas para Oficinas - Solo gestores pueden modificar -->
+    <!-- Rules for Offices - Only managers can modify -->
     <record id="rule_office_location_manager" model="ir.rule">
-      <field name="name">Oficinas: Solo gestores pueden administrar</field>
+      <field name="name">Offices: Only managers can administer</field>
       <field name="model_id" ref="model_office_location"/>
       <field name="groups" eval="[(4, ref('group_telework_manager'))]"/>
       <field name="domain_force">[(1,'=',1)]</field>
     </record>
 
-    <!-- Reglas para Puestos de Trabajo - Solo gestores pueden modificar -->
+    <!-- Rules for Workstations - Only managers can modify -->
     <record id="rule_office_workstation_manager" model="ir.rule">
-      <field name="name">Puestos de Trabajo: Solo gestores pueden administrar</field>
+      <field name="name">Workstations: Only managers can administer</field>
       <field name="model_id" ref="model_office_workstation"/>
       <field name="groups" eval="[(4, ref('group_telework_manager'))]"/>
       <field name="domain_force">[(1,'=',1)]</field>
     </record>
 
-    <!-- Usuarios pueden ver oficinas y puestos (solo lectura) -->
+    <!-- Users can view offices and workstations (read-only) -->
     <record id="rule_office_location_user_read" model="ir.rule">
-      <field name="name">Oficinas: Usuarios - Solo lectura</field>
+      <field name="name">Offices: Users - Read only</field>
       <field name="model_id" ref="model_office_location"/>
       <field name="groups" eval="[(4, ref('group_telework_user'))]"/>
       <field name="domain_force">[(1,'=',1)]</field>
@@ -110,7 +109,7 @@
     </record>
 
     <record id="rule_office_workstation_user_read" model="ir.rule">
-      <field name="name">Puestos de Trabajo: Usuarios - Solo lectura</field>
+      <field name="name">Workstations: Users - Read only</field>
       <field name="model_id" ref="model_office_workstation"/>
       <field name="groups" eval="[(4, ref('group_telework_user'))]"/>
       <field name="domain_force">[(1,'=',1)]</field>

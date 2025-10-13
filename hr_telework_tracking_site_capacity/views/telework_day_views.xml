@@ -15,7 +15,6 @@
             create="true"
             delete="true">
 
-        <!-- Core fields -->
         <field name="employee_id" string="Employee" options="{'no_create': True}"/>
         <field name="department_id" string="Department" readonly="1"/>
         <field name="state" string="State"/>
@@ -36,7 +35,6 @@
                decoration-warning="total_status_color=='yellow'"
                decoration-danger="total_status_color=='red'"/>
 
-        <!-- Invisible fields for logic -->
         <field name="total_status_color" invisible="1"/>
         <field name="mode_icon" invisible="1"/>
       </tree>
@@ -68,7 +66,6 @@
           statusbar_visible="draft,pending_review,confirmed"/>
         </header>
         <sheet>
-          <!-- Visual alerts for overcapacity -->
           <div class="alert alert-danger" role="alert"
                attrs="{'invisible': [('total_status_color','!=','red')]}">
             <strong>⚠️ WARNING:</strong> The total company capacity is exceeded for this day.
@@ -93,7 +90,6 @@
             </page>
           </notebook>
 
-          <!-- Workstation Conflicts Alert -->
           <div class="alert alert-warning" role="alert"
                attrs="{'invisible': ['|', '|', ('mode','=','remote'), ('has_workstation_conflict','=',False), ('workstation_id','=',False)]}">
             <strong>  WORKSTATION CONFLICT:</strong> This workstation is already occupied by other declarations on the same date.
@@ -110,7 +106,6 @@
 
           <group>
             <field name="note" colspan="2" placeholder="Notes about this declaration..."/>
-            <!-- Invisible fields for logic -->
             <field name="total_status_color" invisible="1"/>
             <field name="overbooked" readonly="1" invisible="1"/>
             <field name="has_workstation_conflict" invisible="1"/>
@@ -135,7 +130,6 @@
         <field name="department_id"/>
         <field name="create_date"/>
 
-        <!-- Date filters -->
         <filter string="Today" name="today"
                 domain="[('date','=', context_today())]"/>
         <filter string="This Week" name="this_week"
@@ -145,7 +139,6 @@
 
         <separator/>
 
-        <!-- User filter -->
         <filter string="My Declarations" name="my_declarations"
                 domain="[('employee_id.user_id','=',uid)]"/>
 
@@ -223,7 +216,6 @@
     <field name="domain">[]</field>
   </record>
 
-  <!-- Mass action: Confirm selected records -->
   <record id="action_server_mass_confirm" model="ir.actions.server">
     <field name="name">Confirm Selected</field>
     <field name="model_id" ref="model_hr_telework_day"/>
@@ -237,7 +229,6 @@
     <field name="binding_view_types">list</field>
   </record>
 
-  <!-- Mass action: Refresh availability -->
   <record id="action_server_refresh_availability" model="ir.actions.server">
     <field name="name">Refresh Availability</field>
     <field name="model_id" ref="model_hr_telework_day"/>
@@ -249,7 +240,6 @@
     <field name="binding_view_types">list</field>
   </record>
 
-  <!-- Mass action: Set selected records to draft -->
   <record id="action_server_mass_draft" model="ir.actions.server">
     <field name="name">Set to Draft</field>
     <field name="model_id" ref="model_hr_telework_day"/>
@@ -289,7 +279,6 @@ else:
     <field name="binding_view_types">list</field>
   </record>
 
-  <!-- Specific tree view for conflicting declarations -->
   <record id="view_conflicting_declarations_tree" model="ir.ui.view">
     <field name="name">conflicting.declarations.tree</field>
     <field name="model">hr.telework.day</field>

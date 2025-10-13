@@ -20,8 +20,6 @@
         "security/security.xml",
         "security/ir.model.access.csv",
         "data/telework_bot.xml",
-        "data/params.xml",
-        "data/mail_template.xml",
         "data/ir_cron.xml",
         "views/weekly_declaration_views.xml",
         "views/telework_day_views.xml",

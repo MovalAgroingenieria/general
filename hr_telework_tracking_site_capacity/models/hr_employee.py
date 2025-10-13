@@ -3,67 +3,81 @@
 
 from odoo import api, fields, models
 from datetime import date, datetime, timedelta
-import logging
-
-_logger = logging.getLogger(__name__)
 
 
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
     auto_generate_week = fields.Boolean(
-        string='Enable Automatic Generation',
+        string='Enable automatic generation',
         default=False,
-        help='Automatically generate weekly telework schedule'
+        help='Automatically generate weekly declarations based on preferences',
     )
 
     monday_preference = fields.Selection([
-        ('remote', 'Remote Work'),
-        ('onsite', 'On-site'),
-        ('flexible', 'Flexible'),
-    ], string='Monday', default='onsite')
+            ('remote', 'Remote Work'),
+            ('onsite', 'On-site'),
+            ('flexible', 'Flexible'),
+        ],
+        string='Monday',
+        default='onsite',
+    )
 
     tuesday_preference = fields.Selection([
-        ('remote', 'Remote Work'),
-        ('onsite', 'On-site'),
-        ('flexible', 'Flexible'),
-    ], string='Tuesday', default='onsite')
+            ('remote', 'Remote Work'),
+            ('onsite', 'On-site'),
+            ('flexible', 'Flexible'),
+        ],
+        string='Tuesday',
+        default='onsite',
+    )
 
     wednesday_preference = fields.Selection([
-        ('remote', 'Remote Work'),
-        ('onsite', 'On-site'),
-        ('flexible', 'Flexible'),
-    ], string='Wednesday', default='onsite')
+            ('remote', 'Remote Work'),
+            ('onsite', 'On-site'),
+            ('flexible', 'Flexible'),
+        ],
+        string='Wednesday',
+        default='onsite',
+    )
 
     thursday_preference = fields.Selection([
-        ('remote', 'Remote Work'),
-        ('onsite', 'On-site'),
-        ('flexible', 'Flexible'),
-    ], string='Thursday', default='onsite')
+            ('remote', 'Remote Work'),
+            ('onsite', 'On-site'),
+            ('flexible', 'Flexible'),
+        ],
+        string='Thursday',
+        default='onsite',
+    )
 
     friday_preference = fields.Selection([
-        ('remote', 'Remote Work'),
-        ('onsite', 'On-site'),
-        ('flexible', 'Flexible'),
-    ], string='Friday', default='onsite')
+            ('remote', 'Remote Work'),
+            ('onsite', 'On-site'),
+            ('flexible', 'Flexible'),
+        ],
+        string='Friday',
+        default='onsite',
+    )
 
     preferred_workstation_ids = fields.Many2many(
-        'office.workstation',
-        'employee_workstation_preference_rel',
-        'employee_id',
-        'workstation_id',
+        comodel_name='office.workstation',
+        relation='employee_workstation_preference_rel',
+        column1='employee_id',
+        column2='workstation_id',
         string='Preferred Workstations',
-        help='Workstations preferred by the employee')
+        help='Workstations preferred by the employee',
+    )
 
     primary_workstation_id = fields.Many2one(
-        'office.workstation',
+        comodel_name='office.workstation',
         string='Primary Workstation',
-        help='Default primary workstation')
+        help='Default primary workstation',
+    )
 
     telework_day_ids = fields.One2many(
-        'hr.telework.day',
-        'employee_id',
-        string='Telework Days'
+        comodel_name='hr.telework.day',
+        inverse_name='employee_id',
+        string='Telework Days',
     )
 
     def generate_week_schedule(self, monday_date=None, return_existing=True):
@@ -128,7 +142,6 @@ class HrEmployee(models.Model):
         Args:
             force (bool): If True, skip cutoff time check. Default True.
         """
-        _logger.info("=== GENERATE WEEKLY CRON START ===")
         Param = self.env['ir.config_parameter'].sudo()
 
         def _safe_int(value, default):
@@ -154,11 +167,6 @@ class HrEmployee(models.Model):
             18.0
         )
 
-        _logger.info(
-            "Generate config: weekday=%s (0=Mon), time=%.2f",
-            cutoff_weekday, cutoff_time
-        )
-
         now = fields.Datetime.now()
         week_start_date = now.date() - timedelta(days=now.weekday())
         cutoff_date = week_start_date + timedelta(days=cutoff_weekday)
@@ -175,47 +183,21 @@ class HrEmployee(models.Model):
             microsecond=0
         )
 
-        _logger.info(
-            "Current time: %s, Cutoff time: %s, Force: %s",
-            now, cutoff_dt, force
-        )
-
         if not force and now < cutoff_dt:
-            _logger.info(
-                "Generation SKIPPED. Current time %s is before "
-                "configured cutoff %s. Use force=True to override.",
-                now, cutoff_dt
-            )
             return 0
-
-        if force:
-            _logger.info("Force mode enabled - skipping cutoff check")
 
         target_week_start = week_start_date + timedelta(days=7)
         target_week_end = target_week_start + timedelta(days=6)
 
-        _logger.info(
-            "Target week: %s to %s", target_week_start, target_week_end
-        )
-
         employees = self.search([('auto_generate_week', '=', True)])
 
-        _logger.info(
-            "Found %d employees with auto_generate_week=True", len(employees)
-        )
-
         if not employees:
-            _logger.info(
-                "Generation COMPLETED: No employees with auto-generation "
-                "enabled"
-            )
             return 0
 
         TeleworkDay = self.env['hr.telework.day']
         new_records = TeleworkDay.browse()
 
         for employee in employees:
-            _logger.info("Generating for employee: %s", employee.name)
             try:
                 employee_ctx = employee.with_context(auto_generation=True)
                 created = employee_ctx.generate_week_schedule(
@@ -223,12 +205,8 @@ class HrEmployee(models.Model):
                     return_existing=False
                 )
                 new_records |= created
-            except Exception as error:
-                _logger.exception(
-                    "Error generating week for employee %s: %s",
-                    employee.name,
-                    error
-                )
+            except Exception:
+                pass
 
         assignment_summary = {
             'assigned_count': 0,
@@ -254,19 +232,6 @@ class HrEmployee(models.Model):
                 new_records,
                 assignment_summary
             )
-
-        _logger.info(
-            "=== GENERATE WEEKLY COMPLETED === Week %s - %s. "
-            "Employees: %d, New declarations: %d, Assigned: %d, "
-            "Waiting: %d, Pending review: %d",
-            target_week_start,
-            target_week_end,
-            len(employees),
-            len(new_records),
-            assignment_summary.get('assigned_count', 0),
-            assignment_summary.get('waiting_list_count', 0),
-            assignment_summary.get('pending_review_count', 0)
-        )
 
         return len(new_records)
 
