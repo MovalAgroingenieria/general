@@ -44,9 +44,9 @@ class WeeklyGenerationWizard(models.TransientModel):
 
     def _refresh_views_and_cache(self, records=None):
         """Utility method to refresh views and cache"""
-        self.env['hr.telework.day'].invalidate_cache()
-        self.env['hr.employee'].invalidate_cache()
-        self.env['office.workstation'].invalidate_cache()
+        self.env['hr.telework.day'].invalidate_model()
+        self.env['hr.employee'].invalidate_model()
+        self.env['office.workstation'].invalidate_model()
 
         if records:
             try:
