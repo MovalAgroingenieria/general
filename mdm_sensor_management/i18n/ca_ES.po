@@ -6,14 +6,29 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-23 13:56+0000\n"
-"PO-Revision-Date: 2025-07-23 13:56+0000\n"
+"POT-Creation-Date: 2025-10-14 13:39+0000\n"
+"PO-Revision-Date: 2025-10-14 13:39+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_active
+msgid "Active"
+msgstr "Actius"
+
+#. module: mdm_sensor_management
+#: model:ir.actions.server,name:mdm_sensor_management.action_archive_device_sensor_readings
+msgid "Archive Selected Sensor Readings"
+msgstr "Arxiva les lectures seleccionades del sensor"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_search
+msgid "Archived"
+msgstr "Arxivat"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_attributes
@@ -138,7 +153,12 @@ msgstr "Gestor MDM"
 #. module: mdm_sensor_management
 #: model:res.groups,name:mdm_sensor_management.group_mdm_user
 msgid "MDM User"
-msgstr "Usuari MDM"
+msgstr "Usuari MDM""
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_retention_days
+msgid "Maximum number of days to keep readings linked to this device. Older readings should be cleaned up automatically by cron."
+msgstr "Nombre màxim de dies per mantenir les lectures enllaçades a aquest dispositiu. Cron hauria de netejar automàticament les lectures més antigues."
 
 #. module: mdm_sensor_management
 #: model:ir.model,name:mdm_sensor_management.model_mdm_measurement_device
@@ -227,13 +247,18 @@ msgid "Readings"
 msgstr "Lectures"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_retention_days
+msgid "Retention (days)"
+msgstr "Retenció (dies)"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_sensor_id
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_search
 msgid "Sensor"
 msgstr "Sensor"
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:56
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:63
 #, python-format
 msgid "Sensor Readings"
 msgstr "Lectures de sensor"

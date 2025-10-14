@@ -41,6 +41,9 @@
                     <field name="measurement_time"/>
                     <filter string="Device" name="device_id" context="{'group_by':'device_id'}"/>
                     <filter string="Sensor" name="sensor_id" context="{'group_by':'sensor_id'}"/>
+                    <separator/>
+                    <filter string="Archived" name="archived_readings"
+                            domain="[('active', '=', False)]"/>
                 </search>
             </field>
         </record>
@@ -70,5 +73,25 @@
                 (0, 0, {'view_mode': 'pivot', 'view_id': ref('mdm_reading_view_pivot')})
             ]"/>
             <field name="search_view_id" ref="mdm_reading_view_search"/>
+        </record>
+
+        <!-- Actions -->
+        <record id="action_archive_device_sensor_readings" model="ir.actions.server">
+            <field name="name">Archive Selected Sensor Readings</field>
+            <field name="model_id" ref="model_mdm_measurement_device_sensor_reading"/>
+            <field name="state">code</field>
+            <field name="code">
+                if context.get('active_ids'):
+                    active_ids = context.get('active_ids', [])
+                    action = env['mdm.measurement.device.sensor.reading'].browse(active_ids).archive_device_sensor_reading()
+            </field>
+        </record>
+
+        <record id="action_archive_device_sensor_readings_multi" model="ir.values">
+            <field name="name">Archive Selected Device Sensor Readings</field>
+            <field name="model">mdm.measurement.device.sensor.reading</field>
+            <field name="key">action</field>
+            <field name="key2">client_action_multi</field>
+            <field name="value" eval="'ir.actions.server,' + str(ref('action_archive_device_sensor_readings'))"/>
         </record>
 </odoo>

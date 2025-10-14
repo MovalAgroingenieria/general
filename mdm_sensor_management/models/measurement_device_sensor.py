@@ -3,7 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 
-from odoo import models, fields, _
+from odoo import models, fields, api, _
 
 
 class MeasurementDeviceSensor(models.Model):
@@ -49,6 +49,13 @@ class MeasurementDeviceSensor(models.Model):
         readonly=True,
     )
 
+    reading_retention_days = fields.Integer(
+        string="Retention (days)",
+        default=-1,
+        help="Maximum number of days to keep readings linked to this device. "
+             "Older readings should be cleaned up automatically by cron."
+    )
+
     def action_view_readings(self):
         self.ensure_one()
         return {
@@ -59,3 +66,4 @@ class MeasurementDeviceSensor(models.Model):
             'domain': [('sensor_id', '=', self.id)],
             'context': {'default_sensor_id': self.id},
         }
+

@@ -3,6 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import models, fields, api
+from datetime import datetime, timedelta
 
 
 class MeasurementDeviceSensorReading(models.Model):
@@ -53,6 +54,11 @@ class MeasurementDeviceSensorReading(models.Model):
         readonly=True,
     )
 
+    active = fields.Boolean(
+        string='Active',
+        default=True,
+    )
+
     _sql_constraints = [
         ('unique_name', 'unique(name)', 'The sensor reading must be unique.'),
     ]
@@ -76,3 +82,23 @@ class MeasurementDeviceSensorReading(models.Model):
             if record.sensor_id and record.sensor_id.device_id:
                 device_id = record.sensor_id.device_id
             record.device_id = device_id
+
+    def archive_device_sensor_reading(self):
+        self.write({'active': False})
+
+    @api.model
+    def cron_cleanup_old_readings(self):
+        # Search for sensors with a positive retention period
+        sensors = self.env['mdm.measurement.device.sensor'].search([
+            ('reading_retention_days', '>', 0)
+        ])
+        for sensor in sensors:
+            cutoff_datetime = datetime.now() - timedelta(days=sensor.reading_retention_days)
+            cutoff_date_str = cutoff_datetime.strftime('%Y-%m-%d %H:%M:%S')
+            old_readings = self.search([
+                ('sensor_id', '=', sensor.id),
+                ('measurement_time', '<', cutoff_date_str)
+            ])
+            if old_readings:
+                old_readings.write({'active': False})
+        return True
