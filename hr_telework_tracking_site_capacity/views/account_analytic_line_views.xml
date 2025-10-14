@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2025 Moval Agroingeniería -->
+<!-- License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html) -->
+
+<odoo>
+
+    <!-- Add is_telework field to timesheet tree view -->
+    <record id="account_analytic_line_tree_inherit_telework" model="ir.ui.view">
+        <field name="name">account.analytic.line.tree.inherit.telework</field>
+        <field name="model">account.analytic.line</field>
+        <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_tree"/>
+        <field name="arch" type="xml">
+            <field name="unit_amount" position="after">
+                <field name="is_telework" optional="show" widget="boolean_toggle"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Add is_telework field to timesheet form view -->
+    <record id="account_analytic_line_form_inherit_telework" model="ir.ui.view">
+        <field name="name">account.analytic.line.form.inherit.telework</field>
+        <field name="model">account.analytic.line</field>
+        <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_form"/>
+        <field name="arch" type="xml">
+            <field name="date" position="after">
+                <field name="is_telework" widget="boolean_toggle"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

@@ -6,7 +6,7 @@
     "name": "Telework and Site Capacity Tracking",
     "summary": "Daily work mode declaration and department capacity "
                "control",
-    "version": "16.0.1.1.0",
+    "version": "16.0.1.3.0",
     "author": "Moval Agroingeniería",
     "maintainers": ["MovalAgroingenieria"],
     "website": "https://moval.es",
@@ -14,6 +14,9 @@
     "category": "Human Resources",
     "depends": [
         "hr",
+        "hr_holidays",
+        "hr_timesheet",
+        "hr_timesheet_sheet",
         "mail",
     ],
     "data": [
@@ -30,6 +33,8 @@
         "views/bulk_preferences_views.xml",
         "views/telework_report_wizard_views.xml",
         "views/res_config_settings_views.xml",
+        "views/account_analytic_line_views.xml",
+        "views/hr_timesheet_sheet_views.xml",
         "views/menu.xml",
         "reports/telework_report.xml",
     ],

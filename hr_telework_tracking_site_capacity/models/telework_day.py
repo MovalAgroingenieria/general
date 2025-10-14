@@ -724,6 +724,19 @@ class HrTeleworkDay(models.Model):
                 if employee.department_id:
                     vals['department_id'] = employee.department_id.id
 
+            # Validate that there's no full-day leave on this date
+            if 'employee_id' in vals and 'date' in vals:
+                employee = self.env['hr.employee'].browse(vals['employee_id'])
+                if employee._has_full_day_leave(vals['date']):
+                    raise UserError(
+                        _('Cannot create a telework declaration for %s on %s '
+                          'because the employee has a full-day absence/leave '
+                          'on that date.') % (
+                              employee.name,
+                              vals['date']
+                          )
+                    )
+
         records = super().create(vals_list)
 
         newly_pending = self.browse()
@@ -815,6 +828,25 @@ class HrTeleworkDay(models.Model):
                         rec.message_post(
                             body=message, message_type='notification'
                         )
+
+        # Validate no full-day leave when changing date or employee
+        if 'date' in vals or 'employee_id' in vals:
+            for rec in self:
+                check_date = vals.get('date', rec.date)
+                check_employee_id = vals.get(
+                    'employee_id',
+                    rec.employee_id.id
+                )
+                employee = self.env['hr.employee'].browse(check_employee_id)
+                if employee._has_full_day_leave(check_date):
+                    raise UserError(
+                        _('Cannot modify telework declaration for %s on %s '
+                          'because the employee has a full-day '
+                          'absence/leave on that date.') % (
+                              employee.name,
+                              check_date
+                          )
+                    )
 
         result = super().write(vals)
 
@@ -932,17 +964,6 @@ class HrTeleworkDay(models.Model):
                 ('state', 'in', ['confirmed', 'draft', 'pending_review']),
                 ('workstation_id', '!=', False),
             ])
-
-            sample_record = records_sudo[:1]
-            if sample_record:
-                date_available_for_booking = (
-                    sample_record._is_date_available_for_booking(target_date)
-                )
-            else:
-                date_available_for_booking = True
-
-            if not date_available_for_booking:
-                total_available_workstations = 0
 
             if occupied_workstations > total_available_workstations:
                 total_color = 'red'
@@ -1365,6 +1386,35 @@ class HrTeleworkDay(models.Model):
             '</ul>'
         )
 
+    def _generate_auto_confirm_message(
+        self, start_label, end_label, confirmed_total, confirmed_remote,
+        confirmed_onsite, pending_review_total, unconfirmed_total,
+        error_count
+    ):
+        """Generate auto-confirmation message with translations"""
+        return (
+            '<p><strong>' +
+            _('Auto-confirmation executed for week %s to %s') %
+            (start_label, end_label) +
+            '</strong></p>'
+            '<ul>'
+            '<li>' +
+            _('%s declarations confirmed (%s remote, %s on-site)') %
+            (confirmed_total, confirmed_remote, confirmed_onsite) +
+            '</li>'
+            '<li>' +
+            _('%s declarations pending with waiting list') %
+            pending_review_total +
+            '</li>'
+            '<li>' +
+            _('%s unconfirmed declarations') % unconfirmed_total +
+            '</li>'
+            '<li>' +
+            _('%s issues detected') % error_count +
+            '</li>'
+            '</ul>'
+        )
+
     @api.model
     def _notify_managers_weekly_generation(self, week_start, created_records,
                                            assignment_summary):
@@ -1484,20 +1534,6 @@ class HrTeleworkDay(models.Model):
         pending_review_total = len(pending_review_records)
         error_count = len(errors) if errors else 0
 
-        message_body = _(
-            '<p><strong>Auto-confirmation executed for week '
-            '%s to %s</strong></p>'
-            '<ul>'
-            '<li>%s declarations confirmed (%s remote, %s on-site)</li>'
-            '<li>%s declarations pending with waiting list</li>'
-            '<li>%s issues detected</li>'
-            '</ul>'
-        ) % (
-            start_label, end_label,
-            confirmed_total, confirmed_remote, confirmed_onsite,
-            pending_review_total, unconfirmed_total, error_count
-        )
-
         telework_bot = self.env.ref(
             'hr_telework_tracking_site_capacity.user_telework_bot',
             raise_if_not_found=False
@@ -1509,6 +1545,14 @@ class HrTeleworkDay(models.Model):
         for user in manager_users:
             if not user.partner_id:
                 continue
+
+            # Generate message in user's language
+            ctx_self = self.with_context(lang=user.lang)
+            message_body = ctx_self._generate_auto_confirm_message(
+                start_label, end_label, confirmed_total, confirmed_remote,
+                confirmed_onsite, pending_review_total, unconfirmed_total,
+                error_count
+            )
 
             channel_info = self.env['mail.channel'].with_user(
                 telework_bot
@@ -1821,3 +1865,39 @@ class HrTeleworkDay(models.Model):
         )
 
         return len(confirmed_records)
+
+    @api.model
+    def cron_clean_declarations_with_leaves(self):
+        """
+        Cron job to clean up telework declarations that conflict with
+        approved full-day leaves. This is useful for cleaning up existing
+        inconsistencies.
+        """
+        Leave = self.env['hr.leave']
+
+        # Find all approved full-day leaves
+        approved_leaves = Leave.search([
+            ('state', '=', 'validate'),
+            ('request_unit_half', '=', False),
+        ])
+
+        total_removed = 0
+        for leave in approved_leaves:
+            if not leave.employee_id:
+                continue
+
+            leave_start = leave.date_from.date()
+            leave_end = leave.date_to.date()
+
+            # Find conflicting declarations
+            conflicting = self.search([
+                ('employee_id', '=', leave.employee_id.id),
+                ('date', '>=', leave_start),
+                ('date', '<=', leave_end),
+            ])
+
+            if conflicting:
+                total_removed += len(conflicting)
+                conflicting.unlink()
+
+        return total_removed

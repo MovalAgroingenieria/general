@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2025 Moval Agroingeniería -->
+<!-- License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html) -->
+
+<odoo>
+
+    <!-- Add is_telework field to timesheet sheet Details notebook -->
+    <record id="hr_timesheet_sheet_form_inherit_telework" model="ir.ui.view">
+        <field name="name">hr.timesheet.sheet.form.inherit.telework</field>
+        <field name="model">hr_timesheet.sheet</field>
+        <field name="inherit_id" ref="hr_timesheet_sheet.hr_timesheet_sheet_form"/>
+        <field name="arch" type="xml">
+            <!-- Add is_telework field in Details tree view (inside timesheet_ids) -->
+            <xpath expr="//field[@name='timesheet_ids']/tree/field[@name='user_id']" position="after">
+                <field name="is_telework" readonly="1" widget="boolean_toggle" optional="show"/>
+            </xpath>
+            <!-- Add is_telework field in Details form view (inside timesheet_ids) -->
+            <xpath expr="//field[@name='timesheet_ids']/form/group/field[@name='user_id']" position="after">
+                <field name="is_telework" readonly="1" widget="boolean_toggle"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit pivot view to add is_telework field -->
+    <record id="view_timesheets_analysis_pivot_telework" model="ir.ui.view">
+        <field name="name">timesheets.analysis.report.pivot.telework</field>
+        <field name="model">timesheets.analysis.report</field>
+        <field name="inherit_id" ref="hr_timesheet.timesheets_analysis_report_pivot_employee"/>
+        <field name="arch" type="xml">
+            <field name="employee_id" position="after">
+                <field name="is_telework" type="col"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

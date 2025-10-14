@@ -111,6 +111,10 @@ class HrEmployee(models.Model):
         for i, preference in enumerate(preferences):
             day_date = monday_date + timedelta(days=i)
 
+            # Skip days with full-day leaves/absences
+            if self._has_full_day_leave(day_date):
+                continue
+
             if self.department_id:
                 mode = self._map_preference_to_mode(preference)
 
@@ -131,6 +135,47 @@ class HrEmployee(models.Model):
         if preference == 'flexible':
             return 'onsite'
         return preference or 'onsite'
+
+    def _has_full_day_leave(self, check_date):
+        """
+        Check if employee has a full-day leave/absence on the given date.
+
+        Args:
+            check_date (date): The date to check for leaves
+
+        Returns:
+            bool: True if there's a full-day leave, False otherwise
+        """
+        if not self:
+            return False
+
+        Leave = self.env['hr.leave']
+        datetime_start = datetime.combine(check_date, datetime.min.time())
+        datetime_end = datetime.combine(check_date, datetime.max.time())
+
+        # Search for approved leaves that cover this date
+        leaves = Leave.search([
+            ('employee_id', '=', self.id),
+            ('state', '=', 'validate'),
+            ('date_from', '<=', datetime_end),
+            ('date_to', '>=', datetime_start),
+        ])
+
+        for leave in leaves:
+            # Check if it's a full day leave
+            # A leave is considered full-day if request_unit_half is False
+            # or if it covers the entire working day
+            if not leave.request_unit_half:
+                # Check if the leave covers the entire day
+                leave_start = leave.date_from.date()
+                leave_end = leave.date_to.date()
+
+                if leave_start <= check_date <= leave_end:
+                    # Calculate the duration for this specific day
+                    if leave.number_of_days >= 1.0:
+                        return True
+
+        return False
 
     @api.model
     def cron_generate_weekly_declarations(self, force=True):
