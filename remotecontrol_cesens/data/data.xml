@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_cesens" model="remotecontrol">
+            <field name="name">Cesens</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://app.cesens.com</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="is_cesens">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "username": "",
+  "password": ""
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>Cesens · Odoo Integration</h2>
+
+<hr/>
+
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code> · Base URL: <code>https://app.cesens.com/api</code></p>
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+  "username": "user@example.com",
+  "password": "********"
+}</pre>
+<ul>
+  <li><em>Get Token</em> → performs <code>POST /usuarios/login</code> and stores <code>bag["token"]</code>.</li>
+  <li>Subsequent requests must include the header: <code>Authentication: Token &lt;token&gt;</code>.</li>
+  <li><em>Logout</em> → optional, invalidates the token using <code>POST /usuarios/logout</code>.</li>
+</ul>
+
+<h3>2) Available Procedures</h3>
+<p>The following predefined procedures are included in this module:</p>
+<ul>
+  <li><strong>Cesens: Import Devices and Metrics</strong> → retrieves all Cesens locations, sensors, and metrics, generates a JSON attachment with the data, and shows a summary count.</li>
+  <li><strong>Cesens: Daily Sync</strong> → automatic daily synchronization of readings: obtains token, builds the sensor plan, and downloads new readings.</li>
+</ul>
+
+<h3>3) Typical Workflow</h3>
+<ol>
+  <li><strong>Get Token</strong> → authenticates the user and stores <code>bag["token"]</code>.</li>
+  <li><strong>Import Devices and Metrics</strong> → calls:
+    <ul>
+      <li><code>GET /ubicaciones/cliente</code> → retrieves Cesens stations and their sensors.</li>
+      <li><code>GET /metricas</code> → retrieves available metrics (humidity, temperature, etc.).</li>
+    </ul>
+    Generates a JSON attachment with all information: <code>cesens_devices_metrics_YYYYMMDD_HHMMSS.json</code>.</li>
+  <li><strong>Get Devices (Plan)</strong> → builds <code>bag["sensors_plan"]</code> with (sensor_id, metric_id, location).</li>
+  <li><strong>Get Readings</strong> → executes:
+    <code>GET /datos/{location_id}/{sensor_id}/{YYYYMMDD-YYYYMMDD}</code>
+    for each sensor in the plan and updates readings in Odoo.</li>
+</ol>
+
+<h3>4) Authentication</h3>
+<p>Required header:</p>
+<pre>Authentication: Token &lt;token&gt;</pre>
+<p><strong>Login example:</strong></p>
+<pre>POST /usuarios/login
+{
+  "nombre": "user",
+  "clave": "pwd1234"
+}</pre>
+<p><strong>Response:</strong></p>
+<pre>{
+  "auth": "TdDRWJvLmZrUk9tTdDR7"
+}</pre>
+
+<h3>5) Odoo Configuration</h3>
+<h4>In Device (<code>mdm.measurement.device</code>):</h4>
+<pre>{
+  "location_id": 10140,
+  "start_date": "2025-01-01"
+}</pre>
+<ul>
+  <li><code>location_id</code>: Cesens station identifier where the device is installed.</li>
+  <li><code>start_date</code>: Default start date if the sensor has no readings.</li>
+</ul>
+
+<h4>In Sensor (<code>mdm.measurement.device.sensor</code>):</h4>
+<pre>{
+  "sensor_id": 28,
+  "start_date": "2025-01-01" //optional
+}</pre>
+<ul>
+  <li><code>sensor_id</code>: Cesens metric identifier (e.g., temperature, humidity).</li>
+  <li><code>start_date</code>: Overrides the device start date if provided.</li>
+</ul>
+
+<h3>6) Endpoints Used</h3>
+<ul>
+  <li><code>/usuarios/login</code> → obtain authentication token (POST).</li>
+  <li><code>/usuarios/logout</code> → close the current session (POST).</li>
+  <li><code>/ubicaciones/cliente</code> → list all stations and their connected sensors (GET).</li>
+  <li><code>/metricas</code> → list all available metrics (GET).</li>
+  <li><code>/datos/{location_id}/{sensor_id}/{YYYYMMDD-YYYYMMDD}</code> → retrieve readings for a given sensor (GET).</li>
+</ul>
+
+<h3>7) Generated File Structure</h3>
+<p>The JSON attachment <code>cesens_devices_metrics_YYYYMMDD_HHMMSS.json</code> contains:</p>
+<pre>{
+  "devices": [
+    {
+      "id": 1234,
+      "name": "Station 1",
+      "sensors": [
+        {"id": 45, "name": "Air Temperature"},
+        {"id": 46, "name": "Soil Humidity"}
+      ]
+    }
+  ],
+  "metrics_info": [
+    {"id": 1, "name": "Temperature"},
+    {"id": 2, "name": "Humidity"}
+  ],
+  "summary": {
+    "total_devices": 15,
+    "total_sensors": 60,
+    "total_metrics": 34,
+    "executed_at": "2025-10-14 09:37:24"
+  }
+}</pre>
+
+<h3>8) Readings</h3>
+<p>The reading flow executes <code>GET /datos/{location_id}/{sensor_id}/{YYYYMMDD-YYYYMMDD}</code> and stores results in <code>mdm.measurement.device.sensor.reading</code>.</p>
+<ul>
+  <li>Key: <code>(sensor_id, measurement_time)</code> (updates if already exists).</li>
+  <li>Timestamps are converted to <code>YYYY-MM-DD HH:MM:SS</code>.</li>
+  <li>The numeric value is stored in the <code>value</code> field.</li>
+</ul>
+
+<h3>9) Recommendations</h3>
+<ul>
+  <li>Run <strong>Import Devices and Metrics</strong> first to ensure correct sensor mapping.</li>
+  <li>Verify that each sensor in Odoo has the proper <code>sensor_id</code> and <code>location_id</code> defined.</li>
+  <li>The JSON attachment can be downloaded from the attachments list of the <code>remotecontrol</code> record.</li>
+</ul>
+]]></field>
+        </record>
+
+        <record id="remotecontrol_cesens_action_get_token" model="remotecontrol.action">
+            <field name="name">Cesens: Get Token</field>
+            <field name="remote_id" ref="remotecontrol_cesens"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Read auth parameter keys from remote.connection_params JSON
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+username = (cfg.get('username') or '').strip()
+password = (cfg.get('password') or '').strip()
+if not username or not password:
+    raise Exception("Missing cesens credentials: set username/password in connection_params.")
+url = (base_url or '').rstrip('/') + '/api/usuarios/login'
+resp = request_retry('POST', url, json={'nombre': username, 'clave': password})
+if resp.status_code >= 400:
+    raise Exception("Login failed: %s %s" % (resp.status_code, resp.text))
+j = resp.json() or {}
+token = j.get('auth') or ''
+if not token:
+    raise Exception("Login OK but no 'access' token in response.")
+bag['token'] = token
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_cesens_action_get_devices" model="remotecontrol.action">
+            <field name="name">Cesens: Get Devices (Plan)</field>
+            <field name="remote_id" ref="remotecontrol_cesens"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+Sensor=env['mdm.measurement.device.sensor']
+Reading=env['mdm.measurement.device.sensor.reading']
+today_str=fields.Date.today()
+sensors=Sensor.search([('device_id','!=',False)])
+plan=[]
+for sensor in sensors:
+    device=sensor.device_id
+    try:
+        sensor_cfg=json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg={}
+    try:
+        device_cfg=json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg={}
+    location_id=sensor_cfg.get('location_id') or device_cfg.get('location_id')
+    sensor_id_param=sensor_cfg.get('sensor_id')
+    start_cfg=sensor_cfg.get('start_date') or device_cfg.get('start_date')
+    if not(location_id and sensor_id_param):
+        continue
+    last=Reading.search([('sensor_id','=',sensor.id)],order='measurement_time desc',limit=1)
+    if last and last.measurement_time:
+        last_dt=fields.Datetime.from_string(last.measurement_time)
+        initial_date=fields.Date.to_string(last_dt.date())
+    elif start_cfg:
+        initial_date=start_cfg[:10]
+    else:
+        year_str=today_str[:4]
+        initial_date='%s-01-01'%year_str
+    plan.append({
+        'sensor_id':sensor.id,                # ID del sensor en Odoo
+        'sensor_id_param':sensor_id_param,    # ID del sensor Cesens
+        'device_id':device.id,
+        'location_id':location_id,
+        'initial_date':initial_date
+    })
+bag['sensors_plan']=plan
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_cesens_action_get_readings" model="remotecontrol.action">
+            <field name="name">Cesens: Get readings</field>
+            <field name="remote_id" ref="remotecontrol_cesens"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+from datetime import datetime
+
+Remote = self.remote_id
+SensorModel = env['mdm.measurement.device.sensor']
+plan = bag.get('sensors_plan') or []
+token = bag.get('token')
+if not token:
+    raise Exception("Missing Cesens token in bag")
+headers = {'Authentication': 'Token %s' % token, 'Accept': 'application/json'}
+final_date = fields.Date.today()
+window_start_suffix = ' 00:00:00'
+window_end_suffix = ' 23:59:59'
+final_date_str = final_date.replace('-', '')
+total_upserts = 0
+total_errors = 0
+items = []
+base_url_api = base_url + "/api"
+for idx, sensor_plan in enumerate(plan, 1):
+    sensor_id = sensor_plan['sensor_id']
+    sensor_id_param = sensor_plan['sensor_id_param']
+    device_id = sensor_plan['device_id']
+    location_id = sensor_plan['location_id']
+    initial_date = sensor_plan['initial_date']
+    url = '%s/datos/%s/%s/%s-%s' % (
+        base_url_api, location_id, sensor_id_param,
+        initial_date.replace('-', ''), final_date_str
+    )
+    sensor_record = SensorModel.browse(sensor_id)
+    try:
+        resp = request_retry('GET', url, headers=headers, timeout=timeout)
+        code = resp.status_code
+        full_url = getattr(resp, 'url', url)
+        if code < 400:
+            payload = resp.json() or {}
+            upserts = 0
+            errs = 0
+            readings_summary = []
+            window_start = initial_date + window_start_suffix
+            window_end = final_date + window_end_suffix
+            for reading_ts, value in payload.items():
+                try:
+                    try:
+                        ts_dt = datetime.fromtimestamp(int(reading_ts))
+                    except Exception:
+                        ts_dt = fields.Datetime.from_string(reading_ts)
+                    ts_str = ts_dt.strftime('%Y-%m-%d %H:%M:%S')
+                    valf = float(value)
+                    if not (window_start <= ts_str <= window_end):
+                        continue
+                    Remote.upsert(
+                        'mdm.measurement.device.sensor.reading',
+                        {'sensor_id': sensor_record.id, 'measurement_time': ts_str},
+                        {'value': valf, 'device_id': device_id}
+                    )
+                    upserts += 1
+                    if len(readings_summary) < 5:
+                        readings_summary.append({'ts': ts_str, 'value': valf})
+                except Exception as e:
+                    errs += 1
+                    if len(readings_summary) < 5:
+                        readings_summary.append({'error': str(e), 'raw_ts': reading_ts, 'value': value})
+            total_upserts += upserts
+            total_errors += errs
+            items.append({
+                'sensor_id': sensor_id,
+                'sensor_id_param': sensor_id_param,
+                'device_id': device_id,
+                'location_id': location_id,
+                'status': 200,
+                'url': full_url,
+                'points_found': len(payload),
+                'upserts': upserts,
+                'errors': errs,
+                'readings': readings_summary,
+            })
+        else:
+            items.append({
+                'sensor_id': sensor_id,
+                'sensor_id_param': sensor_id_param,
+                'device_id': device_id,
+                'location_id': location_id,
+                'status': code,
+                'error': (resp.text or '')[:400],
+                'url': full_url
+            })
+    except Exception as e:
+        items.append({
+            'sensor_id': sensor_id,
+            'sensor_id_param': sensor_id_param,
+            'device_id': device_id,
+            'location_id': location_id,
+            'status': -1,
+            'error': str(e)
+        })
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'final_date': final_date,
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'items': items,
+}
+b64 = base64.b64encode(json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
+fname = 'cesens_readings_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+Remote.message_post(
+    body=u"[Cesens] upserts=%s errors=%s" % (total_upserts, total_errors),
+    attachment_ids=[att.id]
+)
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_cesens_action_import_devices_metrics" model="remotecontrol.action">
+            <field name="name">Cesens: Import Devices and Metrics</field>
+            <field name="remote_id" ref="remotecontrol_cesens"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="code"><![CDATA[
+Remote=self.remote_id
+token=bag.get("token")
+if not token:
+    raise Exception(u"Missing Cesens token in bag")
+
+base_url=(bag.get(u'base_url') or Remote.base_url or u'').rstrip(u'/')+u'/api'
+headers={u'Authentication':u'Token %s'%token,u'Accept':u'application/json'}
+
+resp_ubi=request_retry(u'GET',base_url+u'/ubicaciones/cliente',headers=headers,timeout=timeout)
+if resp_ubi.status_code>=400:
+    raise Exception(u"Error fetching devices: %s %s"%(resp_ubi.status_code,resp_ubi.text))
+ubicaciones=resp_ubi.json() or []
+
+resp_met=request_retry(u'GET',base_url+u'/metricas',headers=headers,timeout=timeout)
+if resp_met.status_code>=400:
+    raise Exception(u"Error fetching metrics: %s %s"%(resp_met.status_code,resp_met.text))
+metricas=resp_met.json() or []
+
+devices_list=[]
+total_sensors=0
+for u in ubicaciones:
+    device_entry={u'id':u.get(u'id'),u'name':u.get(u'nombre'),u'sensors':[]}
+    nodo=u.get(u'nodo') or {}
+    conectores=nodo.get(u'conectores') or []
+    for c in conectores:
+        sensor=c.get(u'sensor') or {}
+        metricas_s=sensor.get(u'metricas') or []
+        metric_id=metricas_s[0] if isinstance(metricas_s,list) and metricas_s else None
+        if metric_id is None:
+            continue
+        sensor_name=sensor.get(u'referencia') or sensor.get(u'nombre') or sensor.get(u'name') or u'Unnamed'
+        sensor_entry={u'id':metric_id,u'name':sensor_name}
+        device_entry[u'sensors'].append(sensor_entry)
+        total_sensors+=1
+    devices_list.append(device_entry)
+
+metrics_info=[]
+for m in metricas:
+    if isinstance(m,dict):
+        metrics_info.append({u'id':m.get(u'id'),u'name':m.get(u'nombre') or m.get(u'name') or u'Unnamed'})
+    else:
+        metrics_info.append({u'id':m,u'name':unicode(m)})
+
+data={
+    u'devices':devices_list,
+    u'metrics_info':metrics_info,
+    u'summary':{
+        u'total_devices':len(devices_list),
+        u'total_sensors':total_sensors,
+        u'total_metrics':len(metrics_info),
+        u'executed_at':fields.Datetime.now()
+    }
+}
+
+json_str=json.dumps(data,ensure_ascii=False,indent=2)
+encoded=base64.b64encode(json_str.encode(u'utf-8'))
+fname=u'cesens_devices_metrics_%s.json'%fields.Datetime.now().replace(u':',u'').replace(u'-',u'').replace(u' ',u'_')
+
+att=env[u'ir.attachment'].create({
+    u'name':fname,
+    u'datas_fname':fname,
+    u'datas':encoded,
+    u'mimetype':u'application/json',
+    u'res_model':u'remotecontrol',
+    u'res_id':Remote.id
+})
+Remote.message_post(
+    body=u'[Cesens] Devices=%s Sensors=%s Metrics=%s'%(len(devices_list),total_sensors,len(metrics_info)),
+    attachment_ids=[att.id]
+)
+bag.clear()
+bag[u'total_devices']=len(devices_list)
+bag[u'total_sensors']=total_sensors
+bag[u'total_metrics']=len(metrics_info)
+bag[u'attachment_id']=att.id
+bag[u'attachment_name']=fname
+]]></field>
+        </record>
+
+        <record id="remotecontrol_cesens_procedure_import_devices_metrics" model="remotecontrol.procedure">
+            <field name="name">Cesens: Import Devices and Metrics</field>
+            <field name="remote_id" ref="remotecontrol_cesens"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_cesens_step_10_token_import" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_cesens_procedure_import_devices_metrics"/>
+            <field name="action_id" ref="remotecontrol_cesens_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_cesens_step_20_import_devices" model="remotecontrol.step">
+            <field name="name">Import Devices and Metrics</field>
+            <field name="procedure_id" ref="remotecontrol_cesens_procedure_import_devices_metrics"/>
+            <field name="action_id" ref="remotecontrol_cesens_action_import_devices_metrics"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_cesens_procedure" model="remotecontrol.procedure">
+            <field name="name">Cesens: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_cesens"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_cesens_step_10_token" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_cesens_procedure"/>
+            <field name="action_id" ref="remotecontrol_cesens_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_cesens_step_20_devices" model="remotecontrol.step">
+            <field name="name">Get devices (plan)</field>
+            <field name="procedure_id" ref="remotecontrol_cesens_procedure"/>
+            <field name="action_id" ref="remotecontrol_cesens_action_get_devices"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_cesens_step_30_readings" model="remotecontrol.step">
+            <field name="name">Get readings</field>
+            <field name="procedure_id" ref="remotecontrol_cesens_procedure"/>
+            <field name="action_id" ref="remotecontrol_cesens_action_get_readings"/>
+            <field name="sequence">30</field>
+        </record>
+
+    </data>
+</odoo>

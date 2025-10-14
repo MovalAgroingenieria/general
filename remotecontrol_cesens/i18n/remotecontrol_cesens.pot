@@ -1,0 +1,324 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* remotecontrol_cesens
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-14 10:59+0000\n"
+"PO-Revision-Date: 2025-10-14 10:59+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "1) Connection (Remote Control)"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "2) Available Procedures"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "3) Typical Workflow"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "4) Authentication"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "5) Odoo Configuration"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "6) Endpoints Used"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "7) Generated File Structure"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "8) Readings"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "9) Recommendations"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<code>/datos/{location_id}/{sensor_id}/{YYYYMMDD-YYYYMMDD}</code> → retrieve readings for a given sensor (GET)."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<code>/metricas</code> → list all available metrics (GET)."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<code>/ubicaciones/cliente</code> → list all stations and their connected sensors (GET)."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<code>/usuarios/login</code> → obtain authentication token (POST)."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<code>/usuarios/logout</code> → close the current session (POST)."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<code>GET /metricas</code> → retrieves available metrics (humidity, temperature, etc.)."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<code>GET /ubicaciones/cliente</code> → retrieves Cesens stations and their sensors."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<code>location_id</code>: Cesens station identifier where the device is installed."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<code>sensor_id</code>: Cesens metric identifier (e.g., temperature, humidity)."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<code>start_date</code>: Default start date if the sensor has no readings."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<code>start_date</code>: Overrides the device start date if provided."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<em>Get Token</em> → performs <code>POST /usuarios/login</code> and stores <code>bag[\"token\"]</code>."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<em>Logout</em> → optional, invalidates the token using <code>POST /usuarios/logout</code>."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<strong>Cesens: Daily Sync</strong> → automatic daily synchronization of readings: obtains token, builds the sensor plan, and downloads new readings."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<strong>Cesens: Import Devices and Metrics</strong> → retrieves all Cesens locations, sensors, and metrics, generates a JSON attachment with the data, and shows a summary count."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<strong>Get Devices (Plan)</strong> → builds <code>bag[\"sensors_plan\"]</code> with (sensor_id, metric_id, location)."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<strong>Get Readings</strong> → executes:\n"
+"    <code>GET /datos/{location_id}/{sensor_id}/{YYYYMMDD-YYYYMMDD}</code>\n"
+"    for each sensor in the plan and updates readings in Odoo."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<strong>Get Token</strong> → authenticates the user and stores <code>bag[\"token\"]</code>."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<strong>Import Devices and Metrics</strong> → calls:"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<strong>Login example:</strong>"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<strong>Response:</strong>"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "<strong>connection_params</strong> (JSON):"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "Authentication: Token &lt;token&gt;"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "Cesens · Odoo Integration"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "Generates a JSON attachment with all information: <code>cesens_devices_metrics_YYYYMMDD_HHMMSS.json</code>."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "In Device (<code>mdm.measurement.device</code>):"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "In Sensor (<code>mdm.measurement.device.sensor</code>):"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "Key: <code>(sensor_id, measurement_time)</code> (updates if already exists)."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "POST /usuarios/login\n"
+"{\n"
+"  \"nombre\": \"user\",\n"
+"  \"clave\": \"pwd1234\"\n"
+"}"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "Required header:"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "Run <strong>Import Devices and Metrics</strong> first to ensure correct sensor mapping."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "Subsequent requests must include the header: <code>Authentication: Token &lt;token&gt;</code>."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "The JSON attachment <code>cesens_devices_metrics_YYYYMMDD_HHMMSS.json</code> contains:"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "The JSON attachment can be downloaded from the attachments list of the <code>remotecontrol</code> record."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "The following predefined procedures are included in this module:"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "The numeric value is stored in the <code>value</code> field."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "The reading flow executes <code>GET /datos/{location_id}/{sensor_id}/{YYYYMMDD-YYYYMMDD}</code> and stores results in <code>mdm.measurement.device.sensor.reading</code>."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "Timestamps are converted to <code>YYYY-MM-DD HH:MM:SS</code>."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "Type: <code>REST</code> · Base URL: <code>https://app.cesens.com/api</code>"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "Verify that each sensor in Odoo has the proper <code>sensor_id</code> and <code>location_id</code> defined."
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "{\n"
+"  \"auth\": \"TdDRWJvLmZrUk9tTdDR7\"\n"
+"}"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "{\n"
+"  \"devices\": [\n"
+"    {\n"
+"      \"id\": 1234,\n"
+"      \"name\": \"Station 1\",\n"
+"      \"sensors\": [\n"
+"        {\"id\": 45, \"name\": \"Air Temperature\"},\n"
+"        {\"id\": 46, \"name\": \"Soil Humidity\"}\n"
+"      ]\n"
+"    }\n"
+"  ],\n"
+"  \"metrics_info\": [\n"
+"    {\"id\": 1, \"name\": \"Temperature\"},\n"
+"    {\"id\": 2, \"name\": \"Humidity\"}\n"
+"  ],\n"
+"  \"summary\": {\n"
+"    \"total_devices\": 15,\n"
+"    \"total_sensors\": 60,\n"
+"    \"total_metrics\": 34,\n"
+"    \"executed_at\": \"2025-10-14 09:37:24\"\n"
+"  }\n"
+"}"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "{\n"
+"  \"location_id\": 10140,\n"
+"  \"start_date\": \"2025-01-01\"\n"
+"}"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "{\n"
+"  \"sensor_id\": 28,\n"
+"  \"start_date\": \"2025-01-01\" //optional\n"
+"}"
+msgstr ""
+
+#. module: remotecontrol_cesens
+#: model:remotecontrol,remotecontrol_help:remotecontrol_cesens.remotecontrol_cesens
+msgid "{\n"
+"  \"username\": \"user@example.com\",\n"
+"  \"password\": \"********\"\n"
+"}"
+msgstr ""
