@@ -15,6 +15,7 @@
         "base",
         "mail",
         "web_ir_actions_act_window_message",
+        "document",
     ],
     'data': [
         'security/security.xml',

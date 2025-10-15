@@ -6,6 +6,18 @@
         <field name="model">mdm.measurement.device</field>
         <field name="inherit_id" ref="mdm_sensor_management.mdm_device_view_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <field name="readings_procedure_id" invisible="1"/>
+                    <button name="action_run_readings_procedure" type="object"
+                            string="Get readings"
+                            style="width: 150px;"
+                            icon="fa-download"
+                            attrs="{'invisible': [('readings_procedure_id','=',False)]}"
+                            groups="mdm_sensor_management.group_mdm_manager"
+                            confirm="This action will retrieve pending readings. Proceed?"/>
+                </header>
+            </xpath>
             <xpath expr="//field[@name='serial_number']" position="after">
                 <field name="remotecontrol_id"/>
                 <field name="remotecontrol_params" widget="ace" options="{'mode': 'json', 'theme': 'monokai'}" placeholder="{'device_id': 1234}" attrs="{'invisible': [('remotecontrol_id', '=', False)]}"/>

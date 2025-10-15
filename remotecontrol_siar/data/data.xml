@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <data noupdate="1">
+
+        <record id="remotecontrol_siar" model="remotecontrol">
+            <field name="name">Web API SiAR</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://servicio.mapama.gob.es/apisiar/API/v1/Datos</field>
+            <field name="timeout">10</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "api_key": ""
+}
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_siar_action_get_devices" model="remotecontrol.action">
+            <field name="name">SiAR: Get devices (plan)</field>
+            <field name="remote_id" ref="remotecontrol_siar"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.50</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[# Action A: build sensors plan (robust JSON parsing)
+import json
+from datetime import datetime, timedelta
+plan = []
+api_key = ''
+condition = []
+if selected_device_id:
+    condition.append(('id', '=', selected_device_id))
+else:
+    condition.append(('remotecontrol_id', '=', self.remote_id.id))
+devices = env['mdm.measurement.device'].search(condition)
+if devices:
+    remotecontrol_cfg = \
+        json.loads(self.remote_id.connection_params or '{}') or {}
+    api_key = (remotecontrol_cfg.get('api_key') or '').strip()
+else:
+    raise Exception('There is no SiAR device.')
+if not api_key:
+    raise Exception('There is no API key.')
+yesterday_str = (datetime.strptime(fields.Date.today(), "%Y-%m-%d") -
+                 timedelta(days=1)).strftime("%Y-%m-%d")
+default_initial_date = '%s-%s-01' % (yesterday_str[:4], yesterday_str[5:7])
+default_final_date = yesterday_str
+for device in (devices or []):
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+    station = (device_cfg.get('station') or '').strip()
+    if not station:
+        continue
+    for sensor in (device.sensor_ids or []):
+        start_date = (device_cfg.get('start_date') or '').strip()
+        if not start_date:
+            start_date = default_initial_date
+        try:
+            sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+        except Exception:
+            sensor_cfg = {}
+        magnitude = (sensor_cfg.get('magnitude') or '').strip()
+        if not magnitude:
+            continue
+        sensor_plan = {
+            'api_key': api_key,
+            'device_id': device.id,
+            'sensor_id': sensor.id,
+            'station': station,
+            'magnitude': magnitude
+        }
+        last_reading = env['mdm.measurement.device.sensor.reading'].search(
+            [('sensor_id', '=', sensor.id)],
+            order='measurement_time desc', limit=1)
+        if last_reading and last_reading.measurement_time:
+            last_reading_dt = fields.Datetime.from_string(
+                last_reading.measurement_time)
+            start_date = fields.Date.to_string(last_reading_dt.date() + \
+                timedelta(days=1))
+        sensor_plan['initial_date'] = start_date
+        end_date = default_final_date
+        if end_date < start_date:
+            end_date = start_date
+        sensor_plan['final_date'] = end_date
+        plan.append(sensor_plan)
+bag['sensors_plan'] = plan]]></field>
+        </record>
+
+        <record id="remotecontrol_siar_action_get_readings" model="remotecontrol.action">
+            <field name="name">SiAR: Get readings</field>
+            <field name="remote_id" ref="remotecontrol_siar"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[# Action B: fetch readings by group/key, upsert (generic), and attach audit
+import json, base64
+from datetime import datetime, timedelta
+remotecontrol = self.remote_id
+plan = bag.get('sensors_plan') or []
+final_date = (datetime.strptime(fields.Date.today(), "%Y-%m-%d") -
+              timedelta(days=1)).strftime("%Y-%m-%d")
+total_upserts = 0
+total_errors = 0
+items = []
+for sensor_plan in (plan or []):
+    api_key = sensor_plan['api_key']
+    device_id = sensor_plan['device_id']
+    sensor_id = sensor_plan['sensor_id']
+    station = sensor_plan['station']
+    magnitude = sensor_plan['magnitude']
+    initial_date = sensor_plan['initial_date']
+    final_date = sensor_plan['final_date']
+    url_request = (
+        (remotecontrol.base_url or '').rstrip('/')
+        + '/Diarios/Estacion?Id=%s&FechaInicial=%s&FechaFinal=%s&ClaveAPI=%s'
+          % (station, initial_date, final_date, api_key)
+    )
+    try:
+        resp = request_retry('GET', url_request, timeout=timeout)
+        payload = resp.json() or {}
+        mensaje_respuesta = (payload.get('MensajeRespuesta') or '').strip()
+        code = resp.status_code
+        if code < 400:
+            data_list = payload['Datos'] or []
+            upserts = 0
+            errs = 0
+            readings_summary = []
+            for reading in data_list:
+                measurement_time = fields.Datetime.to_string(
+                    datetime.strptime(reading['Fecha'], "%Y-%m-%dT%H:%M:%S"))
+                value = float(reading[magnitude])
+                try:
+                    remotecontrol.upsert(
+                        'mdm.measurement.device.sensor.reading',
+                        {'remotecontrol_origin_id': remotecontrol.id,
+                         'sensor_id': sensor_id,
+                         'measurement_time': measurement_time,
+                         'value': value})
+                    upserts = upserts + 1
+                    readings_summary.append({
+                        'measurement_time': measurement_time,
+                        'value': value})
+                except Exception as e:
+                    errs = errs + 1
+                    readings_summary.append({
+                        'measurement_time': reading['Fecha'],
+                        'value': reading[magnitude],
+                        'error': str(e)})
+            total_upserts = total_upserts + upserts
+            total_errors = total_errors + errs
+            items.append({'sensor_id': sensor_id, 'device_id': device_id,
+                          'station': station, 'magnitude': magnitude,
+                          'url': url_request, 'status': 200,
+                          'points_found': len(data_list),
+                          'upserts': total_upserts, 'errors': total_errors,
+                          'readings': readings_summary})
+        else:
+            items.append({'sensor_id': sensor_id, 'device_id': device_id,
+                          'station': station, 'magnitude': magnitude,
+                          'status': code, 'error': mensaje_respuesta,
+                          'url': url_request})
+    except Exception as e:
+        items.append({'sensor_id': sensor_id, 'device_id': device_id,
+                      'station': station, 'magnitude': magnitude,
+                      'status': -1, 'error': str(e),
+                      'url': url_request})
+local_dt = fields.Datetime.to_string(fields.Datetime.context_timestamp(
+    self, fields.Datetime.from_string(fields.Datetime.now())))
+audit = {'executed_at': local_dt, 'final_date': final_date, 'total_upserts': total_upserts, 'total_errors': total_errors, 'items': items}
+b64 = base64.b64encode(json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
+fname = 'readings_fetch_%s.json' % local_dt.replace('-','').replace(' ','_').replace(':','')
+att = env['ir.attachment'].create({'name': fname, 'datas_fname': fname, 'datas': b64, 'mimetype': 'application/json', 'res_model': 'remotecontrol', 'res_id': remotecontrol.id})
+remotecontrol.message_post(body=u"[Readings] upserts=%s errors=%s" % (total_upserts, total_errors), attachment_ids=[att.id])
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id]]></field>
+        </record>
+
+        <record id="remotecontrol_siar_procedure" model="remotecontrol.procedure">
+            <field name="name">SiAR: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_siar"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings">True</field>
+        </record>
+
+        <record id="remotecontrol_siar_step_10_devices" model="remotecontrol.step">
+            <field name="name">Get devices (plan)</field>
+            <field name="procedure_id" ref="remotecontrol_siar_procedure"/>
+            <field name="action_id" ref="remotecontrol_siar_action_get_devices"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_siar_step_20_readings" model="remotecontrol.step">
+            <field name="name">Get readings</field>
+            <field name="procedure_id" ref="remotecontrol_siar_procedure"/>
+            <field name="action_id" ref="remotecontrol_siar_action_get_readings"/>
+            <field name="sequence">20</field>
+        </record>
+
+    </data>
+
+    <data noupdate="0">
+
+        <record id="remotecontrol_siar" model="remotecontrol">
+            <field name="remotecontrol_help"><![CDATA[
+<h2>SiAR · Odoo Integration Help</h2>
+<p><strong>Official API docs: </strong><a href="https://servicio.mapa.gob.es/websiar/ControlesDatosAPI/Manual%20Web%20API%20SiAR%20Versi%C3%B3n%201.0.pdf" target="_blank" rel="noopener">https://servicio.mapa.gob.es/websiar/ControlesDatosAPI/Manual Web API SiAR Versión 1.0.pdf</a></p>
+
+<hr/>
+
+<h3>1) Reading Acquisition Procedure (default)</h3><br>
+<p>The procedure to be executed to obtain readings is <strong>SiAR: Daily Sync</strong>, and it consists of the following actions:</p><br>
+<ol>
+<li>Action <strong>SiAR: Get devices (plan)</strong> → instantiates <code>bag['sensors_plan']</code> based on the configuration of devices and sensors. If the variable <code>selected_device_id</code> is instantiated, only that device will be taken into account.</li><br>
+<li>Action <strong>SiAR: Get readings</strong> → performs the call to the <code>Web API SiAR</code>, using the data from <code>bag['sensors_plan']</code>, and after obtaining the readings, persists them in the table <code>mdm_measurement_device_sensor_reading</code>.</li><br>
+</ol>
+
+<h3>2) Remotecontrol Configuration</h3><br>
+<p>Communication with the remotecontrol is carried out through a <code>REST API</code>, whose base URL is <code>https://servicio.mapama.gob.es/apisiar/API/v1/Datos</code></p><br>
+<p>It is important that each remote control installation has its own API key. This API key can be obtained as follows:</p><br>
+<ol>
+<li>Go to <a href="https://servicio.mapa.gob.es/websiar" target="_blank" rel="noopener">https://servicio.mapa.gob.es/websiar</a>, click on <strong>API SIAR</strong>, and select <strong>Register new user in CAS</strong> (follow the instructions).</li><br>
+<li>Once you have a username and password, repeat the previous step, but this time select <strong>Registered user in CAS</strong>.</li><br>
+<li>In the <strong>SIAR API Data</strong> form, note down the content of the <strong>API KEY</strong> text box.</li><br>
+  <li>Once you have the API key, go to the remotecontrol form (<strong>Settings / Remote Control / Remotes</strong> menu) and edit the <strong>Connection Parameters</strong> field (<code>connection_params</code>), entering the API key in the <code>api_key</code> entry.</li><br>
+<pre>{
+  "api_key": [API_key_value]
+}</pre>
+</ol>
+<br>Example:<br><br>
+<div style="text-align: center;">
+    <img src="/remotecontrol_siar/static/img/remotecontrol_configuration.png"
+         style="border: 1px solid #ccc; border-radius: 4px;"/>
+</div><br>
+
+<h3>3) Device configuration</h3><br>
+<p>In the device form (<strong>Measurement Devices / Sensory / Devices</strong> menu), in addition to assigning the <code>SiAR Web API</code> remotecontrol, it is also necessary to edit the <strong>Remotecontrol Parameters</strong> field (<code>remotecontrol_params</code>), specifying the code of the agroclimatic station from which readings will be collected and, optionally, a start date for the first reading (if not specified, the first day of the current month will be assumed).</p><br>
+<pre>{
+  "station": [station_code],
+  "start_date": [start_date]
+}</pre>
+<br>Example:<br><br>
+<div style="text-align: center;">
+    <img src="/remotecontrol_siar/static/img/device_configuration.png"
+         style="border: 1px solid #ccc; border-radius: 4px;"/>
+</div><br>
+<p>The complete list of all station codes is <a href="https://servicio.mapama.gob.es/apisiar/API/v1/Info/Estaciones?ClaveAPI=-NqONT7QZtgqZae_6mgfU_Kj_AM_4ioTMgm-_4iBHXjU__7A19" target="_blank" rel="noopener">here</a>.</p><br>
+
+<h3>4) Sensor configuration</h3><br>
+<p>A sensor must be created for each of the magnitudes to be read. In SiAR, the list of possible magnitudes is as follows:</p><br>
+<ul>
+<li>TempMedia: Average temperature</li>
+<li>TempMax: Maximum temperature</li>
+<li>HorMinTempMax: Time of maximum temperature</li>
+<li>TempMin: Minimum temperature</li>
+<li>HorMinTempMin: Time of minimum temperature</li>
+<li>HumedadMedia: Average humidity</li>
+<li>HumedadMax: Maximum humidity</li>
+<li>HorMinHumMax: Time of maximum humidity</li>
+<li>HumedadMin: Minimum humidity</li>
+<li>HorMinHumMin: Time of minimum humidity</li>
+<li>VelViento: Wind speed</li>
+<li>DirViento: Wind direction</li>
+<li>VelVientoMax: Maximum wind speed</li>
+<li>HorMinVelMax: Time of maximum wind speed</li>
+<li>DirVientoVelMax: Wind direction at time of maximum speed</li>
+<li>Radiacion: Solar radiation</li>
+<li>Precipitación: Precipitation</li>
+<li>TempSuelo1: Soil temperature at 10 cm</li>
+<li>TempSuelo2: Soil temperature at 20 cm</li>
+<li>EtPmon: Reference evapotranspiration</li>
+<li>PePmon: Effective precipitation</li>
+</ul><br>
+
+<p>Sensors can be accessed from the device form by clicking the <strong>Sensors</strong> button. Once there, you can create a sensor by assigning it a name, a type, and a unit of measure. You must also edit the <strong>Remotecontrol Parameters</strong> field (<code>remotecontrol_params</code>), entering the remotecontrol parameter to be measured (one of the magnitudes listed above).<p><br>
+<pre>{
+  "magnitude": [magnitude]
+}</pre>
+<br>Example:<br><br>
+<div style="text-align: center;">
+    <img src="/remotecontrol_siar/static/img/sensor_configuration.png"
+         style="border: 1px solid #ccc; border-radius: 4px;"/>
+</div><br>
+
+<h3>5) Examples of reading acquisition</h3><br>
+<p>Starting point:</p><br>
+<ul>
+<li>We have configured the <strong>Web API SiAR</strong> remotecontrol.
+<li>We have registered and configured a device for this remotecontrol.
+<li>We have created and configured two sensors for the device: <strong>Et0</strong> and <strong>Pe</strong> (reference evapotranspiration and effective precipitation).
+</ul><br>
+<p>Case No. 1: Global reading, taking into account the newly created device and other possible devices:</p><br>
+<ol>
+<li>Menu <strong>Settings / Remote Control / Remotes</strongt> and select the <strong>Web API SiAR</strong> remotecontrol.</li>
+<li>In the remotecontrol form, click on <strong>Procedures</strong> and select <strong>SiAR: Daily Sync</strong>.</li>
+<li>In the procedure form, click on <strong>Run Now</strong>.</li>
+</ol>
+<br>Example:<br><br>
+<div style="text-align: center;">
+    <img src="/remotecontrol_siar/static/img/run_now.png"
+         style="border: 1px solid #ccc; border-radius: 4px;"/>
+</div><br>
+<p>After obtaining the readings, they can be viewed by clicking the <strong>Readings</strong> button in the device form (it is also possible to access the readings from the sensor form). For each sensor, all readings will be obtained from the date of the last reading up to the day before the current date.</p>
+<br>Example:<br><br>
+<div style="text-align: center;">
+    <img src="/remotecontrol_siar/static/img/readings.png"
+         style="border: 1px solid #ccc; border-radius: 4px;"/>
+</div><br>
+<p>Case No. 2: Reading only those records that come from a specific device:</p><br>
+<ol>
+<li>Menu <strong>Measurement Devices / Sensory / Devices</strong> and select the device.</li>
+<li>From the device form, click on <strong>Get readings</strong>.</li>
+</ol>
+<br>Example:<br><br>
+<div style="text-align: center;">
+    <img src="/remotecontrol_siar/static/img/get_readings.png"
+         style="border: 1px solid #ccc; border-radius: 4px;"/>
+</div>
+]]>
+            </field>
+        </record>
+
+    </data>
+
+</odoo>

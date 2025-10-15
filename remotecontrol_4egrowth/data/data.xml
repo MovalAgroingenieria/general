@@ -167,10 +167,12 @@ bag['token'] = token
 Sensor = env['mdm.measurement.device.sensor']
 Reading = env['mdm.measurement.device.sensor.reading']
 today_str = fields.Date.today()
-sensors = Sensor.search([
-    ('remotecontrol_params','!=',False),
-    ('device_id','!=',False),
-])
+condition = [('remotecontrol_params','!=',False)]
+if selected_device_id:
+    condition.append(('device_id', '=', selected_device_id))
+else:
+    condition.append(('device_id','!=',False))
+sensors = Sensor.search(condition)
 plan = []
 for sensor in sensors:
     device = sensor.device_id

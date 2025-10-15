@@ -1,0 +1,336 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* remotecontrol_siar
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-15 08:41+0000\n"
+"PO-Revision-Date: 2025-10-15 08:41+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid ", click on <strong>API SIAR</strong>, and select <strong>Register new user in CAS</strong> (follow the instructions)."
+msgstr ", clicar sobre <strong>API SIAR</strong>, y elegir <strong>Alta nuevo usuario en CAS</strong> (seguir las instrucciones)."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "1) Reading Acquisition Procedure (default)"
+msgstr "1) Procedimiento de obtención de lecturas (predeterminado)"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "2) Remotecontrol Configuration"
+msgstr "2) Configuración del telecontrol"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "3) Device configuration"
+msgstr "3) Configuración de los dispositivos"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "4) Sensor configuration"
+msgstr "4) Configuración de los sensores"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "5) Examples of reading acquisition"
+msgstr "5) Ejemplos de adquisición de lecturas"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "<br>Example:<br><br>"
+msgstr "<br>Ejemplo:<br><br>"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "<strong>Official API docs: </strong>"
+msgstr "<strong>Documentación oficial de la API: </strong>"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "A sensor must be created for each of the magnitudes to be read. In SiAR, the list of possible magnitudes is as follows:"
+msgstr "Es necesario crear un sensor para cada una de las magnitudes a leer. En SiAR la lista de magnitudes posibles es la siguiente:"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "Action <strong>SiAR: Get devices (plan)</strong> → instantiates <code>bag['sensors_plan']</code> based on the configuration of devices and sensors. If the variable <code>selected_device_id</code> is instantiated, only that device will be taken into account."
+msgstr "Acción <strong>SiAR: Get devices (plan)</strong> → instancia <code>bag['sensors_plan']</code> a partir de la configuración de los dispositivos y sensores. Si la variable <code>selected_device_id</code> está instanciada, sólo se tendrá en cuenta ese dispositivo."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "Action <strong>SiAR: Get readings</strong> → performs the call to the <code>Web API SiAR</code>, using the data from <code>bag['sensors_plan']</code>, and after obtaining the readings, persists them in the table <code>mdm_measurement_device_sensor_reading</code>."
+msgstr "Acción <strong>SiAR: Get readings</strong> → realiza la llamada a la <code>Web API SiAR</code>, teniendo en cuenta los datos de <code>bag['sensors_plan']</code>, y después de obtener las lecturas les da persistencia en la tabla <code>mdm_measurement_device_sensor_reading</code>."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "After obtaining the readings, they can be viewed by clicking the <strong>Readings</strong> button in the device form (it is also possible to access the readings from the sensor form). For each sensor, all readings will be obtained from the date of the last reading up to the day before the current date."
+msgstr "Después de obtener las lecturas, estas se pueden ver clicando sobre el botón de <strong>Lecturas</strong> del formulario del dispositivo (también es posible acceder a las lecturas desde el formulario del sensor). Para cada sensor, se obtendrán todas las lecturas entre la fecha de la última lectura y el día anterior a la fecha actual."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "Case No. 1: Global reading, taking into account the newly created device and other possible devices:"
+msgstr "Caso nº 1: Lectura global, teniendo en cuenta el dispositivo recién creado y otros dispositivos posibles:"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "Case No. 2: Reading only those records that come from a specific device:"
+msgstr "Caso nº 2: Lectura de sólo aquellos registros que provengan de un determinado dispositivo:"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "Communication with the remotecontrol is carried out through a <code>REST API</code>, whose base URL is <code>https://servicio.mapama.gob.es/apisiar/API/v1/Datos</code>"
+msgstr "La comunicación con el telecontrol se lleva a cabo a través de una <code>REST API</code>, cuya URL base es <code>https://servicio.mapama.gob.es/apisiar/API/v1/Datos</code>"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "DirViento: Wind direction"
+msgstr "DirViento: Dirección del viento"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "DirVientoVelMax: Wind direction at time of maximum speed"
+msgstr "DirVientoVelMax: Dirección del viento en el momento de su mayor velocidad"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "EtPmon: Reference evapotranspiration"
+msgstr "EtPmon: Evapotranspiración de referencia"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "From the device form, click on <strong>Get readings</strong>."
+msgstr "Desde el formulario del dispositivo, clicar sobre <strong>Obtener lecturas</strong>."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "Go to"
+msgstr "Ir a"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "HorMinHumMax: Time of maximum humidity"
+msgstr "HorMinHumMax: Instante de la humedad máxima"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "HorMinHumMin: Time of minimum humidity"
+msgstr "HorMinHumMin: Instante de la humedad mínima"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "HorMinTempMax: Time of maximum temperature"
+msgstr "HorMinTempMax: Instante de la temperatura máxima"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "HorMinTempMin: Time of minimum temperature"
+msgstr "HorMinTempMin: Instante de la temperatura mínima"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "HorMinVelMax: Time of maximum wind speed"
+msgstr "HorMinVelMax: Instante de la velocidad máxima del viento"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "HumedadMax: Maximum humidity"
+msgstr "HumedadMax: Humedad máxima"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "HumedadMedia: Average humidity"
+msgstr "HumedadMedia: Humedad media"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "HumedadMin: Minimum humidity"
+msgstr "HumedadMin: Humedad mínima"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "In the <strong>SIAR API Data</strong> form, note down the content of the <strong>API KEY</strong> text box."
+msgstr "En el formulario de <strong>Datos API SIAR</strong>, anotar el contenido de la caja de texto <strong>CLAVE API</strong>."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "In the device form (<strong>Measurement Devices / Sensory / Devices</strong> menu), in addition to assigning the <code>SiAR Web API</code> remotecontrol, it is also necessary to edit the <strong>Remotecontrol Parameters</strong> field (<code>remotecontrol_params</code>), specifying the code of the agroclimatic station from which readings will be collected and, optionally, a start date for the first reading (if not specified, the first day of the current month will be assumed)."
+msgstr "En el formulario del dispositivo (menú <strong>Dispositivos de medición / Sensórica / Dispositivos</strong>), además de asignarle el telecontrol <code>Web API SiAR</code>, también es necesario editar el campo <strong>Parámetros del telecontrol</strong> (<code>remotecontrol_params</code>), indicando el código de la estación agroclimática de la que se recabarán las lecturas y, opcionalmente, una fecha de inicio para la primera lectura (si no se indica, se asumirá que es el primer día del mes actual)"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "In the procedure form, click on <strong>Run Now</strong>."
+msgstr "En el formulario del procedimiento, clicamos sobre <strong>Ejecutar Ahora</strong>."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "In the remotecontrol form, click on <strong>Procedures</strong> and select <strong>SiAR: Daily Sync</strong>."
+msgstr "En el formulario del telecontrol, clicamos sobre <strong>Procedimientos</strong> y elegimos <strong>SiAR: Daily Sync</strong>."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "It is important that each remote control installation has its own API key. This API key can be obtained as follows:"
+msgstr "Es importante que cada instalación de telecontrol disponga de su propia clave API. Esta clave API se obtiene del siguiente modo:"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "Menu <strong>Measurement Devices / Sensory / Devices</strong> and select the device."
+msgstr "Menú <strong>Dispositivos de medición / Sensórica / Dispositivos</strong> y elegimos el dispositivo."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "Menu <strong>Settings / Remote Control / Remotes and select the <strong>Web API SiAR</strong> remotecontrol.</strong>"
+msgstr "Menú <strong>Configuración / Telecontrol / Telecontroles</strong> y elegimos el telecontrol <strong>Web API SiAR</strong>."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "Once you have a username and password, repeat the previous step, but this time select <strong>Registered user in CAS</strong>."
+msgstr "Una vez se disponga de usuario y contraseña, repetir el paso anterior, pero ahora elegir <strong>Usuario registrado en CAS</strong>."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "Once you have the API key, go to the remotecontrol form (<strong>Settings / Remote Control / Remotes</strong> menu) and edit the <strong>Connection Parameters</strong> field (<code>connection_params</code>), entering the API key in the <code>api_key</code> entry."
+msgstr "Una vez se disponga de la clave API, hay que ir al formulario del telecontrol (menú <strong>Configuración / Telecontrol / Telecontroles</strong>) y editar el campo de <strong>Parámetros de Conexión</strong> (<code>connection_params</code>), introduciendo la clave API en la entrada <code>api_key</code>."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "PePmon: Effective precipitation"
+msgstr "PePmon: Precipitación efectiva"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "Precipitación: Precipitation"
+msgstr "Precipitacion: Precipitación"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "Radiacion: Solar radiation"
+msgstr "Radiacion: Radiación solar"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "Sensors can be accessed from the device form by clicking the <strong>Sensors</strong> button. Once there, you can create a sensor by assigning it a name, a type, and a unit of measure. You must also edit the <strong>Remotecontrol Parameters</strong> field (<code>remotecontrol_params</code>), entering the remotecontrol parameter to be measured (one of the magnitudes listed above)."
+msgstr "A los sensores se puede acceder desde el formulario del dispositivo, clicando sobre el botón de <strong>Sensores</strong>. Una vez allí, se puede crear un sensor asignándole un nombre, un tipo y la unidad de medida. También hay que editar el campo <strong>Parámetros del telecontrol</strong> (<code>remotecontrol_params</code>), introduciendo el parámetro del telecontrol que se necesita medir (alguna de las magnitudes indicadas en la lista anterior)."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "SiAR · Odoo Integration Help"
+msgstr "SiAR · Ayuda para la integración en Odoo"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "Starting point:"
+msgstr "Punto de partida:"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "TempMax: Maximum temperature"
+msgstr "TempMax: Temperatura máxima"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "TempMedia: Average temperature"
+msgstr "TempMedia: Temperatura media"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "TempMin: Minimum temperature"
+msgstr "TempMin: Temperatura mínima"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "TempSuelo1: Soil temperature at 10 cm"
+msgstr "TempSuelo1: Temperatura del suelo a 10 cm"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "TempSuelo2: Soil temperature at 20 cm"
+msgstr "TempSuelo2: Temperatura del suelo a 20 cm"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "The complete list of all station codes is"
+msgstr "La lista completa de todos los códigos de estación está"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "The procedure to be executed to obtain readings is <strong>SiAR: Daily Sync</strong>, and it consists of the following actions:"
+msgstr "El procedimiento que hay que ejecutar para obtener lecturas es <strong>SiAR: Daily Sync</strong>, y se compone de las siguientes acciones:"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "VelViento: Wind speed"
+msgstr "VelViento: Velocidad del viento"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "VelVientoMax: Maximum wind speed"
+msgstr "VelVientoMax: Velocidad máxima del viento"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "We have configured the <strong>Web API SiAR</strong> remotecontrol."
+msgstr "Hemos configurado el telecontrol <strong>Web API SiAR</strong>."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "We have created and configured two sensors for the device: <strong>Et0</strong> and <strong>Pe</strong> (reference evapotranspiration and effective precipitation)."
+msgstr "Hemos creado y configurado dos sensores para el dispositivo: <strong>Et0</strong> and <strong>Pe</strong> (evapotranspiración de referencia y precipitación efectiva)."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "We have registered and configured a device for this remotecontrol."
+msgstr "Hemos dado de alta y configurado un dispositivo de este telecontrol."
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "here"
+msgstr "aquí"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "https://servicio.mapa.gob.es/websiar"
+msgstr "https://servicio.mapa.gob.es/websiar"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "https://servicio.mapa.gob.es/websiar/ControlesDatosAPI/Manual Web API SiAR Versión 1.0.pdf"
+msgstr "https://servicio.mapa.gob.es/websiar/ControlesDatosAPI/Manual Web API SiAR Versión 1.0.pdf"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "{\n"
+"  \"api_key\": [API_key_value]\n"
+"}"
+msgstr "{\n"
+"  \"api_key\": [API_key_value]\n"
+"}"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "{\n"
+"  \"magnitude\": [magnitude]\n"
+"}"
+msgstr "{\n"
+"  \"magnitude\": [magnitude]\n"
+"}"
+
+#. module: remotecontrol_siar
+#: model:remotecontrol,remotecontrol_help:remotecontrol_siar.remotecontrol_siar
+msgid "{\n"
+"  \"station\": [station_code],\n"
+"  \"start_date\": [start_date]\n"
+"}"
+msgstr "{\n"
+"  \"station\": [station_code],\n"
+"  \"start_date\": [start_date]\n"
+"}"
+
