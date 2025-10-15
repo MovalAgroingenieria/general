@@ -16,7 +16,7 @@ class AccountInvoiceSingleconcept(models.Model):
     )
 
     extra_field = fields.Boolean(
-        sgtring="Extra Field",
+        string="Extra Field",
         help="If checked a free text field will be shown in the invoice.",
     )
 
