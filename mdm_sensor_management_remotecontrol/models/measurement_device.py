@@ -17,6 +17,24 @@ class MeasurementDevice(models.Model):
         string='Remotecontrol Parameters',
     )
 
+    readings_procedure_id = fields.Many2one(
+        string='Readings Procedure',
+        comodel_name='remotecontrol.procedure',
+        store=False,
+        compute='_compute_readings_procedure_id',
+    )
+
+    @api.multi
+    def _compute_readings_procedure_id(self):
+        for record in self:
+            resp = None
+            procedures = self.env['remotecontrol.procedure'].search(
+                [('remote_id', '=', record.remotecontrol_id.id),
+                 ('procedure_for_readings', '=', True)])
+            if procedures and len(procedures) == 1:
+                resp = procedures[0].id
+            record.readings_procedure_id = resp
+
     @api.multi
     def copy(self, default=None):
         self.ensure_one()
@@ -40,3 +58,8 @@ class MeasurementDevice(models.Model):
                 }))
             default['sensor_ids'] = sensor_vals
         return super(MeasurementDevice, self).copy(default)
+
+    @api.multi
+    def action_run_readings_procedure(self):
+        self.ensure_one()
+        self.readings_procedure_id.run(selected_device_id=self.id)

@@ -57,12 +57,12 @@ for device in (devices or []):
     except Exception:
         device_cfg = {}
     station = (device_cfg.get('station') or '').strip()
-    start_date = (device_cfg.get('start_date') or '').strip()
     if not station:
         continue
-    if not start_date:
-        start_date = default_initial_date
     for sensor in (device.sensor_ids or []):
+        start_date = (device_cfg.get('start_date') or '').strip()
+        if not start_date:
+            start_date = default_initial_date
         try:
             sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
         except Exception:
@@ -192,6 +192,7 @@ bag['audit_attachment_id'] = att.id]]></field>
             <field name="active">True</field>
             <field name="schedule_cron">False</field>
             <field name="readonly">True</field>
+            <field name="procedure_for_readings">True</field>
         </record>
 
         <record id="remotecontrol_siar_step_10_devices" model="remotecontrol.step">
@@ -218,6 +219,115 @@ bag['audit_attachment_id'] = att.id]]></field>
 <p><strong>Official API docs: </strong><a href="https://servicio.mapa.gob.es/websiar/ControlesDatosAPI/Manual%20Web%20API%20SiAR%20Versi%C3%B3n%201.0.pdf" target="_blank" rel="noopener">https://servicio.mapa.gob.es/websiar/ControlesDatosAPI/Manual Web API SiAR Versión 1.0.pdf</a></p>
 
 <hr/>
+
+<h3>1) Reading Acquisition Procedure (default)</h3><br>
+<p>The procedure to be executed to obtain readings is <strong>SiAR: Daily Sync</strong>, and it consists of the following actions:</p><br>
+<ol>
+<li>Action <strong>SiAR: Get devices (plan)</strong> → instantiates <code>bag['sensors_plan']</code> based on the configuration of devices and sensors. If the variable <code>selected_device_id</code> is instantiated, only that device will be taken into account.</li><br>
+<li>Action <strong>SiAR: Get readings</strong> → performs the call to the <code>Web API SiAR</code>, using the data from <code>bag['sensors_plan']</code>, and after obtaining the readings, persists them in the table <code>mdm_measurement_device_sensor_reading</code>.</li><br>
+</ol>
+
+<h3>2) Remotecontrol Configuration</h3><br>
+<p>Communication with the remotecontrol is carried out through a <code>REST API</code>, whose base URL is <code>https://servicio.mapama.gob.es/apisiar/API/v1/Datos</code></p><br>
+<p>It is important that each remote control installation has its own API key. This API key can be obtained as follows:</p><br>
+<ol>
+<li>Go to <a href="https://servicio.mapa.gob.es/websiar" target="_blank" rel="noopener">https://servicio.mapa.gob.es/websiar</a>, click on <strong>API SIAR</strong>, and select <strong>Register new user in CAS</strong> (follow the instructions).</li><br>
+<li>Once you have a username and password, repeat the previous step, but this time select <strong>Registered user in CAS</strong>.</li><br>
+<li>In the <strong>SIAR API Data</strong> form, note down the content of the <strong>API KEY</strong> text box.</li><br>
+  <li>Once you have the API key, go to the remotecontrol form (<strong>Settings / Remote Control / Remotes</strong> menu) and edit the <strong>Connection Parameters</strong> field (<code>connection_params</code>), entering the API key in the <code>api_key</code> entry.</li><br>
+<pre>{
+  "api_key": [API_key_value]
+}</pre>
+</ol>
+<br>Example:<br><br>
+<div style="text-align: center;">
+    <img src="/remotecontrol_siar/static/img/remotecontrol_configuration.png"
+         style="border: 1px solid #ccc; border-radius: 4px;"/>
+</div><br>
+
+<h3>3) Device configuration</h3><br>
+<p>In the device form (<strong>Measurement Devices / Sensory / Devices</strong> menu), in addition to assigning the <code>SiAR Web API</code> remotecontrol, it is also necessary to edit the <strong>Remotecontrol Parameters</strong> field (<code>remotecontrol_params</code>), specifying the code of the agroclimatic station from which readings will be collected and, optionally, a start date for the first reading (if not specified, the first day of the current month will be assumed).</p><br>
+<pre>{
+  "station": [station_code],
+  "start_date": [start_date]
+}</pre>
+<br>Example:<br><br>
+<div style="text-align: center;">
+    <img src="/remotecontrol_siar/static/img/device_configuration.png"
+         style="border: 1px solid #ccc; border-radius: 4px;"/>
+</div><br>
+<p>The complete list of all station codes is <a href="https://servicio.mapama.gob.es/apisiar/API/v1/Info/Estaciones?ClaveAPI=-NqONT7QZtgqZae_6mgfU_Kj_AM_4ioTMgm-_4iBHXjU__7A19" target="_blank" rel="noopener">here</a>.</p><br>
+
+<h3>4) Sensor configuration</h3><br>
+<p>A sensor must be created for each of the magnitudes to be read. In SiAR, the list of possible magnitudes is as follows:</p><br>
+<ul>
+<li>TempMedia: Average temperature</li>
+<li>TempMax: Maximum temperature</li>
+<li>HorMinTempMax: Time of maximum temperature</li>
+<li>TempMin: Minimum temperature</li>
+<li>HorMinTempMin: Time of minimum temperature</li>
+<li>HumedadMedia: Average humidity</li>
+<li>HumedadMax: Maximum humidity</li>
+<li>HorMinHumMax: Time of maximum humidity</li>
+<li>HumedadMin: Minimum humidity</li>
+<li>HorMinHumMin: Time of minimum humidity</li>
+<li>VelViento: Wind speed</li>
+<li>DirViento: Wind direction</li>
+<li>VelVientoMax: Maximum wind speed</li>
+<li>HorMinVelMax: Time of maximum wind speed</li>
+<li>DirVientoVelMax: Wind direction at time of maximum speed</li>
+<li>Radiacion: Solar radiation</li>
+<li>Precipitación: Precipitation</li>
+<li>TempSuelo1: Soil temperature at 10 cm</li>
+<li>TempSuelo2: Soil temperature at 20 cm</li>
+<li>EtPmon: Reference evapotranspiration</li>
+<li>PePmon: Effective precipitation</li>
+</ul><br>
+
+<p>Sensors can be accessed from the device form by clicking the <strong>Sensors</strong> button. Once there, you can create a sensor by assigning it a name, a type, and a unit of measure. You must also edit the <strong>Remotecontrol Parameters</strong> field (<code>remotecontrol_params</code>), entering the remotecontrol parameter to be measured (one of the magnitudes listed above).<p><br>
+<pre>{
+  "magnitude": [magnitude]
+}</pre>
+<br>Example:<br><br>
+<div style="text-align: center;">
+    <img src="/remotecontrol_siar/static/img/sensor_configuration.png"
+         style="border: 1px solid #ccc; border-radius: 4px;"/>
+</div><br>
+
+<h3>5) Examples of reading acquisition</h3><br>
+<p>Starting point:</p><br>
+<ul>
+<li>We have configured the <strong>Web API SiAR</strong> remotecontrol.
+<li>We have registered and configured a device for this remotecontrol.
+<li>We have created and configured two sensors for the device: <strong>Et0</strong> and <strong>Pe</strong> (reference evapotranspiration and effective precipitation).
+</ul><br>
+<p>Case No. 1: Global reading, taking into account the newly created device and other possible devices:</p><br>
+<ol>
+<li>Menu <strong>Settings / Remote Control / Remotes</strongt> and select the <strong>Web API SiAR</strong> remotecontrol.</li>
+<li>In the remotecontrol form, click on <strong>Procedures</strong> and select <strong>SiAR: Daily Sync</strong>.</li>
+<li>In the procedure form, click on <strong>Run Now</strong>.</li>
+</ol>
+<br>Example:<br><br>
+<div style="text-align: center;">
+    <img src="/remotecontrol_siar/static/img/run_now.png"
+         style="border: 1px solid #ccc; border-radius: 4px;"/>
+</div><br>
+<p>After obtaining the readings, they can be viewed by clicking the <strong>Readings</strong> button in the device form (it is also possible to access the readings from the sensor form). For each sensor, all readings will be obtained from the date of the last reading up to the day before the current date.</p>
+<br>Example:<br><br>
+<div style="text-align: center;">
+    <img src="/remotecontrol_siar/static/img/readings.png"
+         style="border: 1px solid #ccc; border-radius: 4px;"/>
+</div><br>
+<p>Case No. 2: Reading only those records that come from a specific device:</p><br>
+<ol>
+<li>Menu <strong>Measurement Devices / Sensory / Devices</strong> and select the device.</li>
+<li>From the device form, click on <strong>Get readings</strong>.</li>
+</ol>
+<br>Example:<br><br>
+<div style="text-align: center;">
+    <img src="/remotecontrol_siar/static/img/get_readings.png"
+         style="border: 1px solid #ccc; border-radius: 4px;"/>
+</div>
 ]]>
             </field>
         </record>
