@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_riegos_salz" model="remotecontrol">
+            <field name="name">Riegos Salz</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://cloudcontrol.riegosalz.com</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="is_riegosSalz">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "username": "",
+  "password": ""
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+              <h2>Riegos Salz · Automatic Synchronization with Odoo</h2>
+
+<p>This system allows connecting Odoo with the <strong>Riegos Salz</strong> platform to automatically import historical data from sensors (flow, pressure, etc.) installed in the remote control system.</p>
+
+<p>Once configured, the system automatically retrieves the values recorded in the Riegos Salz cloud and stores them in Odoo as readings linked to their corresponding sensors.
+This makes all irrigation system information available inside Odoo, simplifying analysis, comparison, and monitoring of the measured variables.</p>
+
+<hr>
+
+<h3>1) Connection setup</h3>
+<p>In the remote control configuration tab, fill in the <strong>Connection Parameters</strong> section with the username and password used in Riegos Salz.</p>
+
+<pre>{
+  "username": "USERNAME",
+  "password": "PASSWORD"
+}</pre>
+
+<p>The system uses these credentials to connect with the Riegos Salz web service.
+During the process, the password is automatically encrypted internally (<em>MD5 format</em>), ensuring that it is never sent in plain text.</p>
+
+<p>The connection is made through the secure Riegos Salz web service (<code>https://cloudcontrol.riegosalz.com/wm-rest.php</code>), which accepts requests in JSON format.</p>
+
+<hr>
+
+<h3>2) Configure devices and sensors</h3>
+
+<h4>Devices</h4>
+<p>Each device must define a <strong>start date</strong> from which historical data should be retrieved.
+This date is placed in the device's <em>Remote Control Parameters</em> field:</p>
+
+<pre>{
+  "start_date": "2025-10-01"
+}</pre>
+
+<p>If no date is specified, the system will use January 1st of the current year by default.
+The start date limits the range of queries and helps optimize download time.</p>
+
+<h4>Sensors</h4>
+<p>Each sensor must have a linked <strong>variable ID from Riegos Salz</strong>.
+This number uniquely identifies the measurement point (for example, a flow meter or pressure sensor) in the Riegos Salz platform.</p>
+
+<p>In the sensor's <em>Remote Control Parameters</em> field, enter:</p>
+
+<pre>{
+  "id": 42955
+}</pre>
+
+<p>If a sensor does not have this number, it cannot be synchronized.</p>
+
+<p>The variable IDs can be obtained from the Riegos Salz platform or through the system's technical equipment list.</p>
+
+<p>Depending on the installation, the identification number (<code>id</code>) may correspond to different types of measurements, for example:</p>
+
+<ul>
+  <li><strong>LEVEL</strong></li>
+  <li><strong>FLOW</strong></li>
+  <li><strong>VELOCITY</strong></li>
+  <li><strong>OPENING</strong></li>
+</ul>
+
+<hr>
+
+<h3>3) Running the process</h3>
+
+<h4>1. Get sensor plan</h4>
+<p>The <strong>“Get devices (plan)”</strong> action scans all configured sensors and internally generates a list containing the sensors, their devices, their Riegos Salz IDs, and the start date from which readings should be downloaded.</p>
+
+<p>This step does not download data yet; it only prepares the synchronization plan.</p>
+
+<h4>2. Download readings</h4>
+<p>The <strong>“Get readings”</strong> action contacts Riegos Salz and retrieves the historical data for each sensor included in the plan.</p>
+
+<p>Each reading includes a value and a timestamp, for example: <em>Flow = 35 l/s on 10/10/2025 at 10:00</em>.</p>
+
+<p>The system automatically saves each reading in Odoo, under the corresponding sensor record.
+This way, daily historical data is continuously stored for later viewing and analysis.</p>
+
+<p>The process uses the <strong>consultaHistoricos</strong> command from the Riegos Salz API.
+Communication is done in JSON format, with the following main fields:</p>
+
+<pre>{
+  "comando": "consultaHistoricos",
+  "correo": "USERNAME",
+  "contrasenya": "PASSWORD",
+  "variables": [42955],
+  "fechaIni": "2025-10-01 00:00:00"
+}</pre>
+
+<p>The API returns a list of readings, each containing two values: the <strong>timestamp</strong> (for example, "2025-10-15 08:00:00") and the <strong>measured value</strong> (for example, "75").
+Each pair becomes a reading in Odoo.</p>
+
+<p>The system performs one request per configured sensor, ensuring that each reading is linked to the correct sensor and device.</p>
+
+<hr>
+
+<h3>4) Results and reports</h3>
+<p>Once synchronization is completed:</p>
+<ul>
+  <li>A message appears in the remote control record showing the total number of readings created and any detected errors.</li>
+  <li>A JSON file (<code>.json</code>) is generated with a detailed summary of the operation: processed sensors, dates, total readings, and any errors.</li>
+</ul>
+
+<p>This file can be viewed in the remote control attachments section in Odoo.
+A summary message is also recorded in the same entry, allowing historical tracking of past synchronizations.</p>
+
+<hr>
+
+<h3>5) Tips and best practices</h3>
+<ul>
+  <li>Verify that the Riegos Salz username and password are correct. If the password changes, update it in Odoo as well.</li>
+  <li>Ensure that each sensor has its <strong>variable ID</strong> correctly configured (the exact number provided by Riegos Salz).</li>
+  <li>The start date should match the first date you wish to retrieve data from. Setting it too far in the past may increase processing time.</li>
+  <li>Review the audit file after each execution to confirm that all readings were imported successfully.</li>
+  <li>If no data is returned, check in the Riegos Salz platform that the sensor has historical data for the indicated date range.</li>
+  <li>The Riegos Salz API updates its readings approximately every 15 minutes. It is recommended to schedule the synchronization in Odoo as a daily task to keep data up to date.</li>
+</ul>
+
+<hr>
+
+<h3>6) Full configuration example</h3>
+
+<p><strong>Connection parameters in remote control:</strong></p>
+<pre>{
+  "username": "USERNAME",
+  "password": "PASSWORD"
+}</pre>
+
+<p><strong>Device:</strong></p>
+<pre>{
+  "start_date": "2025-10-01"
+}</pre>
+
+<p><strong>Sensor:</strong></p>
+<pre>{
+  "id": 42955
+}</pre>
+
+<p>Once configured, simply run the <strong>“Riegos Salz: Daily Sync”</strong> procedure so Odoo automatically connects, downloads the data, and stores it in the corresponding sensors.</p>
+
+<p>The procedure can be run manually or scheduled as a recurring automatic task (cron) to execute daily without user intervention.</p>
+
+<hr>
+
+<h3>7) Common error messages</h3>
+<ul>
+  <li><strong>“Missing credentials”</strong>: the username or password is missing in the configuration.</li>
+  <li><strong>“Invalid ID”</strong>: the sensor does not have a valid variable ID in Riegos Salz.</li>
+  <li><strong>“No data found”</strong>: no readings are available on the platform for the specified date range.</li>
+  <li><strong>“Timeout”</strong>: the connection took too long. Try running the action again later.</li>
+  <li><strong>“Error 15”</strong>: the platform was temporarily unable to access historical data. Try again later.</li>
+  <li><strong>“CodError ≠ 0”</strong>: the API returned an error code different from 0 (see official documentation for details).</li>
+</ul>
+]]>
+            </field>
+        </record>
+
+        <record id="remotecontrol_riegos_salz_action_get_devices" model="remotecontrol.action">
+            <field name="name">Riegos Salz: Get devices (plan)</field>
+            <field name="remote_id" ref="remotecontrol_riegos_salz"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+from datetime import datetime
+
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+sensors = Sensor.search([
+    ('remotecontrol_params', '!=', False),
+    ('device_id', '!=', False),
+])
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+    sensor_id_value = sensor_cfg.get('id')
+    if isinstance(sensor_id_value, int):
+        try:
+            device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+        except Exception:
+            device_cfg = {}
+        last = Reading.search(
+            [('sensor_id', '=', sensor.id)],
+            order='measurement_time desc',
+            limit=1
+        )
+        if last and last.measurement_time:
+            try:
+                last_dt = fields.Datetime.from_string(last.measurement_time)
+                start_date = last_dt.strftime('%Y-%m-%d %H:%M:%S')
+            except Exception:
+                start_date = fields.Datetime.to_string(last_dt)
+        else:
+            start_cfg = device_cfg.get('start_date')
+            if start_cfg:
+                s = start_cfg.strip().replace('/', '-')
+                if len(s) == 10:
+                    s = s + ' 00:00:00'
+                try:
+                    dt_cfg = datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
+                    start_date = dt_cfg.strftime('%Y-%m-%d %H:%M:%S')
+                except Exception:
+                    start_date = s
+            else:
+                year_str = today_str[:4]
+                s2 = '%s-01-01 00:00:00' % year_str
+                try:
+                    dt_y = datetime.strptime(s2, '%Y-%m-%d %H:%M:%S')
+                    start_date = dt_y.strftime('%Y-%m-%d %H:%M:%S')
+                except Exception:
+                    start_date = s2
+        plan.append({
+            'sensor_id': sensor.id,
+            'device_id': device.id,
+            'sensor_id_value': sensor_id_value,
+            'start_date': str(start_date),
+        })
+bag['sensors_plan'] = plan
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_riegos_salz_action_get_readings" model="remotecontrol.action">
+            <field name="name">Riegos Salz: Get readings</field>
+            <field name="remote_id" ref="remotecontrol_riegos_salz"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+
+import hashlib
+from datetime import datetime, timedelta
+import pytz
+
+Remote = self.remote_id
+SensorModel = env['mdm.measurement.device.sensor']
+ReadingModel = env['mdm.measurement.device.sensor.reading']
+plan = bag.get('sensors_plan') or []
+base_url = Remote.base_url
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}') or {}
+except Exception:
+    cfg = {}
+username = (cfg.get('username') or '').strip()
+password = (cfg.get('password') or '').strip()
+if not username or not password:
+    raise Exception("Missing credentials: please configure username/password in connection_params")
+password_md5 = hashlib.md5(password.encode('utf-8')).hexdigest().upper()
+url = base_url + '/wm-rest.php'
+headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+total_upserts = 0
+total_errors = 0
+items = []
+for sensor_plan in plan:
+    sensor_id = sensor_plan['sensor_id']
+    device_id = sensor_plan['device_id']
+    sensor_id_value = sensor_plan['sensor_id_value']
+    start_date = sensor_plan['start_date']
+    if len(start_date) == 10:
+        fecha_ini = start_date + ' 00:00:00'
+    else:
+        fecha_ini = start_date
+    try:
+        s = fecha_ini.strip().replace('/', '-')
+        parts = s.split(' ')
+        if len(parts) == 1:
+            date_part = parts[0]
+            time_part = '00:00:00'
+        else:
+            date_part = parts[0]
+            time_part = parts[1]
+        ymd = [b.zfill(2) for b in date_part.split('-')]
+        hms = [p.zfill(2) for p in time_part.split(':')]
+        while len(hms) < 3:
+            hms.append('00')
+        fecha_ini = "%s-%s-%s %02d:%02d:%02d" % (
+            ymd[0], ymd[1], ymd[2],
+            int(hms[0]), int(hms[1]), int(hms[2])
+        )
+    except Exception:
+        pass
+    payload = {
+        'comando': 'consultaHistoricos',
+        'correo': username,
+        'contrasenya': password_md5,
+        'variables': [sensor_id_value],
+        'fechaIni': fecha_ini,
+    }
+    try:
+        resp = request_retry('POST', url, headers=headers, json=payload, timeout=Remote.timeout)
+        code = resp.status_code
+        if code >= 400:
+            items.append({
+                'sensor_id': sensor_id,
+                'status': code,
+                'error': (resp.text or '')[:400],
+                'url': url
+            })
+            total_errors += 1
+            continue
+        data = resp.json() or {}
+        historicos = data.get('historicos', {}) or {}
+        readings = historicos.get(str(sensor_id_value)) or []
+        upserts = 0
+        errs = 0
+        readings_summary = []
+        for entry in readings:
+            ts_s = entry.get('fecha')
+            val_s = entry.get('valor')
+            if not ts_s or val_s is None:
+                continue
+            try:
+                valf = float(val_s)
+            except Exception:
+                continue
+            try:
+                s2 = unicode(ts_s).strip().replace('/', '-')
+                parts2 = s2.split(' ')
+                if len(parts2) == 1:
+                    date_part2 = parts2[0]
+                    time_part2 = '00:00:00'
+                else:
+                    date_part2 = parts2[0]
+                    time_part2 = parts2[1]
+                ymd2 = [b.zfill(2) for b in date_part2.split('-')]
+                hms2 = [p.zfill(2) for p in time_part2.split(':')]
+                while len(hms2) < 3:
+                    hms2.append('00')
+                ts_norm = "%s-%s-%s %02d:%02d:%02d" % (
+                    ymd2[0], ymd2[1], ymd2[2],
+                    int(hms2[0]), int(hms2[1]), int(hms2[2])
+                )
+                dt_fake = datetime.strptime(ts_norm, '%Y-%m-%d %H:%M:%S')
+                dt_real_utc = dt_fake - timedelta(hours=2)
+                ts_store = dt_real_utc.strftime('%Y-%m-%d %H:%M:%S')
+            except Exception:
+                ts_store = ts_s
+            try:
+                Remote.upsert(
+                    'mdm.measurement.device.sensor.reading',
+                    {'sensor_id': sensor_id, 'measurement_time': ts_store},
+                    {'value': valf, 'remotecontrol_origin_id': Remote.id}
+                )
+                upserts += 1
+                readings_summary.append({'ts': ts_store, 'value': valf})
+            except Exception as e:
+                errs += 1
+                readings_summary.append({'ts': ts_store, 'value': valf, 'error': str(e)})
+        total_upserts += upserts
+        total_errors += errs
+        items.append({
+            'sensor_id': sensor_id,
+            'device_id': device_id,
+            'sensor_id_value': sensor_id_value,
+            'status': 200,
+            'url': url,
+            'points_found': len(readings),
+            'upserts': upserts,
+            'errors': errs,
+            'readings': readings_summary,
+        })
+    except Exception as e:
+        total_errors += 1
+        items.append({'sensor_id': sensor_id, 'status': -1, 'error': str(e)})
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'items': items,
+}
+try:
+    audit_json = json.dumps(audit, ensure_ascii=True, indent=2, default=str)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+except Exception as json_error:
+    simple_audit = {
+        'executed_at': str(fields.Datetime.now()),
+        'total_upserts': total_upserts,
+        'total_errors': total_errors,
+        'error': str(json_error),
+    }
+    audit_json = json.dumps(simple_audit, ensure_ascii=True, indent=2)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+fname = 'readings_riegosalz_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id,
+})
+Remote.message_post(
+    body=u"[RiegosSalz] upserts=%s errors=%s" % (total_upserts, total_errors),
+    attachment_ids=[att.id]
+)
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_riegos_salz_procedure" model="remotecontrol.procedure">
+            <field name="name">Riegos Salz: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_riegos_salz"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_riegos_salz_step_20_devices" model="remotecontrol.step">
+            <field name="name">Get devices (plan)</field>
+            <field name="procedure_id" ref="remotecontrol_riegos_salz_procedure"/>
+            <field name="action_id" ref="remotecontrol_riegos_salz_action_get_devices"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_riegos_salz_step_30_readings" model="remotecontrol.step">
+            <field name="name">Get readings</field>
+            <field name="procedure_id" ref="remotecontrol_riegos_salz_procedure"/>
+            <field name="action_id" ref="remotecontrol_riegos_salz_action_get_readings"/>
+            <field name="sequence">20</field>
+        </record>
+
+    </data>
+</odoo>

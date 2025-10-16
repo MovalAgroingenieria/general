@@ -185,43 +185,45 @@ bag['token'] = token
             <field name="max_retries">1</field>
             <field name="readonly">True</field>
             <field name="code"><![CDATA[
-Sensor=env['mdm.measurement.device.sensor']
-Reading=env['mdm.measurement.device.sensor.reading']
-today_str=fields.Date.today()
-sensors=Sensor.search([('device_id','!=',False)])
-plan=[]
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+sensors = Sensor.search([('device_id', '!=', False)])
+plan = []
 for sensor in sensors:
-    device=sensor.device_id
+    device = sensor.device_id
     try:
-        sensor_cfg=json.loads(sensor.remotecontrol_params or '{}') or {}
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
     except Exception:
-        sensor_cfg={}
+        sensor_cfg = {}
     try:
-        device_cfg=json.loads(device.remotecontrol_params or '{}') or {}
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
     except Exception:
-        device_cfg={}
-    location_id=sensor_cfg.get('location_id') or device_cfg.get('location_id')
-    sensor_id_param=sensor_cfg.get('sensor_id')
-    start_cfg=sensor_cfg.get('start_date') or device_cfg.get('start_date')
-    if not(location_id and sensor_id_param):
+        device_cfg = {}
+    location_id = sensor_cfg.get('location_id') or device_cfg.get('location_id')
+    sensor_id_param = sensor_cfg.get('sensor_id')
+    start_cfg = sensor_cfg.get('start_date') or device_cfg.get('start_date')
+    if not (location_id and sensor_id_param):
         continue
-    last=Reading.search([('sensor_id','=',sensor.id)],order='measurement_time desc',limit=1)
+    last = Reading.search([('sensor_id', '=', sensor.id)], order='measurement_time desc', limit=1)
     if last and last.measurement_time:
-        last_dt=fields.Datetime.from_string(last.measurement_time)
-        initial_date=fields.Date.to_string(last_dt.date())
+        last_dt = fields.Datetime.from_string(last.measurement_time)
+        initial_date = fields.Date.to_string(last_dt.date())
     elif start_cfg:
-        initial_date=start_cfg[:10]
+        initial_date = start_cfg[:10]
     else:
-        year_str=today_str[:4]
-        initial_date='%s-01-01'%year_str
+        year_str = today_str[:4]
+        initial_date = '%s-01-01' % year_str
+    if isinstance(initial_date, unicode):
+        initial_date = initial_date.encode('utf-8')
     plan.append({
-        'sensor_id':sensor.id,                # ID del sensor en Odoo
-        'sensor_id_param':sensor_id_param,    # ID del sensor Cesens
-        'device_id':device.id,
-        'location_id':location_id,
-        'initial_date':initial_date
+        'sensor_id': sensor.id,
+        'sensor_id_param': sensor_id_param,
+        'device_id': device.id,
+        'location_id': location_id,
+        'initial_date': initial_date
     })
-bag['sensors_plan']=plan
+bag['sensors_plan'] = plan
             ]]></field>
         </record>
 
@@ -234,10 +236,14 @@ bag['sensors_plan']=plan
             <field name="backoff">1.6</field>
             <field name="readonly">True</field>
             <field name="code"><![CDATA[
+import time
 from datetime import datetime
 
 Remote = self.remote_id
 SensorModel = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+sensors = SensorModel.search([('device_id', '!=', False)])
 plan = bag.get('sensors_plan') or []
 token = bag.get('token')
 if not token:
@@ -328,6 +334,7 @@ for idx, sensor_plan in enumerate(plan, 1):
             'status': -1,
             'error': str(e)
         })
+    time.sleep(1)
 audit = {
     'executed_at': fields.Datetime.now(),
     'final_date': final_date,
