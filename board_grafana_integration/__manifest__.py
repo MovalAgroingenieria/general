@@ -19,6 +19,7 @@
         "views/base_menu.xml",
         "views/resources.xml",
         "views/board_grafana_dashboard_storage_view.xml",
+        "data/welcome_grafana_dashboard.xml",
     ],
     "installable": True,
     "application": False,

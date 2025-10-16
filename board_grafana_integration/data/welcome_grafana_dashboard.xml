@@ -1,0 +1,1224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="welcome_dashboard" model="board.grafana.dashboard.storage">
+            <field name="name">Welcome Dashboard</field>
+            <field name="dashboard_title">welcome_integration</field>
+            <field name="dashboard_uid">welcomeYRCded23dd</field>
+            <field name="dashboard_path">/d/welcomeYRCded23dd</field>
+            <field name="integrated_dashboard">0</field>
+            <field name="integrated_panel_only">0</field>
+            <field name="integrated_panel_id">0</field>
+            <field name="dashboard_json"><![CDATA[
+            {
+                "annotations": {
+                    "list": [
+                    {
+                        "builtIn": 1,
+                        "datasource": {
+                        "type": "datasource",
+                        "uid": "grafana"
+                        },
+                        "enable": true,
+                        "hide": true,
+                        "iconColor": "rgba(0, 211, 255, 1)",
+                        "name": "Annotations & Alerts",
+                        "target": {
+                        "limit": 100,
+                        "matchAny": false,
+                        "tags": [],
+                        "type": "dashboard"
+                        },
+                        "type": "dashboard"
+                    }
+                    ]
+                },
+                "editable": true,
+                "fiscalYearStartMonth": 0,
+                "graphTooltip": 0,
+                "id": 0,
+                "links": [],
+                "panels": [
+                    {
+                    "collapsed": false,
+                    "gridPos": {
+                        "h": 1,
+                        "w": 24,
+                        "x": 0,
+                        "y": 0
+                    },
+                    "id": 11,
+                    "panels": [],
+                    "title": "Censo y Parcelario",
+                    "type": "row"
+                    },
+                    {
+                    "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${FuenteDatos}"
+                    },
+                    "fieldConfig": {
+                        "defaults": {
+                        "color": {
+                            "fixedColor": "semi-dark-blue",
+                            "mode": "fixed"
+                        },
+                        "mappings": [],
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                            ]
+                        },
+                        "unit": "none"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 9,
+                        "w": 4,
+                        "x": 0,
+                        "y": 1
+                    },
+                    "id": 15,
+                    "options": {
+                        "colorMode": "background",
+                        "graphMode": "area",
+                        "justifyMode": "auto",
+                        "orientation": "horizontal",
+                        "percentChangeColorMode": "standard",
+                        "reduceOptions": {
+                        "calcs": [
+                            "lastNotNull"
+                        ],
+                        "fields": "",
+                        "values": false
+                        },
+                        "showPercentChange": false,
+                        "textMode": "value_and_name",
+                        "wideLayout": true
+                    },
+                    "pluginVersion": "12.2.0",
+                    "targets": [
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(*) AS \"Partners activos\" FROM res_partner WHERE active;",
+                        "refId": "A",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "value"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "timeColumn": "time",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        },
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": true,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(*) AS \"Socios\" FROM res_partner WHERE is_wua_partner AND active;\t",
+                        "refId": "B",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "value"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "timeColumn": "time",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        },
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(*) AS \"Usuarios\" FROM res_users WHERE is_wua_user AND active;",
+                        "refId": "C",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "value"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "timeColumn": "time",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        },
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(*) AS \"Usuarios de portal\" FROM res_users WHERE is_wua_portal_user AND active;",
+                        "refId": "D",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "value"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "timeColumn": "time",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        },
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(*) AS \"Proveedores\" FROM res_partner WHERE supplier AND active;",
+                        "refId": "E",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "value"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "timeColumn": "time",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        },
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(*) AS \"Partners inactivos\" FROM res_partner WHERE active = false;",
+                        "refId": "F",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "value"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "timeColumn": "time",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        }
+                    ],
+                    "title": "",
+                    "type": "stat"
+                    },
+                    {
+                    "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${FuenteDatos}"
+                    },
+                    "fieldConfig": {
+                        "defaults": {
+                        "color": {
+                            "fixedColor": "semi-dark-blue",
+                            "mode": "fixed"
+                        },
+                        "mappings": [],
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                            ]
+                        },
+                        "unit": "none"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 5,
+                        "w": 4,
+                        "x": 4,
+                        "y": 1
+                    },
+                    "id": 7,
+                    "options": {
+                        "colorMode": "background",
+                        "graphMode": "area",
+                        "justifyMode": "auto",
+                        "orientation": "horizontal",
+                        "percentChangeColorMode": "standard",
+                        "reduceOptions": {
+                        "calcs": [
+                            "lastNotNull"
+                        ],
+                        "fields": "",
+                        "values": false
+                        },
+                        "showPercentChange": false,
+                        "textMode": "value_and_name",
+                        "wideLayout": true
+                    },
+                    "pluginVersion": "12.2.0",
+                    "targets": [
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(*) AS \"Socios\" FROM res_partner WHERE active AND is_wua_partner;",
+                        "refId": "A",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "value"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "timeColumn": "time",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        },
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(*) AS \"Propietarios\" FROM res_partner WHERE active AND is_wua_partner AND is_owner;",
+                        "refId": "B",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "value"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "timeColumn": "time",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        },
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(*) AS \"Arrendatarios\" FROM res_partner WHERE active AND is_wua_partner AND is_lessee;",
+                        "refId": "C",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "value"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "timeColumn": "time",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        }
+                    ],
+                    "title": "",
+                    "type": "stat"
+                    },
+                    {
+                    "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${FuenteDatos}"
+                    },
+                    "fieldConfig": {
+                        "defaults": {
+                        "color": {
+                            "fixedColor": "semi-dark-blue",
+                            "mode": "fixed"
+                        },
+                        "mappings": [],
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                            ]
+                        },
+                        "unit": "none"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 9,
+                        "w": 4,
+                        "x": 9,
+                        "y": 1
+                    },
+                    "id": 17,
+                    "options": {
+                        "colorMode": "background",
+                        "graphMode": "area",
+                        "justifyMode": "auto",
+                        "orientation": "horizontal",
+                        "percentChangeColorMode": "standard",
+                        "reduceOptions": {
+                        "calcs": [
+                            "lastNotNull"
+                        ],
+                        "fields": "",
+                        "values": false
+                        },
+                        "showPercentChange": false,
+                        "textMode": "value_and_name",
+                        "wideLayout": true
+                    },
+                    "pluginVersion": "12.2.0",
+                    "targets": [
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(*) AS \"Parcelas\" FROM wua_parcel WHERE active;\n",
+                        "refId": "A",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "unit_amount"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "table": "account_analytic_line",
+                        "timeColumn": "create_date",
+                        "timeColumnType": "timestamp",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        },
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(*) AS \"Arrendadas\" FROM (SELECT distinct parcel_id FROM wua_parcel_partnerlink WHERE active AND profile = 'L') leased_parcels;",
+                        "refId": "E",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "unit_amount"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "table": "account_analytic_line",
+                        "timeColumn": "create_date",
+                        "timeColumnType": "timestamp",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        },
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(*) AS \"Sin propietario\" FROM wua_parcel WHERE partner_id IS NULL;",
+                        "refId": "D",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "unit_amount"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "table": "account_analytic_line",
+                        "timeColumn": "create_date",
+                        "timeColumnType": "timestamp",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        },
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(*) AS \"Subparcelas\" FROM wua_parcel_subparcel WHERE active;",
+                        "refId": "B",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "unit_amount"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "table": "account_analytic_line",
+                        "timeColumn": "create_date",
+                        "timeColumnType": "timestamp",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        },
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(*) AS \"Inactivas\" FROM wua_parcel WHERE active = false;",
+                        "refId": "C",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "unit_amount"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "table": "account_analytic_line",
+                        "timeColumn": "create_date",
+                        "timeColumnType": "timestamp",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        }
+                    ],
+                    "title": "",
+                    "type": "stat"
+                    },
+                    {
+                    "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${FuenteDatos}"
+                    },
+                    "fieldConfig": {
+                        "defaults": {
+                        "color": {
+                            "fixedColor": "semi-dark-blue",
+                            "mode": "fixed"
+                        },
+                        "mappings": [],
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                            ]
+                        },
+                        "unit": "Ha"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 5,
+                        "w": 5,
+                        "x": 13,
+                        "y": 1
+                    },
+                    "id": 16,
+                    "options": {
+                        "colorMode": "background",
+                        "graphMode": "area",
+                        "justifyMode": "auto",
+                        "orientation": "horizontal",
+                        "percentChangeColorMode": "standard",
+                        "reduceOptions": {
+                        "calcs": [
+                            "lastNotNull"
+                        ],
+                        "fields": "",
+                        "values": false
+                        },
+                        "showPercentChange": false,
+                        "textMode": "value_and_name",
+                        "wideLayout": true
+                    },
+                    "pluginVersion": "12.2.0",
+                    "targets": [
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT sum(area_official) AS \"Superficie total censada\" FROM wua_parcel WHERE active;\n",
+                        "refId": "E",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "unit_amount"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "table": "account_analytic_line",
+                        "timeColumn": "create_date",
+                        "timeColumnType": "timestamp",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        },
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "    SELECT sum(p.area_official) AS \"Superficie total arrendada\"\n      FROM (SELECT distinct parcel_id FROM wua_parcel_partnerlink WHERE active and profile = 'L') l\nINNER JOIN wua_parcel p ON l.parcel_id=p.id;\n\n",
+                        "refId": "A",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "unit_amount"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "table": "account_analytic_line",
+                        "timeColumn": "create_date",
+                        "timeColumnType": "timestamp",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        }
+                    ],
+                    "title": "",
+                    "type": "stat"
+                    },
+                    {
+                    "collapsed": false,
+                    "gridPos": {
+                        "h": 1,
+                        "w": 24,
+                        "x": 0,
+                        "y": 10
+                    },
+                    "id": 13,
+                    "panels": [],
+                    "title": "Territorio",
+                    "type": "row"
+                    },
+                    {
+                    "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${FuenteDatos}"
+                    },
+                    "fieldConfig": {
+                        "defaults": {
+                        "color": {
+                            "mode": "palette-classic"
+                        },
+                        "custom": {
+                            "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                            }
+                        },
+                        "mappings": [],
+                        "unit": "ha"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 11,
+                        "w": 10,
+                        "x": 0,
+                        "y": 11
+                    },
+                    "id": 3,
+                    "options": {
+                        "displayLabels": [
+                        "percent",
+                        "name"
+                        ],
+                        "legend": {
+                        "displayMode": "table",
+                        "placement": "right",
+                        "showLegend": true,
+                        "values": [
+                            "value",
+                            "percent"
+                        ]
+                        },
+                        "pieType": "donut",
+                        "reduceOptions": {
+                        "calcs": [
+                            "lastNotNull"
+                        ],
+                        "fields": "/^Área total$/",
+                        "values": true
+                        },
+                        "sort": "desc",
+                        "tooltip": {
+                        "hideZeros": false,
+                        "mode": "single",
+                        "sort": "none"
+                        }
+                    },
+                    "pluginVersion": "12.2.0",
+                    "targets": [
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT wh1.name AS \"Sector hidráulico\", sum(wp1.area_official) AS \"Área total\"\nFROM wua_parcel wp1\nINNER JOIN wua_hydraulicsector wh1 ON wp1.hydraulicsector_id = wh1.id\nGROUP BY \"Sector hidráulico\"\nORDER BY \"Sector hidráulico\"\n",
+                        "refId": "A",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "unit_amount"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "table": "account_analytic_line",
+                        "timeColumn": "create_date",
+                        "timeColumnType": "timestamp",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        }
+                    ],
+                    "title": "Área por sector hidráulico",
+                    "type": "piechart"
+                    },
+                    {
+                    "collapsed": false,
+                    "gridPos": {
+                        "h": 1,
+                        "w": 24,
+                        "x": 0,
+                        "y": 22
+                    },
+                    "id": 20,
+                    "panels": [],
+                    "title": "Base de datos",
+                    "type": "row"
+                    },
+                    {
+                    "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${FuenteDatos}"
+                    },
+                    "description": "${FuenteDatos}",
+                    "fieldConfig": {
+                        "defaults": {
+                        "color": {
+                            "fixedColor": "semi-dark-blue",
+                            "mode": "fixed"
+                        },
+                        "mappings": [],
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                            ]
+                        },
+                        "unit": "bytes"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 5,
+                        "w": 4,
+                        "x": 0,
+                        "y": 23
+                    },
+                    "id": 5,
+                    "options": {
+                        "colorMode": "background",
+                        "graphMode": "area",
+                        "justifyMode": "auto",
+                        "orientation": "horizontal",
+                        "percentChangeColorMode": "standard",
+                        "reduceOptions": {
+                        "calcs": [
+                            "lastNotNull"
+                        ],
+                        "fields": "",
+                        "values": false
+                        },
+                        "showPercentChange": false,
+                        "textMode": "value",
+                        "wideLayout": true
+                    },
+                    "pluginVersion": "12.2.0",
+                    "targets": [
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "editorMode": "code",
+                        "format": "table",
+                        "group": [],
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT pg_database_size(pg_database.datname) FROM pg_database WHERE pg_database.datname = current_database();",
+                        "refId": "A",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "unit_amount"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "sql": {
+                            "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                            ],
+                            "groupBy": [
+                            {
+                                "property": {
+                                "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                            ],
+                            "limit": 50
+                        },
+                        "table": "account_analytic_line",
+                        "timeColumn": "create_date",
+                        "timeColumnType": "timestamp",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        }
+                    ],
+                    "title": "Tamaño base de datos",
+                    "type": "stat"
+                    },
+                    {
+                    "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${FuenteDatos}"
+                    },
+                    "fieldConfig": {
+                        "defaults": {
+                        "color": {
+                            "fixedColor": "semi-dark-blue",
+                            "mode": "fixed"
+                        },
+                        "mappings": [],
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                            ]
+                        },
+                        "unit": "none"
+                        },
+                        "overrides": []
+                    },
+                    "gridPos": {
+                        "h": 5,
+                        "w": 4,
+                        "x": 4,
+                        "y": 23
+                    },
+                    "id": 6,
+                    "options": {
+                        "colorMode": "background",
+                        "graphMode": "area",
+                        "justifyMode": "auto",
+                        "orientation": "horizontal",
+                        "percentChangeColorMode": "standard",
+                        "reduceOptions": {
+                        "calcs": [
+                            "lastNotNull"
+                        ],
+                        "fields": "",
+                        "values": false
+                        },
+                        "showPercentChange": false,
+                        "textMode": "value_and_name",
+                        "wideLayout": true
+                    },
+                    "pluginVersion": "12.2.0",
+                    "targets": [
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(id) AS \"Instalados\" FROM ir_module_module WHERE state = 'installed';",
+                        "refId": "A",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "unit_amount"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "table": "account_analytic_line",
+                        "timeColumn": "create_date",
+                        "timeColumnType": "timestamp",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        },
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(id) AS \"No instalados\" FROM ir_module_module WHERE state = 'uninstalled';",
+                        "refId": "B",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "unit_amount"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "table": "account_analytic_line",
+                        "timeColumn": "create_date",
+                        "timeColumnType": "timestamp",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        },
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${FuenteDatos}"
+                        },
+                        "format": "table",
+                        "group": [],
+                        "hide": false,
+                        "metricColumn": "none",
+                        "rawQuery": true,
+                        "rawSql": "SELECT count(id) AS \"No instalables\" FROM ir_module_module WHERE state = 'uninstallable';",
+                        "refId": "C",
+                        "select": [
+                            [
+                            {
+                                "params": [
+                                "unit_amount"
+                                ],
+                                "type": "column"
+                            }
+                            ]
+                        ],
+                        "table": "account_analytic_line",
+                        "timeColumn": "create_date",
+                        "timeColumnType": "timestamp",
+                        "where": [
+                            {
+                            "name": "$__timeFilter",
+                            "params": [],
+                            "type": "macro"
+                            }
+                        ]
+                        }
+                    ],
+                    "title": "Módulos",
+                    "type": "stat"
+                    }
+                ],
+                "preload": false,
+                "refresh": "",
+                "schemaVersion": 42,
+                "tags": [],
+                "templating": {
+                    "list": [
+                    {
+                        "current": {
+                        "text": "default",
+                        "value": ""
+                        },
+                        "includeAll": false,
+                        "name": "FuenteDatos",
+                        "options": [],
+                        "query": "postgres",
+                        "refresh": 1,
+                        "regex": "",
+                        "type": "datasource"
+                    }
+                    ]
+                },
+                "time": {
+                    "from": "now-6h",
+                    "to": "now"
+                },
+                "timepicker": {},
+                "timezone": "",
+                "title": "Welcome Dashboard",
+                "uid": "welcomeYRCded23dd",
+                "version": 7
+                }]]></field>
+        </record>
+    </data>
+</odoo>
