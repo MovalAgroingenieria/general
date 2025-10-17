@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-22 14:58+0000\n"
-"PO-Revision-Date: 2025-05-22 14:58+0000\n"
+"POT-Creation-Date: 2025-10-17 05:48+0000\n"
+"PO-Revision-Date: 2025-10-17 05:48+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -31,7 +31,7 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:108
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:133
 #, python-format
 msgid "Close"
 msgstr "Cerrar"
@@ -48,10 +48,15 @@ msgstr "Creado por"
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_create_date
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_create_date
 msgid "Created on"
-msgstr "Creado en"
+msgstr "Creado el"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:132
+#: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_dashboard_storage_view_form
+msgid "Dashboard"
+msgstr "Tablero"
+
+#. module: board_grafana_integration
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:157
 #, python-format
 msgid "Dashboard '%s' imported successfully."
 msgstr "Tablero '%s' importado correctamente."
@@ -62,7 +67,7 @@ msgid "Dashboard height"
 msgstr "Altura tablero"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:104
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:129
 #, python-format
 msgid "Dashboard id '%s' does not match the JSON uid '%s'."
 msgstr "La uid del tablero '%s' no concuerda con la uid en el JSON '%s'."
@@ -88,7 +93,7 @@ msgid "Dashboard title"
 msgstr "Título del tablero"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:100
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:125
 #, python-format
 msgid "Dashboard title '%s' does not match the JSON title '%s'."
 msgstr "El título del tablero '%s' no concuerda con el título en JSON '%s'."
@@ -118,10 +123,25 @@ msgid "Display Name"
 msgstr "Nombre mostrado"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:138
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:163
 #, python-format
 msgid "Failed to import dashboard '%s'. HTTP %s: %s"
 msgstr "Error importando el tablero '%s'. HTTP %s: %s"
+
+#. module: board_grafana_integration
+#: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_dashboard_storage_view_form
+msgid "Frame"
+msgstr "Marco"
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_frame_height
+msgid "Frame height"
+msgstr "Alto marco"
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_frame_width
+msgid "Frame width"
+msgstr "Ancho marco"
 
 #. module: board_grafana_integration
 #: model:ir.actions.act_window,name:board_grafana_integration.login_into_grafana_action
@@ -134,10 +154,10 @@ msgstr "Grafana"
 #. module: board_grafana_integration
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_api_key
 msgid "Grafana API Key"
-msgstr "Grafana API Key"
+msgstr "Clave API Grafana"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:142
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:167
 #, python-format
 msgid "Grafana Dashboard Import"
 msgstr "Importación tablero Grafana"
@@ -154,7 +174,7 @@ msgid "Grafana URL"
 msgstr "Grafana URL"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:116
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:141
 #, python-format
 msgid "Grafana URL or API key not found."
 msgstr "No se ha encontrado la URL o la llave API de Grafana."
@@ -167,7 +187,7 @@ msgstr "Configuración Grafana"
 #. module: board_grafana_integration
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_grafana_frame
 msgid "Grafana frame"
-msgstr "Grafana frame"
+msgstr "Marco Grafana"
 
 #. module: board_grafana_integration
 #: model:ir.actions.server,name:board_grafana_integration.go_to_grafana_server_action
@@ -178,7 +198,7 @@ msgstr "Servidor Grafana"
 #. module: board_grafana_integration
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_url
 msgid "Grafana url"
-msgstr "Grafana url"
+msgstr "Grafana URL"
 
 #. module: board_grafana_integration
 #: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_dashboard_storage_view_search
@@ -188,7 +208,12 @@ msgstr "Agrupar por"
 #. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_configuration_grafana_dashboard_height
 msgid "Height of dashboard, in pixels (optional)."
-msgstr "Altura del tablero en píxeles (optional)."
+msgstr "Alto del tablero en píxeles (optional)."
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_frame_height
+msgid "Height of the iframe. Default is 600px."
+msgstr "Ancho del marco. Por defecto 600px."
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_id
@@ -196,6 +221,11 @@ msgstr "Altura del tablero en píxeles (optional)."
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_id
 msgid "ID"
 msgstr "ID"
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_integrated_panel_only
+msgid "If only a panel of the dashboard is integrated."
+msgstr "Si solo está integrado un panel del tablero."
 
 #. module: board_grafana_integration
 #: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_dashboard_storage_view_form
@@ -219,14 +249,19 @@ msgid "Integrated Dashboard"
 msgstr "Tablero integrado"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:95
+#: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_dashboard_storage_view_form
+msgid "Integration"
+msgstr "Integration"
+
+#. module: board_grafana_integration
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:120
 #, python-format
 msgid "Invalid JSON for dashboard '%s': %s"
 msgstr "El JSON del tablero '%s' no es válido: %s"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:60
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:73
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:79
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:92
 #, python-format
 msgid "Invalid JSON. Dashboard '%s': %s"
 msgstr "El JSON del tablero '%s' no es válido: %s"
@@ -241,7 +276,7 @@ msgstr "Contenido JSON"
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration___last_update
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage___last_update
 msgid "Last Modified on"
-msgstr "Última modificación el"
+msgstr "Última modificación en"
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_write_uid
@@ -255,7 +290,17 @@ msgstr "Última actualización por"
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_write_date
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_write_date
 msgid "Last Updated on"
-msgstr "Última actualización en"
+msgstr "Última actualización el"
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_integrated_panel_id
+msgid "Panel id"
+msgstr "ID panel"
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_integrated_panel_only
+msgid "Panel only"
+msgstr "Solo panel"
 
 #. module: board_grafana_integration
 #: model:ir.actions.act_window,name:board_grafana_integration.grafana_configuration_action
@@ -297,6 +342,11 @@ msgid "The id of the embebbed dashboard."
 msgstr "La ID del tablero incorporado."
 
 #. module: board_grafana_integration
+#: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_integrated_panel_id
+msgid "The id of the panel in the dashboard."
+msgstr "El ID del panel en el tablero."
+
+#. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_configuration_grafana_dashboard_uid
 msgid "The id of the welcome dashboard (optional, else the default dashboard)."
 msgstr "La UID del tablero de bienvenida (opcional, si no se utiliza el tablero por defecto configurado en Grafana)."
@@ -305,6 +355,11 @@ msgstr "La UID del tablero de bienvenida (opcional, si no se utiliza el tablero 
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_dashboard_title
 msgid "The title of the embebbed dashboard."
 msgstr "El título del tablero incrustado."
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_frame_width
+msgid "Width of the iframe. Default is 100%."
+msgstr "Ancho del marco. Por defecto es 100%."
 
 #. module: board_grafana_integration
 #: model:ir.model,name:board_grafana_integration.model_board_grafana_configuration
