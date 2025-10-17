@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_prismab" model="remotecontrol">
+            <field name="name">PrismaB</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://app.prismab.com</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="is_prismab">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "username": "",
+  "password": ""
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>PrismaB · Odoo Integration Help</h2>
+<p><strong>Official API docs:</strong> <a href="/remotecontrol_prismab/static/description/prismab_api_docs.pdf" target="_blank" rel="noopener">📄 Download API Documentation (PDF)</a></p>
+
+<hr/>
+
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code> · Base URL: <code>https://app.prismab.com</code></p>
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+  "username": "user@example.com",
+  "password": "*******"
+}</pre>
+<ul>
+  <li><em>Get Token</em> calls <code>/api/auth/login</code> and stores <code>bag["token"]</code> (JWT <code>access</code>).</li>
+  <li><em>Get devices (plan)</em> and <em>Get readings</em> send <code>Authorization: Bearer &lt;token&gt;</code>.</li>
+</ul>
+
+<h3>2) Device Discovery and Manual Configuration</h3>
+
+<p>For initial setup or when adding new PrismaB devices, use the <strong>List Devices procedure</strong> to discover available devices and configure them manually in Odoo.</p>
+
+<h4>What does this procedure do?</h4>
+<p>The <strong>"PrismaB: List Devices for Support"</strong> procedure performs the following actions:</p>
+<ol>
+  <li><strong>Authenticates</strong> with PrismaB API using your credentials</li>
+  <li><strong>Retrieves</strong> all devices available in your PrismaB account from <code>/api/devices</code></li>
+  <li><strong>Extracts</strong> the device name and prisma_id (UUID) from each device</li>
+  <li><strong>Generates</strong> a simple JSON file with the device list</li>
+  <li><strong>Attaches</strong> the JSON to the Remote Control record for download</li>
+</ol>
+<p><em>This procedure only reads data from PrismaB - it does not create or modify anything in Odoo.</em></p>
+
+<h3>2.5) List Devices Procedure</h3>
+<ol>
+  <li><strong>Get Token</strong> → obtain JWT and store it in the bag.</li>
+  <li><strong>List Devices</strong> → call <code>/api/devices</code> and extract device names and prisma_ids into JSON attachment.</li>
+</ol>
+
+<h3>3) Default Procedure</h3>
+<ol>
+  <li><strong>Get Token</strong> → obtain JWT and store it in the bag.</li>
+  <li><strong>Get devices (plan)</strong> → build <code>bag["sensors_plan"]</code> from device/sensor config.</li>
+  <li><strong>Get readings</strong> → call <code>/api/devices/{prisma_id}/data</code> with date filters and upsert readings.</li>
+</ol>
+
+<h3>4) Device Configuration</h3>
+<p>In each <strong>Device</strong> (<code>mdm.measurement.device</code>) set <em>remotecontrol_params</em>:</p>
+<pre>{
+  "prisma_id": "b5f7d28c-d7e1-4a7b-a50a-3083c679a4fc",
+  "start_date": "2025-10-13"
+}</pre>
+
+<h3>5) Sensor Configuration</h3>
+<p>In each <strong>Sensor</strong> (<code>mdm.measurement.device.sensor</code>) set <em>remotecontrol_params</em>:</p>
+<pre>{
+  "position": "1",
+  "key": "water",
+  "start_date": "2025-10-13"
+}</pre>
+
+<h4>Complete Configuration Examples</h4>
+
+<div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid #007bff;">
+<p><strong>Example: Three soil moisture sensors</strong></p>
+
+<p><em>Sensor 1 (first ground sensor):</em></p>
+<pre>{
+  "position": "1",
+  "key": "water",
+  "start_date": "2025-10-13"
+}</pre>
+
+<p><em>Sensor 2 (second ground sensor):</em></p>
+<pre>{
+  "position": "2",
+  "key": "water",
+  "start_date": "2025-10-13"
+}</pre>
+
+<p><em>Sensor 3 (third ground sensor):</em></p>
+<pre>{
+  "position": "3",
+  "key": "water",
+  "start_date": "2025-10-13"
+}</pre>
+</div>
+
+<h3>6) API Structure &amp; Data Extraction</h3>
+<p>PrismaB returns data in this format:</p>
+<pre>[
+  {
+    "date": "2025-10-13T00:48:25.461Z",
+    "deviceId": "b5f7d28c-d7e1-4a7b-a50a-3083c679a4fc",
+    "sensors": [
+      {                              // ← Position 1 (index 0)
+        "kind": "Ground",
+        "type": 1,
+        "water": 30.098890341760004,
+        "conductivity": 0.49,
+        "extSat": 2.5528999999999997,
+        "temperature": 22.2
+      },
+      {                              // ← Position 2 (index 1)
+        "water": 29.51586281536,
+        "temperature": 22.8,
+        // ... more parameters
+      },
+      {                              // ← Position 3 (index 2)
+        "water": 34.04090048,
+        "temperature": 23.6,
+        // ... more parameters
+      }
+    ]
+  }
+]</pre>
+
+<p><strong>Position Mapping:</strong></p>
+<ul>
+  <li><strong>Position "1"</strong> → extracts from <code>sensors[0]</code> (first sensor)</li>
+  <li><strong>Position "2"</strong> → extracts from <code>sensors[1]</code> (second sensor)</li>
+  <li><strong>Position "3"</strong> → extracts from <code>sensors[2]</code> (third sensor)</li>
+</ul>
+
+<h3>7) Time Window &amp; Filtering</h3>
+<ul>
+  <li><em>Get devices (plan)</em> computes <code>initial_date</code> per sensor: last stored reading date → else <code>sensor.start_date</code> → else <code>device.start_date</code> → else Jan 1 of current year.</li>
+  <li><em>Get readings</em> calls <code>/api/devices/{prisma_id}/data?startDate=YYYY-MM-DD&amp;endDate=YYYY-MM-DD</code></li>
+  <li>Only readings within time window <code>YYYY-MM-DD 00:00:00</code> to <code>YYYY-MM-DD 23:59:59</code> are inserted.</li>
+  <li>Timestamps are stored as provided by the API (ISO 8601 UTC format).</li>
+</ul>
+
+<hr/>
+
+<h3>Available Parameters in Sensor Data</h3>
+<p>Use these values in the <code>"key"</code> field of sensor configuration:</p>
+
+<h4>Physical Measurements</h4>
+<ul>
+  <li><code><strong>water</strong></code> - Soil moisture/water content (%)</li>
+  <li><code><strong>temperature</strong></code> - Soil temperature (°C)</li>
+  <li><code><strong>conductivity</strong></code> - Electrical conductivity</li>
+  <li><code><strong>extSat</strong></code> - External saturation</li>
+</ul>
+
+<h4>Sensor Metadata</h4>
+<ul>
+  <li><code><strong>kind</strong></code> - Sensor type (e.g., "Ground")</li>
+  <li><code><strong>type</strong></code> - Sensor subtype (numeric)</li>
+</ul>
+
+<h4>Complete Configuration Examples</h4>
+
+<div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid #007bff;">
+<p><strong>Example 1: Three soil moisture sensors</strong></p>
+<p><em>Device configuration:</em></p>
+<pre>{
+  "prisma_id": "b5f7d28c-d7e1-4a7b-a50a-3083c679a4fc",
+  "start_date": "2025-10-13"
+}</pre>
+
+<p><em>Sensor 1 (first ground sensor):</em></p>
+<pre>{
+  "position": "1",
+  "key": "water",
+  "start_date": "2025-10-13"
+}</pre>
+
+<p><em>Sensor 2 (second ground sensor):</em></p>
+<pre>{
+  "position": "2",
+  "key": "water",
+  "start_date": "2025-10-13"
+}</pre>
+
+<p><em>Sensor 3 (third ground sensor):</em></p>
+<pre>{
+  "position": "3",
+  "key": "water",
+  "start_date": "2025-10-13"
+}</pre>
+</div>
+
+<div style="background: #fff3cd; padding: 15px; margin: 10px 0; border-left: 4px solid #ffc107;">
+<p><strong>Example 2: Mixed parameters from same device</strong></p>
+<p><em>Sensor A (water from first sensor):</em></p>
+<pre>{
+  "position": "1",
+  "key": "water"
+}</pre>
+
+<p><em>Sensor B (temperature from second sensor):</em></p>
+<pre>{
+  "position": "2",
+  "key": "temperature"
+}</pre>
+
+<p><em>Sensor C (conductivity from third sensor):</em></p>
+<pre>{
+  "position": "3",
+  "key": "conductivity"
+}</pre>
+</div>
+
+<h3>8) Troubleshooting</h3>
+<ul>
+  <li><strong>Missing token error:</strong> Ensure "Get Token" action is active and runs first (sequence = 10)</li>
+  <li><strong>No sensors found:</strong> Check that sensors have valid <code>remotecontrol_params</code> and are linked to devices</li>
+  <li><strong>Array index errors:</strong> Verify <code>position</code> values (1, 2, 3) match available sensors in PrismaB response</li>
+  <li><strong>No readings inserted:</strong> Check date window filters and parameter key names</li>
+</ul>
+
+<p><strong>Sequence order:</strong> Get Token (10) → Get devices (20) → Get readings (30)</p>]]>
+            </field>
+        </record>
+
+        <record id="remotecontrol_prismab_action_get_token" model="remotecontrol.action">
+            <field name="name">PrismaB: Get Token</field>
+            <field name="remote_id" ref="remotecontrol_prismab"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Read auth parameter keys from remote.connection_params JSON
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+user = (cfg.get('username') or '').strip()
+password = (cfg.get('password') or '').strip()
+if not user or not password:
+    raise Exception("Missing PrismaB credentials: set user/password in connection_params.")
+url = (base_url or '').rstrip('/') + '/api/users/login'
+resp = request_retry('POST', url, json={'user': user, 'password': password})
+if resp.status_code >= 400:
+    raise Exception("Login failed: %s %s" % (resp.status_code, resp.text))
+j = resp.json() or {}
+token = j.get('token') or ''
+if not token:
+    raise Exception("Login OK but no 'token' in response.")
+bag['token'] = token
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_prismab_action_get_devices" model="remotecontrol.action">
+            <field name="name">PrismaB: Get devices (plan)</field>
+            <field name="remote_id" ref="remotecontrol_prismab"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Action A: build sensors plan (robust JSON parsing)
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+sensors = Sensor.search([
+    ('remotecontrol_params','!=',False),
+    ('device_id','!=',False),
+])
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+    position = (sensor_cfg.get('position') or '').strip()
+    parameter_key = (sensor_cfg.get('key') or '').strip()
+    if position not in (None,'') and parameter_key:
+        try:
+            device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+        except Exception:
+            device_cfg = {}
+        prisma_id = (device_cfg.get('prisma_id') or '').strip()
+        if prisma_id:
+            last = Reading.search([('sensor_id','=',sensor.id)], order='measurement_time desc', limit=1)
+            if last and last.measurement_time:
+                last_dt = fields.Datetime.from_string(last.measurement_time)
+                initial_date = fields.Date.to_string(last_dt.date())
+            else:
+                start_cfg = (sensor_cfg.get('start_date') or device_cfg.get('start_date'))
+                if start_cfg:
+                    initial_date = start_cfg[:10]
+                else:
+                    year_str = today_str[:4]
+                    initial_date = '%s-01-01' % year_str
+            plan.append({
+                'sensor_id': sensor.id,
+                'device_id': device.id,
+                'prisma_id': prisma_id,
+                'position': position,
+                'parameter_key': parameter_key,
+                'initial_date': initial_date,
+            })
+bag['sensors_plan'] = plan
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_prismab_action_get_readings" model="remotecontrol.action">
+            <field name="name">PrismaB: Get readings</field>
+            <field name="remote_id" ref="remotecontrol_prismab"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="sequence">30</field>
+            <field name="code"><![CDATA[
+# Action C: fetch readings by group/key, upsert (generic), and attach audit
+Remote = self.remote_id
+SensorModel = env['mdm.measurement.device.sensor']
+plan = bag.get('sensors_plan') or []
+token = bag.get('token')
+if not token:
+    raise Exception("Missing token in bag")
+headers = {'Authorization': 'Bearer %s' % token, 'Accept': 'application/json'}
+final_date = fields.Date.today()
+window_start_suffix = ' 00:00:00'
+window_end_suffix = ' 23:59:59'
+total_upserts = 0
+total_errors = 0
+items = []
+for sensor_plan in plan:
+    sensor_id = sensor_plan['sensor_id']
+    device_id = sensor_plan['device_id']
+    prisma_id = sensor_plan['prisma_id']
+    position = sensor_plan['position']
+    parameter_key = sensor_plan['parameter_key']
+    initial_date = sensor_plan['initial_date']
+    sensor_record = SensorModel.browse(sensor_id)
+    base = (base_url or '').rstrip('/') + '/api/devices/%s/data' % prisma_id
+    params = {'startDate': initial_date, 'endDate': final_date}
+    try:
+        resp = request_retry('GET', base, headers=headers, timeout=timeout, params=params)
+        code = resp.status_code
+        full_url = getattr(resp, 'url', base)
+        if code < 400:
+            payload = resp.json() or []
+            data_list = []
+            sensor_index = int(position) - 1
+            for record in payload:
+                if isinstance(record, dict) and 'sensors' in record and 'date' in record:
+                    sensors_array = record['sensors']
+                    timestamp = record['date']
+                    if sensor_index < len(sensors_array):
+                        sensor_data = sensors_array[sensor_index]
+                        if parameter_key in sensor_data:
+                            value = sensor_data[parameter_key]
+                            data_list.append({'ts': timestamp, 'value': value})
+            window_start = initial_date + window_start_suffix
+            window_end = final_date + window_end_suffix
+            upserts = 0
+            errs = 0
+            readings_summary = []
+            for reading in data_list:
+                ts_s = reading['ts']
+                valf = float(reading['value'])
+                if (ts_s >= window_start) and (ts_s <= window_end):
+                    try:
+                        Remote.upsert(
+                            'mdm.measurement.device.sensor.reading',
+                            {'sensor_id': sensor_record.id, 'measurement_time': ts_s},
+                            {'value': valf, 'remotecontrol_origin_id': Remote.id}
+                        )
+                        upserts += 1
+                        readings_summary.append({'ts': ts_s, 'value': valf})
+                    except Exception as e:
+                        errs += 1
+                        readings_summary.append({'ts': ts_s, 'value': valf, 'error': str(e)})
+            total_upserts += upserts
+            total_errors += errs
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'prisma_id': prisma_id,
+                'status': 200,
+                'url': full_url,
+                'points_found': len(data_list),
+                'upserts': upserts,
+                'errors': errs,
+                'key': parameter_key,
+                'readings': readings_summary,
+            })
+        else:
+            items.append({'sensor_id': sensor_id, 'device_id': device_id, 'prisma_id': prisma_id, 'status': code, 'error': (resp.text or '')[:400], 'url': full_url})
+    except Exception as e:
+        items.append({'sensor_id': sensor_id, 'device_id': device_id, 'prisma_id': prisma_id, 'status': -1, 'error': str(e)})
+audit = {'executed_at': fields.Datetime.now(), 'final_date': final_date, 'total_upserts': total_upserts, 'total_errors': total_errors, 'items': items}
+try:
+    audit_json = json.dumps(audit, ensure_ascii=True, indent=2, default=str)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+except Exception as json_error:
+    simple_audit = {'executed_at': str(fields.Datetime.now()), 'total_upserts': total_upserts, 'total_errors': total_errors, 'error': str(json_error)}
+    audit_json = json.dumps(simple_audit, ensure_ascii=True, indent=2)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+fname = 'readings_fetch_%s.json' % fields.Datetime.now().replace(':','').replace('-','').replace(' ','_')
+att = env['ir.attachment'].create({'name': fname, 'datas_fname': fname, 'datas': b64, 'mimetype': 'application/json', 'res_model': 'remotecontrol', 'res_id': Remote.id})
+Remote.message_post(body=u"[Readings] upserts=%s errors=%s" % (total_upserts, total_errors), attachment_ids=[att.id])
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_prismab_action_list_devices" model="remotecontrol.action">
+            <field name="name">PrismaB: List Devices</field>
+            <field name="remote_id" ref="remotecontrol_prismab"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="sequence">15</field>
+            <field name="code"><![CDATA[
+Remote = self.remote_id
+token = bag.get('token')
+if not token:
+    raise Exception('Missing PrismaB token in bag')
+
+base_url = (bag.get('base_url') or Remote.base_url or '').rstrip('/') + '/api/user-devices/list'
+headers = {'Authorization': 'Bearer %s' % token, 'Accept': 'application/json'}
+
+# Get devices from PrismaB
+resp = request_retry('GET', base_url, headers=headers, timeout=timeout)
+if resp.status_code >= 400:
+    raise Exception('Error fetching devices: %s %s' % (resp.status_code, resp.text))
+
+devices_data = resp.json() or []
+
+# Build device list extracting from device object
+devices_list = []
+for item in devices_data:
+    if isinstance(item, dict) and 'device' in item:
+        device = item.get('device', {})
+        device_id = device.get('id')  # UUID from device object
+        device_name = device.get('name') or 'Device %s' % device_id if device_id else 'Unnamed Device'
+
+        if device_id:
+            devices_list.append({
+                'prisma_id': device_id,
+                'name': device_name
+            })
+# Sort by name
+devices_list.sort(key=lambda x: x['name'])
+
+# Generate JSON
+report = {
+    'generated_at': fields.Datetime.now(),
+    'total_devices': len(devices_list),
+    'devices': devices_list
+}
+
+# Create attachment
+json_str = json.dumps(report, ensure_ascii=False, indent=2)
+encoded = base64.b64encode(json_str.encode('utf-8'))
+fname = 'prismab_devices_%s.json' % fields.Datetime.now()
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': encoded,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+
+Remote.message_post(
+    body='[PrismaB] %s devices listed' % len(devices_list),
+    attachment_ids=[att.id]
+)
+
+bag.clear()
+bag['total_devices'] = len(devices_list)
+bag['attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <!-- Procedure: List Devices for Team -->
+        <record id="remotecontrol_prismab_procedure_list_devices" model="remotecontrol.procedure">
+            <field name="name">PrismaB: List Devices for Support</field>
+            <field name="remote_id" ref="remotecontrol_prismab"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_prismab_step_list_10_token" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_prismab_procedure_list_devices"/>
+            <field name="action_id" ref="remotecontrol_prismab_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_prismab_step_list_20_devices" model="remotecontrol.step">
+            <field name="name">List Devices</field>
+            <field name="procedure_id" ref="remotecontrol_prismab_procedure_list_devices"/>
+            <field name="action_id" ref="remotecontrol_prismab_action_list_devices"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_prismab_procedure" model="remotecontrol.procedure">
+            <field name="name">PrismaB: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_prismab"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_prismab_step_10_token" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_prismab_procedure"/>
+            <field name="action_id" ref="remotecontrol_prismab_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_prismab_step_20_devices" model="remotecontrol.step">
+            <field name="name">Get devices (plan)</field>
+            <field name="procedure_id" ref="remotecontrol_prismab_procedure"/>
+            <field name="action_id" ref="remotecontrol_prismab_action_get_devices"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_prismab_step_30_readings" model="remotecontrol.step">
+            <field name="name">Get readings</field>
+            <field name="procedure_id" ref="remotecontrol_prismab_procedure"/>
+            <field name="action_id" ref="remotecontrol_prismab_action_get_readings"/>
+            <field name="sequence">30</field>
+        </record>
+
+    </data>
+</odoo>
