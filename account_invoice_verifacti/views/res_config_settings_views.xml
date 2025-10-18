@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit account settings view -->
+    <record id="view_account_config_settings_verifacti" model="ir.ui.view">
+        <field name="name">account.config.settings.form.verifacti</field>
+        <field name="model">account.config.settings</field>
+        <field name="inherit_id" ref="account.view_account_config_settings"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <group string="Verifacti Integration" col="2">
+                    <group>
+                        <field name="verifacti_active"/>
+                    </group>
+                    <group attrs="{'invisible': [('verifacti_active', '=', False)]}">
+                        <field name="verifacti_api_key" password="True"/>
+                        <field name="verifacti_api_url" placeholder="https://api.verifacti.com"/>
+                        <field name="verifacti_nif_api_url" placeholder="https://nifs.verifacti.com"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

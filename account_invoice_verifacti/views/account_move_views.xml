@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_invoice_form_verifacti" model="ir.ui.view">
+        <field name="name">account.invoice.form.verifacti</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_send_verifacti"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-send-o"
+                        attrs="{'invisible': ['|', ('type', 'not in', ['out_invoice', 'out_refund']), ('state', '!=', 'open')]}">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Send to</span>
+                        <span class="o_stat_text">Verifacti</span>
+                    </div>
+                </button>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Verifacti" attrs="{'invisible': [('type', 'not in', ['out_invoice', 'out_refund'])]}">
+                    <group>
+                        <group>
+                            <field name="verifacti_state" widget="badge" decoration-success="verifacti_state == 'sent'" decoration-warning="verifacti_state == 'pending'" decoration-danger="verifacti_state == 'error'"/>
+                            <field name="verifacti_id" attrs="{'invisible': [('verifacti_id', '=', False)]}"/>
+                        </group>
+                        <group>
+                            <field name="verifacti_qr_code" widget="image" options="{'size': [200, 200]}" attrs="{'invisible': [('verifacti_qr_code', '=', False)]}"/>
+                        </group>
+                    </group>
+                    <group attrs="{'invisible': [('verifacti_last_error', '=', False)]}">
+                        <field name="verifacti_last_error" readonly="1" widget="text"/>
+                    </group>
+                    <field name="verifacti_log_ids" readonly="1">
+                        <tree>
+                            <field name="create_date"/>
+                            <field name="state" widget="badge" decoration-success="state == 'accepted'" decoration-danger="state in ['rejected', 'error']"/>
+                            <field name="verifacti_id"/>
+                            <field name="error_message"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

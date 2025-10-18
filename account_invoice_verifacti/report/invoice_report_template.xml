@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_invoice_document_verifacti_qr" inherit_id="account.report_invoice_document">
+        <xpath expr="//div[@name='invoice_data']" position="after">
+             <div class="col-xs-6">
+                <p>
+                    <strong>ID Verifacti:</strong>
+                    <span t-field="o.verifacti_id"/>
+                </p>
+                <p t-if="o.verifacti_url">
+                    <strong>Consultar factura:</strong><br/>
+                    <a t-att-href="o.verifacti_url" target="_blank">
+                        <span t-field="o.verifacti_url"/>
+                    </a>
+                </p>
+                <p class="text-muted" style="font-size: 10px; margin-top: 10px;">
+                    Esta factura ha sido registrada en el sistema Verifactu de la Agencia Tributaria Española.
+                    Puede verificar su autenticidad escaneando el código QR o accediendo al enlace.
+                </p>
+            </div>
+            <div class="col-xs-6 text-right">
+                <img t-if="o.verifacti_qr_code"
+                        t-att-src="'data:image/png;base64,%s' % o.verifacti_qr_code"
+                        style="max-width: 150px; max-height: 150px;"
+                        alt="Código QR Verifacti"/>
+                <strong>Código QR Verifacti</strong>
+            </div>
+        </xpath>
+    </template>
+</odoo>

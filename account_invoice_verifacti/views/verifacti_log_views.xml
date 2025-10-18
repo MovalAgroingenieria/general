@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_verifacti_log_tree" model="ir.ui.view">
+        <field name="name">verifacti.log.tree</field>
+        <field name="model">verifacti.log</field>
+        <field name="arch" type="xml">
+            <tree create="false">
+                <field name="create_date"/>
+                <field name="invoice_id"/>
+                <field name="state" widget="badge" decoration-success="state == 'accepted'" decoration-warning="state == 'pending'" decoration-danger="state in ['rejected', 'error']"/>
+                <field name="verifacti_id"/>
+                <field name="sent_date"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_verifacti_log_form" model="ir.ui.view">
+        <field name="name">verifacti.log.form</field>
+        <field name="model">verifacti.log</field>
+        <field name="arch" type="xml">
+            <form create="false">
+                <header>
+                    <button name="send_to_verifacti" type="object" string="Retry Send" class="btn-primary" attrs="{'invisible': [('state', '!=', 'error')]}"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="invoice_id" readonly="1"/>
+                            <field name="verifacti_id"/>
+                            <field name="sent_date"/>
+                        </group>
+                        <group>
+                            <field name="qr_code" widget="image" options="{'size': [200, 200]}" attrs="{'invisible': [('qr_code', '=', False)]}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Request Data">
+                            <field name="request_data" widget="ace" options="{'mode': 'json'}" readonly="1"/>
+                        </page>
+                        <page string="Response Data">
+                            <field name="response_data" widget="ace" options="{'mode': 'json'}" readonly="1"/>
+                        </page>
+                        <page string="Error" attrs="{'invisible': [('error_message', '=', False)]}">
+                            <field name="error_message" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_verifacti_log" model="ir.actions.act_window">
+        <field name="name">Verifacti Transaction Logs</field>
+        <field name="res_model">verifacti.log</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

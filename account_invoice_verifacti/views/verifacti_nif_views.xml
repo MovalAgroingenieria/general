@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_verifacti_nif_form" model="ir.ui.view">
+        <field name="name">verifacti.nif.form</field>
+        <field name="model">verifacti.nif</field>
+        <field name="arch" type="xml">
+            <form string="Verifacti NIF">
+                <header>
+                    <button name="action_validate_nif" type="object" string="Validate NIF" class="btn-primary" attrs="{'invisible': [('state', '=', 'validated')]}"/>
+                    <button name="action_create_nif" type="object" string="Create in Verifacti" attrs="{'invisible': [('state', '=', 'validated')]}"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="nif"/>
+                            <field name="name"/>
+                            <field name="country_code"/>
+                            <field name="company_id" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="verifacti_id" attrs="{'invisible': [('verifacti_id', '=', False)]}"/>
+                            <field name="validation_date" attrs="{'invisible': [('validation_date', '=', False)]}"/>
+                        </group>
+                    </group>
+                    <group attrs="{'invisible': [('error_message', '=', False)]}">
+                        <field name="error_message" readonly="1" widget="text"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_verifacti_nif_tree" model="ir.ui.view">
+        <field name="name">verifacti.nif.tree</field>
+        <field name="model">verifacti.nif</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="nif"/>
+                <field name="name"/>
+                <field name="country_code"/>
+                <field name="state" widget="badge" decoration-success="state == 'validated'" decoration-danger="state == 'error'"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_verifacti_nif" model="ir.actions.act_window">
+        <field name="name">Verifacti NIFs</field>
+        <field name="res_model">verifacti.nif</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage NIFs for Verifacti
+            </p>
+        </field>
+    </record>
+</odoo>
