@@ -77,13 +77,14 @@ class HrAttendance(models.Model):
                         len(record.attendance_observations) < 6) and not att_admin:
                     raise exceptions.ValidationError(_("The length of observations must be at least 6 characters."))
 
-    @api.model
-    def create(self, vals):
-        if ("attendance_observations" in vals and vals["attendance_observations"]):
-            att_obs = vals["attendance_observations"].lstrip().rstrip()
-            att_obs = re.sub(' +', ' ', att_obs)
-            vals['attendance_observations'] = att_obs
-        return super(HrAttendance, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if ("attendance_observations" in vals and vals["attendance_observations"]):
+                att_obs = vals["attendance_observations"].lstrip().rstrip()
+                att_obs = re.sub(' +', ' ', att_obs)
+                vals['attendance_observations'] = att_obs
+        return super().create(vals_list)
 
     def write(self, vals):
         if ("attendance_observations" in vals and vals["attendance_observations"]):
