@@ -10,8 +10,9 @@ class ProjectMilestone(models.Model):
 
     sequence = fields.Integer()
 
-    @api.model
-    def create(self, vals):
-        seq = self.env["ir.sequence"].next_by_code("project.milestone") or 0
-        vals["sequence"] = seq
-        return super().create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            seq = self.env["ir.sequence"].next_by_code("project.milestone") or 0
+            vals["sequence"] = seq
+        return super().create(vals_list)
