@@ -6,7 +6,7 @@
     "name": "RemoteControl: Riegos Salz",
     "summary": "Remotecontrol Riegos Salz (REST) with default actions and "
                "procedures",
-    "version": "10.0.1.0.1",
+    "version": "10.0.1.0.2",
     "category": "Tools",
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",

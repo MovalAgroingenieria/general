@@ -81,4 +81,10 @@ class MeasurementDevice(models.Model):
     @api.multi
     def action_run_readings_procedure(self):
         self.ensure_one()
-        self.readings_procedure_id.run(selected_device_id=self.id)
+        procedure = self.readings_procedure_id
+        if not procedure:
+            return
+        # Pass device_ids via context so it can be injected into the bag
+        procedure.with_context(
+            selected_device_ids=self.ids,
+        ).run()

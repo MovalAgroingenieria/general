@@ -6,7 +6,7 @@
     "name": "RemoteControl: Prismab",
     "summary": "Remotecontrol Prismab (REST) with default actions and "
                "procedures",
-    "version": "10.0.1.0.0",
+    "version": "10.0.1.0.1",
     "category": "Tools",
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",

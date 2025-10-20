@@ -26,7 +26,7 @@
             <field name="active">True</field>
             <field name="rate_limit_seconds">0.0</field>
             <field name="max_retries">1</field>
-            <field name="backoff">1.50</field>
+            <field name="backoff">0</field>
             <field name="readonly">True</field>
             <field name="code"><![CDATA[# Action A: build sensors plan (robust JSON parsing)
 import json
@@ -34,8 +34,8 @@ from datetime import datetime, timedelta
 plan = []
 api_key = ''
 condition = []
-if selected_device_id:
-    condition.append(('id', '=', selected_device_id))
+if selected_device_ids:
+    condition.append(('id', 'in', selected_device_ids))
 else:
     condition.append(('remotecontrol_id', '=', self.remote_id.id))
 devices = env['mdm.measurement.device'].search(condition)
@@ -51,6 +51,25 @@ yesterday_str = (datetime.strptime(fields.Date.today(), "%Y-%m-%d") -
                  timedelta(days=1)).strftime("%Y-%m-%d")
 default_initial_date = '%s-%s-01' % (yesterday_str[:4], yesterday_str[5:7])
 default_final_date = yesterday_str
+# Optimize: collect all sensor IDs first to avoid N+1 queries
+all_sensor_ids = []
+for device in (devices or []):
+    all_sensor_ids.extend([s.id for s in device.sensor_ids])
+# Build map of sensor_id -> most recent reading (single query)
+last_readings_map = {}
+if all_sensor_ids:
+    Reading = env['mdm.measurement.device.sensor.reading']
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(all_sensor_ids),)
+    )
+    for row in cr.fetchall():
+        last_readings_map[row[0]] = row[1]
+# Now iterate devices/sensors using the map
 for device in (devices or []):
     try:
         device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
@@ -77,14 +96,14 @@ for device in (devices or []):
             'station': station,
             'magnitude': magnitude
         }
-        last_reading = env['mdm.measurement.device.sensor.reading'].search(
-            [('sensor_id', '=', sensor.id)],
-            order='measurement_time desc', limit=1)
-        if last_reading and last_reading.measurement_time:
-            last_reading_dt = fields.Datetime.from_string(
-                last_reading.measurement_time)
-            start_date = fields.Date.to_string(last_reading_dt.date() + \
-                timedelta(days=1))
+        # Retrieve last_reading from map (no query per sensor)
+        last_reading_time = last_readings_map.get(sensor.id)
+        if last_reading_time:
+            try:
+                start_date = fields.Date.to_string(
+                    last_reading_time.date() + timedelta(days=1))
+            except Exception:
+                start_date = default_initial_date
         sensor_plan['initial_date'] = start_date
         end_date = default_final_date
         if end_date < start_date:

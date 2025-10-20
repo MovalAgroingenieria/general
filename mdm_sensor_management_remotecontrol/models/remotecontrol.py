@@ -39,6 +39,18 @@ class RemoteControl(models.Model):
             return act_window
 
 
+class RemoteControlAction(models.Model):
+    _inherit = 'remotecontrol.action'
+
+    def _prepare_action_context(self, bag=None):
+        context = super(RemoteControlAction, self)._prepare_action_context(
+            bag=bag)
+        # Add selected_device_ids from bag if present (as list)
+        context['selected_device_ids'] = bag.get('selected_device_ids', []) \
+            if bag else []
+        return context
+
+
 class RemoteControlProcedure(models.Model):
     _inherit = 'remotecontrol.procedure'
 
@@ -58,6 +70,15 @@ class RemoteControlProcedure(models.Model):
         required=True,
         default=_get_procedure_for_readings,
     )
+
+    def _prepare_procedure_bag(self, bag=None):
+        bag = super(RemoteControlProcedure, self)._prepare_procedure_bag(
+            bag=bag)
+        # Inject selected_device_ids from context into bag
+        selected_device_ids = self.env.context.get('selected_device_ids', [])
+        if selected_device_ids:
+            bag['selected_device_ids'] = selected_device_ids
+        return bag
 
     @api.constrains('procedure_for_readings')
     def _check_procedure_for_readings(self):

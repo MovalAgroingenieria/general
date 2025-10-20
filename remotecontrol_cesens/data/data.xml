@@ -188,7 +188,27 @@ bag['token'] = token
 Sensor = env['mdm.measurement.device.sensor']
 Reading = env['mdm.measurement.device.sensor.reading']
 today_str = fields.Date.today()
-sensors = Sensor.search([('device_id', '!=', False)])
+condition = [('remotecontrol_params','!=',False)]
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+else:
+    condition.append(('device_id','!=',False))
+sensors = Sensor.search(condition)
+# Optimize: build map of sensor_id -> most recent reading (single query)
+last_readings_map = {}
+if sensors:
+    sensor_ids = [s.id for s in sensors]
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for row in cr.fetchall():
+        last_readings_map[row[0]] = row[1]
+# Now iterate sensors using the map
 plan = []
 for sensor in sensors:
     device = sensor.device_id
@@ -205,10 +225,13 @@ for sensor in sensors:
     start_cfg = sensor_cfg.get('start_date') or device_cfg.get('start_date')
     if not (location_id and sensor_id_param):
         continue
-    last = Reading.search([('sensor_id', '=', sensor.id)], order='measurement_time desc', limit=1)
-    if last and last.measurement_time:
-        last_dt = fields.Datetime.from_string(last.measurement_time)
-        initial_date = fields.Date.to_string(last_dt.date())
+    # Retrieve last_reading from map (no query per sensor)
+    last_reading_time = last_readings_map.get(sensor.id)
+    if last_reading_time:
+        try:
+            initial_date = fields.Date.to_string(last_reading_time.date())
+        except Exception:
+            initial_date = str(last_reading_time)[:10]
     elif start_cfg:
         initial_date = start_cfg[:10]
     else:

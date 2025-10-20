@@ -240,16 +240,14 @@ class RemoteControlAction(models.Model):
         default=False,
     )
 
-    def execute(self, bag=None, selected_device_id=None):
+    def _prepare_action_context(self, bag=None):
         self.ensure_one()
         bag = dict(bag or {})
         remote_control = self.remote_id
-        action_name = self.name
         context = {
             'env': self.env,
             'self': self,
             'bag': bag,
-            'selected_device_id': selected_device_id,
             'base_url': remote_control.base_url or '',
             'timeout': remote_control.timeout,
             'fields': fields,
@@ -272,6 +270,14 @@ class RemoteControlAction(models.Model):
                 )
             ),
         }
+        return context
+
+    def execute(self, bag=None):
+        self.ensure_one()
+        bag = dict(bag or {})
+        action_name = self.name
+        remote_control = self.remote_id
+        context = self._prepare_action_context(bag=bag)
         try:
             if self.rate_limit_seconds:
                 time.sleep(self.rate_limit_seconds)
@@ -283,7 +289,8 @@ class RemoteControlAction(models.Model):
             raise UserError(
                 _("Execution error (%s) in action '%s':\n%s") % (
                     action_name, traceback_info, str(e)))
-        return bag
+        # Return the bag from context as it may have been modified by exec
+        return context.get('bag', bag)
 
     def test_execute(self):
         self.ensure_one()
@@ -414,17 +421,21 @@ class RemoteControlProcedure(models.Model):
         default=False,
     )
 
-    def run(self, procedure_id=None, selected_device_id=None):
+    # Hook method to prepare the initial bag for procedure execution.
+    # Can be overridden by inherited modules to add custom data to the bag.
+    def _prepare_procedure_bag(self, bag=None):
+        return dict(bag or {})
+
+    def run(self, procedure_id=None):
         procedures = []
         if self:
             procedures = self
         elif procedure_id:
             procedures = self.browse(procedure_id)
         for procedure in procedures:
-            bag = {}
+            bag = procedure._prepare_procedure_bag()
             for step in procedure.step_ids.sorted(key=lambda s: s.sequence):
-                bag = step.action_id.execute(
-                    bag=bag, selected_device_id=selected_device_id)
+                bag = step.action_id.execute(bag=bag)
             procedure.remote_id.message_log(
                 u"Procedure '%s' finished OK." % procedure.name)
         return True
