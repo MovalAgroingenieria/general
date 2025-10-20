@@ -1,29 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="report_invoice_document_verifacti_qr" inherit_id="account.report_invoice_document">
-        <xpath expr="//div[@name='invoice_data']" position="after">
-             <div class="col-xs-6">
-                <p>
-                    <strong>ID Verifacti:</strong>
-                    <span t-field="o.verifacti_id"/>
-                </p>
-                <p t-if="o.verifacti_url">
-                    <strong>Consultar factura:</strong><br/>
-                    <a t-att-href="o.verifacti_url" target="_blank">
-                        <span t-field="o.verifacti_url"/>
-                    </a>
-                </p>
-                <p class="text-muted" style="font-size: 10px; margin-top: 10px;">
-                    Esta factura ha sido registrada en el sistema Verifactu de la Agencia Tributaria Española.
-                    Puede verificar su autenticidad escaneando el código QR o accediendo al enlace.
-                </p>
-            </div>
-            <div class="col-xs-6 text-right">
-                <img t-if="o.verifacti_qr_code"
-                        t-att-src="'data:image/png;base64,%s' % o.verifacti_qr_code"
-                        style="max-width: 150px; max-height: 150px;"
-                        alt="Código QR Verifacti"/>
-                <strong>Código QR Verifacti</strong>
+        <xpath expr="//div[@style='display: table-cell; padding-left: 40px;']" position="after">
+            <div t-if="o.verifacti_qr_code" style="display: table-cell; padding-left: 40px; text-align: center; vertical-align: middle; min-height: 130px;">
+                <table name="verifacti_qr_data" class="table-condensed" style="width:100%; margin: 0 auto;">
+                    <tbody>
+                        <tr name="tr_verifacti_qr_title">
+                            <td style="text-align: center; padding-bottom: 8px; vertical-align: middle;">
+                                <strong style="color: #0a6340; font-size: 12px;">QR Verifactu:</strong>
+                            </td>
+                        </tr>
+                        <tr name="tr_verifacti_qr_code">
+                            <td style="text-align: center; vertical-align: middle;">
+                                <img t-att-src="'data:image/png;base64,%s' % o.verifacti_qr_code"
+                                     style="max-width: 90px; max-height: 90px; vertical-align: middle;"
+                                     alt="Verifactu QR"/>
+                            </td>
+                        </tr>
+                        <tr name="tr_verifacti_id" t-if="o.verifacti_id">
+                            <td style="text-align: center; padding-top: 4px; vertical-align: middle;">
+                                <span style="font-size: 9px; color: #666; display: block;">
+                                    <span t-field="o.verifacti_id"/>
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </xpath>
     </template>

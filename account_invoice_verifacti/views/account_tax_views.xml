@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tax_form_verifacti" model="ir.ui.view">
+        <field name="name">account.tax.form.verifacti</field>
+        <field name="model">account.tax</field>
+        <field name="inherit_id" ref="account.view_tax_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='description']" position="after">
+                <group string="Verifacti Settings" col="4">
+                    <field name="verifacti_tax_type"/>
+                    <field name="verifacti_operation_classification"/>
+                    <field name="verifacti_regime_code"/>
+                    <field name="verifacti_exempt_operation"/>
+                    <field name="verifacti_surcharge_rate"/>
+                    <field name="verifacti_is_surcharge"/>
+                    <field name="verifacti_cost_based_tax_base" attrs="{'invisible': [('verifacti_regime_code', 'not in', ['06'])]}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

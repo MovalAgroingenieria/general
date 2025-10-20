@@ -5,33 +5,33 @@
         <field name="model">account.invoice</field>
         <field name="inherit_id" ref="account.invoice_form"/>
         <field name="arch" type="xml">
-            <!-- Add computed field (invisible) for attrs evaluation -->
             <xpath expr="//field[@name='type']" position="after">
                 <field name="verifacti_journal_enabled" invisible="1"/>
                 <field name="verifacti_state" invisible="1"/>
             </xpath>
-
-            <!-- Replace cancel button for invoices (group_no_one) to hide it when invoice has been sent to Verifacti -->
-            <xpath expr="//button[@name='action_invoice_cancel'][@groups='base.group_no_one']" position="replace">
-                <button name="action_invoice_cancel" type="object" states="draft,proforma2,open" string="Cancel Invoice" groups="base.group_no_one" attrs="{'invisible': ['&amp;', ('verifacti_journal_enabled', '=', True), ('verifacti_state', '=', 'sent')]}"/>
-            </xpath>
-
-            <!-- Add Verifacti page in notebook -->
             <xpath expr="//notebook" position="inside">
-                <page string="Verifacti" attrs="{'invisible': ['|', ('type', 'not in', ['out_invoice', 'out_refund']), ('verifacti_journal_enabled', '=', False)]}">
+                <page string="Verifactu" attrs="{'invisible': ['|', ('type', 'not in', ['out_invoice', 'out_refund']), ('verifacti_journal_enabled', '=', False)]}">
                     <group>
                         <group string="Verifactu Status">
-                            <field name="verifacti_state"/>
+                            <field name="verifacti_state" attrs="{'decoration-danger': [('verifacti_incident', '=', True)]}"/>
                             <field name="verifacti_id" attrs="{'invisible': [('verifacti_id', '=', False)]}"/>
+                            <button name="action_check_verifacti_status" type="object" string="Check Status" class="oe_highlight" attrs="{'invisible': [('verifacti_id', '=', 'sent')]}" icon="fa-refresh"/>
+                        </group>
+                        <group string="Rectificative" attrs="{'invisible': [('type', 'not in', ['out_refund'])]}">
+                            <field name="verifacti_rectification_type" attrs="{'required': [('type', 'in', ['out_refund'])]}"/>
+                        </group>
+                        <group string="Additional Data">
+                            <field name="verifacti_operation_date" string="Operation Date"/>
+                            <field name="verifacti_incident" attrs="{'decoration-danger': [('verifacti_incident', '=', True)]}"/>
                         </group>
                         <group string="QR Code">
                             <field name="verifacti_qr_code" widget="image" attrs="{'invisible': [('verifacti_qr_code', '=', False)]}"/>
-                            <field name="verifacti_url" widget="url" string="Ver en Verifacti" attrs="{'invisible': [('verifacti_url', '=', False)]}"/>
+                            <field name="verifacti_url" widget="url" string="View on Verifacti" attrs="{'invisible': [('verifacti_url', '=', False)]}"/>
                         </group>
                     </group>
                     <separator string="Transaction Logs"/>
                     <field name="verifacti_log_ids" readonly="1" nolabel="1">
-                        <tree>
+                        <tree decoration-danger="state == 'rejected'" decoration-info="state == 'processing'" decoration-success="state == 'accepted'">
                             <field name="create_date"/>
                             <field name="state"/>
                             <field name="verifacti_id"/>
@@ -39,6 +39,17 @@
                         </tree>
                     </field>
                 </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_invoice_form_verifacti_cancel" model="ir.ui.view">
+        <field name="name">account.invoice.form.verifacti.cancel</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account_cancel.invoice_form_cancel_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_invoice_cancel']" position="replace">
+                <button name="action_invoice_cancel" type="object" invisible="1" string="Cancel Invoice" groups="account.group_account_invoice"/>
             </xpath>
         </field>
     </record>

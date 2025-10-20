@@ -22,6 +22,7 @@
             <form create="false">
                 <header>
                     <button name="send_to_verifacti" type="object" string="Retry Send" class="btn-primary" attrs="{'invisible': [('state', '!=', 'error')]}"/>
+                    <button name="_check_invoice_status" type="object" string="Check Status" class="btn-secondary" attrs="{'invisible': ['|', ('state', 'not in', ['sent', 'pending']), ('verifacti_id', '=', False)]}"/>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
@@ -30,6 +31,8 @@
                             <field name="invoice_id" readonly="1"/>
                             <field name="verifacti_id"/>
                             <field name="sent_date"/>
+                            <field name="last_check_date"/>
+                            <field name="retry_count"/>
                         </group>
                         <group>
                             <field name="qr_code" widget="image" options="{'size': [200, 200]}" attrs="{'invisible': [('qr_code', '=', False)]}"/>
@@ -37,10 +40,10 @@
                     </group>
                     <notebook>
                         <page string="Request Data">
-                            <field name="request_data" widget="ace" options="{'mode': 'json'}" readonly="1"/>
+                            <field name="request_data" readonly="1" class="oe_inline"/>
                         </page>
                         <page string="Response Data">
-                            <field name="response_data" widget="ace" options="{'mode': 'json'}" readonly="1"/>
+                            <field name="response_data" readonly="1" class="oe_inline"/>
                         </page>
                         <page string="Error" attrs="{'invisible': [('error_message', '=', False)]}">
                             <field name="error_message" readonly="1"/>

@@ -1,39 +1,50 @@
+# -*- coding: utf-8 -*-
+# 2025 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 import json
 import logging
 
-_logger = logging.getLogger(__name__)
 
 class AccountInvoice(models.Model):
     _inherit = 'account.invoice'
 
     verifacti_state = fields.Selection([
-        ('not_sent', 'Not Sent'),
-        ('pending', 'Pending'),
-        ('sent', 'Sent'),
-        ('error', 'Error')
-    ], string='Verifacti State', default='not_sent', readonly=True, copy=False)
+            ('not_sent', 'Not Sent'),
+            ('pending', 'Pending'),
+            ('sent', 'Sent'),
+            ('error', 'Error')
+        ],
+        string='Verifacti Status',
+        default='not_sent',
+        readonly=True,
+        copy=False,
+    )
 
     verifacti_id = fields.Char(
         string='Verifacti ID',
         readonly=True,
-        copy=False
+        copy=False,
     )
+
     verifacti_qr_code = fields.Binary(
         string='Verifacti QR Code',
         readonly=True,
-        copy=False
+        copy=False,
     )
+
     verifacti_log_ids = fields.One2many(
         'verifacti.log',
         'invoice_id',
         string='Verifacti Logs',
-        readonly=True
+        readonly=True,
     )
+
     verifacti_last_error = fields.Text(
         string='Last Error',
-        compute='_compute_verifacti_last_error'
+        compute='_compute_verifacti_last_error',
     )
 
     @api.depends('verifacti_log_ids.error_message')
@@ -48,7 +59,6 @@ class AccountInvoice(models.Model):
         """Override to send to Verifacti after validation"""
         res = super().action_post()
 
-        # Only process customer invoices
         invoices_to_send = self.filtered(
             lambda m: m.move_type in ['out_invoice', 'out_refund'] and
                      m.company_id.country_id.code == 'ES'
@@ -68,10 +78,8 @@ class AccountInvoice(models.Model):
         if self.verifacti_state in ['sent', 'pending']:
             return
 
-        # Prepare invoice data for Verifacti
         invoice_data = self._prepare_verifacti_data()
 
-        # Create log entry
         log = self.env['verifacti.log'].create({
             'invoice_id': self.id,
             'state': 'pending',
@@ -80,7 +88,6 @@ class AccountInvoice(models.Model):
 
         self.write({'verifacti_state': 'pending'})
 
-        # Try to send immediately if possible
         log.send_to_verifacti()
 
         return log
@@ -89,7 +96,6 @@ class AccountInvoice(models.Model):
         """Prepare invoice data for Verifacti API"""
         self.ensure_one()
 
-        # Group invoice lines by tax
         lines_by_tax = {}
         for line in self.invoice_line_ids.filtered(lambda l: not l.display_type):
             tax_ids = tuple(line.tax_ids.ids) if line.tax_ids else (0,)
@@ -103,7 +109,6 @@ class AccountInvoice(models.Model):
             lines_by_tax[tax_ids]['lines'].append(line)
             lines_by_tax[tax_ids]['subtotal'] += line.price_subtotal
 
-            # Calculate tax amount for this line
             taxes_res = line.tax_ids.compute_all(
                 line.price_unit,
                 quantity=line.quantity,
@@ -113,21 +118,19 @@ class AccountInvoice(models.Model):
             )
             lines_by_tax[tax_ids]['tax_amount'] += taxes_res['total_included'] - taxes_res['total_excluded']
 
-        # Create grouped lines (max 12 lines)
         grouped_lines = []
-        for tax_group in list(lines_by_tax.values())[:12]:  # Limit to 12 lines
+        for tax_group in list(lines_by_tax.values())[:12]:
             tax_rate = 0.0
             if tax_group['taxes']:
-                # Assume first tax rate (simplified - may need adjustment)
                 tax_rate = tax_group['taxes'][0].amount if tax_group['taxes'] else 0.0
 
             line_descriptions = ', '.join(
                 line.name or line.product_id.name or 'Product'
-                for line in tax_group['lines'][:5]  # Limit descriptions
+                for line in tax_group['lines'][:5]
             )
 
             grouped_lines.append({
-                'description': line_descriptions[:200],  # Limit description length
+                'description': line_descriptions[:200],
                 'quantity': 1,
                 'unit_price': tax_group['subtotal'],
                 'tax_rate': tax_rate,
@@ -135,32 +138,21 @@ class AccountInvoice(models.Model):
                 'total': tax_group['subtotal'] + tax_group['tax_amount']
             })
 
-        # Prepare the complete invoice data
         invoice_data = {
             'invoice_number': self.name,
             'invoice_date': self.invoice_date.isoformat() if self.invoice_date else '',
             'issue_date': fields.Date.today().isoformat(),
             'tax_period': self.invoice_date.strftime('%Y-%m') if self.invoice_date else '',
-
-            # Issuer data (company)
             'issuer_nif': self.company_id.vat or '',
             'issuer_name': self.company_id.name,
             'issuer_address': self._format_address(self.company_id.partner_id),
-
-            # Recipient data (customer)
             'recipient_nif': self.partner_id.vat or '',
             'recipient_name': self.partner_id.name,
             'recipient_address': self._format_address(self.partner_id),
-
-            # Lines
             'lines': grouped_lines,
-
-            # Totals
             'subtotal': self.amount_untaxed,
             'tax_total': self.amount_tax,
             'total': self.amount_total,
-
-            # Additional fields
             'invoice_type': 'F1' if self.move_type == 'out_invoice' else 'R1',
             'description': self.narration or '',
         }
@@ -194,8 +186,6 @@ class AccountInvoice(models.Model):
 
         if self.move_type not in ['out_invoice', 'out_refund']:
             raise UserError(_('Only customer invoices can be sent to Verifacti.'))
-
-        log = self._create_verifacti_log()
 
         return {
             'type': 'ir.actions.client',
