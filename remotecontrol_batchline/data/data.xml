@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="remotecontrol_batchline" model="remotecontrol">
+            <field name="name">Batchline</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url"></field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="is_batchline">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "username": "",
+  "password": ""
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>Batchline · Odoo Integration Help</h2>
+
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code> · Base URL: <code>http://irriweb.crxxx.es:XXXXX</code></p>
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+  "username": "username",
+  "password": "password"
+}</pre>
+
+<ul>
+  <li><em>Get Token</em> calls <code>/token</code> using form data (<code>grant_type=password</code>) and stores <code>bag["token"]</code> (Bearer access token).</li>
+  <li><em>Get devices (plan)</em> and <em>Get readings</em> send <code>Authorization: Bearer &lt;token&gt;</code> in headers.</li>
+</ul>
+
+<hr>
+
+<h3>2) Procedures</h3>
+
+<h4>2.1 Batchline: Import elements</h4>
+<ol>
+  <li><strong>Get Token</strong> → obtain access token and store it in <code>bag["token"]</code>.</li>
+  <li><strong>Import elements</strong> → call <code>/api/elementos</code> and store the resulting JSON list in an attachment. Each element includes <code>Identificador</code>, <code>Descripción</code>, and a list of <code>Tags</code> with <code>Nombre</code> and <code>Unidad</code>.</li>
+</ol>
+
+<h4>2.2 Batchline: Daily Sync</h4>
+<ol>
+  <li><strong>Get Token</strong> → authenticate and store token in <code>bag["token"]</code>.</li>
+  <li><strong>Get devices (plan)</strong> → build <code>bag["sensors_plan"]</code> from Odoo sensors linked to devices with valid <code>remotecontrol_params</code>.</li>
+  <li><strong>Get readings</strong> → iterate through plan and call <code>/api/elementos/historico</code> with filters by date, device, and tag to upsert readings into Odoo.</li>
+</ol>
+
+<hr>
+
+<h3>3) Device Configuration</h3>
+<p>Each <strong>Device</strong> (<code>mdm.measurement.device</code>) must define <em>remotecontrol_params</em>:</p>
+<pre>{
+  "device_id": "DEVICE_CODE_FROM_BATCHLINE",
+  "start_date": "2025-01-01"   // optional fallback start date
+}</pre>
+
+<p><em>device_id</em> corresponds to the “Identificador” returned by the <code>/api/elementos</code> endpoint.</p>
+
+<hr>
+
+<h3>4) Sensor Configuration</h3>
+<p>Each <strong>Sensor</strong> (<code>mdm.measurement.device.sensor</code>) defines <em>remotecontrol_params</em>:</p>
+<pre>{
+  "tag": "TAG_NAME_IN_BATCHLINE",
+  "start_date": "2025-01-01"   // optional; else device.start_date; else Jan 1 of current year
+}</pre>
+
+<ul>
+  <li><code>tag</code> must match the “Nombre” of a <code>Tag</code> entry returned by the device’s <code>/api/elementos</code> response.</li>
+  <li>If <code>start_date</code> is missing, it falls back to the device’s or the current year.</li>
+</ul>
+
+<hr>
+
+<h3>5) Time Window and Reading Logic</h3>
+<ul>
+  <li><em>Get devices (plan)</em> computes <code>initial_date</code> for each sensor:
+    last stored reading → else <code>sensor.start_date</code> → else <code>device.start_date</code> → else Jan 1 of current year.
+  </li>
+  <li><em>Get readings</em> uses <code>inicio</code> = <code>initial_date</code> and <code>fin</code> = today, calling:
+    <pre>/api/elementos/historico?inicio=YYYY-MM-DD&amp;fin=YYYY-MM-DD&amp;elemento=DEVICE_ID&amp;tag=TAG_NAME</pre>
+  </li>
+  <li>Timestamps (<code>Fecha</code>) are parsed from ISO format (<code>YYYY-MM-DDTHH:MM:SS</code>), localized to Europe/Madrid, and stored in UTC in Odoo.</li>
+</ul>
+
+<hr>
+
+<h3>6) Stored Results</h3>
+<ul>
+  <li>Each reading (<code>Valor</code>) is upserted into <code>mdm.measurement.device.sensor.reading</code> using <code>sensor_id</code> + <code>measurement_time</code> as unique key.</li>
+  <li>An audit JSON file is created and attached to the remote control record after each sync, containing summary, counts, and error details.</li>
+  <li>The remote control posts a log message like <em>[Batchline readings] upserts=NN errors=MM</em> with the attachment.</li>
+</ul>
+
+<hr>
+
+<h3>7) Endpoint Summary</h3>
+<table border="1" cellspacing="0" cellpadding="5">
+  <thead>
+    <tr>
+      <th>Action</th>
+      <th>Endpoint</th>
+      <th>Method</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Get Token</strong></td>
+      <td><code>/token</code></td>
+      <td>POST (form)</td>
+      <td>Authenticate using username/password and obtain Bearer token.</td>
+    </tr>
+    <tr>
+      <td><strong>Import elements</strong></td>
+      <td><code>/api/elementos</code></td>
+      <td>GET</td>
+      <td>Fetch list of available devices and their tags (identifiers, units).</td>
+    </tr>
+    <tr>
+      <td><strong>Get hydrants</strong></td>
+      <td><code>/api/hidrantes</code></td>
+      <td>GET</td>
+      <td>Retrieve hydrants information (ID, description, linked devices).</td>
+    </tr>
+    <tr>
+      <td><strong>Get readings</strong></td>
+      <td><code>/api/elementos/historico</code></td>
+      <td>GET</td>
+      <td>Retrieve historical readings filtered by date range, device, and tag.</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h3>8) Typical Data Structures</h3>
+
+<h4>Response from <code>/api/elementos</code>:</h4>
+<pre>[
+    {
+        "Identificador": "EM01",
+        "Descripcion": "BUENAVISTA - Filtrado S4",
+        "Tags": [
+            {
+                "Nombre": "H_MINUTOS_OBSERVADOS_DIA",
+                "IdItemOPC": 9101066,
+                "Unidad": "",
+                "Fecha": "2025-10-19T00:00:00",
+                "Valor": 1440.00
+            },
+            {
+                "Nombre": "H_TEMPERATURA_EXTERIOR_DIARIA_MAXIMA",
+                "IdItemOPC": 9101067,
+                "Unidad": "ºC",
+                "Fecha": "2025-10-19T16:10:00",
+                "Valor": 24.94
+            }]
+    }
+]</pre>
+
+<h4>Response from <code>/api/hidrantes</code>:</h4>
+<pre>[
+      {
+        "Id": "CAB-03_2-01",
+        "Nombre": "CAB-03_2",
+        "Toma": 1,
+        "Fecha": "2025-10-20T08:19:35",
+        "Volumen": 0.10,
+        "Caudal": 0.00,
+        "ModoAuto": false,
+        "ValvulaAbierta": false,
+        "EstadoValvula": 4,
+        "CaudalNominal": 0.00
+    }
+]</pre>
+
+<h4>Response from <code>/api/elementos/historico</code>:</h4>
+<pre>[
+  {"Fecha": "2025-10-20T09:00:00", "Valor": 2.54},
+  {"Fecha": "2025-10-20T10:00:00", "Valor": 2.58}
+]</pre>
+
+<p>Each reading will be inserted or updated in Odoo under the corresponding sensor with <code>value</code> = <code>Valor</code>.</p>
+
+<hr>
+
+<h3>9) Available Tags (Generic and Unique)</h3>
+<p>These are all unique tag patterns and names (<code>nombre</code>) available in the Batchline system. Tags with numeric suffixes have been generalized using “X”.</p>
+
+<table border="1" cellspacing="0" cellpadding="5">
+  <thead>
+    <tr>
+      <th>Tag Name (generic)</th>
+      <th>Unit</th>
+      <th>Description (English)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>H_GENERAL_ENERGIA_SOLAR_TOTAL</td><td>kWh</td><td>Total accumulated solar energy.</td></tr>
+    <tr><td>H_GENERAL_ENERGIA_RED_DIARIA</td><td>kWh/dia</td><td>Daily energy consumption from the electrical grid.</td></tr>
+    <tr><td>H_GENERAL_ENERGIA_SOLAR_DIARIA</td><td>kWh/dia</td><td>Daily solar energy production.</td></tr>
+
+    <tr><td>H_BOMBAX_ENERGIA_RED_TOTAL</td><td>kWh</td><td>Total grid energy consumed by Pump X.</td></tr>
+    <tr><td>H_BOMBAX_ENERGIA_SOLAR_TOTAL</td><td>kWh</td><td>Total solar energy consumed by Pump X.</td></tr>
+    <tr><td>H_BOMBAX_ENERGIA_RED_DIARIA</td><td>kWh/dia</td><td>Daily grid energy consumed by Pump X.</td></tr>
+    <tr><td>H_BOMBAX_ENERGIA_SOLAR_DIARIA</td><td>kWh/dia</td><td>Daily solar energy consumed by Pump X.</td></tr>
+
+    <tr><td>H_NIVEL</td><td>mca</td><td>Water level in meters of column (hydraulic head).</td></tr>
+    <tr><td>H_VOLUMEN</td><td>m3</td><td>Water volume or equivalent hydraulic capacity.</td></tr>
+
+    <tr><td>H_FILTRADO_INF_CICLO_LAVADO</td><td>Desactivado|Activado</td><td>Filter washing cycle state.</td></tr>
+    <tr><td>H_FILTRADO_INF_LAVADOS_TOTALES</td><td>Lavados</td><td>Total completed filter wash cycles.</td></tr>
+    <tr><td>H_FITLRADO_INF_LAVADOS_PARCIALES</td><td>Lavados</td><td>Partial filter wash cycle count.</td></tr>
+
+    <tr><td>H_PRESION</td><td>bar</td><td>Pressure measurement.</td></tr>
+    <tr><td>H_CAUDAL</td><td>l/s</td><td>Instantaneous flow rate (liters per second).</td></tr>
+
+    <tr><td>H_ABIERTA</td><td>ESTADO 0|ESTADO 1</td><td>Valve open state (0=closed, 1=open).</td></tr>
+    <tr><td>H_CERRADA</td><td>ESTADO 0|ESTADO 1</td><td>Valve closed state (0=closed, 1=open).</td></tr>
+
+    <tr><td>H_MARCHA</td><td>ESTADO 0|ESTADO 1</td><td>Pump running status (0=stopped, 1=running).</td></tr>
+    <tr><td>H_BOYA_ARRANQUE</td><td>Inactiva|Activa</td><td>Start float switch (inactive/active).</td></tr>
+    <tr><td>H_BOYA_PARO</td><td>Inactiva|Activa</td><td>Stop float switch (inactive/active).</td></tr>
+
+    <tr><td>H_COBERTURA</td><td>(none)</td><td>Signal coverage or communication quality indicator.</td></tr>
+  </tbody>
+</table>
+
+<p>All tag names are case-sensitive and must exactly match Batchline API values when defined in <code>sensor.remotecontrol_params</code> in Odoo.</p>
+
+<hr>
+
+<h3>10) Troubleshooting Notes</h3>
+<ul>
+  <li>If login fails, the action raises <em>“Login failed: [code] [message]”</em>.</li>
+  <li>Invalid JSON responses trigger a fallback audit record with basic info.</li>
+  <li>API errors (HTTP ≥ 400) are logged per sensor in the audit attachment.</li>
+</ul>
+]]>
+            </field>
+        </record>
+
+        <record id="remotecontrol_batchline_action_get_token" model="remotecontrol.action">
+            <field name="name">Batchline: Get Token</field>
+            <field name="remote_id" ref="remotecontrol_batchline"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Read auth parameter keys from remote.connection_params JSON
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+username = (cfg.get('username') or '').strip()
+password = (cfg.get('password') or '').strip()
+if not username or not password:
+    raise Exception("Missing Batchline credentials: set username/password in connection_params.")
+url = (base_url or '').rstrip('/') + '/token'
+auth_data = {
+    'grant_type': 'password',
+    'username': username,
+    'password': password,
+}
+headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+}
+resp = request_retry('POST', url, data=auth_data, headers=headers)
+if resp.status_code >= 400:
+    raise Exception("Login failed: %s %s" % (resp.status_code, resp.text))
+try:
+    j = resp.json() or {}
+except ValueError:
+    raise Exception("Login response is not valid JSON: %s" % resp.text)
+token = j.get('access_token') or ''
+if not token:
+    raise Exception("Login OK but no 'access_token' in response.")
+bag['token'] = token
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_batchline_action_get_devices" model="remotecontrol.action">
+            <field name="name">Batchline: Get devices (plan)</field>
+            <field name="remote_id" ref="remotecontrol_batchline"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Action A: build sensors plan (robust JSON parsing)
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+condition = [('remotecontrol_params','!=',False),
+             ('device_id','!=',False)]
+sensors = Sensor.search(condition)
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+    sensor_tag = (sensor_cfg.get('tag') or '').strip()
+    if sensor_tag:
+        try:
+            device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+        except Exception:
+            device_cfg = {}
+        device_id = (device_cfg.get('device_id') or '').strip()
+        if device_id:
+            last = Reading.search([('sensor_id','=',sensor.id)], order='measurement_time desc', limit=1)
+            if last and last.measurement_time:
+                last_dt = fields.Datetime.from_string(last.measurement_time)
+                initial_date = fields.Date.to_string(last_dt.date())
+            else:
+                start_cfg = (sensor_cfg.get('start_date') or device_cfg.get('start_date'))
+                if start_cfg:
+                    initial_date = start_cfg[:10]
+                else:
+                    year_str = today_str[:4]
+                    initial_date = '%s-01-01' % year_str
+            plan.append({
+                'sensor_id': sensor.id,
+                'device_id': device.id,
+                'device_batchline_id': device_id,
+                'sensor_tag': sensor_tag,
+                'initial_date': initial_date,
+            })
+bag['sensors_plan'] = plan
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_batchline_action_get_readings" model="remotecontrol.action">
+            <field name="name">Batchline: Get readings</field>
+            <field name="remote_id" ref="remotecontrol_batchline"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import pytz
+from datetime import datetime
+Remote = self.remote_id
+SensorModel = env['mdm.measurement.device.sensor']
+ReadingModel = env['mdm.measurement.device.sensor.reading']
+plan = bag.get('sensors_plan') or []
+token = bag.get('token')
+if not token:
+    raise Exception("Missing token in bag")
+base_api = (base_url or '').rstrip('/') + '/api/elementos/historico'
+headers = {'Authorization': 'Bearer %s' % token, 'Accept': 'application/json'}
+final_date = fields.Date.today()
+total_upserts = 0
+total_errors = 0
+items = []
+for sensor_plan in plan:
+    sensor_id = sensor_plan['sensor_id']
+    sensor_tag = sensor_plan['sensor_tag']
+    device_batchline_id = sensor_plan['device_batchline_id']
+    initial_date = sensor_plan['initial_date']
+    params = {'inicio': initial_date, 'fin': final_date, 'elemento': device_batchline_id, 'tag': sensor_tag}
+    try:
+        resp = request_retry('GET', base_api, headers=headers, params=params, timeout=timeout)
+        code = resp.status_code
+        full_url = getattr(resp, 'url', base_api)
+        if code < 400:
+            try:
+                payload = resp.json() or []
+            except Exception as e_json:
+                raise
+            if isinstance(payload, list):
+                readings = payload
+            elif isinstance(payload, dict):
+                readings = payload.get('data') or []
+            else:
+                readings = []
+            upserts = 0
+            errs = 0
+            readings_summary = []
+            for reading in readings:
+                try:
+                    ts_s = reading.get('Fecha')
+                    valf = float(reading.get('Valor') or 0.0)
+                    if ts_s and valf is not None:
+                        date_time_read = datetime.strptime(ts_s, '%Y-%m-%dT%H:%M:%S')
+                        date_time_read = pytz.timezone('Europe/Madrid').localize(date_time_read)
+                        date_time_read = date_time_read.astimezone(pytz.timezone('UTC'))
+                        ts_utc = date_time_read.strftime('%Y-%m-%d %H:%M:%S')
+                        Remote.upsert('mdm.measurement.device.sensor.reading', {'sensor_id': sensor_id, 'measurement_time': ts_utc}, {'value': valf, 'remotecontrol_origin_id': Remote.id})
+                        upserts += 1
+                        readings_summary.append({'ts': ts_utc, 'value': valf})
+                except Exception as e:
+                    errs += 1
+                    readings_summary.append({'error': str(e)})
+            total_upserts += upserts
+            total_errors += errs
+            items.append({'sensor_id': sensor_id, 'device_id': sensor_plan['device_id'], 'status': code, 'url': full_url, 'points_found': len(readings), 'upserts': upserts, 'errors': errs, 'tag': sensor_tag, 'elemento': device_batchline_id, 'readings': readings_summary})
+        else:
+            items.append({'sensor_id': sensor_id, 'device_id': sensor_plan['device_id'], 'status': code, 'error': (resp.text or '')[:400], 'url': full_url})
+    except Exception as e:
+        items.append({'sensor_id': sensor_id, 'device_id': sensor_plan['device_id'], 'status': -1, 'error': str(e)})
+audit = {'executed_at': fields.Datetime.now(), 'final_date': final_date, 'total_upserts': total_upserts, 'total_errors': total_errors, 'items': items}
+try:
+    audit_json = json.dumps(audit, ensure_ascii=True, indent=2, default=str)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+except Exception as json_error:
+    simple_audit = {'executed_at': str(fields.Datetime.now()), 'total_upserts': total_upserts, 'total_errors': total_errors, 'error': str(json_error)}
+    audit_json = json.dumps(simple_audit, ensure_ascii=True, indent=2)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+fname = 'batchline_readings_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+att = env['ir.attachment'].create({'name': fname, 'datas_fname': fname, 'datas': b64, 'mimetype': 'application/json', 'res_model': 'remotecontrol', 'res_id': Remote.id})
+Remote.message_post(body=u"[Batchline readings] upserts=%s errors=%s" % (total_upserts, total_errors), attachment_ids=[att.id])
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_batchline_action_get_elements" model="remotecontrol.action">
+            <field name="name">Batchline: Get devices</field>
+            <field name="remote_id" ref="remotecontrol_batchline"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="code"><![CDATA[
+Remote=self.remote_id
+token=bag.get("token")
+if not token:
+    raise Exception(u"Missing Batchline token in bag")
+base_url=(bag.get(u'base_url') or Remote.base_url or u'').rstrip(u'/')+u'/api'
+headers={u'Authorization':u'Bearer %s'%token,u'Accept':u'application/json'}
+
+resp=request_retry(u'GET', base_url+u'/elementos', headers=headers, timeout=timeout)
+if resp.status_code>=400:
+    raise Exception(u"Error fetching elements: %s %s"%(resp.status_code, resp.text))
+elements=resp.json() or []
+elements_list=[]
+for e in elements:
+    if not isinstance(e, dict):
+        continue
+    identificador=e.get(u'Identificador') or e.get(u'id') or u'Elemento sin identificador'
+    descripcion=e.get(u'Descripcion') or e.get(u'descripción') or e.get(u'name') or u'Sin descripción'
+    tags=e.get(u'Tags') or []
+    tag_list=[]
+    for t in tags:
+        if not isinstance(t, dict):
+            continue
+        tag_list.append({
+            u'nombre': t.get(u'Nombre') or t.get(u'name') or u'Sin nombre',
+            u'unidad': t.get(u'Unidad') or t.get(u'unidad') or u''
+        })
+    elements_list.append({
+        u'identificador': identificador,
+        u'descripcion': descripcion,
+        u'tags': tag_list
+    })
+summary={
+    u'total_elements': len(elements_list),
+    u'executed_at': fields.Datetime.now()
+}
+data={
+    u'elements': elements_list,
+    u'summary': summary
+}
+json_str=json.dumps(data, ensure_ascii=False, indent=2)
+encoded=base64.b64encode(json_str.encode(u'utf-8'))
+fname=u'batchline_elements_%s.json'%fields.Datetime.now().replace(u':',u'').replace(u'-',u'').replace(u' ',u'_')
+att=env[u'ir.attachment'].create({
+    u'name': fname,
+    u'datas_fname': fname,
+    u'datas': encoded,
+    u'mimetype': u'application/json',
+    u'res_model': u'remotecontrol',
+    u'res_id': Remote.id
+})
+Remote.message_post(
+    body=u'[Batchline] Imported %s elements'%(len(elements_list)),
+    attachment_ids=[att.id]
+)
+bag.clear()
+bag[u'total_elements']=len(elements_list)
+bag[u'attachment_id']=att.id
+bag[u'attachment_name']=fname
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_batchline_procedure_get_elements" model="remotecontrol.procedure">
+            <field name="name">Batchline: Import elements</field>
+            <field name="remote_id" ref="remotecontrol_batchline"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_batchline_procedure" model="remotecontrol.procedure">
+            <field name="name">Batchline: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_batchline"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_batchline_step_10_token_import" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_batchline_procedure_get_elements"/>
+            <field name="action_id" ref="remotecontrol_batchline_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_batchline_step_20_get_elements" model="remotecontrol.step">
+            <field name="name">Import elements</field>
+            <field name="procedure_id" ref="remotecontrol_batchline_procedure_get_elements"/>
+            <field name="action_id" ref="remotecontrol_batchline_action_get_elements"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_batchline_step_10_token_daily" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_batchline_procedure"/>
+            <field name="action_id" ref="remotecontrol_batchline_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_batchline_step_20_devices" model="remotecontrol.step">
+            <field name="name">Get devices (plan)</field>
+            <field name="procedure_id" ref="remotecontrol_batchline_procedure"/>
+            <field name="action_id" ref="remotecontrol_batchline_action_get_devices"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_batchline_step_30_readings" model="remotecontrol.step">
+            <field name="name">Get readings</field>
+            <field name="procedure_id" ref="remotecontrol_batchline_procedure"/>
+            <field name="action_id" ref="remotecontrol_batchline_action_get_readings"/>
+            <field name="sequence">30</field>
+        </record>
+
+    </data>
+</odoo>
