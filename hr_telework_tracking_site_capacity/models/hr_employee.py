@@ -139,14 +139,15 @@ class HrEmployee(models.Model):
     def _has_full_day_leave(self, check_date):
         """
         Check if employee has a full-day leave/absence on the given date.
-
-        Args:
-            check_date (date): The date to check for leaves
-
-        Returns:
-            bool: True if there's a full-day leave, False otherwise
         """
         if not self:
+            return False
+
+        # Convert string to date object if necessary
+        if isinstance(check_date, str):
+            check_date = fields.Date.from_string(check_date)
+
+        if not check_date:
             return False
 
         Leave = self.env['hr.leave']
