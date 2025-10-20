@@ -257,9 +257,9 @@ bag['sensors_plan'] = plan
             <field name="readonly">True</field>
             <field name="code"><![CDATA[
 
-import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime
 import pytz
+import hashlib
 
 Remote = self.remote_id
 SensorModel = env['mdm.measurement.device.sensor']
@@ -281,6 +281,8 @@ headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
 total_upserts = 0
 total_errors = 0
 items = []
+tz_madrid = pytz.timezone('Europe/Madrid')
+tz_utc = pytz.timezone('UTC')
 for sensor_plan in plan:
     sensor_id = sensor_plan['sensor_id']
     device_id = sensor_plan['device_id']
@@ -360,9 +362,10 @@ for sensor_plan in plan:
                     ymd2[0], ymd2[1], ymd2[2],
                     int(hms2[0]), int(hms2[1]), int(hms2[2])
                 )
-                dt_fake = datetime.strptime(ts_norm, '%Y-%m-%d %H:%M:%S')
-                dt_real_utc = dt_fake - timedelta(hours=2)
-                ts_store = dt_real_utc.strftime('%Y-%m-%d %H:%M:%S')
+                dt_ts = datetime.strptime(ts_norm, '%Y-%m-%d %H:%M:%S')
+                dt_local = tz_madrid.localize(dt_ts)
+                dt_utc = dt_local.astimezone(tz_utc)
+                ts_store = dt_utc.strftime('%Y-%m-%d %H:%M:%S')
             except Exception:
                 ts_store = ts_s
             try:
