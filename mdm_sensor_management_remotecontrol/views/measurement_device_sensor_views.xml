@@ -6,9 +6,23 @@
         <field name="model">mdm.measurement.device.sensor</field>
         <field name="inherit_id" ref="mdm_sensor_management.mdm_sensor_view_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//form/sheet" position="before">
+                <div class="alert alert-danger" role="alert"
+                     attrs="{'invisible': ['|', ('remotecontrol_params_valid', '=', True), ('remotecontrol_id', '=', False)]}">
+                    <strong>Configuration Error:</strong> The Remotecontrol Parameters field contains invalid JSON format.
+                    Please correct the syntax before saving.
+                </div>
+            </xpath>
             <xpath expr="//field[@name='uom_id']" position="after">
                 <field name="remotecontrol_id"/>
-                <field name="remotecontrol_params" widget="ace" options="{'mode': 'json', 'theme': 'monokai'}" placeholder="{'sensor_id': 1234}" attrs="{'invisible': [('remotecontrol_id', '=', False)]}"/>
+                <field name="remotecontrol_params_valid" invisible="1"/>
+                <field name="remotecontrol_params"
+                       widget="ace"
+                       options="{'mode': 'json', 'theme': 'monokai'}"
+                       placeholder="{'sensor_id': 1234}"
+                       class="oe_edit_only"
+                       attrs="{'invisible': [('remotecontrol_id', '=', False)]}"
+                       style="border: 3px solid;"/>
             </xpath>
         </field>
     </record>
