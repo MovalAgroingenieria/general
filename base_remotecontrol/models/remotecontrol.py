@@ -84,12 +84,30 @@ class RemoteControl(models.Model):
         sanitize=True,
     )
 
+    connection_params_valid = fields.Boolean(
+        string='Valid JSON Connector',
+        compute='_compute_connection_params_valid',
+        store=True,
+    )
+
     @api.multi
     def _compute_action_count(self):
         for record in self:
             action_model = self.env['remotecontrol.action']
             record.action_count = action_model.search_count(
                 [('remote_id', '=', record.id)])
+
+    @api.depends('connection_params')
+    def _compute_connection_params_valid(self):
+        for record in self:
+            connection_params_valid = True
+            if record.connection_params:
+                try:
+                    json.loads(record.connection_params)
+                    connection_params_valid = True
+                except (ValueError, TypeError):
+                    connection_params_valid = False
+            record.connection_params_valid = connection_params_valid
 
     def action_view_actions(self):
         self.ensure_one()

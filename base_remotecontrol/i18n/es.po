@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-29 09:30+0000\n"
-"PO-Revision-Date: 2025-08-29 09:30+0000\n"
+"POT-Creation-Date: 2025-10-20 06:02+0000\n"
+"PO-Revision-Date: 2025-10-20 06:02+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:438
+#: code:addons/base_remotecontrol/models/remotecontrol.py:458
 #, python-format
 msgid "\n"
 "Results:\n"
@@ -26,8 +26,8 @@ msgstr "\n"
 ""
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:291
-#: code:addons/base_remotecontrol/models/remotecontrol.py:445
+#: code:addons/base_remotecontrol/models/remotecontrol.py:310
+#: code:addons/base_remotecontrol/models/remotecontrol.py:465
 #, python-format
 msgid "  (No data returned)\n"
 ""
@@ -534,6 +534,13 @@ msgstr "# Working with timezones\n"
 
 #. module: base_remotecontrol
 #: model:ir.ui.view,arch_db:base_remotecontrol.view_remotecontrol_form
+msgid "<strong>Configuration Error:</strong> The Connection Parameters field contains invalid JSON format.\n"
+"                Please correct the syntax before saving."
+msgstr "<strong>Error de configuración:</strong> Los parámetros de conexión contienen código JSON inválido.\n"
+"                Por favor corrija la sintáxis."
+
+#. module: base_remotecontrol
+#: model:ir.ui.view,arch_db:base_remotecontrol.view_remotecontrol_form
 msgid "<strong>bag</strong> - Dictionary to store/share data between actions"
 msgstr "<strong>bag</strong> - Diccionario para almacenar/compartir datos entre acciones"
 
@@ -594,8 +601,8 @@ msgid "Action"
 msgstr "Acción"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:281
-#: code:addons/base_remotecontrol/models/remotecontrol.py:305
+#: code:addons/base_remotecontrol/models/remotecontrol.py:300
+#: code:addons/base_remotecontrol/models/remotecontrol.py:324
 #, python-format
 msgid "Action: %s\n"
 ""
@@ -603,7 +610,7 @@ msgstr "Acción: %s\n"
 ""
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:98
+#: code:addons/base_remotecontrol/models/remotecontrol.py:116
 #: model:ir.actions.act_window,name:base_remotecontrol.action_remotecontrol_action
 #: model:ir.ui.menu,name:base_remotecontrol.menu_remotecontrol_actions
 #: model:ir.ui.view,arch_db:base_remotecontrol.view_remotecontrol_action_tree
@@ -650,10 +657,10 @@ msgid "Batch Processing:"
 msgstr "Procesamiento por Lotes:"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:300
-#: code:addons/base_remotecontrol/models/remotecontrol.py:316
-#: code:addons/base_remotecontrol/models/remotecontrol.py:454
+#: code:addons/base_remotecontrol/models/remotecontrol.py:319
+#: code:addons/base_remotecontrol/models/remotecontrol.py:335
 #: code:addons/base_remotecontrol/models/remotecontrol.py:474
+#: code:addons/base_remotecontrol/models/remotecontrol.py:494
 #, python-format
 msgid "Close"
 msgstr "Cerrar"
@@ -729,14 +736,14 @@ msgid "Error Handling:"
 msgstr "Gestión de Errores:"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:307
-#: code:addons/base_remotecontrol/models/remotecontrol.py:465
+#: code:addons/base_remotecontrol/models/remotecontrol.py:326
+#: code:addons/base_remotecontrol/models/remotecontrol.py:485
 #, python-format
 msgid "Error: %s"
 msgstr "Error: %s"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:265
+#: code:addons/base_remotecontrol/models/remotecontrol.py:284
 #, python-format
 msgid "Execution error (%s) in action '%s':\n"
 "%s"
@@ -911,7 +918,7 @@ msgid "Procedure Step"
 msgstr "Paso de Procedimiento"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:458
+#: code:addons/base_remotecontrol/models/remotecontrol.py:478
 #, python-format
 msgid "Procedure Test Failed\n"
 "\n"
@@ -921,7 +928,7 @@ msgstr "Prueba de Procedimiento Fallida\n"
 ""
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:432
+#: code:addons/base_remotecontrol/models/remotecontrol.py:452
 #, python-format
 msgid "Procedure Test Successful (dry-run)\n"
 "\n"
@@ -931,8 +938,8 @@ msgstr "Prueba de Procedimiento Exitosa (simulación)\n"
 ""
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:433
-#: code:addons/base_remotecontrol/models/remotecontrol.py:459
+#: code:addons/base_remotecontrol/models/remotecontrol.py:453
+#: code:addons/base_remotecontrol/models/remotecontrol.py:479
 #, python-format
 msgid "Procedure: %s\n"
 ""
@@ -940,7 +947,7 @@ msgstr "Procedimiento: %s\n"
 ""
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:109
+#: code:addons/base_remotecontrol/models/remotecontrol.py:127
 #: model:ir.actions.act_window,name:base_remotecontrol.action_remotecontrol_procedure
 #: model:ir.ui.menu,name:base_remotecontrol.menu_remotecontrol_procedures
 #: model:ir.ui.view,arch_db:base_remotecontrol.view_remotecontrol_form
@@ -1017,7 +1024,7 @@ msgid "Remote Control Type"
 msgstr "Tipo de Telecontrol"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:434
+#: code:addons/base_remotecontrol/models/remotecontrol.py:454
 #, python-format
 msgid "Remote Control: %s\n"
 ""
@@ -1025,9 +1032,9 @@ msgstr "Telecontrol: %s\n"
 ""
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:282
-#: code:addons/base_remotecontrol/models/remotecontrol.py:306
-#: code:addons/base_remotecontrol/models/remotecontrol.py:460
+#: code:addons/base_remotecontrol/models/remotecontrol.py:301
+#: code:addons/base_remotecontrol/models/remotecontrol.py:325
+#: code:addons/base_remotecontrol/models/remotecontrol.py:480
 #, python-format
 msgid "Remote Control: %s\n"
 "\n"
@@ -1058,7 +1065,7 @@ msgid "Request with Custom Headers:"
 msgstr "Petición con Encabezados Personalizados:"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:283
+#: code:addons/base_remotecontrol/models/remotecontrol.py:302
 #, python-format
 msgid "Results:\n"
 ""
@@ -1106,7 +1113,7 @@ msgid "Step"
 msgstr "Paso"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:436
+#: code:addons/base_remotecontrol/models/remotecontrol.py:456
 #, python-format
 msgid "Step Results:\n"
 ""
@@ -1120,7 +1127,7 @@ msgid "Steps"
 msgstr "Pasos"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:462
+#: code:addons/base_remotecontrol/models/remotecontrol.py:482
 #, python-format
 msgid "Steps completed before failure:\n"
 ""
@@ -1128,7 +1135,7 @@ msgstr "Pasos completados antes del fallo:\n"
 ""
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:435
+#: code:addons/base_remotecontrol/models/remotecontrol.py:455
 #, python-format
 msgid "Steps executed: %d\n"
 "\n"
@@ -1143,14 +1150,14 @@ msgid "Test Execute"
 msgstr "Ejecutar test"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:310
-#: code:addons/base_remotecontrol/models/remotecontrol.py:468
+#: code:addons/base_remotecontrol/models/remotecontrol.py:329
+#: code:addons/base_remotecontrol/models/remotecontrol.py:488
 #, python-format
 msgid "Test Failed"
 msgstr "Prueba Fallida"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:304
+#: code:addons/base_remotecontrol/models/remotecontrol.py:323
 #, python-format
 msgid "Test Failed\n"
 "\n"
@@ -1165,14 +1172,14 @@ msgid "Test Run"
 msgstr "Ejecutar Prueba"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:294
-#: code:addons/base_remotecontrol/models/remotecontrol.py:448
+#: code:addons/base_remotecontrol/models/remotecontrol.py:313
+#: code:addons/base_remotecontrol/models/remotecontrol.py:468
 #, python-format
 msgid "Test Successful"
 msgstr "Prueba Exitosa"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:280
+#: code:addons/base_remotecontrol/models/remotecontrol.py:299
 #, python-format
 msgid "Test Successful (dry-run)\n"
 "\n"
@@ -1207,6 +1214,11 @@ msgid "Using the Upsert Helper:"
 msgstr "Usando el Ayudante Upsert:"
 
 #. module: base_remotecontrol
+#: model:ir.model.fields,field_description:base_remotecontrol.field_remotecontrol_connection_params_valid
+msgid "Valid JSON Connector"
+msgstr "JSON válido"
+
+#. module: base_remotecontrol
 #: model:ir.model.fields,field_description:base_remotecontrol.field_remotecontrol_verify_ssl
 msgid "Verify SSL"
 msgstr "Verificar SSL"
@@ -1232,14 +1244,14 @@ msgid "Working with XML:"
 msgstr "Trabajando con XML:"
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:326
+#: code:addons/base_remotecontrol/models/remotecontrol.py:345
 #, python-format
 msgid "You cannot delete a read-only Action."
 msgstr "No puedes eliminar una Acción de solo lectura."
 
 #. module: base_remotecontrol
-#: code:addons/base_remotecontrol/models/remotecontrol.py:168
-#: code:addons/base_remotecontrol/models/remotecontrol.py:506
+#: code:addons/base_remotecontrol/models/remotecontrol.py:186
+#: code:addons/base_remotecontrol/models/remotecontrol.py:526
 #, python-format
 msgid "You cannot delete a read-only Remote Control."
 msgstr "No puedes eliminar un Telecontrol de solo lectura."

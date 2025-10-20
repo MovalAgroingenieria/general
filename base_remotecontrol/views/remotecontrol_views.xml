@@ -7,6 +7,11 @@
         <field name="model">remotecontrol</field>
         <field name="arch" type="xml">
         <form string="Remote Control">
+            <div class="alert alert-danger" role="alert"
+                 attrs="{'invisible': [('connection_params_valid', '=', True)]}">
+                <strong>Configuration Error:</strong> The Connection Parameters field contains invalid JSON format.
+                Please correct the syntax before saving.
+            </div>
             <sheet>
             <div name="buttons" class="oe_button_box">
                 <field name="action_count" invisible="1"/>
@@ -38,6 +43,7 @@
                     widget="ace"
                     options="{'mode': 'json', 'theme': 'monokai'}"
                     nolabel="1"/>
+                    <field name="connection_params_valid" invisible="1"/>
                 </page>
                 <page string="General Help">
                     <div style="padding: 20px;">
