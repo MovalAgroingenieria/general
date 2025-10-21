@@ -33,7 +33,7 @@ class BankPaymentLine(models.Model):
         string="N63 Stage 3 done",
         readonly=True,
         help='Indicates whether this payment has already been added '
-            'to an N63 stage 3')
+             'to an N63 stage 3')
 
 
 class AccountPaymentOrder(models.Model):
@@ -63,7 +63,7 @@ class AccountPaymentOrder(models.Model):
         compute='_compute_payment_mode_name',
         string="Payment mode name")
 
-    #Campos nuevos para n63 fase 1 y 3
+    # New n63 fields for phase 1 & 3
     nrbe_entity_code = fields.Char(
         string="NRBE Entity Code",
         help="Code of the entity that sends the delegated charge to N63")
@@ -88,7 +88,6 @@ class AccountPaymentOrder(models.Model):
     ine_code_issuring_organisation = fields.Char(
         string="INE Code Issuring Organisation",
         help="INE code of the organisation that issues the file")
-
 
     # Methods
     @api.depends('payment_mode_id')
@@ -137,7 +136,7 @@ class AccountPaymentOrder(models.Model):
         header_registre_code = self.REGISTR_CODE_HEADER
         header_line += header_registre_code
         # Position B [02-03] Length 02 Format N
-        #free
+        # free
         pos_b = str(' ' * 2)
         header_line += pos_b
 
@@ -148,12 +147,12 @@ class AccountPaymentOrder(models.Model):
         else:
             header_line += str(' ' * 4)
         # Position D [08-15] Length 08 Format N
-        #free
+        # free
         pos_d = str(' ' * 8)
         header_line += pos_d
 
         # Position E [16-23] Length 08 Format N
-        #free
+        # free
         pos_e = str(' ' * 8)
         header_line += pos_e
 
@@ -167,17 +166,17 @@ class AccountPaymentOrder(models.Model):
         header_line += date_of_obtaining_the_file.replace('-', '')
 
         # Position F3 [33-40] Length 08 Format N
-        #Only for phases 2, 4, and 6
+        # Only for phases 2, 4, and 6
         pos_f3 = str('0' * 8)
         header_line += pos_f3
 
         # Position F4 [41-54] Length 14 Format N
-        #free
+        # free
         pos_f4 = str(' ' * 14)
         header_line += pos_f4
 
         # Position F5 [55-56] Length 02 Format N
-        #free
+        # free
         pos_f5 = str(' ' * 2)
         header_line += pos_f5
 
@@ -196,9 +195,9 @@ class AccountPaymentOrder(models.Model):
                 ine_code_issuring_organisation = (
                     ine_code_issuring_organisation)[:6]
             else:
-                ine_code_issuring_organisation = (str('0' * (6 - len(
-                    ine_code_issuring_organisation)))
-                    + ine_code_issuring_organisation)
+                ine_code_issuring_organisation = (
+                    str('0' * (6 - len(ine_code_issuring_organisation))) +
+                    ine_code_issuring_organisation)
             header_line += ine_code_issuring_organisation[:6]
         else:
             header_line += str('0' * 6)
@@ -221,7 +220,7 @@ class AccountPaymentOrder(models.Model):
         header_line += notebook_version
 
         # Position H2 [117-650] Length 534 Format A
-        #free
+        # free
         pos_h2 = str(' ' * 534)
         header_line += pos_h2
         _log.info('BANK LINE FIELD Total Line         (length %s [651]): %s'
@@ -301,9 +300,9 @@ class AccountPaymentOrder(models.Model):
             pos_c = debit_identifier
 
             if phase == "1":
-                #Stage 1:
+                # Stage 1:
                 # Position D [120-134] Length 15 Format N
-                #free
+                # free
                 pos_d_p1 = str(' ' * 15)
 
                 # Position E [135-142] Length 08 Format N
@@ -315,42 +314,42 @@ class AccountPaymentOrder(models.Model):
                     pos_e_p1 = str(' ' * 8)
 
                 # Position F [143-157] Length 15 Format N
-                #free
+                # free
                 pos_f_p1 = str(' ' * 15)
 
                 # Position G [158-158] Length 01 Format N
-                #free
+                # free
                 pos_g_p1 = str(' ' * 1)
 
                 # Position H [159-166] Length 08 Format N
-                #free
+                # free
                 pos_h_p1 = str(' ' * 8)
 
                 # Position I [167-174] Length 08 Format N
-                #free
+                # free
                 pos_i_p1 = str(' ' * 8)
 
                 # Position J [175-285] Length 111 Format A
-                #free
+                # free
                 pos_j_p1 = str(' ' * 111)
 
                 # Position K [286-291] Length 06 Format N
-                #free
+                # free
                 pos_k_p1 = str(' ' * 6)
 
                 # Position L [292-327] Length 36 Format A
-                #free
+                # free
                 pos_l_p1 = str(' ' * 36)
 
                 # Position M [328-650] Length 323 Format A
-                #free
+                # free
                 pos_m_p1 = str(' ' * 323)
                 bank_line = (pos_a + pos_b1 + pos_b2 + pos_b3 + pos_b4 +
                              pos_b5 + pos_c + pos_d_p1 + pos_e_p1 + pos_f_p1 +
                              pos_g_p1 + pos_h_p1 + pos_i_p1 + pos_j_p1 +
                              pos_k_p1 + pos_l_p1 + pos_m_p1 + '\r\n')
             if phase == "3":
-                #Stage 3:
+                # Stage 3:
                 # Position D [120-134] Length 15 Format N
                 total_amount_attached = payment.amount_currency
                 formatted_total_amount_attached = (
@@ -376,19 +375,19 @@ class AccountPaymentOrder(models.Model):
                     pos_e_p3 = str(' ' * 8)
 
                 # Position F [143-157] Length 15 Format N
-                #free
+                # free
                 pos_f_p3 = str(' ' * 15)
 
                 # Position G [158-158] Length 01 Format N
-                #free
+                # free
                 pos_g_p3 = str(' ' * 1)
 
                 # Position H [159-166] Length 08 Format N
-                #free
+                # free
                 pos_h_p3 = str(' ' * 8)
 
                 # Position I [167-174] Length 08 Format N
-                #free
+                # free
                 pos_i_p3 = str(' ' * 8)
 
                 # Position J [175-420] Length 246 Format A
@@ -397,32 +396,34 @@ class AccountPaymentOrder(models.Model):
                 bank_ids = payment.partner_id.bank_ids
                 if bank_ids:
                     if bank_ids[0] and bank_ids[0].acc_number:
-                        account_bank_1 = bank_ids[0].acc_number
+                        account_bank_1 = bank_ids[0].acc_number.replace(
+                            ' ', '')
                         if len(account_bank_1) > 24:
                             pos_j1_p3 = account_bank_1[:24]
                         else:
-                            pos_j1_p3 = account_bank_1 + str(' ' * (
-                                    24 - len(account_bank_1)))
+                            pos_j1_p3 = account_bank_1 + str(' ' * (24 - len(
+                                account_bank_1)))
                     else:
                         pos_j1_p3 = str(' ' * 24)
 
                     # Position J2 [199-200] Length 02 Format N
-                    #free
+                    # free
                     pos_j2_p3 = str(' ' * 2)
 
                     # Position J3 [201-215] Length 15 Format N
-                    #free
+                    # free
                     pos_j3_p3 = str(' ' * 15)
 
                     # Position J4 [216-239] Length 24 Format A
                     if len(bank_ids) > 1:
                         if bank_ids[1].acc_number:
-                            account_bank_2 = bank_ids[1].acc_number
+                            account_bank_2 = bank_ids[1].acc_number.replace(
+                                ' ', '')
                             if len(account_bank_2) > 24:
                                 pos_j4_p3 = account_bank_2[:24]
                             else:
                                 pos_j4_p3 = account_bank_2 + str(' ' * (
-                                        24 - len(account_bank_2)))
+                                    24 - len(account_bank_2)))
                         else:
                             pos_j4_p3 = str(' ' * 24)
                     else:
@@ -439,12 +440,13 @@ class AccountPaymentOrder(models.Model):
                     # Position J7 [257-280] Length 24 Format A
                     if len(bank_ids) > 2:
                         if bank_ids[2].acc_number:
-                            account_bank_3 = bank_ids[2].acc_number
+                            account_bank_3 = bank_ids[2].acc_number.replace(
+                                ' ', '')
                             if len(account_bank_3) > 24:
                                 pos_j7_p3 = account_bank_3[:24]
                             else:
                                 pos_j7_p3 = account_bank_3 + str(' ' * (
-                                        24 - len(account_bank_3)))
+                                    24 - len(account_bank_3)))
                         else:
                             pos_j7_p3 = str(' ' * 24)
                     else:
@@ -461,12 +463,13 @@ class AccountPaymentOrder(models.Model):
                     # Position J10 [298-321] Length 24 Format A
                     if len(bank_ids) > 3:
                         if bank_ids[3].acc_number:
-                            account_bank_4 = bank_ids[3].acc_number
+                            account_bank_4 = bank_ids[3].acc_number.replace(
+                                ' ', '')
                             if len(account_bank_4) > 24:
                                 pos_j10_p3 = account_bank_4[:24]
                             else:
                                 pos_j10_p3 = account_bank_4 + str(' ' * (
-                                        24 - len(account_bank_4)))
+                                    24 - len(account_bank_4)))
                         else:
                             pos_j10_p3 = str(' ' * 24)
                     else:
@@ -483,12 +486,13 @@ class AccountPaymentOrder(models.Model):
                     # Position J13 [339-362] Length 24 Format A
                     if len(bank_ids) > 4:
                         if bank_ids[4].acc_number:
-                            account_bank_5 = bank_ids[4].acc_number
+                            account_bank_5 = bank_ids[4].acc_number.replace(
+                                ' ', '')
                             if len(account_bank_5) > 24:
                                 pos_j13_p3 = account_bank_5[:24]
                             else:
                                 pos_j13_p3 = account_bank_5 + str(' ' * (
-                                        24 - len(account_bank_5)))
+                                    24 - len(account_bank_5)))
                         else:
                             pos_j13_p3 = str(' ' * 24)
                     else:
@@ -505,12 +509,13 @@ class AccountPaymentOrder(models.Model):
                     # Position J16 [380-403] Length 24 Format A
                     if len(bank_ids) > 5:
                         if bank_ids[5].acc_number:
-                            account_bank_6 = bank_ids[5].acc_number
+                            account_bank_6 = bank_ids[5].acc_number.replace(
+                                ' ', '')
                             if len(account_bank_6) > 24:
                                 pos_j16_p3 = account_bank_6[:24]
                             else:
                                 pos_j16_p3 = account_bank_6 + str(' ' * (
-                                        24 - len(account_bank_6)))
+                                    24 - len(account_bank_6)))
                         else:
                             pos_j16_p3 = str(' ' * 24)
                     else:
@@ -540,129 +545,131 @@ class AccountPaymentOrder(models.Model):
                 pos_l_p3 = str(' ' * 72)
 
                 # Position M [499-650] Length 152 Format A
-                #free
+                # free
                 pos_m_p3 = str(' ' * 152)
                 bank_line = (pos_a + pos_b1 + pos_b2 + pos_b3 + pos_b4 +
-                            pos_b5 + pos_c + pos_d_p3 + pos_e_p3 + pos_f_p3 +
-                            pos_g_p3 + pos_h_p3 + pos_i_p3 + pos_j_p3 +
-                            pos_k_p3 + pos_l_p3 + pos_m_p3 + '\r\n')
+                             pos_b5 + pos_c + pos_d_p3 + pos_e_p3 + pos_f_p3 +
+                             pos_g_p3 + pos_h_p3 + pos_i_p3 + pos_j_p3 +
+                             pos_k_p3 + pos_l_p3 + pos_m_p3 + '\r\n')
 
             qty_registers += 1
             # Log the payment file
             # Log bank line fields with length [and expected length]
             _log.info('NEW BANK LINE. Number %s #########################'
                       % str(nif_customer).zfill(5))
-            _log.info('BANK LINE FIELD Registre Code      (length %s [001]): %s'
+            _log.info('BANK LINE FIELD Registre Code     (length %s [001]): %s'
                       % (str(len(pos_a)).zfill(3), pos_a))
-            _log.info('BANK LINE FIELD NIF                (length %s [009]): %s'
+            _log.info('BANK LINE FIELD NIF               (length %s [009]): %s'
                       % (str(len(pos_b1)).zfill(3), pos_b1))
-            _log.info('BANK LINE FIELD Customer Name      (length %s [040]): %s'
+            _log.info('BANK LINE FIELD Customer Name     (length %s [040]): %s'
                       % (str(len(pos_b2)).zfill(3), pos_b2))
-            _log.info('BANK LINE FIELD Customer Address   (length %s [039]): %s'
+            _log.info('BANK LINE FIELD Customer Address  (length %s [039]): %s'
                       % (str(len(pos_b3)).zfill(3), pos_b3))
-            _log.info('BANK LINE FIELD Town               (length %s [012]): %s'
+            _log.info('BANK LINE FIELD Town              (length %s [012]): %s'
                       % (str(len(pos_b4)).zfill(3), pos_b4))
-            _log.info('BANK LINE FIELD Postal Code        (length %s [005]): %s'
+            _log.info('BANK LINE FIELD Postal Code       (length %s [005]): %s'
                       % (str(len(pos_b5)).zfill(3), pos_b5))
-            _log.info('BANK LINE FIELD Debit Identifier   (length %s [013]): %s'
+            _log.info('BANK LINE FIELD Debit Identifier  (length %s [013]): %s'
                       % (str(len(pos_c)).zfill(3), pos_c))
             if phase == "1":
-                _log.info('BANK LINE FIELD Free Pos D         (length %s [015])'
+                _log.info('BANK LINE FIELD Free Pos D        (length %s [015])'
                           ': %s' % (str(len(pos_d_p1)).zfill(3), pos_d_p1))
-                _log.info('BANK LINE FIELD Opt Debit Id       (length %s [008])'
+                _log.info('BANK LINE FIELD Opt Debit Id      (length %s [008])'
                           ': %s' % (str(len(pos_e_p1)).zfill(3), pos_e_p1))
-                _log.info('BANK LINE FIELD Free Pos F         (length %s [015])'
+                _log.info('BANK LINE FIELD Free Pos F        (length %s [015])'
                           ': %s' % (str(len(pos_f_p1)).zfill(3), pos_f_p1))
-                _log.info('BANK LINE FIELD Free Pos G         (length %s [001])'
+                _log.info('BANK LINE FIELD Free Pos G        (length %s [001])'
                           ': %s' % (str(len(pos_g_p1)).zfill(3), pos_g_p1))
-                _log.info('BANK LINE FIELD Free Pos H         (length %s [008])'
+                _log.info('BANK LINE FIELD Free Pos H        (length %s [008])'
                           ': %s' % (str(len(pos_h_p1)).zfill(3), pos_h_p1))
-                _log.info('BANK LINE FIELD Free Pos I         (length %s [008])'
+                _log.info('BANK LINE FIELD Free Pos I        (length %s [008])'
                           ': %s' % (str(len(pos_i_p1)).zfill(3), pos_i_p1))
-                _log.info('BANK LINE FIELD Free Pos J         (length %s [111])'
+                _log.info('BANK LINE FIELD Free Pos J        (length %s [111])'
                           ': %s' % (str(len(pos_j_p1)).zfill(3), pos_j_p1))
-                _log.info('BANK LINE FIELD Free Pos K         (length %s [006])'
+                _log.info('BANK LINE FIELD Free Pos K        (length %s [006])'
                           ': %s' % (str(len(pos_k_p1)).zfill(3), pos_k_p1))
-                _log.info('BANK LINE FIELD Free Pos L         (length %s [036])'
+                _log.info('BANK LINE FIELD Free Pos L        (length %s [036])'
                           ': %s' % (str(len(pos_l_p1)).zfill(3), pos_l_p1))
-                _log.info('BANK LINE FIELD Free Pos M         (length %s [323])'
+                _log.info('BANK LINE FIELD Free Pos M        (length %s [323])'
                           ': %s' % (str(len(pos_m_p1)).zfill(3), pos_m_p1))
             if phase == "3":
-                _log.info('BANK LINE FIELD Tot amount att    (length %s [015]):'
+                _log.info('BANK LINE FIELD Tot amount att   (length %s [015]):'
                           ' %s' % (str(len(pos_d_p3)).zfill(3), pos_d_p3))
-                _log.info('BANK LINE FIELD Opt Debit Id      (length %s [008]):'
+                _log.info('BANK LINE FIELD Opt Debit Id     (length %s [008]):'
                           ' %s' % (str(len(pos_e_p3)).zfill(3), pos_e_p3))
-                _log.info('BANK LINE FIELD Free Pos F        (length %s [015]):'
+                _log.info('BANK LINE FIELD Free Pos F       (length %s [015]):'
                           ' %s' % (str(len(pos_f_p3)).zfill(3), pos_f_p3))
-                _log.info('BANK LINE FIELD Free Pos G        (length %s [001]):'
-                          ' %s'  % (str(len(pos_g_p3)).zfill(3), pos_g_p3))
-                _log.info('BANK LINE FIELD Free Pos H        (length %s [008]):'
+                _log.info('BANK LINE FIELD Free Pos G       (length %s [001]):'
+                          ' %s' % (str(len(pos_g_p3)).zfill(3), pos_g_p3))
+                _log.info('BANK LINE FIELD Free Pos H       (length %s [008]):'
                           ' %s' % (str(len(pos_h_p3)).zfill(3), pos_h_p3))
-                _log.info('BANK LINE FIELD Free Pos I        (length %s [008]):'
+                _log.info('BANK LINE FIELD Free Pos I       (length %s [008]):'
                           ' %s' % (str(len(pos_i_p3)).zfill(3), pos_i_p3))
                 if bank_ids:
-                    _log.info('BANK LINE FIELD Acc Bank 1     (length %s [024])'
+                    _log.info('BANK LINE FIELD Acc Bank 1    (length %s [024])'
                               ': %s' % (str(len(pos_j1_p3)).zfill(3),
                                         pos_j1_p3))
-                    _log.info('BANK LINE FIELD Free J2        length %s [002]):'
-                              ' %s' % (str(len(pos_j2_p3)).zfill(3), pos_j2_p3))
-                    _log.info('BANK LINE FIELD Free J3        length %s [015]):'
-                              ' %s' % (str(len(pos_j3_p3)).zfill(3), pos_j3_p3))
-                    _log.info('BANK LINE FIELD Acc Bank 2     (length %s [024])'
+                    _log.info('BANK LINE FIELD Free J2      length %s [002]):'
+                              ' %s' % (str(len(pos_j2_p3)).zfill(3), pos_j2_p3)
+                              )
+                    _log.info('BANK LINE FIELD Free J3       length %s [015]):'
+                              ' %s' % (str(len(pos_j3_p3)).zfill(3), pos_j3_p3)
+                              )
+                    _log.info('BANK LINE FIELD Acc Bank 2    (length %s [024])'
                               ': %s' % (str(len(pos_j4_p3)).zfill(3),
                                         pos_j4_p3))
-                    _log.info('BANK LINE FIELD Free J5        (length %s [002])'
+                    _log.info('BANK LINE FIELD Free J5       (length %s [002])'
                               ': %s' % (str(len(pos_j5_p3)).zfill(3),
                                         pos_j5_p3))
-                    _log.info('BANK LINE FIELD Free J6        (length %s [015])'
+                    _log.info('BANK LINE FIELD Free J6       (length %s [015])'
                               ': %s' % (str(len(pos_j6_p3)).zfill(3),
                                         pos_j6_p3))
-                    _log.info('BANK LINE FIELD Acc Bank 3     (length %s [024])'
+                    _log.info('BANK LINE FIELD Acc Bank 3    (length %s [024])'
                               ': %s' % (str(len(pos_j7_p3)).zfill(3),
                                         pos_j7_p3))
-                    _log.info('BANK LINE FIELD Free J8        (length %s [002])'
+                    _log.info('BANK LINE FIELD Free J8       (length %s [002])'
                               ': %s' % (str(len(pos_j8_p3)).zfill(3),
                                         pos_j8_p3))
-                    _log.info('BANK LINE FIELD Free J9        (length %s [015])'
+                    _log.info('BANK LINE FIELD Free J9       (length %s [015])'
                               ': %s' % (str(len(pos_j9_p3)).zfill(3),
                                         pos_j9_p3))
-                    _log.info('BANK LINE FIELD Acc Bank 4     (length %s [024])'
+                    _log.info('BANK LINE FIELD Acc Bank 4    (length %s [024])'
                               ': %s' % (str(len(pos_j10_p3)).zfill(3),
                                         pos_j10_p3))
-                    _log.info('BANK LINE FIELD Free J11       (length %s [002])'
+                    _log.info('BANK LINE FIELD Free J11      (length %s [002])'
                               ': %s' % (str(len(pos_j11_p3)).zfill(3),
                                         pos_j11_p3))
-                    _log.info('BANK LINE FIELD Free J12       (length %s [015])'
+                    _log.info('BANK LINE FIELD Free J12      (length %s [015])'
                               ': %s' % (str(len(pos_j12_p3)).zfill(3),
                                         pos_j12_p3))
-                    _log.info('BANK LINE FIELD Acc Bank 5     (length %s [024])'
+                    _log.info('BANK LINE FIELD Acc Bank 5    (length %s [024])'
                               ': %s' % (str(len(pos_j13_p3)).zfill(3),
                                         pos_j13_p3))
-                    _log.info('BANK LINE FIELD Free J14       (length %s [002])'
+                    _log.info('BANK LINE FIELD Free J14      (length %s [002])'
                               ': %s' % (str(len(pos_j14_p3)).zfill(3),
                                         pos_j14_p3))
-                    _log.info('BANK LINE FIELD Free J15       (length %s [015])'
+                    _log.info('BANK LINE FIELD Free J15      (length %s [015])'
                               ': %s' % (str(len(pos_j15_p3)).zfill(3),
                                         pos_j15_p3))
-                    _log.info('BANK LINE FIELD Acc Bank 6     (length %s [024])'
+                    _log.info('BANK LINE FIELD Acc Bank 6    (length %s [024])'
                               ': %s' % (str(len(pos_j16_p3)).zfill(3),
                                         pos_j16_p3))
-                    _log.info('BANK LINE FIELD Free J17       (length %s [002])'
+                    _log.info('BANK LINE FIELD Free J17      (length %s [002])'
                               ': %s' % (str(len(pos_j17_p3)).zfill(3),
                                         pos_j17_p3))
-                    _log.info('BANK LINE FIELD Free J18       (length %s [015])'
+                    _log.info('BANK LINE FIELD Free J18      (length %s [015])'
                               ': %s' % (str(len(pos_j18_p3)).zfill(3),
                                         pos_j18_p3))
-                    _log.info('BANK LINE FIELD Free Pos K     (length %s [006])'
+                    _log.info('BANK LINE FIELD Free Pos K    (length %s [006])'
                               ': %s' % (str(len(pos_k_p3)).zfill(3), pos_k_p3))
                 else:
-                    _log.info('BANK LINE FIELD Free Pos J        (length %s [24'
+                    _log.info('BANK LINE FIELD Free Pos J       (length %s [24'
                               '6]): %s' % (str(len(pos_j_p3)).zfill(3),
                                            pos_j_p3))
-                _log.info('BANK LINE FIELD Free Pos L        (length %s [072]):'
+                _log.info('BANK LINE FIELD Free Pos L       (length %s [072]):'
                           ' %s' % (str(len(pos_l_p3)).zfill(3), pos_l_p3))
 
-                _log.info('BANK LINE FIELD Free Pos M        (length %s [152]):'
+                _log.info('BANK LINE FIELD Free Pos M       (length %s [152]):'
                           ' %s' % (str(len(pos_m_p3)).zfill(3), pos_m_p3))
             _log.info('BANK LINE FIELD Total Line        (length %s [651]): %s'
                       % (str(len(bank_line)).zfill(3), bank_line))
@@ -721,9 +728,9 @@ class AccountPaymentOrder(models.Model):
                 ine_code_issuring_organisation = (
                     ine_code_issuring_organisation)[:6]
             else:
-                ine_code_issuring_organisation = (str('0' * (6 - len(
-                    ine_code_issuring_organisation)))
-                    + ine_code_issuring_organisation)
+                ine_code_issuring_organisation = (
+                    str('0' * (6 - len(ine_code_issuring_organisation))) +
+                    ine_code_issuring_organisation)
             footer_line += ine_code_issuring_organisation
         else:
             footer_line += str('0' * 6)
@@ -752,7 +759,7 @@ class AccountPaymentOrder(models.Model):
 
         # Send to the file and encode
         payment_file_str = n63_book.encode(
-             self.ENCODING_NAME, self.ENCODING_TYPE)
+            self.ENCODING_NAME, self.ENCODING_TYPE)
 
         # Generate filename
         filename = (datetime.today().strftime("%Y%m%d") + 'F' +
