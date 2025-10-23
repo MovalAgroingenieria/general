@@ -28,27 +28,27 @@
 
   <!-- Record Rules -->
   <data>
-    <!-- Telework User: Only sees own declarations -->
-    <record id="rule_telework_day_user_own" model="ir.rule">
-      <field name="name">Telework Declarations: User - Own Only</field>
+    <!-- Telework User: Can read all declarations (for dashboard) -->
+    <record id="rule_telework_day_user_read_all" model="ir.rule">
+      <field name="name">Telework Declarations: User - Read All</field>
       <field name="model_id" ref="model_hr_telework_day"/>
       <field name="groups" eval="[(4, ref('group_telework_user'))]"/>
-      <field name="domain_force">[("employee_id.user_id","=",user.id)]</field>
+      <field name="domain_force">[(1,'=',1)]</field>
       <field name="perm_read" eval="True"/>
       <field name="perm_write" eval="False"/>
-      <field name="perm_create" eval="True"/>
+      <field name="perm_create" eval="False"/>
       <field name="perm_unlink" eval="False"/>
     </record>
 
-    <!-- Telework User: Can only edit own draft declarations -->
-    <record id="rule_telework_day_user_edit_draft" model="ir.rule">
-      <field name="name">Telework Declarations: User - Edit own drafts only</field>
+    <!-- Telework User: Can only write/create/delete own declarations -->
+    <record id="rule_telework_day_user_write_own" model="ir.rule">
+      <field name="name">Telework Declarations: User - Write Own Only</field>
       <field name="model_id" ref="model_hr_telework_day"/>
       <field name="groups" eval="[(4, ref('group_telework_user'))]"/>
-      <field name="domain_force">[("employee_id.user_id","=",user.id), ("state","in",["draft","pending_review"])]</field>
+      <field name="domain_force">[("employee_id.user_id","=",user.id)]</field>
       <field name="perm_read" eval="False"/>
       <field name="perm_write" eval="True"/>
-      <field name="perm_create" eval="False"/>
+      <field name="perm_create" eval="True"/>
       <field name="perm_unlink" eval="True"/>
     </record>
 
@@ -60,24 +60,44 @@
       <field name="domain_force">[(1,'=',1)]</field>
     </record>
 
-    <!-- HR Manager: Sees records from their department -->
+    <!-- HR Manager: Sees all records from the company -->
     <record id="rule_telework_day_hr_manager" model="ir.rule">
-      <field name="name">Telework Declarations: HR Manager - Department</field>
+      <field name="name">Telework Declarations: HR Manager - All</field>
       <field name="model_id" ref="model_hr_telework_day"/>
       <field name="groups" eval="[(4, ref('hr.group_hr_manager'))]"/>
-      <field name="domain_force">[("department_id.manager_id.user_id","=",user.id)]</field>
+      <field name="domain_force">[(1,'=',1)]</field>
     </record>
 
-    <!-- Telework User: Can only edit draft declarations -->
-    <record id="rule_telework_day_user_edit" model="ir.rule">
-      <field name="name">Telework Declarations: User - Edit own drafts only</field>
-      <field name="model_id" ref="model_hr_telework_day"/>
+    <!-- Weekly Declaration: User can read all -->
+    <record id="rule_weekly_declaration_user_read_all" model="ir.rule">
+      <field name="name">Weekly Declarations: User - Read All</field>
+      <field name="model_id" ref="model_weekly_telework_declaration"/>
       <field name="groups" eval="[(4, ref('group_telework_user'))]"/>
-      <field name="domain_force">[("employee_id.user_id","=",user.id), ("state","in",["draft","pending_review"])]</field>
+      <field name="domain_force">[(1,'=',1)]</field>
+      <field name="perm_read" eval="True"/>
+      <field name="perm_write" eval="False"/>
+      <field name="perm_create" eval="False"/>
+      <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- Weekly Declaration: User can only write/create/delete own -->
+    <record id="rule_weekly_declaration_user_write_own" model="ir.rule">
+      <field name="name">Weekly Declarations: User - Write Own Only</field>
+      <field name="model_id" ref="model_weekly_telework_declaration"/>
+      <field name="groups" eval="[(4, ref('group_telework_user'))]"/>
+      <field name="domain_force">[("employee_id.user_id","=",user.id)]</field>
       <field name="perm_read" eval="False"/>
       <field name="perm_write" eval="True"/>
       <field name="perm_create" eval="True"/>
-      <field name="perm_unlink" eval="False"/>
+      <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Weekly Declaration: Manager sees all -->
+    <record id="rule_weekly_declaration_manager_all" model="ir.rule">
+      <field name="name">Weekly Declarations: Manager - All</field>
+      <field name="model_id" ref="model_weekly_telework_declaration"/>
+      <field name="groups" eval="[(4, ref('group_telework_manager'))]"/>
+      <field name="domain_force">[(1,'=',1)]</field>
     </record>
 
     <!-- Rules for Offices - Only managers can modify -->
