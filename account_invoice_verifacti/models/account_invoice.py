@@ -276,6 +276,13 @@ class AccountInvoice(models.Model):
                     ) % invoice_type)
 
         lineas = []
+        # For rectificative invoices (R1-R5), amounts should be negative
+        # In Odoo, out_refund amounts come as negative, but we need to ensure they stay negative
+        is_rectificative = (
+            self.type == 'out_refund' and
+            invoice_type in ['R1', 'R2', 'R3', 'R4', 'R5']
+        )
+
         if self.tax_line_ids:
             if len(self.tax_line_ids) > 12:
                 notify = _(
@@ -288,7 +295,11 @@ class AccountInvoice(models.Model):
                 tax = tax_line.tax_id
 
                 line_item = OrderedDict()
-                line_item['base_imponible'] = '{:.2f}'.format(tax_line.base)
+                # For rectificative invoices, ensure amounts are negative
+                base_amount = tax_line.base
+                if is_rectificative and base_amount > 0:
+                    base_amount = -base_amount
+                line_item['base_imponible'] = '{:.2f}'.format(base_amount)
 
                 exempt_operation = self._get_exempt_operation(tax)
 
@@ -296,12 +307,20 @@ class AccountInvoice(models.Model):
                     line_item['operacion_exenta'] = exempt_operation
                 else:
                     line_item['tipo_impositivo'] = '{:.2f}'.format(tax.amount)
-                    line_item['cuota_repercutida'] = '{:.2f}'.format(tax_line.amount)
+                    # For rectificative invoices, ensure amounts are negative
+                    tax_amount = tax_line.amount
+                    if is_rectificative and tax_amount > 0:
+                        tax_amount = -tax_amount
+                    line_item['cuota_repercutida'] = '{:.2f}'.format(tax_amount)
 
                     surcharge_info = self._get_equivalence_surcharge(tax_line)
                     if surcharge_info:
                         line_item['tipo_recargo_equivalencia'] = '{:.2f}'.format(surcharge_info['tipo'])
-                        line_item['cuota_recargo_equivalencia'] = '{:.2f}'.format(surcharge_info['cuota'])
+                        # For rectificative invoices, ensure amounts are negative
+                        surcharge_amount = surcharge_info['cuota']
+                        if is_rectificative and surcharge_amount > 0:
+                            surcharge_amount = -surcharge_amount
+                        line_item['cuota_recargo_equivalencia'] = '{:.2f}'.format(surcharge_amount)
 
                 if hasattr(tax, 'verifacti_tax_type') and tax.verifacti_tax_type and tax.verifacti_tax_type != '01':
                     line_item['impuesto'] = tax.verifacti_tax_type
@@ -321,7 +340,11 @@ class AccountInvoice(models.Model):
                 lineas.append(line_item)
         else:
             line_item = OrderedDict()
-            line_item['base_imponible'] = '{:.2f}'.format(self.amount_untaxed)
+            # For rectificative invoices, ensure amounts are negative
+            base_untaxed = self.amount_untaxed
+            if is_rectificative and base_untaxed > 0:
+                base_untaxed = -base_untaxed
+            line_item['base_imponible'] = '{:.2f}'.format(base_untaxed)
             line_item['tipo_impositivo'] = '0.00'
             line_item['cuota_repercutida'] = '0.00'
 
@@ -359,7 +382,11 @@ class AccountInvoice(models.Model):
                 if rectification_amount:
                     invoice_data['importe_rectificativa'] = rectification_amount
 
-        invoice_data['importe_total'] = '{:.2f}'.format(self.amount_total)
+        # For rectificative invoices, ensure amounts are negative
+        total_amount = self.amount_total
+        if is_rectificative and total_amount > 0:
+            total_amount = -total_amount
+        invoice_data['importe_total'] = '{:.2f}'.format(total_amount)
 
         regime_code = self._get_regime_code(None)
         if regime_code not in ['03', '05', '06', '08', '09']:
