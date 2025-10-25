@@ -5,21 +5,21 @@
         <field name="name">Grafana Dashboard Storage (form view)</field>
         <field name="model">board.grafana.dashboard.storage</field>
         <field name="arch" type="xml">
-            <form>
+            <form duplicate="false" string="Grafana Dashboard Storage">
                 <header>
                     <button name="action_import_to_grafana"
                         string="Import to Grafana"
                         type="object"
                         class="btn-primary"
                         attrs="{'invisible': [('dashboard_json', '=', False)]}"
-                        confirm="If the board already exists in Grafana it will be overwritten. Continue?"/>
+                        confirm="If the board UID already exists in Grafana it will be overwritten. Continue?"/>
                 </header>
                 <sheet>
                     <group name="main_data">
                         <group name="dashboard_data" string="Dashboard">
                             <field name="name"/>
-                            <field name="dashboard_title" attrs="{'required': [('integrated_dashboard', '=', True)]}"/>
-                            <field name="dashboard_uid" attrs="{'required': [('integrated_dashboard', '=', True)]}"/>
+                            <field name="dashboard_title"/>
+                            <field name="dashboard_uid"/>
                             <field name="integrated_panel_id" attrs="{'invisible': [('integrated_panel_only', '=', False)],
                                                                       'required': [('integrated_panel_only', '=', True)]}"/>
                         </group>

@@ -4,8 +4,11 @@
 
 import json
 import requests
-from odoo import models, fields, api, exceptions, _
 import logging
+import random
+import string
+from collections import OrderedDict
+from odoo import models, fields, api, exceptions, _
 
 _logger = logging.getLogger(__name__)
 
@@ -14,6 +17,14 @@ class BoardGrafana(models.Model):
     _name = "board.grafana.dashboard.storage"
     _description = "Storage of Grafana Dashboards"
 
+    def _default_dashboard_uid(self):
+        if not self.dashboard_uid:
+            chars = string.ascii_letters + string.digits
+            dashboard_uid = ''.join(random.choice(chars) for _ in range(10))
+        else:
+            dashboard_uid = self.dashboard_uid
+        return dashboard_uid
+
     name = fields.Char(
         string="Dashboard name",
         readonly=False,
@@ -21,23 +32,23 @@ class BoardGrafana(models.Model):
 
     dashboard_title = fields.Char(
         string="Dashboard title",
-        compute="_compute_dashboard_title",
-        readonly=False,
+        required=True,
         help="The title of the embebbed dashboard.")
 
     dashboard_uid = fields.Char(
         string="Dashboard uid",
-        compute="_compute_dashboard_uid",
-        readonly=False,
+        required=True,
+        default=_default_dashboard_uid,
         help="The id of the embebbed dashboard.")
 
     dashboard_path = fields.Char(
         string="Dashboard path",
-        readonly=False,
         compute="_compute_dashboard_path")
 
     dashboard_json = fields.Text(
-        string="JSON Content")
+        string="JSON Content",
+        required=True,
+        help="The JSON content of the Grafana dashboard.")
 
     integrated_dashboard = fields.Boolean(
         string="Integrated Dashboard",
@@ -68,32 +79,6 @@ class BoardGrafana(models.Model):
          'The dashboard name must be unique!'),
     ]
 
-    @api.depends("dashboard_json")
-    def _compute_dashboard_title(self):
-        for record in self:
-            dashboard_title = dashboard_data = ""
-            if record.dashboard_json:
-                try:
-                    dashboard_data = json.loads(record.dashboard_json)
-                except ValueError as e:
-                    raise exceptions.UserError(_(
-                        "Invalid JSON. Dashboard '%s': %s") % (self.name, e))
-                dashboard_title = dashboard_data.get("title", "")
-            record.dashboard_title = dashboard_title
-
-    @api.depends("dashboard_json")
-    def _compute_dashboard_uid(self):
-        for record in self:
-            dashboard_uid = dashboard_data = ""
-            if record.dashboard_json:
-                try:
-                    dashboard_data = json.loads(record.dashboard_json)
-                except ValueError as e:
-                    raise exceptions.UserError(_(
-                        "Invalid JSON. Dashboard '%s': %s") % (self.name, e))
-                dashboard_uid = dashboard_data.get("uid", "")
-            record.dashboard_uid = dashboard_uid
-
     @api.depends("dashboard_uid", "dashboard_title",
                  "integrated_panel_only", "integrated_panel_id")
     def _compute_dashboard_path(self):
@@ -112,23 +97,12 @@ class BoardGrafana(models.Model):
     @api.multi
     def action_import_to_grafana(self):
         self.ensure_one()
-        # Check json
-        dashboard_title = dashboard_uid = dashboard_data = ""
+        dashboard_data = ""
         try:
             dashboard_data = json.loads(self.dashboard_json)
         except ValueError as e:
             raise exceptions.UserError(_(
                 "Invalid JSON for dashboard '%s': %s") % (self.name, e))
-        dashboard_title = dashboard_data.get("title", "")
-        dashboard_uid = dashboard_data.get("uid", "")
-        if dashboard_title != self.dashboard_title:
-            raise exceptions.UserError(_(
-                "Dashboard title '%s' does not match the JSON title '%s'.") % (
-                    self.name, dashboard_title))
-        if dashboard_uid != self.dashboard_uid:
-            raise exceptions.UserError(_(
-                "Dashboard id '%s' does not match the JSON uid '%s'.") % (
-                    self.dashboard_uid, dashboard_uid))
         # Vars
         buttons = [{'type': 'ir.actions.act_window_close', 'name': _('Close')}]
         message = ""
@@ -171,3 +145,32 @@ class BoardGrafana(models.Model):
             'buttons': buttons
             }
         return act_window
+
+    @api.multi
+    def write(self, vals):
+        if 'dashboard_title' in vals or 'dashboard_uid' in vals:
+            try:
+                dashboard_data = json.loads(
+                    self.dashboard_json, object_pairs_hook=OrderedDict)
+            except ValueError as e:
+                raise exceptions.UserError(_(
+                    "Invalid JSON. Dashboard '%s': %s") % (self.name, e))
+            if 'dashboard_title' in vals:
+                dashboard_data["title"] = vals['dashboard_title']
+            if 'dashboard_uid' in vals:
+                dashboard_data["uid"] = vals['dashboard_uid']
+            self.dashboard_json = json.dumps(dashboard_data, indent=2)
+        return super(BoardGrafana, self).write(vals)
+
+    @api.model
+    def create(self, vals):
+        try:
+            dashboard_data = json.loads(
+                vals['dashboard_json'], object_pairs_hook=OrderedDict)
+        except ValueError as e:
+            raise exceptions.UserError(_(
+                "Invalid JSON. Dashboard '%s': %s") % (vals['name'], e))
+        dashboard_data["title"] = vals['dashboard_title']
+        dashboard_data["uid"] = vals['dashboard_uid']
+        vals['dashboard_json'] = json.dumps(dashboard_data, indent=2)
+        return super(BoardGrafana, self).create(vals)
