@@ -6,14 +6,20 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-25 12:06+0000\n"
-"PO-Revision-Date: 2025-10-25 12:06+0000\n"
+"POT-Creation-Date: 2025-10-26 18:13+0000\n"
+"PO-Revision-Date: 2025-10-26 18:13+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: board_grafana_integration
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:134
+#, python-format
+msgid "<a href='%s'>Open in Grafana</a>"
+msgstr "<a href='%s'>Abrir en Grafana</a>"
 
 #. module: board_grafana_integration
 #: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_config_settings_view_form
@@ -31,7 +37,7 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:107
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:104
 #, python-format
 msgid "Close"
 msgstr "Cerrar"
@@ -56,7 +62,7 @@ msgid "Dashboard"
 msgstr "Panel de control"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:131
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:128
 #, python-format
 msgid "Dashboard '%s' imported successfully."
 msgstr "Panel de control '%s' importado correctamente."
@@ -69,28 +75,28 @@ msgstr "Altura panel de control"
 #. module: board_grafana_integration
 #: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_dashboard_storage_view_form
 msgid "Dashboard json"
-msgstr "Panel de control json"
+msgstr "JSON"
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_name
 msgid "Dashboard name"
-msgstr "Nombre del panel de control"
+msgstr "Nombre"
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_dashboard_path
 msgid "Dashboard path"
-msgstr "Ruta del panel de control"
+msgstr "Ruta"
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_dashboard_title
 msgid "Dashboard title"
-msgstr "Título del panel de control"
+msgstr "Título"
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_dashboard_uid
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_dashboard_uid
 msgid "Dashboard uid"
-msgstr "Panel de control UID"
+msgstr "UID"
 
 #. module: board_grafana_integration
 #: model:ir.actions.act_window,name:board_grafana_integration.grafana_dashboard_storage_action
@@ -108,10 +114,10 @@ msgstr "Fuente de datos por defecto"
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_display_name
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_display_name
 msgid "Display Name"
-msgstr "Nombre mostrado"
+msgstr "Nombre a mostrar"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:137
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:141
 #, python-format
 msgid "Failed to import dashboard '%s'. HTTP %s: %s"
 msgstr "Error importando el panel de control '%s'. HTTP %s: %s"
@@ -145,7 +151,7 @@ msgid "Grafana API Key"
 msgstr "Grafana llave API"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:141
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:145
 #, python-format
 msgid "Grafana Dashboard Import"
 msgstr "Importación panel de control Grafana"
@@ -163,7 +169,7 @@ msgid "Grafana URL"
 msgstr "URL Grafana"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:115
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:112
 #, python-format
 msgid "Grafana URL or API key not found."
 msgstr "No se ha encontrado la URL o la llave API de Grafana."
@@ -219,7 +225,7 @@ msgstr "Si solo está integrado un panel del panel de control."
 #. module: board_grafana_integration
 #: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_dashboard_storage_view_form
 msgid "If the board UID already exists in Grafana it will be overwritten. Continue?"
-msgstr "Si UID del panel de control ya existe en la instancia de Grafana será sobreescrito. ¿Continuar?"
+msgstr "Si el UID del panel de control ya existe en la instancia de Grafana será sobreescrito. ¿Continuar?"
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_integrated_dashboard
@@ -235,22 +241,22 @@ msgstr "Importar a Grafana"
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_integrated_dashboard
 #: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_dashboard_storage_view_search
 msgid "Integrated Dashboard"
-msgstr "Panel de control integrado"
+msgstr "Integrado"
 
 #. module: board_grafana_integration
 #: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_dashboard_storage_view_form
 msgid "Integration"
-msgstr "Integration"
+msgstr "Integración"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:104
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:101
 #, python-format
 msgid "Invalid JSON for dashboard '%s': %s"
 msgstr "El JSON del panel de control '%s' no es válido: %s"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:156
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:171
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:160
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:175
 #, python-format
 msgid "Invalid JSON. Dashboard '%s': %s"
 msgstr "El JSON del panel de control '%s' no es válido: %s"
@@ -279,7 +285,7 @@ msgstr "Última actualización por"
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_write_date
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_write_date
 msgid "Last Updated on"
-msgstr "Última actualización en"
+msgstr "Última actualización el"
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_integrated_panel_id
@@ -333,7 +339,7 @@ msgstr "Los parámetros de configuración de Grafana no han sido establecidos."
 #. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_dashboard_uid
 msgid "The id of the embebbed dashboard."
-msgstr "La ID del panel de control incorporado."
+msgstr "El ID del panel de control incorporado."
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_integrated_panel_id
@@ -343,7 +349,7 @@ msgstr "El ID del panel en el panel de control."
 #. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_configuration_grafana_dashboard_uid
 msgid "The id of the welcome dashboard (optional, else the default dashboard)."
-msgstr "La UID del panel de control de bienvenida (opcional, si no se utiliza el tablero por defecto configurado en Grafana)."
+msgstr "El UID del panel de control de bienvenida (opcional, si no se utiliza el tablero por defecto configurado en Grafana)."
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_dashboard_title

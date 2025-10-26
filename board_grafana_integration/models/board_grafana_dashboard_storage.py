@@ -18,11 +18,8 @@ class BoardGrafana(models.Model):
     _description = "Storage of Grafana Dashboards"
 
     def _default_dashboard_uid(self):
-        if not self.dashboard_uid:
-            chars = string.ascii_letters + string.digits
-            dashboard_uid = ''.join(random.choice(chars) for _ in range(10))
-        else:
-            dashboard_uid = self.dashboard_uid
+        chars = string.ascii_letters + string.digits
+        dashboard_uid = ''.join(random.choice(chars) for _ in range(10))
         return dashboard_uid
 
     name = fields.Char(
@@ -129,6 +126,13 @@ class BoardGrafana(models.Model):
             self.integrated_dashboard = True
             _logger.info("Dashboard '%s' imported successfully.", self.name)
             message += _("Dashboard '%s' imported successfully.") % self.name
+            # Delete kiosk param for opening in Grafana (allow editing)
+            dashboard_path = self.dashboard_path.split('?')[0]
+            imported_dashboard_url = grafana_url + dashboard_path
+            # Add link to open in Grafana
+            message += "<br/><br/>"
+            message += _("<a href='%s'>Open in Grafana</a>") % \
+                imported_dashboard_url
         else:
             error_msg = response.text or response.reason
             _logger.error(
@@ -174,3 +178,15 @@ class BoardGrafana(models.Model):
         dashboard_data["uid"] = vals['dashboard_uid']
         vals['dashboard_json'] = json.dumps(dashboard_data, indent=2)
         return super(BoardGrafana, self).create(vals)
+
+    @api.multi
+    def copy(self, default=None):
+        default = dict(default or {})
+        base_name = self.name
+        existing_copies = self.search_count(
+            [('name', 'ilike', base_name + '%')])
+        new_name = "%s (%d)" % (base_name, existing_copies)
+        new_dashboard_uid = self._default_dashboard_uid()
+        default['name'] = new_name
+        default['dashboard_uid'] = new_dashboard_uid
+        return super(BoardGrafana, self).copy(default)
