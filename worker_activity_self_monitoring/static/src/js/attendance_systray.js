@@ -44,29 +44,15 @@ export class AttendanceIcon extends Component {
                 this.state.isPresent = employee.attendance_state === "checked_in";
 
                 if (this.state.isPresent) {
-                    if (employee.last_attendance_id) {
-                        const [attendance] = await this.orm.searchRead("hr.attendance", [
-                            ["id", "=", employee.last_attendance_id[0]],
-                        ], ["check_in"], { limit: 1 });
-                        //It's possible that the time fail when the hours change from summer time to winter time.
-                        //Change twoHorsDate in winter: 1 * 60 * 60 * 1000; in summer: 2 * 60 * 60 * 1000;
-                        if (attendance) {
-                            const twoHorsDate = 2 * 60 * 60 * 1000;
-                            const checkinHours = new Date(attendance.check_in).getTime();
-                            const correctDate = checkinHours + twoHorsDate
-                            this.state.lastCheckIn = new Date(correctDate);
-                            this.updateAttendanceTime();
-                            if (this.timer) clearInterval(this.timer);
-                            this.timer = setInterval(() => this.updateAttendanceTime(), 60000); // Actualiza cada minuto
-                        }
-                    }
+                    this.updateAttendanceTime();
+                    if (this.timer) clearInterval(this.timer);
+                    this.timer = setInterval(() => this.updateAttendanceTime(), 60000); // Actualiza cada minuto
                 } else {
                     if (this.timer) {
                         clearInterval(this.timer);
                         this.timer = null;
                     }
                     this.state.attendanceTime = "";
-                    this.state.lastCheckIn = null;
                 }
 
                 if (wasPresent !== this.state.isPresent) {
@@ -83,16 +69,20 @@ export class AttendanceIcon extends Component {
         }
     }
 
-    updateAttendanceTime() {
-        if (!this.state.lastCheckIn) return;
-
-        const now = new Date();
-        const diff = now - this.state.lastCheckIn;
-
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-        this.state.attendanceTime = `${hours}h ${minutes}m`;
+    async updateAttendanceTime() {
+        try {
+            // Call the backend method to calculate attendance time
+            const result = await this.orm.call(
+                "hr.employee",
+                "get_current_attendance_time",
+                []
+            );
+            if (result) {
+                this.state.attendanceTime = result.display;
+            }
+        } catch (error) {
+            console.error("Error updating attendance time", error);
+        }
     }
 
     navigateToAttendances() {
