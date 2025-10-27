@@ -56,7 +56,7 @@ export class AttendanceIcon extends Component {
                             const january = new Date(checkDate.getFullYear(), 0, 1);
                             const july = new Date(checkDate.getFullYear(), 6, 1);
                             const isDST = checkDate.getTimezoneOffset() < Math.max(january.getTimezoneOffset(), july.getTimezoneOffset());
-                            const twoHorsDate = 1 * 60 * 60 * 1000;
+                            const twoHorsDate = isDST ? 2 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000;
                             const checkinHours = new Date(attendance.check_in).getTime();
                             const correctDate = checkinHours + twoHorsDate
                             this.state.lastCheckIn = new Date(correctDate);
