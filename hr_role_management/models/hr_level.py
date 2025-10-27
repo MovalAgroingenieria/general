@@ -9,6 +9,7 @@ class HrLevel(models.Model):
     _name = "hr.level"
     _description = "Level"
     _order = "name"
+    _inherit = ["mail.thread", "mail.activity.mixin"]
 
     name = fields.Char(
         required=True,
