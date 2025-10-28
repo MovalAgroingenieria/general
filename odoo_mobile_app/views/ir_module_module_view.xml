@@ -1,0 +1,12 @@
+<odoo>
+    <record id="view_ir_module_module_form_inherit" model="ir.ui.view">
+        <field name="name">ir.module.module.form</field>
+        <field name="model">ir.module.module</field>
+        <field name="inherit_id" ref="base.module_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="available_on_app"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

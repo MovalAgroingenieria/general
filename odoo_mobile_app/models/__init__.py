@@ -7,3 +7,5 @@ from . import oma_config_settings
 from . import oma_notification
 from . import oma_notification_set
 from . import oma_notification_event
+from . import ir_model
+from . import ir_module

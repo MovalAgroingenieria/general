@@ -17,6 +17,8 @@
         "security/oma_security.xml",
         "security/ir.model.access.csv",
         "data/oma_config_settings_data.xml",
+        "views/ir_model_view.xml",
+        "views/ir_module_module_view.xml",
         "views/oma_token_view.xml",
         "views/oma_config_settings_view.xml",
         "views/oma_notification_view.xml",
