@@ -45,7 +45,12 @@ for sensor in sensors:
     parameter_value = sensor_cfg.get('parameter_value')
     parameter_group = (sensor_cfg.get('group') or '').strip()
     parameter_key = (sensor_cfg.get('key') or '').strip()
-    if parameter and parameter_value not in (None,'') and parameter_group and parameter_key:
+    if (
+        parameter
+        and parameter_value not in (None, '')
+        and parameter_group
+        and parameter_key
+    ):
         try:
             device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
         except Exception:
@@ -56,11 +61,16 @@ for sensor in sensors:
             last_reading_time = last_readings_map.get(sensor.id)
             if last_reading_time:
                 try:
-                    initial_date = fields.Date.to_string(last_reading_time.date())
+                    initial_date = fields.Date.to_string(
+                        last_reading_time.date()
+                    )
                 except Exception:
                     initial_date = str(last_reading_time)[:10]
             else:
-                start_cfg = (sensor_cfg.get('start_date') or device_cfg.get('start_date'))
+                start_cfg = (
+                    sensor_cfg.get('start_date')
+                    or device_cfg.get('start_date')
+                )
                 if start_cfg:
                     initial_date = start_cfg[:10]
                 else:

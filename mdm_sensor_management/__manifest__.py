@@ -23,6 +23,8 @@
         'views/measurement_device_sensor_type_views.xml',
         'views/measurement_device_sensor_uom_views.xml',
         'views/measurement_device_sensor_views.xml',
+        'views/sensor_reading_transform_template_views.xml',
+        'wizards/wizard_sensor_reading_transform_views.xml',
         'views/mdm_menus.xml',
     ],
     'application': False,

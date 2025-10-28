@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-14 13:39+0000\n"
-"PO-Revision-Date: 2025-10-14 13:39+0000\n"
+"POT-Creation-Date: 2025-10-28 15:48+0000\n"
+"PO-Revision-Date: 2025-10-28 15:48+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,9 +16,137 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:647
+#, python-format
+msgid "... and %d more errors"
+msgstr "... i %d errors més"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "<code>$device_id</code> - Device ID (use $device_id.field for device fields)"
+msgstr "<code>$device_id</code> - ID del dispositiu (utilitzeu $device_id.camp per a camps del dispositiu)"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "<code>$measurement_time</code> - Reading timestamp"
+msgstr "<code>$measurement_time</code> - Data i hora de la lectura"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "<code>$now</code> - Current date/time"
+msgstr "<code>$now</code> - Data/hora actual"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "<code>$sensor_id</code> - Sensor ID (use $sensor_id.field for sensor fields)"
+msgstr "<code>$sensor_id</code> - ID del sensor (utilitzeu $sensor_id.camp per a camps del sensor)"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "<code>$value</code> - Measured value"
+msgstr "<code>$value</code> - Valor mesurat"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "<code>$volume_diff</code> - Volume difference (only in negative mapping)"
+msgstr "<code>$volume_diff</code> - Diferència de volum (només en mapatge negatiu)"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "<strong>Access related fields:</strong> Use dot notation <code>$field.related_field</code>\n"
+"                                            <br/><span style=\"color: #666;\">Example:</span> <code>\"sensor_name\": \"$sensor_id.name\"</code>\n"
+"                                            <br/><span style=\"color: #666;\">Example:</span> <code>\"location\": \"$sensor_id.location_id.name\"</code>"
+msgstr "<strong>Accedir a camps relacionats:</strong> Utilitzeu notació de punt <code>$camp.camp_relacionat</code>\n"
+"                                            <br/><span style=\"color: #666;\">Exemple:</span> <code>\"sensor_name\": \"$sensor_id.name\"</code>\n"
+"                                            <br/><span style=\"color: #666;\">Exemple:</span> <code>\"location\": \"$sensor_id.location_id.name\"</code>"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "<strong>Available reading fields:</strong>"
+msgstr "<strong>Camps de lectura disponibles:</strong>"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "<strong>Current datetime:</strong> Use <code>$now</code> to get current date/time\n"
+"                                            <br/><span style=\"color: #666;\">Example:</span> <code>\"import_date\": \"$now\"</code>"
+msgstr "<strong>Data/hora actual:</strong> Utilitzeu <code>$now</code> per obtenir la data/hora actual\n"
+"                                            <br/><span style=\"color: #666;\">Exemple:</span> <code>\"import_date\": \"$now\"</code>"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "<strong>Mathematical expressions:</strong> Use Python expressions with field references\n"
+"                                            <br/><span style=\"color: #666;\">Example:</span> <code>\"volume\": \"$value * 3.6\"</code> (convert m³/h to m³/day)"
+msgstr "<strong>Expressions matemàtiques:</strong> Utilitzeu expressions Python amb referències a camps\n"
+"                                            <br/><span style=\"color: #666;\">Exemple:</span> <code>\"volume\": \"$value * 3.6\"</code> (convertir m³/h a m³/dia)"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "<strong>Multiple operations:</strong> <code>\"total\": \"($value + $offset) * $factor\"</code>"
+msgstr "<strong>Operacions múltiples:</strong> <code>\"total\": \"($value + $offset) * $factor\"</code>"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "<strong>Reference sensor reading fields:</strong> Use <code>$field_name</code> syntax\n"
+"                                            <br/><span style=\"color: #666;\">Example:</span> <code>\"date\": \"$measurement_time\"</code>"
+msgstr "<strong>Referenciar camps de lectura del sensor:</strong> Utilitzeu sintaxi <code>$nom_camp</code>\n"
+"                                            <br/><span style=\"color: #666;\">Exemple:</span> <code>\"date\": \"$measurement_time\"</code>"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "<strong>Static values:</strong> Numbers, strings, booleans\n"
+"                                            <br/><span style=\"color: #666;\">Example:</span> <code>\"active\": true, \"origin\": \"sensor_import\"</code>"
+msgstr "<strong>Valors estàtics:</strong> Números, cadenes, booleans\n"
+"                                            <br/><span style=\"color: #666;\">Exemple:</span> <code>\"active\": true, \"origin\": \"sensor_import\"</code>"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "<strong>Volume difference (negative readings only):</strong> Use <code>$volume_diff</code> in negative field mapping\n"
+"                                            <br/><span style=\"color: #666;\">Example:</span> <code>\"volume\": \"$volume_diff\"</code> (difference when counter goes backwards)"
+msgstr "<strong>Diferència de volum (només lectures negatives):</strong> Utilitzeu <code>$volume_diff</code> en el mapatge de camps negatius\n"
+"                                            <br/><span style=\"color: #666;\">Exemple:</span> <code>\"volume\": \"$volume_diff\"</code> (diferència quan el comptador va enrere)"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_active
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_active
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_search
 msgid "Active"
-msgstr "Actius"
+msgstr "Actiu"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_domain_filter
+msgid "Additional domain to filter readings"
+msgstr "Domini addicional per filtrar lectures"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_domain_filter
+msgid "Additional domain to filter readings (Python expression)"
+msgstr "Domini addicional per filtrar lectures (expressió Python)"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Advanced Filters"
+msgstr "Filtres avançats"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Any other field from mdm.measurement.device.sensor.reading model"
+msgstr "Qualsevol altre camp del model mdm.measurement.device.sensor.reading"
 
 #. module: mdm_sensor_management
 #: model:ir.actions.server,name:mdm_sensor_management.action_archive_device_sensor_readings
@@ -27,6 +155,7 @@ msgstr "Arxiva les lectures seleccionades del sensor"
 
 #. module: mdm_sensor_management
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_search
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_search
 msgid "Archived"
 msgstr "Arxivat"
 
@@ -36,10 +165,67 @@ msgid "Attributes"
 msgstr "Atributs"
 
 #. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+msgid "Auto Date Configuration"
+msgstr "Configuració automàtica de dates"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_auto_date_from_last_record
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_auto_date_from_last_record
+msgid "Auto Date From Last Record"
+msgstr "Data automàtica des de l'últim registre"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_from_computed
+msgid "Automatically computed date based on last record"
+msgstr "Data calculada automàticament basada en l'últim registre"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_auto_date_from_last_record
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_auto_date_from_last_record
+msgid "Automatically set date_from based on last record in target model"
+msgstr "Establir automàticament date_from basant-se en l'últim registre del model destí"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_brand
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_device_view_search
 msgid "Brand"
 msgstr "Marca"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Cancel"
+msgstr "Cancel·la"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:706
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:752
+#, python-format
+msgid "Close"
+msgstr "Tancar"
+
+#. module: mdm_sensor_management
+#: selection:mdm.sensor.reading.transform.template,selection_mode:0
+#: selection:mdm.sensor.reading.transform.wizard,selection_mode:0
+msgid "Closest Reading"
+msgstr "Lectura més propera"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:349
+#, python-format
+msgid "Closest Reading mode requires a Reference Date"
+msgstr "El mode de lectura més propera requereix una data de referència"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Complete Example:"
+msgstr "Exemple complet:"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_from_computed
+msgid "Computed From Date"
+msgstr "Data des de calculada"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_create_uid
@@ -47,6 +233,8 @@ msgstr "Marca"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_create_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_create_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_create_uid
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_create_uid
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_create_uid
 msgid "Created by"
 msgstr "Creat per"
 
@@ -56,16 +244,92 @@ msgstr "Creat per"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_create_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_create_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_create_date
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_create_date
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_create_date
 msgid "Created on"
 msgstr "Creat el"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_date_field_for_last_reading
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_field_for_last_reading
+msgid "Date Field for Last Reading"
+msgstr "Camp de data per a última lectura"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/models/sensor_reading_transform_template.py:194
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:197
+#, python-format
+msgid "Date Field for Last Reading is required when Detect Negative Readings is enabled"
+msgstr "El camp de data per a última lectura és obligatori quan la detecció de lectures negatives està habilitada"
+
+#. module: mdm_sensor_management
+#: selection:mdm.sensor.reading.transform.template,selection_mode:0
+#: selection:mdm.sensor.reading.transform.wizard,selection_mode:0
+msgid "Date Range"
+msgstr "Rang de dates"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:333
+#, python-format
+msgid "Date Range mode requires both From Date and To Date"
+msgstr "El mode de rang de dates requereix tant data des de com data fins a"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_target_date_field_id
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_target_date_field_id
+msgid "Date/Datetime field in target model to use for auto date calculation"
+msgstr "Camp Date/Datetime en el model destí per utilitzar en el càlcul automàtic de dates"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+msgid "Date/Time Configuration"
+msgstr "Configuració de data/hora"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Date/Time Selection"
+msgstr "Selecció de data/hora"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_date_from
+msgid "Default from date for transformations"
+msgstr "Data des de per defecte per a transformacions"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_sensor_ids
+msgid "Default sensors for this transformation"
+msgstr "Sensors per defecte per a aquesta transformació"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_date_to
+msgid "Default to date for transformations"
+msgstr "Data fins a per defecte per a transformacions"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+msgid "Describe the purpose of this template..."
+msgstr "Descriviu la finalitat d'aquesta plantilla..."
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_description
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_description
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_description
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_description
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_description
 msgid "Description"
 msgstr "Descripció"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_detect_negative_readings
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_detect_negative_readings
+msgid "Detect Negative Readings"
+msgstr "Detectar lectures negatives"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_detect_negative_readings
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_detect_negative_readings
+msgid "Detect when volume decreases and create in alternative model"
+msgstr "Detectar quan el volum disminueix i crear en model alternatiu"
 
 #. module: mdm_sensor_management
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_search
@@ -85,12 +349,113 @@ msgstr "Dispositius"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_display_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_display_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_display_name
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_display_name
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_display_name
 msgid "Display Name"
-msgstr "Nom per mostrar"
+msgstr "Mostrar Nom"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_show_mapping_help
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_show_mapping_help
+msgid "Display detailed help about field mapping syntax"
+msgstr "Mostrar ajuda detallada sobre la sintaxi de mapeig de camps"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_domain_filter
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_domain_filter
+msgid "Domain Filter"
+msgstr "Filtre de domini"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_sensor_domain_filter
+msgid "Domain to filter readings (e.g., [(\"sensor_type_id.name\", \"=\", \"Temperature\")]). This filter is always applied."
+msgstr "Domini per filtrar lectures (p. ex., [(\"sensor_type_id.name\", \"=\", \"Temperature\")]). Aquest filtre sempre s'aplica."
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_sensor_domain_filter
+msgid "Domain to filter sensors (e.g., [(\"sensor_type_id.name\", \"=\", \"Temperature\")])"
+msgstr "Domini per filtrar sensors (p. ex., [(\"sensor_type_id.name\", \"=\", \"Temperature\")])"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_to
+msgid "End date for date_range mode"
+msgstr "Data final per al mode date_range"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:516
+#, python-format
+msgid "Error evaluating expression \"%s\": %s"
+msgstr "Error en avaluar l'expressió \"%s\": %s"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:621
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:633
+#, python-format
+msgid "Errors"
+msgstr "Errors"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:651
+#, python-format
+msgid "Errors found"
+msgstr "Errors trobats"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_field_mapping_json
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_field_mapping_json
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Field Mapping (JSON)"
+msgstr "Mapeig de camps (JSON)"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Field Mapping Help"
+msgstr "Ajuda de mapeig de camps"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_reference_field
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_reference_field
+msgid "Field in target model to identify the meter/device (e.g., \"flowmeter_id\")"
+msgstr "Camp en el model destí per identificar el comptador/dispositiu (p. ex., \"flowmeter_id\")"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_date_field_for_last_reading
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_field_for_last_reading
+msgid "Field name in target model to use for ordering when searching the last reading (e.g., \"reading_time\", \"measurement_time\"). Used for negative reading detection."
+msgstr "Nom del camp en el model destí a utilitzar per ordenar en buscar l'última lectura (p. ex., \"reading_time\", \"measurement_time\"). Utilitzat per a la detecció de lectures negatives."
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_volume_field
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_volume_field
+msgid "Field name that contains the volume value in target model"
+msgstr "Nom del camp que conté el valor del volum en el model destí"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Filter to restrict which sensors are processed. Applied to all sensors or to selected sensors."
+msgstr "Filtre per restringir quins sensors es processen. Aplicat a tots els sensors o als sensors seleccionats."
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_date_from
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_from
+#: selection:mdm.sensor.reading.transform.template,selection_mode:0
+#: selection:mdm.sensor.reading.transform.wizard,selection_mode:0
+msgid "From Date"
+msgstr "Des de la data"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:341
+#, python-format
+msgid "From Date mode requires a From Date"
+msgstr "El mode Des de la data requereix una data des de"
 
 #. module: mdm_sensor_management
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_sensor_type_view_search
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_uom_view_search
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_search
 msgid "Group By"
 msgstr "Agrupar per"
 
@@ -98,8 +463,10 @@ msgstr "Agrupar per"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_id
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_id_18154
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_id_18166
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_id_20605
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_id_20617
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_id
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_id
 msgid "ID"
 msgstr "ID"
 
@@ -109,9 +476,81 @@ msgid "Identifier"
 msgstr "Identificador"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_use_all_sensors
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_use_all_sensors
+msgid "If checked, all sensors will be used. Otherwise, only selected sensors in sensor_ids will be used"
+msgstr "Si està marcat, s'utilitzaran tots els sensors. En cas contrari, només s'utilitzaran els sensors seleccionats a sensor_ids"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_readonly
+msgid "Indicates if this UOM was created by module installation and should not be deleted"
+msgstr "Indica si aquesta UOM va ser creada per la instal·lació del mòdul i no s'ha d'eliminar"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_measurement_device_sensor_type_readonly
+msgid "Indicates if this sensor type was created by module installation and should not be deleted"
+msgstr "Indica si aquest tipus de sensor va ser creat per la instal·lació del mòdul i no s'ha d'eliminar"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_readonly
+msgid "Indicates if this template was created by module installation and should not be deleted"
+msgstr "Indica si aquesta plantilla va ser creada per la instal·lació del mòdul i no s'ha d'eliminar"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_installation_date
 msgid "Installation Date"
 msgstr "Data d'instal·lació"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/models/sensor_reading_transform_template.py:175
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:534
+#, python-format
+msgid "Invalid JSON in Field Mapping: %s"
+msgstr "JSON invàlid en Mapeig de camps: %s"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/models/sensor_reading_transform_template.py:185
+#, python-format
+msgid "Invalid JSON in Negative Field Mapping: %s"
+msgstr "JSON invàlid en Mapeig de camps per a negatives: %s"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:357
+#, python-format
+msgid "Invalid domain filter: %s"
+msgstr "Filtre de domini invàlid: %s"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:310
+#, python-format
+msgid "Invalid sensor domain filter: %s"
+msgstr "Filtre de domini de sensors invàlid: %s"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_negative_field_mapping_json
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_negative_field_mapping_json
+msgid "JSON mapping for negative readings. Can use $volume_diff for the difference between old and new volume"
+msgstr "Mapeig JSON per a lectures negatives. Pot utilitzar $volume_diff per a la diferència entre el volum antic i el nou"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_field_mapping_json
+msgid "JSON mapping from sensor fields to target model fields.\n"
+"Use $field_name to reference reading fields.\n"
+"Use static values directly: \"field\": \"static_value\""
+msgstr "Mapeig JSON de camps del sensor a camps del model destí.\n"
+"Utilitzeu $nom_camp per referenciar camps de lectura.\n"
+"Utilitzeu valors estàtics directament: \"camp\": \"valor_estàtic\""
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_field_mapping_json
+msgid "JSON mapping from sensor fields to target model fields.\n"
+"Use $field_name to reference reading fields.\n"
+"Use static values directly: \"field\": \"static_value\".\n"
+"Example: {\"reading_time\": \"$measurement_time\", \"volume\": \"$value * 3.6\", \"active\": true, \"notes\": \"Imported from sensor\"}"
+msgstr "Mapeig JSON de camps del sensor a camps del model destí.\n"
+"Utilitzeu $nom_camp per referenciar camps de lectura.\n"
+"Utilitzeu valors estàtics directament: \"camp\": \"valor_estàtic\".\n"
+"Exemple: {\"reading_time\": \"$measurement_time\", \"volume\": \"$value * 3.6\", \"active\": true, \"notes\": \"Importat del sensor\"}"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device___last_update
@@ -119,8 +558,16 @@ msgstr "Data d'instal·lació"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading___last_update
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type___last_update
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom___last_update
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template___last_update
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard___last_update
 msgid "Last Modified on"
 msgstr "Última modificació el "
+
+#. module: mdm_sensor_management
+#: selection:mdm.sensor.reading.transform.template,selection_mode:0
+#: selection:mdm.sensor.reading.transform.wizard,selection_mode:0
+msgid "Last Reading"
+msgstr "Última lectura"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_write_uid
@@ -128,6 +575,8 @@ msgstr "Última modificació el "
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_write_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_write_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_write_uid
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_write_uid
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_write_uid
 msgid "Last Updated by"
 msgstr "Última actualització per"
 
@@ -137,8 +586,10 @@ msgstr "Última actualització per"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_write_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_write_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_write_date
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_write_date
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_write_date
 msgid "Last Updated on"
-msgstr "Última actualització el"
+msgstr "Última actualització a"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_location
@@ -153,7 +604,7 @@ msgstr "Gestor MDM"
 #. module: mdm_sensor_management
 #: model:res.groups,name:mdm_sensor_management.group_mdm_user
 msgid "MDM User"
-msgstr "Usuari MDM""
+msgstr "Usuari MDM"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,help:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_retention_days
@@ -198,18 +649,101 @@ msgid "Measurement Units"
 msgstr "Unitats de mesurament"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_selection_mode
+msgid "Method to select which readings to transform"
+msgstr "Mètode per seleccionar quines lectures transformar"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_model
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_device_view_search
 msgid "Model"
 msgstr "Model"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_negative_model_id
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_negative_model_id
+msgid "Model to use when volume decreases (e.g., wua.negative.flowreading)"
+msgstr "Model a utilitzar quan el volum disminueix (p. ex., wua.negative.flowreading)"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_target_model_id
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_target_model_id
+msgid "Model where readings will be created"
+msgstr "Model on es crearan les lectures"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_name
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_name
 msgid "Name"
 msgstr "Nom"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_name
+msgid "Name for this transformation (used when saving as template)"
+msgstr "Nom d'aquesta transformació (s'utilitza en desar com a plantilla)"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Negative Field Mapping"
+msgstr "Mapeig de camps per a negatius"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_negative_field_mapping_json
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_negative_field_mapping_json
+msgid "Negative Field Mapping (JSON)"
+msgstr "Mapeig de camps per a negatius (JSON)"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_negative_model
+msgid "Negative Model Technical Name"
+msgstr "Nom tècnic del model de negatius"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Negative Reading Detection"
+msgstr "Detecció de lectures negatives"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Negative Reading Example:"
+msgstr "Exemple de lectura negativa:"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_negative_model_id
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_negative_model_id
+msgid "Negative Reading Model"
+msgstr "Model de lectures negatives"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:620
+#, python-format
+msgid "Negative records created"
+msgstr "Registres negatius creats"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:678
+#, python-format
+msgid "No readings found with the specified criteria"
+msgstr "No s'han trobat lectures amb els criteris especificats"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:328
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:368
+#, python-format
+msgid "No sensors found matching the criteria"
+msgstr "No s'han trobat sensors que coincideixin amb els criteris"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:619
+#, python-format
+msgid "Normal records created"
+msgstr "Registres normals creats"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_notes
@@ -235,6 +769,25 @@ msgid "Photos"
 msgstr "Fotos"
 
 #. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:315
+#, python-format
+msgid "Please select at least one sensor or check \"Use All Sensors\""
+msgstr "Si us plau, seleccioneu almenys un sensor o marqueu \"Utilitzar tots els sensors\""
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_readonly
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_readonly
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_readonly
+msgid "Read Only"
+msgstr "Només lectura"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_selection_mode
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_selection_mode
+msgid "Reading Selection Mode"
+msgstr "Mode de selecció de lectures"
+
+#. module: mdm_sensor_management
 #: code:addons/mdm_sensor_management/models/measurement_device.py:87
 #: model:ir.actions.act_window,name:mdm_sensor_management.mdm_sensor_reading_action
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_reading_ids
@@ -247,15 +800,69 @@ msgid "Readings"
 msgstr "Lectures"
 
 #. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:632
+#, python-format
+msgid "Records created"
+msgstr "Registres creats"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_reference_date
+msgid "Reference Date"
+msgstr "Data de referència"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_reference_field
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_reference_field
+msgid "Reference Field"
+msgstr "Camp de referència"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_reference_date
+msgid "Reference date for closest_reading mode"
+msgstr "Data de referència per al mode closest_reading"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_retention_days
 msgid "Retention (days)"
 msgstr "Retenció (dies)"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Save as Template"
+msgstr "Desar com a plantilla"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_template_id
+msgid "Select a template to load configuration"
+msgstr "Seleccioneu una plantilla per carregar la configuració"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_search
+msgid "Selection Mode"
+msgstr "Mode de selecció"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_sensor_id
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_search
 msgid "Sensor"
 msgstr "Sensor"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_sensor_domain_filter
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_sensor_domain_filter
+msgid "Sensor Domain Filter"
+msgstr "Filtre de domini de sensors"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Sensor Filter"
+msgstr "Filtre de sensors"
+
+#. module: mdm_sensor_management
+#: model:ir.model,name:mdm_sensor_management.model_mdm_sensor_reading_transform_template
+msgid "Sensor Reading Transform Template"
+msgstr "Plantilla de transformació de lectures de sensor"
 
 #. module: mdm_sensor_management
 #: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:63
@@ -292,17 +899,24 @@ msgstr "Unitats de sensors"
 
 #. module: mdm_sensor_management
 #: code:addons/mdm_sensor_management/models/measurement_device.py:76
-#: code:addons/mdm_sensor_management/models/measurement_device_sensor_type.py:43
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor_type.py:62
 #: model:ir.actions.act_window,name:mdm_sensor_management.mdm_sensor_action
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_ids
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_sensor_ids
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_sensor_ids
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_sensor_ids
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_sensor_ids
 #: model:ir.ui.menu,name:mdm_sensor_management.mdm_device_sensors_menu
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_device_view_form
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_sensor_type_view_form
 #, python-format
 msgid "Sensors"
 msgstr "Sensors"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_sensor_ids
+msgid "Sensors whose readings will be transformed"
+msgstr "Sensors les lectures dels quals seran transformades"
 
 #. module: mdm_sensor_management
 #: model:ir.ui.menu,name:mdm_sensor_management.mdm_sensory_menu
@@ -320,9 +934,78 @@ msgid "Short Name"
 msgstr "Nom curt"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_show_mapping_help
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_show_mapping_help
+msgid "Show Mapping Help"
+msgstr "Mostrar ajuda de mapeig"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_from
+msgid "Start date for date_range or from_date modes"
+msgstr "Data d'inici per als modes date_range o from_date"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_target_date_field_id
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_target_date_field_id
+msgid "Target Date Field"
+msgstr "Camp de data destí"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_target_date_field
+msgid "Target Date Field Name"
+msgstr "Nom del camp de data destí"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_target_model_id
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_target_model_id
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_search
+msgid "Target Model"
+msgstr "Model destí"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_target_model
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_target_model
+msgid "Target Model Technical Name"
+msgstr "Nom tècnic del model destí"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:668
+#, python-format
+msgid "Target Model is required"
+msgstr "El model destí és obligatori"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:673
+#, python-format
+msgid "Target model \"%s\" does not exist"
+msgstr "El model destí \"%s\" no existeix"
+
+#. module: mdm_sensor_management
 #: model:ir.ui.menu,name:mdm_sensor_management.mdm_technical_menu
 msgid "Technical"
 msgstr "Tècnic"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_template_id
+msgid "Template"
+msgstr "Plantilla"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:742
+#, python-format
+msgid "Template \"%s\" has been saved successfully"
+msgstr "La plantilla \"%s\" s'ha desat correctament"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_name
+msgid "Template Name"
+msgstr "Nom de plantilla"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:745
+#, python-format
+msgid "Template Saved"
+msgstr "Plantilla desada"
 
 #. module: mdm_sensor_management
 #: sql_constraint:mdm.measurement.device:0
@@ -350,6 +1033,69 @@ msgid "The unit of measure must be unique."
 msgstr "La unitat de mesura ha de ser única."
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_date_to
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_to
+msgid "To Date"
+msgstr "Fins la data"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:622
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:634
+#, python-format
+msgid "Total readings processed"
+msgstr "Total de lectures processades"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Transform"
+msgstr "Transformar"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.menu,name:mdm_sensor_management.sensor_reading_transform_wizard_menu
+msgid "Transform Readings"
+msgstr "Transformar lectures"
+
+#. module: mdm_sensor_management
+#: model:ir.actions.act_window,name:mdm_sensor_management.sensor_reading_transform_wizard_action
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "Transform Sensor Readings"
+msgstr "Transformar lectures de sensor"
+
+#. module: mdm_sensor_management
+#: model:ir.model,name:mdm_sensor_management.model_mdm_sensor_reading_transform_wizard
+msgid "Transform Sensor Readings to Target Model"
+msgstr "Transformar lectures de sensor al model destí"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.menu,name:mdm_sensor_management.sensor_reading_transform_template_menu
+msgid "Transform Templates"
+msgstr "Plantilles de transformació"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:659
+#, python-format
+msgid "Transformation Complete"
+msgstr "Transformació completada"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:699
+#, python-format
+msgid "Transformation Result"
+msgstr "Resultat de la transformació"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+msgid "Transformation Template"
+msgstr "Plantilla de transformació"
+
+#. module: mdm_sensor_management
+#: model:ir.actions.act_window,name:mdm_sensor_management.sensor_reading_transform_template_action
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_search
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_tree
+msgid "Transformation Templates"
+msgstr "Plantilles de transformació"
+
+#. module: mdm_sensor_management
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_sensor_view_search
 msgid "Type"
 msgstr "Tipus"
@@ -368,7 +1114,165 @@ msgid "Unit of Measure"
 msgstr "Unitat de mesura"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_use_all_sensors
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_use_all_sensors
+msgid "Use All Sensors"
+msgstr "Utilitzar tots els sensors"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_value
 msgid "Value"
 msgstr "Valor"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_volume_field
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_volume_field
+msgid "Volume Field"
+msgstr "Camp de volum"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "What you CAN do:"
+msgstr "El que SÍ podeu fer:"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "What you CANNOT do:"
+msgstr "El que NO podeu fer:"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor_type.py:55
+#, python-format
+msgid "You cannot delete a read-only Sensor Type."
+msgstr "No podeu eliminar un tipus de sensor de només lectura."
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/models/sensor_reading_transform_template.py:204
+#, python-format
+msgid "You cannot delete a read-only Transform Template."
+msgstr "No podeu eliminar una plantilla de transformació de només lectura."
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor_uom.py:61
+#, python-format
+msgid "You cannot delete a read-only Unit of Measure."
+msgstr "No podeu eliminar una unitat de mesura de només lectura."
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "[(\"sensor_type_id.name\", \"=\", \"Temperature\")]"
+msgstr "[(\"sensor_type_id.name\", \"=\", \"Temperature\")]"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "[('active', '=', True)]"
+msgstr "[('active', '=', True)]"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "flowmeter_id"
+msgstr "flowmeter_id"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "reading_time"
+msgstr "reading_time"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "{\n"
+"    \"flowmeter_id\": \"$sensor_id.flowmeter_id\",\n"
+"    \"reading_time\": \"$measurement_time\",\n"
+"    \"volume\": \"$volume_diff\",\n"
+"    \"consumption_volume\": \"$volume_diff\",\n"
+"    \"instant_flow\": \"$value * 3.6\",\n"
+"    \"notes\": \"Counter rollback detected\"\n"
+"}"
+msgstr "{\n"
+"    \"flowmeter_id\": \"$sensor_id.flowmeter_id\",\n"
+"    \"reading_time\": \"$measurement_time\",\n"
+"    \"volume\": \"$volume_diff\",\n"
+"    \"consumption_volume\": \"$volume_diff\",\n"
+"    \"instant_flow\": \"$value * 3.6\",\n"
+"    \"notes\": \"Counter rollback detected\"\n"
+"}"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "{\n"
+"    \"reading_time\": \"$measurement_time\",\n"
+"    \"volume_m3\": \"$value * 3.6\",\n"
+"    \"sensor_code\": \"$sensor_id\",\n"
+"    \"sensor_name\": \"$sensor_id.name\",\n"
+"    \"location\": \"$sensor_id.location_id.name\",\n"
+"    \"import_date\": \"$now\",\n"
+"    \"active\": true,\n"
+"    \"notes\": \"Imported from sensor\",\n"
+"    \"quality_index\": \"($value / 100) * 0.95\"\n"
+"}"
+msgstr "{\n"
+"    \"reading_time\": \"$measurement_time\",\n"
+"    \"volume_m3\": \"$value * 3.6\",\n"
+"    \"sensor_code\": \"$sensor_id\",\n"
+"    \"sensor_name\": \"$sensor_id.name\",\n"
+"    \"location\": \"$sensor_id.location_id.name\",\n"
+"    \"import_date\": \"$now\",\n"
+"    \"active\": true,\n"
+"    \"notes\": \"Imported from sensor\",\n"
+"    \"quality_index\": \"($value / 100) * 0.95\"\n"
+"}"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "{\"flowmeter_id\": 17, \"reading_time\": \"$measurement_time\", \"volume\": \"$volume_diff\", \"instant_flow\": \"$value * 3.6\"}"
+msgstr "{\"flowmeter_id\": 17, \"reading_time\": \"$measurement_time\", \"volume\": \"$volume_diff\", \"instant_flow\": \"$value * 3.6\"}"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "{\"reading_time\": \"$measurement_time\", \"volume\": \"$value * 3.6\", \"active\": true, \"notes\": \"Imported\"}"
+msgstr "{\"reading_time\": \"$measurement_time\", \"volume\": \"$value * 3.6\", \"active\": true, \"notes\": \"Importat\"}"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+msgid "{\"reading_time\": \"$measurement_time\", \"volume\": \"$value * 3.6\", \"active\": true}"
+msgstr "{\"reading_time\": \"$measurement_time\", \"volume\": \"$value * 3.6\", \"active\": true}"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "❌ Access to models or database queries"
+msgstr "❌ Accés a models o consultes a la base de dades"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "❌ Complex Python code (if/else, loops, function definitions)"
+msgstr "❌ Codi Python complex (if/else, bucles, definicions de funció)"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "❌ Import statements or external libraries"
+msgstr "❌ Sentències d'importació o biblioteques externes"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "❌ Method calls on objects (except basic math operations)"
+msgstr "❌ Crides a mètodes d'objectes (excepte operacions matemàtiques bàsiques)"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
+msgid "❌ Multi-line expressions"
+msgstr "❌ Expressions de múltiples línies"
 

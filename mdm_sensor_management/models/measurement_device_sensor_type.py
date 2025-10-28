@@ -2,7 +2,8 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import models, fields, _
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 
 
 class MeasurementDeviceSensorType(models.Model):
@@ -17,6 +18,14 @@ class MeasurementDeviceSensorType(models.Model):
     )
     description = fields.Text(
         string='Description',
+    )
+
+    readonly = fields.Boolean(
+        string='Read Only',
+        readonly=True,
+        default=False,
+        help='Indicates if this sensor type was created by module '
+             'installation and should not be deleted',
     )
 
     uom_id = fields.Many2one(
@@ -35,6 +44,16 @@ class MeasurementDeviceSensorType(models.Model):
     _sql_constraints = [
         ('unique_name', 'unique(name)', 'The sensor type must be unique.'),
     ]
+
+    @api.multi
+    def unlink(self):
+        force_unlink = self.env.context.get('force_unlink', False)
+        if not force_unlink:
+            for record in self:
+                if record.readonly:
+                    raise UserError(
+                        _("You cannot delete a read-only Sensor Type."))
+        return super(MeasurementDeviceSensorType, self).unlink()
 
     def action_view_sensors(self):
         self.ensure_one()

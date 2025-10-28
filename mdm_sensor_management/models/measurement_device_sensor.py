@@ -66,4 +66,3 @@ class MeasurementDeviceSensor(models.Model):
             'domain': [('sensor_id', '=', self.id)],
             'context': {'default_sensor_id': self.id},
         }
-
