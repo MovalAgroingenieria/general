@@ -282,10 +282,10 @@ for sensor_plan in plan:
             errs = 0
             readings_summary = []
             for reading in data_list:
-                ts_s = reading['ts']
-                valf = float(reading['value'])
-                if (ts_s >= window_start) and (ts_s <= window_end):
-                    try:
+                try:
+                    ts_s = reading['ts']
+                    valf = float(reading['value'])
+                    if (ts_s >= window_start) and (ts_s <= window_end):
                         Remote.upsert(
                             'mdm.measurement.device.sensor.reading',
                             {'sensor_id': sensor_record.id, 'measurement_time': ts_s},
@@ -293,9 +293,9 @@ for sensor_plan in plan:
                         )
                         upserts += 1
                         readings_summary.append({'ts': ts_s, 'value': valf})
-                    except Exception as e:
-                        errs += 1
-                        readings_summary.append({'ts': ts_s, 'value': valf, 'error': str(e)})
+                except Exception as e:
+                    errs += 1
+                    readings_summary.append({'reading': reading, 'error': str(e)})
             total_upserts += upserts
             total_errors  += errs
             items.append({
