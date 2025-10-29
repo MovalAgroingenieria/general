@@ -12,6 +12,7 @@
     "license": "AGPL-3",
     "depends": [
         'mail',
+        'portal_ext',
     ],
     "data": [
         "security/oma_security.xml",
