@@ -368,8 +368,7 @@ class SensorReadingTransformWizard(models.TransientModel):
         sensors = self.env['mdm.measurement.device.sensor'].search(
             sensor_domain)
         if not sensors:
-            raise exceptions.UserError(
-                _('No sensors found matching the criteria'))
+            return self.env['mdm.measurement.device.sensor.reading']
         reading_model = self.env['mdm.measurement.device.sensor.reading']
         if self.selection_mode == 'last_reading':
             # Get last reading per sensor
@@ -576,14 +575,37 @@ class SensorReadingTransformWizard(models.TransientModel):
         neg_values = {}
         # Build values for negative reading
         for field, expr in neg_mapping.items():
-            # Replace $volume_diff
-            if isinstance(expr, (str, unicode)):
-                expr_with_diff = expr.replace(
-                    '$volume_diff',
-                    str(volume_diff))
-                neg_values[field] = (
-                    self._evaluate_expression(
-                        expr_with_diff, reading))
+            # Handle $volume_diff in expressions
+            if isinstance(expr, (str, unicode)) and '$volume_diff' in expr:
+                # Build context with volume_diff available
+                context = {
+                    'value': reading.value,
+                    'measurement_time': reading.measurement_time,
+                    'sensor_id': reading.sensor_id.id,
+                    'sensor_name': reading.sensor_id.name,
+                    'device_id': reading.device_id.id,
+                    'device_name': reading.device_id.name,
+                    'reading': reading,
+                    'sensor': reading.sensor_id,
+                    'device': reading.device_id,
+                    'now': fields.Datetime.now(),
+                    'volume_diff': volume_diff,
+                }
+                # Replace $volume_diff with the variable name
+                eval_expr = expr.replace('$volume_diff', 'volume_diff')
+                # Replace other $ variables
+                eval_expr = self._replace_variables_in_expression(
+                    eval_expr, reading, context)
+                try:
+                    neg_values[field] = safe_eval(
+                        eval_expr, context, mode='eval', nocopy=True)
+                except Exception as e:
+                    _logger.error(
+                        'Error evaluating negative reading expression '
+                        '"%s": %s', expr, str(e))
+                    raise
+            elif isinstance(expr, (str, unicode)):
+                neg_values[field] = self._evaluate_expression(expr, reading)
             else:
                 neg_values[field] = expr
         negative_target.create(neg_values)
@@ -677,9 +699,6 @@ class SensorReadingTransformWizard(models.TransientModel):
                 _('Target model "%s" does not exist') % self.target_model)
         # Get readings to process
         readings = self._get_readings()
-        if not readings:
-            raise exceptions.UserError(
-                _('No readings found with the specified criteria'))
         # Process all readings
         created_count = 0
         negative_count = 0
