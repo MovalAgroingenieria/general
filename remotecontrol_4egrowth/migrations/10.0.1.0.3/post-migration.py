@@ -41,10 +41,7 @@ for sensor_plan in plan:
         full_url = getattr(resp, 'url', base)
         if code < 400:
             payload = resp.json() or {}
-         if code < 400:
-             payload = resp.json() or {}
-             data_list = payload.get(parameter_group, {}).get(parameter_key, {}).get('data') or []
-             window_start = initial_date + window_start_suffix
+            data_list = payload[parameter_group][parameter_key]['data'] or []
             window_start = initial_date + window_start_suffix
             window_end   = final_date   + window_end_suffix
             upserts = 0
@@ -86,8 +83,7 @@ for sensor_plan in plan:
         items.append({'sensor_id': sensor_id, 'device_id': device_id, 'growth_id': growth_id, 'status': -1, 'error': str(e)})
 audit = {'executed_at': fields.Datetime.now(), 'final_date': final_date, 'total_upserts': total_upserts, 'total_errors': total_errors, 'items': items}
 try:
-    # Added ensure_ascii to avoid issues with special chars in JSON
-     audit_json = json.dumps(audit, ensure_ascii=True, indent=2, default=str)
+    # Added ensure_asccii to avoid issues with special chars in JSON
     audit_json = json.dumps(audit, ensure_ascii=True, indent=2, default=str)
     b64 = base64.b64encode(audit_json.encode('utf-8'))
 except Exception as json_error:

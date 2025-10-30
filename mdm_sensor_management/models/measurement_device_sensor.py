@@ -3,7 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 
-from odoo import models, fields, api, _
+from odoo import models, fields, _
 
 
 class MeasurementDeviceSensor(models.Model):
@@ -15,6 +15,7 @@ class MeasurementDeviceSensor(models.Model):
         string='Name',
         required=True,
         index=True,
+        translate=True,
     )
 
     description = fields.Text(
@@ -33,6 +34,7 @@ class MeasurementDeviceSensor(models.Model):
         comodel_name='mdm.measurement.device.sensor.type',
         string='Sensor Type',
         required=True,
+        ondelete='restrict',
     )
 
     sensor_readings = fields.One2many(

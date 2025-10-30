@@ -25,6 +25,7 @@ class MeasurementDeviceSensorUOM(models.Model):
 
     description = fields.Char(
         string='Description',
+        translate=True,
     )
 
     notes = fields.Html(

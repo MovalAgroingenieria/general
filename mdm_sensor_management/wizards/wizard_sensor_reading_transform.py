@@ -303,7 +303,11 @@ class SensorReadingTransformWizard(models.TransientModel):
         # Apply sensor domain filter if provided
         if self.sensor_domain_filter:
             try:
-                sensor_filter = safe_eval(self.sensor_domain_filter)
+                sensor_filter = safe_eval(
+                    self.sensor_domain_filter,
+                    {
+                        'env': self.env,
+                    })
                 domain.extend(sensor_filter)
             except Exception as e:
                 raise exceptions.UserError(

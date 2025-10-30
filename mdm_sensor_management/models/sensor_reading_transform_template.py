@@ -16,10 +16,12 @@ class SensorReadingTransformTemplate(models.Model):
         string='Name',
         required=True,
         index=True,
+        translate=True,
     )
 
     description = fields.Text(
         string='Description',
+        translate=True,
     )
 
     readonly = fields.Boolean(

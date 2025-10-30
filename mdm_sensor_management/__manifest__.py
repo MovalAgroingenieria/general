@@ -5,18 +5,21 @@
 {
     'name': 'MDM Sensor Management',
     'summary': 'Measurement Devices and Sensors Management',
-    'version': '10.0.1.1.0',
+    'version': '10.0.1.1.1',
     'category': 'Tools',
     'website': 'https://www.moval.es',
     'author': 'Moval Agroingeniería',
     'license': 'AGPL-3',
     'depends': [
         'base',
+        'mail',
+        'web_ir_actions_act_window_message',
     ],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
         'data/measurent_device_sensor_reading_cron.xml',
+        'data/measurement_device_sensor_uom_data.xml',
         'views/resources.xml',
         'views/measurement_device_views.xml',
         'views/measurement_device_sensor_reading_views.xml',
