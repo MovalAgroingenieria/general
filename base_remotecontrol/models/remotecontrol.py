@@ -10,6 +10,7 @@ import traceback
 import requests
 import base64
 import pytz
+import pyodbc
 
 
 class RemoteControl(models.Model):
@@ -177,6 +178,74 @@ class RemoteControl(models.Model):
         else:
             return Model.create(vals)
 
+    def _sql_connect(self):
+        self.ensure_one()
+        if self.remotecontrol_type != 'sql':
+            raise UserError(
+                _("SQL connection is only available for 'sql' type remote "
+                  "controls."))
+        try:
+            params = json.loads(self.connection_params or '{}')
+        except (ValueError, TypeError):
+            raise UserError(_("Invalid JSON in connection_params."))
+        host = params.get('host', 'localhost')
+        port = params.get('port', 1433)
+        database = params.get('database', '')
+        user = params.get('user', '')
+        password = params.get('password', '')
+        if not database or not user:
+            raise UserError(
+                _("Database and user are required in connection_params."))
+        # Build connection string for SQL Server
+        driver_name = params.get('driver_name', 'SQL Server')
+        connection_string = (
+            'DRIVER={%s};SERVER=%s;PORT=%s;DATABASE=%s;UID=%s;PWD=%s' % (
+                driver_name, host, port, database, user, password,
+            )
+        )
+        # Add optional parameters
+        if params.get('tds_version'):
+            connection_string += ';TDS_Version=%s' % params['tds_version']
+        if params.get('trusted_connection'):
+            connection_string += ';Trusted_Connection=yes'
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
+        return cursor
+
+    def _sql_execute(self, cursor, query, params=None):
+        self.ensure_one()
+        if not cursor:
+            raise UserError(
+                _("No cursor provided. Call sql_connect() first and store "
+                  "the result in bag['_sql_cursor']."))
+        cursor.execute(query, params or ())
+        return cursor
+
+    def _sql_fetchall(self, cursor):
+        self.ensure_one()
+        if not cursor:
+            raise UserError(
+                _("No cursor provided."))
+        return cursor.fetchall()
+
+    def _sql_fetchone(self, cursor):
+        self.ensure_one()
+        if not cursor:
+            raise UserError(
+                _("No cursor provided."))
+        return cursor.fetchone()
+
+    def _sql_close(self, cursor):
+        self.ensure_one()
+        if cursor:
+            try:
+                connection = cursor.connection
+                cursor.close()
+                if connection:
+                    connection.close()
+            except Exception:
+                pass
+
     def unlink(self):
         force_unlink = self.env.context.get('force_unlink', False)
         if (not force_unlink):
@@ -269,6 +338,17 @@ class RemoteControlAction(models.Model):
                     model_name, key_vals, other_vals=other_vals,
                 )
             ),
+            'sql_connect': lambda: remote_control._sql_connect(),
+            'sql_execute': lambda cursor, query, params=None: (
+                remote_control._sql_execute(cursor, query, params=params)
+            ),
+            'sql_fetchall': lambda cursor: (
+                remote_control._sql_fetchall(cursor)
+            ),
+            'sql_fetchone': lambda cursor: (
+                remote_control._sql_fetchone(cursor)
+            ),
+            'sql_close': lambda cursor: remote_control._sql_close(cursor),
         }
         return context
 

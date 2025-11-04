@@ -164,14 +164,16 @@ bag['token'] = token
             <field name="readonly">True</field>
             <field name="code"><![CDATA[
 # Action A: build sensors plan (robust JSON parsing)
+Remote = self.remote_id
 Sensor = env['mdm.measurement.device.sensor']
 Reading = env['mdm.measurement.device.sensor.reading']
 today_str = fields.Date.today()
-condition = [('remotecontrol_params','!=',False)]
+condition = [
+    ('remotecontrol_params','!=',False),
+    ('device_id.remotecontrol_id', '=', Remote.id)
+]
 if selected_device_ids:
     condition.append(('device_id', 'in', selected_device_ids))
-else:
-    condition.append(('device_id','!=',False))
 sensors = Sensor.search(condition)
 # Optimize: build map of sensor_id -> most recent reading (single query)
 last_readings_map = {}
