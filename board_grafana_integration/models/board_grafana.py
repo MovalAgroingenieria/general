@@ -16,14 +16,16 @@ class BoardGrafana(models.Model):
             'board.grafana.configuration', 'grafana_url')
         grafana_dashboard_height = self.env['ir.values'].get_default(
             'board.grafana.configuration', 'grafana_dashboard_height')
-        grafana_dashboard_id = self.env['ir.values'].get_default(
-            'board.grafana.configuration', 'grafana_dashboard_id')
+        grafana_dashboard_uid = self.env['ir.values'].get_default(
+            'board.grafana.configuration', 'grafana_dashboard_uid')
         if (not grafana_url):
             raise exceptions.ValidationError(
                 _('The grafana configuration parameters have not been set.'))
         url = grafana_url
-        if grafana_dashboard_id:
-            url = url + '/d/' + grafana_dashboard_id
+        if grafana_dashboard_uid:
+            url = url + '/d/' + grafana_dashboard_uid
+        else:
+            url = url + '/dashboards'
         # Does not allow to browse dashboards
         # url = url + '?kiosk'
         height = self.DEFAULT_DASHBOARD_HEIGHT

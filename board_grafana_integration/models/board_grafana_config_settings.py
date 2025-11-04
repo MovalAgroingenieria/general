@@ -31,7 +31,7 @@ class BoardGrafanaConfigSettings(models.TransientModel):
     grafana_dashboard_uid = fields.Char(
         string="Dashboard uid",
         help="The id of the welcome dashboard "
-             "(optional, else the default dashboard).")
+             "(optional, else the dashboard list will be shown).")
 
     @api.depends("grafana_url_raw")
     def _compute_grafana_url(self):
