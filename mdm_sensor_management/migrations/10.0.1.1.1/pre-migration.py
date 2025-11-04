@@ -4,6 +4,8 @@
 
 import logging
 
+from odoo import exceptions, _
+
 _logger = logging.getLogger(__name__)
 
 
@@ -16,12 +18,18 @@ def migrate(cr, version):
     _logger.info('Checking for existing UoM records to rename...')
     for uom_name in uom_names:
         # Check if a UoM with this name already exists
-        cr.execute("""
-            SELECT id, name, readonly
-            FROM mdm_measurement_device_sensor_uom
-            WHERE name = %s
-        """, (uom_name,))
-        existing_uom = cr.fetchone()
+        existing_uom = False
+        try:
+            env.cr.savepoint()
+            cr.execute("""
+                SELECT id, name, readonly
+                FROM mdm_measurement_device_sensor_uom
+                WHERE name = %s
+            """, (uom_name,))
+            existing_uom = cr.fetchone()
+        except Exception:
+            cr.rollback()
+            break
         if existing_uom:
             uom_id, old_name, is_readonly = existing_uom
             new_name = '%s (old)' % old_name
