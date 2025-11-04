@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <menuitem id="mdm_grafana_menu"
+    <menuitem id="mdm_grafana_root_menu"
               name="Grafana"
-              parent="mdm_sensor_management.mdm_sensory_menu"
+              parent="mdm_sensor_management.mdm_root_menu"
+              sequence="70"
+              groups="mdm_sensor_management.group_mdm_user"/>
+
+    <menuitem id="mdm_grafana_menu"
+              name="Grafana instance"
+              parent="mdm_grafana_root_menu"
               action="board_grafana_integration.login_into_grafana_action"
-              sequence="30"
+              sequence="20"
               groups="mdm_sensor_management.group_mdm_user"/>
 
     <menuitem id="mdm_grafana_dashboard_storage_menu"
               name="Dashboards"
-              parent="mdm_sensor_management.mdm_sensory_menu"
+              parent="mdm_grafana_root_menu"
               action="board_grafana_integration.grafana_dashboard_storage_action"
               sequence="40"
               groups="mdm_sensor_management.group_mdm_user"/>
