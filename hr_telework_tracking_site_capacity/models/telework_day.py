@@ -244,16 +244,16 @@ class HrTeleworkDay(models.Model):
     @api.depends('date', 'mode')
     def _compute_office_availability(self):
         """Compute availability information by office"""
-        Office = self.env['office.location'].sudo()
-        Workstation = self.env['office.workstation'].sudo()
-        TeleworkDay = self.env['hr.telework.day'].sudo()
+        office = self.env['office.location'].sudo()
+        workstation = self.env['office.workstation'].sudo()
+        telework_day = self.env['hr.telework.day'].sudo()
 
         for rec in self:
             if not rec.date or rec.mode == 'remote':
                 rec.office_availability = ''
                 continue
 
-            offices = Office.search([
+            offices = office.search([
                 ('active', '=', True)
             ], order='name')
 
@@ -262,12 +262,12 @@ class HrTeleworkDay(models.Model):
             total_workstations = 0
 
             for office in offices:
-                office_workstations = Workstation.search_count([
+                office_workstations = workstation.search_count([
                     ('office_id', '=', office.id),
                     ('active', '=', True)
                 ])
 
-                occupied = TeleworkDay.search_count([
+                occupied = telework_day.search_count([
                     ('date', '=', rec.date),
                     ('mode', '=', 'onsite'),
                     ('state', 'in', ['confirmed', 'draft', 'pending_review']),
@@ -559,11 +559,11 @@ class HrTeleworkDay(models.Model):
 
     def _check_cutoff_on_confirm(self):
         """Check if confirmation is allowed according to cutoff day and time"""
-        Param = self.env['ir.config_parameter'].sudo()
-        cutoff_weekday = int(Param.get_param(
+        param = self.env['ir.config_parameter'].sudo()
+        cutoff_weekday = int(param.get_param(
             'hr_telework_tracking_site_capacity.cutoff_weekday', '4'
         ))
-        cutoff_time = float(Param.get_param(
+        cutoff_time = float(param.get_param(
             'hr_telework_tracking_site_capacity.cutoff_time', '18.0'))
 
         cutoff_hour = int(cutoff_time)
@@ -1088,10 +1088,10 @@ class HrTeleworkDay(models.Model):
     def _auto_assign_workstations_internal(
             self, declarations=None, notify_reviewers=True):
         """Core logic for automatic workstation assignment."""
-        TeleworkDay = self.env['hr.telework.day']
+        telework_day = self.env['hr.telework.day']
 
         if declarations is None:
-            unassigned_declarations = TeleworkDay.search([
+            unassigned_declarations = telework_day.search([
                 ('mode', '=', 'onsite'),
                 ('workstation_id', '=', False),
                 ('state', 'in', ['draft', 'confirmed'])
@@ -1111,7 +1111,7 @@ class HrTeleworkDay(models.Model):
                 'assigned_count': 0,
                 'waiting_list_count': 0,
                 'initial_count': initial_count,
-                'pending_records': TeleworkDay.browse(),
+                'pending_records': telework_day.browse(),
                 'processed_records': unassigned_declarations,
             }
 
@@ -1205,7 +1205,7 @@ class HrTeleworkDay(models.Model):
             d.date for d in unassigned_declarations if d.date
         }
         if all_affected_dates:
-            affected_records = TeleworkDay.search([
+            affected_records = telework_day.search([
                 ('date', 'in', list(all_affected_dates))
             ])
             affected_records._update_availability_info()
@@ -1214,7 +1214,7 @@ class HrTeleworkDay(models.Model):
             ])
 
         if notify_reviewers and waiting_list_count > 0:
-            TeleworkDay._notify_reviewers_pending_assignments()
+            telework_day._notify_reviewers_pending_assignments()
 
         return {
             'assigned_count': assigned_count,
@@ -1757,7 +1757,7 @@ class HrTeleworkDay(models.Model):
         Args:
             force (bool): If True, skip cutoff time check. Default True.
         """
-        Param = self.env['ir.config_parameter'].sudo()
+        param = self.env['ir.config_parameter'].sudo()
 
         def _safe_int(value, default):
             try:
@@ -1772,13 +1772,13 @@ class HrTeleworkDay(models.Model):
                 return default
 
         confirm_weekday = _safe_int(
-            Param.get_param(
+            param.get_param(
                 'hr_telework_tracking_site_capacity.auto_confirm_weekday'
             ),
             4
         )
         confirm_time = _safe_float(
-            Param.get_param(
+            param.get_param(
                 'hr_telework_tracking_site_capacity.auto_confirm_time'
             ),
             8.0
@@ -1873,10 +1873,10 @@ class HrTeleworkDay(models.Model):
         approved full-day leaves. This is useful for cleaning up existing
         inconsistencies.
         """
-        Leave = self.env['hr.leave']
+        leave = self.env['hr.leave']
 
         # Find all approved full-day leaves
-        approved_leaves = Leave.search([
+        approved_leaves = leave.search([
             ('state', '=', 'validate'),
             ('request_unit_half', '=', False),
         ])

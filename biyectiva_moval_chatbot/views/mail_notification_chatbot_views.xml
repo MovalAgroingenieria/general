@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_mail_notification_chatbot_tree" model="ir.ui.view">
+        <field name="name">mail.notification.chatbot.tree</field>
+        <field name="model">mail.notification.chatbot</field>
+        <field name="arch" type="xml">
+            <tree string="Chatbot Notifications" create="false" delete="false">
+                <field name="task_name"/>
+                <field name="task_project_name"/>
+                <field name="task_stage_name"/>
+                <field name="res_partner_name" string="Recipient"/>
+                <field name="author_name" string="Author"/>
+                <field name="is_read"/>
+                <field name="message_type_label" string="Message Type"/>
+                <field name="task_user_names"/>
+                <field name="task_date_deadline"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_mail_notification_chatbot_form" model="ir.ui.view">
+        <field name="name">mail.notification.chatbot.form</field>
+        <field name="model">mail.notification.chatbot</field>
+        <field name="arch" type="xml">
+            <form string="Chatbot Notification" create="false" delete="false" edit="false">
+                <sheet>
+                    <group>
+                        <group name="notification" string="Notification Info">
+                            <field name="author_name" string="Author"/>
+                            <field name="res_partner_name" string="Recipient"/>
+                            <field name="is_read"/>
+                            <field name="author_id" invisible="1"/>
+                            <field name="res_partner_id" invisible="1"/>
+                            <field name="mail_message_id" invisible="1"/>
+                        </group>
+                        <group name="message" string="Message Info">
+                            <field name="message_model"/>
+                            <field name="message_res_name" string="Related Record"/>
+                            <field name="message_type_label" string="Type"/>
+                            <field name="message_subtype_name" string="Subtype"/>
+                            <field name="message_res_id" invisible="1"/>
+                            <field name="message_type" invisible="1"/>
+                            <field name="message_subtype_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group name="task" string="Task Info">
+                            <field name="task_name"/>
+                            <field name="task_project_name" string="Project"/>
+                            <field name="task_stage_name" string="Stage"/>
+                            <field name="task_partner_name" string="Customer"/>
+                            <field name="task_date_deadline"/>
+                            <field name="task_recurring"/>
+                            <field name="task_project_id" invisible="1"/>
+                            <field name="task_stage_id" invisible="1"/>
+                            <field name="task_partner_id" invisible="1"/>
+                        </group>
+                        <group name="task_details" string="Task Details">
+                            <field name="task_reviewer_name" string="Reviewer"/>
+                            <field name="task_type_name" string="Type"/>
+                            <field name="task_user_names" string="Assignees"/>
+                            <field name="task_tag_names" string="Tags"/>
+                            <field name="task_reviewer_id" invisible="1"/>
+                            <field name="task_type_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Message Body" name="body">
+                            <field name="message_body" widget="html"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_mail_notification_chatbot_search" model="ir.ui.view">
+        <field name="name">mail.notification.chatbot.search</field>
+        <field name="model">mail.notification.chatbot</field>
+        <field name="arch" type="xml">
+            <search string="Search Chatbot Notifications">
+                <field name="task_name" string="Task"/>
+                <field name="task_project_name" string="Project"/>
+                <field name="res_partner_id" string="Recipient"/>
+                <field name="task_user_names" string="Assignees"/>
+                <field name="task_stage_name" string="Stage"/>
+                <filter name="unread" string="Unread" domain="[('is_read', '=', False)]"/>
+                <filter name="read" string="Read" domain="[('is_read', '=', True)]"/>
+                <separator/>
+                <filter name="recurring" string="Recurring Tasks" domain="[('task_recurring', '=', True)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter name="group_project" string="Project" context="{'group_by': 'task_project_name'}"/>
+                    <filter name="group_stage" string="Stage" context="{'group_by': 'task_stage_name'}"/>
+                    <filter name="group_recipient" string="Recipient" context="{'group_by': 'res_partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_server_refresh_mv" model="ir.actions.server">
+        <field name="name">Refresh Materialized View</field>
+        <field name="model_id" ref="model_mail_notification_chatbot"/>
+        <field name="binding_model_id" ref="model_mail_notification_chatbot"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.action_refresh_materialized_view()
+        </field>
+        <field name="groups_id" eval="[(4, ref('biyectiva_moval_chatbot.group_chatbot_kpi_manager'))]"/>
+    </record>
+
+    <record id="action_mail_notification_chatbot" model="ir.actions.act_window">
+        <field name="name">Chatbot Notifications Snapshot</field>
+        <field name="res_model">mail.notification.chatbot</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_mail_notification_chatbot_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No notification data in the chatbot snapshot
+            </p>
+            <p>
+                This materialized view aggregates mail notifications linked to project tasks.
+                Data is refreshed automatically every 30 minutes.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu under Discuss -->
+    <menuitem
+        id="menu_mail_notification_chatbot"
+        name="Chatbot Notifications"
+        parent="mail.menu_root_discuss"
+        action="action_mail_notification_chatbot"
+        sequence="100"
+        groups="biyectiva_moval_chatbot.group_chatbot_kpi_manager,biyectiva_moval_chatbot.group_chatbot_token_manager"/>
+
+</odoo>

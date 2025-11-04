@@ -3,8 +3,8 @@
 
 {
     'name': 'Biyectiva Moval Chatbot',
-    'summary': 'Chatbot security groups for KPI and Token management',
-    'version': '16.0.1.0.0',
+    'summary': 'Biyectiva Chatbot Integration for Odoo 16',
+    'version': '16.0.2.0.0',
     'category': 'Hidden',
     'website': 'https://www.moval.es',
     'author': 'Moval Agroingeniería',
@@ -13,9 +13,15 @@
     'installable': True,
     'depends': [
         'base',
+        'mail',
+        'project',
+        'project_task_reviewer',
+        'project_type',
     ],
     'data': [
         'security/chatbot_groups.xml',
         'security/ir.model.access.csv',
+        'data/ir_cron.xml',
+        'views/mail_notification_chatbot_views.xml',
     ],
 }

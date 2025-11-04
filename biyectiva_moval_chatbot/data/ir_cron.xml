@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+    <record id="ir_cron_refresh_mail_notification_chatbot" model="ir.cron">
+        <field name="name">Refresh Chatbot Mail Notification Snapshot</field>
+        <field name="model_id" ref="biyectiva_moval_chatbot.model_mail_notification_chatbot"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_refresh_materialized_view()</field>
+        <field name="interval_number">5</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field name="priority">5</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>
