@@ -39,8 +39,12 @@
             <field name="arch" type="xml">
                 <search>
                     <field name="measurement_time"/>
+                    <field name="device_id"/>
+                    <field name="sensor_id"/>
+                    <field name="type_id"/>
                     <filter string="Device" name="device_id" context="{'group_by':'device_id'}"/>
                     <filter string="Sensor" name="sensor_id" context="{'group_by':'sensor_id'}"/>
+                    <filter string="Sensor Type" name="type_id" context="{'group_by':'type_id'}"/>
                     <separator/>
                     <filter string="Archived" name="archived_readings"
                             domain="[('active', '=', False)]"/>
@@ -61,23 +65,35 @@
             </field>
         </record>
 
+        <record id="mdm_reading_view_graph" model="ir.ui.view">
+            <field name="name">Sensor Reading Graph</field>
+            <field name="model">mdm.measurement.device.sensor.reading</field>
+            <field name="arch" type="xml">
+                <graph string="Sensor Readings" type="line">
+                    <field name="measurement_time" type="row" interval="day"/>
+                    <field name="value" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
         <record id="mdm_sensor_reading_action" model="ir.actions.act_window">
             <field name="name">Readings</field>
             <field name="res_model">mdm.measurement.device.sensor.reading</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form,pivot</field>
+            <field name="view_mode">tree,form,graph,pivot</field>
             <field name="view_ids" eval="[
                 (5, 0),
                 (0, 0, {'view_mode': 'tree',  'view_id': ref('mdm_reading_view_tree')}),
                 (0, 0, {'view_mode': 'form',  'view_id': ref('mdm_reading_view_form')}),
+                (0, 0, {'view_mode': 'graph', 'view_id': ref('mdm_reading_view_graph')}),
                 (0, 0, {'view_mode': 'pivot', 'view_id': ref('mdm_reading_view_pivot')})
             ]"/>
             <field name="search_view_id" ref="mdm_reading_view_search"/>
         </record>
 
         <!-- Actions -->
-        <record id="action_archive_device_sensor_readings" model="ir.actions.server">
-            <field name="name">Archive Selected Sensor Readings</field>
+        <record id="mdm_archive_sensor_readings" model="ir.actions.server">
+            <field name="name">Archive</field>
             <field name="model_id" ref="model_mdm_measurement_device_sensor_reading"/>
             <field name="state">code</field>
             <field name="code">
@@ -87,11 +103,11 @@
             </field>
         </record>
 
-        <record id="action_archive_device_sensor_readings_multi" model="ir.values">
-            <field name="name">Archive Selected Device Sensor Readings</field>
+        <record id="mdm_action_archive_sensor_readings" model="ir.values">
+            <field name="name">Archive</field>
             <field name="model">mdm.measurement.device.sensor.reading</field>
             <field name="key">action</field>
             <field name="key2">client_action_multi</field>
-            <field name="value" eval="'ir.actions.server,' + str(ref('action_archive_device_sensor_readings'))"/>
+            <field name="value" eval="'ir.actions.server,' + str(ref('mdm_archive_sensor_readings'))"/>
         </record>
 </odoo>

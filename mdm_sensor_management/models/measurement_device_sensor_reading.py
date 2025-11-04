@@ -54,6 +54,14 @@ class MeasurementDeviceSensorReading(models.Model):
         readonly=True,
     )
 
+    type_id = fields.Many2one(
+        comodel_name='mdm.measurement.device.sensor.type',
+        string='Sensor Type',
+        related='sensor_id.type_id',
+        store=True,
+        readonly=True,
+    )
+
     active = fields.Boolean(
         string='Active',
         default=True,

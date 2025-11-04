@@ -9,6 +9,9 @@
                 <sheet>
                     <field name="id" invisible="1"/>
                     <div class="oe_button_box" name="buttons">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                        </button>
                         <button name="action_view_sensors"
                                 type="object" class="oe_stat_button oe_read_only"
                                 icon="fa-mdm-generic-sensor"
@@ -75,6 +78,8 @@
                 <field name="location"/>
                 <filter string="Brand" name="brand" context="{'group_by':'brand'}"/>
                 <filter string="Model" name="model" context="{'group_by':'model'}"/>
+                <separator/>
+                <filter string="Archived" name="archived_devices" domain="[('active', '=', False)]"/>
             </search>
         </field>
     </record>
@@ -92,5 +97,25 @@
         <field name="search_view_id" ref="mdm_device_view_search"/>
     </record>
 
+    <!-- Action to archive multiple devices -->
+    <record id="mdm_archive_devices" model="ir.actions.server">
+        <field name="name">Archive</field>
+        <field name="model_id" ref="model_mdm_measurement_device"/>
+        <field name="state">code</field>
+        <field name="code">
+            if context.get('active_ids'):
+                active_ids = context.get('active_ids', [])
+                devices = env['mdm.measurement.device'].browse(active_ids)
+                devices.write({'active': False})
+        </field>
+    </record>
+
+    <record id="mdm_action_archive_devices" model="ir.values">
+        <field name="name">Archive</field>
+        <field name="model">mdm.measurement.device</field>
+        <field name="key">action</field>
+        <field name="key2">client_action_multi</field>
+        <field name="value" eval="'ir.actions.server,' + str(ref('mdm_archive_devices'))"/>
+    </record>
 
 </odoo>

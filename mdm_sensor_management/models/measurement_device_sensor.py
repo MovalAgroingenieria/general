@@ -58,6 +58,19 @@ class MeasurementDeviceSensor(models.Model):
              "Older readings should be cleaned up automatically by cron."
     )
 
+    active = fields.Boolean(
+        string='Active',
+        default=True,
+    )
+
+    def write(self, vals):
+        res = super(MeasurementDeviceSensor, self).write(vals)
+        if 'active' in vals and not vals['active']:
+            # Archive all readings of this sensor
+            for sensor in self:
+                sensor.sensor_readings.write({'active': False})
+        return res
+
     def action_view_readings(self):
         self.ensure_one()
         return {

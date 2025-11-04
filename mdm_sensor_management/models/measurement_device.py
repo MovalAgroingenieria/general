@@ -65,9 +65,22 @@ class MeasurementDevice(models.Model):
         string='Readings',
     )
 
+    active = fields.Boolean(
+        string='Active',
+        default=True,
+    )
+
     _sql_constraints = [
         ('unique_name', 'unique(name)', 'The identifier must be unique.'),
     ]
+
+    def write(self, vals):
+        res = super(MeasurementDevice, self).write(vals)
+        if 'active' in vals and not vals['active']:
+            # Archive all sensors of this device
+            for device in self:
+                device.sensor_ids.write({'active': False})
+        return res
 
     def action_view_sensors(self):
         self.ensure_one()

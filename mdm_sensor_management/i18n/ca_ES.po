@@ -120,6 +120,8 @@ msgstr "<strong>Diferència de volum (només lectures negatives):</strong> Utili
 "                                            <br/><span style=\"color: #666;\">Exemple:</span> <code>\"volume\": \"$volume_diff\"</code> (diferència quan el comptador va enrere)"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_active
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_active
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_active
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_active
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_search
@@ -149,12 +151,19 @@ msgid "Any other field from mdm.measurement.device.sensor.reading model"
 msgstr "Qualsevol altre camp del model mdm.measurement.device.sensor.reading"
 
 #. module: mdm_sensor_management
-#: model:ir.actions.server,name:mdm_sensor_management.action_archive_device_sensor_readings
-msgid "Archive Selected Sensor Readings"
-msgstr "Arxiva les lectures seleccionades del sensor"
+#: model:ir.actions.server,name:mdm_sensor_management.mdm_archive_devices
+#: model:ir.actions.server,name:mdm_sensor_management.mdm_archive_sensor_readings
+#: model:ir.actions.server,name:mdm_sensor_management.mdm_archive_sensors
+#: model:ir.values,name:mdm_sensor_management.mdm_action_archive_devices
+#: model:ir.values,name:mdm_sensor_management.mdm_action_archive_sensor_readings
+#: model:ir.values,name:mdm_sensor_management.mdm_action_archive_sensors
+msgid "Archive"
+msgstr "Arxiva"
 
 #. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_device_view_search
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_search
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_sensor_view_search
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_search
 msgid "Archived"
 msgstr "Arxivat"
@@ -902,7 +911,9 @@ msgstr "Anàlisi de lectures de sensor"
 
 #. module: mdm_sensor_management
 #: model:ir.model,name:mdm_sensor_management.model_mdm_measurement_device_sensor_type
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_type_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_id
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_search
 msgid "Sensor Type"
 msgstr "Tipus de sensor"
 

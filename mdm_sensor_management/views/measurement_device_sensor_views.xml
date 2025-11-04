@@ -8,6 +8,9 @@
                 <sheet>
                     <field name="id" invisible="1"/>
                     <div class="oe_button_box" name="buttons">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                        </button>
                         <button name="action_view_readings"
                                 type="object" class="oe_stat_button oe_read_only"
                                 attrs="{'invisible': [('id', '=', False)]}"
@@ -50,6 +53,8 @@
                 <filter string="Type" name="type_id" context="{'group_by':'type_id'}"/>
                 <filter string="Device" name="device_id" context="{'group_by':'device_id'}"/>
                 <filter string="UOM" name="uom_id" context="{'group_by':'uom_id'}"/>
+                <separator/>
+                <filter string="Archived" name="archived_sensors" domain="[('active', '=', False)]"/>
             </search>
         </field>
     </record>
@@ -65,5 +70,26 @@
             (0, 0, {'view_mode': 'form', 'view_id': ref('mdm_sensor_view_form')})
         ]"/>
         <field name="search_view_id" ref="mdm_sensor_view_search"/>
+    </record>
+
+    <!-- Action to archive multiple sensors -->
+    <record id="mdm_archive_sensors" model="ir.actions.server">
+        <field name="name">Archive</field>
+        <field name="model_id" ref="model_mdm_measurement_device_sensor"/>
+        <field name="state">code</field>
+        <field name="code">
+            if context.get('active_ids'):
+                active_ids = context.get('active_ids', [])
+                sensors = env['mdm.measurement.device.sensor'].browse(active_ids)
+                sensors.write({'active': False})
+        </field>
+    </record>
+
+    <record id="mdm_action_archive_sensors" model="ir.values">
+        <field name="name">Archive</field>
+        <field name="model">mdm.measurement.device.sensor</field>
+        <field name="key">action</field>
+        <field name="key2">client_action_multi</field>
+        <field name="value" eval="'ir.actions.server,' + str(ref('mdm_archive_sensors'))"/>
     </record>
 </odoo>
