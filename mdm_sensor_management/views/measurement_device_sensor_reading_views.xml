@@ -69,8 +69,9 @@
             <field name="name">Sensor Reading Graph</field>
             <field name="model">mdm.measurement.device.sensor.reading</field>
             <field name="arch" type="xml">
-                <graph string="Sensor Readings" type="line">
-                    <field name="measurement_time" type="row" interval="day"/>
+                <graph string="Sensor Readings" type="line" stacked="False">
+                    <field name="sensor_id" type="row"/>
+                    <field name="measurement_time" type="col" interval="day"/>
                     <field name="value" type="measure"/>
                 </graph>
             </field>
@@ -109,5 +110,25 @@
             <field name="key">action</field>
             <field name="key2">client_action_multi</field>
             <field name="value" eval="'ir.actions.server,' + str(ref('mdm_archive_sensor_readings'))"/>
+        </record>
+
+        <record id="mdm_unarchive_sensor_readings" model="ir.actions.server">
+            <field name="name">Unarchive</field>
+            <field name="model_id" ref="model_mdm_measurement_device_sensor_reading"/>
+            <field name="state">code</field>
+            <field name="code">
+                if context.get('active_ids'):
+                    active_ids = context.get('active_ids', [])
+                    readings = env['mdm.measurement.device.sensor.reading'].with_context(active_test=False).browse(active_ids)
+                    readings.write({'active': True})
+            </field>
+        </record>
+
+        <record id="mdm_action_unarchive_sensor_readings" model="ir.values">
+            <field name="name">Unarchive</field>
+            <field name="model">mdm.measurement.device.sensor.reading</field>
+            <field name="key">action</field>
+            <field name="key2">client_action_multi</field>
+            <field name="value" eval="'ir.actions.server,' + str(ref('mdm_unarchive_sensor_readings'))"/>
         </record>
 </odoo>

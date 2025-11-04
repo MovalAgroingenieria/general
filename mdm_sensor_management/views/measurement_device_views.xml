@@ -9,7 +9,8 @@
                 <sheet>
                     <field name="id" invisible="1"/>
                     <div class="oe_button_box" name="buttons">
-                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive"
+                                confirm="Are you sure you want to archive/unarchive this device and all its sensors?">
                             <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
                         </button>
                         <button name="action_view_sensors"
@@ -116,6 +117,27 @@
         <field name="key">action</field>
         <field name="key2">client_action_multi</field>
         <field name="value" eval="'ir.actions.server,' + str(ref('mdm_archive_devices'))"/>
+    </record>
+
+    <!-- Action to unarchive multiple devices -->
+    <record id="mdm_unarchive_devices" model="ir.actions.server">
+        <field name="name">Unarchive</field>
+        <field name="model_id" ref="model_mdm_measurement_device"/>
+        <field name="state">code</field>
+        <field name="code">
+            if context.get('active_ids'):
+                active_ids = context.get('active_ids', [])
+                devices = env['mdm.measurement.device'].with_context(active_test=False).browse(active_ids)
+                devices.write({'active': True})
+        </field>
+    </record>
+
+    <record id="mdm_action_unarchive_devices" model="ir.values">
+        <field name="name">Unarchive</field>
+        <field name="model">mdm.measurement.device</field>
+        <field name="key">action</field>
+        <field name="key2">client_action_multi</field>
+        <field name="value" eval="'ir.actions.server,' + str(ref('mdm_unarchive_devices'))"/>
     </record>
 
 </odoo>

@@ -98,14 +98,15 @@ class MeasurementDeviceSensorReading(models.Model):
     def cron_cleanup_old_readings(self):
         # Search for sensors with a positive retention period
         sensors = self.env['mdm.measurement.device.sensor'].search([
-            ('reading_retention_days', '>', 0)
+            ('reading_retention_days', '>', 0),
         ])
         for sensor in sensors:
-            cutoff_datetime = datetime.now() - timedelta(days=sensor.reading_retention_days)
+            cutoff_datetime = datetime.now() - timedelta(
+                days=sensor.reading_retention_days)
             cutoff_date_str = cutoff_datetime.strftime('%Y-%m-%d %H:%M:%S')
             old_readings = self.search([
                 ('sensor_id', '=', sensor.id),
-                ('measurement_time', '<', cutoff_date_str)
+                ('measurement_time', '<', cutoff_date_str),
             ])
             if old_readings:
                 old_readings.write({'active': False})

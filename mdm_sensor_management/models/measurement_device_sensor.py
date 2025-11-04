@@ -65,10 +65,16 @@ class MeasurementDeviceSensor(models.Model):
 
     def write(self, vals):
         res = super(MeasurementDeviceSensor, self).write(vals)
-        if 'active' in vals and not vals['active']:
-            # Archive all readings of this sensor
+        if 'active' in vals:
             for sensor in self:
-                sensor.sensor_readings.write({'active': False})
+                if not vals['active']:
+                    # Archive all readings of this sensor
+                    sensor.sensor_readings.write({'active': False})
+                else:
+                    # Unarchive all readings of this sensor
+                    readings = sensor.with_context(
+                        active_test=False).sensor_readings
+                    readings.write({'active': True})
         return res
 
     def action_view_readings(self):
