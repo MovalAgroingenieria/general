@@ -20,7 +20,7 @@ def migrate(cr, version):
         # Check if a UoM with this name already exists
         existing_uom = False
         try:
-            env.cr.savepoint()
+            cr.savepoint()
             cr.execute("""
                 SELECT id, name, readonly
                 FROM mdm_measurement_device_sensor_uom
