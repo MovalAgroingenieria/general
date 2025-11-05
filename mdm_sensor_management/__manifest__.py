@@ -21,6 +21,7 @@
         'data/measurent_device_sensor_reading_cron.xml',
         'data/measurement_device_sensor_uom_data.xml',
         'views/resources.xml',
+        'views/measurement_device_category_views.xml',
         'views/measurement_device_views.xml',
         'views/measurement_device_sensor_reading_views.xml',
         'views/measurement_device_sensor_type_views.xml',

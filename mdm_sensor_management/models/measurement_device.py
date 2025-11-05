@@ -53,6 +53,12 @@ class MeasurementDevice(models.Model):
         attachment=True,
     )
 
+    category_id = fields.Many2one(
+        string='Category',
+        comodel_name='mdm.measurement.device.category',
+        ondelete='set null',
+    )
+
     sensor_ids = fields.One2many(
         comodel_name='mdm.measurement.device.sensor',
         inverse_name='device_id',

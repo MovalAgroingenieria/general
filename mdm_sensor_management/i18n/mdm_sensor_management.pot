@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-30 10:31+0000\n"
-"PO-Revision-Date: 2025-10-30 10:31+0000\n"
+"POT-Creation-Date: 2025-11-05 12:20+0000\n"
+"PO-Revision-Date: 2025-11-05 12:20+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:651
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:673
 #, python-format
 msgid "... and %d more errors"
 msgstr ""
@@ -113,7 +113,6 @@ msgid "<strong>Volume difference (negative readings only):</strong> Use <code>$v
 msgstr ""
 
 #. module: mdm_sensor_management
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_active
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_active
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_active
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_active
@@ -147,9 +146,6 @@ msgstr ""
 #: model:ir.actions.server,name:mdm_sensor_management.mdm_archive_devices
 #: model:ir.actions.server,name:mdm_sensor_management.mdm_archive_sensor_readings
 #: model:ir.actions.server,name:mdm_sensor_management.mdm_archive_sensors
-#: model:ir.values,name:mdm_sensor_management.mdm_action_archive_devices
-#: model:ir.values,name:mdm_sensor_management.mdm_action_archive_sensor_readings
-#: model:ir.values,name:mdm_sensor_management.mdm_action_archive_sensors
 msgid "Archive"
 msgstr ""
 
@@ -174,16 +170,6 @@ msgstr ""
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_attributes
 msgid "Attributes"
-msgstr ""
-
-#. module: mdm_sensor_management
-#: model:ir.actions.server,name:mdm_sensor_management.mdm_unarchive_devices
-#: model:ir.actions.server,name:mdm_sensor_management.mdm_unarchive_sensor_readings
-#: model:ir.actions.server,name:mdm_sensor_management.mdm_unarchive_sensors
-#: model:ir.values,name:mdm_sensor_management.mdm_action_unarchive_devices
-#: model:ir.values,name:mdm_sensor_management.mdm_action_unarchive_sensor_readings
-#: model:ir.values,name:mdm_sensor_management.mdm_action_unarchive_sensors
-msgid "Unarchive"
 msgstr ""
 
 #. module: mdm_sensor_management
@@ -220,8 +206,24 @@ msgid "Cancel"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:710
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:756
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_id_19107
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_device_view_search
+msgid "Category"
+msgstr ""
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_measurement_device_category_id_19107
+msgid "Category for grouping devices (e.g., Flow meters, Pressure transducers)"
+msgstr ""
+
+#. module: mdm_sensor_management
+#: sql_constraint:mdm.measurement.device.category:0
+msgid "Category name must be unique!"
+msgstr ""
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:729
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:775
 #, python-format
 msgid "Close"
 msgstr ""
@@ -250,6 +252,7 @@ msgid "Computed From Date"
 msgstr ""
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_create_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_create_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_create_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_create_uid
@@ -261,6 +264,7 @@ msgid "Created by"
 msgstr ""
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_create_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_create_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_create_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_create_date
@@ -338,6 +342,7 @@ msgid "Describe the purpose of this template..."
 msgstr ""
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_description
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_description
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_description
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_description
@@ -365,12 +370,34 @@ msgid "Device"
 msgstr ""
 
 #. module: mdm_sensor_management
+#: model:ir.actions.act_window,name:mdm_sensor_management.measurement_device_category_action
+#: model:ir.ui.menu,name:mdm_sensor_management.menu_measurement_device_category
+#: model:ir.ui.view,arch_db:mdm_sensor_management.measurement_device_category_view_tree
+msgid "Device Categories"
+msgstr ""
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.measurement_device_category_view_form
+msgid "Device Category"
+msgstr ""
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_device_count
+msgid "Device Count"
+msgstr ""
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/models/measurement_device_category.py:51
 #: model:ir.actions.act_window,name:mdm_sensor_management.mdm_measurement_device_action
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_device_ids
 #: model:ir.ui.menu,name:mdm_sensor_management.mdm_device_menu
+#: model:ir.ui.view,arch_db:mdm_sensor_management.measurement_device_category_view_form
+#, python-format
 msgid "Devices"
 msgstr ""
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_display_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_display_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_display_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_display_name
@@ -409,20 +436,25 @@ msgid "End date for date_range mode"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:520
+#: model:ir.ui.view,arch_db:mdm_sensor_management.measurement_device_category_view_form
+msgid "Enter category description..."
+msgstr ""
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:519
 #, python-format
 msgid "Error evaluating expression \"%s\": %s"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:625
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:637
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:647
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:659
 #, python-format
 msgid "Errors"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:655
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:677
 #, python-format
 msgid "Errors found"
 msgstr ""
@@ -487,11 +519,12 @@ msgid "Group By"
 msgstr ""
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_id
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_id_1600
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_id_1613
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_id_18152
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_id_18164
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_id
 msgid "ID"
@@ -530,7 +563,7 @@ msgstr ""
 
 #. module: mdm_sensor_management
 #: code:addons/mdm_sensor_management/models/sensor_reading_transform_template.py:177
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:538
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:537
 #, python-format
 msgid "Invalid JSON in Field Mapping: %s"
 msgstr ""
@@ -575,12 +608,8 @@ msgid "JSON mapping from sensor fields to target model fields.\n"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: model:mdm.measurement.device.sensor.uom,name:mdm_sensor_management.mdm_sensor_uom_ls
-msgid "L/s"
-msgstr ""
-
-#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device___last_update
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category___last_update
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor___last_update
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading___last_update
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type___last_update
@@ -597,6 +626,7 @@ msgid "Last Reading"
 msgstr ""
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_write_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_write_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_write_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_write_uid
@@ -608,6 +638,7 @@ msgid "Last Updated by"
 msgstr ""
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_write_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_write_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_write_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_write_date
@@ -648,6 +679,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_device_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_device_id
 msgid "Measurement Device"
+msgstr ""
+
+#. module: mdm_sensor_management
+#: model:ir.model,name:mdm_sensor_management.model_mdm_measurement_device_category
+msgid "Measurement Device Category"
 msgstr ""
 
 #. module: mdm_sensor_management
@@ -714,6 +750,7 @@ msgid "Model where readings will be created"
 msgstr ""
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_name
@@ -763,26 +800,19 @@ msgid "Negative Reading Model"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:624
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:646
 #, python-format
 msgid "Negative records created"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:682
-#, python-format
-msgid "No readings found with the specified criteria"
-msgstr ""
-
-#. module: mdm_sensor_management
 #: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:332
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:372
 #, python-format
 msgid "No sensors found matching the criteria"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:623
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:645
 #, python-format
 msgid "Normal records created"
 msgstr ""
@@ -830,7 +860,7 @@ msgid "Reading Selection Mode"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/models/measurement_device.py:87
+#: code:addons/mdm_sensor_management/models/measurement_device.py:114
 #: model:ir.actions.act_window,name:mdm_sensor_management.mdm_sensor_reading_action
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_reading_ids
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_sensor_readings
@@ -842,7 +872,7 @@ msgid "Readings"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:636
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:658
 #, python-format
 msgid "Records created"
 msgstr ""
@@ -871,6 +901,11 @@ msgstr ""
 #. module: mdm_sensor_management
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
 msgid "Save as Template"
+msgstr ""
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.measurement_device_category_view_search
+msgid "Search Device Category"
 msgstr ""
 
 #. module: mdm_sensor_management
@@ -907,7 +942,8 @@ msgid "Sensor Reading Transform Template"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:65
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:84
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_graph
 #, python-format
 msgid "Sensor Readings"
 msgstr ""
@@ -942,7 +978,7 @@ msgid "Sensor Units"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/models/measurement_device.py:76
+#: code:addons/mdm_sensor_management/models/measurement_device.py:103
 #: code:addons/mdm_sensor_management/models/measurement_device_sensor_type.py:63
 #: model:ir.actions.act_window,name:mdm_sensor_management.mdm_sensor_action
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_ids
@@ -1013,13 +1049,13 @@ msgid "Target Model Technical Name"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:672
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:694
 #, python-format
 msgid "Target Model is required"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:677
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:699
 #, python-format
 msgid "Target model \"%s\" does not exist"
 msgstr ""
@@ -1035,7 +1071,7 @@ msgid "Template"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:746
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:765
 #, python-format
 msgid "Template \"%s\" has been saved successfully"
 msgstr ""
@@ -1046,7 +1082,7 @@ msgid "Template Name"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:749
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:768
 #, python-format
 msgid "Template Saved"
 msgstr ""
@@ -1083,8 +1119,8 @@ msgid "To Date"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:626
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:638
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:648
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:660
 #, python-format
 msgid "Total readings processed"
 msgstr ""
@@ -1116,13 +1152,13 @@ msgid "Transform Templates"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:663
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:685
 #, python-format
 msgid "Transformation Complete"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:703
+#: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:722
 #, python-format
 msgid "Transformation Result"
 msgstr ""
@@ -1147,6 +1183,13 @@ msgstr ""
 #. module: mdm_sensor_management
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_sensor_view_search
 msgid "UOM"
+msgstr ""
+
+#. module: mdm_sensor_management
+#: model:ir.actions.server,name:mdm_sensor_management.mdm_unarchive_devices
+#: model:ir.actions.server,name:mdm_sensor_management.mdm_unarchive_sensor_readings
+#: model:ir.actions.server,name:mdm_sensor_management.mdm_unarchive_sensors
+msgid "Unarchive"
 msgstr ""
 
 #. module: mdm_sensor_management
@@ -1220,11 +1263,6 @@ msgstr ""
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
 msgid "flowmeter_id"
-msgstr ""
-
-#. module: mdm_sensor_management
-#: model:mdm.measurement.device.sensor.uom,name:mdm_sensor_management.mdm_sensor_uom_mca
-msgid "m.c.a"
 msgstr ""
 
 #. module: mdm_sensor_management

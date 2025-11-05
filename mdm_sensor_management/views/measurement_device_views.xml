@@ -29,6 +29,7 @@
                     <group col="2">
                         <group>
                             <field name="name"/>
+                            <field name="category_id"/>
                             <field name="description"/>
                             <field name="location"/>
                             <field name="installation_date"/>
@@ -62,6 +63,7 @@
         <field name="arch" type="xml">
             <tree class="o_mdm_measurement_device_tree">
                 <field name="name"/>
+                <field name="category_id"/>
                 <field name="location"/>
                 <field name="brand"/>
                 <field name="model"/>
@@ -76,7 +78,9 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="category_id"/>
                 <field name="location"/>
+                <filter string="Category" name="category" context="{'group_by':'category_id'}"/>
                 <filter string="Brand" name="brand" context="{'group_by':'brand'}"/>
                 <filter string="Model" name="model" context="{'group_by':'model'}"/>
                 <separator/>
