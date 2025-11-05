@@ -2,9 +2,9 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from decimal import Decimal
-from unicodedata import normalize, combining
+from unicodedata import combining, normalize
 
-from odoo import _, api, models
+from odoo import api, models
 from odoo.exceptions import UserError
 
 
@@ -31,10 +31,14 @@ class PaymentConverterSpain(models.Model):
         base = "".join(ch for ch in nfkd if not combining(ch))
         # Post-map cases not covered nicely by NFKD or for consistency
         replacements = {
-            "ñ": "n", "Ñ": "N",
-            "ç": "c", "Ç": "C",
-            "ª": "a", "º": "o",
-            "·": ".", "\n": " ",
+            "ñ": "n",
+            "Ñ": "N",
+            "ç": "c",
+            "Ç": "C",
+            "ª": "a",
+            "º": "o",
+            "·": ".",
+            "\n": " ",
         }
         for old, new in replacements.items():
             base = base.replace(old, new)
@@ -62,25 +66,32 @@ class PaymentConverterSpain(models.Model):
         if isinstance(number, str):
             try:
                 number = Decimal(number)
-            except Exception:
-                raise UserError(_("Invalid float string: %s") % number)
+            except Exception as exc:
+                raise UserError(
+                    self.env._("Invalid float string: %(value)s", value=number)
+                ) from exc
         elif isinstance(number, float):
             number = Decimal(str(number))
         elif isinstance(number, int):
             number = Decimal(number)
 
         if not isinstance(number, Decimal):
-            raise UserError(_("Unsupported number type: %s") % type(number).__name__)
+            raise UserError(
+                self.env._(
+                    "Unsupported number type: %(tname)s", tname=type(number).__name__
+                )
+            )
 
         cents = int((number * Decimal("100")).quantize(Decimal("1")))
         text = str(cents)
         if len(text) > size:
             raise UserError(
-                _(
-                    "Error:\n\nCan not convert float number %(number).2f "
-                    "to fit in %(size)d characters."
+                self.env._(
+                    "Error:\n\nCan not convert float number %(num).2f to "
+                    "fit in %(size)d characters.",
+                    num=float(number),
+                    size=size,
                 )
-                % {"number": float(number), "size": size}
             )
         return text.zfill(size)
 
@@ -88,16 +99,19 @@ class PaymentConverterSpain(models.Model):
     def convert_int(self, number, size: int) -> str:
         try:
             ival = int(number)
-        except Exception:
-            raise UserError(_("Invalid integer: %s") % number)
+        except Exception as exc:
+            raise UserError(
+                self.env._("Invalid integer: %(value)s", value=number)
+            ) from exc
         text = str(ival)
         if len(text) > size:
             raise UserError(
-                _(
-                    "Error:\n\nCan not convert integer number %(number)d "
-                    "to fit in %(size)d characters."
+                self.env._(
+                    "Error:\n\nCan not convert integer number %(num)d to fit "
+                    "in %(size)d characters.",
+                    num=ival,
+                    size=size,
                 )
-                % {"number": ival, "size": size}
             )
         return text.zfill(size)
 
@@ -110,13 +124,14 @@ class PaymentConverterSpain(models.Model):
           - int → convert_int
           - else → convert_text
         """
-
         if value in (None, "", False):
             return self.convert_text("", size, justified)
         if isinstance(value, int) or (isinstance(value, str) and value.isdigit()):
             return self.convert_int(value, size)
-        if isinstance(value, (float, Decimal, str)) and self._looks_numeric_float(value):
-            # route floats/decimals/float-like strings to convert_float
+        if isinstance(value, (float, Decimal, str)) and self._looks_numeric_float(
+            value
+        ):
+            # Route floats/decimals/float-like strings to convert_float
             return self.convert_float(value, size)
         return self.convert_text(value, size, justified)
 
@@ -144,7 +159,12 @@ class PaymentConverterSpain(models.Model):
         if len(digits) == 20:
             return digits
         # ES IBAN has 24 chars; if we see >= 22 digits, take the last 20
-        if value and isinstance(value, str) and value.strip().upper().startswith("ES") and len(digits) >= 22:
+        if (
+            value
+            and isinstance(value, str)
+            and value.strip().upper().startswith("ES")
+            and len(digits) >= 22
+        ):
             return digits[-20:]
         return digits  # let caller validate length
 
@@ -156,17 +176,20 @@ class PaymentConverterSpain(models.Model):
         """
         if not value:
             raise UserError(
-                _("User error:\n\nThe bank account number of %s is not defined.")
-                % (partner_name,)
+                self.env._(
+                    "User error:\n\nThe bank account number of %(partner)s "
+                    "is not defined.",
+                    partner=partner_name,
+                )
             )
         ccc = self._extract_ccc_from_any(value)
         if len(ccc) != 20:
             raise UserError(
-                _(
-                    "User error:\n\nThe bank account number of %s does not "
-                    "have 20 digits."
+                self.env._(
+                    "User error:\n\nThe bank account number of %(partner)s does "
+                    "not have 20 digits.",
+                    partner=partner_name,
                 )
-                % (partner_name,)
             )
         return ccc
 
