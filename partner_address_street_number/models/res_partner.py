@@ -1,7 +1,7 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import models, fields, api
+from odoo import api, fields, models
 
 
 class ResPartner(models.Model):
@@ -18,6 +18,7 @@ class ResPartner(models.Model):
         you use `%(street_num)s` in country address formats without
         warnings or drops during formatting.
     """
+
     _inherit = "res.partner"
 
     # New address field, stored as plain text because formats vary widely per country.
@@ -46,7 +47,6 @@ class ResPartner(models.Model):
             names.append(field_name)
         return names
 
-
     @api.model
     def _address_fields(self):
         """
@@ -65,6 +65,10 @@ class ResPartner(models.Model):
         On v17+ this method exists upstream. For older versions or custom
         stacks where it may be missing, we gracefully fall back to `[]`.
         """
-        parent = getattr(super(), "_formatting_address_fields", None)
-        res = parent() if parent else []
+        try:
+            # Try to call the parent method if it exists
+            res = super()._formatting_address_fields()
+        except AttributeError:
+            # Fallback for versions where the method doesn't exist
+            res = []
         return self._add_field_name(res, "street_num")
