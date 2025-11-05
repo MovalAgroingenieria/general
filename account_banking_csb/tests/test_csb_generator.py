@@ -2,6 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from datetime import date
+
 from odoo.tests.common import TransactionCase, tagged
 
 
@@ -9,238 +10,290 @@ from odoo.tests.common import TransactionCase, tagged
 class TestCSBGenerator(TransactionCase):
     """Functional tests for CSB file generator on account.payment.order (v18)."""
 
-    def setUp(self):
+    def setUp(self):  # pylint: disable=invalid-name
         super().setUp()
-        self.Partner = self.env["res.partner"]
-        self.Order = self.env["account.payment.order"]
-        self.PayLine = self.env["account.payment.line"]
-        self.PayMode = self.env["account.payment.mode"]
-        self.PayMethod = self.env["account.payment.method"]
-        self.Bank = self.env["res.partner.bank"]
-        self.Journal = self.env["account.journal"]
+        self._setup_models()
+        self._setup_company_bank()
+        self._setup_payment_method()
+        self._setup_payment_mode()
+        self._setup_payment_order()
+        self._setup_beneficiary()
 
-        # Company & bank account (required by _cabecera_ordenante_68)
+    def _setup_models(self):
+        """Initialize all model references."""
+        self.partner_obj = self.env["res.partner"]
+        self.order_obj = self.env["account.payment.order"]
+        self.pay_line_obj = self.env["account.payment.line"]
+        self.pay_mode_obj = self.env["account.payment.mode"]
+        self.pay_method_obj = self.env["account.payment.method"]
+        self.bank_obj = self.env["res.partner.bank"]
+        self.journal_obj = self.env["account.journal"]
+
+    def _setup_company_bank(self):
+        """Setup company bank account and journal."""
         self.company = self.env.company
         self.company_partner = self.company.partner_id
-        self.company_bank = self.Bank.create({
-            # ES IBAN; converter will extract CCC internally if needed
-            "acc_number": "20770024003102575766",
-            "partner_id": self.company_partner.id,
-        })
+        self.company_bank = self.bank_obj.create(
+            {
+                "acc_number": "20770024003102575766",
+                "partner_id": self.company_partner.id,
+            }
+        )
 
-        # Ensure there is a bank journal linked to that bank account (useful for 'fixed' link)
-        self.bank_journal = self.Journal.search([
-            ("type", "=", "bank"),
-            ("company_id", "=", self.company.id),
-            ("bank_account_id", "=", self.company_bank.id),
-        ], limit=1)
+        self.bank_journal = self.journal_obj.search(
+            [
+                ("type", "=", "bank"),
+                ("company_id", "=", self.company.id),
+                ("bank_account_id", "=", self.company_bank.id),
+            ],
+            limit=1,
+        )
         if not self.bank_journal:
-            self.bank_journal = self.Journal.create({
-                "name": "TEST BANK",
-                "code": "TBNK",        # <= 5 chars
-                "type": "bank",
-                "company_id": self.company.id,
-                "bank_account_id": self.company_bank.id,
-            })
+            self.bank_journal = self.journal_obj.create(
+                {
+                    "name": "TEST BANK",
+                    "code": "TBNK",
+                    "type": "bank",
+                    "company_id": self.company.id,
+                    "bank_account_id": self.company_bank.id,
+                }
+            )
 
-        # Payment method: reuse XML record if present; otherwise create it
+    def _setup_payment_method(self):
+        """Setup payment method."""
         self.method = self.env.ref(
             "account_banking_csb.csb_direct_debit_payments",
             raise_if_not_found=False,
-        ) or self.PayMethod.create({
-            "name": "CSB Direct Debit",
-            "code": "csb_direct_debit_payments",
-            "active": True,
-        })
+        ) or self.pay_method_obj.create(
+            {
+                "name": "CSB Direct Debit",
+                "code": "csb_direct_debit_payments",
+                "active": True,
+            }
+        )
 
-        # Helper to get selection dict regardless of being list or callable
-        def _selection_dict(model, field_name):
-            fld = model._fields.get(field_name)
-            if not fld:
-                return {}
-            sel = fld.selection
-            if callable(sel):
-                sel = sel(self.env)
-            try:
-                return {k: v for k, v in sel}
-            except Exception:
-                return {}
-
+    def _setup_payment_mode(self):
+        """Setup payment mode with all required fields."""
         vals = {
             "name": "CSB Mode",
-            "payment_method_id": self.method.id,   # required in many branches
+            "payment_method_id": self.method.id,
             "payment_order_ok": True,
             "group_lines": True,
             "default_payment_mode": "same",
             "default_target_move": "posted",
             "default_date_type": "due",
             "sequence": 10,
-            # Used by _start_68 (12 chars after converter)
             "initiating_party_identifier": "A12345678",
         }
 
-        # bank_account_link (NOT NULL in your branch)
-        chosen = None
-        if "bank_account_link" in self.PayMode._fields:
-            selection = _selection_dict(self.PayMode, "bank_account_link")
-            # Prefer 'company' to avoid extra constraints; else 'fixed'; else fallback
-            preferred = ["company", "fixed", "partner", "variable", "none"]
-            chosen = next((opt for opt in preferred if opt in selection), None) or (next(iter(selection.keys())) if selection else None)
-            if chosen:
-                vals["bank_account_link"] = chosen
+        self._setup_bank_account_link(vals)
+        self._setup_show_bank_account(vals)
 
-        # If the link is 'company' we’re done; if it's 'fixed', set the fixed journal field
+        self.mode = self.pay_mode_obj.create(vals)
+
+    def _setup_bank_account_link(self, vals):
+        """Setup bank account link configuration."""
+        if "bank_account_link" not in self.pay_mode_obj._fields:
+            return
+
+        selection = self._get_selection_dict(self.pay_mode_obj, "bank_account_link")
+        preferred = ["company", "fixed", "partner", "variable", "none"]
+        chosen = next((opt for opt in preferred if opt in selection), None)
+        if not chosen:
+            return
+
+        vals["bank_account_link"] = chosen
+
         if chosen == "company":
-            # Some branches also expose a MODE-level bank account field; set it if present
-            for f in ("company_partner_bank_id", "partner_bank_id"):
-                if f in self.PayMode._fields:
-                    vals[f] = self.company_bank.id
-                    break
+            self._setup_company_bank_link(vals)
         elif chosen == "fixed":
-            # Find the MODE field that expects an account.journal (usually fixed_journal_id)
-            fixed_journal_field = None
-            for fname, field in self.PayMode._fields.items():
-                if getattr(field, "type", None) == "many2one" and getattr(field, "comodel_name", "") == "account.journal":
-                    # prefer names that contain 'fixed' and 'journal'
-                    if "fixed" in fname and "journal" in fname:
-                        fixed_journal_field = fname
-                        break
-            if not fixed_journal_field:
-                # fallback: any journal M2o on mode
-                for fname, field in self.PayMode._fields.items():
-                    if getattr(field, "type", None) == "many2one" and getattr(field, "comodel_name", "") == "account.journal":
-                        fixed_journal_field = fname
-                        break
-            if fixed_journal_field:
-                vals[fixed_journal_field] = self.bank_journal.id
-            # Also set a MODE-level bank account if the branch requires it
-            for f in ("company_partner_bank_id", "partner_bank_id"):
-                if f in self.PayMode._fields:
-                    vals[f] = self.company_bank.id
-                    break
+            self._setup_fixed_bank_link(vals)
 
-        # show_bank_account (some branches keep it)
-        if "show_bank_account" in self.PayMode._fields:
-            sel_show = _selection_dict(self.PayMode, "show_bank_account")
-            vals["show_bank_account"] = "full" if "full" in sel_show else (next(iter(sel_show.keys())) if sel_show else False)
+    def _setup_company_bank_link(self, vals):
+        """Setup company bank account link."""
+        for field_name in ("company_partner_bank_id", "partner_bank_id"):
+            if field_name in self.pay_mode_obj._fields:
+                vals[field_name] = self.company_bank.id
+                break
 
-        self.mode = self.PayMode.create(vals)
+    def _setup_fixed_bank_link(self, vals):
+        """Setup fixed bank account link."""
+        fixed_journal_field = self._find_fixed_journal_field()
+        if fixed_journal_field:
+            vals[fixed_journal_field] = self.bank_journal.id
 
-        # Payment order (uses method + mode + company bank)
-        self.order = self.Order.create({
-            "name": "PO/TEST/CSB",
-            "payment_method_id": self.method.id,
-            "payment_mode_id": self.mode.id,
-            "company_partner_bank_id": self.company_bank.id,
-        })
+        for field_name in ("company_partner_bank_id", "partner_bank_id"):
+            if field_name in self.pay_mode_obj._fields:
+                vals[field_name] = self.company_bank.id
+                break
 
-        # Beneficiary with VAT + address (used in beneficiary records)
-        self.partner = self.Partner.create({
-            "name": "Beneficiario de Prueba Ñ",
-            "vat": "ES12345678",
-            "street": "C/ Alcalá 1",
-            "street2": "Piso 3",
-            "zip": "28001",
-            "city": "Madrid",
-            "country_id": self.env.ref("base.es").id,
-        })
+    def _find_fixed_journal_field(self):
+        """Find the fixed journal field in payment mode."""
+        for fname, field in self.pay_mode_obj._fields.items():
+            if (
+                getattr(field, "type", None) == "many2one"
+                and getattr(field, "comodel_name", "") == "account.journal"
+                and "fixed" in fname
+                and "journal" in fname
+            ):
+                return fname
+        return None
 
-    # --------------------------- Helpers ---------------   ----------------------
+    def _setup_show_bank_account(self, vals):
+        """Setup show bank account configuration."""
+        if "show_bank_account" in self.pay_mode_obj._fields:
+            sel_show = self._get_selection_dict(self.pay_mode_obj, "show_bank_account")
+            vals["show_bank_account"] = (
+                "full"
+                if "full" in sel_show
+                else (next(iter(sel_show.keys())) if sel_show else False)
+            )
 
-    def _assert_block_len(self, block: str, label: str):
-        """Each emitted CSB line is 100 chars + CRLF -> length multiple of 102."""
-        self.assertTrue(
-            len(block) % 102 == 0,
-            f"{label}: block length must be multiple of 102 (100 + CRLF), got {len(block)}",
+    def _setup_payment_order(self):
+        """Setup payment order."""
+        self.order = self.order_obj.create(
+            {
+                "name": "PO/TEST/CSB",
+                "payment_method_id": self.method.id,
+                "payment_mode_id": self.mode.id,
+                "company_partner_bank_id": self.company_bank.id,
+            }
         )
+
+    def _setup_beneficiary(self):
+        """Setup beneficiary partner."""
+        self.partner = self.partner_obj.create(
+            {
+                "name": "Beneficiario de Prueba Ñ",
+                "vat": "ES12345678",
+                "street": "C/ Alcalá 1",
+                "street2": "Piso 3",
+                "zip": "28001",
+                "city": "Madrid",
+                "country_id": self.env.ref("base.es").id,
+            }
+        )
+
+    def _get_selection_dict(self, model, field_name):
+        """Get selection dict regardless of being list or callable."""
+        fld = model._fields.get(field_name)
+        if not fld:
+            return {}
+        sel = fld.selection
+        if callable(sel):
+            sel = sel(self.env)
+        try:
+            return dict(sel)
+        except (TypeError, ValueError):
+            return {}
+
+    # --------------------------- Helpers -------------------------------------
+
+    def _assert_block_len(self, block, label):
+        """Each emitted CSB line is 100 chars + CRLF -> length multiple of 102."""
+        error_msg = (
+            f"{label}: block length must be multiple of 102 (100 + CRLF), "
+            f"got {len(block)}"
+        )
+        self.assertTrue(len(block) % 102 == 0, error_msg)
+
+    def _get_payment_line_fields(self):
+        """Determine the correct field names for payment line."""
+        pl_fields = self.pay_line_obj._fields
+        return {
+            "amount": self._get_amount_field(pl_fields),
+            "date": self._get_date_field(pl_fields),
+            "communication": self._get_communication_field(pl_fields),
+        }
+
+    def _get_amount_field(self, pl_fields):
+        """Get the correct amount field name."""
+        for field_name in ["amount", "amount_currency", "amount_company_currency"]:
+            if field_name in pl_fields:
+                return field_name
+        return None
+
+    def _get_date_field(self, pl_fields):
+        """Get the correct date field name."""
+        for field_name in ["date", "payment_date", "ml_maturity_date"]:
+            if field_name in pl_fields:
+                return field_name
+        return None
+
+    def _get_communication_field(self, pl_fields):
+        """Get the correct communication field name."""
+        for field_name in ["communication", "name"]:
+            if field_name in pl_fields:
+                return field_name
+        return None
 
     # ----------------------------- Tests -------------------------------------
 
     def test_header_and_totals(self):
-        head = self.order._cabecera_ordenante_68()
+        """Test header and totals generation."""
+        head = self.order._cabecera_ordenante_68()  # pylint: disable=protected-access
         self._assert_block_len(head, "Cabecera 68")
         self.assertTrue(head.startswith("0359"))
 
-        totals = self.order._total_general_68(total_payments=0, total_amount=0.0)
+        totals = self.order._total_general_68(  # pylint: disable=protected-access
+            total_payments=0, total_amount=0.0
+        )
         self._assert_block_len(totals, "Totales 68")
         self.assertTrue(totals.startswith("0859"))
 
     def test_beneficiary_records_block(self):
-        # Pick the correct amount/date/communication fields for this branch
-        pl_fields = self.PayLine._fields
-
-        # amount-like field
-        if "amount" in pl_fields:
-            amount_key = "amount"
-        elif "amount_currency" in pl_fields:
-            amount_key = "amount_currency"
-        elif "amount_company_currency" in pl_fields:
-            amount_key = "amount_company_currency"
-        else:
-            # Fallback: some branches compute amount from move lines; give a safe default
-            amount_key = None
-
-        # date-like field
-        if "date" in pl_fields:
-            date_key = "date"
-        elif "payment_date" in pl_fields:
-            date_key = "payment_date"
-        elif "ml_maturity_date" in pl_fields:
-            date_key = "ml_maturity_date"
-        else:
-            date_key = None
-
-        # communication-like field
-        if "communication" in pl_fields:
-            comm_key = "communication"
-        elif "name" in pl_fields:
-            comm_key = "name"
-        else:
-            comm_key = None
-
+        """Test beneficiary records generation."""
+        fields = self._get_payment_line_fields()
         vals = {
             "order_id": self.order.id,
             "partner_id": self.partner.id,
         }
-        if amount_key:
-            vals[amount_key] = 123.45
-        if date_key:
-            from datetime import date as _d
-            vals[date_key] = _d(2025, 1, 31)
-        if comm_key:
-            vals[comm_key] = "FAC-2025-0001"
 
-        line = self.PayLine.create(vals)
+        if fields["amount"]:
+            vals[fields["amount"]] = 123.45
+        if fields["date"]:
+            vals[fields["date"]] = date(2025, 1, 31)
+        if fields["communication"]:
+            vals[fields["communication"]] = "FAC-2025-0001"
 
-        block = self.order._registro_beneficiario_68(line, num_of_payment=1)
+        line = self.pay_line_obj.create(vals)
+
+        block = (
+            self.order._registro_beneficiario_68(  # pylint: disable=protected-access
+                line, num_of_payment=1
+            )
+        )
         rows = [r for r in block.split("\r\n") if r]
         self.assertEqual(len(rows), 6)
+
         for idx, row in enumerate(rows, start=1):
             self.assertEqual(len(row), 100, f"Row {idx} must be exactly 100 chars")
 
-            # Common prefix: 0659 + s68 + VAT(12)
-            s68 = self.order._start_68()
-            vat12 = self.env["payment.converter.spain"].convert_text(
-                (self.partner.vat or "").strip(), 12
-            )
-            head = "0659" + s68 + vat12
+        s68 = self.order._start_68()  # pylint: disable=protected-access
+        vat12 = self.env["payment.converter.spain"].convert_text(
+            (self.partner.vat or "").strip(), 12
+        )
+        header_prefix = "0659" + s68 + vat12
 
-            # Now assert each record type code
-            self.assertTrue(rows[0].startswith(head + "010"))  # name
-            self.assertTrue(rows[1].startswith(head + "011"))  # street
-            self.assertTrue(rows[2].startswith(head + "012"))  # zip short + city
-            self.assertTrue(rows[3].startswith(head + "013"))  # zip long + state + country
-            self.assertTrue(rows[4].startswith(head + "014"))  # num_of_payment + date + amount
-            self.assertTrue(rows[5].startswith(head + "015"))  # refs + gen date + amount + comm
+        self.assertTrue(rows[0].startswith(header_prefix + "010"))
+        self.assertTrue(rows[1].startswith(header_prefix + "011"))
+        self.assertTrue(rows[2].startswith(header_prefix + "012"))
+        self.assertTrue(rows[3].startswith(header_prefix + "013"))
+        self.assertTrue(rows[4].startswith(header_prefix + "014"))
+        self.assertTrue(rows[5].startswith(header_prefix + "015"))
 
     def test_generate_payment_file_no_lines(self):
-        content, fname = self.order.generate_payment_file()
+        """Test payment file generation with no lines."""
+        content, filename = self.order.generate_payment_file()
         self.assertIsInstance(content, (bytes, bytearray))
-        self.assertTrue(fname.endswith(".txt"))
-        self.assertIn("PO_TEST_CSB", fname.replace("/", "_"))
+        self.assertTrue(filename.endswith(".txt"))
+        self.assertIn("PO_TEST_CSB", filename.replace("/", "_"))
 
     def test_calculate_num_of_payment_control_digit(self):
-        line = self.PayLine.new({"partner_id": self.partner.id})
-        num = self.order._calculate_num_of_payment(line, 42)
+        """Test payment number calculation with control digit."""
+        line = self.pay_line_obj.new({"partner_id": self.partner.id})
+        num = self.order._calculate_num_of_payment(  # pylint: disable=protected-access
+            line, 42
+        )
         self.assertEqual(len(num), 8)
         self.assertTrue(num.startswith("0000042"))
