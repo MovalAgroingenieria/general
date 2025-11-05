@@ -57,9 +57,8 @@ Payment Method & Mode
   - *Payment Method*: ``csb_direct_debit_payments``
   - *Initiating Party Identifier* (or Issuer): your company identifier (e.g. NIF)
   - *Bank Account Link*: choose a strategy your OCA branch validates.
-    - If you use **Fixed**, set a **fixed bank journal** pointing to a company
-      bank account.
-    - If you use **Company**, make sure the company has a bank account.
+  - If you use **Fixed**, set a **fixed bank journal** pointing to a company bank account.
+  - If you use **Company**, make sure the company has a bank account.
 
 Company Bank Account
 --------------------
@@ -78,16 +77,6 @@ Usage
 
 The generator strictly checks that each CSB record line is **exactly 100 chars**
 (plus CRLF). Any mismatch raises an explicit error with the failing block name.
-
-Testing
-=======
-
-Run the module tests:
-
-.. code-block:: bash
-
-   odoo-bin -c <your.conf> -i account_banking_csb \
-     --test-enable --test-tags=/account_banking_csb --workers=0 --stop-after-init
 
 Notes for CI
 ------------
