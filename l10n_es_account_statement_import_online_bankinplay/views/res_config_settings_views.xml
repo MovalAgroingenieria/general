@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='bank_cash']" position="inside">
+                <div class="col-xs-12 col-md-6 o_setting_box"
+                     id="bankinplay_integration_setting"
+                     title="Bankinplay integration.">
+                    <div class="o_setting_left_pane">
+                        <field name="bankinplay_integration"/>
+                    </div>
+                    <div class="o_setting_right_pane">
+                        <label string="BankInPlay Integration" for="bankinplay_integration"/>
+                        <div class="text-muted">
+                            Import account bank statements from bankinplay services
+                        </div>
+                        <div class="content-group" attrs="{'invisible': [('bankinplay_integration', '=',  False)]}">
+                            <div class="mt16">
+                                <label for="bankinplay_integration_url_for_callback" string="URL:" class="o_light_label"/>
+                                <field name="bankinplay_integration_url_for_callback" class="oe_inline"/>
+                                <span>/webhook/bankinplay_callback</span>
+                            </div>
+                        </div>
+                        <div class="content-group" attrs="{'invisible': [('bankinplay_integration', '=',  False)]}">
+                            <div class="mt16">
+                                <label for="bankinplay_integration_api_key" string="API Key:" class="o_light_label"/>
+                                <field name="bankinplay_integration_api_key" password="True" class="oe_inline"/>
+                            </div>
+                        </div>
+                        <div class="content-group" attrs="{'invisible': [('bankinplay_integration', '=',  False)]}">
+                            <div class="mt16">
+                                <label for="bankinplay_integration_api_secret" string="API Secret:" class="o_light_label"/>
+                                <field name="bankinplay_integration_api_secret" password="True" class="oe_inline"/>
+                            </div>
+                        </div>
+                        <button name="register_bankinplay_callbacks" type="object"
+                            string="Register Callbacks" class="btn-primary"
+                            attrs="{'invisible': [('bankinplay_integration', '=', False)]}"/>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
