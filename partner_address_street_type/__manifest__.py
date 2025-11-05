@@ -2,7 +2,7 @@
 {
     "name": "Partner Address Street Type",
     "summary": "Add street type to partner address",
-    "version": "18.0.1.2.0",
+    "version": "18.0.1.3.0",
     "category": "Partner Management",
     "website": "https://www.moval.es",
     "author": "Moval Agroingeniería",

@@ -49,8 +49,8 @@
 
     <!-- res.partner main form:
  Only touch the inline form under child_ids -->
-    <record id="view_partner_form_inherit_child_ids_street_num" model="ir.ui.view">
-        <field name="name">res.partner.form: child_ids street_num injection</field>
+    <record id="view_partner_form_inherit_child_ids_street_type" model="ir.ui.view">
+        <field name="name">res.partner.form: child_ids street_type_id injection</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="priority">30</field>
@@ -76,8 +76,7 @@
             </xpath>
             <!-- 3) Add street_type_id to child_ids context -->
             <field name="child_ids" position="attributes">
-                <attribute name="context">
-                    {
+                <attribute name="context">{
                     'default_parent_id': id,
                     'default_street': street,
                     'default_street2': street2,
@@ -88,12 +87,10 @@
                     'default_lang': lang,
                     'default_user_id': user_id,
                     'default_type': 'other',
-                    'default_street_num': street_num,
                     'default_street_type_id': street_type_id
                     }
                 </attribute>
             </field>
-
         </field>
     </record>
 
