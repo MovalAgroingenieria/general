@@ -123,7 +123,7 @@
                         "x": 0,
                         "y": 1
                     },
-                    "id": 5,
+                    "id": 6,
                     "options": {
                         "legend": {
                         "calcs": [
@@ -133,7 +133,7 @@
                             "max"
                         ],
                         "displayMode": "table",
-                        "placement": "right",
+                        "placement": "bottom",
                         "showLegend": true
                         },
                         "tooltip": {
@@ -142,7 +142,7 @@
                         "sort": "desc"
                         }
                     },
-                    "pluginVersion": "12.2.0",
+                    "pluginVersion": "12.2.1",
                     "targets": [
                         {
                         "datasource": {
@@ -153,7 +153,7 @@
                         "format": "time_series",
                         "hide": false,
                         "rawQuery": true,
-                        "rawSql": "   SELECT reading.measurement_time AS \"time\",\n          SUM(reading.value) AS \"${sensor_type}\",\n          device.name\n     FROM mdm_measurement_device_sensor_reading reading\nLEFT JOIN mdm_measurement_device device ON device.id = reading.device_id\n    WHERE device.name IN (${devices})\n      AND $__timeFilter(reading.measurement_time)\n GROUP BY reading.measurement_time, device.name\n ORDER BY reading.measurement_time;\n\n ",
+                        "rawSql": "   SELECT reading.measurement_time AS \"time\",\n          reading.value AS \"Lecturas\",\n          device.name AS \"Dispostivo\",\n          sensor.name AS \"Sensor\"\n     FROM mdm_measurement_device_sensor_reading reading\nLEFT JOIN mdm_measurement_device device ON device.id = reading.device_id\nLEFT JOIN mdm_measurement_device_sensor sensor ON sensor.id = reading.sensor_id\n    WHERE device.name IN (${devices})\n      AND sensor.name IN (${sensors})\n      AND $__timeFilter(reading.measurement_time)\n GROUP BY reading.measurement_time, reading.value, device.name, sensor.name\n ORDER BY reading.measurement_time;",
                         "refId": "A",
                         "sql": {
                             "columns": [
@@ -185,7 +185,7 @@
                         "x": 0,
                         "y": 11
                     },
-                    "id": 3,
+                    "id": 9,
                     "panels": [],
                     "title": "Por dispositivo",
                     "type": "row"
@@ -217,7 +217,7 @@
                             "viz": false
                             },
                             "insertNulls": false,
-                            "lineInterpolation": "linear",
+                            "lineInterpolation": "smooth",
                             "lineWidth": 1,
                             "pointSize": 5,
                             "scaleDistribution": {
@@ -235,7 +235,6 @@
                             }
                         },
                         "mappings": [],
-                        "min": -1,
                         "thresholds": {
                             "mode": "absolute",
                             "steps": [
@@ -267,7 +266,7 @@
                         "x": 0,
                         "y": 12
                     },
-                    "id": 4,
+                    "id": 14,
                     "options": {
                         "legend": {
                         "calcs": [
@@ -286,21 +285,20 @@
                         "sort": "desc"
                         }
                     },
-                    "pluginVersion": "12.2.0",
+                    "pluginVersion": "12.2.1",
                     "repeat": "devices",
                     "repeatDirection": "h",
                     "targets": [
                         {
-                        "dataset": "fill",
                         "datasource": {
                             "type": "grafana-postgresql-datasource",
                             "uid": "${datasource}"
                         },
                         "editorMode": "code",
-                        "format": "table",
+                        "format": "time_series",
                         "hide": false,
                         "rawQuery": true,
-                        "rawSql": "   SELECT reading.measurement_time AS \"time\",\n          SUM(reading.value) AS \"${sensor_type}\",\n          device.name\n     FROM mdm_measurement_device_sensor_reading reading\nLEFT JOIN mdm_measurement_device device ON device.id = reading.device_id\n    WHERE device.name IN (${devices})\n      AND $__timeFilter(reading.measurement_time)\n GROUP BY reading.measurement_time, device.name\n ORDER BY reading.measurement_time;",
+                        "rawSql": "   SELECT reading.measurement_time AS \"time\",\n          reading.value AS \"Lecturas\",\n          sensor.name AS \"Sensor\"\n     FROM mdm_measurement_device_sensor_reading reading\nLEFT JOIN mdm_measurement_device device ON device.id = reading.device_id\nLEFT JOIN mdm_measurement_device_sensor sensor ON sensor.id = reading.sensor_id\n    WHERE device.name IN (${devices})\n      AND sensor.name IN (${sensors})\n      AND $__timeFilter(reading.measurement_time)\n GROUP BY reading.measurement_time, reading.value, sensor.name\n ORDER BY reading.measurement_time;",
                         "refId": "A",
                         "sql": {
                             "columns": [
@@ -321,7 +319,152 @@
                         }
                         }
                     ],
-                    "title": "$devices",
+                    "title": "${devices}",
+                    "type": "timeseries"
+                    },
+                    {
+                    "collapsed": false,
+                    "gridPos": {
+                        "h": 1,
+                        "w": 24,
+                        "x": 0,
+                        "y": 22
+                    },
+                    "id": 7,
+                    "panels": [],
+                    "title": "Por sensor",
+                    "type": "row"
+                    },
+                    {
+                    "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "fieldConfig": {
+                        "defaults": {
+                        "color": {
+                            "mode": "palette-classic"
+                        },
+                        "custom": {
+                            "axisBorderShow": false,
+                            "axisCenteredZero": false,
+                            "axisColorMode": "text",
+                            "axisLabel": "",
+                            "axisPlacement": "auto",
+                            "barAlignment": 0,
+                            "barWidthFactor": 0.6,
+                            "drawStyle": "line",
+                            "fillOpacity": 0,
+                            "gradientMode": "none",
+                            "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                            },
+                            "insertNulls": false,
+                            "lineInterpolation": "smooth",
+                            "lineWidth": 1,
+                            "pointSize": 5,
+                            "scaleDistribution": {
+                            "type": "linear"
+                            },
+                            "showPoints": "auto",
+                            "showValues": false,
+                            "spanNulls": false,
+                            "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                            },
+                            "thresholdsStyle": {
+                            "mode": "off"
+                            }
+                        },
+                        "mappings": [],
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                            ]
+                        }
+                        },
+                        "overrides": [
+                        {
+                            "matcher": {
+                            "id": "byType",
+                            "options": "number"
+                            },
+                            "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 4
+                            }
+                            ]
+                        }
+                        ]
+                    },
+                    "gridPos": {
+                        "h": 10,
+                        "w": 24,
+                        "x": 0,
+                        "y": 23
+                    },
+                    "id": 13,
+                    "options": {
+                        "legend": {
+                        "calcs": [
+                            "last",
+                            "min",
+                            "mean",
+                            "max"
+                        ],
+                        "displayMode": "table",
+                        "placement": "bottom",
+                        "showLegend": true
+                        },
+                        "tooltip": {
+                        "hideZeros": false,
+                        "mode": "multi",
+                        "sort": "desc"
+                        }
+                    },
+                    "pluginVersion": "12.2.1",
+                    "repeat": "sensors",
+                    "repeatDirection": "h",
+                    "targets": [
+                        {
+                        "datasource": {
+                            "type": "grafana-postgresql-datasource",
+                            "uid": "${datasource}"
+                        },
+                        "editorMode": "code",
+                        "format": "time_series",
+                        "hide": false,
+                        "rawQuery": true,
+                        "rawSql": "   SELECT reading.measurement_time AS \"time\",\n          reading.value AS \"Lecturas\",\n          device.name AS \"Dispositivo\"\n     FROM mdm_measurement_device_sensor_reading reading\nLEFT JOIN mdm_measurement_device device ON device.id = reading.device_id\nLEFT JOIN mdm_measurement_device_sensor sensor ON sensor.id = reading.sensor_id\n    WHERE device.name IN (${devices})\n      AND sensor.name IN (${sensors})\n      AND $__timeFilter(reading.measurement_time)\n GROUP BY reading.measurement_time, reading.value, device.name\n ORDER BY reading.measurement_time;",
+                        "refId": "A",
+                        "sql": {
+                            "columns": [
+                            {
+                                "parameters": [],
+                                "type": "function"
+                            }
+                            ],
+                            "groupBy": [
+                            {
+                                "property": {
+                                "type": "string"
+                                },
+                                "type": "groupBy"
+                            }
+                            ],
+                            "limit": 50
+                        }
+                        }
+                    ],
+                    "title": "${sensors}",
                     "type": "timeseries"
                     }
                 ],
@@ -333,8 +476,8 @@
                     {
                         "allowCustomValue": false,
                         "current": {
-                        "text": "fill",
-                        "value": "fill"
+                        "text": "",
+                        "value": ""
                         },
                         "label": "Fuente Datos",
                         "name": "datasource",
@@ -386,8 +529,8 @@
                     {
                         "allowCustomValue": false,
                         "current": {
-                        "text": "fill",
-                        "value": "fill"
+                        "text": "4",
+                        "value": "4"
                         },
                         "datasource": {
                         "type": "grafana-postgresql-datasource",
@@ -405,8 +548,8 @@
                     {
                         "allowCustomValue": false,
                         "current": {
-                        "text": "fill",
-                        "value": "fill"
+                        "text": "",
+                        "value": ""
                         },
                         "datasource": {
                         "type": "grafana-postgresql-datasource",
@@ -424,9 +567,11 @@
                     {
                         "allowCustomValue": false,
                         "current": {
-                        "text": "All",
+                        "text": [
+                            ""
+                        ],
                         "value": [
-                            "$__all"
+                            ""
                         ]
                         },
                         "datasource": {
@@ -443,6 +588,54 @@
                         "refresh": 1,
                         "regex": "",
                         "type": "query"
+                    },
+                    {
+                        "allowCustomValue": false,
+                        "current": {
+                        "text": [
+                            ""
+                        ],
+                        "value": [
+                            ""
+                        ]
+                        },
+                        "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${datasource}"
+                        },
+                        "definition": "SELECT device.id FROM mdm_measurement_device device LEFT JOIN mdm_measurement_device_sensor sensor ON device.id = sensor.device_id LEFT JOIN mdm_measurement_device_sensor_type type ON type.id = sensor.type_id WHERE type.id =$sensor_type_id AND device.name IN ($devices) GROUP BY device.id ORDER BY device.id;",
+                        "hide": 2,
+                        "multi": true,
+                        "name": "device_ids",
+                        "options": [],
+                        "query": "SELECT device.id FROM mdm_measurement_device device LEFT JOIN mdm_measurement_device_sensor sensor ON device.id = sensor.device_id LEFT JOIN mdm_measurement_device_sensor_type type ON type.id = sensor.type_id WHERE type.id =$sensor_type_id AND device.name IN ($devices) GROUP BY device.id ORDER BY device.id;",
+                        "refresh": 1,
+                        "regex": "",
+                        "type": "query"
+                    },
+                    {
+                        "allowCustomValue": false,
+                        "current": {
+                        "text": [
+                            ""
+                        ],
+                        "value": [
+                            ""
+                        ]
+                        },
+                        "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${datasource}"
+                        },
+                        "definition": "SELECT sensor.name AS sensor FROM mdm_measurement_device_sensor sensor LEFT JOIN mdm_measurement_device device ON device.id = sensor.device_id WHERE device.id IN ($device_ids) AND sensor.type_id = ${sensor_type_id} GROUP BY sensor.name ORDER BY sensor.name;",
+                        "label": "Sensores",
+                        "multi": true,
+                        "name": "sensors",
+                        "options": [],
+                        "query": "SELECT sensor.name AS sensor FROM mdm_measurement_device_sensor sensor LEFT JOIN mdm_measurement_device device ON device.id = sensor.device_id WHERE device.id IN ($device_ids) AND sensor.type_id = ${sensor_type_id} GROUP BY sensor.name ORDER BY sensor.name;",
+                        "refresh": 1,
+                        "regex": "",
+                        "type": "query"
                     }
                     ]
                 },
@@ -454,7 +647,7 @@
                 "timezone": "browser",
                 "title": "Template Sensor Dashboard",
                 "uid": "TSad2chsc",
-                "version": 1,
+                "version": 2,
                 "weekStart": "monday"
                 }]]></field>
         </record>
