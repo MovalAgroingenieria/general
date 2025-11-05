@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_partner_form" model="ir.ui.view">
+        <field name="name">Add separate fields for street type</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='street']" position="attributes">
+                <attribute name="style">width:88%; display:inline-block; margin-left:2%;</attribute>
+            </xpath>
+            <xpath expr="//field[@name='street']" position="before">
+                <field
+                    name="street_type_id"
+                    modifiers="{'readonly': [('type', '=', 'contact'), ('parent_id', '!=', False)]}"
+                    context="{'in_combo': True}"
+                    domain="[('show_in_list', '=', True)]"
+                    groups="base.group_no_one"
+                    options="{'no_open': True, 'no_quick_create': True, 'no_create_edit': True}"
+                    style="width:10%;"
+                />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_address_form" model="ir.ui.view">
+        <field name="name">Add separate fields for street type (edition form)</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_address_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='street']" position="attributes">
+                <attribute name="style">width:88%; display:inline-block; margin-left:2%;</attribute>
+            </xpath>
+            <xpath expr="//field[@name='street']" position="before">
+                <field
+                    name="street_type_id"
+                    modifiers="{'readonly': [('type', '=', 'contact'), ('parent_id', '!=', False)]}"
+                    context="{'in_combo': True}"
+                    domain="[('show_in_list', '=', True)]"
+                    groups="base.group_no_one"
+                    options="{'no_open': True, 'no_quick_create': True, 'no_create_edit': True}"
+                    style="width:10%;"
+                />
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

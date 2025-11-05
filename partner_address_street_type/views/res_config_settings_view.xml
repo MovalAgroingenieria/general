@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_general_settings" model="ir.ui.view">
+        <field name="name">Street type General Settings</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+                <xpath expr="//form" position="inside">
+                <div class="app_settings_block" data-string="Street &amp; Address" string="Street &amp; Address" name="street_address_settings_block">
+                    <h2>Street &amp; Address</h2>
+                    <div class="row mt16 o_settings_container" name="street_type_setting_container">
+                        <div class="col-xs-12 col-md-6 o_setting_box" id="street_type">
+                            <div class="o_setting_right_pane" id="street_type_settings">
+                                <div class="o_form_label">Street Type</div>
+                                <div class="text-muted">
+                                    Configure how street type is displayed in printed documents
+                                </div>
+                                <div class="mt8">
+                                    <field name="street_type_shown"/>
+                                </div>
+                                <div class="mt8">
+                                    <button type="action"
+                                            name="%(action_res_street_type_tree)d"
+                                            string="Street types"
+                                            icon="fa-arrow-right"
+                                            class="btn-link"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-6 o_setting_box" id="address_format">
+                            <div class="o_setting_right_pane" id="address_format_set_settings">
+                                <div class="o_form_label">Address format</div>
+                                <div class="text-muted">
+                                    Configure address format of printed documents
+                                </div>
+                                <div class="mt8">
+                                    <field name="address_format_set" style="width: 100%;"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
