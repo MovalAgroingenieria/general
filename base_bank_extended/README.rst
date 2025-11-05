@@ -1,25 +1,35 @@
-.. image:: https://img.shields.io/badge/licence-AGPL--3-blue.svg
+.. |badge| image:: https://img.shields.io/badge/licence-AGPL--3-blue.png
    :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
    :alt: License: AGPL-3
 
-======================
+|badge|
+
+=======================
 Resource Bank Extended
-======================
+=======================
 
 Description
 ===========
+This module extends the core **res_bank** functionality.
+It provides minor customizations around bank records to better fit business needs.
 
-Extended functionality of res_bank base module.
+**Key features**
+- Lightweight adjustments on res.bank / res.partner.bank models and views.
+- Keeps full compatibility with the standard Accounting apps.
 
+Compatibility
+=============
+- Odoo 18.0
 
 Credits
 =======
 
+Authors
+-------
 * Moval Agroingeniería S.L.
 
 Contributors
 ------------
-
 * Alberto Hernández <ahernandez@moval.es>
 * Eduardo Iniesta <einiesta@moval.es>
 * Miguel Mora <mmora@moval.es>
@@ -27,11 +37,10 @@ Contributors
 * Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
 
-Maintainer
-----------
+Maintainers
+-----------
+This module is maintained by Moval Agroingeniería.
 
 .. image:: https://services.moval.es/static/images/logo_moval_small.png
    :target: http://moval.es
    :alt: Moval Agroingeniería
-
-This module is maintained by Moval Agroingeniería.
