@@ -4,7 +4,6 @@
 
 |badge1|
 
-
 ========================================
 Account Payment Order: Payment Line Date
 ========================================
@@ -14,12 +13,45 @@ Account Payment Order: Payment Line Date
 .. contents::
    :local:
 
+Overview
+========
 
-Description
-===========
+This module adds a **requested payment date** to payment lines of a payment order
+and exposes it in the *account.payment* list used inside the payment order form.
 
-This module adds requested payment date to transactions payment lines.
+Features
+========
 
+* New field on payment lines to store the requested payment date.
+* Form inheritance on **account.payment.order** to open the lines with a specific list view.
+* List inheritance on **account.payment** to display the requested payment date
+  right after the *name* column.
+
+Usage
+=====
+
+1. Go to *Invoicing/Accounting → Vendors/Customers → Payment Orders*.
+2. Open or create a payment order.
+3. Add payment lines; the list view shows the **Requested Payment Date** column.
+4. Set a date per line as needed.
+
+Compatibility
+=============
+
+* Odoo/OCB **18.0**.
+
+Installation
+============
+
+1. Install the module as usual from *Apps*.
+2. Make sure the module **account_payment_order** (or your distribution’s equivalent)
+   is installed and available, as this module inherits its views.
+
+Known issues / Roadmap
+======================
+
+* None at the moment.
+* Future: add domain/filters to ease planning by requested date.
 
 Credits
 =======
@@ -28,7 +60,6 @@ Authors
 ~~~~~~~
 
 * Moval Agroingeniería S.L.
-
 
 Contributors
 ~~~~~~~~~~~~
@@ -43,7 +74,6 @@ Contributors
 * Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
 
-
 Maintainers
 ~~~~~~~~~~~
 
@@ -52,4 +82,3 @@ This module is maintained by Moval Agroingeniería.
 .. image:: https://services.moval.es/static/images/logo_moval_small.png
    :alt: Moval Agroingeniería
    :target: http://moval.es
-
