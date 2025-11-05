@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form view -->
+    <record id="measurement_device_category_view_form" model="ir.ui.view">
+        <field name="name">mdm.measurement.device.category.form</field>
+        <field name="model">mdm.measurement.device.category</field>
+        <field name="arch" type="xml">
+            <form string="Device Category">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_devices"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-microchip">
+                            <field name="device_count" widget="statinfo" string="Devices"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="description" placeholder="Enter category description..."/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree view -->
+    <record id="measurement_device_category_view_tree" model="ir.ui.view">
+        <field name="name">mdm.measurement.device.category.tree</field>
+        <field name="model">mdm.measurement.device.category</field>
+        <field name="arch" type="xml">
+            <tree string="Device Categories">
+                <field name="name"/>
+                <field name="device_count"/>
+                <field name="description"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Search view -->
+    <record id="measurement_device_category_view_search" model="ir.ui.view">
+        <field name="name">mdm.measurement.device.category.search</field>
+        <field name="model">mdm.measurement.device.category</field>
+        <field name="arch" type="xml">
+            <search string="Search Device Category">
+                <field name="name"/>
+                <field name="description"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="measurement_device_category_action" model="ir.actions.act_window">
+        <field name="name">Device Categories</field>
+        <field name="res_model">mdm.measurement.device.category</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="measurement_device_category_view_search"/>
+    </record>
+
+    <!-- Menu item in Parameters -->
+    <menuitem id="menu_measurement_device_category"
+              name="Device Categories"
+              parent="mdm_parameters_menu"
+              action="measurement_device_category_action"
+              sequence="5"/>
+</odoo>
