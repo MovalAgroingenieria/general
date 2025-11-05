@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_file_report_base" model="ir.actions.report">
+        <field name="name">Base Report</field>
+        <field name="model">res.file</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">crm_filemgmt.file_report_base_document</field>
+        <field name="report_file">crm_filemgmt.file_report_base_document</field>
+        <field name="binding_model_id" eval="False"/>
+    </record>
+
+    <template id="crm_filemgmt.file_report_base_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+
+                        <!-- Top comment -->
+                        <t t-if="o.env['common.format'].is_html_field_filled(o.file_top_comment)">
+                            <div t-field="o.file_top_comment"/>
+                        </t>
+
+                        <!-- Template start -->
+                        <div name="template_start_rendered">
+                            <div t-field="o.template_start_rendered"/>
+                        </div>
+
+                        <!-- Template end -->
+                        <div name="template_end_rendered">
+                            <div t-field="o.template_end_rendered"/>
+                        </div>
+
+                        <!-- Bottom comment -->
+                        <t t-if="o.env['common.format'].is_html_field_filled(o.file_bottom_comment)">
+                            <div t-field="o.file_bottom_comment"/>
+                        </t>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+	<templates id="template" xml:space="preserve">
+	    <t t-extend="ListView.buttons">
+	      <t t-jquery="button.o_list_button_add" t-operation="after">
+	        <t t-if="widget">
+	          <button class="btn btn-secondary button_duotone" type="button"
+	            t-att-title="widget.string" t-att-disabled="disabled || undefined"
+                t-attf-class="o_icon_button #{disabled ? 'oe_list_button_disabled' : ''}">
+                <i t-attf-class="duotone-icon #{widget.duotone_icon}" t-att-title="widget.string">
+                    <span class="path1"><span class="path2"></span></span>
+                </i>
+	           </button>
+	        </t>
+	      </t>
+	    </t>
+	</templates>
+
+
+<!-- 
+    <templates id="template_duotone_listview" name="duotone_listview_template" inherit_id="web.template">
+        <xpath expr="//button[@t-name='ListView.row.button']" position="after">
+            <button t-name="ListView.row.button_duotone" type="button"
+                t-att-title="widget.string" t-att-disabled="disabled || undefined"
+                t-attf-class="o_icon_button #{disabled ? 'oe_list_button_disabled' : ''}">
+                <i t-attf-class="duotone-icon #{widget.duotone_icon}" t-att-title="widget.string">
+                    <span class="path1"><span class="path2"></span></span>
+                </i>
+            </button>
+        </xpath>
+        
+    </templates>
+ -->
+
+
+
+</odoo>
+

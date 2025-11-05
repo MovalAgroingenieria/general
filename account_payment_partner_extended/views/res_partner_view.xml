@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_res_partner_filter" model="ir.ui.view">
+        <field name="name">res.partner.select</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='group_country']" position="after">
+                <filter name="group_customer_payment_mode_id" string="Payment mode (customer)"
+                    context="{'group_by': 'computed_customer_payment_mode_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

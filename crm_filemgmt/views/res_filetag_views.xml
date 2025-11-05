@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_filetag_view_form" model="ir.ui.view">
+        <field name="name">File Tags (form view)</field>
+        <field name="model">res.filetag</field>
+        <field name="arch" type="xml">
+            <form duplicate="0">
+                <group name="master_data">
+                    <field name="name" style="width:200px"/>
+                    <field name="color"  style="width:200px"/>
+                </group>
+                <notebook name="slave_data_notebook" colspan="4">
+                    <page name="notes_page" string="Notes">
+                        <field name="notes"/>
+                    </page>
+                </notebook>
+            </form>
+        </field>
+    </record>
+
+    <record id="res_filetag_view_tree" model="ir.ui.view">
+        <field name="name">File Tags (tree view)</field>
+        <field name="model">res.filetag</field>
+        <field name="arch" type="xml">
+            <tree string="Tags">
+                <field name="name"/>
+                <field name="color"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="res_filetag_view_search" model="ir.ui.view">
+        <field name="name">File Tags (search view)</field>
+        <field name="model">res.filetag</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="res_filetag_action" model="ir.actions.act_window">
+        <field name="name">File Tags</field>
+        <field name="res_model">res.filetag</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="res_filetag_view_tree"/>
+        <field name="search_view_id" ref="res_filetag_view_search"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to add a new file tag
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_res_filetag" name="File Tags"
+              parent="menu_config_labels"
+              action="res_filetag_action"
+              sequence="10"/>
+
+</odoo>

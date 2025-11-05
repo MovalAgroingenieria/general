@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <template id="report_saleorder_document_comments" inherit_id="sale_comment_template.report_saleorder_document_comments">
+
+        <xpath expr="//t[@t-as='comment_template_top']" position="replace">
+            <span t-field="doc.top_comment"/>
+        </xpath>
+        <xpath expr="//t[@t-as='comment_template_bottom']" position="replace">
+            <span t-field="doc.bottom_comment"/>
+        </xpath>
+    </template>
+
+</odoo>

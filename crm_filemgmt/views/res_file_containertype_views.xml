@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_file_containertype_view_form" model="ir.ui.view">
+        <field name="name">Files Container Type (form view)</field>
+        <field name="model">res.file.containertype</field>
+        <field name="arch" type="xml">
+            <form duplicate="0">
+                <header/>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <!--
+                        <button name="action_get_containers"
+                                type="object" class="oe_stat_button"
+                                icon="fa-archive"
+                                attrs="{'invisible': [('number_of_containers','=', 0)]}">
+                            <div class="o_form_field o_stat_info">
+                                <field name="number_of_containers"/>
+                                <span attrs="{'invisible': [('number_of_containers','>', 1)]}"> file</span>
+                                <span attrs="{'invisible': [('number_of_containers','=', 1)]}"> files</span>
+                            </div>
+                        </button>
+                        -->
+                    </div>
+                    <div class="oe_title">
+                        <label class="oe_edit_only" for="name" string="Container type"/>
+                        <h1>
+                            <field name="name" placeholder="Container type"/>
+                        </h1>
+                    </div>
+                    <group name="master_data">
+                        <field name="description"/>
+                    </group>
+                    <notebook name="slave_data_notebook" colspan="4">
+                        <page name="notes_page" string="Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="res_file_containertype_view_tree" model="ir.ui.view">
+        <field name="name">Files Container Type (tree view)</field>
+        <field name="model">res.file.containertype</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="description"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="res_file_containertype_view_search" model="ir.ui.view">
+        <field name="name">Files Container Type (search view)</field>
+        <field name="model">res.file.containertype</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="description"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="res_file_containertype_action" model="ir.actions.act_window">
+        <field name="name">File Container type</field>
+        <field name="res_model">res.file.containertype</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids"
+         eval="[(5, 0),
+                (0, 0, {'view_mode': 'tree',
+                        'view_id': ref('res_file_containertype_view_tree')}),
+                (0, 0, {'view_mode': 'form',
+                        'view_id': ref('res_file_containertype_view_form')})]"/>
+        <field name="search_view_id" ref="res_file_containertype_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Click to add a new container type
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_files_containertype" name="Containers Type"
+              parent="menu_config_general_data"
+              sequence="50"
+              action="res_file_containertype_action"/>
+
+</odoo>

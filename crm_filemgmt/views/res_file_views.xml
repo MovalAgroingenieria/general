@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_file_view_form" model="ir.ui.view">
+        <field name="name">Files (form view)</field>
+        <field name="model">res.file</field>
+        <field name="arch" type="xml">
+            <form duplicate="0">
+                <field name="id" invisible="1"/>
+                <field name="active" invisible="1"/>
+                <field name="is_blocked" invisible="1"/>
+                <field name="is_closing_stage" invisible="1"/>
+                <header>
+                    <button name="toggle_active"
+                            type="object" string="Archive"
+                            icon="fa-archive"
+                            confirm="Are you sure you want to archive this file?"
+                            attrs="{'invisible':[('active','=',False)]}"
+                            groups="crm_filemgmt.group_file_manager"/>
+                    <button name="toggle_active"
+                            type="object" string="Unarchive"
+                            icon="fa-archive"
+                            confirm="Are you sure you want to unarchive this file?"
+                            attrs="{'invisible':[('active','=',True)]}"
+                            groups="crm_filemgmt.group_file_manager"/>
+                    <button name="action_block_file"
+                            type="object" string="Block"
+                            icon="fa-lock"
+                            style="width: 105px;"
+                            attrs="{'invisible':['|',('is_closing_stage','=', True),
+                                                     ('is_blocked','=',True)]}"
+                            groups="crm_filemgmt.group_file_manager"/>
+                    <button name="action_unblock_file"
+                            type="object" string="Unblock"
+                            icon="fa-unlock"
+                            style="width: 125px;"
+                            attrs="{'invisible':['|',('is_closing_stage','=', True),
+                                                     ('is_blocked','=',False)]}"
+                            groups="crm_filemgmt.group_file_manager"/>
+                    <button name="action_print_selected_report"
+                            type="object" string="Print"
+                            icon="fa-print"
+                            style="width: 105px;"/>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': True, 'fold_field': 'fold'}"
+                        attrs="{'invisible':['|',('active','=',False),('is_blocked','=',True)]}"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"></div>
+                    <div name="info_block" class="text-end">
+                        <div name="blocked_file" style="display:inline-block;color:red;"
+                            attrs="{'invisible':[('is_blocked','=',False)]}">
+                            <span class="fa fa-lock" style="font-size: 200%;" title="Blocked"/>
+                        </div>
+                        <div name="archived_file" style="display: inline-block;color:red;margin-left:20px;font-weight:bold;"
+                           attrs="{'invisible':[('active','=',True)]}"> A R C H I V E D
+                        </div>
+                    </div>
+                    <group name="master_data" col="12">
+                        <group name="master_data_left" colspan="2">
+                            <field name="image" widget="image" nolabel="1" colspan="2"/>
+                        </group>
+                        <group name="master_data_center" colspan="5">
+                            <field name="alphanum_code" attrs="{'readonly': [('id', '>', 0)]}"/>
+                            <field name="subject" attrs="{'readonly':['|',('is_closing_stage', '=', True),('is_blocked','=',True)]}"/>
+                            <field name="category_id" attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"/>
+                            <field name="file_report_id" attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"/>
+                        </group>
+                        <group  name="master_data_right" colspan="5">
+                            <field name="date_file"
+                                   attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=', True)]}"/>
+                            <field name="container_id"
+                                   attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=', True)]}"
+                                   context="{'show_container_data': True}"/>
+                            <field name="technician_id"
+                                   attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=', True)]}"
+                                   context="{'show_container_data': True}"/>
+                            <field name="tag_ids" widget="many2many_tags" placeholder="Tags..."
+                                   attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=', True)]}"/>
+                            <field name="closing_date" attrs="{'invisible':[('is_closing_stage','=', False)]}"/>
+                        </group>
+                    </group>
+                    <notebook name="slave_data_notebook" colspan="4">
+                        <page name="partnerlinks_page" string="Partner Links">
+                            <field name="partnerlink_ids"
+                                    attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"
+                                    context="{'tree_view_ref': 'crm_filemgmt.res_file_partnerlink_view_tree'}"/>
+                        </page>
+                        <page name="filelinks_page" string="File Links">
+                            <field name="filelink_ids"
+                                    attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"
+                                    context="{'tree_view_ref': 'crm_filemgmt.res_file_filelink_view_tree'}"/>
+                        </page>
+                        <page name="file_comments" string="Comments" >
+                            <group string="Top Comments">
+                                <field name="file_top_comment_template_id" string="Load a template"
+                                    domain="[('position','=','before_lines')]" context="{'default_position': 'before_lines'}"/>
+                                <field name="file_top_comment" nolabel="1" colspan="2"/>
+                            </group>
+                            <group string="Bottom Comments">
+                                <field name="file_bottom_comment_template_id" string="Load a template"
+                                    context="{'default_position': 'after_lines'}" domain="[('position','=','after_lines')]"/>
+                                <field name="file_bottom_comment" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+                        <page name="start_template_page" string="Template start">
+                            <field name="template_start" attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"/>
+                            <div class="text-end oe_edit_only">
+                                <button name="action_get_start_template" type="object" class="btn btn-link text-end oe_edit_only"
+                                    attrs="{'invisible': ['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"
+                                    string="Refresh" icon="fa-retweet" style="margin-top:2px; margin-bottom:2px;"
+                                    help="Copy start template from selected report."
+                                    groups="crm_filemgmt.group_file_manager"/>
+                            </div>
+                        </page>
+                        <page name="end_template_page" string="Template end">
+                            <field name="template_end" attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"/>
+                            <div class="text-end oe_edit_only">
+                                <button name="action_get_end_template" type="object" class="btn btn-link"
+                                    attrs="{'invisible': ['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"
+                                    string="Refresh" icon="fa-retweet" style="margin-top:2px; margin-bottom:2px;"
+                                    help="Copy end template from selected report."
+                                    groups="crm_filemgmt.group_file_manager"/>
+                            </div>
+                        </page>
+                        <page name="attachments" string="Attachments">
+                            <field name="file_attachment_ids">
+                                <tree string="Attachments" editable="top">
+                                    <field name="name"/>
+                                    <field name="mimetype"/>
+                                    <field name="datas"/>
+                                    <field name="create_uid"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="notes_page" string="Notes">
+                            <field name="notes"
+                                    attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="res_file_view_tree" model="ir.ui.view">
+        <field name="name">Files (tree view)</field>
+        <field name="model">res.file</field>
+        <field name="arch" type="xml">
+            <tree string="Files" class="o_res_file" default_order="name desc">
+                <field name="image" widget="image" optional="hide" class="o_res_file_image"/>
+                <field name="alphanum_code" class="align-middle"/>
+                <field name="partner_id" optional="show" class="align-middle"/>
+                <field name="date_file" optional="show" class="align-middle o_res_file_date_file"/>
+                <field name="subject" optional="show" class="align-middle border-right"/>
+                <field name="stage_id" string="Stage" optional="show" class="align-middle o_res_file_stage_id"/>
+                <field name="technician_id" optional="show" class="align-middle"/>
+                <field name="category_id" optional="hide" class="align-middle o_res_file_category_id"/>
+                <field name="is_blocked" optional="show" class="align-middle o_res_file_is_blocked"/>
+                <field name="tag_ids" widget="many2many_tags" optional="hide" class="align-middle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="res_file_view_tree_related" model="ir.ui.view">
+        <field name="name">Files (tree related view)</field>
+        <field name="model">res.file</field>
+        <field name="arch" type="xml">
+            <tree string="Files" create="false" edit="false" default_order="name desc">
+                <field name="active" invisible="1"/>
+                <field name="alphanum_code" class="align-middle"/>
+                <field name="partner_id" optional="show" class="align-middle"/>
+                <field name="date_file" optional="show" class="align-middle o_res_file_date_file"/>
+                <field name="category_id" optional="hide" class="align-middle o_res_file_category_id"/>
+                <field name="subject" optional="show" class="align-middle border-right"/>
+                <field name="technician_id" optional="show" class="align-middle"/>
+                <field name="is_blocked" optional="show" class="align-middle o_res_file_is_blocked"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="res_file_view_search" model="ir.ui.view">
+        <field name="name">Files (search view)</field>
+        <field name="model">res.file</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="alphanum_code"/>
+                <field name="partner_id"/>
+                <field name="date_file"/>
+                <field name="subject"/>
+                <field name="category_id"/>
+                <field name="technician_id"/>
+                <field name="stage_id"/>
+                <field name="active"/>
+                <filter string="In closed stage" name="closed_stage" domain="[('is_closing_stage','=', True)]"/>
+                <separator/>
+                <filter string="Blocked: Yes" name="blocked_yes" domain="[('is_blocked','=',True)]"/>
+                <filter string="Blocked: No" name="blocked_no" domain="[('is_blocked','=',False)]"/>
+                <separator/>
+                <filter string="Archived: Yes" name="archived_yes" domain="[('active','=',False)]"/>
+                <filter string="Archived: No" name="archived_no" domain="[('active','=',True)]"/>
+                <separator/>
+                <filter string="With technician: Yes" name="technician_yes" domain="[('with_technician','=',True)]"/>
+                <filter string="With technician: No" name="technician_no" domain="[('with_technician','=',False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Partner" name="groupby_partner" context="{'group_by':'partner_id'}"/>
+                    <filter string="Technician" name="groupby_technician" context="{'group_by':'technician_id'}"/>
+                    <filter string="Stage" name="groupby_stage" context="{'group_by':'stage_id'}"/>
+                    <filter string="Category" name="groupby_category" context="{'group_by':'category_id'}"/>
+                    <filter string="Container" name="groupby_container" context="{'group_by':'container_id'}"/>
+                 </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="res_file_view_kanban" model="ir.ui.view">
+        <field name="name">Files (kanban view)</field>
+        <field name="model">res.file</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id">
+                <field name="id"/>
+                <field name="active"/>
+                <field name="alphanum_code"/>
+                <field name="partner_id"/>
+                <field name="date_file"/>
+                <field name="subject"/>
+                <field name="stage_id"/>
+                <field name="tag_ids"/>
+                <field name="image"/>
+                <field name="color"/>
+                <field name="closing_date"/>
+                <field name="is_blocked"/>
+                <field name="has_filelinks"/>
+                <field name="has_attachments"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click o_kanban_record_has_image_fill">
+                            <div class="o_dropdown_kanban dropdown" groups="crm_filemgmt.group_file_user">
+                                <a class="dropdown-toggle o-no-caret btn" data-toggle="dropdown" data-display="static" href="#" role="button" aria-label="Dropdown menu" title="Dropdown menu">
+                                    <span class="fa fa-ellipsis-v"/>
+                                </a>
+                                <div class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                    <a type="edit" class="dropdown-item">Edit File</a>
+                                    <a type="delete" class="dropdown-item">Delete File</a>
+                                    <li><ul class="oe_kanban_colorpicker" data-field="color" role="menu"/></li>
+                                </div>
+                            </div>
+                            <div class="oe_kanban_details" style="max-width:30%; margin-left:2%; margin-top:2%;">
+                                <div class="o_kanban_image_fill_left o_kanban_image_full" role="img"
+                                    t-attf-style="background-image: url(#{kanban_image('res.file', 'image', record.id.raw_value)})">
+                                    <img class="o_kanban_image_inner_pic" t-if="record.partner_id.raw_value" t-att-alt="record.partner_id.value"
+                                    t-att-src="kanban_image('res.partner', 'image_128', record.partner_id.raw_value)"/>
+                                </div>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <div name="archived">
+                                    <t t-if="record.active.raw_value">
+                                        <span></span>
+                                    </t>
+                                    <t t-else="">
+                                        <span style="color:red; float:right; margin-right:3%; font-size:10px;">A R C H I V E D</span>
+                                    </t>
+                                </div>
+                                <div style="clear:both;"></div>
+                                <div style="diplay:float;">
+                                    <strong class="o_kanban_record_title" style="float:left;"><field name="alphanum_code"/></strong>
+                                    <t t-if="record.is_blocked.raw_value">
+                                        <span style="color:red; float:right; margin-right:3%;" title="lock" class="fa fa-lock fa-lg"/>
+                                    </t>
+                                    <t t-if="record.has_attachments.raw_value">
+                                        <span style="float:right; margin-right:3%;" title="attachment" class="fa fa-paperclip o_button_icon"/>
+                                    </t>
+                                    <t t-if="record.has_filelinks.raw_value">
+                                        <span style="float:right; margin-right:3%;" title="file" class="fa fa-filemgmt-files o_button_icon"/>
+                                    </t>
+                                </div>
+                                <div style="clear:both;"></div>
+                                <ul>
+                                    <li t-if="record.partner_id.raw_value" class="o_text_overflow">
+                                        <strong><field name="partner_id"/></strong>
+                                    </li>
+                                    <li>Date: <field name="date_file"/></li>
+                                    <li t-if="record.subject.raw_value" class="o_text_overflow">
+                                        Subject: <field name="subject"/>
+                                     </li>
+                                    <li t-if="record.closing_date.raw_value">
+                                        Closing date: <field name="closing_date"/>
+                                    </li>
+                                </ul>
+                                <div class="o_kanban_tags_section">
+                                    <span class="oe_kanban_list_many2many">
+                                        <field name="tag_ids" widget="many2many_tags"
+                                            options="{'color_field': 'color'}"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="res_file_view_calendar" model="ir.ui.view">
+        <field name="name">Files (calendar view)</field>
+        <field name="model">res.file</field>
+        <field name="arch" type="xml">
+            <calendar string="Files" date_start="date_file"
+                color="category_id" mode="month">
+                <field name="subject"/>
+                <field name="stage_id"/>
+                <field name="partner_id"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="res_file_action" model="ir.actions.act_window">
+        <field name="name">Files</field>
+        <field name="res_model">res.file</field>
+        <field name="view_mode">tree,form,kanban,calendar</field>
+        <field name="view_ids"
+         eval="[(5, 0),
+                (0, 0, {'view_mode': 'tree',
+                        'view_id': ref('res_file_view_tree')}),
+                (0, 0, {'view_mode': 'form',
+                        'view_id': ref('res_file_view_form')})]"/>
+        <field name="search_view_id" ref="res_file_view_search"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to add a new file
+            </p>
+        </field>
+    </record>
+
+    <record id="res_file_partnerlink_view_form" model="ir.ui.view">
+        <field name="name">File Partnerlink (form view)</field>
+        <field name="model">res.file.partnerlink</field>
+        <field name="arch" type="xml">
+            <form duplicate="0">
+                <sheet>
+                    <group name="master_data">
+                        <field name="file_id"/>
+                        <field name="category_id"/>
+                        <field name="partner_id"/>
+                        <field name="is_main"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="res_file_partnerlink_view_tree" model="ir.ui.view">
+        <field name="name">File Partnerlink (tree view)</field>
+        <field name="model">res.file.partnerlink</field>
+        <field name="arch" type="xml">
+            <tree string="Partnerlinks" editable="bottom" class="o_res_file_partnerlink">
+                <field name="partner_id" class="align-middle"/>
+                <field name="is_main" class="align-middle o_res_file_partnerlink_is_main"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="res_file_partnerlink_of_partner_view_tree" model="ir.ui.view">
+        <field name="name">File Partnerlink of partner (tree view)</field>
+        <field name="model">res.file.partnerlink</field>
+        <field name="arch" type="xml">
+            <tree string="Partnerlinks" create="false" edit="false" delete="false" class="o_res_file_partnerlink">
+                <field name="date_file" class="align-middle o_res_file_partnerlink_of_partner_date_file"/>
+                <field name="file_id" class="align-middle"/>
+                <field name="stage_id" class="align-middle o_res_file_partnerlink_of_partner_stage_id"/>
+                <field name="is_main" class="align-middle o_res_file_partnerlink_of_partner_is_main"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="res_file_partnerlink_view_search" model="ir.ui.view">
+        <field name="name">File Partnerlink (search view)</field>
+        <field name="model">res.file.partnerlink</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="file_id"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="res_file_filelink_view_form" model="ir.ui.view">
+        <field name="name">File filelink (form view)</field>
+        <field name="model">res.file.filelink</field>
+        <field name="arch" type="xml">
+            <form duplicate="0">
+                <sheet>
+                    <group name="master_data">
+                        <field name="file_id"/>
+                        <field name="related_file_id"/>
+                        <field name="related_file_category_id"/>
+                        <field name="related_file_subject"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="res_file_filelink_view_tree" model="ir.ui.view">
+        <field name="name">File filelink (tree view)</field>
+        <field name="model">res.file.filelink</field>
+        <field name="arch" type="xml">
+            <tree class="o_res_file_filelink" editable="bottom"
+                  default_order="related_file_id desc">
+                <field name="related_file_category_id" readonly="1"/>
+                <field name="related_file_id"/>
+                <field name="related_file_subject"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="res_file_partnerlink_view_search" model="ir.ui.view">
+        <field name="name">File filelink (search view)</field>
+        <field name="model">res.file.filelink</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="file_id"/>
+            </search>
+        </field>
+    </record>
+
+    <menuitem id="menu_files" name="Files"
+              parent="menu_filemgmt"
+              sequence="10"
+              action="res_file_action"/>
+
+</odoo>
