@@ -4,7 +4,7 @@
 {
     'name': 'Display Decimal Precision',
     'summary': 'Distinguish computation digits and display digits',
-    'version': '16.0.1.0.0',
+    'version': "18.0.1.0.0",
     'category': 'Hidden/Dependency',
     'website': 'http://www.moval.es',
     'author': 'Moval Agroingeniería',
