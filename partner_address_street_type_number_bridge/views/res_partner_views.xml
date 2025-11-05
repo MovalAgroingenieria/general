@@ -1,0 +1,29 @@
+<odoo>
+  <!-- Ensure this loads AFTER both modules’ own inherits -->
+  <record id="view_partner_form_child_ctx_bridge" model="ir.ui.view">
+    <field name="name">res.partner.form: child_ids merged context</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_form"/>
+    <field name="priority">90</field>
+    <field name="arch" type="xml">
+      <field name="child_ids" position="attributes">
+        <attribute name="context">
+          {
+            'default_parent_id': id,
+            'default_street': street,
+            'default_street2': street2,
+            'default_city': city,
+            'default_state_id': state_id,
+            'default_zip': zip,
+            'default_country_id': country_id,
+            'default_lang': lang,
+            'default_user_id': user_id,
+            'default_type': 'other',
+            'default_street_num': street_num,
+            'default_street_type_id': street_type_id
+          }
+        </attribute>
+      </field>
+    </field>
+  </record>
+</odoo>
