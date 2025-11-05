@@ -4,7 +4,7 @@
 {
     "name": "Sale Comments Extended",
     "summary": "Extends the functionality of the parent module",
-    "version": "16.0.0.0.1",
+    "version": "18.0.1.0.0",
     "license": "AGPL-3",
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",
