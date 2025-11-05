@@ -5,7 +5,7 @@
     'name': 'Partner Address Street Type (Spain)',
     'summary': 'Add the Spanish street types and their abbreviations \
                 according to the Spanish cadastre',
-    'version': '16.0.1.1.0',
+    'version': "18.0.1.0.0",
     'category': 'Localization',
     'website': 'http://www.moval.es',
     'author': 'Moval Agroingeniería',
