@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_partner_form_purchase_followup" model="ir.ui.view">
+            <field name="name">res.partner.form.purchase.followup</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <notebook position="inside">
+                    <page string="Purchase Follow-up" attrs="{'invisible': [('is_company', '=', False)]}">
+                        <group>
+                            <group string="Configuration">
+                                <field name="purchase_notifications_enabled"/>
+                                <field name="days_without_purchase_limit"
+                                       attrs="{'invisible': [('purchase_notifications_enabled', '=', False)]}"/>
+                                <field name="notification_users" widget="many2many_tags"
+                                       attrs="{'invisible': [('purchase_notifications_enabled', '=', False)]}"
+                                       options="{'no_create': True}"/>
+                            </group>
+                            <group string="Notification Options"
+                                   attrs="{'invisible': [('purchase_notifications_enabled', '=', False)]}">
+                                <field name="send_email_notification"/>
+                                <field name="create_crm_opportunity"/>
+                            </group>
+                        </group>
+
+                        <group>
+                            <group string="Purchase Information">
+                                <field name="last_purchase_date" readonly="1"/>
+                                <field name="days_since_last_purchase" readonly="1"/>
+                            </group>
+                            <group string="Notification Status">
+                                <field name="client_notified" readonly="1"/>
+                                <field name="last_notification_date" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_send_manual_notification"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-bell"
+                                    attrs="{'invisible': [('purchase_notifications_enabled', '=', False)]}"
+                                    confirm="Are you sure you want to send a notification for this customer?">
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_text">Send</span>
+                                    <span class="o_stat_text">Notification</span>
+                                </div>
+                            </button>
+
+                            <button name="reset_notification_status"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-refresh"
+                                    attrs="{'invisible': ['|', ('purchase_notifications_enabled', '=', False), ('client_notified', '=', False)]}"
+                                    confirm="This will reset the notification status. Continue?">
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_text">Reset</span>
+                                    <span class="o_stat_text">Status</span>
+                                </div>
+                            </button>
+                        </div>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+
+        <record id="view_partner_tree_purchase_followup" model="ir.ui.view">
+            <field name="name">res.partner.list.purchase.followup</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_tree"/>
+            <field name="arch" type="xml">
+                <field name="display_name" position="after">
+                    <field name="purchase_notifications_enabled" optional="hide"/>
+                    <field name="last_purchase_date" optional="hide"/>
+                    <field name="days_since_last_purchase" optional="hide"/>
+                    <field name="client_notified" optional="hide"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="action_partner_purchase_followup" model="ir.actions.act_window">
+            <field name="name">Customers with Purchase Follow-up</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_mode">list,form</field>
+            <field name="domain">[('purchase_notifications_enabled', '=', True), ('is_company', '=', True)]</field>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Configure customers for purchase follow-up notifications
+                </p>
+                <p>
+                    Enable purchase notifications for customers to receive alerts when they haven't purchased in a while.
+                </p>
+            </field>
+        </record>
+
+        <record id="action_partner_needs_notification" model="ir.actions.act_window">
+            <field name="name">Customers Needing Follow-up</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_mode">list,form</field>
+            <field name="domain">[
+                ('purchase_notifications_enabled', '=', True),
+                ('is_company', '=', True),
+                ('client_notified', '=', False)
+            ]</field>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No customers need follow-up notifications right now
+                </p>
+                <p>
+                    This list shows customers who have purchase notifications enabled
+                    but haven't been notified yet about their lack of recent purchases.
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_purchase_followup_root"
+                  name="Purchase Follow-up"
+                  parent="sale.sale_menu_root"
+                  sequence="50"/>
+
+        <menuitem id="menu_partner_purchase_followup"
+                  name="Customers with Follow-up"
+                  parent="menu_purchase_followup_root"
+                  action="action_partner_purchase_followup"
+                  sequence="10"/>
+
+        <menuitem id="menu_partner_needs_notification"
+                  name="Customers Needing Follow-up"
+                  parent="menu_purchase_followup_root"
+                  action="action_partner_needs_notification"
+                  sequence="20"/>
+
+    </data>
+</odoo>
