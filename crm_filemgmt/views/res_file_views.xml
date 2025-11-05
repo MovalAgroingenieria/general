@@ -83,12 +83,12 @@
                         <page name="partnerlinks_page" string="Partner Links">
                             <field name="partnerlink_ids"
                                     attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"
-                                    context="{'tree_view_ref': 'crm_filemgmt.res_file_partnerlink_view_tree'}"/>
+                                    context="{'list_view_ref': 'crm_filemgmt.res_file_partnerlink_view_tree'}"/>
                         </page>
                         <page name="filelinks_page" string="File Links">
                             <field name="filelink_ids"
                                     attrs="{'readonly':['|',('is_closing_stage','=', True),('is_blocked','=',True)]}"
-                                    context="{'tree_view_ref': 'crm_filemgmt.res_file_filelink_view_tree'}"/>
+                                    context="{'list_view_ref': 'crm_filemgmt.res_file_filelink_view_tree'}"/>
                         </page>
                         <page name="file_comments" string="Comments" >
                             <group string="Top Comments">
@@ -124,12 +124,12 @@
                         </page>
                         <page name="attachments" string="Attachments">
                             <field name="file_attachment_ids">
-                                <tree string="Attachments" editable="top">
+                                <list editable="top">
                                     <field name="name"/>
                                     <field name="mimetype"/>
                                     <field name="datas"/>
                                     <field name="create_uid"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                         <page name="notes_page" string="Notes">
@@ -138,10 +138,7 @@
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids" widget="mail_followers"/>
-                    <field name="message_ids" widget="mail_thread"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -150,7 +147,7 @@
         <field name="name">Files (tree view)</field>
         <field name="model">res.file</field>
         <field name="arch" type="xml">
-            <tree string="Files" class="o_res_file" default_order="name desc">
+            <list class="o_res_file" default_order="name desc">
                 <field name="image" widget="image" optional="hide" class="o_res_file_image"/>
                 <field name="alphanum_code" class="align-middle"/>
                 <field name="partner_id" optional="show" class="align-middle"/>
@@ -161,7 +158,7 @@
                 <field name="category_id" optional="hide" class="align-middle o_res_file_category_id"/>
                 <field name="is_blocked" optional="show" class="align-middle o_res_file_is_blocked"/>
                 <field name="tag_ids" widget="many2many_tags" optional="hide" class="align-middle"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -169,7 +166,7 @@
         <field name="name">Files (tree related view)</field>
         <field name="model">res.file</field>
         <field name="arch" type="xml">
-            <tree string="Files" create="false" edit="false" default_order="name desc">
+            <list create="false" edit="false" default_order="name desc">
                 <field name="active" invisible="1"/>
                 <field name="alphanum_code" class="align-middle"/>
                 <field name="partner_id" optional="show" class="align-middle"/>
@@ -178,7 +175,7 @@
                 <field name="subject" optional="show" class="align-middle border-right"/>
                 <field name="technician_id" optional="show" class="align-middle"/>
                 <field name="is_blocked" optional="show" class="align-middle o_res_file_is_blocked"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -320,10 +317,10 @@
     <record id="res_file_action" model="ir.actions.act_window">
         <field name="name">Files</field>
         <field name="res_model">res.file</field>
-        <field name="view_mode">tree,form,kanban,calendar</field>
+        <field name="view_mode">list,form,kanban,calendar</field>
         <field name="view_ids"
          eval="[(5, 0),
-                (0, 0, {'view_mode': 'tree',
+                (0, 0, {'view_mode': 'list',
                         'view_id': ref('res_file_view_tree')}),
                 (0, 0, {'view_mode': 'form',
                         'view_id': ref('res_file_view_form')})]"/>
@@ -356,10 +353,10 @@
         <field name="name">File Partnerlink (tree view)</field>
         <field name="model">res.file.partnerlink</field>
         <field name="arch" type="xml">
-            <tree string="Partnerlinks" editable="bottom" class="o_res_file_partnerlink">
+            <list editable="bottom" class="o_res_file_partnerlink">
                 <field name="partner_id" class="align-middle"/>
                 <field name="is_main" class="align-middle o_res_file_partnerlink_is_main"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -367,12 +364,12 @@
         <field name="name">File Partnerlink of partner (tree view)</field>
         <field name="model">res.file.partnerlink</field>
         <field name="arch" type="xml">
-            <tree string="Partnerlinks" create="false" edit="false" delete="false" class="o_res_file_partnerlink">
+            <list create="false" edit="false" delete="false" class="o_res_file_partnerlink">
                 <field name="date_file" class="align-middle o_res_file_partnerlink_of_partner_date_file"/>
                 <field name="file_id" class="align-middle"/>
                 <field name="stage_id" class="align-middle o_res_file_partnerlink_of_partner_stage_id"/>
                 <field name="is_main" class="align-middle o_res_file_partnerlink_of_partner_is_main"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -407,12 +404,12 @@
         <field name="name">File filelink (tree view)</field>
         <field name="model">res.file.filelink</field>
         <field name="arch" type="xml">
-            <tree class="o_res_file_filelink" editable="bottom"
+            <list class="o_res_file_filelink" editable="bottom"
                   default_order="related_file_id desc">
                 <field name="related_file_category_id" readonly="1"/>
                 <field name="related_file_id"/>
                 <field name="related_file_subject"/>
-            </tree>
+            </list>
         </field>
     </record>
 
