@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="sale_stock_report_invoice_document_scrap_notice" inherit_id="sale_stock.sale_stock_report_invoice_document">
+        <xpath expr="//p[@name='payment_communication']" position="before">
+            <t t-set="scrap_total" t-value="o.scrap_contribution_total or 0.0"/>
+            <t t-if="scrap_total > 0.0">
+                <p t-if="scrap_total > 0.0">
+                    <t t-esc="('Contribución al SCRAP: %.2f €') % scrap_total"/>
+                </p>
+            </t>
+        </xpath>
+    </template>
+</odoo>

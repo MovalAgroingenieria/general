@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record model="ir.ui.view" id="nan_product_pack_form">
+        <field name="name">product.template.ecoembes.form</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view" />
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Ecoembes">
+                    <group>
+                        <field name="is_manufactured" />
+                    </group>
+                    <group>
+                        <field name="product_component_line_ids" nolabel="1">
+                            <list editable="bottom">
+                                <field name="material_id"/>
+                                <field name="submaterial_id"/>
+                                <field name="submaterial_type_id"/>
+                                <field name="weight_grams"/>
+                            </list>
+                        </field>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_scrap_annual_report_wizard_form" model="ir.ui.view">
+        <field name="name">scrap.annual.report.wizard.form</field>
+        <field name="model">scrap.annual.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="SCRAP Annual Report">
+                <group>
+                    <group>
+                        <field name="year" widget="integer"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="print_report"
+                            string="Generate Report"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_scrap_annual_report_wizard" model="ir.actions.act_window">
+        <field name="name">SCRAP Annual Report</field>
+        <field name="res_model">scrap.annual.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_scrap_annual_report_wizard_form"/>
+    </record>
+
+    <!-- Create Ecoembes category under Reports -->
+    <menuitem id="menu_ecoembes_reports"
+              name="Ecoembes"
+              parent="account.menu_finance_reports"
+              sequence="150"/>
+
+    <!-- SCRAP Annual Report under Ecoembes category -->
+    <menuitem id="menu_scrap_annual_report"
+              name="SCRAP Annual Report"
+              parent="menu_ecoembes_reports"
+              action="action_scrap_annual_report_wizard"
+              sequence="10"/>
+</odoo>
