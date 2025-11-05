@@ -1,257 +1,305 @@
-# 2023 Moval Agroingeniería
+# 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from datetime import datetime
-from odoo import _, models
+from odoo import _, api, models
 from odoo.exceptions import UserError
 
 
 class AccountPaymentOrder(models.Model):
     _inherit = "account.payment.order"
 
-    # Num of payment: num_of_payment + control digit
-    def _calculate_num_of_payment(self, line, num_of_payment):
-        converter = self.env['payment.converter.spain']
-        id_code = converter.digits_only(line['partner_id'].vat)
-        num_of_payment = str(num_of_payment).zfill(7)
-        base_number = int(id_code + num_of_payment)
-        control_digit = base_number % 7
-        num_of_payment = num_of_payment + str(control_digit)  # No space
-        return num_of_payment
+    # ---------- Helpers ------------------------------------------------------
 
-    def _search_in_payment_lines(self, line):
-        found_payment_line = False
-        for payment_line in self.payment_line_ids:
-            for transaction_line in line.payment_line_ids:
-                if payment_line.id == transaction_line.id:
-                    found_payment_line = payment_line
-        return found_payment_line
+    def _calculate_num_of_payment(self, line, num_of_payment):
+        """
+        Build the 'num_of_payment' (7 digits + control digit mod 7),
+        using partner VAT numeric part + padded sequence.
+        """
+        self.ensure_one()
+        converter = self.env["payment.converter.spain"]
+        vat = (line.partner_id.vat or "").strip()
+        if not vat:
+            raise UserError(_("Missing VAT on partner %s") % (line.partner_id.display_name,))
+        id_code = converter.digits_only(vat)
+        num_str = str(num_of_payment).zfill(7)
+        base_number = int((id_code or "0") + num_str)
+        control_digit = base_number % 7
+        return f"{num_str}{control_digit}"
 
     def _start_68(self):
-        converter = self.env['payment.converter.spain']
-        start_68 = False
-        if self.payment_mode_id.initiating_party_identifier:
-            start_68 = self.payment_mode_id.initiating_party_identifier
-        elif self.payment_mode_id.initiating_party_issuer:
-            start_68 = self.payment_mode_id.initiating_party_issuer
+        """
+        Fetch and convert the initiating party identifier/issuer to 12 chars.
+        """
+        self.ensure_one()
+        converter = self.env["payment.converter.spain"]
+        start_68 = (
+            self.payment_mode_id.initiating_party_identifier
+            or self.payment_mode_id.initiating_party_issuer
+        )
         if not start_68:
             raise UserError(
-                _('The Transaction Initiator Identifier or Transaction Issuer '
-                    'have not been configured.'))
-        else:
-            start_68 = converter.convert(start_68, 12)
-        return start_68
+                _(
+                    "The Transaction Initiator Identifier or Transaction Issuer "
+                    "have not been configured."
+                )
+            )
+        return converter.convert(start_68, 12)
+
+    # ---------- CSB Lines ----------------------------------------------------
 
     def _cabecera_ordenante_68(self):
-        converter = self.env['payment.converter.spain']
-        today = datetime.today().strftime('%d%m%y')
-        text = '0359'
-        text += self._start_68()
-        text += ' ' * 12
-        text += '001'
-        text += today
-        text += ' ' * 9
-        if not self.company_partner_bank_id.acc_number:
+        self.ensure_one()
+        converter = self.env["payment.converter.spain"]
+        today = datetime.today().strftime("%d%m%y")
+        txt = "0359"
+        txt += self._start_68()
+        txt += " " * 12
+        txt += "001"
+        txt += today
+        txt += " " * 9
+
+        acc_number = (self.company_partner_bank_id.acc_number or "").replace(" ", "")
+        if not acc_number:
             raise UserError(
-                _('Configuration error:\n\n No account bank number found '
-                  'for ordering party: Cabecera ordenante 68'))
-        bank_acc_number = self.company_partner_bank_id.acc_number
-        bank_acc_number = \
-            converter.convert(bank_acc_number.replace(' ', ''), 24)
-        text += bank_acc_number
-        text += ' ' * 30
-        text += '\r\n'
-        if len(text) % 102 != 0:
+                _(
+                    "Configuration error:\n\n No account bank number found "
+                    "for ordering party: Cabecera ordenante 68"
+                )
+            )
+        txt += converter.convert(acc_number, 24)
+        txt += " " * 30
+        txt += "\r\n"
+
+        if len(txt) % 102 != 0:
             raise UserError(
-                _('Configuration error:\n\nA line in "%s" is not 100 '
-                  'characters long:\n%s') % ('Cabecera ordenante 68', text))
-        return text
+                _(
+                    'Configuration error:\n\nA line in "%s" is not 100 '
+                    "characters long:\n%s"
+                )
+                % ("Cabecera ordenante 68", txt)
+            )
+        return txt
 
     def _cabecera_beneficiario_68(self, line):
-        converter = self.env['payment.converter.spain']
-        text = '0659'
-        text += self._start_68()
-        text += converter.convert(line['partner_id'].vat, 12)
-        return text
+        converter = self.env["payment.converter.spain"]
+        txt = "0659"
+        txt += self._start_68()
+        vat = (line.partner_id.vat or "")
+        txt += converter.convert_text(vat, 12)
+        return txt
 
     def _registro_beneficiario_68(self, line, num_of_payment):
-        converter = self.env['payment.converter.spain']
-        num_of_payment = self._calculate_num_of_payment(line, num_of_payment)
-        text = ''
+        """
+        Build the 6-detail records for one beneficiary (types 010..015).
+        """
+        converter = self.env["payment.converter.spain"]
+        num_of_payment_txt = self._calculate_num_of_payment(line, num_of_payment)
+        txt = ""
 
-        # Get address
-        address = None
-        partner = self.env['res.partner']
-        address_ids = line['partner_id'].address_get(['default', 'invoice'])
-        if address_ids.get('invoice'):
-            address = partner.browse(address_ids.get('invoice'))
-        elif address_ids.get('default'):
-            address = partner.browse(address_ids.get('default'))
-        else:
+        # Invoicing/default address
+        partner = line.partner_id
+        address = partner
+        # Prefer invoice address if available
+        addr_map = partner.address_get(["invoice", "default"])
+        if addr_map.get("invoice"):
+            address = self.env["res.partner"].browse(addr_map["invoice"])
+        elif addr_map.get("default"):
+            address = self.env["res.partner"].browse(addr_map["default"])
+        if not address:
             raise UserError(
-                _('User error:\n\nPartner %s has no invoicing or '
-                  'default address.') % line['partner_id'].name)
+                _("User error:\n\nPartner %s has no invoicing or default address.")
+                % partner.display_name
+            )
 
-        # Primer tipo
+        # --- Type 010
         text1 = self._cabecera_beneficiario_68(line)
-        text1 += '010'
-        text1 += converter.convert(line['partner_id'].name[:40], 40)
-        text1 += ' ' * 29
-        text1 += '\r\n'
+        text1 += "010"
+        text1 += converter.convert_text((partner.name or "")[:40], 40)
+        text1 += " " * 29
+        text1 += "\r\n"
         if len(text1) % 102 != 0:
             raise UserError(
-                _('Configuration error:\n\nA line in "%s" is not 100 '
-                  'characters long:\n%s') %
-                ('Beneficiary record, type 1', text))
-        text += text1
+                _(
+                    'Configuration error:\n\nA line in "%s" is not 100 '
+                    "characters long:\n%s"
+                )
+                % ("Beneficiary record, type 1", text1)
+            )
+        txt += text1
 
-        # Segundo tipo
+        # --- Type 011 (street)
         text2 = self._cabecera_beneficiario_68(line)
-        text2 += '011'
-        txt_address = ''
-        if address.street:
-            txt_address += address.street
-        if address.street2:
-            txt_address += ' ' + address.street2
-        text2 += converter.convert(txt_address[:45], 45)
-        text2 += ' ' * 24
-        text2 += '\r\n'
+        text2 += "011"
+        street = " ".join(
+            s for s in [(address.street or ""), (address.street2 or "")] if s
+        )
+        text2 += converter.convert(street[:45], 45)
+        text2 += " " * 24
+        text2 += "\r\n"
         if len(text2) % 102 != 0:
             raise UserError(
-                _('Configuration error:\n\nA line in "%s" is not 100 '
-                  'characters long:\n%s') %
-                ('Beneficiary record, type 2', text))
-        text += text2
+                _(
+                    'Configuration error:\n\nA line in "%s" is not 100 '
+                    "characters long:\n%s"
+                )
+                % ("Beneficiary record, type 2", text2)
+            )
+        txt += text2
 
-        # Tercer tipo
+        # --- Type 012 (city + zip short)
         text3 = self._cabecera_beneficiario_68(line)
-        text3 += '012'
-        text3 += converter.convert(address.zip, 5)
-        text3 += converter.convert(address.city[:40], 40)
-        text3 += ' ' * 24
-        text3 += '\r\n'
+        text3 += "012"
+        text3 += converter.convert(address.zip or "", 5)
+        text3 += converter.convert((address.city or "")[:40], 40)
+        text3 += " " * 24
+        text3 += "\r\n"
         if len(text3) % 102 != 0:
             raise UserError(
-                _('Configuration error:\n\nA line in "%s" is not 100 '
-                  'characters long:\n%s') %
-                ('Beneficiary record, type 3', text))
-        text += text3
+                _(
+                    'Configuration error:\n\nA line in "%s" is not 100 '
+                    "characters long:\n%s"
+                )
+                % ("Beneficiary record, type 3", text3)
+            )
+        txt += text3
 
-        # Cuarto tipo
+        # --- Type 013 (zip long + state + country)
         text4 = self._cabecera_beneficiario_68(line)
-        text4 += '013'
-        text4 += converter.convert(address.zip, 9)
-        text4 += converter.convert(address.state_id.name[:30] or '', 30)
-        text4 += converter.convert(address.country_id.name[:20] or '', 20)
-        text4 += ' ' * 10
-        text4 += '\r\n'
+        text4 += "013"
+        text4 += converter.convert(address.zip or "", 9)
+        text4 += converter.convert((address.state_id.name or "")[:30], 30)
+        text4 += converter.convert((address.country_id.name or "")[:20], 20)
+        text4 += " " * 10
+        text4 += "\r\n"
         if len(text4) % 102 != 0:
             raise UserError(
-                _('Configuration error:\n\nA line in "%s" is not 100 '
-                  'characters long:\n%s') %
-                ('Beneficiary record, type 4', text))
-        text += text4
+                _(
+                    'Configuration error:\n\nA line in "%s" is not 100 '
+                    "characters long:\n%s"
+                )
+                % ("Beneficiary record, type 4", text4)
+            )
+        txt += text4
 
-        # Quinto tipo
+        # --- Type 014 (num_of_payment + date + amount + country code)
         text5 = self._cabecera_beneficiario_68(line)
-        text5 += '014'
-        text5 += num_of_payment
-        if 'date' in line:
-            date_pago = line['date']
-        else:
-            date_pago = datetime.today()
+        text5 += "014"
+        text5 += num_of_payment_txt
 
-        text5 += converter.convert(date_pago.strftime('%d%m%Y'), 8)
-        text5 += converter.convert(abs(line['amount']), 12)
-        text5 += '0'
-        country_code = address.country_id and address.country_id.code or ''
-        if country_code != 'ES':
-            text5 += country_code  # 2
-        else:
-            text5 += ' ' * 2
-        text5 += ' ' * 6
-        text5 += ' ' * 32
-        text5 += '\r\n'
+        pay_date = line.date or datetime.today().date()
+        text5 += converter.convert(pay_date.strftime("%d%m%Y"), 8)
+
+        # Use absolute amount; prefer line.amount if available
+        amount = getattr(line, "amount", None)
+        if amount is None:
+            amount = getattr(line, "amount_currency", 0.0)  # fallback
+        text5 += converter.convert(abs(amount), 12)
+        text5 += "0"
+
+        country_code = (address.country_id.code or "")
+        text5 += (country_code if country_code != "ES" else " " * 2)
+        text5 += " " * 6
+        text5 += " " * 32
+        text5 += "\r\n"
         if len(text5) % 102 != 0:
             raise UserError(
-                _('Configuration error:\n\nA line in "%s" is not 100 '
-                  'characters long:\n%s') %
-                ('Beneficiary record, type 5', text))
-        text += text5
+                _(
+                    'Configuration error:\n\nA line in "%s" is not 100 '
+                    "characters long:\n%s"
+                )
+                % ("Beneficiary record, type 5", text5)
+            )
+        txt += text5
 
-        # Sexto tipo
+        # --- Type 015 (references + generation date + amount + communication)
         text6 = self._cabecera_beneficiario_68(line)
-        text6 += '015'
-        text6 += num_of_payment  # 8 spaces (not used)
-        payment_line = self._search_in_payment_lines(line)
-        if payment_line:
-            ref_payment = converter.convert(payment_line['communication'], 12)
-            communication = \
-                converter.convert(payment_line['communication'], 26)
-        else:
-            ref_payment = ' ' * 12
-            communication = ' ' * 26
-        text6 += ref_payment  # Repeat
-        self.date_generated = datetime.today()  # Set generated_date
-        date_create = \
-            converter.convert(self.date_generated.strftime('%d%m%Y'), 8)
+        text6 += "015"
+        text6 += num_of_payment_txt
+
+        # Communication/reference
+        ref = (line.communication or "").strip()
+        ref_payment = converter.convert(ref, 12)
+        communication = converter.convert(ref, 26)
+
+        # Generated date
+        self.date_generated = datetime.today()
+        date_create = converter.convert(self.date_generated.strftime("%d%m%Y"), 8)
+
+        text6 += ref_payment
         text6 += date_create
-        text6 += converter.convert(abs(line['amount']), 12)
-        text6 += 'H'
+        text6 += converter.convert(abs(amount), 12)
+        text6 += "H"
         text6 += communication
-        text6 += ' ' * 2
-        text6 += '\r\n'
+        text6 += " " * 2
+        text6 += "\r\n"
         if len(text6) % 102 != 0:
             raise UserError(
-                _('Configuration error:\n\nA line in "%s" is not 100 '
-                  'characters long:\n%s') %
-                ('Beneficiary record, type 6', text))
-        text += text6
+                _(
+                    'Configuration error:\n\nA line in "%s" is not 100 '
+                    "characters long:\n%s"
+                )
+                % ("Beneficiary record, type 6", text6)
+            )
+        txt += text6
 
-        return text
+        return txt
 
     def _total_general_68(self, total_payments, total_amount):
-        converter = self.env['payment.converter.spain']
-        text = '0859'
-        text += self._start_68()
-        text += ' ' * 12
-        text += ' ' * 3
-        text += converter.convert(abs(total_amount), 12)
-        text += converter.convert(abs(total_payments * 6 + 2), 10)
-        text += ' ' * 42
-        text += ' ' * 5
-        text += '\r\n'
-        if len(text) % 102 != 0:
+        self.ensure_one()
+        converter = self.env["payment.converter.spain"]
+        txt = "0859"
+        txt += self._start_68()
+        txt += " " * 12
+        txt += " " * 3
+        txt += converter.convert(abs(total_amount), 12)
+        # Each beneficiary contributes 6 lines; +2 header/footer lines
+        txt += converter.convert(abs(total_payments * 6 + 2), 10)
+        txt += " " * 42
+        txt += " " * 5
+        txt += "\r\n"
+        if len(txt) % 102 != 0:
             raise UserError(
-                _('Configuration error:\n\nA line in "%s" is not 100 '
-                  'characters long:\n%s') %
-                ('Registration of totals', text))
-        return text
+                _(
+                    'Configuration error:\n\nA line in "%s" is not 100 '
+                    "characters long:\n%s"
+                )
+                % ("Registration of totals", txt)
+            )
+        return txt
+
+    # ---------- Public API ---------------------------------------------------
 
     def generate_payment_file(self):
-        """Creates the CSB Direct Debit file"""
+        """
+        Create the CSB Direct Debit file for code 'csb_direct_debit_payments'.
+        Falls back to super() for other methods.
+        """
         self.ensure_one()
         if self.payment_method_id.code != "csb_direct_debit_payments":
             return super().generate_payment_file()
 
-        # Vars
-        txt_file = ''
-        num_of_payment = 0
+        txt_file = ""
+        seq = 0
         total_payments = 0
         total_amount = 0.0
 
         # Header
         txt_file += self._cabecera_ordenante_68()
 
-        # Beneficiary records
+        # Beneficiaries (assume self.payment_ids are the payment lines on this order)
         for line in self.payment_ids:
-            num_of_payment += 1
-            txt_file += self._registro_beneficiario_68(line, num_of_payment)
+            seq += 1
+            txt_file += self._registro_beneficiario_68(line, seq)
             total_payments += 1
-            total_amount += abs(line['amount'])
+            amt = getattr(line, "amount", None)
+            if amt is None:
+                amt = getattr(line, "amount_currency", 0.0)
+            total_amount += abs(amt)
+
+        # Totals
         txt_file += self._total_general_68(total_payments, total_amount)
 
-        filename = self.name.replace('/', '_')
-        filename += datetime.today().strftime('%d-%m-%Y') + '.txt'
-        txt_bin = txt_file.encode()
-        return (txt_bin, filename)
+        # Filename
+        filename = self.name.replace("/", "_") + datetime.today().strftime("%d-%m-%Y") + ".txt"
+        return txt_file.encode(), filename

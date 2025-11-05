@@ -1,105 +1,185 @@
-# 2023 Moval Agroingeniería
+# 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import models, api, _
+from decimal import Decimal
+from unicodedata import normalize, combining
+
+from odoo import _, api, models
 from odoo.exceptions import UserError
 
 
 class PaymentConverterSpain(models.Model):
-    _name = 'payment.converter.spain'
+    _name = "payment.converter.spain"
     _description = "Payment converter for Spain"
 
+    # ------------------------------ utils ------------------------------------
+
     @api.model
-    def digits_only(self, cc_in):
-        """Discards non-numeric chars"""
-        cc = ""
-        for i in cc_in or '':
+    def digits_only(self, s):
+        """Return only numeric characters from the input."""
+        return "".join(ch for ch in (s or "") if ch.isdigit())
+
+    @api.model
+    def _strip_accents(self, text: str) -> str:
+        """
+        Convert accented chars to closest ASCII; keep ñ/Ñ → n/N, ç/Ç → c/C,
+        and map a few special symbols.
+        """
+        text = text or ""
+        # Normalize and drop combining marks
+        nfkd = normalize("NFKD", text)
+        base = "".join(ch for ch in nfkd if not combining(ch))
+        # Post-map cases not covered nicely by NFKD or for consistency
+        replacements = {
+            "ñ": "n", "Ñ": "N",
+            "ç": "c", "Ç": "C",
+            "ª": "a", "º": "o",
+            "·": ".", "\n": " ",
+        }
+        for old, new in replacements.items():
+            base = base.replace(old, new)
+        return base
+
+    @api.model
+    def to_ascii(self, text: str) -> str:
+        """Public ASCII-normalizer (kept for API compatibility)."""
+        return self._strip_accents(text)
+
+    # --------------------------- formatting ----------------------------------
+
+    @api.model
+    def convert_text(self, text, size: int, justified: str = "left") -> str:
+        txt = self.to_ascii(str(text or ""))
+        txt = txt[:size]
+        return txt.ljust(size) if justified == "left" else txt.rjust(size)
+
+    @api.model
+    def convert_float(self, number, size: int) -> str:
+        """
+        Format monetary/float as integer cents, zero-filled to `size`.
+        """
+        # Accept float/Decimal/str
+        if isinstance(number, str):
             try:
-                int(i)
-                cc += i
-            except ValueError:
-                pass
-        return cc
+                number = Decimal(number)
+            except Exception:
+                raise UserError(_("Invalid float string: %s") % number)
+        elif isinstance(number, float):
+            number = Decimal(str(number))
+        elif isinstance(number, int):
+            number = Decimal(number)
 
-    @api.model
-    def to_ascii(self, text):
-        """Converts special characters such as those with accents to their
-        ASCII equivalents"""
-        old_chars = ['á', 'é', 'í', 'ó', 'ú', 'à', 'è', 'ì', 'ò', 'ù', 'ä',
-                     'ë', 'ï', 'ö', 'ü', 'â', 'ê', 'î', 'ô', 'û', 'Á', 'É',
-                     'Í', 'Ú', 'Ó', 'À', 'È', 'Ì', 'Ò', 'Ù', 'Ä', 'Ë', 'Ï',
-                     'Ö', 'Ü', 'Â', 'Ê', 'Î', 'Ô', 'Û', 'ñ', 'Ñ', 'ç', 'Ç',
-                     'ª', 'º', '·', '\n']
-        new_chars = ['a', 'e', 'i', 'o', 'u', 'a', 'e', 'i', 'o', 'u', 'a',
-                     'e', 'i', 'o', 'u', 'a', 'e', 'i', 'o', 'u', 'A', 'E',
-                     'I', 'U', 'O', 'A', 'E', 'I', 'O', 'U', 'A', 'E', 'I',
-                     'O', 'U', 'A', 'E', 'I', 'O', 'U', 'n', 'N', 'c', 'C',
-                     'a', 'o', '.', ' ']
-        for old, new in zip(old_chars, new_chars):
-            text = text.replace(old, new)
-        return text
+        if not isinstance(number, Decimal):
+            raise UserError(_("Unsupported number type: %s") % type(number).__name__)
 
-    @api.model
-    def convert_text(self, text, size, justified='left'):
-        if justified == 'left':
-            return self.to_ascii(text)[:size].ljust(size)
-        else:
-            return self.to_ascii(text)[:size].rjust(size)
-
-    @api.model
-    def convert_float(self, number, size):
-        text = str(int(round(number * 100, 0)))
+        cents = int((number * Decimal("100")).quantize(Decimal("1")))
+        text = str(cents)
         if len(text) > size:
             raise UserError(
-                _('Error:\n\nCan not convert float number %(number).2f '
-                    'to fit in %(size)d characters.') % {
-                    'number': number, 'size': size})
+                _(
+                    "Error:\n\nCan not convert float number %(number).2f "
+                    "to fit in %(size)d characters."
+                )
+                % {"number": float(number), "size": size}
+            )
         return text.zfill(size)
 
     @api.model
-    def convert_int(self, number, size):
-        text = str(number)
+    def convert_int(self, number, size: int) -> str:
+        try:
+            ival = int(number)
+        except Exception:
+            raise UserError(_("Invalid integer: %s") % number)
+        text = str(ival)
         if len(text) > size:
             raise UserError(
-                _('Error:\n\nCan not convert integer number %(number)d '
-                    'to fit in %(size)d characters.') % {
-                    'number': number, 'size': size})
+                _(
+                    "Error:\n\nCan not convert integer number %(number)d "
+                    "to fit in %(size)d characters."
+                )
+                % {"number": ival, "size": size}
+            )
         return text.zfill(size)
 
     @api.model
-    def convert(self, value, size, justified='left'):
-        if not value:
-            return self.convert_text('', size)
-        elif isinstance(value, float):
-            return self.convert_float(value, size)
-        elif isinstance(value, int):
+    def convert(self, value, size: int, justified: str = "left") -> str:
+        """
+        Generic converter:
+          - None/'' → padded blank text
+          - float/Decimal → convert_float
+          - int → convert_int
+          - else → convert_text
+        """
+
+        if value in (None, "", False):
+            return self.convert_text("", size, justified)
+        if isinstance(value, int) or (isinstance(value, str) and value.isdigit()):
             return self.convert_int(value, size)
-        else:
-            return self.convert_text(value, size, justified)
+        if isinstance(value, (float, Decimal, str)) and self._looks_numeric_float(value):
+            # route floats/decimals/float-like strings to convert_float
+            return self.convert_float(value, size)
+        return self.convert_text(value, size, justified)
 
     @api.model
-    def convert_bank_account(self, value, partner_name):
-        if not isinstance(value):
+    def _looks_numeric_float(self, value) -> bool:
+        """Detect float-like strings; numbers with dot/comma."""
+        if isinstance(value, (float, Decimal)):
+            return True
+        if isinstance(value, str):
+            v = value.strip().replace(",", ".")
+            # Accept plain ints here too (float path still OK)
+            return any(ch in v for ch in ".eE") or v.replace(".", "", 1).isdigit()
+        return False
+
+    # --------------------------- bank helpers --------------------------------
+
+    @api.model
+    def _extract_ccc_from_any(self, value: str) -> str:
+        """
+        Try to extract a 20-digit Spanish CCC from either:
+          - raw CCC (20 digits), or
+          - Spanish IBAN (ESkk + 20 digits) → take last 20 digits.
+        """
+        digits = self.digits_only(value)
+        if len(digits) == 20:
+            return digits
+        # ES IBAN has 24 chars; if we see >= 22 digits, take the last 20
+        if value and isinstance(value, str) and value.strip().upper().startswith("ES") and len(digits) >= 22:
+            return digits[-20:]
+        return digits  # let caller validate length
+
+    @api.model
+    def convert_bank_account(self, value, partner_name: str) -> str:
+        """
+        Return a 20-digit CCC for Spain. Accepts CCC or ES IBAN.
+        Raises UserError if not valid.
+        """
+        if not value:
             raise UserError(
-                _('User error:\n\nThe bank account number of %s is not '
-                    'defined.') % partner_name)
-        ccc = self.digits_only(value)
+                _("User error:\n\nThe bank account number of %s is not defined.")
+                % (partner_name,)
+            )
+        ccc = self._extract_ccc_from_any(value)
         if len(ccc) != 20:
             raise UserError(
-                _('User error:\n\nThe bank account number of %s does not '
-                    'have 20 digits.') % partner_name)
+                _(
+                    "User error:\n\nThe bank account number of %s does not "
+                    "have 20 digits."
+                )
+                % (partner_name,)
+            )
         return ccc
 
     @api.model
-    def bank_account_parts(self, value, partner_name):
-        if not isinstance(value):
-            raise UserError(
-                _('User error:\n\nThe bank account number of %s is not '
-                    'defined.') % partner_name)
-        ccc = self.digits_only(value)
-        if len(ccc) != 20:
-            raise UserError(
-                _('User error:\n\nThe bank account number of %s does not '
-                    'have 20 digits.') % partner_name)
-        return {'bank': ccc[:4], 'office': ccc[4:8], 'dc': ccc[8:10],
-                'account': ccc[10:]}
+    def bank_account_parts(self, value, partner_name: str):
+        """
+        Split a Spanish CCC (20 digits) into parts: bank, office, dc, account.
+        Accepts CCC or ES IBAN.
+        """
+        ccc = self.convert_bank_account(value, partner_name)
+        return {
+            "bank": ccc[:4],
+            "office": ccc[4:8],
+            "dc": ccc[8:10],
+            "account": ccc[10:],
+        }

@@ -1,13 +1,13 @@
-# Translation of Odoo Server.
-# This file contains the translation of the following modules:
+# Traducción de Odoo Server.
+# Este archivo contiene la traducción de los siguientes módulos:
 # 	* account_banking_csb
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 14.0\n"
+"Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-19 07:03+0000\n"
-"PO-Revision-Date: 2023-05-19 07:03+0000\n"
+"POT-Creation-Date: 2025-11-05 11:41+0000\n"
+"PO-Revision-Date: 2025-11-05 11:41+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,19 +17,24 @@ msgstr ""
 
 #. module: account_banking_csb
 #: model:account.payment.method,name:account_banking_csb.csb_direct_debit_payments
-msgid "CSB Pagos domiciliados"
-msgstr "CSB Pagos domiciliados"
+msgid "CSB Direct Debit"
+msgstr "Domiciliación CSB"
 
 #. module: account_banking_csb
+#. odoo-python
 #: code:addons/account_banking_csb/models/account_payment_order.py:0
+msgid ""
+"Configuration error:\n"
+"\n"
+" No account bank number found for ordering party: Cabecera ordenante 68"
+msgstr ""
+"Error de configuración:\n"
+"\n"
+"No se encontró número de cuenta bancaria para el ordenante: Cabecera ordenante 68"
+
+#. module: account_banking_csb
+#. odoo-python
 #: code:addons/account_banking_csb/models/account_payment_order.py:0
-#: code:addons/account_banking_csb/models/account_payment_order.py:0
-#: code:addons/account_banking_csb/models/account_payment_order.py:0
-#: code:addons/account_banking_csb/models/account_payment_order.py:0
-#: code:addons/account_banking_csb/models/account_payment_order.py:0
-#: code:addons/account_banking_csb/models/account_payment_order.py:0
-#: code:addons/account_banking_csb/models/account_payment_order.py:0
-#, python-format
 msgid ""
 "Configuration error:\n"
 "\n"
@@ -42,14 +47,23 @@ msgstr ""
 "%s"
 
 #. module: account_banking_csb
-#: model:ir.model.fields,field_description:account_banking_csb.field_account_payment_order__display_name
-#: model:ir.model.fields,field_description:account_banking_csb.field_payment_converter_spain__display_name
-msgid "Display Name"
-msgstr "Mostrar Nombre"
+#: model:ir.model.fields,field_description:account_banking_csb.field_payment_converter_spain__create_uid
+msgid "Created by"
+msgstr "Creado por"
 
 #. module: account_banking_csb
+#: model:ir.model.fields,field_description:account_banking_csb.field_payment_converter_spain__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: account_banking_csb
+#: model:ir.model.fields,field_description:account_banking_csb.field_payment_converter_spain__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: account_banking_csb
+#. odoo-python
 #: code:addons/account_banking_csb/models/converter.py:0
-#, python-format
 msgid ""
 "Error:\n"
 "\n"
@@ -57,11 +71,11 @@ msgid ""
 msgstr ""
 "Error:\n"
 "\n"
-"No se puede convertir un número flotante %(number).2f para encajar en %(size)d caracteres."
+"No se puede convertir el número decimal %(number).2f para que quepa en %(size)d caracteres."
 
 #. module: account_banking_csb
+#. odoo-python
 #: code:addons/account_banking_csb/models/converter.py:0
-#, python-format
 msgid ""
 "Error:\n"
 "\n"
@@ -69,19 +83,40 @@ msgid ""
 msgstr ""
 "Error:\n"
 "\n"
-"No se puede convertir un número entero %(number)d para encajar en %(size)d caracteres."
+"No se puede convertir el número entero %(number)d para que quepa en %(size)d caracteres."
 
 #. module: account_banking_csb
-#: model:ir.model.fields,field_description:account_banking_csb.field_account_payment_order__id
 #: model:ir.model.fields,field_description:account_banking_csb.field_payment_converter_spain__id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: account_banking_csb
-#: model:ir.model.fields,field_description:account_banking_csb.field_account_payment_order____last_update
-#: model:ir.model.fields,field_description:account_banking_csb.field_payment_converter_spain____last_update
-msgid "Last Modified on"
-msgstr "última modificación en"
+#. odoo-python
+#: code:addons/account_banking_csb/models/converter.py:0
+msgid "Invalid float string: %s"
+msgstr "Cadena de número decimal no válida: %s"
+
+#. module: account_banking_csb
+#. odoo-python
+#: code:addons/account_banking_csb/models/converter.py:0
+msgid "Invalid integer: %s"
+msgstr "Entero no válido: %s"
+
+#. module: account_banking_csb
+#: model:ir.model.fields,field_description:account_banking_csb.field_payment_converter_spain__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: account_banking_csb
+#: model:ir.model.fields,field_description:account_banking_csb.field_payment_converter_spain__write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: account_banking_csb
+#. odoo-python
+#: code:addons/account_banking_csb/models/account_payment_order.py:0
+msgid "Missing VAT on partner %s"
+msgstr "Falta el NIF/CIF en el partner %s"
 
 #. module: account_banking_csb
 #: model:ir.model,name:account_banking_csb.model_account_payment_order
@@ -91,21 +126,26 @@ msgstr "Orden de pago"
 #. module: account_banking_csb
 #: model:ir.model,name:account_banking_csb.model_payment_converter_spain
 msgid "Payment converter for Spain"
-msgstr ""
+msgstr "Conversor de pagos para España"
 
 #. module: account_banking_csb
+#. odoo-python
 #: code:addons/account_banking_csb/models/account_payment_order.py:0
-#, python-format
 msgid ""
 "The Transaction Initiator Identifier or Transaction Issuer have not been "
 "configured."
 msgstr ""
-"El identificador del iniciador de la transacción o el emisor de la transacción no han sido "
-"configurados."
+"El Identificador del Iniciador de la Transacción o el Emisor de la Transacción no han sido configurados."
 
 #. module: account_banking_csb
+#. odoo-python
+#: code:addons/account_banking_csb/models/converter.py:0
+msgid "Unsupported number type: %s"
+msgstr "Tipo de número no soportado: %s"
+
+#. module: account_banking_csb
+#. odoo-python
 #: code:addons/account_banking_csb/models/account_payment_order.py:0
-#, python-format
 msgid ""
 "User error:\n"
 "\n"
@@ -113,12 +153,11 @@ msgid ""
 msgstr ""
 "Error del usuario:\n"
 "\n"
-"El socio %s no tiene dirección de facturación o dirección por defecto."
+"El partner %s no tiene dirección de facturación o dirección por defecto."
 
 #. module: account_banking_csb
+#. odoo-python
 #: code:addons/account_banking_csb/models/converter.py:0
-#: code:addons/account_banking_csb/models/converter.py:0
-#, python-format
 msgid ""
 "User error:\n"
 "\n"
@@ -126,12 +165,11 @@ msgid ""
 msgstr ""
 "Error del usuario:\n"
 "\n"
-"El número de cuenta bancaria %s no tiene 20 dígitos."
+"El número de cuenta bancaria de %s no tiene 20 dígitos."
 
 #. module: account_banking_csb
+#. odoo-python
 #: code:addons/account_banking_csb/models/converter.py:0
-#: code:addons/account_banking_csb/models/converter.py:0
-#, python-format
 msgid ""
 "User error:\n"
 "\n"
