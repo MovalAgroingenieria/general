@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-    <record id="view_account_payment_tree_payment_order" model="ir.ui.view">
-        <field name="name">account.payment.list</field>
+    <!-- Inherit the tree (list) view of account.payment lines to add the payment_line_date field -->
+    <record id="view_account_payment_list_payment_order_inherit" model="ir.ui.view">
+        <field name="name">account.payment.list.inherit.payment_order</field>
         <field name="model">account.payment</field>
-        <field name="inherit_id" ref="account_payment_order.view_account_payment_tree_payment_order"/>
+        <field name="inherit_id"
+               ref="account_payment_order.view_account_payment_tree_payment_order"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='name']" position="after">
                 <field name="payment_line_date"/>
             </xpath>
+
         </field>
     </record>
 

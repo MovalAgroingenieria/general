@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-    <record id="account_payment_order_form" model="ir.ui.view">
-        <field name="name">account.payment.order.form</field>
+    <record id="account_payment_order_form_inherit_listref" model="ir.ui.view">
+        <field name="name">account.payment.order.form.inherit.listref</field>
         <field name="model">account.payment.order</field>
-        <field name="inherit_id" ref="account_payment_order.account_payment_order_form"/>
+        <field name="inherit_id"
+               ref="account_payment_order.account_payment_order_form"/>
         <field name="arch" type="xml">
+            <!-- Put the context as a literal dict; no eval here -->
             <xpath expr="//field[@name='payment_ids']" position="attributes">
                 <attribute name="context">
-                    {'list_view_ref': 'account_payment_order_payment_line_date.view_account_payment_tree_payment_order'}
+                    {'list_view_ref':
+                    'account_payment_order_payment_line_date.view_account_payment_tree_payment_order'}
                 </attribute>
             </xpath>
         </field>
