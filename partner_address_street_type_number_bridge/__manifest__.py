@@ -7,8 +7,6 @@
     "author": "Moval Agroingeniería",
     "maintainers": ["moval"],
     "license": "AGPL-3",
-    "application": False,
-    "installable": True,
     "depends": ["partner_address_street_type", "partner_address_street_number"],
     "data": [
         "views/res_partner_views.xml",
