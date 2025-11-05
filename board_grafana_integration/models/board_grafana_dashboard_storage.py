@@ -131,7 +131,7 @@ class BoardGrafana(models.Model):
             imported_dashboard_url = grafana_url + dashboard_path
             # Add link to open in Grafana
             message += "<br/><br/>"
-            message += _("<a href='%s'>Open in Grafana</a>") % \
+            message += _("<a href='%s' target='_blank'>Open in Grafana</a>") % \
                 imported_dashboard_url
         else:
             error_msg = response.text or response.reason
