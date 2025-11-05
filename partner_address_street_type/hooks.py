@@ -2,6 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import logging
+
 from odoo import SUPERUSER_ID, api
 
 _logger = logging.getLogger(__name__)
@@ -36,9 +37,8 @@ def _inject_token(address_format: str) -> str:
 
 def _strip_token(address_format: str) -> str:
     address_format = address_format or ""
-    return (
-        address_format.replace("%(street_type_shown)s ", "")
-        .replace("%(street_type_shown)s", "")
+    return address_format.replace("%(street_type_shown)s ", "").replace(
+        "%(street_type_shown)s", ""
     )
 
 
@@ -71,7 +71,8 @@ def post_init_hook(*args):
                     country.name,
                     country.code,
                 )
-        except Exception as e:
+        except (ValueError, TypeError, AttributeError) as e:
+            # Errores específicos que pueden ocurrir durante la manipulación de strings
             _logger.warning(
                 "partner_address_street_type: could not update %s (%s): %s",
                 country.name,
@@ -102,7 +103,8 @@ def uninstall_hook(*args):
                 new_fmt = _strip_token(old_fmt)
                 if new_fmt != old_fmt:
                     country.sudo().write({"address_format": new_fmt})
-        except Exception as e:
+        except (ValueError, TypeError, AttributeError) as e:
+            # Errores específicos que pueden ocurrir durante la manipulación de strings
             _logger.warning(
                 "partner_address_street_type: could not restore %s (%s): %s",
                 country.name,

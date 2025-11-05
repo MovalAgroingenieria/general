@@ -8,13 +8,9 @@
     "author": "Moval Agroingeniería",
     "maintainers": ["moval"],
     "license": "AGPL-3",
-    "application": False,
-    "installable": True,
     "post_init_hook": "post_init_hook",
     "uninstall_hook": "uninstall_hook",
-    "depends": [
-        "contacts", "base_setup"
-    ],
+    "depends": ["contacts", "base_setup"],
     "data": [
         "security/ir.model.access.csv",
         "views/res_street_type_views.xml",
