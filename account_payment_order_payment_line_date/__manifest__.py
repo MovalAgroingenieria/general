@@ -4,7 +4,7 @@
 {
     "name": "Account Payment Order: Payment line date",
     "summary": "Add payment request date to payment lines",
-    "version": "18.0.1.0.0",
+    "version": "18.0.2.0.0",
     "category": "Moval General Addons",
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",

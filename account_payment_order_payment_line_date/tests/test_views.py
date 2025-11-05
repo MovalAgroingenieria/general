@@ -19,21 +19,18 @@ class TestPaymentOrderViews(TransactionCase):
        after the 'name' column.
     """
 
-    def _get_view_arch(self, model, view_id, view_type):
-        """Return the combined (final) arch for a given model/view."""
-        res = self.env[model].fields_view_get(view_id=view_id, view_type=view_type)
+    def _get_view_arch(self, view_ref, view_type):
+        """Return the combined (final) arch for a given view."""
+        view = self.env.ref(view_ref)
+        arch = self.env[view.model].get_view(view_id=view.id, view_type=view_type)
         return etree.fromstring(
-            res["arch"].encode()
+            arch["arch"].encode()
         )  # pylint: disable=c-extension-no-member
 
     def test_form_inherit_sets_list_view_ref_on_payment_ids(self):
-        # Base parent form view of payment order (from account_payment_order)
-        parent_xmlid = "account_payment_order.account_payment_order_form"
-        parent_view = self.env.ref(parent_xmlid)
-
-        # Get the combined (inherited) arch of that form
+        # Get the combined (inherited) arch of the payment order form
         root = self._get_view_arch(
-            "account.payment.order", parent_view.id, view_type="form"
+            "account_payment_order.account_payment_order_form", view_type="form"
         )
 
         # Find the payment_ids field in the final arch
@@ -63,15 +60,10 @@ class TestPaymentOrderViews(TransactionCase):
         )
 
     def test_list_inherit_adds_payment_line_date_after_name(self):
-        # Target list view (tree) inherited by our module
-        base_list_xmlid = (
-            "account_payment_order.view_account_payment_tree_payment_order"
-        )
-        base_list_view = self.env.ref(base_list_xmlid)
-
-        # Get the combined (inherited) arch of that list
+        # Get the combined (inherited) arch of the payment list view
         root = self._get_view_arch(
-            "account.payment", base_list_view.id, view_type="list"
+            "account_payment_order.view_account_payment_tree_payment_order",
+            view_type="tree",
         )
 
         # Collect column names in order
