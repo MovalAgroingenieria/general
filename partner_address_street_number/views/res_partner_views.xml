@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- v18: replace deprecated `attrs` with `modifiers` (JSON) -->
+    <record id="view_partner_form" model="ir.ui.view">
+        <field name="name">Add separate field for street number</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <field name="street" position="attributes">
+                <attribute name="style">width:76%; display:inline-block; margin-right:2%;</attribute>
+            </field>
+            <field name="street" position="after">
+                <field
+                        name="street_num"
+                        style="width: 10%;"
+                        placeholder="Num."
+                        groups="base.group_no_one"
+                        modifiers='{"readonly": [["type","=","contact"], ["parent_id","!=", false]]}'
+                />
+
+            </field>
+        </field>
+    </record>
+
+    <record id="view_partner_address_form" model="ir.ui.view">
+        <field name="name">Add separate field for street number (edition form)</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_address_form"/>
+        <field name="arch" type="xml">
+            <field name="street" position="attributes">
+                <attribute name="style">width:76%; display:inline-block; margin-right:2%;</attribute>
+            </field>
+            <field name="street" position="after">
+                <field
+                        name="street_num"
+                        style="width: 15%;"
+                        placeholder="Num."
+                        groups="base.group_no_one"
+                        modifiers='{"readonly": [["type","=","contact"], ["parent_id","!=", false]]}'
+                />
+            </field>
+        </field>
+    </record>
+
+    <!-- res.partner main form:
+ Only touch the inline form under child_ids -->
+    <record id="view_partner_form_inherit_child_ids_street_num" model="ir.ui.view">
+        <field name="name">res.partner.form: child_ids street_num injection</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="priority">30</field>
+        <field name="arch" type="xml">
+
+            <!-- 1) Narrow the street field ONLY inside the child_ids embedded form -->
+            <xpath expr="//field[@name='child_ids']/form//field[@name='street']" position="attributes">
+                <attribute name="style">width:76%; display:inline-block; margin-right:2%;</attribute>
+            </xpath>
+
+            <!-- 2) Insert street_num right after street in that same embedded form -->
+            <xpath expr="//field[@name='child_ids']/form//field[@name='street']" position="after">
+                <field
+                        name="street_num"
+                        style="width: 20%;"
+                        placeholder="Num."
+                        groups="base.group_no_one"
+                        modifiers='{"readonly": [["type","=","contact"], ["parent_id","!=", false]]}'
+                />
+            </xpath>
+            <!-- 3) Add default_street_num to child_ids context -->
+            <field name="child_ids" position="attributes">
+                <attribute name="context">
+                    {
+                    'default_parent_id': id,
+                    'default_street': street,
+                    'default_street2': street2,
+                    'default_city': city,
+                    'default_state_id': state_id,
+                    'default_zip': zip,
+                    'default_country_id': country_id,
+                    'default_lang': lang,
+                    'default_user_id': user_id,
+                    'default_type': 'other',
+                    'default_street_num': street_num
+                    }
+                </attribute>
+            </field>
+
+        </field>
+    </record>
+
+
+</odoo>
