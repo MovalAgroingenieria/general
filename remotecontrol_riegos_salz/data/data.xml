@@ -206,7 +206,7 @@ if sensors:
     cr.execute(
         'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
         'FROM mdm_measurement_device_sensor_reading '
-        'WHERE sensor_id IN %s '
+        'WHERE sensor_id IN %s AND active = TRUE '
         'ORDER BY sensor_id, measurement_time DESC',
         (tuple(sensor_ids),)
     )
