@@ -1,0 +1,581 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_odins" model="remotecontrol">
+            <field name="name">ODINS (Wiclouds)</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://wiclouds.es</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "token": ""
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>ODINS (Wiclouds) · Odoo Integration</h2>
+
+<hr/>
+
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code> · Base URL: <code>https://wiclouds.es</code></p>
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+  "token": ""
+}</pre>
+<ul>
+  <li>Authentication is done via header: <code>x-access-token: &lt;token&gt;</code>.</li>
+  <li>The token must be obtained from the ODINS/Wiclouds platform and configured in connection_params.</li>
+</ul>
+
+<h3>2) Available Procedures</h3>
+<p>The following predefined procedures are included in this module:</p>
+<ul>
+  <li><strong>ODINS: Get Devices</strong> → discovers all available entities/devices from the platform and generates a structured JSON file for importing devices and sensors into Odoo.</li>
+  <li><strong>ODINS: Get Sensor Readings</strong> → builds sensor plan and downloads readings from configured sensors for synchronization.</li>
+</ul>
+
+<h3>3) Typical Workflow</h3>
+<ol>
+  <li><strong>Get Devices</strong> → calls <code>GET /backend/v2/entities/</code> to discover available devices and their sensors, then generates a structured JSON file.</li>
+  <li><strong>Get Devices (Plan)</strong> → builds <code>bag["sensors_plan"]</code> with (sensor_id, device_parameter, sensor_parameter, level, dates).</li>
+  <li><strong>Get Sensor Readings</strong> → executes:
+    <code>GET /backend/STH/v1/contextEntities/type/Device/id/{device_id}/attributes/{sensor_id}?dateFrom=YYYY-MM-DDTHH:MM:SS.sssZ&amp;dateTo=YYYY-MM-DDTHH:MM:SS.sssZ</code>
+    for each sensor in the plan and updates readings in Odoo.</li>
+</ol>
+
+<h3>4) Authentication</h3>
+<p>Required header:</p>
+<pre>x-access-token: &lt;token&gt;</pre>
+<p>The token is a JWT token that must be configured in the connection_params JSON field.</p>
+
+<h3>5) Odoo Configuration</h3>
+<h4>In Device (<code>mdm.measurement.device</code>):</h4>
+<pre>{
+  "device_id": "Mex03:00000",
+  "start_date": "2025-01-01"
+}</pre>
+<ul>
+  <li><code>device_id</code>: ODINS device ID (format: Mex03:XXXXX)</li>
+  <li><code>start_date</code>: Default start date if the sensor has no readings</li>
+</ul>
+
+<h4>In Sensor (<code>mdm.measurement.device.sensor</code>):</h4>
+<pre>{
+  "sensor_id": "Temperature",
+  "level": "0", (optional)
+  "start_date": "2025-01-01"
+}</pre>
+<ul>
+  <li><code>sensor_id</code>: Full sensor ID from ODINS response (e.g., pulseCounter, Temperature)</li>
+  <li><code>level</code>: For array sensors, specify the array index (0-7). For single value sensors, leave empty.</li>
+  <li><code>start_date</code>: Overrides the device start date if provided</li>
+</ul>
+
+<h3>6) Endpoints Used</h3>
+<ul>
+  <li><code>GET /backend/v2/entities/</code> → list all available entities/devices and their sensor structure</li>
+  <li><code>GET /backend/STH/v1/contextEntities/type/Device/id/{device_id}/attributes/{sensor_id}</code> → get historical readings for a specific sensor</li>
+  <li>Query parameters: <code>dateFrom</code> and <code>dateTo</code> in ISO format (YYYY-MM-DDTHH:MM:SS.sssZ)</li>
+</ul>
+
+<h3>7) API Response Structure</h3>
+<p><strong>Device list response:</strong></p>
+<pre>{
+  "id": "Mex03:00000",
+  "type": "Device",
+  "batteryLevel": {"value": 85},
+  "Temperature": {
+    "type": "StructuredValue",
+    "value": ["15.49", "16.65", "17.2", "17.71", "18.23", "18.5", "18.8", "19.06"]
+  }
+}</pre>
+<p><strong>Sensor readings response:</strong></p>
+<pre>{
+  "contextResponses": [{
+    "contextElement": {
+      "attributes": [{
+        "values": [{
+          "recvTime": "2025-11-01T23:30:00.000Z",
+          "attrValue": ["15.49", "16.65", "17.2", "17.71", "18.23", "18.5", "18.8", "19.06"]
+        }]
+      }]
+    }
+  }]
+}</pre>
+
+<h3>8) Important Notes</h3>
+<ul>
+  <li><strong>Array sensors</strong>: Multi-level sensors (Temperature, Humidity, Salinity) contain arrays with up to 8 values (indices 0-7)</li>
+  <li><strong>Level configuration</strong>: Use numeric index (0, 1, 2, ..., 7) to select which array position to read</li>
+  <li><strong>Timestamp format</strong>: API returns ISO format (2025-11-01T23:30:00.000Z), converted to Odoo format (2025-11-01 23:30:00)</li>
+  <li><strong>Dynamic sensor IDs</strong>: Sensor keys include unique MongoDB-style IDs (e.g., Temperature)</li>
+  <li><strong>Data validation</strong>: Module handles missing values, type conversions, and timestamp parsing errors gracefully</li>
+</ul>
+
+<h3>9) Configuration Examples</h3>
+<p><strong>Single value sensor (pulseCounter):</strong></p>
+<pre>Device: {"device_id": "Mex03:00000"}
+Sensor: {"sensor_id": "pulseCounter"}</pre>
+<p><strong>Array sensor (Temperature level 0):</strong></p>
+<pre>Device: {"device_id": "Mex03:00000"}
+Sensor: {"sensor_id": "Temperature", "level": "0"}</pre>
+<p><strong>Array sensor (Temperature level 3):</strong></p>
+<pre>Device: {"device_id": "Mex03:00000"}
+Sensor: {"sensor_id": "Temperature", "level": "3"}</pre>
+
+<h3>10) JSON Export Structure</h3>
+<p>The "Get Devices" procedure generates a structured JSON file: <code>odins_devices_sensors_YYYYMMDDHHMMSS.json</code></p>
+
+<h4>JSON Structure:</h4>
+<pre>{
+  "procedure": "ODINS: Get Devices (All)",
+  "executed_at": "2025-11-06 10:30:00",
+  "summary": {
+    "total_devices": 2,
+    "total_sensors": 8,
+    "total_api_entities": 2
+  },
+  "devices": [
+    {
+      "odins_id": "Mex03:00000",
+      "name": "DISPOSITIVO",
+      "serial_number": "0006800015",
+      "sensors": [
+        {
+          "sensor_id": "batteryLevel",
+          "type": "Integer",
+          "unit_of_measure": "%",
+          "has_levels": false
+        },
+        {
+          "sensor_id": "pulseCounter",
+          "type": "Float",
+          "unit_of_measure": "L",
+          "has_levels": false
+        },
+        {
+          "sensor_id": "Temperature",
+          "type": "StructuredValue",
+          "unit_of_measure": "°C",
+          "has_levels": true,
+          "levels": {
+            "0": 12.67,
+            "1": 14.38,
+            "2": 15.62
+          }
+        },
+        {
+          "sensor_id": "Humidity",
+          "type": "StructuredValue",
+          "unit_of_measure": "%",
+          "has_levels": true,
+          "levels": {
+            "0": 44.42,
+            "1": 54.4,
+            "2": 52.58
+          }
+        }
+      ]
+    }
+  ]
+}</pre>
+
+<p><strong>Usage:</strong></p>
+<ul>
+  <li>Download the JSON file from remotecontrol attachments</li>
+  <li>Parse the JSON to extract device and sensor information</li>
+  <li>Create necessary sensor types and UOMs in Odoo</li>
+  <li>Use the structured data to prepare CSV imports or create records programmatically</li>
+  <li>For array sensors, each level contains complete configuration for separate sensor creation</li>
+</ul>
+
+<h3>13) Sensor Types Available</h3>
+<p>ODINS devices can have multiple sensor types:</p>
+<ul>
+  <li><strong>pulseCounter_*</strong>: Pulse counters (e.g., water meters)
+    <ul>
+      <li>Properties: value, multiplier, unitCode (L, m³, etc.)</li>
+      <li>Typical use: Water consumption tracking</li>
+    </ul>
+  </li>
+  <li><strong>analogInput_*</strong>: Analog inputs (voltage, current, etc.)
+    <ul>
+      <li>Properties: value, formula, unitCode</li>
+      <li>Typical use: Battery voltage, pressure sensors</li>
+    </ul>
+  </li>
+  <li><strong>Temperature</strong>: Temperature sensors
+    <ul>
+      <li>StructuredValue array with up to 8 levels (indices 0-7)</li>
+      <li>unitCode: ºC</li>
+      <li>Typical use: Soil temperature at different depths</li>
+      <li>Example: <code>["15.49", "16.65", "17.2", "17.71", "18.23", "18.5", "18.8", "19.06"]</code></li>
+    </ul>
+  </li>
+  <li><strong>Humidity</strong>: Humidity sensors
+    <ul>
+      <li>StructuredValue array with up to 8 levels (indices 0-7)</li>
+      <li>unitCode: mm or % depending on configuration</li>
+      <li>Typical use: Soil moisture at different depths</li>
+    </ul>
+  </li>
+  <li><strong>Salinity</strong>: Salinity sensors
+    <ul>
+      <li>StructuredValue array with up to 8 levels (indices 0-7)</li>
+      <li>Typical use: Soil salinity monitoring</li>
+    </ul>
+  </li>
+</ul>
+
+]]></field>
+        </record>
+
+        <!-- Actions -->
+        <record id="remotecontrol_odins_action_get_device" model="remotecontrol.action">
+            <field name="name">ODINS: Get devices</field>
+            <field name="remote_id" ref="remotecontrol_odins"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+condition = [('remotecontrol_params','!=',False)]
+selected_device_id = bag.get('selected_device_id')
+if selected_device_id:
+    condition.append(('device_id', '=', selected_device_id))
+else:
+    condition.append(('device_id','!=',False))
+sensors = Sensor.search(condition)
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+    sensor_parameter = (sensor_cfg.get('sensor_id') or '').strip()
+    if sensor_parameter not in (None,''):
+        try:
+            device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+        except Exception:
+            device_cfg = {}
+        device_parameter = (device_cfg.get('device_id') or '').strip()
+        if device_parameter:
+            last = Reading.search([('sensor_id','=',sensor.id)], order='measurement_time desc', limit=1)
+            if last and last.measurement_time:
+                last_dt = fields.Datetime.from_string(last.measurement_time)
+                initial_date = fields.Date.to_string(last_dt.date())
+            else:
+                start_cfg = (sensor_cfg.get('start_date') or device_cfg.get('start_date'))
+                if start_cfg:
+                    initial_date = start_cfg[:10]
+                else:
+                    year_str = today_str[:4]
+                    initial_date = '%s-01-01' % year_str
+            level = sensor_cfg.get('level', '')
+            plan.append({
+                'sensor_id': sensor.id,
+                'device_id': device.id,
+                'sensor_parameter': sensor_parameter,
+                'device_parameter': device_parameter,
+                'level': level,
+                'initial_date': initial_date,
+            })
+bag['sensors_plan'] = plan
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_odins_action_get_devices" model="remotecontrol.action">
+            <field name="name">ODINS: Get Devices (All)</field>
+            <field name="remote_id" ref="remotecontrol_odins"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+token = (cfg.get('token') or '').strip()
+if not token:
+    raise Exception("Missing ODINS token in connection_params.")
+base_url = remote.base_url.rstrip('/')
+headers = {'x-access-token': token}
+url = '%s/backend/v2/entities/' % base_url
+resp = request_retry('GET', url, headers=headers, timeout=timeout)
+if resp.status_code >= 400:
+    raise Exception("Error fetching devices: %s %s" % (resp.status_code, resp.text))
+devices = resp.json() or []
+devices_list = []
+total_devices = 0
+total_sensors = 0
+for device in devices:
+    device_id = device.get('id')
+    if not device_id:
+        continue
+    device_name = device.get('name', device_id)
+    serial_number = device.get('serialNumber', device_id)
+    if isinstance(serial_number, dict):
+        serial_number = serial_number.get('value', device_id)
+    device_info = {
+        'odins_id': device_id,
+        'name': device_name,
+        'serial_number': serial_number,
+        'sensors': []
+    }
+    for attr_name, attr_data in device.items():
+        if attr_name in ['id', 'type', 'name', 'serialNumber', 'dateModified']:
+            continue
+        if not isinstance(attr_data, dict):
+            continue
+        attr_type = attr_data.get('type', 'Text')
+        attr_value = attr_data.get('value')
+        unit_code = ''
+        metadata = attr_data.get('metadata', {})
+        if isinstance(metadata, dict):
+            unit_code_data = metadata.get('unitCode', {})
+            if isinstance(unit_code_data, dict):
+                unit_code = unit_code_data.get('value', '')
+            else:
+                unit_code = str(unit_code_data) if unit_code_data else ''
+        sensor_info = {
+            'sensor_id': attr_name,
+            'type': attr_type,
+            'unit_of_measure': unit_code
+        }
+        if attr_type == 'StructuredValue' and isinstance(attr_value, dict):
+            sensor_info['has_levels'] = True
+            sensor_info['levels'] = {}
+            for level_key, level_value in attr_value.items():
+                clean_key = level_key[1:] if level_key and level_key[0] in 'THSP' else level_key
+                sensor_info['levels'][clean_key] = level_value
+                total_sensors += 1
+        else:
+            sensor_info['has_levels'] = False
+            total_sensors += 1
+        device_info['sensors'].append(sensor_info)
+    devices_list.append(device_info)
+    total_devices += 1
+data = {
+    'procedure': 'ODINS: Get Devices (All)',
+    'executed_at': fields.Datetime.now(),
+    'summary': {
+        'total_devices': total_devices,
+        'total_sensors': total_sensors,
+        'total_api_entities': len(devices)
+    },
+    'devices': devices_list
+}
+json_str = json.dumps(data, ensure_ascii=False, indent=2)
+encoded = base64.b64encode(json_str.encode('utf-8'))
+timestamp = fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+fname = 'odins_devices_sensors_%s.json' % timestamp
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': encoded,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': remote.id
+})
+remote.message_post(
+    body='[ODINS] Devices=%s Sensors=%s - JSON generated for import preparation' % (total_devices, total_sensors),
+    attachment_ids=[att.id]
+)
+bag['total_devices'] = total_devices
+bag['total_sensors'] = total_sensors
+bag['attachment_id'] = att.id
+bag['attachment_name'] = fname
+bag['message'] = 'ODINS Get Devices - JSON generated: %d devices, %d sensors' % (total_devices, total_sensors)
+            ]]></field>
+        </record>
+        <record id="remotecontrol_odins_action_get_sensor_readings" model="remotecontrol.action">
+            <field name="name">ODINS: Get Sensor Readings</field>
+            <field name="remote_id" ref="remotecontrol_odins"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+token = (cfg.get('token') or '').strip()
+if not token:
+    raise Exception("Missing ODINS token in connection_params.")
+base_url = remote.base_url.rstrip('/')
+headers = {'x-access-token': token}
+sensors_plan = bag.get('sensors_plan', [])
+if not sensors_plan:
+    raise Exception("No sensors_plan found in bag. Run Build Sensors Plan first.")
+total_readings_created = 0
+errors = []
+for plan_item in sensors_plan:
+    device_parameter = plan_item.get('device_parameter')
+    sensor_parameter = plan_item.get('sensor_parameter')
+    sensor_id = plan_item.get('sensor_id')
+    level = plan_item.get('level', '')
+    initial_date = plan_item.get('initial_date')
+    if not (device_parameter and sensor_parameter and sensor_id):
+        continue
+    try:
+        url = '%s/backend/STH/v1/contextEntities/type/Device/id/%s/attributes/%s' % (base_url, device_parameter, sensor_parameter)
+        params = []
+        if initial_date:
+            params.append('dateFrom=%sT00:00:00.000Z' % initial_date)
+        params.append('dateTo=%sT23:59:59.999Z' % fields.Date.today())
+        if params:
+            url = url + '?' + '&'.join(params)
+        resp = request_retry('GET', url, headers=headers, timeout=timeout)
+        if resp.status_code >= 400:
+            errors.append("Device %s, Sensor %s: %s" % (device_parameter, sensor_parameter, resp.status_code))
+            continue
+        data = resp.json() or {}
+        context_responses = data.get('contextResponses', [])
+        if not context_responses:
+            continue
+        context_element = context_responses[0].get('contextElement', {})
+        attributes = context_element.get('attributes', [])
+        if not attributes:
+            continue
+        values = attributes[0].get('values', [])
+        for value_entry in values:
+            recv_time = value_entry.get('recvTime')
+            attr_value = value_entry.get('attrValue')
+            if not recv_time:
+                continue
+            try:
+                clean_time = recv_time.replace('Z', '').replace('T', ' ')
+                if '.' in clean_time:
+                    clean_time = clean_time.split('.')[0]
+                measurement_time = fields.Datetime.from_string(clean_time)
+            except ValueError:
+                continue
+            if attr_value is None:
+                continue
+            if isinstance(attr_value, list):
+                if level is not None and level != '':
+                    try:
+                        level_index = int(level)
+                        if level_index < len(attr_value):
+                            try:
+                                value = float(attr_value[level_index]) if attr_value[level_index] else 0.0
+                            except (ValueError, TypeError):
+                                continue
+                            ts_str = measurement_time.strftime('%Y-%m-%d %H:%M:%S')
+                            remote.upsert('mdm.measurement.device.sensor.reading', {'sensor_id': sensor_id, 'measurement_time': ts_str}, {'value': value})
+                            total_readings_created += 1
+                    except (ValueError, TypeError, IndexError):
+                        continue
+                else:
+                    try:
+                        for i, val in enumerate(attr_value):
+                            if val:
+                                try:
+                                    value = float(val)
+                                except (ValueError, TypeError):
+                                    continue
+                                ts_str = measurement_time.strftime('%Y-%m-%d %H:%M:%S')
+                                remote.upsert('mdm.measurement.device.sensor.reading', {'sensor_id': sensor_id, 'measurement_time': ts_str}, {'value': value})
+                                total_readings_created += 1
+                                break
+                    except TypeError:
+                        continue
+            else:
+                try:
+                    value = float(attr_value) if attr_value else 0.0
+                except (ValueError, TypeError):
+                    continue
+                ts_str = measurement_time.strftime('%Y-%m-%d %H:%M:%S')
+                remote.upsert('mdm.measurement.device.sensor.reading', {'sensor_id': sensor_id, 'measurement_time': ts_str}, {'value': value})
+                total_readings_created += 1
+    except Exception as e:
+        errors.append("Device %s, Sensor %s: %s" % (device_parameter, sensor_parameter, str(e)))
+audit = {
+    'procedure': 'ODINS: Get Sensor Readings',
+    'executed_at': fields.Datetime.now(),
+    'total_sensors_processed': len(sensors_plan),
+    'total_readings_created': total_readings_created,
+    'total_errors': len(errors),
+    'sensors': sensors_plan,
+    'errors': errors
+}
+b64 = base64.b64encode(json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
+fname = 'odins_readings_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': remote.id
+})
+remote.message_post(
+    body='[ODINS] upserts=%s errors=%s' % (total_readings_created, len(errors)),
+    attachment_ids=[att.id]
+)
+bag['total_readings_created'] = total_readings_created
+bag['total_sensors_processed'] = len(sensors_plan)
+bag['errors'] = errors
+bag['audit_attachment_id'] = att.id
+bag['message'] = 'ODINS Get Sensor Readings - completed: %d readings created, %d sensors processed, %d errors' % (total_readings_created, len(sensors_plan), len(errors))
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_odins_procedure_get_devices" model="remotecontrol.procedure">
+            <field name="name">ODINS: Get Devices</field>
+            <field name="remote_id" ref="remotecontrol_odins"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_odins_step_10_get_devices" model="remotecontrol.step">
+            <field name="name">Get All Devices</field>
+            <field name="procedure_id" ref="remotecontrol_odins_procedure_get_devices"/>
+            <field name="action_id" ref="remotecontrol_odins_action_get_devices"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_odins_procedure_get_readings" model="remotecontrol.procedure">
+            <field name="name">ODINS: Get Sensor Readings</field>
+            <field name="remote_id" ref="remotecontrol_odins"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_odins_step_10_get_readings" model="remotecontrol.step">
+            <field name="name">Get Devices</field>
+            <field name="procedure_id" ref="remotecontrol_odins_procedure_get_readings"/>
+            <field name="action_id" ref="remotecontrol_odins_action_get_device"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_odins_step_20_get_readings" model="remotecontrol.step">
+            <field name="name">Get Sensor Readings</field>
+            <field name="procedure_id" ref="remotecontrol_odins_procedure_get_readings"/>
+            <field name="action_id" ref="remotecontrol_odins_action_get_sensor_readings"/>
+            <field name="sequence">20</field>
+        </record>
+
+    </data>
+</odoo>
