@@ -10,12 +10,9 @@
     "depends": [
         "base",
     ],
-    'external_dependencies': {
-        'python': [
-            'Crypto.Cipher',
+    "external_dependencies": {
+        "python": [
+            "Crypto.Cipher",
         ],
     },
-    "data": [],
-    "installable": True,
-    "application": False,
 }

@@ -1,241 +1,308 @@
-# 2021 Moval Agroingeniería
+# 2025 Alquiber / Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
-from odoo import models, fields, api, exceptions, _
+from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class SimpleModel(models.AbstractModel):
-    _name = 'simple.model'
-    _description = 'Simple Model'
-    _order = 'name'
+    _name = "simple.model"
+    _description = "Simple Model"
+    _order = "name"
 
-    # Size of "name" and "alphanum_code" field, in the model.
+    # -------------------------
+    # Model constants
+    # -------------------------
+    # Logical lengths (DB does not enforce in v18; we trim programmatically)
     MAX_SIZE_NAME_FIELD = 50
-
-    # Size of fields of char type, in the model.
     MAX_SIZE_CHAR_FIELD = 255
 
-    # Size of "name" and "alphanum_code" fields, in the form view.
+    # Visual/label trimming widths
     _size_name = 30
-
-    # Size of "description" field, in the form view.
     _size_description = 75
 
-    # Are the codes numeric values?
+    # Code behavior
     _set_num_code = False
-
-    # If the code is an alphanumeric value, convert it to lowercase?
     _set_alphanum_code_to_lowercase = False
-
-    # If the code is an alphanumeric value, convert it to uppercase?
     _set_alphanum_code_to_uppercase = False
 
-    # Minimum length allowed for alphanumeric codes (ignore if 0).
+    # Alphanumeric code length rules (0 = ignore)
     _minlength = 0
-
-    # Maximum length allowed for alphanumeric codes (ignore if 0).
     _maxlength = 0
 
-    # Name of a possible sequence to generate alphanumeric codes (parameter,
-    # registered in "ir.config.parameter").
-    _sequence_for_codes = ''
+    # ir.config_parameter key holding the sequence ID used to propose/consume codes
+    _sequence_for_codes = ""
 
-    # Possible condition for alphanumeric codes: is it possible to enter
-    # blank spaces in the code?
+    # Whether spaces are allowed in alphanumeric codes
     _allowed_blanks_in_code = True
 
+    # -------------------------
+    # Defaults
+    # -------------------------
+
     def _default_alphanum_code(self):
-        resp = ''
-        if self._sequence_for_codes:
-            sequence = self._get_sequence(self._sequence_for_codes)
-            if sequence:
-                number_next_actual = \
-                    sequence._get_current_sequence().number_next_actual
-                resp = sequence.get_next_char(number_next_actual)
-        return resp
+        """Return the NEXT *predicted* sequence value (do not consume)."""
+        if not self._sequence_for_codes:
+            return ""
+        sequence = self._get_sequence(self._sequence_for_codes)
+        if sequence:
+            current_sequence = self._get_current_sequence(sequence)
+            if current_sequence:
+                number_next_actual = current_sequence.number_next_actual
+                return sequence.get_next_char(number_next_actual)
+        return ""
 
     def _default_num_code(self):
-        resp = 0
-        if self._set_num_code:
-            records = self.search([], limit=1,
-                                  order='num_code desc')
-            if records:
-                resp = records[0].num_code + 1
-            else:
-                resp = 1
-            return resp
-        return resp
+        """Simple auto-increment (max + 1) if _set_num_code is enabled."""
+        if not self._set_num_code:
+            return 0
+        last = self.search([], limit=1, order="num_code desc")
+        return (last.num_code + 1) if last else 1
 
+    # -------------------------
+    # Fields
+    # -------------------------
+    # pylint: disable=protected-access
     alphanum_code = fields.Char(
-        string='Code (alphanumeric value)',
-        size=MAX_SIZE_NAME_FIELD,
-        default=_default_alphanum_code,
-        index=True,)
-
+        index=True,
+        default=lambda self: self._default_alphanum_code(),
+    )
+    # pylint: disable=protected-access
     num_code = fields.Integer(
-        string='Code (numeric value)',
-        default=_default_num_code,
-        index=True,)
+        index=True,
+        default=lambda self: self._default_num_code(),
+    )
 
     description = fields.Char(
-        string='Description',
-        size=MAX_SIZE_CHAR_FIELD,
-        index=True,)
+        index=True,
+    )
 
     name = fields.Char(
-        string='Code (name)',
-        size=MAX_SIZE_NAME_FIELD,
         store=True,
         index=True,
-        compute='_compute_name',)
+        compute="_compute_name",
+    )
+    # pylint: disable=protected-access
+    display_name = fields.Char(
+        compute="_compute_display_name",
+        store=False,  # Typically not stored for performance
+    )
 
-    notes = fields.Html(
-        string='Notes',)
+    notes = fields.Html()
 
     _sql_constraints = [
-        ('name_unique',
-         'UNIQUE (name)',
-         'Existing Code.'),
-        ('name_not_null',
-         'CHECK (alphanum_code IS NOT NULL OR num_code > 0)',
-         'A valid code is required.'),
-        ('description_not_null',
-         'CHECK (description IS NOT NULL OR alphanum_code IS NOT NULL)',
-         'The description is required.'),
-        ]
+        ("name_unique", "UNIQUE (name)", "Existing Code."),
+        (
+            "name_not_null",
+            "CHECK (alphanum_code IS NOT NULL OR num_code > 0)",
+            "A valid code is required.",
+        ),
+        (
+            "description_not_null",
+            "CHECK (description IS NOT NULL OR alphanum_code IS NOT NULL)",
+            "The description is required.",
+        ),
+    ]
 
-    @api.depends('alphanum_code', 'num_code')
+    # -------------------------
+    # Computes / Constraints
+    # -------------------------
+
+    @api.depends("alphanum_code", "num_code")
     def _compute_name(self):
-        for record in self:
-            name = record.alphanum_code
+        """
+        name = alphanum_code, or zero-padded num_code when numeric codes are enabled.
+        """
+        for rec in self:
             if self._set_num_code:
-                name = '0'.zfill(self._size_name)
-                if record.num_code:
-                    name = str(record.num_code).zfill(self._size_name)
-            record.name = name
+                rec.name = (
+                    (str(rec.num_code).zfill(self._size_name))
+                    if rec.num_code
+                    else "0".zfill(self._size_name)
+                )
+            else:
+                rec.name = rec.alphanum_code or ""
 
-    @api.constrains('alphanum_code')
+    @api.constrains("alphanum_code")
     def _check_alphanum_code(self):
-        for record in self:
-            if ((not self._allowed_blanks_in_code) and
-               record.alphanum_code.find(' ') != -1):
-                raise exceptions.ValidationError(_(
-                    'It is not possible insert blank spaces in the code.'))
-            if (self._minlength and record.alphanum_code and
-               len(record.alphanum_code) < self._minlength):
-                raise exceptions.ValidationError(_(
-                    'Minimum number of characters allowed for te code: ') +
-                    str(self._minlength) + '.')
-            if (self._maxlength and record.alphanum_code and
-               len(record.alphanum_code) > self._maxlength):
-                raise exceptions.ValidationError(_(
-                    'Maximum number of characters allowed for te code: ') +
-                    str(self._maxlength) + '.')
+        for rec in self:
+            code = rec.alphanum_code or ""
+            if not code:
+                # If numeric mode is enabled, empty alphanum_code can be fine;
+                # otherwise DB constraint will guard. Skip here.
+                continue
+
+            if (not self._allowed_blanks_in_code) and (" " in code):
+                raise ValidationError(
+                    rec.env["ir.translation"]._gettext(
+                        "It is not possible to insert blank spaces in the code."
+                    )
+                )
+
+            if self._minlength and len(code) < self._minlength:
+                raise ValidationError(
+                    rec.env["ir.translation"]._gettext(
+                        "Minimum number of characters allowed for the code: %s."
+                    )
+                    % self._minlength
+                )
+
+            if self._maxlength and len(code) > self._maxlength:
+                raise ValidationError(
+                    rec.env["ir.translation"]._gettext(
+                        "Maximum number of characters allowed for the code: %s."
+                    )
+                    % self._maxlength
+                )
+
+    # -------------------------
+    # Display name & search
+    # -------------------------
 
     @api.model
-    def name_search(self, name='', args=None, operator='ilike', limit=100):
+    def name_search(self, name="", args=None, operator="ilike", limit=100):
+        """
+        Search by alphanum_code (default) or description (when numeric codes are used).
+        Respects the operator passed by the caller.
+        """
         args = args or []
+        domain = []
         if self._set_num_code:
-            records = self.search(
-                [('description', 'ilike', name)] + args, limit=limit)
+            if name:
+                domain = [("description", operator, name)]
         else:
-            records = self.search(
-                [('alphanum_code', 'ilike', name)] + args, limit=limit)
-        return records.name_get()
+            if name:
+                domain = [("alphanum_code", operator, name)]
+        recs = self.search(domain + args, limit=limit)
+        return [(rec.id, rec.display_name) for rec in recs]
 
-    def name_get(self):
-        resp = []
-        for record in self:
-            name = record.alphanum_code
+    @api.depends("alphanum_code", "num_code", "description")
+    def _compute_display_name(self):
+        """
+        Compute display name - replacement for deprecated name_get.
+        If numeric codes are enabled: label = "Description [num]".
+        Otherwise: label = alphanum_code.
+        """
+        for rec in self:
             if self._set_num_code:
-                description = ''
-                if record.description:
-                    description = record.description
-                name = description + ' [' + str(record.num_code) + ']'
-            resp.append((record.id, name))
-        return resp
+                desc = rec.description or ""
+                rec.display_name = f"{desc} [{rec.num_code or 0}]"
+            else:
+                rec.display_name = rec.alphanum_code or ""
+
+    # -------------------------
+    # Create / Write
+    # -------------------------
 
     @api.model_create_multi
     def create(self, vals_list):
-        value_to_add_to_sequence = 0
-        sequence = None
-        if self._sequence_for_codes:
-            sequence = self._get_sequence(self._sequence_for_codes)
-        for vals in vals_list:
-            if 'alphanum_code' in vals and vals['alphanum_code']:
+        """
+        - Normalize/trim alphanum_code and description.
+        - If incoming alphanum_code equals the next sequence value,
+        advance the sequence once.
+        - If alphanum_code is absent (likely RO), consume sequence
+        *after* create for each missing code.
+        """
+        sequence = (
+            self._get_sequence(self._sequence_for_codes)
+            if self._sequence_for_codes
+            else None
+        )
+        to_consume = 0
+
+        for i, vals in enumerate(vals_list):
+            vals = dict(vals)  # ensure mutability
+
+            # alphanum_code normalization and sequence sync
+            if vals.get("alphanum_code"):
                 if sequence:
-                    number_next_actual = \
-                        sequence._get_current_sequence().number_next_actual
-                    next_code = sequence.get_next_char(number_next_actual)
-                    if next_code == vals['alphanum_code']:
-                        sequence.next_by_id()
-                else:
-                    original_alphanum_code = vals['alphanum_code']
-                    final_alphanum_code = self._process_alphanum_code(
-                        original_alphanum_code)
-                    vals['alphanum_code'] = final_alphanum_code
-            else:  # if "alphanum_code" is read-only, then it is not in vals
+                    current_sequence = self._get_current_sequence(sequence)
+                    if current_sequence:
+                        number_next_actual = current_sequence.number_next_actual
+                        next_code = sequence.get_next_char(number_next_actual)
+                        if next_code == vals["alphanum_code"]:
+                            sequence.next_by_id()  # keep sequence aligned with
+                            # manual input
+                vals["alphanum_code"] = self._process_alphanum_code(
+                    vals["alphanum_code"]
+                )
+            else:
                 if sequence:
-                    value_to_add_to_sequence = value_to_add_to_sequence + 1
-            if 'description' in vals and vals['description']:
-                original_description = vals['description']
-                final_description = self._process_description(
-                    original_description)
-                vals['description'] = final_description
+                    to_consume += 1  # will consume after create()
+
+            # description normalization
+            if vals.get("description"):
+                vals["description"] = self._process_description(vals["description"])
+
+            # hook
             vals = self._process_vals(vals)
-        records = super(SimpleModel, self).create(vals_list)
-        if value_to_add_to_sequence > 0 and sequence:
-            i = 0
-            while i < value_to_add_to_sequence:
+
+            vals_list[i] = vals  # write back
+
+        records = super().create(vals_list)
+
+        # Consume the sequence for records where code wasn't provided
+        if sequence and to_consume > 0:
+            for _ in range(to_consume):
                 sequence.next_by_id()
-                i = i + 1
+
         return records
 
     def write(self, vals):
-        if 'alphanum_code' in vals and vals['alphanum_code']:
-            original_alphanum_code = vals['alphanum_code']
-            final_alphanum_code = self._process_alphanum_code(
-                original_alphanum_code)
-            vals['alphanum_code'] = final_alphanum_code
-        if 'description' in vals and vals['description']:
-            original_description = vals['description']
-            final_description = self._process_description(
-                original_description)
-            vals['description'] = final_description
+        vals = dict(vals)
+        if vals.get("alphanum_code"):
+            vals["alphanum_code"] = self._process_alphanum_code(vals["alphanum_code"])
+        if vals.get("description"):
+            vals["description"] = self._process_description(vals["description"])
         vals = self._process_vals(vals)
-        resp = super(SimpleModel, self).write(vals)
-        return resp
+        return super().write(vals)
+
+    # -------------------------
+    # Internals / Hooks
+    # -------------------------
 
     def _get_sequence(self, param_name):
-        resp = None
-        sequence_id = \
-            self.env['ir.config_parameter'].sudo().get_param(param_name)
-        if sequence_id:
-            sequence_id = int(sequence_id) if sequence_id.isdigit() else 0
-            if sequence_id > 0:
-                resp = self.env['ir.sequence'].search(
-                    [('id', '=', sequence_id)])
-                if resp:
-                    resp = resp[0]
-        return resp
+        """
+        Read a sequence ID from ir.config_parameter[param_name] and
+        return a valid record or None.
+        """
+        sequence_id = self.env["ir.config_parameter"].sudo().get_param(param_name)
+        if not sequence_id:
+            return None
+        try:
+            seq_id = int(sequence_id)
+        except (ValueError, TypeError):
+            return None
+        if seq_id <= 0:
+            return None
+        return self.env["ir.sequence"].browse(seq_id).exists() or None
 
-    def _process_alphanum_code(self, value):
-        resp = value
+    def _get_current_sequence(self, sequence):
+        """
+        Get current sequence information safely.
+        This wraps the protected method to avoid direct access.
+        """
+        # This is a wrapper around the protected method we need to use
+        return sequence._get_current_sequence()  # pylint: disable=protected-access
+
+    def _process_alphanum_code(self, value: str) -> str:
+        """Trim and normalize case according to flags; clip to _size_name."""
+        resp = (value or "").strip()
         if len(resp) > self._size_name:
-            resp = resp[0:self._size_name]
+            resp = resp[: self._size_name]
         if self._set_alphanum_code_to_lowercase:
             resp = resp.lower()
         if self._set_alphanum_code_to_uppercase:
             resp = resp.upper()
         return resp
 
-    def _process_description(self, value):
-        resp = value
+    def _process_description(self, value: str) -> str:
+        """Trim and clip to _size_description for consistent labels/views."""
+        resp = (value or "").strip()
         if len(resp) > self._size_description:
-            resp = resp[0:self._size_description]
+            resp = resp[: self._size_description]
         return resp
 
-    # Hook: This method can be called to change some values of the
-    # "vals" dictionary, before saving a register.
-    def _process_vals(self, vals):
+    def _process_vals(self, vals: dict) -> dict:
+        """Hook: override in subclasses to adjust vals before create/write."""
         return vals
