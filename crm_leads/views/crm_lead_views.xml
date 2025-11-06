@@ -1,40 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Extend main CRM Lead form (attrs removed) -->
     <record id="crm_lead_view_form_inherit" model="ir.ui.view">
-        <field name="name">crm.lead.form.inherit</field>
+        <field name="name">crm.lead.form.inherit.stage_new_requirements</field>
         <field name="model">crm.lead</field>
-        <field name="inherit_id" ref="crm.crm_lead_view_form" />
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
         <field name="arch" type="xml">
+
+            <!-- Hidden helper (optional) -->
             <xpath expr="//field[@name='name']" position="after">
                 <field name="stage_new" invisible="1"/>
             </xpath>
+
+            <!-- Rename tag_ids label to Category -->
             <xpath expr="//field[@name='tag_ids']" position="attributes">
-                <attribute name="attrs">{'required': [('stage_new', '!=', True)]}</attribute>
                 <attribute name="string">Category</attribute>
             </xpath>
-            <xpath expr="//page[@name='lead']//field[@name='source_id']" position="attributes">
-                <attribute name="attrs">{'required': [('stage_new', '!=', True)]}</attribute>
-            </xpath>
+
+            <!-- Remove domain restriction and relabel to Areas -->
             <xpath expr="//field[@name='team_id']" position="attributes">
                 <attribute name="string">Areas</attribute>
                 <attribute name="domain">[]</attribute>
             </xpath>
+
         </field>
     </record>
+
+    <!-- Extend quick create opportunity dialog (attrs removed) -->
     <record id="quick_create_opportunity_form_inherit" model="ir.ui.view">
-        <field name="name">quick.create.opportunity.form.inherit</field>
+        <field name="name">crm.lead.quick.create.inherit.stage_new_requirements</field>
         <field name="model">crm.lead</field>
-        <field name="inherit_id" ref="crm.quick_create_opportunity_form" />
+        <field name="inherit_id" ref="crm.quick_create_opportunity_form"/>
         <field name="arch" type="xml">
+
+            <!-- Hidden helper (optional) -->
             <xpath expr="//field[@name='phone']" position="after">
                 <field name="stage_new" invisible="1"/>
             </xpath>
+
+            <!-- Category as tags, no attrs -->
             <xpath expr="//field[@name='phone']" position="after">
-                <field name="tag_ids" string="Category" widget="many2many_tags" attrs="{'required': [('stage_new', '!=', True)]}"/>
+                <field name="tag_ids"
+                       string="Category"
+                       widget="many2many_tags"/>
             </xpath>
+
+            <!-- Origin without attrs -->
             <xpath expr="//field[@name='phone']" position="after">
-                <field name="source_id" attrs="{'required': [('stage_new', '!=', True)]}"/>
+                <field name="source_id"/>
             </xpath>
+
         </field>
     </record>
 </odoo>
