@@ -85,31 +85,6 @@ class TestResPartnerFileLinks(BaseCase):
             }
         )
 
-    def _patch_access(self, allow: bool):
-        """Monkeypatch res.file._check_access_file_filemgmt to return allow.
-        If the method does not exist, create a temporary stub and restore later.
-        """
-        # pylint: disable=protected-access
-        model_class = self.env.registry[self.File._name]
-        old = getattr(model_class, "_check_access_file_filemgmt", None)
-
-        # pylint: disable=unused-argument
-        def _stub(self):  # pylint: disable=protected-access
-            # pylint: disable=protected-access
-            return allow
-
-        # pylint: disable=protected-access
-        model_class._check_access_file_filemgmt = _stub  # type: ignore
-
-        def _restore():
-            if old is None:
-                delattr(model_class, "_check_access_file_filemgmt")
-            else:
-                # pylint: disable=protected-access
-                model_class._check_access_file_filemgmt = old
-
-        return _restore
-
     # -------------------------
     # number_of_files compute
     # -------------------------
