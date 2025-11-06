@@ -29,15 +29,16 @@ class ResStreetType(models.Model):
     )
 
     active = fields.Boolean(
-        'Active', default=True,
-        help="By unchecking the active field, you may hide a type of address you will not use.")
+        "Active",
+        default=True,
+        help="By unchecking the active field, you may hide a type of address you will not use.",
+    )
 
     def name_get(self):
         result = []
         if self.env.context.get("in_combo", False):
             for record in self:
-                result.append(
-                    (record.id, record.abbreviation + " - " + record.name))
+                result.append((record.id, record.abbreviation + " - " + record.name))
         else:
             for record in self:
                 result.append((record.id, record.abbreviation))

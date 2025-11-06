@@ -12,9 +12,9 @@ class ProductTemplate(models.Model):
     )
 
     product_component_line_ids = fields.One2many(
-        comodel_name='material.component.line',
-        inverse_name='product_tmpl_id',
-        string='Material Components',
+        comodel_name="material.component.line",
+        inverse_name="product_tmpl_id",
+        string="Material Components",
     )
 
     @api.depends("weight")

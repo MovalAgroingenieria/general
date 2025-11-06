@@ -1,14 +1,17 @@
 # 2024 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models, api
 from datetime import datetime, timedelta
+
+from odoo import api, fields, models
 
 
 class BankinplayResponse(models.Model):
-    _name = 'bankinplay.response'
-    _description = 'Intermediate table to store bankinplay responses when ' + \
-        'being used as remote endpoint'
+    _name = "bankinplay.response"
+    _description = (
+        "Intermediate table to store bankinplay responses when "
+        + "being used as remote endpoint"
+    )
 
     # TO be checked by later callbacks
     bankinplay_signature = fields.Char(
@@ -38,5 +41,5 @@ class BankinplayResponse(models.Model):
     @api.model
     def delete_old_responses(self):
         limit_date = datetime.now() - timedelta(weeks=1)
-        old_responses = self.search([('create_date', '<', limit_date)])
+        old_responses = self.search([("create_date", "<", limit_date)])
         old_responses.unlink()

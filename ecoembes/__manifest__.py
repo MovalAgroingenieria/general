@@ -9,9 +9,9 @@
     "version": "18.0.1.0.0",
     "depends": ["account"],
     "data": [
-        'data/product_material.xml',
-        'data/product_submaterial.xml',
-        'data/submaterial_types.xml',
+        "data/product_material.xml",
+        "data/product_submaterial.xml",
+        "data/submaterial_types.xml",
         "security/groups.xml",
         "security/ir.model.access.csv",
         "views/product_material_view.xml",

@@ -8,9 +8,7 @@ class IrActionsServer(models.Model):
     def report_label_associated_view(self):
         """View the associated qweb templates"""
         self.ensure_one()
-        res = self.env["ir.actions.act_window"]._for_xml_id(
-            "base.action_ui_view"
-        )
+        res = self.env["ir.actions.act_window"]._for_xml_id("base.action_ui_view")
         if not res or len(self.label_template.split(".")) < 2:
             return False
         res["domain"] = [

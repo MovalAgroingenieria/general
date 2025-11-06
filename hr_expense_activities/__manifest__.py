@@ -14,7 +14,7 @@
     "data": [
         "views/res_config_settings_views.xml",
     ],
-    "images":  ["static/description/banner.png"],
+    "images": ["static/description/banner.png"],
     "installable": True,
     "application": False,
 }

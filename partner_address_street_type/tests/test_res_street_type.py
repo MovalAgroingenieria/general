@@ -3,8 +3,8 @@
 
 from contextlib import contextmanager
 
-from odoo.tests import TransactionCase, tagged
 from odoo.exceptions import ValidationError
+from odoo.tests import TransactionCase, tagged
 from odoo.tools.misc import mute_logger
 
 # Import SQL exception classes so we can catch DB-level integrity failures
@@ -38,18 +38,22 @@ class TestResStreetType(TransactionCase):
         cls.StreetType = cls.env["res.street.type"]
 
         # Seed two street types
-        cls.st1 = cls.StreetType.create({
-            "name": "Avenida",
-            "abbreviation": "Av.",
-            # boolean defaults should apply
-        })
-        cls.st2 = cls.StreetType.create({
-            "name": "Calle",
-            "abbreviation": "C/",
-            "show_in_list": False,
-            "is_default": True,
-            "active": True,
-        })
+        cls.st1 = cls.StreetType.create(
+            {
+                "name": "Avenida",
+                "abbreviation": "Av.",
+                # boolean defaults should apply
+            }
+        )
+        cls.st2 = cls.StreetType.create(
+            {
+                "name": "Calle",
+                "abbreviation": "C/",
+                "show_in_list": False,
+                "is_default": True,
+                "active": True,
+            }
+        )
 
     # ------------------------
     # Defaults & required fields
@@ -57,10 +61,12 @@ class TestResStreetType(TransactionCase):
 
     def test_defaults_applied(self):
         """New records should get default boolean values."""
-        st = self.StreetType.create({
-            "name": "Carretera",
-            "abbreviation": "Ct.",
-        })
+        st = self.StreetType.create(
+            {
+                "name": "Carretera",
+                "abbreviation": "Ct.",
+            }
+        )
         self.assertTrue(st.show_in_list)
         self.assertFalse(st.is_default)
         self.assertTrue(st.active)
@@ -68,16 +74,20 @@ class TestResStreetType(TransactionCase):
     def test_required_name(self):
         """Creating without a name must fail (ORM validation or SQL NOT NULL)."""
         with assert_orm_or_sql_error(self, ValidationError, NotNullViolation):
-            self.StreetType.create({
-                "abbreviation": "XX",
-            })
+            self.StreetType.create(
+                {
+                    "abbreviation": "XX",
+                }
+            )
 
     def test_required_abbreviation(self):
         """Creating without an abbreviation must fail (ORM validation or SQL NOT NULL)."""
         with assert_orm_or_sql_error(self, ValidationError, NotNullViolation):
-            self.StreetType.create({
-                "name": "Pasaje",
-            })
+            self.StreetType.create(
+                {
+                    "name": "Pasaje",
+                }
+            )
 
     # ------------------------
     # SQL constraint: unique(name)
@@ -86,10 +96,12 @@ class TestResStreetType(TransactionCase):
     def test_unique_name_constraint_on_create(self):
         """Creating a duplicate name must fail (ORM ValidationError or SQL UNIQUE)."""
         with assert_orm_or_sql_error(self, ValidationError, UniqueViolation):
-            self.StreetType.create({
-                "name": "Avenida",            # duplicate of st1
-                "abbreviation": "Avenida.",
-            })
+            self.StreetType.create(
+                {
+                    "name": "Avenida",  # duplicate of st1
+                    "abbreviation": "Avenida.",
+                }
+            )
 
     def test_unique_name_constraint_on_write(self):
         """
@@ -118,10 +130,13 @@ class TestResStreetType(TransactionCase):
         self.assertEqual(ng1, [(self.st1.id, "Av.")])
 
         ng2 = (self.st1 | self.st2).name_get()
-        self.assertEqual(ng2, [
-            (self.st1.id, "Av."),
-            (self.st2.id, "C/"),
-        ])
+        self.assertEqual(
+            ng2,
+            [
+                (self.st1.id, "Av."),
+                (self.st2.id, "C/"),
+            ],
+        )
 
     def test_name_get_with_context_in_combo_true(self):
         """When context['in_combo']=True, name_get must return 'abbr - name'."""
@@ -130,10 +145,13 @@ class TestResStreetType(TransactionCase):
         self.assertEqual(ng1, [(self.st1.id, "Av. - Avenida")])
 
         ng2 = st_ctx.browse((self.st1 | self.st2).ids).name_get()
-        self.assertEqual(ng2, [
-            (self.st1.id, "Av. - Avenida"),
-            (self.st2.id, "C/ - Calle"),
-        ])
+        self.assertEqual(
+            ng2,
+            [
+                (self.st1.id, "Av. - Avenida"),
+                (self.st2.id, "C/ - Calle"),
+            ],
+        )
 
     def test_name_get_works_with_inactive_records_if_browsed(self):
         """
@@ -144,5 +162,7 @@ class TestResStreetType(TransactionCase):
         ng = self.st2.name_get()
         self.assertEqual(ng, [(self.st2.id, "C/")])
 
-        ng_combo = self.StreetType.with_context(in_combo=True).browse(self.st2.id).name_get()
+        ng_combo = (
+            self.StreetType.with_context(in_combo=True).browse(self.st2.id).name_get()
+        )
         self.assertEqual(ng_combo, [(self.st2.id, "C/ - Calle")])

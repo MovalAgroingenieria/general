@@ -19,20 +19,24 @@ class TestResPartnerStreetType(TransactionCase):
         cls.IrConfig.set_param(cls.param_key, "long")
 
         # Two sample street types
-        cls.type_long = cls.StreetType.create({
-            "name": "Avenida",
-            "abbreviation": "Av.",
-            "show_in_list": True,
-            "is_default": True,
-            "active": True,
-        })
-        cls.type_short = cls.StreetType.create({
-            "name": "Calle",
-            "abbreviation": "C/",
-            "show_in_list": True,
-            "is_default": False,
-            "active": True,
-        })
+        cls.type_long = cls.StreetType.create(
+            {
+                "name": "Avenida",
+                "abbreviation": "Av.",
+                "show_in_list": True,
+                "is_default": True,
+                "active": True,
+            }
+        )
+        cls.type_short = cls.StreetType.create(
+            {
+                "name": "Calle",
+                "abbreviation": "C/",
+                "show_in_list": True,
+                "is_default": False,
+                "active": True,
+            }
+        )
 
     # ------------------------
     # Defaults & address fields
@@ -111,26 +115,32 @@ class TestResPartnerStreetType(TransactionCase):
         """create() should set street_type_shown (even if compute is non-stored)."""
         # long
         self._force_param("long")
-        p_long = self.Partner.create({
-            "name": "CLong",
-            "street_type_id": self.type_short.id,
-        })
+        p_long = self.Partner.create(
+            {
+                "name": "CLong",
+                "street_type_id": self.type_short.id,
+            }
+        )
         self.assertEqual(p_long.street_type_shown, "Calle")
 
         # short
         self._force_param("short")
-        p_short = self.Partner.create({
-            "name": "CShort",
-            "street_type_id": self.type_long.id,
-        })
+        p_short = self.Partner.create(
+            {
+                "name": "CShort",
+                "street_type_id": self.type_long.id,
+            }
+        )
         self.assertEqual(p_short.street_type_shown, "Av.")
 
         # not_show
         self._force_param("not_show")
-        p_none = self.Partner.create({
-            "name": "CNone",
-            "street_type_id": self.type_long.id,
-        })
+        p_none = self.Partner.create(
+            {
+                "name": "CNone",
+                "street_type_id": self.type_long.id,
+            }
+        )
         self.assertEqual(p_none.street_type_shown, "")
 
     def test_write_updates_street_type_shown_when_street_type_changes(self):
@@ -139,10 +149,12 @@ class TestResPartnerStreetType(TransactionCase):
         according to the current config parameter.
         """
         self._force_param("long")
-        partner = self.Partner.create({
-            "name": "W1",
-            "street_type_id": self.type_long.id,
-        })
+        partner = self.Partner.create(
+            {
+                "name": "W1",
+                "street_type_id": self.type_long.id,
+            }
+        )
         self.assertEqual(partner.street_type_shown, "Avenida")
 
         # Change to another type with param=short
@@ -161,10 +173,12 @@ class TestResPartnerStreetType(TransactionCase):
         street_type_shown should become empty on next compute.
         """
         self._force_param("long")
-        partner = self.Partner.create({
-            "name": "W2",
-            "street_type_id": self.type_long.id,
-        })
+        partner = self.Partner.create(
+            {
+                "name": "W2",
+                "street_type_id": self.type_long.id,
+            }
+        )
         # Clear the m2o
         partner.write({"street_type_id": False})
         # Compute method sets empty when no street_type_id

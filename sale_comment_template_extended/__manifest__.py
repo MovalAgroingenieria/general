@@ -9,8 +9,6 @@
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",
     "category": "Reporting",
-    "application": False,
-    "installable": True,
     "depends": [
         "sale_comment_template",
     ],

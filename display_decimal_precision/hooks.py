@@ -1,7 +1,7 @@
 # 2023 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
-from odoo.api import Environment, SUPERUSER_ID
+from odoo.api import SUPERUSER_ID, Environment
 
 
 def post_init_hook(cr, registry):

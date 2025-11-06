@@ -12,8 +12,7 @@
     "depends": [
         "report_label",
     ],
-    "data": [
-    ],
+    "data": [],
     "installable": True,
     "application": False,
 }

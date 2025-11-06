@@ -1,14 +1,23 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <template id="report_saleorder_document_comments" inherit_id="sale_comment_template.report_saleorder_document_comments">
+    <template id="report_saleorder_document_comments"
+              inherit_id="sale_comment_template.report_saleorder_document_comments">
 
+        <!-- Top comments -->
         <xpath expr="//t[@t-as='comment_template_top']" position="replace">
-            <span t-field="doc.top_comment"/>
+            <div t-if="doc.top_comment"
+                 t-field="doc.top_comment"
+                 t-options="{'widget': 'html'}"/>
         </xpath>
+
+        <!-- Bottom comments -->
         <xpath expr="//t[@t-as='comment_template_bottom']" position="replace">
-            <span t-field="doc.bottom_comment"/>
+            <div t-if="doc.bottom_comment"
+                 t-field="doc.bottom_comment"
+                 t-options="{'widget': 'html'}"/>
         </xpath>
+
     </template>
 
 </odoo>

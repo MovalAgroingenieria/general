@@ -33,5 +33,5 @@ class SubmaterialType(models.Model):
     )
 
     _sql_constraints = [
-        ('code_unique', 'unique(code)', 'Code must be unique.'),
+        ("code_unique", "unique(code)", "Code must be unique."),
     ]

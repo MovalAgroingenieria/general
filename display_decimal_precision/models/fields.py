@@ -1,17 +1,15 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo.fields import Field
-
 from odoo.addons.display_decimal_precision.models import DecimalPrecision
+from odoo.fields import Field
 
 native_get_description = Field.get_description
 
 
 def new_get_description(self, env, **kwargs):
     desc = native_get_description(self, env, **kwargs)
-    if (hasattr(self, '_related__digits') and
-       isinstance(self._related__digits, str)):
+    if hasattr(self, "_related__digits") and isinstance(self._related__digits, str):
         #
         # IMPORTANT (EIS Note):
         #
@@ -27,13 +25,14 @@ def new_get_description(self, env, **kwargs):
         # float fields is processed, which can have a significant impact
         # on performance.
         #
-        env.cr.execute("""SELECT COUNT(*) FROM ir_module_module
-        WHERE name = 'display_decimal_precision' AND state = 'installed'""")
+        env.cr.execute(
+            """SELECT COUNT(*) FROM ir_module_module
+        WHERE name = 'display_decimal_precision' AND state = 'installed'"""
+        )
         query_results = env.cr.dictfetchall()
-        if query_results and query_results[0].get('count') == 1:
+        if query_results and query_results[0].get("count") == 1:
             application = self._related__digits
-            desc['digits'] = DecimalPrecision.get_display_precision(
-                env, application)
+            desc["digits"] = DecimalPrecision.get_display_precision(env, application)
     return desc
 
 
