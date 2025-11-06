@@ -7,20 +7,10 @@ from odoo import api, fields, models
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
-    def _default_street_type_id(self):
-        resp = 0
-        proposed_street_type_id = self.env["res.street.type"].search(
-            [("is_default", "=", True), ("show_in_list", "=", True)]
-        )
-        if proposed_street_type_id:
-            resp = proposed_street_type_id[0].id
-        return resp
-
     street_type_id = fields.Many2one(
         string="Street type",
         comodel_name="res.street.type",
         ondelete="set null",
-        default=_default_street_type_id,
     )
 
     street_type_shown = fields.Char(
@@ -47,10 +37,10 @@ class ResPartner(models.Model):
 
     @api.model
     def _address_fields(self):
-        fields = super()._address_fields()
-        fields.append("street_type_id")
-        fields.append("street_type_shown")
-        return fields
+        afields = super()._address_fields()
+        afields.append("street_type_id")
+        afields.append("street_type_shown")
+        return afields
 
     @api.model_create_multi
     def create(self, vals):
