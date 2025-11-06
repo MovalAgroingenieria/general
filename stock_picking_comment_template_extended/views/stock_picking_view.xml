@@ -1,28 +1,45 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-
-    <record model="ir.ui.view" id="stock_picking_form_add_comment_extended">
+    <record id="stock_picking_form_add_comment_extended" model="ir.ui.view">
         <field name="name">comment_template.stock.picking.form</field>
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock_picking_comment_template.stock_picking_form_add_comment"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@name='comments']/field[@name='comment_template_ids']" position="after">
-                <div attrs="{'invisible':['|',('state', '==', 'done'),('state', '==', 'cancel')]}" class="oe_edit_only">
-                     <hr/>
-                    <button name="action_insert_comments" string="Insert comments" type="object" class="oe_highlight"/>
-                    <p style="margin-top:10px; margin-left:14px; display:inline-block; font-size:0.8em;" class="text-muted">
+
+                <!-- Action area: visible only when state is not 'done' or 'cancel' -->
+                <group class="oe_edit_only"
+                       modifiers="{'invisible': [['|', ['state', '=', 'done'], ['state', '=', 'cancel']]]}">
+                    <separator string="Insert templates into comments"/>
+                    <button name="action_insert_comments"
+                            string="Insert comments"
+                            type="object"
+                            class="btn-primary"
+                            modifiers="{}"/>
+                    <p class="text-muted"
+                       style="margin-top:10px; margin-left:14px; display:inline-block; font-size:0.8em;">
                         The selected templates will be added to the top or bottom comment.
                         Comments can be edited later without altering the template.
                     </p>
-                </div>
+                </group>
+
+                <!-- Top comment editor -->
                 <group string="Top Comments">
-                    <field name="top_comment" nolabel="1" attrs="{'readonly':['|',('state', '==', 'done'),('state', '==', 'cancel')]}"/>
+                    <field name="top_comment"
+                           nolabel="1"
+                           widget="html"
+                           modifiers="{'readonly': [['|', ['state', '=', 'done'], ['state', '=', 'cancel']]]}"/>
                 </group>
+
+                <!-- Bottom comment editor -->
                 <group string="Bottom Comments">
-                    <field name="bottom_comment" nolabel="1" attrs="{'readonly':['|',('state', '==', 'done'),('state', '==', 'cancel')]}"/>
+                    <field name="bottom_comment"
+                           nolabel="1"
+                           widget="html"
+                           modifiers="{'readonly': [['|', ['state', '=', 'done'], ['state', '=', 'cancel']]]}"/>
                 </group>
+
             </xpath>
         </field>
     </record>
-
 </odoo>
