@@ -1,0 +1,17 @@
+from . import (
+    test_config_settings_file_prefix,
+    test_menus,
+    test_report_base,
+    test_res_company_file_prefix,
+    test_res_config_settings_view,
+    test_res_file,
+    test_res_file_category,
+    test_res_file_container,
+    test_res_file_containertype,
+    test_res_file_location,
+    test_res_file_report,
+    test_res_file_stage,
+    test_res_file_template_actions,
+    test_res_filetag,
+    test_res_partner_links,
+)

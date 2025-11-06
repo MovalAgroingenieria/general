@@ -1,10 +1,19 @@
 repos:
+  - repo: https://github.com/pycqa/pylint
+    rev: v3.3.1
+    hooks:
+      - id: pylint
+        language_version: python3.11
+        additional_dependencies:
+          - "pylint-odoo==9.3.22"
+
+
   - repo: https://github.com/OCA/odoo-pre-commit-hooks
     rev: v0.1.7
     hooks:
       - id: oca-checks-odoo-module
       - id: oca-checks-po
-        args: [ "--fix" ]   # opcional: autoarregla PO
+        args: [ "--fix" ]
 
   - repo: https://github.com/psf/black
     rev: 25.9.0

@@ -1,13 +1,39 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models
+from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class ResCompany(models.Model):
     _inherit = "res.company"
 
+    # Company-dependent char stored via ir.property.
     file_prefix = fields.Char(
-        string='File Prefix',
-        size=10,
-        company_dependent=True,)
+        help="Short prefix used when generating file codes. Max 10 characters.",
+        company_dependent=True,
+    )
+
+    @api.constrains("file_prefix")
+    def _check_file_prefix_length(self):
+        """Enforce a hard limit of 10 characters."""
+        for rec in self:
+            if rec.file_prefix and len(rec.file_prefix) > 10:
+                raise ValidationError(
+                    self.env._("File Prefix must be at most 10 characters.")
+                )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Trim whitespace before saving."""
+        for vals in vals_list:
+            if "file_prefix" in vals and vals["file_prefix"]:
+                vals["file_prefix"] = vals["file_prefix"].strip()
+        return super().create(vals_list)
+
+    def write(self, vals):
+        """Trim whitespace before saving."""
+        if "file_prefix" in vals and vals["file_prefix"]:
+            vals = dict(vals)
+            vals["file_prefix"] = vals["file_prefix"].strip()
+        return super().write(vals)

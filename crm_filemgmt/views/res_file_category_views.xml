@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- Form view -->
     <record id="res_file_category_view_form" model="ir.ui.view">
-        <field name="name">File Category (form view)</field>
+        <field name="name">res.file.category.form</field>
         <field name="model">res.file.category</field>
         <field name="arch" type="xml">
             <form duplicate="0">
@@ -11,24 +12,33 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_get_files"
-                                type="object" class="oe_stat_button"
-                                icon="fa-filemgmt-files"
-                                attrs="{'invisible': [('number_of_files','=', 0)]}">
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-folder-open"
+                                modifiers="{'invisible': [('number_of_files','=', 0)]}">
                             <div class="o_form_field o_stat_info">
                                 <field name="number_of_files"/>
-                                <span attrs="{'invisible': [('number_of_files','>', 1)]}"> file</span>
-                                <span attrs="{'invisible': [('number_of_files','=', 1)]}"> files</span>
+                                <span modifiers="{'invisible': [('number_of_files','>', 1)]}">
+                                    file
+                                </span>
+                                <span modifiers="{'invisible': [('number_of_files','=', 1)]}">
+                                    files
+                                </span>
                             </div>
                         </button>
                     </div>
+
                     <div class="oe_title">
-                        <label class="oe_edit_only" for="name" string="Category Name"/>
+                        <label class="oe_edit_only" for="name"
+                               string="Category Name"/>
                         <h1>
                             <field name="name" placeholder="Category Name"
-                                   attrs="{'readonly': [('is_readonly','=',True)]}"/>
+                                   modifiers="{'readonly': [('is_readonly','=', True)]}"/>
                         </h1>
-                        <field name="parent_id" attrs="{'readonly': [('is_readonly','=',True)]}"/>
+                        <field name="parent_id"
+                               modifiers="{'readonly': [('is_readonly','=', True)]}"/>
                     </div>
+
                     <group name="master_data"/>
                     <notebook name="slave_data_notebook" colspan="4">
                         <page name="notes_page" string="Notes">
@@ -40,37 +50,38 @@
         </field>
     </record>
 
+    <!-- Tree view -->
     <record id="res_file_category_view_tree" model="ir.ui.view">
-        <field name="name">File Category (tree view)</field>
+        <field name="name">res.file.category.tree</field>
         <field name="model">res.file.category</field>
         <field name="arch" type="xml">
-            <list class="res_file_category">
+            <list string="File Categories">
                 <field name="name"/>
                 <field name="number_of_files"/>
             </list>
         </field>
     </record>
 
+    <!-- Search view -->
     <record id="res_file_category_view_search" model="ir.ui.view">
-        <field name="name">File Category (search view)</field>
+        <field name="name">res.file.category.search</field>
         <field name="model">res.file.category</field>
         <field name="arch" type="xml">
-            <search>
+            <search string="Search Categories">
                 <field name="name"/>
             </search>
         </field>
     </record>
 
+    <!-- Action -->
     <record id="res_file_category_action" model="ir.actions.act_window">
         <field name="name">File Category</field>
         <field name="res_model">res.file.category</field>
         <field name="view_mode">list,form</field>
-        <field name="view_ids"
-         eval="[(5, 0),
-                (0, 0, {'view_mode': 'list',
-                        'view_id': ref('res_file_category_view_tree')}),
-                (0, 0, {'view_mode': 'form',
-                        'view_id': ref('res_file_category_view_form')})]"/>
+        <field name="views" eval="[
+        (ref('res_file_category_view_tree'), 'list'),
+        (ref('res_file_category_view_form'), 'form')
+      ]"/>
         <field name="search_view_id" ref="res_file_category_view_search"/>
         <field name="help" type="html">
             <p class="oe_view_nocontent_create">
@@ -79,10 +90,10 @@
         </field>
     </record>
 
+    <!-- Menu -->
     <menuitem id="menu_file_category"
               name="Categories"
-              parent="menu_config_general_data"
+              parent="crm_filemgmt.menu_config_general_data"
               sequence="20"
               action="res_file_category_action"/>
-
 </odoo>

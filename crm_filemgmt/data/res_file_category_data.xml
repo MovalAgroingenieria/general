@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <data>
+<odoo noupdate="1">
+    <!-- Keep these records stable across updates -->
 
-        <record id="resfilecategory_internal_file"
-                model="res.file.category" forcecreate="False">
-            <field name="name">Internal Files</field>
-            <field name="is_readonly">True</field>
-        </record>
+    <record id="resfilecategory_internal_file" model="res.file.category">
+        <field name="name">Internal Files</field>
+        <field name="is_readonly" eval="True"/>
+    </record>
 
-        <record id="resfilecategory_external_file"
-                model="res.file.category" forcecreate="False">
-            <field name="name">External Files</field>
-            <field name="is_readonly">True</field>
-        </record>
+    <record id="resfilecategory_external_file" model="res.file.category">
+        <field name="name">External Files</field>
+        <field name="is_readonly" eval="True"/>
+    </record>
 
-    </data>
 </odoo>

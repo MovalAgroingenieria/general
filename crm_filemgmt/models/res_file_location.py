@@ -1,70 +1,85 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import models, fields, api, _
+from odoo import api, fields, models
 
 
 class ResFileLocation(models.Model):
-    _name = 'res.file.location'
+    _name = "res.file.location"
     _description = "Locations of Files"
+    _order = "name"
 
-    name = fields.Char(
-        string='Name',
-        required=True,
-        index=True)
+    name = fields.Char(required=True, index=True)
 
-    description = fields.Char(
-        string='Description',)
+    description = fields.Char()
 
     location_id = fields.Many2one(
-        string='Site',
-        comodel_name='res.file.location',
-        ondelete='restrict',)
+        comodel_name="res.file.location",
+        ondelete="restrict",
+        index=True,
+    )
 
-    image = fields.Binary(
-        string='Photo / Image',
-        attachment=True,)
+    image = fields.Image(string="Photo / Image")
 
     container_ids = fields.One2many(
-        string='Containers',
-        comodel_name='res.file.container',
-        inverse_name='location_id',)
+        comodel_name="res.file.container",
+        inverse_name="location_id",
+    )
 
-    notes = fields.Html(
-        string='Notes',)
+    notes = fields.Html()
 
     number_of_containers = fields.Integer(
-        string='Files',
+        string="Containers",
         store=True,
-        compute='_compute_number_of_containers',)
+        compute="_compute_number_of_containers",
+    )
 
     _sql_constraints = [
-        ('unique_name', 'UNIQUE (name)', 'Existing location name.')]
+        ("unique_name", "UNIQUE (name)", "Existing location name."),
+    ]
 
-    @api.depends('container_ids')
+    # -------------------------
+    # Computes
+    # -------------------------
+    @api.depends("container_ids")
     def _compute_number_of_containers(self):
-        for record in self:
-            if record.container_ids:
-                record.number_of_containers = len(record.container_ids)
+        for rec in self:
+            rec.number_of_containers = len(rec.container_ids)
 
+    # -------------------------
+    # Actions
+    # -------------------------
     def action_get_containers(self):
+        """Open related containers in a window action."""
         self.ensure_one()
-        if self.container_ids:
-            id_tree_view = self.env.ref(
-                'crm_filemgmt.res_file_container_view_tree_related').id
-            id_form_view = self.env.ref(
-                'crm_filemgmt.res_file_container_view_form').id
-            search_view = self.env.ref(
-                'crm_filemgmt.res_file_container_view_search')
-            act_window = {
-                'type': 'ir.actions.act_window',
-                'name': _('Containers'),
-                'res_model': 'res.file.container',
-                'view_mode': 'list',
-                'views': [(id_tree_view, 'list'),
-                          (id_form_view, 'form')],
-                'search_view_id': (search_view.id, search_view.name),
-                'target': 'current',
-                'domain': [('id', 'in', self.container_ids.ids)],
-                }
-            return act_window
+        if not self.container_ids:
+            return False
+
+        tree = self.env.ref(
+            "crm_filemgmt.res_file_container_view_tree_related",
+            raise_if_not_found=False,
+        )
+        form = self.env.ref(
+            "crm_filemgmt.res_file_container_view_form", raise_if_not_found=False
+        )
+        search = self.env.ref(
+            "crm_filemgmt.res_file_container_view_search", raise_if_not_found=False
+        )
+
+        views = []
+        if tree:
+            views.append((tree.id, "tree"))
+        if form:
+            views.append((form.id, "form"))
+
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Containers"),
+            "res_model": "res.file.container",
+            "views": views or [(False, "tree"), (False, "form")],
+            "view_mode": "tree,form",
+            "search_view_id": search.id if search else False,
+            "target": "current",
+            "domain": [("id", "in", self.container_ids.ids)],
+            "context": {"default_location_id": self.id},
+        }

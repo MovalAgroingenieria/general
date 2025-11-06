@@ -1,39 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- === FORM VIEW === -->
     <record id="res_file_location_view_form" model="ir.ui.view">
         <field name="name">Files Location (form view)</field>
         <field name="model">res.file.location</field>
         <field name="arch" type="xml">
-            <form duplicate="0">
+            <form>
                 <header/>
                 <sheet>
-                    <div class="oe_button_box" name="button_box">
+                    <div class="o_button_box" name="button_box">
                         <button name="action_get_containers"
-                                type="object" class="oe_stat_button"
-                                icon="fa-archive"
-                                attrs="{'invisible': [('number_of_containers','=', 0)]}">
-                            <div class="o_form_field o_stat_info">
-                                <field name="number_of_containers"/>
-                                <span attrs="{'invisible': [('number_of_containers','>', 1)]}"> container</span>
-                                <span attrs="{'invisible': [('number_of_containers','=', 1)]}"> containers</span>
+                                type="object"
+                                class="o_stat_button"
+                                icon="fa-archive">
+                            <div class="o_field o_stat_info">
+                                <field name="number_of_containers" widget="statinfo"/>
+                                <span>container</span>
+                                <span>containers</span>
                             </div>
                         </button>
                     </div>
+
                     <div class="oe_title"/>
-                    <group name="master_data" col="12">
-                        <group name="master_data_left" colspan="2">
-                            <field name="image" widget="image" nolabel="1" colspan="2"/>
+                    <group name="master_data">
+                        <group name="master_data_left">
+                            <field name="image" widget="image" nolabel="1"/>
                         </group>
-                        <group name="master_data_center" colspan="5">
+                        <group name="master_data_center">
                             <field name="name"/>
                             <field name="description"/>
                         </group>
-                        <group  name="master_data_right" colspan="5">
+                        <group name="master_data_right">
                             <field name="location_id"/>
                         </group>
                     </group>
-                    <notebook name="slave_data_notebook" colspan="4">
+
+                    <notebook name="slave_data_notebook">
                         <page name="notes_page" string="Notes">
                             <field name="notes"/>
                         </page>
@@ -43,12 +46,14 @@
         </field>
     </record>
 
+    <!-- === TREE VIEW === -->
     <record id="res_file_location_view_tree" model="ir.ui.view">
         <field name="name">Files Location (tree view)</field>
         <field name="model">res.file.location</field>
         <field name="arch" type="xml">
             <list class="o_res_file_location">
-                <field name="image" widget="image" optional="hide" class="o_res_file_location_image"/>
+                <field name="image" widget="image" optional="hide"
+                       class="o_res_file_location_image"/>
                 <field name="name" class="align-middle"/>
                 <field name="description" class="align-middle"/>
                 <field name="location_id" class="align-middle"/>
@@ -56,6 +61,7 @@
         </field>
     </record>
 
+    <!-- === SEARCH VIEW === -->
     <record id="res_file_location_view_search" model="ir.ui.view">
         <field name="name">Files Location (search view)</field>
         <field name="model">res.file.location</field>
@@ -67,25 +73,26 @@
         </field>
     </record>
 
+    <!-- === ACTION === -->
     <record id="res_file_location_action" model="ir.actions.act_window">
         <field name="name">File Location</field>
         <field name="res_model">res.file.location</field>
         <field name="view_mode">list,form</field>
-        <field name="view_ids"
-         eval="[(5, 0),
-                (0, 0, {'view_mode': 'list',
-                        'view_id': ref('res_file_location_view_tree')}),
-                (0, 0, {'view_mode': 'form',
-                        'view_id': ref('res_file_location_view_form')})]"/>
+        <field name="views" eval="[
+            (ref('res_file_location_view_tree'), 'list'),
+            (ref('res_file_location_view_form'), 'form')
+        ]"/>
         <field name="search_view_id" ref="res_file_location_view_search"/>
         <field name="help" type="html">
-            <p class="oe_view_nocontent_create">
+            <p class="o_view_nocontent_smiling_face">
                 Click to add a new file location
             </p>
         </field>
     </record>
 
-    <menuitem id="menu_files_location" name="Locations"
+    <!-- === MENU === -->
+    <menuitem id="menu_files_location"
+              name="Locations"
               parent="menu_config_general_data"
               sequence="40"
               action="res_file_location_action"/>
