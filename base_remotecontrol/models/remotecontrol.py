@@ -178,7 +178,7 @@ class RemoteControl(models.Model):
         else:
             return Model.create(vals)
 
-    def _sql_connect(self):
+    def _remotecontrol_sql_connect(self):
         self.ensure_one()
         if self.remotecontrol_type != 'sql':
             raise UserError(
@@ -212,7 +212,8 @@ class RemoteControl(models.Model):
         cursor = connection.cursor()
         return cursor
 
-    def _sql_execute(self, cursor, query, params=None):
+    @api.multi
+    def _remotecontrol_sql_execute(self, cursor, query, params=None):
         self.ensure_one()
         if not cursor:
             raise UserError(
@@ -221,21 +222,24 @@ class RemoteControl(models.Model):
         cursor.execute(query, params or ())
         return cursor
 
-    def _sql_fetchall(self, cursor):
+    @api.multi
+    def _remotecontrol_sql_fetchall(self, cursor):
         self.ensure_one()
         if not cursor:
             raise UserError(
                 _("No cursor provided."))
         return cursor.fetchall()
 
-    def _sql_fetchone(self, cursor):
+    @api.multi
+    def _remotecontrol_sql_fetchone(self, cursor):
         self.ensure_one()
         if not cursor:
             raise UserError(
                 _("No cursor provided."))
         return cursor.fetchone()
 
-    def _sql_close(self, cursor):
+    @api.multi
+    def _remotecontrol_sql_close(self, cursor):
         self.ensure_one()
         if cursor:
             try:
@@ -338,17 +342,23 @@ class RemoteControlAction(models.Model):
                     model_name, key_vals, other_vals=other_vals,
                 )
             ),
-            'sql_connect': lambda: remote_control._sql_connect(),
+            'sql_connect': lambda: (
+                remote_control._remotecontrol_sql_connect()
+            ),
             'sql_execute': lambda cursor, query, params=None: (
-                remote_control._sql_execute(cursor, query, params=params)
+                remote_control._remotecontrol_sql_execute(
+                    cursor, query, params=params,
+                )
             ),
             'sql_fetchall': lambda cursor: (
-                remote_control._sql_fetchall(cursor)
+                remote_control._remotecontrol_sql_fetchall(cursor)
             ),
             'sql_fetchone': lambda cursor: (
-                remote_control._sql_fetchone(cursor)
+                remote_control._remotecontrol_sql_fetchone(cursor)
             ),
-            'sql_close': lambda cursor: remote_control._sql_close(cursor),
+            'sql_close': lambda cursor: (
+                remote_control._remotecontrol_sql_close(cursor)
+            ),
         }
         return context
 

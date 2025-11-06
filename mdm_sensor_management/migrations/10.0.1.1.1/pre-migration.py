@@ -4,8 +4,6 @@
 
 import logging
 
-from odoo import exceptions, _
-
 _logger = logging.getLogger(__name__)
 
 
