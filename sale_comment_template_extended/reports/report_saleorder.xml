@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <template id="report_saleorder_document_comments_ext"
+              inherit_id="sale.report_saleorder_document"
+              priority="100">
 
-    <template id="report_saleorder_document_comments"
-              inherit_id="sale_comment_template.report_saleorder_document_comments">
-
-        <!-- Top comments -->
-        <xpath expr="//t[@t-as='comment_template_top']" position="replace">
-            <div t-if="doc.top_comment"
-                 t-field="doc.top_comment"
-                 t-options="{'widget': 'html'}"/>
+        <!-- TOP comments: before the main lines table -->
+        <xpath expr="//table[contains(@class, 'o_main_table')]" position="before">
+            <t t-foreach="doc.comment_template_ids.filtered(lambda x: x.position == 'before_lines')"
+               t-as="comment_template_top">
+                <div t-raw="doc.render_comment(comment_template_top)"/>
+            </t>
         </xpath>
 
-        <!-- Bottom comments -->
-        <xpath expr="//t[@t-as='comment_template_bottom']" position="replace">
-            <div t-if="doc.bottom_comment"
-                 t-field="doc.bottom_comment"
-                 t-options="{'widget': 'html'}"/>
+        <!-- BOTTOM comments: after the fiscal position remark paragraph -->
+        <xpath expr="//p[@id='fiscal_position_remark']" position="after">
+            <t t-foreach="doc.comment_template_ids.filtered(lambda x: x.position == 'after_lines')"
+               t-as="comment_template_bottom">
+                <div class="mt16" t-raw="doc.render_comment(comment_template_bottom)"/>
+            </t>
         </xpath>
 
     </template>
-
 </odoo>
