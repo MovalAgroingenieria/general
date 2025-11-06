@@ -124,10 +124,6 @@ class ResPartner(models.Model):
         if view_type != "form":
             return res
 
-        has_access = self.env["res.file"].check_access_file_filemgmt()
-        if has_access:
-            return res
-
         # Parse and modify XML safely
         doc = etree.XML(res["arch"])
         for node in doc.xpath("//button[@name='action_get_files']"):
