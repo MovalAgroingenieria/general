@@ -6,7 +6,7 @@
     "name": "Telework and Site Capacity Tracking",
     "summary": "Daily work mode declaration and department capacity "
                "control",
-    "version": "16.0.1.4.0",
+    "version": "16.0.1.4.2",
     "author": "Moval Agroingeniería",
     "maintainers": ["MovalAgroingenieria"],
     "website": "https://moval.es",
