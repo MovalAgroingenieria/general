@@ -15,7 +15,9 @@
         "mdm_sensor_management",
     ],
     "data": [
-        "data/template_sensor_grafana_dashboard.xml",
+        "data/template_multi_sensor_grafana_dashboard.xml",
+        "data/template_mono_sensor_grafana_dashboard.xml",
+        "data/template_mono_sensor_histogram_grafana_dashboard.xml",
         "views/mdm_menus.xml",
     ],
     "application": False,
