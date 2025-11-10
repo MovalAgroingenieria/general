@@ -4,24 +4,16 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2023-09-02 20:42+0000\n"
-"Last-Translator: Ivorra78 <informatica@totmaterial.es>\n"
-"Language-Team: none\n"
-"Language: es\n"
+"POT-Creation-Date: 2025-11-10 22:49+0000\n"
+"PO-Revision-Date: 2025-11-10 22:49+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.17\n"
-
-#. module: report_label
-#: model:ir.model.fields,field_description:report_label.field_base_automation__state
-#: model:ir.model.fields,field_description:report_label.field_ir_actions_server__state
-#: model:ir.model.fields,field_description:report_label.field_ir_cron__state
-msgid "Action To Do"
-msgstr "Acción a realizar"
+"Plural-Forms: \n"
 
 #. module: report_label
 #: model_terms:ir.ui.view,arch_db:report_label.view_paperformat_label_view_form
@@ -123,7 +115,6 @@ msgstr "Etiqueta Relleno Superior (mm)"
 
 #. module: report_label
 #: model:ir.model,name:report_label.model_report_paperformat_label
-#: model:ir.model.fields,field_description:report_label.field_base_automation__label_paperformat_id
 #: model:ir.model.fields,field_description:report_label.field_ir_actions_server__label_paperformat_id
 #: model:ir.model.fields,field_description:report_label.field_ir_cron__label_paperformat_id
 #: model:ir.model.fields,field_description:report_label.field_report_label_wizard__label_paperformat_id
@@ -136,7 +127,6 @@ msgid "Label Paper Formats"
 msgstr "Formatos de papel para la etiqueta"
 
 #. module: report_label
-#: model:ir.model.fields,field_description:report_label.field_base_automation__label_template_view_id
 #: model:ir.model.fields,field_description:report_label.field_ir_actions_server__label_template_view_id
 #: model:ir.model.fields,field_description:report_label.field_ir_cron__label_template_view_id
 #: model:ir.model.fields,field_description:report_label.field_report_label_wizard__label_template_view_id
@@ -162,13 +152,6 @@ msgstr "Anchura de la etiqueta (mm)"
 #: model:ir.actions.act_window,name:report_label.paperformat_label_action
 msgid "Label paper format configuration"
 msgstr "Configuración del formato del papel de etiqueta"
-
-#. module: report_label
-#: model:ir.model.fields,field_description:report_label.field_report_label_wizard____last_update
-#: model:ir.model.fields,field_description:report_label.field_report_label_wizard_line____last_update
-#: model:ir.model.fields,field_description:report_label.field_report_paperformat_label____last_update
-msgid "Last Modified on"
-msgstr "Última Modificación el"
 
 #. module: report_label
 #: model:ir.model.fields,field_description:report_label.field_report_label_wizard__write_uid
@@ -230,11 +213,6 @@ msgid "Print"
 msgstr "Imprimir"
 
 #. module: report_label
-#: model:ir.actions.server,name:report_label.actions_server_label_partner_address
-msgid "Print Address Labels"
-msgstr "Imprimir etiquetas de dirección"
-
-#. module: report_label
 #: model_terms:ir.ui.view,arch_db:report_label.report_label_wizard_view_form
 msgid "Print Labels"
 msgstr "Imprimir etiquetas"
@@ -257,7 +235,7 @@ msgstr "Registro"
 #. module: report_label
 #: model:ir.model,name:report_label.model_ir_actions_report
 msgid "Report Action"
-msgstr "Informar Acción"
+msgstr "Acción de informe"
 
 #. module: report_label
 #: model:ir.model,name:report_label.model_report_label_wizard
@@ -292,7 +270,7 @@ msgstr "Secuencia"
 #. module: report_label
 #: model:ir.model,name:report_label.model_ir_actions_server
 msgid "Server Action"
-msgstr "Acción de Servidor"
+msgstr "Acción de servidor"
 
 #. module: report_label
 #: model_terms:ir.ui.view,arch_db:report_label.report_label_wizard_view_form
@@ -300,7 +278,6 @@ msgid "Settings"
 msgstr "Configuraciones"
 
 #. module: report_label
-#: model:ir.model.fields,help:report_label.field_base_automation__label_template_view_id
 #: model:ir.model.fields,help:report_label.field_ir_actions_server__label_template_view_id
 #: model:ir.model.fields,help:report_label.field_ir_cron__label_template_view_id
 msgid "The QWeb template key to render the labels"
@@ -312,29 +289,34 @@ msgid "Top (mm)"
 msgstr "Superior (mm)"
 
 #. module: report_label
-#: model:ir.model.fields,help:report_label.field_base_automation__state
+#: model:ir.model.fields,field_description:report_label.field_ir_actions_server__state
+#: model:ir.model.fields,field_description:report_label.field_ir_cron__state
+msgid "Type"
+msgstr "Tipo"
+
+#. module: report_label
 #: model:ir.model.fields,help:report_label.field_ir_actions_server__state
 #: model:ir.model.fields,help:report_label.field_ir_cron__state
 msgid ""
 "Type of server action. The following values are available:\n"
-"- 'Execute Python Code': a block of python code that will be executed\n"
-"- 'Create a new Record': create a new record with new values\n"
 "- 'Update a Record': update the values of a record\n"
-"- 'Execute several actions': define an action that triggers several other server actions\n"
+"- 'Create Activity': create an activity (Discuss)\n"
 "- 'Send Email': post a message, a note or send an email (Discuss)\n"
-"- 'Add Followers': add followers to a record (Discuss)\n"
-"- 'Create Next Activity': create an activity (Discuss)\n"
-"- 'Send SMS Text Message': send SMS, log them on documents (SMS)"
+"- 'Send SMS': send SMS, log them on documents (SMS)- 'Add/Remove Followers': add or remove followers to a record (Discuss)\n"
+"- 'Create Record': create a new record with new values\n"
+"- 'Execute Code': a block of Python code that will be executed\n"
+"- 'Send Webhook Notification': send a POST request to an external system, also known as a Webhook\n"
+"- 'Execute Existing Actions': define an action that triggers several other server actions\n"
 msgstr ""
-"Tipo de acción del servidor. Están disponibles los siguientes valores:\n"
-"- 'Ejecutar código Python': un bloque de código Python que se ejecutará\n"
-"- 'Crear un nuevo registro': crea un nuevo registro con nuevos valores\n"
-"- 'Actualizar un registro': actualiza los valores de un registro\n"
-"- 'Ejecutar varias acciones': define una acción que desencadena varias otras acciones del servidor\n"
-"- 'Enviar correo electrónico': publicar un mensaje, una nota o enviar un correo electrónico (Discuss)\n"
-"- 'Agregar seguidores': agrega seguidores a un registro (Discuss)\n"
-"- 'Crear siguiente actividad': crea una actividad (Discuss)\n"
-"- 'Enviar mensaje de texto SMS': envíe SMS, regístrelos en documentos (SMS)"
+"Tipo de acción de servidor. Los siguientes valores están disponibles:\n"
+"- 'Actualizar un registro': actualizar los valores de un registro\n"
+"- 'Crear actividad': crear una actividad (conversaciones)\n"
+"- 'Enviar correo electrónico': publicar un mensaje, una nota o enviar un correo electrónico (Conversaciones)\n"
+"- 'Enviar SMS': enviar SMS y registrarlos en los documentos (SMS)- 'Añadir o eliminar seguidores': añadir o eliminar seguidores de un registro (Conversaciones)\n"
+"- 'Crear registro': crear un nuevo registro con nuevos valores\n"
+"- 'Ejecutar código': un bloque de código Python que se ejecutará\n"
+"- 'Enviar notificación webhook': enviar una solicitud POST a un sistema externo, también conocido como Webhook\n"
+"- 'Ejecutar acciones existentes': definir una acción que activa otras acciones de servidor\n"
 
 #. module: report_label
 #: model:ir.model.fields,field_description:report_label.field_report_label_wizard_line__wizard_id
