@@ -1,4 +1,4 @@
-# (C) 2023 Smile (<http://www.smile.fr>)
-# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+# 2025 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from . import ir_qweb
