@@ -1,20 +1,19 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="view_server_action_form" model="ir.ui.view">
+    <!-- Extend Server Action form (Odoo 18) -->
+    <record id="view_server_action_form_inherit_report_label" model="ir.ui.view">
+        <field name="name">ir.actions.server.form.inherit.report.label</field>
         <field name="model">ir.actions.server</field>
-        <field name="inherit_id" ref="base.view_server_action_form" />
+        <field name="inherit_id" ref="base.view_server_action_form"/>
         <field name="arch" type="xml">
-            <field name="type" position="after">
-                <field
-                    name="label_paperformat_id"
-                    attrs="{'invisible': [('state', '!=', 'report_label')]}"
-                />
-                <field
-                    name="label_template_view_id"
-                    attrs="{'invisible': [('state', '!=', 'report_label')]}"
-                />
-            </field>
+            <!-- Insert after the 'state' field (present in v18) -->
+            <xpath expr="//form//sheet//field[@name='state']" position="after">
+                <field name="label_paperformat_id"
+                       attrs="{'invisible': [('state', '!=', 'report_label')]}"/>
+                <field name="label_template_view_id"
+                       attrs="{'invisible': [('state', '!=', 'report_label')]}"/>
+            </xpath>
         </field>
     </record>
 
