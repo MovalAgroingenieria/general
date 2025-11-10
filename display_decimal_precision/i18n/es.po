@@ -28,12 +28,12 @@ msgstr "Moneda"
 #. module: display_decimal_precision
 #: model_terms:ir.ui.view,arch_db:display_decimal_precision.customer_purchase_follow_up_res_config_settings_view
 msgid "Decimal places for product price display."
-msgstr ""
+msgstr "Número de decimales para mostrar el precio del producto."
 
 #. module: display_decimal_precision
 #: model_terms:ir.ui.view,arch_db:display_decimal_precision.customer_purchase_follow_up_res_config_settings_view
 msgid "Decimal places for quantity display."
-msgstr ""
+msgstr "Número de decimales para mostrar las cantidades."
 
 #. module: display_decimal_precision
 #: model:ir.model.fields,help:display_decimal_precision.field_res_currency__display_decimal_places
@@ -42,50 +42,56 @@ msgid ""
 " when 0 < display_rounding < 1; otherwise falls back to the currency's "
 "decimal_places (or 0 if rounding>=1)."
 msgstr ""
+"Número derivado de decimales utilizados para mostrar: "
+"ceil(log10(1/display_rounding)) cuando 0 < display_rounding < 1; de lo "
+"contrario, se usa el número de decimales de la moneda (o 0 si el redondeo es"
+" >= 1)."
 
 #. module: display_decimal_precision
 #: model:ir.model.fields,field_description:display_decimal_precision.field_res_currency__display_decimal_places
 msgid "Display Decimal Places"
-msgstr ""
+msgstr "Mostrar decimales"
 
 #. module: display_decimal_precision
 #: model_terms:ir.ui.view,arch_db:display_decimal_precision.customer_purchase_follow_up_res_config_settings_view
 msgid "Display Precision"
-msgstr ""
+msgstr "Precisión de visualización"
 
 #. module: display_decimal_precision
 #: model:ir.model.fields,field_description:display_decimal_precision.field_res_currency__display_rounding
 msgid "Display Rounding"
-msgstr ""
+msgstr "Redondeo visual"
 
 #. module: display_decimal_precision
 #. odoo-python
 #: code:addons/display_decimal_precision/models/res_currency.py:0
 msgid "Display Rounding is too small. Use a value >= 1e-12."
 msgstr ""
+"El redondeo visual es demasiado pequeño. Utiliza un valor mayor o igual a "
+"1e-12."
 
 #. module: display_decimal_precision
 #. odoo-python
 #: code:addons/display_decimal_precision/models/res_currency.py:0
 msgid "Display Rounding must be >= 0."
-msgstr ""
+msgstr "El redondeo visual debe ser mayor o igual a 0."
 
 #. module: display_decimal_precision
 #. odoo-python
 #: code:addons/display_decimal_precision/models/res_currency.py:0
 msgid "Display Rounding must be a non-negative number."
-msgstr ""
+msgstr "El redondeo visual debe ser un número no negativo."
 
 #. module: display_decimal_precision
 #: model:ir.model,name:display_decimal_precision.model_ir_http
 msgid "HTTP Routing"
-msgstr "Enrutamiento HTTP "
+msgstr "Enrutamiento HTTP"
 
 #. module: display_decimal_precision
 #. odoo-python
 #: code:addons/display_decimal_precision/models/res_currency.py:0
 msgid "Invalid value"
-msgstr ""
+msgstr "Valor no válido"
 
 #. module: display_decimal_precision
 #: model:ir.model.fields,help:display_decimal_precision.field_res_currency__display_rounding
@@ -94,23 +100,27 @@ msgid ""
 "prefer that many decimal places for display. If empty or 0, the currency's "
 "own decimal places are used."
 msgstr ""
+"Redondeo visual opcional. Si se establece entre 0 y 1 (por ejemplo, 0.01), "
+"la interfaz mostrará esa cantidad de decimales. Si está vacío o en 0, se "
+"usarán los decimales propios de la moneda."
 
 #. module: display_decimal_precision
 #: model:ir.model.fields,field_description:display_decimal_precision.field_res_config_settings__dp_product_price
 msgid "Product Price Display Digits"
-msgstr ""
+msgstr "Dígitos decimales para mostrar el precio del producto"
 
 #. module: display_decimal_precision
 #: model:ir.model.fields,field_description:display_decimal_precision.field_res_config_settings__dp_product_uom
 msgid "Product UoM Display Digits"
-msgstr ""
+msgstr "Dígitos decimales para mostrar la unidad de medida del producto"
 
 #. module: display_decimal_precision
 #: model:ir.model.fields,help:display_decimal_precision.field_res_config_settings__dp_product_price
 msgid "Scale (number of decimals) for displaying product prices."
 msgstr ""
+"Escala (número de decimales) para mostrar los precios de los productos."
 
 #. module: display_decimal_precision
 #: model:ir.model.fields,help:display_decimal_precision.field_res_config_settings__dp_product_uom
 msgid "Scale (number of decimals) for displaying product quantities."
-msgstr ""
+msgstr "Escala (número de decimales) para mostrar las cantidades de producto."
