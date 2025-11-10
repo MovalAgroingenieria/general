@@ -16,36 +16,37 @@ Display Decimal Precision
 Description
 ===========
 
-This module allows to distinguish computation digits and display digits in
-decimal precision.
+This module allows you to distinguish between **computation digits** and
+**display digits** for decimal precision in numeric fields.
 
-> Note that currencies are not included.
+In Odoo 18, the legacy *decimal.precision* model has been removed.
+This module reproduces its functionality by storing display-digit
+preferences in system parameters and exposing them in *Settings*.
 
+> Note that currencies are managed separately through their own rounding
+> and decimal-place configuration.
 
 Usage
 =====
 
-To edit a decimal precision :
+To edit a display precision:
 
-1. Choose a field that you want to edit its decimal accuracy (Ex. Product Price)
-2. Go to ``Settings > Technical > Database Structure``> Decimal accuracy menu
-3. Select Decimal accuracy corresponding to field
-4. Then edit the value of digits you want to compute, and the number of digits you want to display
-5. Now, go back to your interface to see the new decimal accuracy
-
+1. Go to **Settings → General Settings → Display Precision** section.
+2. Adjust the number of decimals you want to display for each category,
+   such as *Product Price* or *Unit of Measure*.
+3. Save the settings.
+4. The configured values will automatically apply to fields that use
+   those display precisions across the system.
 
 Credits
 =======
 
-
 Authors
 ~~~~~~~
-
 * Moval Agroingeniería S.L.
 
 Contributors
 ~~~~~~~~~~~~
-
 * Alberto Hernández <ahernandez@moval.es>
 * Eduardo Iniesta <einiesta@moval.es>
 * Jesús Martínez <jmartinez@moval.es>
@@ -54,10 +55,8 @@ Contributors
 * Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
 
-
 Maintainer
 ~~~~~~~~~~
-
 This module is maintained by Moval Agroingeniería.
 
 .. image:: https://services.moval.es/static/images/logo_moval_small.png
