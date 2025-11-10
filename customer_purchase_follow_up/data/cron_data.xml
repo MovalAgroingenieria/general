@@ -1,16 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <data noupdate="1">
-        <record id="ir_cron_check_purchase_notifications" model="ir.cron">
-            <field name="name">Check Purchase Notifications</field>
-            <field name="model_id" ref="base.model_res_partner"/>
-            <field name="state">code</field>
-            <field name="code">model._cron_check_purchase_notifications()</field>
-            <field name="interval_number">1</field>
-            <field name="interval_type">days</field>
-            <field name="numbercall">-1</field>
-            <field name="active">True</field>
-            <field name="doall">False</field>
-        </record>
-    </data>
+<odoo noupdate="1">
+
+    <!-- Scheduled action: periodically checks purchase notifications -->
+    <record id="ir_cron_check_purchase_notifications" model="ir.cron">
+        <!-- Cron job name -->
+        <field name="name">Check Purchase Notifications</field>
+
+        <!-- Model to execute on -->
+        <field name="model_id" ref="base.model_res_partner"/>
+
+        <!-- Execution type: run Python code -->
+        <field name="state">code</field>
+
+        <!-- Method to call on the model -->
+        <field name="code">model._cron_check_purchase_notifications()</field>
+
+        <!-- Frequency: every 1 day -->
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+
+        <!-- Active cron, executed by system user -->
+        <field name="active" eval="True"/>
+        <field name="user_id" ref="base.user_root"/>
+    </record>
+
 </odoo>
