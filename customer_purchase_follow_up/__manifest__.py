@@ -20,9 +20,10 @@
         "data/mail_template_data.xml",
         "data/cron_data.xml",
         "views/res_partner_views.xml",
-        "views/templates/assets.xml",
     ],
-    "application": False,
-    "installable": True,
-    "auto_install": False,
+    "assets": {
+        "web.assets_backend": [
+            "customer_purchase_follow_up/static/src/js/notification_handler.js",
+        ],
+    },
 }
