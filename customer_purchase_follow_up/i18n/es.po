@@ -4,65 +4,81 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 14.0\n"
+"Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-05 10:10+0000\n"
-"PO-Revision-Date: 2025-10-05 10:10+0000\n"
+"POT-Creation-Date: 2025-11-10 15:27+0000\n"
+"PO-Revision-Date: 2025-11-10 15:27+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
 
 #. module: customer_purchase_follow_up
 #: model:mail.template,body_html:customer_purchase_follow_up.mail_template_purchase_notification
 msgid ""
-"<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p>Dear ${ctx.get('recipient_user').name or 'User'},</p>\n"
+"<div style=\"margin:0;padding:0;\">\n"
+"                <p>Dear ${ctx.get('recipient_user').name or 'User'},</p>\n"
 "\n"
-"                    <p>We inform you that the customer <strong>${object.name}</strong> has not made any purchases recently.</p>\n"
+"                <p>We inform you that the customer <strong>${object.name}</strong> has not made any purchases recently.\n"
+"                </p>\n"
 "\n"
-"                    <table style=\"border-collapse: collapse; width: 100%; margin: 20px 0;\">\n"
-"                        <tr>\n"
-"                            <td style=\"border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;\"><strong>Customer:</strong></td>\n"
-"                            <td style=\"border: 1px solid #ddd; padding: 8px;\">${object.name}</td>\n"
-"                        </tr>\n"
-"                        <tr>\n"
-"                            <td style=\"border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;\"><strong>Last purchase:</strong></td>\n"
-"                            <td style=\"border: 1px solid #ddd; padding: 8px;\">\n"
-"                                % if object.last_purchase_date:\n"
-"                                    ${object.last_purchase_date.strftime('%d/%m/%Y')}\n"
-"                                % else:\n"
-"                                    No purchases recorded\n"
-"                                % endif\n"
-"                            </td>\n"
-"                        </tr>\n"
-"                        <tr>\n"
-"                            <td style=\"border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;\"><strong>Days without purchase:</strong></td>\n"
-"                            <td style=\"border: 1px solid #ddd; padding: 8px;\">${object.days_since_last_purchase} days</td>\n"
-"                        </tr>\n"
-"                        <tr>\n"
-"                            <td style=\"border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;\"><strong>Configured limit:</strong></td>\n"
-"                            <td style=\"border: 1px solid #ddd; padding: 8px;\">${object.days_without_purchase_limit} days</td>\n"
-"                        </tr>\n"
-"                    </table>\n"
+"                <table style=\"border-collapse:collapse;width:100%;margin:20px 0;\">\n"
+"                    <tr>\n"
+"                        <td style=\"border:1px solid #ddd;padding:8px;background-color:#f2f2f2;\">\n"
+"                            <strong>Customer:</strong>\n"
+"                        </td>\n"
+"                        <td style=\"border:1px solid #ddd;padding:8px;\">${object.name}</td>\n"
+"                    </tr>\n"
+"                    <tr>\n"
+"                        <td style=\"border:1px solid #ddd;padding:8px;background-color:#f2f2f2;\">\n"
+"                            <strong>Last purchase:</strong>\n"
+"                        </td>\n"
+"                        <td style=\"border:1px solid #ddd;padding:8px;\">\n"
+"                            % if object.last_purchase_date:\n"
+"                            ${object.last_purchase_date.strftime('%d/%m/%Y')}\n"
+"                            % else:\n"
+"                            No purchases recorded\n"
+"                            % endif\n"
+"                        </td>\n"
+"                    </tr>\n"
+"                    <tr>\n"
+"                        <td style=\"border:1px solid #ddd;padding:8px;background-color:#f2f2f2;\">\n"
+"                            <strong>Days without purchase:</strong>\n"
+"                        </td>\n"
+"                        <td style=\"border:1px solid #ddd;padding:8px;\">${object.days_since_last_purchase} days</td>\n"
+"                    </tr>\n"
+"                    <tr>\n"
+"                        <td style=\"border:1px solid #ddd;padding:8px;background-color:#f2f2f2;\">\n"
+"                            <strong>Configured limit:</strong>\n"
+"                        </td>\n"
+"                        <td style=\"border:1px solid #ddd;padding:8px;\">${object.days_without_purchase_limit} days</td>\n"
+"                    </tr>\n"
+"                </table>\n"
 "\n"
-"                    <p>We recommend contacting this customer to evaluate their current needs and offer products or services that may interest them.</p>\n"
+"                <p>We recommend contacting this customer to assess their current needs and offer products or services\n"
+"                    that may interest them.\n"
+"                </p>\n"
 "\n"
-"                    % if object.email:\n"
-"                    <p><strong>Customer email:</strong> <a href=\"mailto:${object.email}\">${object.email}</a></p>\n"
-"                    % endif\n"
+"                % if object.email:\n"
+"                <p>\n"
+"                    <strong>Customer email:</strong>\n"
+"                    <a href=\"mailto:%24%7Bobject.email%7D\">${object.email}</a>\n"
+"                </p>\n"
+"                % endif\n"
 "\n"
-"                    % if object.phone:\n"
-"                    <p><strong>Customer phone:</strong> ${object.phone}</p>\n"
-"                    % endif\n"
+"                % if object.phone:\n"
+"                <p>\n"
+"                    <strong>Customer phone:</strong>\n"
+"                    ${object.phone}\n"
+"                </p>\n"
+"                % endif\n"
 "\n"
-"                    <p>Best regards,<br/>\n"
-"                    Customer Follow-up System</p>\n"
-"                </div>\n"
-"            "
+"                <p>Best regards,<br/>Customer Follow-up System\n"
+"                </p>\n"
+"            </div>\n"
+"        "
 msgstr ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "                    <p>Estimado/a ${ctx.get('recipient_user').name or 'Usuario'},</p>\n"
@@ -113,19 +129,15 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:customer_purchase_follow_up.view_partner_form_purchase_followup
 msgid ""
 "<span class=\"o_stat_text\">Reset</span>\n"
-"                                    <span class=\"o_stat_text\">Status</span>"
+"                                <span class=\"o_stat_text\">Status</span>"
 msgstr ""
-"<span class=\"o_stat_text\">Restablecer</span>\n"
-"                                    <span class=\"o_stat_text\">Estado</span>"
 
 #. module: customer_purchase_follow_up
 #: model_terms:ir.ui.view,arch_db:customer_purchase_follow_up.view_partner_form_purchase_followup
 msgid ""
 "<span class=\"o_stat_text\">Send</span>\n"
-"                                    <span class=\"o_stat_text\">Notification</span>"
+"                                <span class=\"o_stat_text\">Notification</span>"
 msgstr ""
-"<span class=\"o_stat_text\">Enviar</span>\n"
-"                                    <span class=\"o_stat_text\">Notificación</span>"
 
 #. module: customer_purchase_follow_up
 #: model:ir.model.fields,help:customer_purchase_follow_up.field_res_partner__purchase_notifications_enabled
@@ -144,8 +156,6 @@ msgstr "¿Está seguro de que desea enviar una notificación para este cliente?"
 
 #. module: customer_purchase_follow_up
 #: model:ir.actions.server,name:customer_purchase_follow_up.ir_cron_check_purchase_notifications_ir_actions_server
-#: model:ir.cron,cron_name:customer_purchase_follow_up.ir_cron_check_purchase_notifications
-#: model:ir.cron,name:customer_purchase_follow_up.ir_cron_check_purchase_notifications
 msgid "Check Purchase Notifications"
 msgstr "Verificar Notificaciones de Compra"
 
@@ -229,12 +239,6 @@ msgid "Days Without Purchase Limit"
 msgstr "Límite de días sin compra"
 
 #. module: customer_purchase_follow_up
-#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__display_name
-#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_sale_order__display_name
-msgid "Display Name"
-msgstr "Nombre mostrado"
-
-#. module: customer_purchase_follow_up
 #: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__purchase_notifications_enabled
 #: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_users__purchase_notifications_enabled
 msgid "Enable Purchase Notifications"
@@ -250,16 +254,10 @@ msgstr ""
 "cuando lleven tiempo sin comprar."
 
 #. module: customer_purchase_follow_up
+#. odoo-python
 #: code:addons/customer_purchase_follow_up/models/res_partner.py:0
-#, python-format
 msgid "Follow-up: Customer without recent purchases - %s"
 msgstr "Seguimiento: Cliente sin compras recientes - %s"
-
-#. module: customer_purchase_follow_up
-#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__id
-#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_sale_order__id
-msgid "ID"
-msgstr ""
 
 #. module: customer_purchase_follow_up
 #: model:ir.model.fields,help:customer_purchase_follow_up.field_res_partner__client_notified
@@ -270,12 +268,6 @@ msgid ""
 msgstr ""
 "Indica si el cliente ya ha sido notificado sobre la falta de compras "
 "recientes"
-
-#. module: customer_purchase_follow_up
-#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner____last_update
-#: model:ir.model.fields,field_description:customer_purchase_follow_up.field_sale_order____last_update
-msgid "Last Modified on"
-msgstr "Última modificación el"
 
 #. module: customer_purchase_follow_up
 #: model:ir.model.fields,field_description:customer_purchase_follow_up.field_res_partner__last_notification_date
@@ -296,8 +288,8 @@ msgid "Maximum days without purchase before sending notification"
 msgstr "Máximo de días sin compra antes de enviar la notificación"
 
 #. module: customer_purchase_follow_up
+#. odoo-python
 #: code:addons/customer_purchase_follow_up/models/res_partner.py:0
-#, python-format
 msgid "Never"
 msgstr "Nunca"
 
@@ -323,14 +315,14 @@ msgid "Notification Users"
 msgstr "Usuarios de Notificación"
 
 #. module: customer_purchase_follow_up
+#. odoo-python
 #: code:addons/customer_purchase_follow_up/models/res_partner.py:0
-#, python-format
 msgid "Notification sent successfully."
 msgstr "Notificación enviada con éxito."
 
 #. module: customer_purchase_follow_up
+#. odoo-python
 #: code:addons/customer_purchase_follow_up/models/res_partner.py:0
-#, python-format
 msgid "Notification status reset successfully."
 msgstr "Estado de notificación restablecido con éxito."
 
@@ -347,13 +339,18 @@ msgid "Purchase Follow-up"
 msgstr "Seguimiento de la compra"
 
 #. module: customer_purchase_follow_up
+#: model:mail.template,name:customer_purchase_follow_up.mail_template_purchase_notification
+msgid "Purchase Follow-up Notification"
+msgstr ""
+
+#. module: customer_purchase_follow_up
 #: model_terms:ir.ui.view,arch_db:customer_purchase_follow_up.view_partner_form_purchase_followup
 msgid "Purchase Information"
 msgstr "Información de compra"
 
 #. module: customer_purchase_follow_up
+#. odoo-python
 #: code:addons/customer_purchase_follow_up/models/res_partner.py:0
-#, python-format
 msgid "Purchase notifications are not enabled for this customer."
 msgstr "Las notificaciones de compra no están habilitadas para este cliente."
 
@@ -375,17 +372,21 @@ msgid "Send notification by email"
 msgstr "Enviar notificación por correo electrónico"
 
 #. module: customer_purchase_follow_up
+#. odoo-javascript
+#: code:addons/customer_purchase_follow_up/static/src/js/notification_handler.js:0
+msgid "Success"
+msgstr ""
+
+#. module: customer_purchase_follow_up
 #: model_terms:ir.actions.act_window,help:customer_purchase_follow_up.action_partner_needs_notification
 msgid ""
 "This list shows customers who have purchase notifications enabled\n"
-"                    but haven't been notified yet about their lack of recent purchases."
+"                but haven't been notified yet about their lack of recent purchases."
 msgstr ""
-"Esta lista muestra los clientes que tienen activadas las notificaciones de compra\n"
-"                    pero que aún no han recibido ninguna notificación sobre sus compras recientes."
 
 #. module: customer_purchase_follow_up
+#. odoo-python
 #: code:addons/customer_purchase_follow_up/models/res_partner.py:0
-#, python-format
 msgid ""
 "This opportunity was created automatically because the customer has not made"
 " purchases for %d days. Last purchase date: %s"
@@ -405,7 +406,7 @@ msgid "Users who will receive notifications for this customer"
 msgstr "Usuarios que recibirán notificaciones para este cliente"
 
 #. module: customer_purchase_follow_up
+#. odoo-python
 #: code:addons/customer_purchase_follow_up/models/res_partner.py:0
-#, python-format
 msgid "Warning"
 msgstr "Advertencia"
