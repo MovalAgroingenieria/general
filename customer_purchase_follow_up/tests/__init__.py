@@ -1,1 +1,1 @@
-from . import test_sale_order_notification
+from . import test_partner_purchase_follow_up, test_sale_order_notification
