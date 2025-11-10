@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="customer_purchase_follow_up_res_config_settings_view" model="ir.ui.view">
+        <field name="name">customer.purchase.follow.up.settings</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Base form is empty in your build; inject our section inside the <form> root -->
+            <xpath expr="//form" position="inside">
+                <sheet>
+                    <div id="settings">
+                        <div class="app_settings_block" string="Display Precision">
+                            <h2>Display Precision</h2>
+                            <div class="row mt16 o_settings_container">
+
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                        <field name="dp_product_price"/>
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <label for="dp_product_price"/>
+                                        <div class="text-muted">Decimal places for product price display.</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                        <field name="dp_product_uom"/>
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <label for="dp_product_uom"/>
+                                        <div class="text-muted">Decimal places for quantity display.</div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </sheet>
+            </xpath>
+        </field>
+    </record>
+</odoo>
