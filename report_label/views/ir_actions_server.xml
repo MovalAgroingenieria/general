@@ -10,9 +10,9 @@
             <!-- Insert after the 'state' field (present in v18) -->
             <xpath expr="//form//sheet//field[@name='state']" position="after">
                 <field name="label_paperformat_id"
-                       attrs="{'invisible': [('state', '!=', 'report_label')]}"/>
+                       invisible="state != 'report_label'"/>
                 <field name="label_template_view_id"
-                       attrs="{'invisible': [('state', '!=', 'report_label')]}"/>
+                       invisible="state != 'report_label'"/>
             </xpath>
         </field>
     </record>
