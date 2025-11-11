@@ -9,9 +9,20 @@ PARAM_OLD = "ht_expense_activities.with_activity"
 PARAM_NEW = "hr_expense_activities.with_activity"
 
 
-def post_init_hook(cr, registry):
+def _coerce_env(*args):
+    """v14–v18 compatible hook signature: returns (env, cr)."""
+    if len(args) == 1 and isinstance(args[0], api.Environment):
+        return args[0], args[0].cr
+    if len(args) >= 2:
+        cr = args[0]
+        return api.Environment(cr, SUPERUSER_ID, {}), cr
+    raise TypeError("Invalid hook signature")
+
+
+def post_init_hook(*args):
     """Migrate legacy config parameter to the canonical one and remove the old key."""
-    env = api.Environment(cr, SUPERUSER_ID, {})
+
+    env, _cr = _coerce_env(*args)
     icp = env["ir.config_parameter"].sudo()
 
     old_val = icp.get_param(PARAM_OLD, default=None)
