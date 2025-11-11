@@ -1,104 +1,109 @@
-# Copyright 2023 Alfredo de la fuente - AvanzOSC
-# License AGPL-3 - See http://www.gnu.org/licenses/agpl-3.0.html
-from odoo import _, api, fields, models
+# 2025 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
+from odoo import api, fields, models
 
 
 class IrAttachment(models.Model):
     _inherit = "ir.attachment"
 
     state = fields.Selection(
-        [("red", _("Red")), ("green", _("Green"))],
+        [("red", "Red"), ("green", "Green")],
         string="Status",
         compute="_compute_state",
+        store=False,  # store not needed; set to True if
+        # you want to filter/search by this field
     )
-    contracting_company_id = fields.Many2one(
-        string="Contracting company", comodel_name="res.partner", copy=False
-    )
+    contracting_company_id = fields.Many2one("res.partner", copy=False)
     document_type = fields.Selection(
         [
-            ("admin", _("Administrative")),
-            ("worker", _("Worker")),
-            ("machinery", _("Machinery")),
-            ("supplier_form", _("Supplier Form")),
-            ("technical_details", _("Technical Details")),
-            ("safety_details", _("Safety Details")),
-            ("analysis", _("Analysis")),
-            ("declaration_conformity", _("Declaration of Conformity")),
-            ("declaration_manger", _("Declaration Manager")),
-            ("quality_certificate", _("Quality Certificate")),
-            ("health_registration", _("Health Registration")),
-            ("appcc", _("APPCC")),
-            ("contract", _("Contract")),
-            ("migration_test", _("Migration Test")),
+            ("admin", "Administrative"),
+            ("worker", "Worker"),
+            ("machinery", "Machinery"),
+            ("supplier_form", "Supplier Form"),
+            ("technical_details", "Technical Details"),
+            ("safety_details", "Safety Details"),
+            ("analysis", "Analysis"),
+            ("declaration_conformity", "Declaration of Conformity"),
+            ("declaration_manger", "Declaration Manager"),
+            ("quality_certificate", "Quality Certificate"),
+            ("health_registration", "Health Registration"),
+            ("appcc", "APPCC"),
+            ("contract", "Contract"),
+            ("migration_test", "Migration Test"),
         ],
-        string="Document type",
         copy=False,
     )
-    worker_id = fields.Many2one(string="Worker", comodel_name="res.partner", copy=False)
-    machinery = fields.Text(string="Machinery", copy=False)
+    worker_id = fields.Many2one("res.partner", string="Worker", copy=False)
+    machinery = fields.Text(copy=False)
     revision = fields.Selection(
-        [("to_review", _("To review")), ("reviewed", _("Reviewed"))],
-        string="Revision",
+        [("to_review", "To Review"), ("reviewed", "Reviewed")],
         copy=False,
     )
-    date_request = fields.Date(string="Date request", copy=False)
-    expiration_date = fields.Date(string="Expiration date", copy=False)
+    date_request = fields.Date(string="Request Date", copy=False)
+    expiration_date = fields.Date(copy=False)
     is_prl = fields.Boolean(string="Is PRL", default=False, copy=False)
 
+    @api.depends("expiration_date")
     def _compute_state(self):
-        for file in self:
-            color = "green"
-            if (
-                file.expiration_date
-                and file.expiration_date > fields.Date.context_today(self)
-            ):
-                color = "red"
-            file.state = color
+        """Red if expired (expiration_date <= today), otherwise green."""
+        today = fields.Date.context_today(self)
+        for rec in self:
+            # If you want the previous logic (red with future date), use:
+            # `rec.expiration_date and rec.expiration_date > today`
+            rec.state = (
+                "red"
+                if rec.expiration_date and rec.expiration_date <= today
+                else "green"
+            )
 
     @api.model_create_multi
     def create(self, vals_list):
-        if (
-            "active_model" not in self.env.context
-            and "default_is_prl" not in self.env.context
-        ):
-            return super(IrAttachment, self).create(vals_list)
-        if (
-            "active_model" in self.env.context
-            and self.env.context.get("active_model") == "account.journal"
-        ):
-            return super(IrAttachment, self).create(vals_list)
-        if (
-            "active_model" in self.env.context
-            and self.env.context.get("active_model", "aa") == "account.analytic.line"
-        ):
-            if isinstance(vals_list, dict):
-                if (
-                    "res_model" in vals_list
-                    and vals_list.get("res_model", "aa") == "res.partner"
-                ):
-                    del vals_list["res.model"]
-            else:
-                for vals in vals_list:
-                    if (
-                        "res_model" in vals
-                        and vals.get("res_model", "aa") == "res.partner"
-                    ):
-                        del vals["res.model"]
-            return super(IrAttachment, self).create(vals_list)
+        """
+        - Respects context shortcuts you already had.
+        - For PRL, assigns the attachment to the partner
+        (worker or contracting company).
+        - Corrects 'res.model' -> 'res_model'.
+        - Does not write 'res_name' (in v18 it's computed).
+        """
+        ctx = self.env.context
+
+        # Accept dict or list
+        if isinstance(vals_list, dict):
+            vals_list = [vals_list]
+
+        # If we don't come from PRL flow and there's no default, delegate
+        if not ctx.get("active_model") and not ctx.get("default_is_prl"):
+            return super().create(vals_list)
+
+        # Specific case: account.journal -> don't modify
+        if ctx.get("active_model") == "account.journal":
+            return super().create(vals_list)
+
+        # Specific case: account.analytic.line -> clear res_model=partner if it appears
+        if ctx.get("active_model") == "account.analytic.line":
+            for vals in vals_list:
+                if vals.get("res_model") == "res.partner":
+                    vals.pop("res_model", None)
+            return super().create(vals_list)
+
+        # PRL flow: assign to appropriate partner
         for vals in vals_list:
-            # Annotated to avoid problems when attaching files to disfrimur emails
-            # vals["res_model"] = "res.partner"
-            if "is_prl" in vals and vals.get("is_prl", False):
-                if (
-                    "document_type" in vals
-                    and "worker_id" in vals
-                    and vals.get("document_type") == "worker"
-                    and vals.get("worker_id", False)
-                ):
+            if vals.get("is_prl"):
+                partner_id = None
+                if vals.get("document_type") == "worker" and vals.get("worker_id"):
                     partner_id = vals.get("worker_id")
                 else:
                     partner_id = vals.get("contracting_company_id")
-                partner = self.env["res.partner"].browse(partner_id)
-                vals.update({"res_id": partner.id, "res_name": partner.name})
-        attachments = super(IrAttachment, self).create(vals_list)
-        return attachments
+
+                if partner_id:
+                    # Ensures link to partner
+                    vals.update(
+                        {
+                            "res_model": "res.partner",
+                            "res_id": partner_id,
+                        }
+                    )
+                    # 'res_name' is computed; don't force it
+
+        return super().create(vals_list)
