@@ -26,17 +26,14 @@ class ResFile(models.Model):
     def _default_file_code(self):
         """Generate next code as <PREFIX>-<YYYY>/<NNNN> per company."""
         current_year = dt.date.today().year
-        param_key = f"crm_filemgmt.file_prefix_{self.env.company.id}"
-        file_prefix = (
-            self.env["ir.config_parameter"].sudo().get_param(param_key) or ""
-        ).strip()
-        if not file_prefix:
+        if not self.env.user.company_id.file_prefix:
             raise exceptions.UserError(
                 self.env._(
                     "The file prefix parameter is not set. Go to configuration "
                     "and set a value for the parameter."
                 )
             )
+        file_prefix = self.env.user.company_id.file_prefix.strip()
         full_prefix = f"{file_prefix}-{current_year:04d}/"
         resp = f"{full_prefix}{1:0{self.SIZE_ANNUALSEQ_CODE}d}"
 
@@ -295,19 +292,6 @@ class ResFile(models.Model):
 
     def _check_filecode_format(self, filecode: str):
         """Ensure <PREFIX>-<YYYY>/<NNNN> shape and sane parts."""
-        param_key = f"crm_filemgmt.file_prefix_{self.env.company.id}"
-        file_prefix = (
-            self.env["ir.config_parameter"].sudo().get_param(param_key) or ""
-        ).strip()
-        real_prefix = f"{file_prefix}-"
-
-        if not filecode.startswith(real_prefix):
-            raise exceptions.UserError(
-                self.env._(
-                    "The prefix must be separated from the rest of "
-                    "the file name by a hyphen (-)."
-                )
-            )
 
         if filecode.startswith("/") or filecode.endswith("/"):
             raise exceptions.UserError(
