@@ -15,7 +15,7 @@ class MeasurementDeviceSensor(models.Model):
         string='Name',
         required=True,
         index=True,
-        translate=True,
+        translate=False,
     )
 
     description = fields.Text(

@@ -11,6 +11,8 @@ import requests
 import base64
 import pytz
 import pyodbc
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class RemoteControl(models.Model):
@@ -134,7 +136,10 @@ class RemoteControl(models.Model):
 
     def message_log(self, body):
         for record in self:
-            record.message_post(body=body)
+            try:
+                record.message_post(body=body)
+            except Exception as e:
+                _logger.error("Error logging %s: %s", record.id, e)
 
     def _build_rest_client(self):
         session = requests.Session()
