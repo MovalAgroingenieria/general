@@ -293,7 +293,9 @@ for sensor in sensors:
             last_reading_time = last_readings_map.get(sensor.id)
             if last_reading_time:
                 try:
-                    initial_date = fields.Date.to_string(last_reading_time.date())
+                    initial_date = fields.Date.to_string(
+                        fields.Datetime.from_string(last_reading_time) +
+                        timedelta(days=1))
                 except Exception:
                     initial_date = str(last_reading_time)[:10]
             else:
