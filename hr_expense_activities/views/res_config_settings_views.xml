@@ -1,27 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
-        <record id="res_config_settings_view_form" model="ir.ui.view">
-            <field name="name">res.config.settings.view.form.inherit.hr.expense</field>
-            <field name="model">res.config.settings</field>
-            <field name="priority" eval="85"/>
-            <field name="inherit_id" ref="hr_expense.res_config_settings_view_form"/>
-            <field name="arch" type="xml">
-                <xpath expr="//div[@id='hr_payroll_accountant']" position="after">
-                    <div class="col-lg-6 col-12 o_setting_box" id="hr_expense_activities">
-                        <div class="o_setting_left_pane">
-                            <field name="with_activity"/>
-                        </div>
-                        <div class="o_setting_right_pane">
-                            <label for="with_activity"
-                                   string="Include activities in expenses confirmation"/>
-                            <div class="text-muted">
-                                Include activities in expenses confirmation
-                            </div>
+    <!-- Inherit the Expenses settings view -->
+    <record id="res_config_settings_view_form_hr_expense_activities" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.hr.expense.activities</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="hr_expense.res_config_settings_view_form"/>
+        <field name="priority" eval="85"/>
+        <field name="arch" type="xml">
+
+            <!-- Append at the end of the settings root to avoid fragile anchors -->
+            <app name="hr_expense" position="inside">
+                <div class="col-lg-6 col-12 o_setting_box" id="hr_expense_activities_box">
+                    <div class="o_setting_left_pane">
+                        <field name="with_activity"/>
+                    </div>
+                    <div class="o_setting_right_pane">
+                        <label for="with_activity" string="Create an activity for new expenses"/>
+                        <div class="text-muted">
+                            When enabled, expense submission follows the standard flow and may create activities.
+                            When disabled, expense sheets are submitted without creating related activities.
                         </div>
                     </div>
-                </xpath>
-            </field>
-        </record>
-    </data>
+                </div>
+            </app>
+
+        </field>
+    </record>
 </odoo>

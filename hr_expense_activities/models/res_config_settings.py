@@ -1,27 +1,17 @@
-from odoo import api, fields, models
+# 2025 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
+
+from odoo import fields, models
 
 
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
+    # Stores/reads from ir.config_parameter automatically
+    # (string <-> bool handled by Odoo)
     with_activity = fields.Boolean(
-        string="Create new activity for new expense",
+        string="Create an activity for new expenses",
+        config_parameter="hr_expense_activities.with_activity",
         default=False,
-        config_parameter="ht_expense_activities.with_activity",
     )
-
-    @api.model
-    def get_values(self):
-        res = super(ResConfigSettings, self).get_values()
-        res["with_activity"] = (
-            self.env["ir.config_parameter"]
-            .sudo()
-            .get_param("hr_expense_activities.with_activity", default=False)
-        )
-        return res
-
-    def set_values(self):
-        super(ResConfigSettings, self).set_values()
-        self.env["ir.config_parameter"].sudo().set_param(
-            "hr_expense_activities.with_activity", self.with_activity
-        )
