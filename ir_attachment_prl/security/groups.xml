@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- (Opcional) categoría para agrupar permisos del módulo -->
+    <record id="module_category_prl" model="ir.module.category">
+        <field name="name">PRL</field>
+        <field name="description">Prevención de riesgos laborales</field>
+        <field name="sequence" eval="30"/>
+    </record>
+
+    <record id="group_prl_manager" model="res.groups">
+        <field name="name">PRL Manager</field>
+        <field name="category_id" ref="module_category_prl"/>
+        <!-- Añade implied_ids si tu grupo debe heredar permisos de otros -->
+        <!-- <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/> -->
+    </record>
+</odoo>

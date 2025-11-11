@@ -11,8 +11,7 @@
     "website": "http://www.avanzosc.es",
     "category": "Custom",
     "data": [
-        "data/ir_attachment_prl_data.xml",
+        "security/groups.xml",
         "views/ir_attachment_views.xml",
     ],
-    "installable": True,
 }
