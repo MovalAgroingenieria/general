@@ -1,5 +1,6 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+# pylint: disable=no-else-return
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
@@ -30,7 +31,7 @@ class MaterialComponentLine(models.Model):
     )
 
     submaterial_type_id = fields.Many2one(
-        comodel_name="product.submaterial.type",
+        comodel_name="submaterial.type",
         string="Submaterial Type",
         required=True,
         help="Specific type within the selected submaterial "
@@ -55,9 +56,18 @@ class MaterialComponentLine(models.Model):
                 # Reset dependent fields
                 line.submaterial_id = False
                 line.submaterial_type_id = False
+                # Set domain for submaterial_id to only show
+                # submaterials of the selected material
+                return {
+                    "domain": {
+                        "submaterial_id": [("material_id", "=", line.material_id.id)]
+                    }
+                }
             else:
                 line.submaterial_id = False
                 line.submaterial_type_id = False
+                # Clear domain if no material is selected
+                return {"domain": {"submaterial_id": [], "submaterial_type_id": []}}
 
     @api.onchange("submaterial_id")
     def _onchange_submaterial_id(self):
@@ -65,31 +75,52 @@ class MaterialComponentLine(models.Model):
         for line in self:
             if line.submaterial_id:
                 line.submaterial_type_id = False
+                return {
+                    "domain": {
+                        "submaterial_type_id": [
+                            ("submaterial_id", "=", line.submaterial_id.id)
+                        ]
+                    }
+                }
             else:
                 line.submaterial_type_id = False
+                return {"domain": {"submaterial_type_id": []}}
 
     @api.onchange("submaterial_type_id")
-    def _onchange_type_id(self):
-        """Selecting a type auto-fills submaterial and material."""
+    def _onchange_submaterial_type_id(self):
+        """Selecting a type auto-fills submaterial and material for consistency."""
         for line in self:
-            st = line.submaterial_type_id
-            if st:
-                line.submaterial_id = st.submaterial_id
-                line.material_id = (
-                    st.submaterial_id.material_id if st.submaterial_id else False
-                )
-            else:
-                line.submaterial_id = False
-                line.material_id = False
+            if line.submaterial_type_id:
+                line.submaterial_id = line.submaterial_type_id.submaterial_id
+                line.material_id = line.submaterial_type_id.submaterial_id.material_id
 
     # --------------
     # Validations
     # --------------
 
-    @api.constrains("weight_grams")
-    def _check_weight_non_negative(self):
+    @api.onchange("weight_grams")
+    def _onchange_weight_grams(self):
+        """Check weight non-negative and reset to 0 if negative."""
         for rec in self:
             if rec.weight_grams and rec.weight_grams < 0.0:
+                # Reset to 0 and show warning
+                rec.weight_grams = 0.0
+                return {
+                    "warning": {
+                        "title": self.env._("Warning"),
+                        "message": self.env._(
+                            "Weight (g) must be greater than or "
+                            "equal to 0. Value has been set to 0."
+                        ),
+                    }
+                }
+            return {}
+
+    @api.constrains("weight_grams")
+    def _check_weight_non_negative(self):
+        """Ensure weight is non-negative in database."""
+        for rec in self:
+            if rec.weight_grams < 0.0:
                 raise ValidationError(
                     self.env._("Weight (g) must be greater than or equal to 0.")
                 )
