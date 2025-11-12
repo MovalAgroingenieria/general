@@ -214,6 +214,15 @@ class RemoteControl(models.Model):
         if params.get('trusted_connection'):
             connection_string += ';Trusted_Connection=yes'
         connection = pyodbc.connect(connection_string)
+        # Configure pyodbc to return UTF-8 strings for SQL Server
+        # (avoids encoding issues in Python 2.7 when working with CSV)
+        sql_server_drivers = (
+            'SQL Server', 'FreeTDS', 'ODBC Driver 17 for SQL Server',
+        )
+        if driver_name in sql_server_drivers:
+            connection.setdecoding(pyodbc.SQL_CHAR, encoding='utf-8')
+            connection.setdecoding(pyodbc.SQL_WCHAR, encoding='utf-8')
+            connection.setencoding(encoding='utf-8')
         cursor = connection.cursor()
         return cursor
 
