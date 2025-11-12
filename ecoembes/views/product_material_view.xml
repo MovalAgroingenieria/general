@@ -1,51 +1,79 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
-    <record id="view_product_material_tree" model="ir.ui.view">
-        <field name="name">view.product.material.list</field>
+    <!-- ===== List (Grid) ===== -->
+    <record id="view_product_material_list" model="ir.ui.view">
+        <field name="name">product.material.list</field>
         <field name="model">product.material</field>
         <field name="arch" type="xml">
-            <list>
-                <field name="code" />
-                <field name="name" />
+            <list string="Materials">
+                <field name="code"/>
+                <field name="name"/>
             </list>
         </field>
     </record>
 
-    <record id="view_product_material_form" model="ir.ui.view">
-        <field name="name">view.product.material.form</field>
+    <!-- Classic alternative:
+    <record id="view_product_material_tree" model="ir.ui.view">
+        <field name="name">product.material.tree</field>
         <field name="model">product.material</field>
         <field name="arch" type="xml">
-            <form>
+            <tree string="Materials">
+                <field name="code"/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    -->
+
+    <!-- ===== Form ===== -->
+    <record id="view_product_material_form" model="ir.ui.view">
+        <field name="name">product.material.form</field>
+        <field name="model">product.material</field>
+        <field name="arch" type="xml">
+            <form string="Material">
                 <sheet>
-                    <div class="oe_title" style="width:100%;">
-                        <label for="name" class="oe_edit_only" />
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
                         <h1>
-                            <field name="name" />
+                            <field name="name" placeholder="Material name"/>
                         </h1>
                     </div>
-                    <group name="header">
-                        <field name="code" style="width:40%;" />
+                    <group>
+                        <field name="code"/>
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
 
+    <!-- ===== Search ===== -->
     <record id="view_product_material_search" model="ir.ui.view">
-        <field name="name">view.product.material.search</field>
+        <field name="name">product.material.search</field>
         <field name="model">product.material</field>
         <field name="arch" type="xml">
-            <search string="Search productMaterial">
-                <field name="name" filter_domain="[('name','ilike',self)]" string="Material" />
-                <field name="code" />
+            <search string="Search Materials">
+                <field name="name" string="Material" filter_domain="[('name','ilike', self)]"/>
+                <field name="code" string="Code" filter_domain="[('code','ilike', self)]"/>
+                <separator/>
+                <!-- Optional quick ordering filters via context -->
+                <filter string="Code A→Z" name="code_asc" context="{'search_default_order':'code asc'}"/>
+                <filter string="Name A→Z" name="name_asc" context="{'search_default_order':'name asc'}"/>
             </search>
         </field>
     </record>
 
     <record id="action_product_material" model="ir.actions.act_window">
-        <field name="name">Material</field>
+        <field name="name">Materials</field>
         <field name="res_model">product.material</field>
         <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+        <field name="target">current</field>
     </record>
+    <menuitem
+            id="menu_product_material"
+            name="Materials"
+            parent="menu_product_main"
+            sequence="10"
+            action="action_product_material"
+    />
 </odoo>

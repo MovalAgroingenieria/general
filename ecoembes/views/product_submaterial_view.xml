@@ -1,50 +1,67 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <record id="view_product_submaterial_tree" model="ir.ui.view">
-        <field name="name">view.product.submaterial.list</field>
+    <record id="view_product_submaterial_list" model="ir.ui.view">
+        <field name="name">product.submaterial.list</field>
         <field name="model">product.submaterial</field>
         <field name="arch" type="xml">
-            <list>
-                <field name="code" />
-                <field name="material_id" />
-                <field name="name" />
+            <list string="Submaterials">
+                <field name="code"/>
+                <field name="material_id"/>
+                <field name="name"/>
             </list>
         </field>
     </record>
+
+    <!-- ===== Form view for Submaterials ===== -->
     <record id="view_product_submaterial_form" model="ir.ui.view">
-        <field name="name">view.product.submaterial.form</field>
+        <field name="name">product.submaterial.form</field>
         <field name="model">product.submaterial</field>
         <field name="arch" type="xml">
-            <form>
+            <form string="Submaterial">
                 <sheet>
-                    <div class="oe_title" style="width:100%;">
-                        <label for="name" class="oe_edit_only" />
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
                         <h1>
-                            <field name="name" />
+                            <field name="name" placeholder="Submaterial name"/>
                         </h1>
                     </div>
-                    <group name="header">
-                        <field name="code" style="width:40%;" />
-                        <field name="material_id" style="width:40%;" />
+                    <group>
+                        <field name="code"/>
+                        <field name="material_id"/>
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
+
+    <!-- ===== Search view for Submaterials ===== -->
     <record id="view_product_submaterial_search" model="ir.ui.view">
-        <field name="name">view.product.submaterial.search</field>
+        <field name="name">product.submaterial.search</field>
         <field name="model">product.submaterial</field>
         <field name="arch" type="xml">
-            <search>
-                <field name="name" filter_domain="[('name','ilike',self)]" string="Submaterial" />
-                <field name="code" />
-                <field name="material_id" />
+            <search string="Search Submaterials">
+                <field name="name" string="Submaterial" filter_domain="[('name','ilike', self)]"/>
+                <field name="code" string="Code" filter_domain="[('code','ilike', self)]"/>
+                <field name="material_id" string="Material"/>
             </search>
         </field>
     </record>
+
+    <!-- ===== Action to open Submaterials ===== -->
     <record id="action_product_submaterial" model="ir.actions.act_window">
-        <field name="name">Submaterial</field>
+        <field name="name">Submaterials</field>
         <field name="res_model">product.submaterial</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,form</field> <!-- 'tree,form' also works -->
+        <field name="target">current</field>
     </record>
+
+    <!-- ===== Submaterials ===== -->
+
+    <menuitem
+            id="menu_product_submaterial"
+            name="Submaterials"
+            parent="menu_product_main"
+            sequence="20"
+            action="action_product_submaterial"
+    />
+
 </odoo>

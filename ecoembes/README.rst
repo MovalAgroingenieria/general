@@ -10,7 +10,7 @@
 Ecoembes
 ========
 
-**Table of contents**
+**Table of Contents**
 
 .. contents::
    :local:
@@ -18,20 +18,27 @@ Ecoembes
 Description
 ===========
 
-This module add information on the contribution to Ecoembes on invoices
+This module adds support for managing and reporting **Ecoembes environmental contributions** within Odoo.
+It provides the necessary fields, calculations, and reports to include **SCRAP (Extended Producer Responsibility)** data in invoices and generate annual contribution summaries.
 
+Key Features
+------------
+
+* Adds Ecoembes-related information to invoices.
+* Calculates SCRAP contributions based on product materials and submaterials.
+* Provides a detailed **annual SCRAP report** grouped by material and submaterial type.
+* Integrates with the Odoo accounting and invoicing workflow.
 
 Credits
 =======
 
-
 Authors
-~~~~~~~
+-------
 
-* Moval Agroingeniería S.L.
+* **Moval Agroingeniería S.L.**
 
 Contributors
-~~~~~~~~~~~~
+------------
 
 * Guillermo Amante <gamante@moval.es>
 * Samuel Fernández <sfernandez@moval.es>
@@ -44,12 +51,10 @@ Contributors
 * Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
 
-
-
 Maintainer
-~~~~~~~~~~
+==========
 
-This module is maintained by Moval Agroingeniería.
+This module is maintained by **Moval Agroingeniería S.L.**
 
 .. image:: https://services.moval.es/static/images/logo_moval_small.png
    :alt: Moval Agroingeniería
