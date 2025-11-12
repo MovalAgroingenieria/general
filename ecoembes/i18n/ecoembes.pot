@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 14.0\n"
+"Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-24 11:45+0000\n"
-"PO-Revision-Date: 2025-09-24 11:45+0000\n"
+"POT-Creation-Date: 2025-11-12 21:48+0000\n"
+"PO-Revision-Date: 2025-11-12 21:48+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -18,6 +18,11 @@ msgstr ""
 #. module: ecoembes
 #: model:ir.actions.report,print_report_name:ecoembes.action_report_scrap_annual
 msgid "'SCRAP annual report - %s' % (object.year)"
+msgstr ""
+
+#. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.report_invoice_document_scrap_notice
+msgid "<span style=\"font-weight: bold;\">SCRAP contribution:</span>"
 msgstr ""
 
 #. module: ecoembes
@@ -84,7 +89,21 @@ msgstr ""
 #: model:ir.model.fields,field_description:ecoembes.field_product_material__code
 #: model:ir.model.fields,field_description:ecoembes.field_product_submaterial__code
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__code
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_product_material_search
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_product_submaterial_search
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_submaterial_type_search
 msgid "Code"
+msgstr ""
+
+#. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_product_material_search
+msgid "Code A→Z"
+msgstr ""
+
+#. module: ecoembes
+#. odoo-python
+#: code:addons/ecoembes/models/product_material.py:0
+msgid "Code is required."
 msgstr ""
 
 #. module: ecoembes
@@ -92,6 +111,17 @@ msgstr ""
 #: model:ir.model.constraint,message:ecoembes.constraint_product_submaterial_code_unique
 #: model:ir.model.constraint,message:ecoembes.constraint_submaterial_type_code_unique
 msgid "Code must be unique."
+msgstr ""
+
+#. module: ecoembes
+#. odoo-python
+#: code:addons/ecoembes/models/product_material.py:0
+msgid "Code must contain only digits."
+msgstr ""
+
+#. module: ecoembes
+#: model:ir.model.fields,help:ecoembes.field_material_component_line__weight_grams
+msgid "Component weight in grams used for fee calculations."
 msgstr ""
 
 #. module: ecoembes
@@ -123,11 +153,9 @@ msgid "Created on"
 msgstr ""
 
 #. module: ecoembes
-#: model:ir.model.fields,field_description:ecoembes.field_account_move__display_name
 #: model:ir.model.fields,field_description:ecoembes.field_material_component_line__display_name
 #: model:ir.model.fields,field_description:ecoembes.field_product_material__display_name
 #: model:ir.model.fields,field_description:ecoembes.field_product_submaterial__display_name
-#: model:ir.model.fields,field_description:ecoembes.field_product_template__display_name
 #: model:ir.model.fields,field_description:ecoembes.field_scrap_annual_report_wizard__display_name
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__display_name
 msgid "Display Name"
@@ -142,13 +170,20 @@ msgstr ""
 #. module: ecoembes
 #: model:ir.ui.menu,name:ecoembes.menu_ecoembes_reports
 #: model:ir.ui.menu,name:ecoembes.menu_product_main
-#: model_terms:ir.ui.view,arch_db:ecoembes.nan_product_pack_form
+#: model_terms:ir.ui.view,arch_db:ecoembes.product_template_form_view_ecoembes
 msgid "Ecoembes"
 msgstr ""
 
 #. module: ecoembes
 #: model:res.groups,name:ecoembes.group_ecoembes_manager
 msgid "Ecoembes Manager"
+msgstr ""
+
+#. module: ecoembes
+#: model:ir.model.fields,help:ecoembes.field_product_product__is_manufactured
+#: model:ir.model.fields,help:ecoembes.field_product_template__is_manufactured
+msgid ""
+"Enable for products that you manufacture (used for SCRAP fee calculation)."
 msgstr ""
 
 #. module: ecoembes
@@ -159,6 +194,12 @@ msgstr ""
 #. module: ecoembes
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__fee_per_kg
 msgid "Fee €/kg"
+msgstr ""
+
+#. module: ecoembes
+#. odoo-python
+#: code:addons/ecoembes/models/submaterial_type.py:0
+msgid "Fee €/kg cannot be negative."
 msgstr ""
 
 #. module: ecoembes
@@ -198,14 +239,17 @@ msgid "HDPE"
 msgstr ""
 
 #. module: ecoembes
-#: model:ir.model.fields,field_description:ecoembes.field_account_move__id
 #: model:ir.model.fields,field_description:ecoembes.field_material_component_line__id
 #: model:ir.model.fields,field_description:ecoembes.field_product_material__id
 #: model:ir.model.fields,field_description:ecoembes.field_product_submaterial__id
-#: model:ir.model.fields,field_description:ecoembes.field_product_template__id
 #: model:ir.model.fields,field_description:ecoembes.field_scrap_annual_report_wizard__id
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__id
 msgid "ID"
+msgstr ""
+
+#. module: ecoembes
+#: model:ir.model.fields,help:ecoembes.field_product_submaterial__code
+msgid "Internal submaterial code (must be unique)."
 msgstr ""
 
 #. module: ecoembes
@@ -217,17 +261,6 @@ msgstr ""
 #. module: ecoembes
 #: model:ir.model,name:ecoembes.model_account_move
 msgid "Journal Entry"
-msgstr ""
-
-#. module: ecoembes
-#: model:ir.model.fields,field_description:ecoembes.field_account_move____last_update
-#: model:ir.model.fields,field_description:ecoembes.field_material_component_line____last_update
-#: model:ir.model.fields,field_description:ecoembes.field_product_material____last_update
-#: model:ir.model.fields,field_description:ecoembes.field_product_submaterial____last_update
-#: model:ir.model.fields,field_description:ecoembes.field_product_template____last_update
-#: model:ir.model.fields,field_description:ecoembes.field_scrap_annual_report_wizard____last_update
-#: model:ir.model.fields,field_description:ecoembes.field_submaterial_type____last_update
-msgid "Last Modified on"
 msgstr ""
 
 #. module: ecoembes
@@ -254,11 +287,12 @@ msgid "METALS"
 msgstr ""
 
 #. module: ecoembes
-#: model:ir.actions.act_window,name:ecoembes.action_product_material
 #: model:ir.model.fields,field_description:ecoembes.field_material_component_line__material_id
 #: model:ir.model.fields,field_description:ecoembes.field_product_material__name
 #: model:ir.model.fields,field_description:ecoembes.field_product_submaterial__material_id
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_product_material_form
 #: model_terms:ir.ui.view,arch_db:ecoembes.view_product_material_search
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_product_submaterial_search
 msgid "Material"
 msgstr ""
 
@@ -279,18 +313,37 @@ msgid "Material Components"
 msgstr ""
 
 #. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_product_material_form
+msgid "Material name"
+msgstr ""
+
+#. module: ecoembes
+#: model:ir.actions.act_window,name:ecoembes.action_product_material
 #: model:ir.ui.menu,name:ecoembes.menu_product_material
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_product_material_list
 msgid "Materials"
 msgstr ""
 
 #. module: ecoembes
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__name
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_submaterial_type_search
 msgid "Name"
 msgstr ""
 
 #. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_product_material_search
+msgid "Name A→Z"
+msgstr ""
+
+#. module: ecoembes
+#: model:ir.model.fields,field_description:ecoembes.field_product_product__weight_net_gram_round
+#: model:ir.model.fields,field_description:ecoembes.field_product_template__weight_net_gram_round
+msgid "Net Weight (g, rounded)"
+msgstr ""
+
+#. module: ecoembes
+#. odoo-python
 #: code:addons/ecoembes/wizard/scrap_annual_report_wizard.py:0
-#, python-format
 msgid "No SCRAP contributions found for year %s."
 msgstr ""
 
@@ -339,6 +392,11 @@ msgid "OTHERS"
 msgstr ""
 
 #. module: ecoembes
+#: model:ir.model.fields,help:ecoembes.field_submaterial_type__fee_per_kg
+msgid "Official SCRAP contribution fee per kilogram."
+msgstr ""
+
+#. module: ecoembes
 #: model:submaterial.type,name:ecoembes.type_pet_other_bottles
 msgid "Other bottles"
 msgstr ""
@@ -380,14 +438,25 @@ msgid "Paper and cardboard"
 msgstr ""
 
 #. module: ecoembes
+#: model:ir.model,name:ecoembes.model_product_template
+msgid "Product"
+msgstr ""
+
+#. module: ecoembes
 #: model:ir.model,name:ecoembes.model_product_material
 msgid "Product Material"
 msgstr ""
 
 #. module: ecoembes
-#: model:ir.model,name:ecoembes.model_product_template
 #: model:ir.model.fields,field_description:ecoembes.field_material_component_line__product_tmpl_id
 msgid "Product Template"
+msgstr ""
+
+#. module: ecoembes
+#: model:ir.model.fields,help:ecoembes.field_product_product__weight_net_gram_round
+#: model:ir.model.fields,help:ecoembes.field_product_template__weight_net_gram_round
+msgid ""
+"Product weight in grams, rounded to the nearest gram. Source: `weight` (kg)."
 msgstr ""
 
 #. module: ecoembes
@@ -441,12 +510,19 @@ msgstr ""
 
 #. module: ecoembes
 #: model_terms:ir.ui.view,arch_db:ecoembes.view_product_material_search
-msgid "Search productMaterial"
+msgid "Search Materials"
 msgstr ""
 
 #. module: ecoembes
-#: model:ir.model.fields,help:ecoembes.field_scrap_annual_report_wizard__year
-msgid "Select the year for the SCRAP contribution report"
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_product_submaterial_search
+msgid "Search Submaterials"
+msgstr ""
+
+#. module: ecoembes
+#: model:ir.model.fields,help:ecoembes.field_material_component_line__submaterial_type_id
+msgid ""
+"Specific type within the selected submaterial (carries the per-kg fee, "
+"etc.)."
 msgstr ""
 
 #. module: ecoembes
@@ -455,12 +531,13 @@ msgid "Steel"
 msgstr ""
 
 #. module: ecoembes
-#: model:ir.actions.act_window,name:ecoembes.action_product_submaterial
 #: model:ir.model,name:ecoembes.model_product_submaterial
 #: model:ir.model.fields,field_description:ecoembes.field_material_component_line__submaterial_id
 #: model:ir.model.fields,field_description:ecoembes.field_product_submaterial__name
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__submaterial_id
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_product_submaterial_form
 #: model_terms:ir.ui.view,arch_db:ecoembes.view_product_submaterial_search
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_submaterial_type_search
 msgid "Submaterial"
 msgstr ""
 
@@ -477,20 +554,21 @@ msgid "Submaterial Types"
 msgstr ""
 
 #. module: ecoembes
-#: model:ir.ui.menu,name:ecoembes.menu_product_submaterial
-msgid "Submaterials"
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_product_submaterial_form
+msgid "Submaterial name"
 msgstr ""
 
 #. module: ecoembes
-#: model:ir.model.fields,help:ecoembes.field_submaterial_type__fee_per_kg
-msgid "Tarifa oficial de contribución al SCRAP por kilogramo"
+#: model:ir.actions.act_window,name:ecoembes.action_product_submaterial
+#: model:ir.ui.menu,name:ecoembes.menu_product_submaterial
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_product_submaterial_list
+msgid "Submaterials"
 msgstr ""
 
 #. module: ecoembes
 #: model:ir.model.fields,field_description:ecoembes.field_account_bank_statement_line__scrap_contribution_total
 #: model:ir.model.fields,field_description:ecoembes.field_account_move__scrap_contribution_total
-#: model:ir.model.fields,field_description:ecoembes.field_account_payment__scrap_contribution_total
-msgid "Total SCRAP Contribution (€)"
+msgid "Total SCRAP Contribution"
 msgstr ""
 
 #. module: ecoembes
@@ -533,4 +611,16 @@ msgstr ""
 #: model:ir.model.fields,field_description:ecoembes.field_scrap_annual_report_wizard__year
 #: model_terms:ir.ui.view,arch_db:ecoembes.report_scrap_annual_document
 msgid "Year"
+msgstr ""
+
+#. module: ecoembes
+#. odoo-python
+#: code:addons/ecoembes/wizard/scrap_annual_report_wizard.py:0
+msgid "Year must be between 2000 and %s."
+msgstr ""
+
+#. module: ecoembes
+#: model:ir.model.fields,help:ecoembes.field_scrap_annual_report_wizard__year
+msgid ""
+"Year to compute the SCRAP contribution report for posted customer invoices."
 msgstr ""
