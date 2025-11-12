@@ -92,9 +92,7 @@ class AccountMove(models.Model):
             return {}
 
         fee_by_submaterial = {}
-        submaterial_records = self.env["product.submaterial.type"].browse(
-            submaterial_ids
-        )
+        submaterial_records = self.env["submaterial.type"].browse(submaterial_ids)
 
         for submaterial in submaterial_records:
             fee_by_submaterial[submaterial.id] = float(
