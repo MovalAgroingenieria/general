@@ -37,6 +37,18 @@ class ProductSubmaterialType(models.Model):
         ("code_unique", "unique(code)", "Code must be unique."),
     ]
 
+    @api.onchange("fee_per_kg")
+    def onchange_check_fee_non_negative(self):
+        if self.fee_per_kg and self.fee_per_kg < 0:
+            self.fee_per_kg = 0
+            return {
+                "warning": {
+                    "title": self.env._("Warning"),
+                    "message": self.env._("Fee €/kg cannot be negative."),
+                },
+            }
+        return {}
+
     @api.constrains("fee_per_kg")
     def _check_fee_non_negative(self):
         for record in self:
