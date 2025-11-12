@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-12 21:48+0000\n"
-"PO-Revision-Date: 2025-11-12 21:48+0000\n"
+"POT-Creation-Date: 2025-11-12 22:46+0000\n"
+"PO-Revision-Date: 2025-11-12 22:46+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -117,6 +117,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/ecoembes/models/product_material.py:0
 msgid "Code must contain only digits."
+msgstr ""
+
+#. module: ecoembes
+#: model:ir.actions.act_window,name:ecoembes.action_product_component_line
+#: model:ir.ui.menu,name:ecoembes.menu_action_product_component_line
+msgid "Component Ecoembes list"
 msgstr ""
 
 #. module: ecoembes
@@ -325,6 +331,7 @@ msgid "Materials"
 msgstr ""
 
 #. module: ecoembes
+#: model:ir.model.fields,field_description:ecoembes.field_product_submaterial__name
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__name
 #: model_terms:ir.ui.view,arch_db:ecoembes.view_submaterial_type_search
 msgid "Name"
@@ -514,6 +521,7 @@ msgid "Search Materials"
 msgstr ""
 
 #. module: ecoembes
+#: model_terms:ir.ui.view,arch_db:ecoembes.view_product_component_search
 #: model_terms:ir.ui.view,arch_db:ecoembes.view_product_submaterial_search
 msgid "Search Submaterials"
 msgstr ""
@@ -533,7 +541,6 @@ msgstr ""
 #. module: ecoembes
 #: model:ir.model,name:ecoembes.model_product_submaterial
 #: model:ir.model.fields,field_description:ecoembes.field_material_component_line__submaterial_id
-#: model:ir.model.fields,field_description:ecoembes.field_product_submaterial__name
 #: model:ir.model.fields,field_description:ecoembes.field_submaterial_type__submaterial_id
 #: model_terms:ir.ui.view,arch_db:ecoembes.view_product_submaterial_form
 #: model_terms:ir.ui.view,arch_db:ecoembes.view_product_submaterial_search
@@ -592,8 +599,21 @@ msgid "WOOD/CORK"
 msgstr ""
 
 #. module: ecoembes
+#. odoo-python
+#: code:addons/ecoembes/models/material_component_line.py:0
+#: code:addons/ecoembes/models/submaterial_type.py:0
+msgid "Warning"
+msgstr ""
+
+#. module: ecoembes
 #: model:ir.model.fields,field_description:ecoembes.field_material_component_line__weight_grams
 msgid "Weight (g)"
+msgstr ""
+
+#. module: ecoembes
+#. odoo-python
+#: code:addons/ecoembes/models/material_component_line.py:0
+msgid "Weight (g) must be greater than or equal to 0."
 msgstr ""
 
 #. module: ecoembes

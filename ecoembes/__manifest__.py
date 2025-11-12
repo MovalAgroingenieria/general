@@ -19,10 +19,9 @@
         "views/submaterial_type_view.xml",
         "views/product_template_view.xml",
         "views/menu.xml",
+        "views/product_component_line_view.xml",
         "wizard/scrap_annual_report_wizard_view.xml",
         "report/report_invoice_scrap_notice.xml",
         "report/scrap_annual_report.xml",
     ],
-    "application": False,
-    "installable": True,
 }

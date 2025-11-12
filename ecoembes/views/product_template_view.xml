@@ -13,15 +13,9 @@
                     </group>
 
                     <group>
-                        <field name="product_component_line_ids" nolabel="1">
-                            <!-- One2many inline editor -->
-                            <list editable="bottom">
-                                <field name="material_id"/>
-                                <field name="submaterial_id"/>
-                                <field name="submaterial_type_id"/>
-                                <field name="weight_grams"/>
-                            </list>
-                        </field>
+                        <field name="product_component_line_ids" nolabel="1"
+                               context="{'list_view_ref': 'ecoembes.view_product_component_list_product',
+                               'form_view_ref': 'ecoembes.view_product_component_form_product'}"/>
                     </group>
                 </page>
             </xpath>

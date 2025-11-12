@@ -1,0 +1,101 @@
+<odoo>
+    <record id="view_product_component_list_product" model="ir.ui.view">
+        <field name="name">material.component.line.list</field>
+        <field name="model">material.component.line</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="material_id"/>
+                <field name="submaterial_id"/>
+                <field name="submaterial_type_id"/>
+                <field name="weight_grams"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_product_component_list" model="ir.ui.view">
+        <field name="name">material.component.line.list</field>
+        <field name="model">material.component.line</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="product_tmpl_id"/>
+                <field name="material_id"/>
+                <field name="submaterial_id"/>
+                <field name="submaterial_type_id"/>
+                <field name="weight_grams"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_product_component_form_product" model="ir.ui.view">
+        <field name="name">material.component.line.form</field>
+        <field name="model">material.component.line</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="material_id"/>
+                        <field name="submaterial_id" domain="[('material_id', '=', material_id)]"/>
+                        <field name="submaterial_type_id" domain="[('submaterial_id', '=', submaterial_id)]"/>
+                        <field name="weight_grams"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ===== Form view for Submaterials ===== -->
+    <record id="view_product_component_form" model="ir.ui.view">
+        <field name="name">material.component.line.form</field>
+        <field name="model">material.component.line</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="product_tmpl_id"/>
+                        <field name="material_id"/>
+                        <field name="submaterial_id" domain="[('material_id', '=', material_id)]"/>
+                        <field name="submaterial_type_id" domain="[('submaterial_id', '=', submaterial_id)]"/>
+                        <field name="weight_grams"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ===== Search view for Submaterials ===== -->
+    <record id="view_product_component_search" model="ir.ui.view">
+        <field name="name">material.component.line.search</field>
+        <field name="model">material.component.line</field>
+        <field name="arch" type="xml">
+            <search string="Search Submaterials">
+                <field name="product_tmpl_id"/>
+                <field name="material_id"/>
+                <field name="submaterial_id"/>
+                <field name="submaterial_type_id"/>
+                <field name="weight_grams"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ===== Action to open Submaterials ===== -->
+    <record id="action_product_component_line" model="ir.actions.act_window">
+        <field name="name">Component Ecoembes list</field>
+        <field name="res_model">material.component.line</field>
+        <field name="view_mode">list,form</field>
+        <field name="target">current</field>
+    </record>
+
+    <!-- ===== Submaterials ===== -->
+
+    <menuitem
+            id="menu_action_product_component_line"
+            name="Component Ecoembes list"
+            parent="menu_product_main"
+            sequence="30"
+            action="action_product_component_line"
+    />
+
+</odoo>
