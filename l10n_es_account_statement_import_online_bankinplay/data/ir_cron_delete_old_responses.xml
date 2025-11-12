@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo>
+<odoo noupdate="1">
 
-    <data>
-        <record id="ir_cron_delete_old_responses" model="ir.cron">
-            <field name="name">Delete old bankinplay stored responses</field>
-            <field name="model_id" ref="model_bankinplay_response"/>
-            <field name="state">code</field>
-            <field name="code">model.delete_old_responses()</field>
-            <field name="interval_number">1</field>
-            <field name="interval_type">days</field>
-            <field name="numbercall">-1</field>
-            <field name="doall" eval="False"/>
-            <field name="active" eval="True"/>
-        </record>
-    </data>
+    <!--
+    Scheduled action to purge old stored Bankinplay responses.
+    Notes for v18:
+      - Both 'doall' and 'catchup' fields have been removed
+      - 'numbercall' field has been removed - cron jobs run indefinitely by default
+      - 'model_id' references the model to execute 'code' on.
+    -->
+    <record id="ir_cron_delete_old_responses" model="ir.cron">
+        <field name="name">Delete old bankinplay stored responses</field>
+        <field name="model_id" ref="model_bankinplay_response"/>
+        <field name="state">code</field>
+        <field name="code">model.delete_old_responses()</field>
+
+        <!-- run every 1 day -->
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+
+        <field name="active" eval="True"/>
+        <!-- optional: choose the user that executes the cron (defaults to admin)
+        <field name="user_id" ref="base.user_admin"/>
+        -->
+    </record>
 
 </odoo>

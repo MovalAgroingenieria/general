@@ -1,24 +1,38 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record model="ir.ui.view" id="online_bank_statement_provider_form">
-        <field name="name">online.bank.statement.provider.form</field>
+    <record id="online_bank_statement_provider_form_bankinplay" model="ir.ui.view">
+        <field name="name">online.bank.statement.provider.form.bankinplay</field>
         <field name="model">online.bank.statement.provider</field>
-        <field
-            name="inherit_id"
-            ref="account_statement_import_online.online_bank_statement_provider_form"
-        />
+        <field name="inherit_id" ref="account_statement_import_online.online_bank_statement_provider_form"/>
         <field name="arch" type="xml">
             <xpath expr="//group[@name='main']" position="inside">
-                <group
-                    name="bankinplay"
-                    string="Bankinplay Config"
-                    attrs="{'invisible':[('service','!=','bankinplay')]}"
-                >
+                <group name="bankinplay" string="BankInPlay Configuration">
+                    <!-- modifiers replace the old attrs/state logic -->
+                    <attribute name="modifiers">{"invisible": [["service","!=","bankinplay"]]}</attribute>
+
                     <field name="bankinplay_delay_days"/>
+
                     <field name="bankinplay_end_point_type"/>
-                    <field name="bankinplay_end_point" attrs="{'invisible':[('bankinplay_end_point_type','=','same_endpoint')]}"/>
-                    <field name="username" string="API Key" attrs="{'invisible':[('bankinplay_end_point_type','!=','same_endpoint')]}"/>
-                    <field name="password" string="API Secret" attrs="{'invisible':[('bankinplay_end_point_type','!=','same_endpoint')]}"/>
+
+                    <!-- Only show when using a remote endpoint -->
+                    <field name="bankinplay_end_point" string="Remote Endpoint URL">
+                        <attribute name="modifiers">{"invisible": [["bankinplay_end_point_type","=","same_endpoint"]]}
+                        </attribute>
+                    </field>
+
+                    <!-- Only needed when callbacks are handled in this DB -->
+                    <field name="username" string="API Key">
+                        <attribute name="modifiers">{"invisible":
+                            [["bankinplay_end_point_type","!=","same_endpoint"]]}
+                        </attribute>
+                    </field>
+
+                    <field name="password" string="API Secret" password="True">
+                        <attribute name="modifiers">{"invisible":
+                            [["bankinplay_end_point_type","!=","same_endpoint"]]}
+                        </attribute>
+                    </field>
+
                     <field name="bankinplay_date_field"/>
                 </group>
             </xpath>
