@@ -1,6 +1,7 @@
 # 2024 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-
+# pylint: disable=protected-access
+# pylint: disable=no-else-return
 import json
 import logging
 import re
@@ -8,7 +9,7 @@ from datetime import datetime
 
 import pytz
 from dateutil.relativedelta import MO, relativedelta
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -16,24 +17,29 @@ _logger = logging.getLogger(__name__)
 class OnlineBankStatementProviderBankinplay(models.Model):
     _inherit = "online.bank.statement.provider"
 
+    # --- BankInPlay configuration -------------------------------------------
+
+    # Which Bankinplay date field is mapped to the Odoo statement line date
     bankinplay_date_field = fields.Selection(
         [
             ("operation_date", "Operation Date"),
             ("value_date", "Value Date"),
         ],
-        string="Bankinplay Date Field",
         required=True,
         default="operation_date",
-        help="Select the Bankinplay date field that will be used for "
-        "the Odoo bank statement line date.",
+        help="Select the Bankinplay date field that will be used as the "
+        "statement line date in Odoo.",
     )
 
+    # Days of delay to apply when computing the statement period
     bankinplay_delay_days = fields.Integer(
         string="Delay Days",
         required=True,
         default=0,
+        help="Shift the date range this many days back to account for provider delays.",
     )
 
+    # Whether callbacks will be handled by this DB or a remote one
     bankinplay_end_point_type = fields.Selection(
         [
             ("same_endpoint", "Same Endpoint"),
@@ -42,228 +48,203 @@ class OnlineBankStatementProviderBankinplay(models.Model):
         string="Bankinplay End Point",
         required=True,
         default="same_endpoint",
+        help="Choose whether callbacks will be handled by this Odoo database "
+        "or a remote one.",
     )
 
+    # Base URL of the remote endpoint (only used when 'remote_endpoint')
     bankinplay_end_point = fields.Char(
-        string="Bankinplay endpoint",
-        help="Where callback webhook is gonna be setted, just in case don't. "
-        "want to use the default controller functions",
+        string="Bankinplay Endpoint",
+        help="Base URL where the webhook will be registered if using a "
+        "remote endpoint.",
     )
+
+    # --- Service registration ------------------------------------------------
 
     @api.model
     def _get_available_services(self):
-        """Each provider model must register its service."""
-        return super()._get_available_services() + [
-            ("bankinplay", "BankInPlay.com"),
-        ]
+        """Register BankInPlay as an available provider."""
+        return super()._get_available_services() + [("bankinplay", "BankInPlay.com")]
+
+    # --- Date helpers --------------------------------------------------------
 
     def _get_statement_date_since(self, date):
+        """Compute the start bound (00:00) minus the configured delay.
+
+        Matches v18 base semantics (daily/weekly/monthly “bucket” start),
+        but applies bankinplay_delay_days before bucketing.
+        """
         self.ensure_one()
         date = date.replace(hour=0, minute=0, second=0, microsecond=0)
         date = date - relativedelta(days=self.bankinplay_delay_days)
         if self.statement_creation_mode == "daily":
             return date
         elif self.statement_creation_mode == "weekly":
+            # Monday of the previous week relative to (delayed) date
             return date + relativedelta(weekday=MO(-1))
         elif self.statement_creation_mode == "monthly":
             return date.replace(day=1)
+        return date  # fallback
+
+    # --- Entry point ---------------------------------------------------------
 
     def _obtain_statement_data(self, date_since, date_until):
-        """Check wether called for bankinplay servide, otherwise pass the
-        buck."""
+        """Dispatch per service; only handle 'bankinplay' here."""
         self.ensure_one()
         if self.service != "bankinplay":  # pragma: no cover
-            return super()._obtain_statement_data(
-                date_since,
-                date_until,
-            )
+            return super()._obtain_statement_data(date_since, date_until)
         return self._bankinplay_obtain_statement_data(date_since, date_until)
 
     def _bankinplay_obtain_statement_data(self, date_since, date_until):
-        """Create Callbacks to being processed afterwards."""
+        """Schedule BankInPlay callbacks; statement lines arrive via webhook."""
         self.ensure_one()
         _logger.debug(
-            _("Bankinplay obtain statement data for journal %s from %s to %s"),
+            "Bankinplay obtain statement data for journal %s from %s to %s",
             self.journal_id.name,
             date_since,
             date_until,
         )
         response_data = self._bankinplay_retrieve_data(date_since, date_until)
+        # Base contract: (lines, extra_values). We return no lines now.
         return [], response_data
+
+    # --- Statement creation/update (BankInPlay path) -------------------------
 
     def _create_or_update_statement_bankinplay(
         self, data, statement_date_since, statement_date_until
     ):
-        """Create or update bank statement with the data retrieved from
-        provider."""
+        """Create or update a bank statement with BankInPlay data
+        (Odoo v18 compatible).
+
+        - Does not call `_get_statement_date` (no longer exists in v18).
+        - No `state` logic such as reopen/post — statements in v18 do
+         not have that field.
+        - Identifies statements by their `name` (computed via
+        `make_statement_name()`).
+        - Reuses base provider helpers for line filtering and balance calculation.
+        """
         self.ensure_one()
-        repost_statement = False
-        AccountBankStatement = self.env["account.bank.statement"]
-        is_scheduled = self.env.context.get("scheduled")
-        if is_scheduled:
-            AccountBankStatement = AccountBankStatement.with_context(
-                tracking_disable=True,
-            )
+
+        # Normalize payload structure
         if not data:
             data = ([], {})
-        if not data[0] and not data[1] and not self.allow_empty_statements:
-            return
         lines_data, statement_values = data
-        if not lines_data:
-            lines_data = []
-        if not statement_values:
-            statement_values = {}
-        statement_date = self._get_statement_date(
+        lines_data = lines_data or []
+        statement_values = (statement_values or {}).copy()
+
+        # Compute statement name based on the period start date (v18 style)
+        statement_values["name"] = self.make_statement_name(statement_date_since)
+
+        # Filter transaction lines within the given date range
+        filtered_lines = self._get_statement_filtered_lines(
+            lines_data,
+            statement_values,
             statement_date_since,
             statement_date_until,
         )
-        statement = AccountBankStatement.search(
-            [
-                ("journal_id", "=", self.journal_id.id),
-                ("date", "=", statement_date),
-            ],
-            limit=1,
-        )
-        if not statement:
-            statement_values.update(
-                {
-                    "name": "%s/%s"
-                    % (self.journal_id.code, statement_date.strftime("%Y-%m-%d")),
-                    "journal_id": self.journal_id.id,
-                    "date": statement_date,
-                }
-            )
-            statement = AccountBankStatement.with_context(
-                journal_id=self.journal_id.id,
-            ).create(
-                # NOTE: This is needed since create() alters values
-                statement_values.copy()
-            )
-        # If posted but not lines reconciled, try to add new data
-        elif (
-            statement.state == "posted"
-            and len(statement.line_ids.filtered(lambda x: x.is_reconciled)) < 1
-        ):
-            statement.button_reopen()
-            repost_statement = True
-        filtered_lines = self._get_statement_filtered_lines(
-            lines_data, statement_values, statement_date_since, statement_date_until
-        )
-        statement_values.update(
-            {"line_ids": [[0, False, line] for line in filtered_lines]}
-        )
-        if "balance_start" in statement_values:
-            statement_values["balance_start"] = float(statement_values["balance_start"])
-        if "balance_end_real" in statement_values:
-            statement_values["balance_end_real"] = float(
-                statement_values["balance_end_real"]
-            )
-        statement.write(statement_values)
-        if repost_statement:
-            statement.button_post()
+        if not filtered_lines:
+            # Nothing to create or update
+            return self.env["account.bank.statement"]
+
+        # Attach new statement lines to the values dictionary
+        statement_values["line_ids"] = [[0, False, line] for line in filtered_lines]
+
+        # Compute opening/closing balances using the base helper
+        self._update_statement_balances(statement_values)
+
+        # Create or update the statement (v18 identifies by name + journal)
+        statement = self._statement_create_or_write(statement_values)
+        return statement
+
+    # --- Callback post-processing -------------------------------------------
 
     def _bankinplay_update_statement_data_after_callback(self, bank_statement, data):
-        """Translate information from Bankinplay to Odoo bank statement
-        lines."""
+        """Translate BankInPlay payload into Odoo statement lines and write them."""
         self.ensure_one()
         if self.bankinplay_end_point_type == "remote_endpoint":
-            # Already decoded
+            # Already decrypted upstream
             all_transactions = self._bankinplay_get_transactions_from_data_remote(data)
         else:
             all_transactions = self._bankinplay_get_transactions_from_data(data)
-        if not all_transactions or len(all_transactions) < 1:
-            message_to_user = _(
-                "There is no transactions from bankinplay, original message:"
+
+        if not all_transactions:
+            msg = self.env._(
+                "There are no transactions from Bankinplay. Original message: "
             )
-            message_to_user += json.dumps(data)
-            bank_statement.message_post(body=message_to_user)
+            bank_statement.message_post(body=msg + json.dumps(data))
+            return
+
         self._create_or_update_statement_bankinplay(
             (all_transactions, {}),
             bank_statement.bankinplay_date_since,
             bank_statement.bankinplay_date_until,
         )
+        # Align end balance after insertion
         bank_statement.balance_end_real = bank_statement.balance_end
 
-    def _bankinplay_retrieve_data(self, date_since, date_until):
-        """Fill buffer with data from Bankinplay.
+    # --- Provider interaction ------------------------------------------------
 
-        Register a method for retrieval of transactions which will be processed
-        later by the callback action by adding the statement lines.
-        """
-        response_data = {}
+    def _bankinplay_retrieve_data(self, date_since, date_until):
+        """Request BankInPlay to prepare data (local or remote endpoint)."""
         interface_model = self.env["bankinplay.interface"]
         if self.bankinplay_end_point_type == "same_endpoint":
             access_data = interface_model._login(self.username, self.password)
             interface_model._set_access_account(access_data, self.account_number)
-            response_data = interface_model._set_close_movements_callback(
+            return interface_model._set_close_movements_callback(
                 access_data, date_since, date_until
             )
         else:
-            response_data = (
-                interface_model._set_close_movements_callback_remote_endpoint(
-                    date_since,
-                    date_until,
-                    self.bankinplay_end_point,
-                    self.account_number,
-                )
+            return interface_model._set_close_movements_callback_remote_endpoint(
+                date_since, date_until, self.bankinplay_end_point, self.account_number
             )
-        return response_data
+
+    # --- Data translation ----------------------------------------------------
 
     def _bankinplay_get_transactions_from_data(self, data):
-        """Translate information from Bankinplay to statement line vals."""
+        """Decrypt payload with provider credentials and build line values."""
         interface_model = self.env["bankinplay.interface"]
         access_data = interface_model._login(self.username, self.password)
-        transactions_decrypted = interface_model._decrypt_bankinplay_data(
+        decrypted = interface_model._decrypt_bankinplay_data(
             data, access_data["username"], access_data["password"]
-        ).get("results", [])
-        sequence = 0
-        all_transactions = []
-        for transaction_decrypted in transactions_decrypted:
-            transaction_line = self._bankinplay_get_transaction_vals(
-                transaction_decrypted, sequence
-            )
-            all_transactions.append(transaction_line)
-            sequence += 1
-        return all_transactions
+        )
+        transactions = decrypted.get("results", []) or []
+        return [
+            self._bankinplay_get_transaction_vals(tx, i)
+            for i, tx in enumerate(transactions)
+        ]
 
     def _bankinplay_get_transactions_from_data_remote(self, data):
-        """Translate information from Bankinplay to statement line vals."""
-        transactions_decrypted = data.get("results", [])
-        sequence = 0
-        all_transactions = []
-        for transaction_decrypted in transactions_decrypted:
-            transaction_line = self._bankinplay_get_transaction_vals(
-                transaction_decrypted, sequence
-            )
-            all_transactions.append(transaction_line)
-            sequence += 1
-        return all_transactions
+        """Use already-decrypted remote payload to build line values."""
+        transactions = data.get("results", []) or []
+        return [
+            self._bankinplay_get_transaction_vals(tx, i)
+            for i, tx in enumerate(transactions)
+        ]
 
     def _bankinplay_get_transaction_vals(self, transaction, sequence):
-        """Translate information from Bankinplay to statement line vals."""
+        """Map one BankInPlay transaction to account.bank.statement.line vals."""
         date = self._bankinplay_get_transaction_datetime(transaction)
-        ref = transaction.get("descripcion")
-        amount = transaction.get("importeAbsoluto", 0)
-        amount_multiplier = transaction.get("signo", "Cobro")
-        if amount_multiplier != "Cobro":
+        ref = (transaction.get("descripcion") or "/").strip()
+        ref = re.sub(r"\s+", " ", ref) or "/"
+
+        amount = float(transaction.get("importeAbsoluto", 0) or 0.0)
+        # Bankinplay uses 'signo' == 'Cobro' for incoming; anything else => outgoing
+        if transaction.get("signo", "Cobro") != "Cobro":
             amount *= -1
-        vals_line = {
+
+        return {
             "sequence": sequence,
             "date": date,
-            "ref": re.sub(" +", " ", ref) or "/",
-            "unique_import_id": str(transaction["id"]),
+            "ref": ref,
+            "unique_import_id": str(transaction.get("id")),
             "amount": amount,
             "raw_data": json.dumps(transaction),
         }
-        return vals_line
+
+    # --- Date parsing --------------------------------------------------------
 
     def _bankinplay_get_transaction_datetime(self, transaction):
-        """Get execution datetime for a transaction.
-
-        Odoo often names variables containing date and time just xxx_date or
-        date_xxx. We try to avoid this misleading naming by using datetime as
-        much for variables and fields of type datetime.
-        """
+        """Choose operation/value timestamp from the transaction based on settings."""
         if self.bankinplay_date_field == "value_date":
             datetime_str = transaction.get("fechaValor")
         else:
@@ -271,9 +252,13 @@ class OnlineBankStatementProviderBankinplay(models.Model):
         return self._bankinplay_datetime_from_string(datetime_str)
 
     def _bankinplay_datetime_from_string(self, datetime_str):
-        """Dates in Bankinplay are expressed in UTC, so we need to convert them
-        to supplied tz for proper classification.
-        """
+        """BankInPlay timestamps are UTC (Zulu). Convert to
+        provider TZ and return naive."""
+        if not datetime_str:
+            # fallback to now to avoid crashes if upstream payload is missing the date
+            return fields.Datetime.now()
         dt = datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%SZ")
-        dt = dt.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(self.tz or "utc"))
+        provider_tz = self.tz or self.env.user.tz or "UTC"
+        dt = dt.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(provider_tz))
+        # Odoo stores naive datetimes; base API expects naive here
         return dt.replace(tzinfo=None)
