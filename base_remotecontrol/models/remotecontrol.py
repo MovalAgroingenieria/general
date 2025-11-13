@@ -222,7 +222,8 @@ class RemoteControl(models.Model):
         if driver_name in sql_server_drivers:
             connection.setdecoding(pyodbc.SQL_CHAR, encoding='utf-8')
             connection.setdecoding(pyodbc.SQL_WCHAR, encoding='utf-8')
-            connection.setencoding(encoding='utf-8')
+            connection.setencoding(str, encoding='utf-8')
+            connection.setencoding(unicode, encoding='utf-8')
         cursor = connection.cursor()
         return cursor
 
