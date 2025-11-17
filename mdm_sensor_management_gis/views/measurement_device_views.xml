@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mdm_measurement_device_view_form_gis" model="ir.ui.view">
+        <field name="name">mdm.measurement.device.form.gis</field>
+        <field name="model">mdm.measurement.device</field>
+        <field name="inherit_id" ref="mdm_sensor_management.mdm_device_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='serial_number']" position="after">
+                <field name="available_for_gis_devices"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="mdm_measurement_device_view_search_gis" model="ir.ui.view">
+        <field name="name">mdm.measurement.device.search.gis</field>
+        <field name="model">mdm.measurement.device</field>
+        <field name="inherit_id" ref="mdm_sensor_management.mdm_device_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='archived_devices']" position="before">
+                <separator/>
+                <filter string="Available for GIS" name="gis_available"
+                        domain="[('available_for_gis_devices', '=', True)]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

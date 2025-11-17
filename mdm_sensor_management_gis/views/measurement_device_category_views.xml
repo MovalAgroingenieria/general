@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mdm_measurement_device_category_view_form_gis" model="ir.ui.view">
+        <field name="name">mdm.measurement.device.category.form.gis</field>
+        <field name="model">mdm.measurement.device.category</field>
+        <field name="inherit_id" ref="mdm_sensor_management.measurement_device_category_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='description']" position="after">
+                <field name="available_for_gis_devices"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page name="viewer_page" string="Viewer">
+                    <header>
+                        <button name="action_randomize_style" type="object" class="btn btn-link"
+                            string="Randomize Style" icon="fa-random" style="margin-top:2px; margin-bottom:2px;"
+                        />
+                    </header>
+                    <group>
+                        <field name="geojson_style"/>
+                        <field name="geojson_style_preview" readonly="1" widget="html"/>
+                        <field name="legend_symbology"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

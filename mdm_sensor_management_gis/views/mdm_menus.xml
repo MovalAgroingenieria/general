@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Hide Parameters menu from root -->
+        <record id="mdm_sensor_management.mdm_parameters_menu" model="ir.ui.menu">
+            <field name="active" eval="False"/>
+        </record>
+
+        <!-- Create Configuration menu -->
+        <menuitem id="mdm_configuration_menu"
+                  name="Configuration"
+                  parent="mdm_sensor_management.mdm_root_menu"
+                  sequence="55"
+                  groups="mdm_sensor_management.group_mdm_user"/>
+
+        <!-- Reassign Device Categories to Configuration menu -->
+        <record id="mdm_sensor_management.menu_measurement_device_category" model="ir.ui.menu">
+            <field name="parent_id" ref="mdm_configuration_menu"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <!-- Reassign Sensor Types to Configuration menu -->
+        <record id="mdm_sensor_management.mdm_sensor_type_menu" model="ir.ui.menu">
+            <field name="parent_id" ref="mdm_configuration_menu"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <!-- Reassign Measurement Units to Configuration menu -->
+        <record id="mdm_sensor_management.mdm_sensor_uom_menu" model="ir.ui.menu">
+            <field name="parent_id" ref="mdm_configuration_menu"/>
+            <field name="sequence">30</field>
+        </record>
+    </data>
+</odoo>
