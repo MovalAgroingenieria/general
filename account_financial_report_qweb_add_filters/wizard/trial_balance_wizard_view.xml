@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Definición del wizard -->
+        <record id="trial_balance_grouped_wizard" model="ir.ui.view">
+            <field name="name">Trial Balance Grouped</field>
+            <field name="model">trial.balance.report.grouped.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Trial Balance Report Wizard">
+                    <group name="main_info">
+                        <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                    </group>
+                    <div>
+                        <group name="date_range">
+                            <field name="date_range_id"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="fy_start_date" invisible="1"/>
+                            <field name="show_account_zero"/>
+                            <field name="account_ids"/>
+                        </group>
+                    </div>
+                    <footer>
+                        <div>
+                            <button name="button_export_pdf" string="Export PDF" type="object" default_focus="1" class="oe_highlight"/>
+                            or
+                            <button name="button_export_excel" string="Export Excel" type="object" class="btn btn-primary"/>
+                            or
+                            <button string="Cancel" class="oe_link" special="cancel" />
+                        </div>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Acción para el wizard -->
+        <record id="action_trial_balance_grouped_wizard" model="ir.actions.act_window">
+            <field name="name">Trial Balance Grouped</field>
+            <field name="res_model">trial.balance.report.grouped.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="trial_balance_grouped_wizard"/>
+        </record>
+
+
+        <!-- Definición del submenu que usa el menú principal -->
+        <menuitem
+            id="trial_balance_grouped_wizard_menu"
+            name="General Ledger Balance Grouped"
+            parent="account_financial_report.menu_oca_reports"
+            action="action_trial_balance_grouped_wizard"
+            sequence="2"
+            groups="base.group_user"/>
+
+    </data>
+</odoo>

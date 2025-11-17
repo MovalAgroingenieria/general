@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_general_ledger_balance_grouped">
+            <t t-call="report.external_layout">
+                <t t-set="o" t-value="o.with_context(lang=es_ES)" />
+                <div class="page">
+                    <h2>Trial Balance Report</h2>
+                    <h3>Year <t t-esc="o.date_range_id.name"/> - From <t t-esc="o.date_from"/> to <t t-esc="o.date_to"/></h3>
+                    <table class="table table-condensed" name="principal_table">
+                        <thead name="principal_thead">
+                            <tr style="page-break-before: always; page-break-after: auto; page-break-inside: avoid;">
+                                <th style="width: 30%;">Account</th>
+                                <th style="width: 70%;">Item</th>
+                            </tr>
+                        </thead>
+                        <tbody name="principal_tbody">
+                            <!-- Iterar sobre las cuentas -->
+                            <t t-foreach="o.get_accounts()" t-as="account">
+                                <!-- Almacenar los items obtenidos del método en una variable -->
+                                <t t-set="items" t-value="o.get_item_ids(account, o.date_from, o.date_to)"/>
+                                <!-- Verificar si hay registros -->
+                                <t t-if="not items and o.show_account_zero or items">
+                                    <tr style="page-break-before: always; page-break-after: auto; page-break-inside: avoid;">
+                                        <td name="account_td">
+                                            <span t-esc="account.code or ''"/>
+                                            <span> - </span>
+                                            <span t-esc="account.name or ''"/>
+                                        </td>
+                                        <td colspan="6" name="columns_td">
+                                            <!-- Tabla anidada -->
+                                            <table class="table table-condensed" name="internal_table">
+                                                <thead name="internal_thead">
+                                                    <tr style="page-break-before: always; page-break-after: auto; page-break-inside: avoid;">
+                                                        <th style="width: 20%;">
+                                                            <t t-if="account.user_type_id.group_by == 'product_id'">
+                                                                Product
+                                                            </t>
+                                                            <t t-elif="account.user_type_id.group_by == 'partner_id'">
+                                                                Partner
+                                                            </t>
+                                                            <t t-elif="account.user_type_id.group_by == 'journal_id'">
+                                                                Journal
+                                                            </t>
+                                                            <t t-elif="account.user_type_id.group_by == 'tag'">
+                                                                Tag
+                                                            </t>
+                                                            <t t-elif="account.user_type_id.group_by == 'analytic_account'">
+                                                                Analytic Account
+                                                            </t>
+                                                            <t t-else="">
+                                                                N/A
+                                                            </t>
+                                                        </th>
+                                                        <th style="width: 16%;">Credit</th>
+                                                        <th style="width: 16%;">Debit</th>
+                                                        <th style="width: 16%;">Period Balance</th>
+                                                        <th style="width: 16%;">Initial Balance</th>
+                                                        <th style="width: 16%;">Final Balance</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody name="internal_tbody">
+                                                    <!-- Iterar sobre los campos de agrupación relacionados con la cuenta -->
+                                                    <t t-foreach="o.get_item_ids(account, o.date_from, o.date_to)" t-as="item_line">
+                                                        <tr style="page-break-before: always; page-break-after: auto; page-break-inside: avoid;">
+                                                            <td>
+                                                                <t t-if="account.user_type_id.group_by == 'product_id'">
+                                                                    <span t-esc="item_line['product_id']"/>
+                                                                </t>
+                                                                <t t-elif="account.user_type_id.group_by == 'partner_id' and item_line['partner_id']">
+                                                                    <span t-esc="item_line['partner_id'][1] or False"/>
+                                                                </t>
+                                                                <t t-elif="account.user_type_id.group_by == 'journal_id' and item_line['journal_id']">
+                                                                    <span t-esc="item_line['journal_id'][1] or False"/>
+                                                                </t>
+                                                                <t t-elif="account.user_type_id.group_by == 'tag'">
+                                                                    <span t-esc="item_line['tag']"/>
+                                                                </t>
+                                                                <t t-elif="account.user_type_id.group_by == 'analytic_account_id'">
+                                                                    <span t-esc="item_line['analytic_account_id']"/>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <span t-esc="'N/A'"/>
+                                                                </t>
+                                                            </td>
+                                                            <td>
+                                                                <span t-esc="o.env['wua.parcel'].transform_float_to_locale(item_line['credit'] or 0.0, 2)"/>
+                                                            </td>
+                                                            <td>
+                                                                <span t-esc="o.env['wua.parcel'].transform_float_to_locale(item_line['debit'] or 0.0, 2)"/>
+                                                            </td>
+                                                            <td>
+                                                                <span t-esc="o.env['wua.parcel'].transform_float_to_locale(item_line['balance'] or 0.0, 2)"/>
+                                                            </td>
+                                                            <td>
+                                                                <span t-esc="o.env['wua.parcel'].transform_float_to_locale(item_line['initial_balance'] or 0.0, 2)"/>
+                                                            </td>
+                                                            <td>
+                                                                <span t-esc="o.env['wua.parcel'].transform_float_to_locale(item_line['final_balance'] or 0.0, 2)"/>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </template>
+
+
+        <template id="template_report_trial_balance">
+            <t t-call="report.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="account_financial_report_qweb_add_filters.report_general_ledger_balance_grouped"/>
+                </t>
+            </t>
+        </template>
+
+<!--        <report-->
+<!--            id="report_general_ledger_balance_grouped_action"-->
+<!--            string="Trial Balance Report Grouped"-->
+<!--            model="ir.model"-->
+<!--            report_type="qweb-pdf"-->
+<!--            name="account_financial_report_qweb_add_filters.template_report_trial_balance"-->
+<!--            file="account_financial_report_qweb_add_filters.template_report_trial_balance"-->
+<!--        />-->
+
+        <report
+            id="report_general_ledger_balance_grouped_action"
+            string="Trial Balance Report Grouped"
+            model="trial.balance.report.grouped.wizard"
+            report_type="qweb-pdf"
+            name="account_financial_report_qweb_add_filters.template_report_trial_balance"
+            file="account_financial_report_qweb_add_filters.template_report_trial_balance"
+        />
+
+            <!-- PDF REPORTS : paperformat -->
+
+    <record id="general_ledger_report_qweb_paperformat" model="report.paperformat">
+        <field name="name">General Ledger report qweb paperformat</field>
+        <field name="default" eval="True"/>
+        <field name="format">custom</field>
+        <field name="page_height">297</field>
+        <field name="page_width">210</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">20</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">20</field>
+        <field name="dpi">110</field>
+    </record>
+
+    </data>
+</odoo>
