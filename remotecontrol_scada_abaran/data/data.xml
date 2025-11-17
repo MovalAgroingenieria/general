@@ -229,7 +229,8 @@ try:
         'DEVICE_DESCRIPTION',
         'SENSOR_NAME'
     ])
-    # Write data rows (pyodbc now returns UTF-8 strings directly)
+    # Write data rows
+    # In Python 2.7, csv.writer needs byte strings, not unicode
     for row in rows:
         scada_remote = row[0]
         element_type = row[1]
@@ -239,14 +240,23 @@ try:
         history = row[5]
         info_type = row[6]
         sensor_name = row[7] or ''
+        # Encode all string values to UTF-8 bytes for Python 2.7 csv.writer
+        def encode_value(val):
+            if val is None:
+                return ''
+            if isinstance(val, unicode):
+                return val.encode('utf-8')
+            if isinstance(val, (int, long, float)):
+                return str(val)
+            return str(val)
         writer.writerow([
-            scada_remote,
-            element_type,
-            identifier,
-            info_type,
-            device_name,
-            device_description,
-            sensor_name
+            encode_value(scada_remote),
+            encode_value(element_type),
+            encode_value(identifier),
+            encode_value(info_type),
+            encode_value(device_name),
+            encode_value(device_description),
+            encode_value(sensor_name)
         ])
     # Get CSV content as bytes
     csv_bytes = output.getvalue()
