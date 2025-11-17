@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Author: Julien Coux
 # Copyright 2016 Camptocamp SA
 # Copyright 2017 Akretion - Alexis de Lattre
@@ -194,15 +193,15 @@ class TrialBalanceReportWizard(models.TransientModel):
 
         if group_by_field:
             # Usar read_group si se especifica un campo de agrupación
-            move_lines = self.env["account.move.line"].read_group(
+            move_lines = self.env["account.move.line"]._read_group(
                 domain=domain,
-                fields=["credit:sum", "debit:sum", "balance:sum", group_by_field],
                 groupby=[group_by_field],
+                aggregates=['credit:sum', 'debit:sum', 'balance:sum', group_by_field],
             )
-            move_lines_back = self.env["account.move.line"].read_group(
+            move_lines_back = self.env["account.move.line"]._read_group(
                 domain=domain_back,
-                fields=["credit:sum", "debit:sum", "balance:sum", group_by_field],
                 groupby=[group_by_field],
+                aggregates=['credit:sum', 'debit:sum', 'balance:sum', group_by_field],
             )
             item_lines = []
             # all_mlines = move_lines + move_lines_back
