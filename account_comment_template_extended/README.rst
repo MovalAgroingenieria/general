@@ -4,9 +4,9 @@
 
 |badge1|
 
-=========================
+===============================
 Account Comments Extended
-=========================
+===============================
 
 **Table of contents**
 
@@ -17,11 +17,25 @@ Account Comments Extended
 Description
 ===========
 
-After installing this module, the different comment templates for account moves
-are not added to the report by default. They have to be inserted by clicking
-the **Insert comments** button. This action renders the templates for the top
-and bottom comments and inserts them into two fields in the chosen order. These
-fields can be edited without altering the templates.
+This module extends the behavior of comment templates on ``account.move``.
+
+By default, all selected comment templates are inserted directly into the
+invoice report. With this module installed, templates are **not** added
+automatically. Instead, the user must click the **Insert comments** button.
+
+This action will:
+
+* Render each selected template,
+* Split them by their configured position (before or after invoice lines),
+* Insert them into two editable HTML fields:
+  * **Top Comment**
+  * **Bottom Comment**
+
+The rendered comments can then be edited freely in the invoice, without
+modifying the original templates.
+
+This provides more control over how comment templates are applied to invoices.
+
 
 Credits
 =======
@@ -47,8 +61,8 @@ Contributors
 Maintainers
 ~~~~~~~~~~~
 
-This module is maintained by Moval Agroingeniería.
+This module is maintained by **Moval Agroingeniería**.
 
 .. image:: https://services.moval.es/static/images/logo_moval_small.png
    :alt: Moval Agroingeniería
-   :target: http://moval.es
+   :target: https://moval.es
