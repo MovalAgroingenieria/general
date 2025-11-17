@@ -34,9 +34,7 @@ class AccountMove(models.Model):
 
             for template in move.comment_template_ids:
                 # Ensure rendering is done in the proper language context.
-                rendered_comment = move.render_comment(
-                    template.with_context(lang=lang)
-                )
+                rendered_comment = move.render_comment(template.with_context(lang=lang))
                 if template.position == "before_lines":
                     top_comment_html += rendered_comment
                 elif template.position == "after_lines":
