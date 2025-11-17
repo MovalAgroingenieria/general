@@ -17,8 +17,6 @@ class TestAccountMoveComments(TransactionCase):
         cls.AccountMove = cls.env["account.move"]
         cls.Partner = cls.env["res.partner"]
         cls.Journal = cls.env["account.journal"]
-        cls.Account = cls.env["account.account"]
-        cls.AccountType = cls.env["account.account.type"]
 
         cls.company = cls.env.company
 
@@ -30,48 +28,19 @@ class TestAccountMoveComments(TransactionCase):
             }
         )
 
-        # Ensure we have a sale journal
-        cls.journal = cls.Journal.search([("type", "=", "sale")], limit=1)
+        # Ensure we have a general journal (no need for sale/purchase)
+        cls.journal = cls.Journal.search([("type", "=", "general")], limit=1)
         if not cls.journal:
             journal_vals = {
-                "name": "Test Sale Journal",
-                "code": "TSA",
-                "type": "sale",
+                "name": "Test General Journal",
+                "code": "TGEN",
+                "type": "general",
             }
-            # V18 puede tener company_id o company_ids en journal
             if "company_id" in cls.Journal._fields:
                 journal_vals["company_id"] = cls.company.id
             elif "company_ids" in cls.Journal._fields:
                 journal_vals["company_ids"] = [(4, cls.company.id)]
             cls.journal = cls.Journal.create(journal_vals)
-
-        # Ensure we have an "income" account for the invoice line
-        if "account_type" in cls.Account._fields:
-            cls.income_account = cls.Account.search(
-                [("account_type", "=", "income")], limit=1
-            )
-        else:
-            cls.income_account = cls.Account.search([], limit=1)
-
-        if not cls.income_account:
-            account_vals = {
-                "name": "Test Income Account",
-                "code": "TINC",
-            }
-            if "account_type" in cls.Account._fields:
-                account_vals["account_type"] = "income"
-            elif "user_type_id" in cls.Account._fields:
-                acc_type = cls.AccountType.search(
-                    [("type", "=", "income")], limit=1
-                ) or cls.AccountType.search([], limit=1)
-                account_vals["user_type_id"] = acc_type.id
-
-            if "company_id" in cls.Account._fields:
-                account_vals["company_id"] = cls.company.id
-            elif "company_ids" in cls.Account._fields:
-                account_vals["company_ids"] = [(4, cls.company.id)]
-
-            cls.income_account = cls.Account.create(account_vals)
 
         # Dynamically get the comodel of comment_template_ids
         comment_field = cls.AccountMove._fields.get("comment_template_ids")
@@ -100,24 +69,12 @@ class TestAccountMoveComments(TransactionCase):
             }
         )
 
-        # Create a basic move for testing (valid accounting-wise)
+        # Create a minimal move for testing (no lines, no accounting constraints)
         cls.move = cls.AccountMove.create(
             {
-                "move_type": "out_invoice",
-                "partner_id": cls.partner.id,
+                "move_type": "entry",
                 "journal_id": cls.journal.id,
-                "invoice_line_ids": [
-                    (
-                        0,
-                        0,
-                        {
-                            "name": "Test line",
-                            "quantity": 1.0,
-                            "price_unit": 100.0,
-                            "account_id": cls.income_account.id,
-                        },
-                    )
-                ],
+                "partner_id": cls.partner.id,
                 "comment_template_ids": [
                     (6, 0, [cls.template_top.id, cls.template_bottom.id])
                 ],
@@ -137,18 +94,20 @@ class TestAccountMoveComments(TransactionCase):
             return ""
 
         with patch.object(
-            type(move), "render_comment", autospec=True, side_effect=fake_render_comment
+                type(move), "render_comment", autospec=True, side_effect=fake_render_comment
         ):
             move.action_insert_comments()
 
-        self.assertEqual(
-            move.top_comment,
+        # Html fields are stored as Markup and may add <p> wrappers,
+        # so we just check that our text is present in the rendered HTML.
+        self.assertIn(
             "TOP-HTML;",
+            str(move.top_comment),
             "Top template should be rendered into top_comment.",
         )
-        self.assertEqual(
-            move.bottom_comment,
+        self.assertIn(
             "BOTTOM-HTML;",
+            str(move.bottom_comment),
             "Bottom template should be rendered into bottom_comment.",
         )
 
