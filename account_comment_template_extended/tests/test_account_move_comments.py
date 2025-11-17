@@ -94,7 +94,7 @@ class TestAccountMoveComments(TransactionCase):
             return ""
 
         with patch.object(
-                type(move), "render_comment", autospec=True, side_effect=fake_render_comment
+            type(move), "render_comment", autospec=True, side_effect=fake_render_comment
         ):
             move.action_insert_comments()
 
