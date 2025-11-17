@@ -9,22 +9,38 @@ class AccountMove(models.Model):
 
     top_comment = fields.Html(
         string="Top Comment",
+        help="Comments rendered before the invoice lines.",
     )
     bottom_comment = fields.Html(
         string="Bottom Comment",
+        help="Comments rendered after the invoice lines.",
     )
 
     def action_insert_comments(self):
-        for record in self:
-            top_comment_text = bottom_comment_text = ""
-            for comment in record.comment_template_ids:
-                lang = record.partner_id.lang if record.partner_id else None
-                rendered_comment = record.render_comment(
-                    comment.with_context(lang=lang)
+        """Render and inject comment templates into top and bottom comment fields.
+
+        For each move:
+        - Iterate its comment_template_ids.
+        - Render each template in the partner language (if any).
+        - Concatenate templates with position 'before_lines' into top_comment.
+        - Concatenate templates with position 'after_lines' into bottom_comment.
+        """
+        for move in self:
+            top_comment_html = ""
+            bottom_comment_html = ""
+
+            # Fallback to partner language, or current user language if absent.
+            lang = move.partner_id.lang or self.env.user.lang
+
+            for template in move.comment_template_ids:
+                # Ensure rendering is done in the proper language context.
+                rendered_comment = move.render_comment(
+                    template.with_context(lang=lang)
                 )
-                if comment.position == "before_lines":
-                    top_comment_text += rendered_comment
-                elif comment.position == "after_lines":
-                    bottom_comment_text += rendered_comment
-            record.top_comment = top_comment_text
-            record.bottom_comment = bottom_comment_text
+                if template.position == "before_lines":
+                    top_comment_html += rendered_comment
+                elif template.position == "after_lines":
+                    bottom_comment_html += rendered_comment
+
+            move.top_comment = top_comment_html
+            move.bottom_comment = bottom_comment_html
