@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <template id="report_invoice_document_comments" inherit_id="account_comment_template.report_invoice_document_comments">
+        <xpath expr="//t[@t-foreach='before_comment_template_ids']" position="replace">
+            <span t-field="o.top_comment"/>
+        </xpath>
+        <xpath expr="//t[@t-foreach='after_comment_template_ids']" position="replace">
+            <span t-field="o.bottom_comment"/>
+        </xpath>
+    </template>
+
+</odoo>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record model="ir.ui.view" id="move_form_add_comment_extended">
+        <field name="name">account.move.form.comment</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account_comment_template.move_form_add_comment"/>
+        <field name="inherit_id" ref="account.view_move_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='comments']/field[@name='comment_template_ids']" position="after">
+                 <div attrs="{'invisible':[('state', '!=', 'draft')]}" class="oe_edit_only">
+                     <hr/>
+                    <button name="action_insert_comments" string="Insert comments" type="object" class="oe_highlight"/>
+                    <p style="margin-top:10px; margin-left:14px; display:inline-block; font-size:0.8em;" class="text-muted">
+                        The selected templates will be added to the top or bottom comment.
+                        Comments can be edited later without altering the template.
+                    </p>
+                </div>
+                <group string="Top Comments">
+                    <field name="top_comment" nolabel="1" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                </group>
+                <group string="Bottom Comments">
+                    <field name="bottom_comment" nolabel="1" attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+                </group>
+            </xpath>
+      </field>
+    </record>
+
+</odoo>
