@@ -1,0 +1,659 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_agzoom" model="remotecontrol">
+            <field name="name">AG Zoom</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">http://visor.ag-zoom.com</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="is_agzoom">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "client_id": "",
+  "client_secret": "",
+  "username": "",
+  "password": ""
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>AG Zoom · Odoo Integration</h2>
+<p><strong>Official API documentation:</strong> <a href="/remotecontrol_agzoom/static/description/agzoom_api_docs.pdf" target="_blank" rel="noopener">📄 Download API Documentation (PDF)</a></p>
+
+<hr/>
+
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code> · Base URL: <code>http://visor.ag-zoom.com</code></p>
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+  "client_id": "your_client_id",
+  "client_secret": "your_client_secret",
+  "username": "user@example.com",
+  "password": "*******"
+}</pre>
+<ul>
+  <li><em>Get Token</em> calls <code>/oauth/v2/token</code> using OAuth2 password grant and stores <code>bag["access_token"]</code>.</li>
+  <li><em>Get devices (plan)</em> and <em>Get readings</em> send <code>Authorization: Bearer &lt;access_token&gt;</code>.</li>
+</ul>
+
+<h3>2) Device Discovery and Manual Configuration</h3>
+
+<p>For initial setup or when adding new AgZoom devices, use the <strong>List Devices procedure</strong> to discover available devices and configure them manually in Odoo.</p>
+
+<h4>What does this procedure do?</h4>
+<p>The <strong>"AgZoom: List Devices for Support"</strong> procedure performs the following actions:</p>
+<ol>
+  <li><strong>Authenticates</strong> with AgZoom API using your OAuth2 credentials</li>
+  <li><strong>Retrieves</strong> all devices available in your AgZoom account from <code>/api/userdevices</code></li>
+  <li><strong>Fetches</strong> detailed sensor data for each device including sensor codes and available units</li>
+  <li><strong>Extracts</strong> device name, ID, location, sensors, and all available measurement units</li>
+  <li><strong>Generates</strong> a comprehensive JSON file with complete device and sensor configuration</li>
+  <li><strong>Attaches</strong> the JSON to the Remote Control record for download</li>
+</ol>
+<p><em>This procedure only reads data from AgZoom - it does not create or modify anything in Odoo.</em></p>
+
+<h3>3) Default Procedure</h3>
+<ol>
+  <li><strong>Get Token</strong> → obtain OAuth2 token and store it in the bag.</li>
+  <li><strong>Get devices (plan)</strong> → build <code>bag["sensors_plan"]</code> from device/sensor configuration.</li>
+  <li><strong>Get readings</strong> → call <code>/api/getsensordata/{deviceId}/date/{endDate}/{startDate}</code> with date filters and upsert readings.</li>
+</ol>
+
+<h3>4) Device Configuration</h3>
+<p>In each <strong>Device</strong> (<code>mdm.measurement.device</code>) set <em>remotecontrol_params</em>:</p>
+<pre>{
+  "agzoom_device_id": "12345",
+  "start_date": "2025-10-13"
+}</pre>
+
+<h3>5) Sensor Configuration</h3>
+<p>In each <strong>Sensor</strong> (<code>mdm.measurement.device.sensor</code>) set <em>remotecontrol_params</em>:</p>
+<pre>{
+  "sensor_code": "5632",
+  "unit": "water_level",
+  "start_date": "2025-10-13"
+}</pre>
+
+<h4>Complete Configuration Examples</h4>
+
+<div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid #007bff;">
+<p><strong>Example: Soil moisture sensors</strong></p>
+
+<p><em>Device configuration:</em></p>
+<pre>{
+  "agzoom_device_id": "425",
+  "start_date": "2025-05-24"
+}</pre>
+
+<p><em>Sensor 1 (soil moisture - VP-4 sensor, port 5, depth 30cm):</em></p>
+<pre>{
+  "sensor_code": "5632",
+  "unit": "water_level",
+  "start_date": "2025-05-24"
+}</pre>
+
+<p><em>Sensor 2 (soil temperature - same physical sensor):</em></p>
+<pre>{
+  "sensor_code": "5632",
+  "unit": "temperature_water",
+  "start_date": "2025-05-24"
+}</pre>
+</div>
+
+<h3>6) API Structure &amp; Data Extraction</h3>
+<p>AgZoom returns data in this format:</p>
+<pre>{
+  "status": "0",
+  "systemDate": "17-11-2025 11:30:35",
+  "filter": "DATE",
+  "initialDate": "2025-10-17T08:00:07Z",
+  "finalDate": "2025-10-02T08:30:07Z",
+  "device": {
+    "id": 5523,
+    "costumer": "Baix Ter-Lisimetres",
+    "farm": "Lisimietres",
+    "name": "AGD901_25",
+    "sensors": [{
+      "code": "36546",
+      "type": "GEN CTD-10",
+      "port": 5,
+      "variables": [
+        {
+          "id": 1,
+          "type": "Nivel Agua",
+          "data": "-1",
+          "unit": "water_level",
+          "unit_default": "mm (milímetros)",
+          "date": "2025-10-17T08:00:07Z",
+          "mrid": 0
+        },
+        {
+          "id": 2,
+          "type": "Temperatura",
+          "data": "19.9",
+          "unit": "temperature_water",
+          "unit_default": "ºC (Celsius)",
+          "date": "2025-10-17T08:00:07Z",
+          "mrid": 0
+        }
+      ]
+    }]
+  }
+}</pre>
+
+<p><strong>Configuration Mapping:</strong></p>
+<ul>
+  <li><strong>sensor_code</strong> → identifies the physical sensor (e.g., "36546")</li>
+  <li><strong>unit</strong> → identifies the specific unit within that sensor (e.g., "water_level", "temperature_water")</li>
+  <li>The system searches for the sensor by <code>code</code> and then extracts all variables that match the specified <code>unit</code></li>
+  <li><strong>Important note:</strong> The <code>variables[]</code> array contains multiple readings with different dates for the same sensor</li>
+</ul>
+
+<h3>7) Time Window &amp; Filtering</h3>
+<ul>
+  <li><em>Get devices (plan)</em> calculates <code>initial_date</code> per sensor: last reading date → else <code>sensor.start_date</code> → else <code>device.start_date</code> → else January 1st of current year.</li>
+  <li><em>Get readings</em> calls <code>/api/getsensordata/{deviceId}/date/{endDate}/{startDate}</code></li>
+  <li>Date format for URL is: YYYYMMDDHHIISS (e.g., 20251017083007)</li>
+  <li><strong>Response format:</strong> Dates in the response come in ISO 8601 format with UTC: <code>2025-10-17T08:00:07Z</code></li>
+  <li>Dates are automatically converted to Odoo format for storage: <code>2025-10-17 08:00:07</code></li>
+</ul>
+
+<hr/>
+
+<h3>Available Units in Sensor Data</h3>
+<p>Use these values in the <code>"unit"</code> field of sensor configuration. These are the unit names returned by the AgZoom API:</p>
+
+<h4>Common Measurement Units</h4>
+<ul>
+  <li><code><strong>water_level</strong></code> - Water level / Soil moisture</li>
+  <li><code><strong>temperature_water</strong></code> - Water temperature</li>
+  <li><code><strong>temperature_soil</strong></code> - Soil temperature</li>
+  <li><code><strong>conductivity</strong></code> - Electrical conductivity</li>
+  <li><code><strong>electrical_conductivity</strong></code> - Electrical conductivity (alternative)</li>
+  <li><code><strong>Pluviometria</strong></code> - Precipitation / Rainfall</li>
+  <li><code><strong>pressure</strong></code> - Atmospheric pressure</li>
+  <li><code><strong>water_level_relative</strong></code> - Relative water level</li>
+</ul>
+
+<p><em>Note: Specific <code>unit</code> values depend on your AgZoom configuration and installed sensors. Use the "List Devices" procedure and check the complete API response from <code>/api/getsensordata</code> to see which units are available for your specific sensors.</em></p>
+
+<h3>8) Troubleshooting</h3>
+<ul>
+  <li><strong>Missing token error:</strong> Ensure "Get Token" action is active and runs first (sequence = 10)</li>
+  <li><strong>No sensors found:</strong> Check that sensors have valid <code>remotecontrol_params</code> and are linked to devices</li>
+  <li><strong>Missing OAuth2 credentials:</strong> Make sure to configure client_id, client_secret, username and password in connection_params</li>
+  <li><strong>No readings inserted:</strong> Verify date window filters, sensor_code and unit values</li>
+  <li><strong>Date format error:</strong> AgZoom requires YYYYMMDDHHIISS format (e.g., 20240529000000)</li>
+</ul>
+
+<p><strong>Sequence order:</strong> Get Token (10) → Get devices (20) → Get readings (30)</p>]]>
+            </field>
+        </record>
+
+        <record id="remotecontrol_agzoom_action_get_token" model="remotecontrol.action">
+            <field name="name">AgZoom: Get Token</field>
+            <field name="remote_id" ref="remotecontrol_agzoom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# OAuth2 authentication for AgZoom
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+client_id = (cfg.get('client_id') or '').strip()
+client_secret = (cfg.get('client_secret') or '').strip()
+username = (cfg.get('username') or '').strip()
+password = (cfg.get('password') or '').strip()
+if not client_id or not client_secret or not username or not password:
+    raise Exception("Missing AgZoom credentials: set client_id, client_secret, username and password in connection_params.")
+url = (base_url or '').rstrip('/') + '/oauth/v2/token'
+params = {
+    'grant_type': 'password',
+    'client_id': client_id,
+    'client_secret': client_secret,
+    'username': username,
+    'password': password
+}
+resp = request_retry('GET', url, params=params)
+if resp.status_code >= 400:
+    raise Exception("OAuth2 login failed: %s %s" % (resp.status_code, resp.text))
+j = resp.json() or {}
+access_token = j.get('access_token') or ''
+if not access_token:
+    raise Exception("OAuth2 OK but no 'access_token' in response.")
+bag['access_token'] = access_token
+# Optional: store refresh_token if present
+refresh_token = j.get('refresh_token')
+if refresh_token:
+    bag['refresh_token'] = refresh_token
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_agzoom_action_get_devices" model="remotecontrol.action">
+            <field name="name">AgZoom: Get devices (plan)</field>
+            <field name="remote_id" ref="remotecontrol_agzoom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Action A: build sensors plan for AgZoom
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+condition = [
+    ('remotecontrol_params','!=',False),
+    ('device_id.remotecontrol_id', '=', Remote.id)
+]
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+sensors = Sensor.search(condition)
+# Optimize: build map of sensor_id -> most recent reading (single query)
+last_readings_map = {}
+if sensors:
+    sensor_ids = [s.id for s in sensors]
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for row in cr.fetchall():
+        last_readings_map[row[0]] = row[1]
+# Now iterate sensors using the map
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+    sensor_code = (sensor_cfg.get('sensor_code') or '').strip()
+    unit = (sensor_cfg.get('unit') or '').strip()
+    if sensor_code and unit:
+        try:
+            device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+        except Exception:
+            device_cfg = {}
+        agzoom_device_id = (device_cfg.get('agzoom_device_id') or '').strip()
+        if agzoom_device_id:
+            # Retrieve last_reading from map (no query per sensor)
+            last_reading_time = last_readings_map.get(sensor.id)
+            if last_reading_time:
+                try:
+                    initial_date = fields.Date.to_string(
+                        fields.Datetime.from_string(last_reading_time) +
+                        timedelta(days=1))
+                except Exception:
+                    initial_date = str(last_reading_time)[:10]
+            else:
+                start_cfg = (sensor_cfg.get('start_date') or device_cfg.get('start_date'))
+                if start_cfg:
+                    initial_date = start_cfg[:10]
+                else:
+                    year_str = today_str[:4]
+                    initial_date = '%s-01-01' % year_str
+            plan.append({
+                'sensor_id': sensor.id,
+                'device_id': device.id,
+                'agzoom_device_id': agzoom_device_id,
+                'sensor_code': sensor_code,
+                'unit': unit,
+                'initial_date': initial_date,
+            })
+bag['sensors_plan'] = plan
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_agzoom_action_get_readings" model="remotecontrol.action">
+            <field name="name">AgZoom: Get readings</field>
+            <field name="remote_id" ref="remotecontrol_agzoom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="sequence">30</field>
+            <field name="code"><![CDATA[
+# Action C: fetch readings from AgZoom API and upsert
+Remote = self.remote_id
+SensorModel = env['mdm.measurement.device.sensor']
+plan = bag.get('sensors_plan') or []
+access_token = bag.get('access_token')
+if not access_token:
+    raise Exception("Missing access_token in bag")
+headers = {'Authorization': 'Bearer %s' % access_token, 'Accept': 'application/json'}
+final_date = fields.Date.today()
+window_start_suffix = ' 00:00:00'
+window_end_suffix = ' 23:59:59'
+total_upserts = 0
+total_errors = 0
+items = []
+for sensor_plan in plan:
+    sensor_id = sensor_plan['sensor_id']
+    device_id = sensor_plan['device_id']
+    agzoom_device_id = sensor_plan['agzoom_device_id']
+    sensor_code = sensor_plan['sensor_code']
+    unit = sensor_plan['unit']
+    initial_date = sensor_plan['initial_date']
+    sensor_record = SensorModel.browse(sensor_id)
+    # Format dates for AgZoom: YYYYMMDDHHIISS
+    end_date_str = final_date.replace('-', '') + '235959'
+    start_date_str = initial_date.replace('-', '') + '000000'
+    # AgZoom URL: /api/getsensordata/{deviceId}/date/{endDate}/{startDate}
+    base = (base_url or '').rstrip('/') + '/api/getsensordata/%s/date/%s/%s' % (agzoom_device_id, end_date_str, start_date_str)
+    try:
+        resp = request_retry('GET', base, headers=headers, timeout=timeout)
+        code = resp.status_code
+        full_url = getattr(resp, 'url', base)
+        if code < 400:
+            payload = resp.json() or {}
+            status = payload.get('status', '-1')
+            if status != '0':
+                items.append({'sensor_id': sensor_id, 'device_id': device_id, 'agzoom_device_id': agzoom_device_id, 'status': code, 'error': 'AgZoom API error status: %s' % status, 'url': full_url})
+                continue
+            data_list = []
+            # AgZoom structure: device (object, not array) -> sensors[] -> variables[]
+            device_data = payload.get('device', {})
+            if device_data and isinstance(device_data, dict):
+                sensors_array = device_data.get('sensors', [])
+                # Find the sensor by code
+                for sensor_item in sensors_array:
+                    if str(sensor_item.get('code', '')) == sensor_code:
+                        variables = sensor_item.get('variables', [])
+                        # Find all variables with matching unit (can be multiple with different dates)
+                        for variable in variables:
+                            if str(variable.get('unit', '')) == unit:
+                                timestamp = variable.get('date', '')
+                                value = variable.get('data', '')
+                                if timestamp and value:
+                                    data_list.append({'ts': timestamp, 'value': value})
+            window_start = initial_date + window_start_suffix
+            window_end = final_date + window_end_suffix
+            upserts = 0
+            errs = 0
+            readings_summary = []
+            for reading in data_list:
+                ts_s = reading['ts']
+                valf = float(reading['value'])
+                # Convert ISO 8601 timestamp to comparable format (remove Z and T for comparison)
+                ts_comparable = ts_s.replace('T', ' ').replace('Z', '')
+                if (ts_comparable >= window_start) and (ts_comparable <= window_end):
+                    try:
+                        Remote.upsert(
+                            'mdm.measurement.device.sensor.reading',
+                            {'sensor_id': sensor_record.id, 'measurement_time': ts_comparable},
+                            {'value': valf, 'remotecontrol_origin_id': Remote.id}
+                        )
+                        upserts += 1
+                        readings_summary.append({'ts': ts_comparable, 'value': valf})
+                    except Exception as e:
+                        errs += 1
+                        readings_summary.append({'ts': ts_comparable, 'value': valf, 'error': str(e)})
+            total_upserts += upserts
+            total_errors += errs
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'agzoom_device_id': agzoom_device_id,
+                'status': 200,
+                'url': full_url,
+                'points_found': len(data_list),
+                'upserts': upserts,
+                'errors': errs,
+                'sensor_code': sensor_code,
+                'unit': unit,
+                'readings': readings_summary,
+            })
+        else:
+            items.append({'sensor_id': sensor_id, 'device_id': device_id, 'agzoom_device_id': agzoom_device_id, 'status': code, 'error': (resp.text or '')[:400], 'url': full_url})
+    except Exception as e:
+        items.append({'sensor_id': sensor_id, 'device_id': device_id, 'agzoom_device_id': agzoom_device_id, 'status': -1, 'error': str(e)})
+audit = {'executed_at': fields.Datetime.now(), 'final_date': final_date, 'total_upserts': total_upserts, 'total_errors': total_errors, 'items': items}
+try:
+    audit_json = json.dumps(audit, ensure_ascii=True, indent=2, default=str)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+except Exception as json_error:
+    simple_audit = {'executed_at': str(fields.Datetime.now()), 'total_upserts': total_upserts, 'total_errors': total_errors, 'error': str(json_error)}
+    audit_json = json.dumps(simple_audit, ensure_ascii=True, indent=2)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+fname = 'agzoom_readings_fetch_%s.json' % fields.Datetime.now().replace(':','').replace('-','').replace(' ','_')
+att = env['ir.attachment'].create({'name': fname, 'datas_fname': fname, 'datas': b64, 'mimetype': 'application/json', 'res_model': 'remotecontrol', 'res_id': Remote.id})
+Remote.message_post(body=u"[AgZoom Readings] upserts=%s errors=%s" % (total_upserts, total_errors), attachment_ids=[att.id])
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_agzoom_action_list_devices" model="remotecontrol.action">
+            <field name="name">AgZoom: List Devices</field>
+            <field name="remote_id" ref="remotecontrol_agzoom"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="sequence">15</field>
+            <field name="code"><![CDATA[
+Remote = self.remote_id
+access_token = bag.get('access_token')
+if not access_token:
+    raise Exception('Missing AgZoom access_token in bag')
+
+headers = {'Authorization': 'Bearer %s' % access_token, 'Accept': 'application/json'}
+
+# Step 1: Get devices list from AgZoom
+userdevices_url = (bag.get('base_url') or Remote.base_url or '').rstrip('/') + '/api/userdevices'
+resp = request_retry('GET', userdevices_url, headers=headers, timeout=timeout)
+if resp.status_code >= 400:
+    raise Exception('Error fetching devices: %s %s' % (resp.status_code, resp.text))
+
+devices_response = resp.json() or {}
+status = devices_response.get('status', '-1')
+if status != '0':
+    raise Exception('AgZoom API error status: %s' % status)
+
+# Step 2: Build device list and fetch sensor details for each device
+devices_list = []
+costumers = devices_response.get('costumers', [])
+for costumer in costumers:
+    costumer_name = costumer.get('name', 'Unknown')
+    fincas = costumer.get('fincas', [])
+    for finca in fincas:
+        finca_name = finca.get('name', 'Unknown')
+        devices = finca.get('devices', [])
+        for device in devices:
+            device_id = device.get('id')
+            device_name = device.get('name', 'Device %s' % device_id if device_id else 'Unnamed')
+            location = device.get('location', '')
+            battery = device.get('batteryLoad', '')
+
+            if device_id:
+                # Step 3: Fetch sensor data for this device
+                sensors_info = []
+                try:
+                    # Get recent data to extract sensor configuration
+                    # Use last 7 days to ensure we get at least some data
+                    from datetime import datetime, timedelta
+                    end_date = datetime.now()
+                    start_date = end_date - timedelta(days=7)
+                    end_date_str = end_date.strftime('%Y%m%d%H%M%S')
+                    start_date_str = start_date.strftime('%Y%m%d%H%M%S')
+
+                    sensordata_url = (bag.get('base_url') or Remote.base_url or '').rstrip('/') + '/api/getsensordata/%s/date/%s/%s' % (device_id, end_date_str, start_date_str)
+                    sensor_resp = request_retry('GET', sensordata_url, headers=headers, timeout=timeout)
+
+                    if sensor_resp.status_code < 400:
+                        sensor_payload = sensor_resp.json() or {}
+                        sensor_status = sensor_payload.get('status', '-1')
+
+                        if sensor_status == '0':
+                            device_data = sensor_payload.get('device', {})
+                            if device_data and isinstance(device_data, dict):
+                                sensors_array = device_data.get('sensors', [])
+
+                                for sensor_item in sensors_array:
+                                    sensor_code = sensor_item.get('code', '')
+                                    sensor_type = sensor_item.get('type', '')
+                                    sensor_port = sensor_item.get('port', '')
+                                    sensor_depth = sensor_item.get('depth', '')
+
+                                    # Extract unique units from variables
+                                    variables = sensor_item.get('variables', [])
+                                    units_info = []
+                                    seen_units = set()
+
+                                    for variable in variables:
+                                        unit = variable.get('unit', '')
+                                        var_type = variable.get('type', '')
+                                        var_id = variable.get('id', '')
+                                        unit_default = variable.get('unit_default', '')
+
+                                        if unit and unit not in seen_units:
+                                            seen_units.add(unit)
+                                            units_info.append({
+                                                'unit': unit,
+                                                'type': var_type,
+                                                'id': var_id,
+                                                'unit_default': unit_default
+                                            })
+
+                                    if sensor_code:
+                                        sensors_info.append({
+                                            'code': sensor_code,
+                                            'type': sensor_type,
+                                            'port': sensor_port,
+                                            'depth': sensor_depth,
+                                            'available_units': units_info
+                                        })
+                except Exception as e:
+                    # If sensor data fetch fails, still include the device
+                    sensors_info = [{'error': 'Could not fetch sensor data: %s' % str(e)}]
+
+                devices_list.append({
+                    'agzoom_device_id': str(device_id),
+                    'name': device_name,
+                    'costumer': costumer_name,
+                    'finca': finca_name,
+                    'location': location,
+                    'battery': battery,
+                    'sensors': sensors_info
+                })
+
+# Sort by costumer, finca, then name
+devices_list.sort(key=lambda x: (x.get('costumer', ''), x.get('finca', ''), x.get('name', '')))
+
+# Generate comprehensive JSON report
+report = {
+    'generated_at': str(fields.Datetime.now()),
+    'system_date': devices_response.get('systemDate', ''),
+    'total_devices': len(devices_list),
+    'devices': devices_list,
+    'configuration_guide': {
+        'device_params': {
+            'agzoom_device_id': 'Use the device ID from this report',
+            'start_date': 'YYYY-MM-DD format (e.g., 2025-10-13)'
+        },
+        'sensor_params': {
+            'sensor_code': 'Use the sensor code from sensors[].code',
+            'unit': 'Use one of the available units from sensors[].available_units[].unit',
+            'start_date': 'YYYY-MM-DD format (optional, inherits from device if not set)'
+        }
+    }
+}
+
+# Create attachment
+json_str = json.dumps(report, ensure_ascii=False, indent=2, default=str)
+encoded = base64.b64encode(json_str.encode('utf-8'))
+fname = 'agzoom_devices_complete_%s.json' % fields.Datetime.now().replace(':','').replace('-','').replace(' ','_')
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': encoded,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+
+Remote.message_post(
+    body='[AgZoom] %s devices listed with complete sensor configuration' % len(devices_list),
+    attachment_ids=[att.id]
+)
+
+bag.clear()
+bag['total_devices'] = len(devices_list)
+bag['attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <!-- Procedure: List Devices for Team -->
+        <record id="remotecontrol_agzoom_procedure_list_devices" model="remotecontrol.procedure">
+            <field name="name">AgZoom: List Devices for Support</field>
+            <field name="remote_id" ref="remotecontrol_agzoom"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_agzoom_step_list_10_token" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_agzoom_procedure_list_devices"/>
+            <field name="action_id" ref="remotecontrol_agzoom_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_agzoom_step_list_20_devices" model="remotecontrol.step">
+            <field name="name">List Devices</field>
+            <field name="procedure_id" ref="remotecontrol_agzoom_procedure_list_devices"/>
+            <field name="action_id" ref="remotecontrol_agzoom_action_list_devices"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_agzoom_procedure" model="remotecontrol.procedure">
+            <field name="name">AgZoom: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_agzoom"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_agzoom_step_10_token" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_agzoom_procedure"/>
+            <field name="action_id" ref="remotecontrol_agzoom_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_agzoom_step_20_devices" model="remotecontrol.step">
+            <field name="name">Get devices (plan)</field>
+            <field name="procedure_id" ref="remotecontrol_agzoom_procedure"/>
+            <field name="action_id" ref="remotecontrol_agzoom_action_get_devices"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_agzoom_step_30_readings" model="remotecontrol.step">
+            <field name="name">Get readings</field>
+            <field name="procedure_id" ref="remotecontrol_agzoom_procedure"/>
+            <field name="action_id" ref="remotecontrol_agzoom_action_get_readings"/>
+            <field name="sequence">30</field>
+        </record>
+
+    </data>
+</odoo>
