@@ -1,0 +1,936 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_regacom" model="remotecontrol">
+            <field name="name">Regacom</field>
+            <field name="remotecontrol_type">sql</field>
+            <field name="timeout">30</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "driver_name": "FreeTDS",
+  "host": "localhost",
+  "port": 1433,
+  "database": "regacom_db",
+  "user": "sa",
+  "password": "",
+  "tds_version": "7.0"
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>Regacom · Odoo Integration Help</h2>
+<p><strong>Type:</strong> SQL Database Connection (pyodbc)</p>
+
+<hr/>
+
+<h3>1) Database Connection</h3>
+<p>Uses <strong>pyodbc</strong> library to connect to SQL Server databases containing Regacom water meter data.</p>
+
+<h4>Standard connection_params (JSON):</h4>
+<pre>{
+  "driver_name": "SQL Server",
+  "host": "192.168.1.100",
+  "port": 1433,
+  "database": "regacom_db",
+  "user": "regacom_user",
+  "password": "*******"
+}</pre>
+
+<h4>⚠️ Legacy SQL Server (2000-2008)</h4>
+<p>Old SQL Server versions require TDS protocol version specification:</p>
+<pre>{
+  "driver_name": "SQL Server",
+  "host": "192.168.1.100",
+  "port": 1433,
+  "database": "regacom_db",
+  "user": "regacom_user",
+  "password": "*******",
+  "tds_version": "7.0"
+}</pre>
+
+<p><strong>TDS versions by SQL Server:</strong></p>
+<ul>
+  <li><code>"7.0"</code> → SQL Server 2000</li>
+  <li><code>"7.1"</code> → SQL Server 2000 SP1+</li>
+  <li><code>"7.2"</code> → SQL Server 2005</li>
+  <li><code>"7.3"</code> → SQL Server 2008</li>
+  <li><code>"7.4"</code> → SQL Server 2012+</li>
+  <li>Omit for modern SQL Server (2016+)</li>
+</ul>
+
+<h4>Optional parameters:</h4>
+<ul>
+  <li><code>trusted_connection</code>: true/false - Use Windows authentication</li>
+  <li><code>driver_name</code>: "SQL Server", "FreeTDS", etc. - ODBC driver name</li>
+</ul>
+
+<h3>2) Available Procedures</h3>
+
+<h4>A) Daily Sync (Scheduled)</h4>
+<p>Synchronizes readings from configured devices/sensors:</p>
+<ol>
+  <li><strong>Get devices (plan)</strong> - Loads device list from Odoo with remotecontrol_params</li>
+  <li><strong>Get readings</strong> - Queries database and upserts readings into mdm.measurement.device.sensor.reading</li>
+</ol>
+
+<h4>B) Generate Import CSVs (One-time setup)</h4>
+<p>Creates CSV files for bulk import of devices and sensors from Regacom database:</p>
+<ol>
+  <li><strong>Generate Import CSVs</strong> - Queries historico_iru and CAUDALES tables (LIMIT 1000 each)</li>
+  <li>Creates 2 CSV files with external IDs attached to this record's chatter</li>
+  <li>Import devices CSV first, then sensors CSV into Odoo</li>
+</ol>
+
+<h3>3) Device Configuration</h3>
+<p>Each <strong>mdm.measurement.device</strong> needs <code>remotecontrol_params</code> (JSON) with device-level identifiers.</p>
+<p>Field names must match those in sensor's <code>pk_fields</code> that have <code>null</code> values.</p>
+
+<h4>Example (historico_iru table):</h4>
+<pre>{
+  "HIRU_nDirUM": 400001,
+  "HIRU_nDirIRU": 400055
+}</pre>
+
+<h4>Example (CAUDALES table):</h4>
+<pre>{
+  "HIRUC_nDirUM": 400001,
+  "HIRUC_nDirIRU": 400055
+}</pre>
+
+<h3>4) Sensor Configuration</h3>
+<p>Each <strong>mdm.measurement.device.sensor</strong> needs <code>remotecontrol_params</code> (JSON):</p>
+
+<h4>Required fields:</h4>
+<ul>
+  <li><code>table</code>: Table name (e.g., "historico_iru", "CAUDALES")</li>
+  <li><code>value_field</code>: Column with measurement value</li>
+  <li><code>time_field</code>: Column with timestamp</li>
+  <li><code>pk_fields</code>: Array of column names for WHERE clause</li>
+  <li><code>pk_values</code>: Array of values (use <code>null</code> for device-level fields)</li>
+</ul>
+
+<h4>Optional fields:</h4>
+<ul>
+  <li><code>start_date</code>: Initial sync date (default: last reading or current year start)</li>
+  <li><code>unit</code>: Unit of measurement for automatic conversion (see below)</li>
+</ul>
+
+<h4>Example 1: Totalizer from historico_iru</h4>
+<pre>{
+  "table": "historico_iru",
+  "value_field": "HIRU_nTotal",
+  "time_field": "HIRU_nFechaHora",
+  "pk_fields": ["HIRU_nDirUM", "HIRU_nDirIRU", "HIRU_nNumero_contador"],
+  "pk_values": [null, null, 1],
+  "start_date": "2025-01-01"
+}</pre>
+
+<h4>Example 2: Flow from CAUDALES (with unit conversion)</h4>
+<pre>{
+  "table": "CAUDALES",
+  "value_field": "HIRUC_nCaudal",
+  "time_field": "HIRUC_nFechaHora",
+  "pk_fields": ["HIRUC_nDirUM", "HIRUC_nDirIRU", "HIRUC_nContador"],
+  "pk_values": [null, null, 1],
+  "start_date": "2025-01-01",
+  "unit": "m³/h"
+}</pre>
+
+<h4>Example 3: Valve state from CAUDALES</h4>
+<pre>{
+  "table": "CAUDALES",
+  "value_field": "HIRUC_nValvula",
+  "time_field": "HIRUC_nFechaHora",
+  "pk_fields": ["HIRUC_nDirUM", "HIRUC_nDirIRU", "HIRUC_nContador"],
+  "pk_values": [null, null, 1],
+  "start_date": "2025-01-01"
+}</pre>
+
+<h4>Unit Conversion</h4>
+<p>The <code>unit</code> field enables automatic conversion of flow rates to l/s (liters per second):</p>
+<ul>
+  <li><code>"m³/h"</code> → Converts from cubic meters per hour: value × (1000 / 3600) = value × 0.277778</li>
+  <li><code>"m³/s"</code> → Converts from cubic meters per second: value × 1000</li>
+  <li><code>"l/s"</code> or omitted → No conversion (already in l/s)</li>
+  <li>Comparison is case-insensitive and ignores spaces</li>
+</ul>
+<p><strong>Note:</strong> The CSV generation reads units from <code>HIRUC_nCaudal_salida</code> field and adds them automatically to sensor params.</p>
+
+<p><strong>How pk_fields/pk_values work:</strong></p>
+<ul>
+  <li><code>null</code> in pk_values → filled from device's remotecontrol_params using pk_fields name as key</li>
+  <li>Specific value in pk_values → used directly in WHERE clause</li>
+  <li>Query built: <code>WHERE pk_fields[0]=pk_values[0] AND pk_fields[1]=pk_values[1] ...</code></li>
+</ul>
+
+<h3>5) Database Table Structures</h3>
+
+<h4>historico_iru (Accumulated totals)</h4>
+<pre>
+HIRU_idPK            : Primary key
+HIRU_nDirUM          : Management unit ID
+HIRU_nDirIRU         : Hydrant/device ID
+HIRU_nFechaHora      : Reading timestamp
+HIRU_nNumero_contador: Counter number (1, 2, 3...)
+HIRU_nTotal          : Accumulated total (m³)
+HIRU_nConsumo        : Consumption since last reading
+</pre>
+
+<h4>CAUDALES (Flow and valve state)</h4>
+<pre>
+HIRUC_idPK           : Primary key
+HIRUC_nDirUM         : Management unit ID
+HIRUC_nDirIRU        : Hydrant/device ID
+HIRUC_nFechaHora     : Reading timestamp
+HIRUC_nContador      : Counter number (1, 2, 3...)
+HIRUC_nCaudal        : Flow rate (l/s)
+HIRUC_nValvula       : Valve state (0=closed, 1=open)
+HIRUC_nCaudal_salida : Output flow (l/s)
+HIRUC_nCaudal_entrada: Input flow (l/s)
+</pre>
+
+<h3>6) CSV Import Structure</h3>
+<p>The "Generate Import CSVs" action creates two files:</p>
+
+<h4>devices.csv</h4>
+<pre>
+id,name,remotecontrol_id/id,remotecontrol_params
+regacom_device_400001_400055,"Device 400001-400055",remotecontrol_regacom,"{""HIRU_nDirUM"": 400001, ""HIRU_nDirIRU"": 400055}"
+</pre>
+
+<h4>sensors.csv</h4>
+<pre>
+id,name,device_id/id,remotecontrol_params
+regacom_sensor_400001_400055_1_HIRU_nTotal,"Totalizer 1",regacom_device_400001_400055,"{""table"": ""historico_iru"", ...}"
+</pre>
+
+<p><strong>Import order:</strong> Import devices.csv first, then sensors.csv</p>
+
+<h3>7) Security &amp; Performance</h3>
+<ul>
+  <li>Use read-only database user</li>
+  <li>Parameterized queries prevent SQL injection</li>
+  <li>Connection opened/closed per procedure run</li>
+  <li>CSV generation limited to 1000 records per table to avoid overload</li>
+  <li>Cursor stored in bag['_sql_cursor'] shared between actions</li>
+</ul>
+
+<h3>8) Troubleshooting</h3>
+<ul>
+  <li><strong>ImportError: pyodbc</strong> → Install: <code>pip install pyodbc</code></li>
+  <li><strong>Connection refused</strong> → Check host/port/firewall</li>
+  <li><strong>Login failed</strong> → Verify user/password/database name</li>
+  <li><strong>Connection closed unexpectedly</strong> → Add tds_version for old SQL Server</li>
+  <li><strong>Driver not found</strong> → Install ODBC driver or change driver_name</li>
+</ul>
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_regacom_action_get_devices" model="remotecontrol.action">
+            <field name="name">Regacom: Get devices (plan)</field>
+            <field name="remote_id" ref="remotecontrol_regacom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Build sensors plan from device/sensor remotecontrol_params
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+# Get all sensors with remotecontrol_params configured for THIS remote control
+sensors = Sensor.search([
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id)
+])
+# Build map of sensor_id -> most recent reading (single query optimization)
+last_readings_map = {}
+if sensors:
+    sensor_ids = [s.id for s in sensors]
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for row in cr.fetchall():
+        last_readings_map[row[0]] = row[1]
+# Build execution plan
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+    # Parse sensor configuration
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+    # Parse device configuration
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+    # Get table configuration from sensor
+    table_name = sensor_cfg.get('table')
+    value_field = sensor_cfg.get('value_field')
+    time_field = sensor_cfg.get('time_field')
+    pk_fields = sensor_cfg.get('pk_fields', [])
+    pk_values = sensor_cfg.get('pk_values', [])
+    # Validate required parameters
+    if table_name and value_field and time_field and pk_fields and len(pk_fields) == len(pk_values):
+        # Determine initial date for this sensor
+        last_reading_time = last_readings_map.get(sensor.id)
+        if last_reading_time:
+            try:
+                initial_date = fields.Date.to_string(
+                    fields.Datetime.from_string(last_reading_time) +
+                    timedelta(days=1))
+            except Exception:
+                initial_date = str(last_reading_time)[:10]
+        else:
+            # Use start_date from sensor config or device config, or Jan 1 of current year
+            start_cfg = sensor_cfg.get('start_date') or device_cfg.get('start_date')
+            if start_cfg:
+                initial_date = start_cfg[:10]
+            else:
+                year_str = today_str[:4]
+                initial_date = '%s-01-01' % year_str
+        # Build final pk_values replacing nulls with device values
+        # Use pk_fields names as keys to get values from device_cfg
+        final_pk_values = []
+        all_fields_ok = True
+        for i, val in enumerate(pk_values):
+            if val is None:
+                # Get value from device config using the field name
+                field_name = pk_fields[i] if i < len(pk_fields) else None
+                if field_name:
+                    device_val = device_cfg.get(field_name)
+                    if device_val is not None:
+                        final_pk_values.append(device_val)
+                    else:
+                        all_fields_ok = False
+                        break
+                else:
+                    all_fields_ok = False
+                    break
+            else:
+                final_pk_values.append(val)
+
+        if not all_fields_ok:
+            continue
+
+        plan.append({
+            'sensor_id': sensor.id,
+            'device_id': device.id,
+            'table': table_name,
+            'value_field': value_field,
+            'time_field': time_field,
+            'pk_fields': pk_fields,
+            'pk_values': final_pk_values,
+            'initial_date': initial_date,
+        })
+bag['sensors_plan'] = plan
+bag['plan_count'] = len(plan)
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_regacom_action_get_readings" model="remotecontrol.action">
+            <field name="name">Regacom: Get readings</field>
+            <field name="remote_id" ref="remotecontrol_regacom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Fetch readings from Regacom SQL database and upsert into Odoo
+Remote = self.remote_id
+SensorModel = env['mdm.measurement.device.sensor']
+plan = bag.get('sensors_plan') or []
+if not plan:
+    raise Exception("No sensors in plan. Run 'Get devices (plan)' first.")
+final_date = fields.Date.today()
+initial_date = None
+total_upserts = 0
+total_errors = 0
+items = []
+# Connect to Regacom database and store cursor in bag
+cursor = sql_connect()
+bag['_sql_cursor'] = cursor
+try:
+    for sensor_plan in plan:
+        sensor_id = sensor_plan['sensor_id']
+        device_id = sensor_plan['device_id']
+        table_name = sensor_plan['table']
+        value_field = sensor_plan['value_field']
+        time_field = sensor_plan['time_field']
+        pk_fields = sensor_plan['pk_fields']
+        pk_values = sensor_plan['pk_values']
+        initial_date = sensor_plan['initial_date']
+        sensor_record = SensorModel.browse(sensor_id)
+        try:
+            # Build WHERE clause dynamically from pk_fields
+            where_conditions = []
+            query_params = []
+            # Add all PK field conditions
+            for field, value in zip(pk_fields, pk_values):
+                if value is not None:
+                    where_conditions.append("%s = %%s" % field)
+                    query_params.append(value)
+            # Add time range conditions
+            where_conditions.append("%s >= %%s" % time_field)
+            where_conditions.append("%s <= %%s" % time_field)
+            query_params.append(initial_date + ' 00:00:00')
+            query_params.append(final_date + ' 23:59:59')
+            query = """
+                SELECT %s, %s
+                FROM %s
+                WHERE %s
+                ORDER BY %s ASC
+            """ % (
+                value_field,
+                time_field,
+                table_name,
+                ' AND '.join(where_conditions),
+                time_field
+            )
+            sql_execute(cursor, query, tuple(query_params))
+            rows = sql_fetchall(cursor)
+            upserts = 0
+            errs = 0
+            readings_summary = []
+            # Determine conversion factor based on unit
+            conversion_factor = 1.0
+            unit = sensor_cfg.get('unit', '').lower().replace(' ', '')
+            if unit:
+                if unit == 'm³/h':
+                    # m³/h to l/s: m³/h * 1000 / 3600 = l/s * 0.277778
+                    conversion_factor = 1000.0 / 3600.0
+                elif unit == 'm³/s':
+                    # m³/s to l/s: m³/s * 1000 = l/s
+                    conversion_factor = 1000.0
+                # l/s -> no conversion needed (factor = 1.0)
+            for row in rows:
+                try:
+                    raw_value = float(row[0]) if row[0] is not None else 0.0
+                    # Apply conversion factor
+                    value = raw_value * conversion_factor
+                    timestamp = str(row[1])
+                    # Upsert reading into Odoo
+                    Remote.upsert(
+                        'mdm.measurement.device.sensor.reading',
+                        {
+                            'sensor_id': sensor_record.id,
+                            'measurement_time': timestamp
+                        },
+                        {
+                            'value': value,
+                            'remotecontrol_origin_id': Remote.id
+                        }
+                    )
+                    upserts += 1
+                    readings_summary.append({
+                        'time': timestamp,
+                        'value': value
+                    })
+                except Exception as e:
+                    errs += 1
+                    readings_summary.append({
+                        'row': str(row),
+                        'error': str(e)
+                    })
+            total_upserts += upserts
+            total_errors += errs
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'table': table_name,
+                'value_field': value_field,
+                'time_field': time_field,
+                'pk_fields': pk_fields,
+                'pk_values': pk_values,
+                'status': 'success',
+                'points_found': len(rows),
+                'upserts': upserts,
+                'errors': errs,
+                'readings': readings_summary[:10]  # Limit to first 10 for audit
+            })
+        except Exception as e:
+            total_errors += 1
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'status': 'error',
+                'error': str(e)
+            })
+finally:
+    # Always close the connection
+    cursor = bag.get('_sql_cursor')
+    if cursor:
+        sql_close(cursor)
+# Create audit attachment
+audit = {
+    'executed_at': str(fields.Datetime.now()),
+    'initial_date': initial_date if plan else None,
+    'final_date': final_date,
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'sensors_processed': len(plan),
+    'items': items
+}
+try:
+    audit_json = json.dumps(audit, ensure_ascii=True, indent=2, default=str)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+except Exception as json_error:
+    simple_audit = {
+        'executed_at': str(fields.Datetime.now()),
+        'total_upserts': total_upserts,
+        'total_errors': total_errors,
+        'error': str(json_error)
+    }
+    audit_json = json.dumps(simple_audit, ensure_ascii=True, indent=2)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+fname = 'regacom_readings_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+)
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+Remote.message_post(
+    body=u"[Regacom Readings] upserts=%s errors=%s sensors=%s" % (
+        total_upserts, total_errors, len(plan)
+    ),
+    attachment_ids=[att.id]
+)
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_regacom_procedure" model="remotecontrol.procedure">
+            <field name="name">Regacom: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_regacom"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_regacom_step_10_devices" model="remotecontrol.step">
+            <field name="name">Get devices (plan)</field>
+            <field name="procedure_id" ref="remotecontrol_regacom_procedure"/>
+            <field name="action_id" ref="remotecontrol_regacom_action_get_devices"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_regacom_step_20_readings" model="remotecontrol.step">
+            <field name="name">Get readings</field>
+            <field name="procedure_id" ref="remotecontrol_regacom_procedure"/>
+            <field name="action_id" ref="remotecontrol_regacom_action_get_readings"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_regacom_procedure_import" model="remotecontrol.procedure">
+            <field name="name">Regacom: Generate Import CSVs</field>
+            <field name="remote_id" ref="remotecontrol_regacom"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_regacom_action_generate_csv" model="remotecontrol.action">
+            <field name="name">Regacom: Generate Import CSVs</field>
+            <field name="remote_id" ref="remotecontrol_regacom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Generate CSV files for importing devices and sensors from Regacom database
+import csv
+import StringIO
+Remote = self.remote_id
+# Connect to Regacom database
+cursor = sql_connect()
+bag['_sql_cursor'] = cursor
+
+try:
+    # Step 1: Get unique devices from both tables
+    devices_map = {}
+
+    # Query historico_iru table
+    sql_execute(cursor, """
+        SELECT DISTINCT
+            HIRU_nDirUM,
+            HIRU_nDirIRU,
+            HIRU_nNombre,
+            HIRU_nNumero_contador,
+            HIRU_nParcela
+        FROM historico_iru
+        WHERE HIRU_nDirUM IS NOT NULL
+          AND HIRU_nDirIRU IS NOT NULL
+        ORDER BY HIRU_nDirUM, HIRU_nDirIRU
+    """, ())
+
+    for row in sql_fetchall(cursor):
+        dir_um, dir_iru, nombre, contador, parcela = row
+        device_key = (dir_um, dir_iru)
+        if device_key not in devices_map:
+            devices_map[device_key] = {
+                'dir_um': dir_um,
+                'dir_iru': dir_iru,
+                'parcela': parcela,
+                'name': unicode(nombre) if nombre else u'Device_%s_%s' % (dir_um, dir_iru),
+                'sensors': [],
+                'table_source': 'historico_iru'
+            }
+        # Add sensor info
+        if contador is not None:
+            sensor_key = (dir_um, dir_iru, contador, 'historico_iru')
+            if sensor_key not in [s['key'] for s in devices_map[device_key]['sensors']]:
+                devices_map[device_key]['sensors'].append({
+                    'key': sensor_key,
+                    'table': 'historico_iru',
+                    'contador': contador,
+                    'value_field': 'HIRU_nTotal',
+                    'time_field': 'HIRU_nFechaHora',
+                    'pk_fields': ['HIRU_nDirUM', 'HIRU_nDirIRU', 'HIRU_nNumero_contador']
+                })
+    # Query CAUDALES table
+    sql_execute(cursor, """
+        SELECT DISTINCT
+            HIRUC_nDirUM,
+            HIRUC_nDirIRU,
+            HIRUC_nNombre,
+            HIRUC_nContador,
+            HIRUC_nCaudal_salida,
+            HIRUC_nParcela
+        FROM CAUDALES
+        WHERE HIRUC_nDirUM IS NOT NULL
+          AND HIRUC_nDirIRU IS NOT NULL
+        ORDER BY HIRUC_nDirUM, HIRUC_nDirIRU
+    """, ())
+    for row in sql_fetchall(cursor):
+        dir_um, dir_iru, nombre, contador, caudal_salida, parcela = row
+        device_key = (dir_um, dir_iru)
+        if device_key not in devices_map:
+            devices_map[device_key] = {
+                'dir_um': dir_um,
+                'dir_iru': dir_iru,
+                'parcela': parcela,
+                'name': unicode(nombre) if nombre else u'Device_%s_%s' % (dir_um, dir_iru),
+                'sensors': [],
+                'table_source': 'CAUDALES'
+            }
+        # Update parcela if it was None from historico_iru but has value in CAUDALES
+        elif parcela is not None and devices_map[device_key].get('parcela') is None:
+            devices_map[device_key]['parcela'] = parcela
+            devices_map[device_key]['table_source'] = 'CAUDALES'
+        # Normalize unit for comparison (lowercase, no spaces)
+        unit = u''
+        if caudal_salida:
+            unit = unicode(caudal_salida).lower().replace(u' ', u'')
+        # Add caudal sensor
+        if contador is not None:
+            sensor_key = (dir_um, dir_iru, contador, 'CAUDALES_caudal')
+            if sensor_key not in [s['key'] for s in devices_map[device_key]['sensors']]:
+                devices_map[device_key]['sensors'].append({
+                    'key': sensor_key,
+                    'table': 'CAUDALES',
+                    'contador': contador,
+                    'value_field': 'HIRUC_nCaudal',
+                    'time_field': 'HIRUC_nFechaHora',
+                    'pk_fields': ['HIRUC_nDirUM', 'HIRUC_nDirIRU', 'HIRUC_nContador'],
+                    'unit': unit
+                })
+            # Add valvula sensor
+            sensor_key = (dir_um, dir_iru, contador, 'CAUDALES_valvula')
+            if sensor_key not in [s['key'] for s in devices_map[device_key]['sensors']]:
+                devices_map[device_key]['sensors'].append({
+                    'key': sensor_key,
+                    'table': 'CAUDALES',
+                    'contador': contador,
+                    'value_field': 'HIRUC_nValvula',
+                    'time_field': 'HIRUC_nFechaHora',
+                    'pk_fields': ['HIRUC_nDirUM', 'HIRUC_nDirIRU', 'HIRUC_nContador'],
+                    'unit': ''
+                })
+
+    # Step 2: Generate Devices CSV
+    devices_csv = StringIO.StringIO()
+    devices_writer = csv.writer(devices_csv)
+
+    # CSV Header for devices
+    devices_writer.writerow([
+        'id',
+        'name',
+        'remotecontrol_id/id',
+        'remotecontrol_params'
+    ])
+
+    # Write device rows
+    for device_key, device_data in sorted(devices_map.items()):
+        external_id = 'regacom_device_%s_%s' % (device_data['dir_um'], device_data['dir_iru'])
+        name = device_data['name']
+        remotecontrol_id = 'remotecontrol_regacom.remotecontrol_regacom'
+        parcela = device_data.get('parcela')
+
+        # Build remotecontrol_params JSON - use the prefix from first sensor or table_source
+        table_source = device_data.get('table_source', 'historico_iru')
+        if device_data['sensors']:
+            first_sensor = device_data['sensors'][0]
+            pk_fields = first_sensor['pk_fields']
+            # Determine prefix from first field
+            if pk_fields[0].startswith('HIRUC_'):
+                table_source = 'CAUDALES'
+
+        if table_source == 'CAUDALES':
+            if parcela is not None:
+                params = '{"HIRUC_nDirUM": %s, "HIRUC_nDirIRU": %s, "HIRUC_nParcela": %s}' % (device_data['dir_um'], device_data['dir_iru'], parcela)
+            else:
+                params = '{"HIRUC_nDirUM": %s, "HIRUC_nDirIRU": %s}' % (device_data['dir_um'], device_data['dir_iru'])
+        else:
+            if parcela is not None:
+                params = '{"HIRU_nDirUM": %s, "HIRU_nDirIRU": %s, "HIRU_nParcela": %s}' % (device_data['dir_um'], device_data['dir_iru'], parcela)
+            else:
+                params = '{"HIRU_nDirUM": %s, "HIRU_nDirIRU": %s}' % (device_data['dir_um'], device_data['dir_iru'])
+
+        devices_writer.writerow([
+            external_id.encode('utf-8'),
+            name.encode('utf-8'),
+            remotecontrol_id.encode('utf-8'),
+            params.encode('utf-8')
+        ])
+    # Step 3: Generate Sensors CSV
+    sensors_csv = StringIO.StringIO()
+    sensors_writer = csv.writer(sensors_csv)
+    # CSV Header for sensors
+    sensors_writer.writerow([
+        'id',
+        'name',
+        'device_id/id',
+        'remotecontrol_params'
+    ])
+
+    # Write sensor rows
+    sensor_counter = 0
+    for device_key, device_data in sorted(devices_map.items()):
+        device_external_id = 'regacom_device_%s_%s' % (device_data['dir_um'], device_data['dir_iru'])
+
+        for sensor_data in device_data['sensors']:
+            sensor_counter += 1
+            table = sensor_data['table']
+            contador = sensor_data['contador']
+            value_field = sensor_data['value_field']
+
+            # Sensor name based on type
+            if 'Total' in value_field:
+                sensor_type = 'Totalizer'
+            elif 'Caudal' in value_field:
+                sensor_type = 'Flow'
+            elif 'Valvula' in value_field:
+                sensor_type = 'Valve'
+            else:
+                sensor_type = 'Sensor'
+
+            sensor_name = '%s %s_%s C%s' % (sensor_type, device_data['dir_um'], device_data['dir_iru'], contador)
+            sensor_external_id = 'regacom_sensor_%s_%s_%s_%s' % (
+                device_data['dir_um'],
+                device_data['dir_iru'],
+                contador,
+                value_field.replace('_', '')
+            )
+
+            # Build sensor remotecontrol_params JSON
+            pk_fields = sensor_data['pk_fields']
+            params = {
+                'table': table,
+                'value_field': value_field,
+                'time_field': sensor_data['time_field'],
+                'pk_fields': pk_fields,
+                'pk_values': [None, None, contador]
+            }
+            # Add unit conversion factor if applicable
+            if 'unit' in sensor_data and sensor_data['unit']:
+                params['unit'] = sensor_data['unit']
+            params_json = json.dumps(params, ensure_ascii=False)
+            sensors_writer.writerow([
+                sensor_external_id.encode('utf-8'),
+                sensor_name.encode('utf-8'),
+                device_external_id.encode('utf-8'),
+                params_json.encode('utf-8')
+            ])
+    # Step 4: Create CSV attachments
+    devices_csv_content = devices_csv.getvalue()
+    sensors_csv_content = sensors_csv.getvalue()
+
+    devices_b64 = base64.b64encode(devices_csv_content)
+    sensors_b64 = base64.b64encode(sensors_csv_content)
+
+    timestamp = fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+
+    devices_att = env['ir.attachment'].create({
+        'name': 'regacom_devices_%s.csv' % timestamp,
+        'datas_fname': 'regacom_devices_%s.csv' % timestamp,
+        'datas': devices_b64,
+        'mimetype': 'text/csv',
+        'res_model': 'remotecontrol',
+        'res_id': Remote.id
+    })
+
+    sensors_att = env['ir.attachment'].create({
+        'name': 'regacom_sensors_%s.csv' % timestamp,
+        'datas_fname': 'regacom_sensors_%s.csv' % timestamp,
+        'datas': sensors_b64,
+        'mimetype': 'text/csv',
+        'res_model': 'remotecontrol',
+        'res_id': Remote.id
+    })
+
+    Remote.message_post(
+        body=u"[Regacom CSV Generation] Generated %s devices and %s sensors CSV files for import" % (
+            len(devices_map), sensor_counter
+        ),
+        attachment_ids=[devices_att.id, sensors_att.id]
+    )
+
+    bag['devices_count'] = len(devices_map)
+    bag['sensors_count'] = sensor_counter
+    bag['devices_csv_id'] = devices_att.id
+    bag['sensors_csv_id'] = sensors_att.id
+
+finally:
+    cursor = bag.get('_sql_cursor')
+    if cursor:
+        sql_close(cursor)
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_regacom_step_import_csv" model="remotecontrol.step">
+            <field name="name">Generate CSV files</field>
+            <field name="procedure_id" ref="remotecontrol_regacom_procedure_import"/>
+            <field name="action_id" ref="remotecontrol_regacom_action_generate_csv"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <!-- Get Last Readings - Returns nested dictionary in bag -->
+        <record id="remotecontrol_regacom_procedure_last_readings" model="remotecontrol.procedure">
+            <field name="name">Regacom: Get Last Readings</field>
+            <field name="remote_id" ref="remotecontrol_regacom"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_regacom_action_get_last_readings" model="remotecontrol.action">
+            <field name="name">Regacom: Get Last Readings</field>
+            <field name="remote_id" ref="remotecontrol_regacom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Get last reading for each device/counter from historico_iru
+# Returns nested dictionary: {HIRU_nDirUM: {HIRU_nDirIRU: {HIRU_nNumero_contador: {date: ..., value: ...}}}}
+Remote = self.remote_id
+
+# Connect to Regacom database
+cursor = sql_connect()
+bag['_sql_cursor'] = cursor
+
+try:
+    # Query to get the last reading for each unique combination of DirUM + DirIRU + Numero_contador
+    query = """
+        SELECT
+            t1.HIRU_nDirUM,
+            t1.HIRU_nDirIRU,
+            t1.HIRU_nNumero_contador,
+            t1.HIRU_nFechaHora,
+            t1.HIRU_nTotal
+        FROM historico_iru t1
+        INNER JOIN (
+            SELECT
+                HIRU_nDirUM,
+                HIRU_nDirIRU,
+                HIRU_nNumero_contador,
+                MAX(HIRU_nFechaHora) AS max_fecha
+            FROM historico_iru
+            WHERE HIRU_nDirUM IS NOT NULL
+              AND HIRU_nDirIRU IS NOT NULL
+              AND HIRU_nNumero_contador IS NOT NULL
+            GROUP BY HIRU_nDirUM, HIRU_nDirIRU, HIRU_nNumero_contador
+        ) t2 ON t1.HIRU_nDirUM = t2.HIRU_nDirUM
+            AND t1.HIRU_nDirIRU = t2.HIRU_nDirIRU
+            AND t1.HIRU_nNumero_contador = t2.HIRU_nNumero_contador
+            AND t1.HIRU_nFechaHora = t2.max_fecha
+        ORDER BY t1.HIRU_nDirUM, t1.HIRU_nDirIRU, t1.HIRU_nNumero_contador
+    """
+
+    sql_execute(cursor, query, ())
+    rows = sql_fetchall(cursor)
+
+    # Build nested dictionary structure
+    last_readings = {}
+    total_readings = 0
+
+    for row in rows:
+        dir_um = row[0]
+        dir_iru = row[1]
+        numero_contador = row[2]
+        fecha_hora = str(row[3]) if row[3] else None
+        total = float(row[4]) if row[4] is not None else 0.0
+
+        # Initialize nested dictionaries if they don't exist
+        if dir_um not in last_readings:
+            last_readings[dir_um] = {}
+
+        if dir_iru not in last_readings[dir_um]:
+            last_readings[dir_um][dir_iru] = {}
+
+        # Store the reading data
+        last_readings[dir_um][dir_iru][numero_contador] = {
+            'date': fecha_hora,
+            'value': total
+        }
+
+        total_readings += 1
+
+    # Store the nested dictionary in the bag for access by other methods
+    bag['last_readings'] = last_readings
+    bag['total_last_readings'] = total_readings
+
+    # Optional: Also store as JSON for audit purposes
+    try:
+        readings_json = json.dumps(last_readings, ensure_ascii=True, indent=2, default=str)
+        bag['last_readings_json'] = readings_json
+    except Exception as json_error:
+        bag['last_readings_json_error'] = str(json_error)
+
+finally:
+    # Always close the connection
+    cursor = bag.get('_sql_cursor')
+    if cursor:
+        sql_close(cursor)
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_regacom_step_get_last_readings" model="remotecontrol.step">
+            <field name="name">Get Last Readings</field>
+            <field name="procedure_id" ref="remotecontrol_regacom_procedure_last_readings"/>
+            <field name="action_id" ref="remotecontrol_regacom_action_get_last_readings"/>
+            <field name="sequence">10</field>
+        </record>
+
+    </data>
+</odoo>
