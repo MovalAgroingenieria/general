@@ -11,6 +11,102 @@
                 </field>
             </field>
         </record>
+        <record id="mark_model_as_available_on_app" model="ir.actions.server">
+            <field name="name">Mark Available on App</field>
+            <field name="model_id" ref="model_ir_model"/>
+            <field name="state">code</field>
+            <field name="code">
+            if context.get('active_ids'):
+                action = env['ir.model'].browse(context['active_ids']).action_mark_available_on_app()
+            </field>
+        </record>
+        <record id="mark_model_fields_as_available_on_app" model="ir.actions.server">
+            <field name="name">Mark Available on App</field>
+            <field name="model_id" ref="model_ir_model_fields"/>
+            <field name="state">code</field>
+            <field name="code">
+            if context.get('active_ids'):
+                action = env['ir.model.fields'].browse(context['active_ids']).action_mark_available_on_app()
+            </field>
+        </record>
+        <record id="unmark_model_as_available_on_app" model="ir.actions.server">
+            <field name="name">Unmark Available on App</field>
+            <field name="model_id" ref="model_ir_model"/>
+            <field name="state">code</field>
+            <field name="code">
+            if context.get('active_ids'):
+                action = env['ir.model'].browse(context['active_ids']).action_unmark_available_on_app()
+            </field>
+        </record>
+        <record id="unmark_model_fields_as_available_on_app" model="ir.actions.server">
+            <field name="name">Unmark Available on App</field>
+            <field name="model_id" ref="model_ir_model_fields"/>
+            <field name="state">code</field>
+            <field name="code">
+            if context.get('active_ids'):
+                action = env['ir.model.fields'].browse(context['active_ids']).action_unmark_available_on_app()
+            </field>
+        </record>
+        <record id="mark_module_as_available_on_app" model="ir.actions.server">
+            <field name="name">Mark Module Available on App</field>
+            <field name="model_id" ref="base.model_ir_module_module"/>
+            <field name="state">code</field>
+            <field name="code">
+            if context.get('active_ids'):
+            action = env['ir.module.module'].browse(context['active_ids']).action_mark_available_on_app()
+            </field>
+        </record>
+        <record id="unmark_module_as_available_on_app" model="ir.actions.server">
+            <field name="name">Unmark Module Available on App</field>
+            <field name="model_id" ref="base.model_ir_module_module"/>
+            <field name="state">code</field>
+            <field name="code">
+            if context.get('active_ids'):
+            action = env['ir.module.module'].browse(context['active_ids']).action_unmark_available_on_app()
+            </field>
+        </record>
+        <record id="action_mark_module_as_available_on_app" model="ir.values">
+            <field name="name">Mark Module Available on App</field>
+            <field name="model">ir.module.module</field>
+            <field name="key">action</field>
+            <field name="key2">client_action_multi</field>
+            <field name="value" eval="'ir.actions.server,' + str(ref('mark_module_as_available_on_app'))"/>
+        </record>
+        <record id="action_unmark_module_as_available_on_app" model="ir.values">
+            <field name="name">Unmark Module Available on App</field>
+            <field name="model">ir.module.module</field>
+            <field name="key">action</field>
+            <field name="key2">client_action_multi</field>
+            <field name="value" eval="'ir.actions.server,' + str(ref('unmark_module_as_available_on_app'))"/>
+        </record>
+        <record id="action_mark_model_as_available_on_app" model="ir.values">
+            <field name="name">Mark model Available on App</field>
+            <field name="model">ir.model</field>
+            <field name="key">action</field>
+            <field name="key2">client_action_multi</field>
+            <field name="value" eval="'ir.actions.server,' + str(ref('mark_model_as_available_on_app'))"/>
+        </record>
+        <record id="action_mark_model_fields_as_available_on_app" model="ir.values">
+            <field name="name">Mark model Available on App</field>
+            <field name="model">ir.model.fields</field>
+            <field name="key">action</field>
+            <field name="key2">client_action_multi</field>
+            <field name="value" eval="'ir.actions.server,' + str(ref('mark_model_fields_as_available_on_app'))"/>
+        </record>
+        <record id="action_unmark_model_as_available_on_app" model="ir.values">
+            <field name="name">Unmark model Available on App</field>
+            <field name="model">ir.model</field>
+            <field name="key">action</field>
+            <field name="key2">client_action_multi</field>
+            <field name="value" eval="'ir.actions.server,' + str(ref('unmark_model_as_available_on_app'))"/>
+        </record>
+        <record id="action_unmark_model_fields_as_available_on_app" model="ir.values">
+            <field name="name">Unmark model Available on App</field>
+            <field name="model">ir.model.fields</field>
+            <field name="key">action</field>
+            <field name="key2">client_action_multi</field>
+            <field name="value" eval="'ir.actions.server,' + str(ref('unmark_model_fields_as_available_on_app'))"/>
+        </record>
 
         <record id="view_ir_model_fields_form_inherit_available_on_app" model="ir.ui.view">
             <field name="name">ir.model.fields.form.inherit.available.on.app</field>
