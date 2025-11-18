@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="template_element_monosensor_integrated" model="board.grafana.dashboard.storage">
+            <field name="name">Template Element Mono Sensor Integrated Dashboard</field>
+            <field name="dashboard_title">template_element_monosensor_integrated</field>
+            <field name="dashboard_uid">TEMSID2rrsc</field>
+            <field name="dashboard_path">/d/TEMSID2rrsc</field>
+            <field name="integrated_dashboard">0</field>
+            <field name="integrated_panel_only">0</field>
+            <field name="integrated_panel_id">0</field>
+            <field name="dashboard_json"><![CDATA[
+              {
+                "annotations": {
+                  "list": [
+                    {
+                      "builtIn": 1,
+                      "datasource": {
+                        "type": "grafana",
+                        "uid": "-- Grafana --"
+                      },
+                      "enable": true,
+                      "hide": true,
+                      "iconColor": "rgba(0, 211, 255, 1)",
+                      "name": "Annotations & Alerts",
+                      "type": "dashboard"
+                    }
+                  ]
+                },
+                "description": "A versatile Grafana histogram dashboard template designed for visualizing data from all types sensors in GIS Viewer.",
+                "editable": true,
+                "fiscalYearStartMonth": 0,
+                "graphTooltip": 1,
+                "id": 0,
+                "links": [],
+                "panels": [
+                  {
+                    "datasource": {
+                      "type": "grafana-postgresql-datasource",
+                      "uid": "${datasource}"
+                    },
+                    "fieldConfig": {
+                      "defaults": {
+                        "color": {
+                          "mode": "palette-classic"
+                        },
+                        "custom": {
+                          "axisBorderShow": false,
+                          "axisCenteredZero": false,
+                          "axisColorMode": "text",
+                          "axisLabel": "",
+                          "axisPlacement": "auto",
+                          "barAlignment": 0,
+                          "barWidthFactor": 0.6,
+                          "drawStyle": "line",
+                          "fillOpacity": 0,
+                          "gradientMode": "none",
+                          "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                          },
+                          "insertNulls": false,
+                          "lineInterpolation": "linear",
+                          "lineWidth": 1,
+                          "pointSize": 5,
+                          "scaleDistribution": {
+                            "type": "linear"
+                          },
+                          "showPoints": "auto",
+                          "showValues": false,
+                          "spanNulls": false,
+                          "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                          },
+                          "thresholdsStyle": {
+                            "mode": "off"
+                          }
+                        },
+                        "mappings": [],
+                        "thresholds": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green",
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      "overrides": []
+                    },
+                    "gridPos": {
+                      "h": 12,
+                      "w": 24,
+                      "x": 0,
+                      "y": 0
+                    },
+                    "id": 14,
+                    "options": {
+                      "legend": {
+                        "calcs": [
+                          "last",
+                          "min",
+                          "mean",
+                          "max"
+                        ],
+                        "displayMode": "table",
+                        "placement": "bottom",
+                        "showLegend": true
+                      },
+                      "tooltip": {
+                        "hideZeros": false,
+                        "mode": "single",
+                        "sort": "none"
+                      }
+                    },
+                    "pluginVersion": "12.2.1",
+                    "targets": [
+                      {
+                        "datasource": {
+                          "type": "grafana-postgresql-datasource",
+                          "uid": "${datasource}"
+                        },
+                        "editorMode": "code",
+                        "format": "time_series",
+                        "hide": false,
+                        "rawQuery": true,
+                        "rawSql": "   SELECT measurement_time AS \"time\",\n          value AS \"Lecturas (${uom_name})\"\n     FROM mdm_measurement_device_sensor_reading\n    WHERE sensor_id = ${sensor_id}\n      AND $__timeFilter(measurement_time)\n GROUP BY measurement_time, value\n ORDER BY measurement_time;",
+                        "refId": "A",
+                        "sql": {
+                          "columns": [
+                            {
+                              "parameters": [],
+                              "type": "function"
+                            }
+                          ],
+                          "groupBy": [
+                            {
+                              "property": {
+                                "type": "string"
+                              },
+                              "type": "groupBy"
+                            }
+                          ],
+                          "limit": 50
+                        }
+                      }
+                    ],
+                    "title": "${device_name} - ${sensor_name}",
+                    "type": "timeseries"
+                  }
+                ],
+                "preload": false,
+                "schemaVersion": 42,
+                "tags": [],
+                "templating": {
+                  "list": [
+                    {
+                      "allowCustomValue": false,
+                      "current": {
+                        "text": "",
+                        "value": ""
+                      },
+                      "hide": 2,
+                      "label": "Fuente Datos",
+                      "name": "datasource",
+                      "options": [],
+                      "query": "grafana-postgresql-datasource",
+                      "refresh": 1,
+                      "regex": "",
+                      "type": "datasource"
+                    },
+                    {
+                      "allowCustomValue": false,
+                      "current": {
+                        "text": "",
+                        "value": ""
+                      },
+                      "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${datasource}"
+                      },
+                      "definition": "SELECT id FROM mdm_measurement_device_sensor;",
+                      "hide": 2,
+                      "name": "sensor_id",
+                      "options": [],
+                      "query": "SELECT id FROM mdm_measurement_device_sensor;",
+                      "refresh": 1,
+                      "regex": "",
+                      "type": "query"
+                    },
+                    {
+                      "allowCustomValue": false,
+                      "current": {
+                        "text": "",
+                        "value": ""
+                      },
+                      "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${datasource}"
+                      },
+                      "definition": "SELECT name FROM mdm_measurement_device_sensor WHERE id = ${sensor_id};",
+                      "hide": 2,
+                      "name": "sensor_name",
+                      "options": [],
+                      "query": "SELECT name FROM mdm_measurement_device_sensor WHERE id = ${sensor_id};",
+                      "refresh": 1,
+                      "regex": "",
+                      "type": "query"
+                    },
+                    {
+                      "allowCustomValue": false,
+                      "current": {
+                        "text": "",
+                        "value": ""
+                      },
+                      "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${datasource}"
+                      },
+                      "definition": "SELECT device_id FROM mdm_measurement_device_sensor WHERE id = ${sensor_id}",
+                      "hide": 2,
+                      "name": "device_id",
+                      "options": [],
+                      "query": "SELECT device_id FROM mdm_measurement_device_sensor WHERE id = ${sensor_id}",
+                      "refresh": 1,
+                      "regex": "",
+                      "type": "query"
+                    },
+                    {
+                      "allowCustomValue": false,
+                      "current": {
+                        "text": "",
+                        "value": ""
+                      },
+                      "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${datasource}"
+                      },
+                      "definition": "SELECT name FROM mdm_measurement_device WHERE id = ${device_id}",
+                      "hide": 2,
+                      "name": "device_name",
+                      "options": [],
+                      "query": "SELECT name FROM mdm_measurement_device WHERE id = ${device_id}",
+                      "refresh": 1,
+                      "regex": "",
+                      "type": "query"
+                    },
+                    {
+                      "allowCustomValue": false,
+                      "current": {
+                        "text": "",
+                        "value": ""
+                      },
+                      "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${datasource}"
+                      },
+                      "definition": "SELECT uom_id FROM mdm_measurement_device_sensor WHERE id = ${sensor_id}",
+                      "hide": 2,
+                      "name": "uom_id",
+                      "options": [],
+                      "query": "SELECT uom_id FROM mdm_measurement_device_sensor WHERE id = ${sensor_id}",
+                      "refresh": 1,
+                      "regex": "",
+                      "type": "query"
+                    },
+                    {
+                      "allowCustomValue": false,
+                      "current": {
+                        "text": "",
+                        "value": ""
+                      },
+                      "datasource": {
+                        "type": "grafana-postgresql-datasource",
+                        "uid": "${datasource}"
+                      },
+                      "definition": "SELECT name FROM mdm_measurement_device_sensor_uom WHERE id = ${uom_id}",
+                      "hide": 2,
+                      "name": "uom_name",
+                      "options": [],
+                      "query": "SELECT name FROM mdm_measurement_device_sensor_uom WHERE id = ${uom_id}",
+                      "refresh": 1,
+                      "regex": "",
+                      "type": "query"
+                    }
+                  ]
+                },
+                "time": {
+                  "from": "now-7d",
+                  "to": "now"
+                },
+                "timepicker": {},
+                "timezone": "browser",
+                "title": "template_element_monosensor_integrated",
+                "uid": "TEMSID2rrsc",
+                "version": 2,
+                "weekStart": "monday"
+              }]]></field>
+        </record>
+    </data>
+</odoo>
