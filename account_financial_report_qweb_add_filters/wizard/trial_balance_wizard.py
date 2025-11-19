@@ -196,12 +196,12 @@ class TrialBalanceReportWizard(models.TransientModel):
             move_lines = self.env["account.move.line"]._read_group(
                 domain=domain,
                 groupby=[group_by_field],
-                aggregates=['credit:sum', 'debit:sum', 'balance:sum', group_by_field],
+                aggregates=["credit:sum", "debit:sum", "balance:sum", group_by_field],
             )
             move_lines_back = self.env["account.move.line"]._read_group(
                 domain=domain_back,
                 groupby=[group_by_field],
-                aggregates=['credit:sum', 'debit:sum', 'balance:sum', group_by_field],
+                aggregates=["credit:sum", "debit:sum", "balance:sum", group_by_field],
             )
             item_lines = []
             # all_mlines = move_lines + move_lines_back
