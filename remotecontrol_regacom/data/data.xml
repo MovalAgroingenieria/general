@@ -389,8 +389,9 @@ try:
             where_conditions.append("%s <= %%s" % time_field)
             query_params.append(initial_date + ' 00:00:00')
             query_params.append(final_date + ' 23:59:59')
+            # CAST value_field to FLOAT to avoid FreeTDS/TDS 7.0 DECIMAL precision bug
             query = """
-                SELECT %s, %s
+                SELECT CAST(%s AS FLOAT), %s
                 FROM %s
                 WHERE %s
                 ORDER BY %s ASC
@@ -406,22 +407,9 @@ try:
             upserts = 0
             errs = 0
             readings_summary = []
-            # Determine conversion factor based on unit
-            conversion_factor = 1.0
-            unit = sensor_cfg.get('unit', '').lower().replace(' ', '')
-            if unit:
-                if unit == 'm³/h':
-                    # m³/h to l/s: m³/h * 1000 / 3600 = l/s * 0.277778
-                    conversion_factor = 1000.0 / 3600.0
-                elif unit == 'm³/s':
-                    # m³/s to l/s: m³/s * 1000 = l/s
-                    conversion_factor = 1000.0
-                # l/s -> no conversion needed (factor = 1.0)
             for row in rows:
                 try:
-                    raw_value = float(row[0]) if row[0] is not None else 0.0
-                    # Apply conversion factor
-                    value = raw_value * conversion_factor
+                    value = float(row[0]) if row[0] is not None else 0.0
                     timestamp = str(row[1])
                     # Upsert reading into Odoo
                     Remote.upsert(
@@ -844,11 +832,9 @@ finally:
 # Get last reading for each device/counter from historico_iru
 # Returns nested dictionary: {HIRU_nDirUM: {HIRU_nDirIRU: {HIRU_nNumero_contador: {date: ..., value: ...}}}}
 Remote = self.remote_id
-
 # Connect to Regacom database
 cursor = sql_connect()
 bag['_sql_cursor'] = cursor
-
 try:
     # Query to get the last reading for each unique combination of DirUM + DirIRU + Numero_contador
     query = """
@@ -857,7 +843,7 @@ try:
             t1.HIRU_nDirIRU,
             t1.HIRU_nNumero_contador,
             t1.HIRU_nFechaHora,
-            t1.HIRU_nTotal
+            CAST(t1.HIRU_nTotal AS FLOAT) AS HIRU_nTotal
         FROM historico_iru t1
         INNER JOIN (
             SELECT
@@ -876,47 +862,38 @@ try:
             AND t1.HIRU_nFechaHora = t2.max_fecha
         ORDER BY t1.HIRU_nDirUM, t1.HIRU_nDirIRU, t1.HIRU_nNumero_contador
     """
-
     sql_execute(cursor, query, ())
     rows = sql_fetchall(cursor)
-
     # Build nested dictionary structure
     last_readings = {}
     total_readings = 0
-
     for row in rows:
         dir_um = row[0]
         dir_iru = row[1]
         numero_contador = row[2]
         fecha_hora = str(row[3]) if row[3] else None
+        # CAST to FLOAT in SQL avoids FreeTDS/TDS 7.0 DECIMAL precision bug
         total = float(row[4]) if row[4] is not None else 0.0
-
         # Initialize nested dictionaries if they don't exist
         if dir_um not in last_readings:
             last_readings[dir_um] = {}
-
         if dir_iru not in last_readings[dir_um]:
             last_readings[dir_um][dir_iru] = {}
-
         # Store the reading data
         last_readings[dir_um][dir_iru][numero_contador] = {
             'date': fecha_hora,
             'value': total
         }
-
         total_readings += 1
-
     # Store the nested dictionary in the bag for access by other methods
     bag['last_readings'] = last_readings
     bag['total_last_readings'] = total_readings
-
     # Optional: Also store as JSON for audit purposes
     try:
         readings_json = json.dumps(last_readings, ensure_ascii=True, indent=2, default=str)
         bag['last_readings_json'] = readings_json
     except Exception as json_error:
         bag['last_readings_json_error'] = str(json_error)
-
 finally:
     # Always close the connection
     cursor = bag.get('_sql_cursor')
