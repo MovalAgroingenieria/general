@@ -15,10 +15,10 @@ class ResPartner(models.Model):
         column2="base_comment_template_id",
         string="Comment Templates",
         domain=[("global_template", "=", False)],
-        help="Specific partner comments that can be included in reports",
+        help="Partner-specific comment templates that can be included in reports.",
     )
 
     @api.model
     def _commercial_fields(self):
-        """Add comment templates to commercial fields"""
+        """Extend commercial fields with comment templates."""
         return super()._commercial_fields() + ["base_comment_template_ids"]
