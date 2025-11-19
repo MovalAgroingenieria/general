@@ -17,6 +17,7 @@
             </list>
         </field>
     </record>
+
     <record model="ir.ui.view" id="view_base_comment_template_search">
         <field name="name">base.comment.template.search</field>
         <field name="model">base.comment.template</field>
@@ -45,7 +46,7 @@
                             name="web_ribbon"
                             title="Archived"
                             bg_color="bg-danger"
-                            attrs="{'invisible': [('active', '=', True)]}"
+                            invisible="active"
                         />
                         <button
                             class="oe_stat_button"
@@ -85,6 +86,7 @@
             </form>
         </field>
     </record>
+
     <record model="ir.actions.act_window" id="action_base_comment_template">
         <field name="name">Comment Templates</field>
         <field name="type">ir.actions.act_window</field>
@@ -92,7 +94,8 @@
         <field name="view_mode">list,form</field>
         <field name="view_id" ref="view_base_comment_template_tree" />
     </record>
-    <!--  menu in settings/technical/reporting -->
+
+    <!-- menu in settings/technical/reporting -->
     <menuitem
         id="reports_base_comment_template_menuitem"
         name="Comment Templates"
