@@ -1,34 +1,26 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# * base_comment_template
+# 	* base_comment_template
 #
-# Translators:
-# enjolras <yo@miguelrevilla.com>, 2018
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 10.0\n"
+"Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-03 08:01+0000\n"
-"PO-Revision-Date: 2023-09-07 16:37+0000\n"
-"Last-Translator: Ivorra78 <informatica@totmaterial.es>\n"
-"Language-Team: Spanish (https://www.transifex.com/oca/teams/23907/es/)\n"
-"Language: es\n"
+"POT-Creation-Date: 2025-11-19 11:47+0000\n"
+"PO-Revision-Date: 2025-11-19 11:47+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.17\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
 
 #. module: base_comment_template
 #: model_terms:ir.ui.view,arch_db:base_comment_template.base_comment_template_preview_form
 msgid ""
-"<span class=\"text-warning\" attrs=\"{'invisible': [('no_record', '=', "
-"False)]}\">No records\n"
+"<span class=\"text-warning\" invisible=\"not no_record or not bool(no_record)\">No records\n"
 "                        </span>"
 msgstr ""
-"<span class=\"text-warning\" attrs=\"{'invisible': [('no_record', '=', "
-"False)]}\">Sin registros\n"
-"                                                      </span>"
 
 #. module: base_comment_template
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template__active
@@ -132,7 +124,7 @@ msgstr "Creado por"
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template__create_date
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template_preview__create_date
 msgid "Created on"
-msgstr "Creado el"
+msgstr "Creado en"
 
 #. module: base_comment_template
 #: model_terms:ir.ui.view,arch_db:base_comment_template.base_comment_template_preview_form
@@ -143,12 +135,19 @@ msgstr "Descartar"
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template__display_name
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template_preview__display_name
 msgid "Display Name"
-msgstr "Nombre mostrado"
+msgstr "Nombre para mostrar"
 
 #. module: base_comment_template
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template__engine
 msgid "Engine"
 msgstr "Motor"
+
+#. module: base_comment_template
+#: model:ir.model.fields,help:base_comment_template.field_base_comment_template__engine
+msgid "Engine used for rendering the template."
+msgstr ""
+"Este campo permite seleccionar el motor a utilizar para renderizar la "
+"plantilla."
 
 #. module: base_comment_template
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template__domain
@@ -164,7 +163,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template__id
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template_preview__id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: base_comment_template
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template__model_ids
@@ -175,7 +174,8 @@ msgstr "Modelo"
 #. module: base_comment_template
 #: model:ir.model.fields,help:base_comment_template.field_base_comment_template__company_id
 msgid ""
-"If set, the comment template will be available only for the selected company."
+"If set, the comment template will be available only for the selected "
+"company."
 msgstr ""
 "Si se define, la plantilla de comentario va a estar disponible para las "
 "compañías seleccionadas."
@@ -183,7 +183,8 @@ msgstr ""
 #. module: base_comment_template
 #: model:ir.model.fields,help:base_comment_template.field_base_comment_template__partner_ids
 msgid ""
-"If set, the comment template will be available only for the selected partner."
+"If set, the comment template will be available only for the selected "
+"partner."
 msgstr ""
 "Si se define, la plantilla de comentario va a estar disponible para los "
 "contactos seleccionados."
@@ -199,22 +200,16 @@ msgid "Inline template"
 msgstr "Plantilla en línea"
 
 #. module: base_comment_template
-#: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template____last_update
-#: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template_preview____last_update
-msgid "Last Modified on"
-msgstr "Última modificación el"
-
-#. module: base_comment_template
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template__write_uid
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template_preview__write_uid
 msgid "Last Updated by"
-msgstr "Última modificación por"
+msgstr "Última actualización por"
 
 #. module: base_comment_template
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template__write_date
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template_preview__write_date
 msgid "Last Updated on"
-msgstr "Última modificación el"
+msgstr "Última actualización en"
 
 #. module: base_comment_template
 #: model:ir.model.fields,field_description:base_comment_template.field_base_comment_template_preview__model_id
@@ -268,7 +263,7 @@ msgstr "Previsualización de"
 #: model:ir.model.fields.selection,name:base_comment_template.selection__base_comment_template__engine__qweb
 #: model:ir.model.fields.selection,name:base_comment_template.selection__base_comment_template_preview__engine__qweb
 msgid "QWeb"
-msgstr "QWeb"
+msgstr ""
 
 #. module: base_comment_template
 #: model:ir.model.fields.selection,name:base_comment_template.selection__base_comment_template__engine__qweb_view
@@ -291,16 +286,9 @@ msgid "Sequence"
 msgstr "Secuencia"
 
 #. module: base_comment_template
-#. odoo-python
-#: code:addons/base_comment_template/models/base_comment_template.py:0
-#, python-format
-msgid "Some model (%s) not found"
-msgstr "Algún modelo (%s) no se ha encontrado"
-
-#. module: base_comment_template
 #: model:ir.model.fields,help:base_comment_template.field_res_partner__base_comment_template_ids
 #: model:ir.model.fields,help:base_comment_template.field_res_users__base_comment_template_ids
-msgid "Specific partner comments that can be included in reports"
+msgid "Specific partner comments that can be included in reports."
 msgstr "Comentarios de contactos que se pueden incluir en informes"
 
 #. module: base_comment_template
@@ -325,35 +313,27 @@ msgstr "Vista previa de la plantilla Idioma"
 
 #. module: base_comment_template
 #: model:ir.model.fields,help:base_comment_template.field_base_comment_template__sequence
-msgid "The smaller number = The higher priority"
+msgid "The smaller number = The higher priority."
 msgstr "Cuanto menor sea el número = mayor prioridad"
 
 #. module: base_comment_template
 #: model:ir.model.fields,help:base_comment_template.field_base_comment_template__model_ids
 #: model:ir.model.fields,help:base_comment_template.field_base_comment_template_preview__model_ids
 msgid ""
-"This comment template will be available on this models. You can see here "
-"only models allowed to set the coment template."
+"This comment template will be available on these models. Only models allowed"
+" to set the comment template can be selected."
 msgstr ""
-"Esta plantilla de comentarios estará disponible en estos modelos. Sólo vas a "
-"ver los modelos autorizados para configurar la plantilla de comentarios."
+"Esta plantilla de comentarios estará disponible en estos modelos. Sólo vas a"
+" ver los modelos autorizados para configurar la plantilla de comentarios."
 
 #. module: base_comment_template
 #: model:ir.model.fields,help:base_comment_template.field_base_comment_template__domain
 msgid ""
 "This comment template will be available only for objects that satisfy the "
-"condition"
+"condition."
 msgstr ""
 "Esta plantilla de comentarios estará disponible solo para objetos que "
 "satisfagan la condición"
-
-#. module: base_comment_template
-#: model:ir.model.fields,help:base_comment_template.field_base_comment_template__engine
-msgid ""
-"This field allows to select the engine to use for rendering the template."
-msgstr ""
-"Este campo permite seleccionar el motor a utilizar para renderizar la "
-"plantilla."
 
 #. module: base_comment_template
 #: model:ir.model.fields,help:base_comment_template.field_base_comment_template__position
@@ -373,7 +353,7 @@ msgstr "Superior"
 
 #. module: base_comment_template
 #: model:ir.model.fields,help:base_comment_template.field_ir_model__is_comment_template
-msgid "Whether this model supports in reports to add comment templates."
+msgid "Whether this model supports adding comment templates in reports."
 msgstr ""
 "Si este modelo admite en los informes, añadir plantillas de comentarios."
 

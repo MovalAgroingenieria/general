@@ -1,7 +1,6 @@
 from odoo import api, fields, models
-from odoo.tools.safe_eval import safe_eval
-
 from odoo.addons.base.models.res_partner import _lang_get
+from odoo.tools.safe_eval import safe_eval
 
 
 class BaseCommentTemplatePreview(models.TransientModel):

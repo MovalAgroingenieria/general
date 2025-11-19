@@ -10,7 +10,6 @@
     "website": "https://github.com/OCA/reporting-engine",
     "author": "Camptocamp, Odoo Community Association (OCA)",
     "license": "AGPL-3",
-    "installable": True,
     "depends": ["base", "mail"],
     "data": [
         "security/ir.model.access.csv",

@@ -3,32 +3,39 @@
 # Copyright 2018 Camptocamp
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html).
 
-from odoo import models
+from odoo import api, fields, models
 
 
 def setup_test_model(env, model_cls):
-    """Pass a test model class and initialize it.
+    """Initialize a dynamic test model in the registry.
 
     Courtesy of SBidoul from https://github.com/OCA/mis-builder :)
     """
+    # Build the model class in the registry
     model_cls._build_model(env.registry, env.cr)
+    # Reconfigure all models to take the new one into account
     env.registry.setup_models(env.cr)
+    # Initialize the specific model (fields, etc.)
     env.registry.init_models(
         env.cr, [model_cls._name], dict(env.context, update_custom_fields=True)
     )
 
 
 def teardown_test_model(env, model_cls):
-    """Pass a test model class and deinitialize it.
+    """Deinitialize a dynamic test model from the registry.
 
     Courtesy of SBidoul from https://github.com/OCA/mis-builder :)
     """
     if not getattr(model_cls, "_teardown_no_delete", False):
-        del env.registry.models[model_cls._name]
+        # Remove the model from the registry to avoid polluting other tests
+        env.registry.models.pop(model_cls._name, None)
     env.registry.setup_models(env.cr)
 
 
 class ResUsers(models.Model):
+    """Dummy model for testing the comment.template mixin."""
+
     _name = "res.users"
+    _description = "Test Res Users with Comment Template"
     _inherit = ["res.users", "comment.template"]
     _teardown_no_delete = True
