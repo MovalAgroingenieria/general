@@ -9,9 +9,14 @@ from odoo.tests import tagged
 
 @tagged("post_install", "-at_install")
 class TestAccountInvoiceReport(AccountTestInvoicingCommon):
+    """Tests for invoice report integration with base_comment_template."""
+
     @classmethod
     def setUpClass(cls, chart_template_ref=None):
+        # AccountTestInvoicingCommon sets up CoA, journals, products, etc.
         super().setUpClass(chart_template_ref=chart_template_ref)
+
+        # Disable mail/notifications noise in tests
         cls.env = cls.env(
             context=dict(
                 cls.env.context,
@@ -22,10 +27,18 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
                 tracking_disable=True,
             )
         )
+
         cls.base_comment_model = cls.env["base.comment.template"]
         cls.res_model_id = cls.env.ref("account.model_account_move")
-        cls.before_comment = cls._create_comment(cls, "before_lines")
-        cls.after_comment = cls._create_comment(cls, "after_lines")
+
+        # Mark account.move as supporting comment templates
+        cls.res_model_id.is_comment_template = True
+
+        # Create templates before/after invoice lines
+        cls.before_comment = cls._create_comment("before_lines")
+        cls.after_comment = cls._create_comment("after_lines")
+
+        # Partner with specific comment templates
         cls.partner = cls.env["res.partner"].create(
             {
                 "name": "Partner Test",
@@ -35,35 +48,51 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
                 ],
             }
         )
+
+        # Create an invoice to be printed
         cls.invoice = cls.init_invoice(
-            "out_invoice", partner=cls.partner, products=cls.product_a + cls.product_b
+            "out_invoice",
+            partner=cls.partner,
+            products=cls.product_a + cls.product_b,
         )
 
-    def _create_comment(self, position):
-        return self.base_comment_model.create(
+    # -------------------------------------------------------------------------
+    # Helpers
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def _create_comment(cls, position):
+        """Create a comment template for account.move at a given position."""
+        return cls.base_comment_model.create(
             {
                 "name": "Comment " + position,
-                "company_id": self.company_data["company"].id,
+                "company_id": cls.company_data["company"].id,
                 "position": position,
                 "text": "Text " + position,
+                # Use the technical model name; model_ids is computed from this.
                 "models": "account.move",
-                "model_ids": [(6, 0, self.res_model_id.ids)],
             }
         )
 
+    # -------------------------------------------------------------------------
+    # Tests
+    # -------------------------------------------------------------------------
+
     def test_comments_in_invoice_report(self):
-        res = self.env["ir.actions.report"]._render_qweb_html(
+        """Ensure comments are rendered in the invoice QWeb report."""
+        html, _content_type = self.env["ir.actions.report"]._render_qweb_html(
             "account.report_invoice", self.invoice.ids
         )
-        self.assertRegex(str(res[0]), self.before_comment.text)
-        self.assertRegex(str(res[0]), self.after_comment.text)
+        self.assertRegex(str(html), self.before_comment.text)
+        self.assertRegex(str(html), self.after_comment.text)
 
     def test_comments_in_invoice(self):
+        """Ensure comment templates are computed on the invoice record."""
         new_invoice = self.init_invoice(
             "out_invoice",
             partner=self.partner,
             products=self.product_a + self.product_b,
         )
         new_invoice._compute_comment_template_ids()
-        self.assertTrue(self.after_comment in new_invoice.comment_template_ids)
-        self.assertTrue(self.before_comment in new_invoice.comment_template_ids)
+        self.assertIn(self.after_comment, new_invoice.comment_template_ids)
+        self.assertIn(self.before_comment, new_invoice.comment_template_ids)

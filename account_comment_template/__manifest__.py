@@ -12,7 +12,6 @@
     "author": "Camptocamp, Tecnativa, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/account-invoice-reporting",
     "license": "AGPL-3",
-    "installable": True,
     "depends": [
         "account",
         "base_comment_template",
