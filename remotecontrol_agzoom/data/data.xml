@@ -50,7 +50,7 @@
 <ol>
   <li><strong>Authenticates</strong> with AgZoom API using your OAuth2 credentials</li>
   <li><strong>Retrieves</strong> all devices available in your AgZoom account from <code>/api/userdevices</code></li>
-  <li><strong>Fetches</strong> detailed sensor data for each device including sensor codes and available units</li>
+  <li><strong>Fetches</strong> detailed sensor data for each device including sensor codes and available ids</li>
   <li><strong>Extracts</strong> device name, ID, location, sensors, and all available measurement units</li>
   <li><strong>Generates</strong> a comprehensive JSON file with complete device and sensor configuration</li>
   <li><strong>Attaches</strong> the JSON to the Remote Control record for download</li>
@@ -75,7 +75,7 @@
 <p>In each <strong>Sensor</strong> (<code>mdm.measurement.device.sensor</code>) set <em>remotecontrol_params</em>:</p>
 <pre>{
   "sensor_code": "5632",
-  "unit": "water_level",
+  "id": "1",
   "start_date": "2025-10-13"
 }</pre>
 
@@ -93,14 +93,14 @@
 <p><em>Sensor 1 (soil moisture - VP-4 sensor, port 5, depth 30cm):</em></p>
 <pre>{
   "sensor_code": "5632",
-  "unit": "water_level",
+  "id": "1",
   "start_date": "2025-05-24"
 }</pre>
 
 <p><em>Sensor 2 (soil temperature - same physical sensor):</em></p>
 <pre>{
   "sensor_code": "5632",
-  "unit": "temperature_water",
+  "id": "temperature_water",
   "start_date": "2025-05-24"
 }</pre>
 </div>
@@ -284,8 +284,8 @@ for sensor in sensors:
     except Exception:
         sensor_cfg = {}
     sensor_code = (sensor_cfg.get('sensor_code') or '').strip()
-    unit = (sensor_cfg.get('unit') or '').strip()
-    if sensor_code and unit:
+    id = (sensor_cfg.get('id') or '').strip()
+    if sensor_code and id:
         try:
             device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
         except Exception:
@@ -313,7 +313,7 @@ for sensor in sensors:
                 'device_id': device.id,
                 'agzoom_device_id': agzoom_device_id,
                 'sensor_code': sensor_code,
-                'unit': unit,
+                'id': id,
                 'initial_date': initial_date,
             })
 bag['sensors_plan'] = plan
@@ -349,7 +349,7 @@ for sensor_plan in plan:
     device_id = sensor_plan['device_id']
     agzoom_device_id = sensor_plan['agzoom_device_id']
     sensor_code = sensor_plan['sensor_code']
-    unit = sensor_plan['unit']
+    id = sensor_plan['id']
     initial_date = sensor_plan['initial_date']
     sensor_record = SensorModel.browse(sensor_id)
     # Format dates for AgZoom: YYYYMMDDHHIISS
@@ -376,9 +376,9 @@ for sensor_plan in plan:
                 for sensor_item in sensors_array:
                     if str(sensor_item.get('code', '')) == sensor_code:
                         variables = sensor_item.get('variables', [])
-                        # Find all variables with matching unit (can be multiple with different dates)
+                        # Find all variables with matching id (can be multiple with different dates)
                         for variable in variables:
-                            if str(variable.get('unit', '')) == unit:
+                            if str(variable.get('id', '')) == id:
                                 timestamp = variable.get('date', '')
                                 value = variable.get('data', '')
                                 if timestamp and value:
@@ -417,7 +417,7 @@ for sensor_plan in plan:
                 'upserts': upserts,
                 'errors': errs,
                 'sensor_code': sensor_code,
-                'unit': unit,
+                'id': id,
                 'readings': readings_summary,
             })
         else:
@@ -514,24 +514,24 @@ for costumer in costumers:
                                     sensor_port = sensor_item.get('port', '')
                                     sensor_depth = sensor_item.get('depth', '')
 
-                                    # Extract unique units from variables
+                                    # Extract unique id from variables
                                     variables = sensor_item.get('variables', [])
-                                    units_info = []
-                                    seen_units = set()
+                                    id_info = []
+                                    seen_id = set()
 
                                     for variable in variables:
-                                        unit = variable.get('unit', '')
+                                        id = variable.get('id', '')
                                         var_type = variable.get('type', '')
                                         var_id = variable.get('id', '')
-                                        unit_default = variable.get('unit_default', '')
+                                        id_default = variable.get('id_default', '')
 
-                                        if unit and unit not in seen_units:
-                                            seen_units.add(unit)
-                                            units_info.append({
-                                                'unit': unit,
+                                        if id and id not in seen_id:
+                                            seen_id.add(id)
+                                            id_info.append({
+                                                'id': id,
                                                 'type': var_type,
                                                 'id': var_id,
-                                                'unit_default': unit_default
+                                                'id_default': id_default
                                             })
 
                                     if sensor_code:
@@ -540,7 +540,7 @@ for costumer in costumers:
                                             'type': sensor_type,
                                             'port': sensor_port,
                                             'depth': sensor_depth,
-                                            'available_units': units_info
+                                            'available_id': id_info
                                         })
                 except Exception as e:
                     # If sensor data fetch fails, still include the device
@@ -572,7 +572,7 @@ report = {
         },
         'sensor_params': {
             'sensor_code': 'Use the sensor code from sensors[].code',
-            'unit': 'Use one of the available units from sensors[].available_units[].unit',
+            'id': 'Use one of the available id from sensors[].available_id[].id',
             'start_date': 'YYYY-MM-DD format (optional, inherits from device if not set)'
         }
     }
