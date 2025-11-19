@@ -12,9 +12,9 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
     """Tests for invoice report integration with base_comment_template."""
 
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        # AccountTestInvoicingCommon sets up CoA, journals, products, etc.
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        # In Odoo 18, AccountTestInvoicingCommon.setUpClass() takes no params
+        super().setUpClass()
 
         # Disable mail/notifications noise in tests
         cls.env = cls.env(
