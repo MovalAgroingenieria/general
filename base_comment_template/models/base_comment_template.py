@@ -143,9 +143,7 @@ class BaseCommentTemplate(models.Model):
         """Compute the ir.model records from the comma-separated 'models' field."""
         for item in self:
             if item.models:
-                model_names = [
-                    m.strip() for m in item.models.split(",") if m.strip()
-                ]
+                model_names = [m.strip() for m in item.models.split(",") if m.strip()]
                 models = item._get_ir_model_items(model_names)
             else:
                 models = self.env["ir.model"].browse()

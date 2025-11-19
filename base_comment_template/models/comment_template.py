@@ -5,7 +5,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import markupsafe
-
 from odoo import api, fields, models
 from odoo.osv import expression
 from odoo.tools.safe_eval import safe_eval
@@ -20,9 +19,7 @@ class CommentTemplate(models.AbstractModel):
     """
 
     _name = "comment.template"
-    _description = (
-        "Mixin to use base.comment.template for headers/footers in reports"
-    )
+    _description = "Mixin to use base.comment.template for headers/footers in reports"
 
     # Name of the field in downstream models that points to the partner.
     # Override this in inheriting models if the partner field is different
