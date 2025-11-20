@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Override slide comment form to prevent public comments -->
+    <template id="slide_comment_form_security" inherit_id="website_slides.slide_detail_view" name="Slide Comment Security">
+        
+        <!-- Replace the first public user div (name/email inputs) -->
+        <xpath expr="//div[@t-if='is_public_user'][@class='col-md-6'][./input[@name='name']]" position="replace">
+            <div t-if="is_public_user" class="col-md-12">
+                <div class="alert alert-info">
+                    <h4><i class="fa fa-lock"></i> Login Requerido</h4>
+                    <p>Para prevenir spam, debe <a t-attf-href="/web/login?redirect=#{request.httprequest.url}" class="alert-link">iniciar sesión</a> para publicar comentarios.</p>
+                </div>
+            </div>
+        </xpath>
+
+        <!-- Hide the second public user div (description text) -->
+        <xpath expr="//div[@t-if='is_public_user'][@class='col-md-6'][./p[@class='text-muted small']]" position="replace">
+        </xpath>
+
+        <!-- Hide comment textarea and button for public users -->
+        <xpath expr="//div[@class='col-md-12'][./textarea[@name='comment']]" position="attributes">
+            <attribute name="t-if">not is_public_user</attribute>
+        </xpath>
+        
+    </template>
+</odoo>

@@ -13,6 +13,7 @@
         "website_slides",
     ],
     "data": [
+        "views/website_slides_templates.xml",
     ],
     "installable": True,
     "application": False,
