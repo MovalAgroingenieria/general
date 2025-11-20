@@ -1,0 +1,740 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_inelcom" model="remotecontrol">
+            <field name="name">Inelcom</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://smart.inelcom.com:6081/restws</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="is_cesens">True</field>
+            <field name="connection_params"><![CDATA[
+            {
+                "username": "",
+                "password": ""
+            }]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>Inelcom · Odoo Integration</h2>
+
+<hr/>
+
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code> · Base URL: <code>https://smart.inelcom.com:6081/restws</code></p>
+
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+  "username": "user_inelcom",
+  "password": "********"
+}</pre>
+
+<ul>
+  <li><em>Login</em> → performs <code>POST /restws/webresources/sesiones</code> and returns a plain session token string.</li>
+  <li>All subsequent requests must include the query parameter:
+    <pre>?sesion=&lt;token&gt;</pre>
+  </li>
+  <li>No logout endpoint is required.</li>
+</ul>
+
+<h3>2) Available Procedures</h3>
+<p>The following predefined procedures are included:</p>
+<ul>
+  <li><strong>Inelcom: Daily Sync</strong> → automatically performs (1) device/sensor planning, (2) reading download, and (3) upsert of readings into Odoo.</li>
+  <li><strong>Inelcom: Get Devices</strong> → fetches the complete list of available devices from Inelcom API for configuration purposes.</li>
+</ul>
+
+<h3>3) Typical Workflow</h3>
+<ol>
+  <li><strong>Get Devices Plan</strong>:
+    <ul>
+      <li>Finds all sensors belonging to devices connected to this Inelcom remote control.</li>
+      <li>Reads <code>remotecontrol_params</code> from device and sensor records.</li>
+      <li>Extracts:
+        <ul>
+          <li><code>route</code> (hydrant route)</li>
+          <li><code>device_id</code> (counter identifier)</li>
+          <li><code>start_date</code> if available</li>
+        </ul>
+      </li>
+      <li>Determines <code>initial_date</code> based on:
+        <ul>
+          <li>last reading in Odoo, or</li>
+          <li>device start_date, or</li>
+          <li>sensor start_date, or</li>
+          <li>default: <code>YYYY-01-01</code></li>
+        </ul>
+      </li>
+      <li>Stores the resulting plan in <code>bag["sensors_plan"]</code>.</li>
+    </ul>
+  </li>
+
+  <li><strong>Get Readings Data</strong>:
+    <ul>
+      <li>Authenticates using <code>POST /restws/webresources/sesiones</code>.</li>
+      <li>For each sensor in the plan, computes the number of days to request.</li>
+      <li>Calls:
+        <pre>GET /isrlrestws/resources/hidrantes/&lt;route&gt;
+    ?sesion=&lt;token&gt;
+    &contador=&lt;device_id&gt;
+    &fecha=&lt;DD/MM/YY&gt;
+    &dias=&lt;N&gt;</pre>
+      </li>
+      <li>Parses <code>payload["lista"]</code> and builds:
+        <ul>
+          <li>timestamp (date + hour)</li>
+          <li>numeric value</li>
+        </ul>
+      </li>
+      <li>Generates a JSON audit attachment:
+        <pre>inelcom_readings_YYYYMMDD_HHMMSS.json</pre>
+      </li>
+      <li>Stores:
+        <ul>
+          <li><code>bag["raw_readings"]</code></li>
+          <li><code>bag["sensors_with_errors"]</code></li>
+          <li><code>bag["fetch_summary"]</code></li>
+          <li><code>bag["audit_attachment_id"]</code></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li><strong>Upsert Readings</strong>:
+    <ul>
+      <li>Iterates through <code>bag["raw_readings"]</code>.</li>
+      <li>Upserts into <code>mdm.measurement.device.sensor.reading</code> using:
+        <pre>Remote.upsert({
+  key: { sensor_id, measurement_time },
+  values: { value, device_id }
+})</pre>
+      </li>
+      <li>Updates counters: successful, failed.</li>
+      <li>Stores summary in <code>bag["upsert_summary"]</code>.</li>
+      <li>Posts a message in the remote control chatter.</li>
+    </ul>
+  </li>
+</ol>
+
+<h3>4) Device Discovery Workflow</h3>
+<ol>
+  <li><strong>Get Devices List</strong>:
+    <ul>
+      <li>Authenticates using <code>POST /restws/webresources/sesiones</code>.</li>
+      <li>Fetches all sectors using:
+        <pre>GET /restws/webresources/nodos/sectores?sesion=&lt;token&gt;</pre>
+      </li>
+      <li>For each sector, retrieves device counters:
+        <pre>GET /restws/webresources/hidrantes/contadores
+    ?sesion=&lt;token&gt;
+    &sector=&lt;sector_id&gt;</pre>
+      </li>
+      <li>Collects device information including:
+        <ul>
+          <li><code>counter_code</code> (counter identifier)</li>
+          <li><code>name</code> (hydrant name and counter number)</li>
+          <li><code>hydrant_id</code> (hydrant ID)</li>
+          <li><code>value</code> (current reading value)</li>
+          <li><code>sector</code> (sector ID)</li>
+        </ul>
+      </li>
+      <li>Generates a JSON attachment:
+        <pre>inelcom_devices_YYYYMMDD_HHMMSS.json</pre>
+      </li>
+      <li>Stores the complete device list in <code>bag["inelcom_devices"]</code>.</li>
+      <li>This information can be used to configure <code>remotecontrol_params</code> for new devices.</li>
+    </ul>
+  </li>
+</ol>
+
+<h3>5) Odoo Configuration</h3>
+<h4>In Device (<code>mdm.measurement.device</code>):</h4>
+<pre>{
+  "device_id": "1234",       // counter identifier
+  "start_date": "2025-01-01" // optional
+}</pre>
+<ul>
+  <li><code>device_id</code>: Identifier used in Inelcom “contador”.</li>
+  <li><code>start_date</code>: Default beginning date if the sensor has no readings.</li>
+</ul>
+
+<h4>In Sensor (<code>mdm.measurement.device.sensor</code>):</h4>
+<pre>{
+  "route": "45",             // hydrant route
+  "start_date": "2025-01-01" // optional
+}</pre>
+<ul>
+  <li><code>route</code>: Hydrant route/path in the Inelcom API.</li>
+  <li><code>start_date</code>: Overrides device start_date.</li>
+</ul>
+
+<p><strong>Both</strong> <code>route</code> and <code>device_id</code> are required for synchronization.</p>
+
+<h3>6) Endpoints Used</h3>
+<ul>
+  <li><code>POST /restws/webresources/sesiones</code> → obtains plain session token.</li>
+  <li><code>GET /restws/webresources/nodos/sectores</code> → retrieves list of available sectors.</li>
+  <li><code>GET /restws/webresources/hidrantes/contadores</code> → retrieves device counters for a specific sector.</li>
+  <li><code>GET /isrlrestws/resources/hidrantes/&lt;route&gt;</code>
+    → retrieves readings (requires query parameters: <code>sesion</code>, <code>contador</code>, <code>fecha</code>, <code>dias</code>).</li>
+</ul>
+
+<h3>7) Generated File Structure</h3>
+
+<h4>Reading Sync Files</h4>
+<p>The JSON audit attachment <code>inelcom_readings_YYYYMMDD_HHMMSS.json</code> contains:</p>
+<pre>{
+  "executed_at": "2025-10-14 09:37:24",
+  "total_upserts": 120,
+  "total_errors": 3,
+  "items": [
+    {
+      "sensor_id": 12,
+      "device_id": 107,
+      "sensor_id_param": "45",
+      "status": 200,
+      "points_found": 56,
+      "upserts": 56,
+      "errors": 0,
+      "readings_summary": [
+        {"ts": "2025-10-13 12:00:00", "value": 3.2}
+      ]
+    }
+  ],
+  "summary": {
+    "sensors_in_plan": 32,
+    "sensors_processed": 32,
+    "success_rate": "93.8%"
+  }
+}</pre>
+
+<h4>Device Discovery Files</h4>
+<p>The JSON attachment <code>inelcom_devices_YYYYMMDD_HHMMSS.json</code> contains:</p>
+<pre>{
+  "executed_at": "2025-11-19 10:30:15",
+  "total_devices": 245,
+  "total_errors": 0,
+  "devices": [
+    {
+      "counter_code": "12345",
+      "name": "Hydrant A - Counter 001",
+      "hydrant_id": "HYD001",
+      "value": 1234.56,
+      "sector": "SECTOR_01"
+    }
+  ],
+  "errors": []
+}</pre>
+
+<h3>8) Recommendations</h3>
+<ul>
+  <li>Use the <strong>Get Devices</strong> procedure to discover available devices before configuration.</li>
+  <li>Ensure each device and sensor has correct <code>remotecontrol_params</code>:
+    <ul>
+      <li><code>route</code></li>
+      <li><code>device_id</code></li>
+      <li><code>start_date</code> (optional)</li>
+    </ul>
+  </li>
+  <li>Check the generated attachment for diagnostics if errors appear.</li>
+  <li>If readings stop updating, verify:
+    <ul>
+      <li>the login endpoint is available,</li>
+      <li>the date range (<code>initial_date</code>) is correct,</li>
+      <li>the hydrant route and counter ID match Inelcom configuration.</li>
+    </ul>
+  </li>
+</ul>
+]]>
+</field>
+        </record>
+
+        <record id="remotecontrol_inelcom_action_get_devices" model="remotecontrol.action">
+            <field name="name">Inelcom: Get Devices Plan</field>
+            <field name="remote_id" ref="remotecontrol_inelcom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+condition = [
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id)
+]
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+sensors = Sensor.search(condition)
+last_readings_map = {}
+if sensors:
+    readings = Reading.search(
+        [('sensor_id', 'in', sensors.ids), ('active', '=', True)],
+        order='sensor_id ASC, measurement_time DESC'
+    )
+    for r in readings:
+        sid = r.sensor_id.id
+        if sid not in last_readings_map:
+            last_readings_map[sid] = r.measurement_time
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+    route = sensor_cfg.get('route')
+    sensor_id_param = device_cfg.get('device_id')
+    if not (route and sensor_id_param):
+        continue
+    last_reading_time = last_readings_map.get(sensor.id)
+    start_dev = device_cfg.get('start_date')
+    start_sensor = sensor_cfg.get('start_date')
+    if last_reading_time:
+        try:
+            last_dt = fields.Datetime.from_string(last_reading_time)
+            initial_date = fields.Date.to_string(last_dt + timedelta(days=1))
+        except Exception:
+            initial_date = str(last_reading_time)[:10]
+    elif start_dev:
+        initial_date = start_dev[:10]
+    elif start_sensor:
+        initial_date = start_sensor[:10]
+    else:
+        initial_date = '%s-01-01' % today_str[:4]
+    if isinstance(initial_date, unicode):
+        initial_date = initial_date.encode('utf-8')
+    plan.append({
+        'sensor_id': sensor.id,
+        'sensor_id_param': sensor_id_param,
+        'route': route,
+        'device_id': device.id,
+        'initial_date': initial_date
+    })
+bag['sensors_plan'] = plan
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_inelcom_action_get_readings" model="remotecontrol.action">
+            <field name="name">Inelcom: Get Readings Data</field>
+            <field name="remote_id" ref="remotecontrol_inelcom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import time
+import pytz
+from datetime import datetime, timedelta
+
+Remote = self.remote_id
+SensorModel = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today = datetime.now()
+plan = bag.get('sensors_plan') or []
+api_url = 'https://smart2.inelcom.com:28081/isrlrestws/resources/hidrantes'
+total_upserts = 0
+total_errors = 0
+items = []
+
+
+def get_token():
+    cfg = {}
+    try:
+        cfg = json.loads(Remote.connection_params or '{}')
+    except Exception:
+        cfg = {}
+    username = (cfg.get('username') or '').strip()
+    password = (cfg.get('password') or '').strip()
+    if not username or not password:
+        msg = "Missing inelcom credentials: set username/password"
+        raise Exception(msg)
+    url = 'https://smart2.inelcom.com:28081/restws/webresources/sesiones'
+    resp = request_retry('POST', url, json={
+        'usuario': username,
+        'clave': password
+    })
+    if resp.status_code >= 400:
+        raise Exception("Login failed: %s %s" % (resp.status_code, resp.text))
+    id_session = resp.text.strip()
+    if not id_session:
+        raise Exception("Login OK but empty token response")
+    return id_session
+
+
+for idx, sensor_plan in enumerate(plan, 1):
+    sensor_id = sensor_plan['sensor_id']
+    sensor_id_param = sensor_plan['sensor_id_param']
+    device_id = sensor_plan['device_id']
+    route = sensor_plan['route']
+    initial_date = sensor_plan['initial_date']
+    dt_initial = datetime.strptime(initial_date, '%Y-%m-%d')
+    days = (today.date() - dt_initial.date()).days + 1
+    if days < 1:
+        days = 1
+    date_ddmmyy = dt_initial.strftime('%d/%m/%y')
+    try:
+        id_session = get_token()
+    except Exception as e:
+        items.append({
+            'sensor_id': sensor_id,
+            'error': 'Token error: %s' % str(e)
+        })
+        total_errors += 1
+        continue
+    url = "%s/%s?sesion=%s&contador=%s&fecha=%s&dias=%s" % (
+        api_url, route, id_session, sensor_id_param, date_ddmmyy, days
+    )
+    try:
+        resp = request_retry('GET', url, timeout=timeout)
+        code = resp.status_code
+        full_url = getattr(resp, 'url', url)
+        if code < 400:
+            payload = resp.json() or {}
+            upserts = 0
+            errs = 0
+            readings_summary = []
+            all_readings = []
+            lista = payload.get('lista', [])
+            for entry in lista:
+                try:
+                    date_str = entry.get('fecha')
+                    time_str = entry.get('hora')
+                    value = entry.get('valor')
+                    try:
+                        dt = datetime.strptime(date_str, '%d/%m/%y')
+                        dt = dt.replace(
+                            hour=int(time_str[:2]),
+                            minute=int(time_str[3:]),
+                            second=0
+                        )
+                        date_time_read = pytz.timezone('Europe/Madrid').localize(dt)
+                        date_time_read = date_time_read.astimezone(pytz.timezone('UTC'))
+                        ts_str = date_time_read.strftime('%Y-%m-%d %H:%M:%S')
+                    except Exception:
+                        ts_str = initial_date + ' ' + time_str + ':00'
+                    valf = float(value)
+                    all_readings.append({'ts': ts_str, 'value': valf})
+                    upserts += 1
+                    if len(readings_summary) < 5:
+                        readings_summary.append({'ts': ts_str, 'value': valf})
+                except Exception as e:
+                    errs += 1
+                    if len(readings_summary) < 5:
+                        readings_summary.append({
+                            'error': str(e),
+                            'raw': entry
+                        })
+            total_upserts += upserts
+            total_errors += errs
+            items.append({
+                'sensor_id': sensor_id,
+                'sensor_id_param': sensor_id_param,
+                'device_id': device_id,
+                'status': 200,
+                'url': full_url,
+                'points_found': len(lista),
+                'upserts': upserts,
+                'errors': errs,
+                'readings': all_readings,
+                'readings_summary': readings_summary
+            })
+        else:
+            items.append({
+                'sensor_id': sensor_id,
+                'sensor_id_param': sensor_id_param,
+                'device_id': device_id,
+                'status': code,
+                'error': (resp.text or '')[:400],
+                'url': full_url
+            })
+    except Exception as e:
+        items.append({
+            'sensor_id': sensor_id,
+            'sensor_id_param': sensor_id_param,
+            'device_id': device_id,
+            'status': -1,
+            'error': str(e)
+        })
+    time.sleep(1)
+
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'items': items
+}
+audit_json = json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8')
+b64 = base64.b64encode(audit_json)
+now_str = fields.Datetime.now().replace(':', '').replace('-', '')
+fname = 'inelcom_readings_%s.json' % now_str.replace(' ', '_')
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+Remote.message_post(
+    body=u"[Inelcom] upserts=%s errors=%s" % (total_upserts, total_errors),
+    attachment_ids=[att.id]
+)
+bag['raw_readings'] = []
+bag['fetch_errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+bag['total_sensors_planned'] = len(plan)
+bag['sensors_processed'] = len(items)
+bag['audit_filename'] = fname
+success_items = [i for i in items if i.get('status') == 200]
+success_rate = 0
+if items:
+    success_rate = float(len(success_items)) / len(items) * 100
+bag['fetch_summary'] = {
+    'executed_at': fields.Datetime.now(),
+    'total_readings_fetched': total_upserts,
+    'total_errors': total_errors,
+    'sensors_in_plan': len(plan),
+    'sensors_processed': len(items),
+    'success_rate': '%.1f%%' % success_rate
+}
+for item in items:
+    if item.get('status') == 200 and 'readings' in item:
+        for reading in item['readings']:
+            if 'ts' in reading and 'value' in reading:
+                bag['raw_readings'].append({
+                    'sensor_id': item['sensor_id'],
+                    'device_id': item['device_id'],
+                    'measurement_time': reading['ts'],
+                    'value': reading['value']
+                })
+if len(items) <= 10:
+    bag['detailed_results'] = items
+else:
+    truncated = {'truncated': '... %d more items ...' % (len(items) - 5)}
+    bag['detailed_results'] = items[:5] + [truncated] + items[-5:]
+bag['sensors_with_errors'] = [
+    {'sensor_id': i.get('sensor_id'), 'error': i.get('error')}
+    for i in items if i.get('error')
+]
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_inelcom_action_upsert_readings" model="remotecontrol.action">
+            <field name="name">Inelcom: Upsert Readings</field>
+            <field name="remote_id" ref="remotecontrol_inelcom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+Remote = self.remote_id
+raw_readings = bag.get('raw_readings') or []
+total_upserts = 0
+total_errors = 0
+upsert_results = []
+
+for reading_data in raw_readings:
+    try:
+        Remote.upsert(
+            'mdm.measurement.device.sensor.reading',
+            {
+                'sensor_id': reading_data['sensor_id'],
+                'measurement_time': reading_data['measurement_time']
+            },
+            {
+                'value': reading_data['value'],
+                'device_id': reading_data['device_id']
+            }
+        )
+        total_upserts += 1
+        if len(upsert_results) < 10:
+            upsert_results.append({
+                'sensor_id': reading_data['sensor_id'],
+                'measurement_time': reading_data['measurement_time'],
+                'value': reading_data['value'],
+                'status': 'success'
+            })
+    except Exception as e:
+        total_errors += 1
+        if len(upsert_results) < 10:
+            upsert_results.append({
+                'sensor_id': reading_data['sensor_id'],
+                'measurement_time': reading_data['measurement_time'],
+                'value': reading_data['value'],
+                'status': 'error',
+                'error': str(e)
+            })
+
+bag['upserts'] = total_upserts
+bag['upsert_errors'] = total_errors
+bag['upsert_results'] = upsert_results
+success_rate = 0
+if raw_readings:
+    success_rate = float(total_upserts) / len(raw_readings) * 100
+bag['upsert_summary'] = {
+    'executed_at': fields.Datetime.now(),
+    'total_readings_processed': len(raw_readings),
+    'successful_upserts': total_upserts,
+    'failed_upserts': total_errors,
+    'success_rate': '%.1f%%' % success_rate
+}
+msg = "[Inelcom] Upserts: %s successful, %s errors from %s readings"
+Remote.message_post(
+    body=u"" + msg % (total_upserts, total_errors, len(raw_readings))
+)
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_inelcom_action_get_devices_list" model="remotecontrol.action">
+    <field name="name">Inelcom: Get Devices List</field>
+    <field name="remote_id" ref="remotecontrol_inelcom"/>
+    <field name="active">True</field>
+    <field name="rate_limit_seconds">0.0</field>
+    <field name="max_retries">2</field>
+    <field name="readonly">True</field>
+    <field name="code"><![CDATA[
+import time
+Remote = self.remote_id
+
+cfg = json.loads(Remote.connection_params or '{}') or {}
+username = (cfg.get('username') or '').strip()
+password = (cfg.get('password') or '').strip()
+
+url = 'https://smart2.inelcom.com:28081/restws/webresources/sesiones'
+resp = request_retry('POST', url, json={'usuario': username, 'clave': password}, timeout=180)
+if resp.status_code >= 400:
+    raise Exception("Login failed: %s %s" % (resp.status_code, resp.text))
+id_session = resp.text.strip()
+if not id_session:
+    raise Exception("Login OK but empty token")
+
+sectors_url = "https://smart2.inelcom.com:28081/restws/webresources/nodos/sectores?sesion=%s" % id_session
+resp = request_retry('GET', sectors_url)
+if resp.status_code >= 400:
+    raise Exception("Sector query failed: %s %s" % (resp.status_code, resp.text))
+
+payload = resp.json() or {}
+sectors_list = payload.get("listaSectores", []) or []
+devices = []
+errors = []
+
+for sector in sectors_list:
+    sector_id = sector.get("idSector")
+    if not sector_id:
+        continue
+    url = (
+        "https://smart2.inelcom.com:28081/restws/webresources/hidrantes/contadores"
+        "?sesion=%s&sector=%s"
+    ) % (id_session, sector_id)
+    try:
+        resp2 = request_retry('GET', url)
+        if resp2.status_code >= 400:
+            errors.append({'sector': sector_id, 'error': 'HTTP Error %d' % resp2.status_code})
+            continue
+        data = resp2.json() or {}
+        counters_list = data.get("listaContadores", [])
+        for counter in counters_list:
+            counter_code = counter.get("codContador")
+            hydrant_name = counter.get("nombreHidrante") or ""
+            counter_number = counter.get("numContador") or ""
+            name = "%s - %s" % (hydrant_name, counter_number)
+            devices.append({
+                'counter_code': counter_code,
+                'name': name,
+                'hydrant_id': counter.get("idHidrante"),
+                'value': counter.get("valor"),
+                'sector': sector_id
+            })
+    except Exception as e:
+        errors.append({'sector': sector_id, 'error': str(e)})
+    time.sleep(0.5)
+
+result = {
+    'executed_at': fields.Datetime.now(),
+    'total_devices': len(devices),
+    'total_errors': len(errors),
+    'devices': devices,
+    'errors': errors,
+}
+
+audit_json = json.dumps(result, ensure_ascii=True, indent=2, default=str)
+b64 = base64.b64encode(audit_json)
+now_str = fields.Datetime.now().replace(':', '').replace('-', '')
+fname = 'inelcom_devices_%s.json' % now_str.replace(' ', '_')
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+
+msg = "[Inelcom] Devices fetched: %d errors=%d" % (len(devices), len(errors))
+Remote.message_post(body=msg, attachment_ids=[att.id])
+
+bag['inelcom_devices'] = devices
+bag['inelcom_devices_errors'] = errors
+bag['inelcom_devices_filename'] = fname
+    ]]></field>
+</record>
+
+
+
+        <record id="remotecontrol_inelcom_procedure" model="remotecontrol.procedure">
+            <field name="name">Inelcom: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_inelcom"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_inelcom_step_10_devices" model="remotecontrol.step">
+            <field name="name">Get Devices Plan</field>
+            <field name="procedure_id" ref="remotecontrol_inelcom_procedure"/>
+            <field name="action_id" ref="remotecontrol_inelcom_action_get_devices"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_inelcom_step_20_readings" model="remotecontrol.step">
+            <field name="name">Get Readings Data</field>
+            <field name="procedure_id" ref="remotecontrol_inelcom_procedure"/>
+            <field name="action_id" ref="remotecontrol_inelcom_action_get_readings"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_inelcom_step_30_upsert" model="remotecontrol.step">
+            <field name="name">Upsert Readings</field>
+            <field name="procedure_id" ref="remotecontrol_inelcom_procedure"/>
+            <field name="action_id" ref="remotecontrol_inelcom_action_upsert_readings"/>
+            <field name="sequence">30</field>
+        </record>
+
+        <record id="remotecontrol_inelcom_devices_procedure" model="remotecontrol.procedure">
+            <field name="name">Inelcom: Get Devices</field>
+            <field name="remote_id" ref="remotecontrol_inelcom"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_inelcom_step_10_devices_list" model="remotecontrol.step">
+            <field name="name">Fetch Devices List</field>
+            <field name="procedure_id" ref="remotecontrol_inelcom_devices_procedure"/>
+            <field name="action_id" ref="remotecontrol_inelcom_action_get_devices_list"/>
+            <field name="sequence">10</field>
+        </record>
+    </data>
+</odoo>
