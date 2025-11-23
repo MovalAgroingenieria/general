@@ -67,9 +67,9 @@ class GoogleMeetWebsiteCalendar(WebsiteCalendar):
                         "After write - meeting_url: %s", event.meeting_url
                     )
 
-                    booking_type.sudo().write({
-                        'meeting_base_url': meet_link
-                    })
+                    # booking_type.sudo().write({
+                    #     'meeting_base_url': meet_link
+                    # })
 
                     _logger.info(
                         "Successfully set Google Meet URL: %s", meet_link
