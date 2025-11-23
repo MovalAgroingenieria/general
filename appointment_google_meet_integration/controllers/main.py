@@ -167,7 +167,11 @@ class GoogleMeetWebsiteCalendar(WebsiteCalendar):
 
             result = super().calendar_booking_submit(booking_type, **kwargs)
 
-            if (hasattr(result, 'location') and
+            # Check if result exists and has location attribute
+            if (result and
+                    hasattr(result, 'location') and
+                    result.location and
+                    isinstance(result.location, str) and
                     '/website/calendar/view/' in result.location):
                 try:
 
