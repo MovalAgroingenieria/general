@@ -3,6 +3,7 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+from odoo.addons.google_calendar.models.google_sync import google_calendar_token
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -227,3 +228,109 @@ class CalendarEvent(models.Model):
                 'type': 'success' if error_count == 0 else 'warning',
             }
         }
+
+    def _google_values_for_attendee(self, attendee):
+        """
+        Generate event values adapted for a specific attendee.
+        The event will be shown in their calendar as a guest, not as organizer.
+        """
+        try:
+            # Get base event values
+            base_values = self._google_values()
+            if not base_values:
+                return False
+
+            # Configure event from attendee's perspective
+            attendee_values = {
+                **base_values,
+                'organizer': {
+                    'email': self.user_id.email or self.user_id.partner_id.email,
+                    'displayName': self.user_id.name,
+                    'self': False  # The attendee is not the organizer
+                },
+                'attendees': self._get_attendees_for_google(),
+                # Configure so attendee receives invitations
+                'sendNotifications': True,
+                'sendUpdates': 'all',
+                'guestsCanModify': False,
+                'guestsCanInviteOthers': False,
+                'guestsCanSeeOtherGuests': True,
+            }
+
+            # Mark current attendee in the attendees list
+            for att_data in attendee_values.get('attendees', []):
+                if att_data.get('email') == attendee.partner_id.email:
+                    att_data['self'] = True
+                    break
+
+            return attendee_values
+
+        except Exception as e:
+            _logger.error(f"Error generating Google values for attendee {attendee.partner_id.name}: {e}")
+            return False
+
+    def _get_attendees_for_google(self):
+        """Get attendees list formatted for Google Calendar"""
+        attendees = []
+        for attendee in self.attendee_ids:
+            if attendee.partner_id.email:
+                attendees.append({
+                    'email': attendee.partner_id.email,
+                    'displayName': attendee.partner_id.name,
+                    'responseStatus': self._map_odoo_state_to_google(attendee.state),
+                    'self': False
+                })
+        return attendees
+
+    def _map_odoo_state_to_google(self, odoo_state):
+        """Map Odoo state to Google Calendar state"""
+        mapping = {
+            'needsAction': 'needsAction',
+            'accepted': 'accepted',
+            'declined': 'declined',
+            'tentative': 'tentative',
+        }
+        return mapping.get(odoo_state, 'needsAction')
+
+    def _find_existing_google_event_for_user(self, user):
+        """
+        Search if the event already exists in the user's Google Calendar.
+        Returns google_id if it exists, False otherwise.
+        """
+        # This function should implement Google Calendar search
+        # For now we return False to force creation of new events
+        return False
+
+    def _sync_single_attendee_event(self, attendee):
+        """Synchronize a specific event for an individual attendee"""
+        user = self.env.user
+
+        try:
+            google_values = self._google_values_for_attendee(attendee)
+            if not google_values:
+                return
+
+            google_service = self.env['google.service']
+
+            with google_calendar_token(user.sudo()) as token:
+                if token:
+                    existing_event_id = self._find_existing_google_event_for_user(user)
+
+                    if existing_event_id:
+                        google_service.patch(
+                            existing_event_id,
+                            google_values,
+                            token=token,
+                            timeout=10
+                        )
+                    else:
+                        google_service.insert(
+                            google_values,
+                            token=token,
+                            timeout=10
+                        )
+
+                    _logger.info(f"Event {self.name} synchronized for {user.name}")
+
+        except Exception as e:
+            _logger.error(f"Error synchronizing event {self.name} for {user.name}: {e}")

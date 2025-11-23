@@ -100,11 +100,16 @@ Configure appointment types
 
 1. **Go to Calendar → Configuration → Booking Types**
 2. **For each appointment type you want to use Google Meet**:
+
    - Open the appointment type form
    - In the "Video Conference Settings" section:
+
      - Enable "Use Google Meet"
+
    - In the "Google Meet Settings" tab:
+
      - Customize description template if needed
+
 
 
 Usage
