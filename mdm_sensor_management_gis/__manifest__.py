@@ -16,8 +16,6 @@
         'mdm_sensor_management',
     ],
     'data': [
-        'security/ir.model.access.csv',
-        'views/mdm_menus.xml',
         'views/measurement_device_category_views.xml',
         'views/measurement_device_views.xml',
         'views/mdm_settings_views.xml',

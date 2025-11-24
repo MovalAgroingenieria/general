@@ -7,6 +7,7 @@
               web_icon="mdm_sensor_management,static/description/icon.png"
               groups="mdm_sensor_management.group_mdm_user"/>
 
+    <!-- mdm_sensory_menu -->
     <menuitem id="mdm_sensory_menu"
               name="Sensory"
               parent="mdm_root_menu"
@@ -27,12 +28,42 @@
               action="mdm_sensor_management.mdm_sensor_action"
               groups="mdm_sensor_management.group_mdm_user"/>
 
-    <menuitem id="mdm_parameters_menu"
-              name="Parameters"
-              parent="mdm_root_menu"
-              sequence="50"
+    <!-- mdm_config_menu -->
+    <menuitem id="mdm_configuration_menu"
+                name="Configuration"
+                parent="mdm_sensor_management.mdm_root_menu"
+                sequence="55"
+                groups="mdm_sensor_management.group_mdm_user"/>
+
+    <menuitem id="mdm_config_settings_menu"
+              name="Settings"
+              parent="mdm_configuration_menu"
+              action="mdm_config_settings_action"
+              sequence="10"
               groups="mdm_sensor_management.group_mdm_user"/>
 
+
+    <menuitem id="menu_measurement_device_category"
+              name="Device Categories"
+              parent="mdm_configuration_menu"
+              action="measurement_device_category_action"
+              sequence="20"/>
+
+    <menuitem id="mdm_sensor_type_menu"
+              name="Sensor Types"
+              parent="mdm_configuration_menu"
+              action="mdm_sensor_management.mdm_sensor_type_action"
+              sequence="30"
+              groups="mdm_sensor_management.group_mdm_user"/>
+
+    <menuitem id="mdm_sensor_uom_menu"
+              name="Measurement Units"
+              parent="mdm_configuration_menu"
+              action="mdm_sensor_management.mdm_sensor_uom_action"
+              sequence="40"
+              groups="mdm_sensor_management.group_mdm_user"/>
+
+    <!-- mdm_technical_menu -->
     <menuitem id="mdm_technical_menu"
               name="Technical"
               parent="mdm_root_menu"
@@ -45,20 +76,6 @@
               action="mdm_sensor_management.mdm_sensor_reading_action"
               sequence="10"
               groups="mdm_sensor_management.group_mdm_manager"/>
-
-    <menuitem id="mdm_sensor_type_menu"
-              name="Sensor Types"
-              parent="mdm_parameters_menu"
-              action="mdm_sensor_management.mdm_sensor_type_action"
-              sequence="10"
-              groups="mdm_sensor_management.group_mdm_user"/>
-
-    <menuitem id="mdm_sensor_uom_menu"
-              name="Measurement Units"
-              parent="mdm_parameters_menu"
-              action="mdm_sensor_management.mdm_sensor_uom_action"
-              sequence="20"
-              groups="mdm_sensor_management.group_mdm_user"/>
 
     <menuitem id="sensor_reading_transform_template_menu"
               name="Transform Templates"
@@ -73,11 +90,5 @@
               action="sensor_reading_transform_wizard_action"
               sequence="30"
               groups="mdm_sensor_management.group_mdm_user"/>
-
-    <menuitem id="menu_measurement_device_category"
-              name="Device Categories"
-              parent="mdm_parameters_menu"
-              action="measurement_device_category_action"
-              sequence="5"/>
 
 </odoo>

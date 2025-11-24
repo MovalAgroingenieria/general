@@ -6,8 +6,7 @@ from odoo import api, fields, models
 
 
 class MDMConfigSettings(models.TransientModel):
-    _name = 'mdm.config.settings'
-    _inherit = 'res.config.settings'
+    _inherit = 'mdm.config.settings'
 
     default_gis_devices_refresh_interval = fields.Integer(
         string='GIS Devices Refresh Interval (seconds)',

@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <record id="mdm_config_settings_view_form" model="ir.ui.view">
         <field name="name">mdm.config.settings.form</field>
         <field name="model">mdm.config.settings</field>
+        <field name="inherit_id" ref="mdm_sensor_management.mdm_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <form string="MDM Settings" class="oe_form_configuration">
-                <header>
-                    <button string="Apply" type="object" name="execute" class="oe_highlight"/>
-                    <button string="Cancel" type="object" name="cancel" class="oe_link"/>
-                </header>
+            <xpath expr="//form" position="inside">
                 <separator string="GIS Configuration"/>
                 <group>
                     <label for="default_gis_devices_refresh_interval"/>
@@ -17,22 +15,8 @@
                         <span> seconds</span>
                     </div>
                 </group>
-            </form>
+            </xpath>
         </field>
     </record>
 
-    <record id="mdm_config_settings_action" model="ir.actions.act_window">
-        <field name="name">Settings</field>
-        <field name="res_model">mdm.config.settings</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">form</field>
-        <field name="target">inline</field>
-    </record>
-
-    <menuitem id="mdm_config_settings_menu"
-              name="Settings"
-              parent="mdm_configuration_menu"
-              action="mdm_config_settings_action"
-              sequence="5"
-              groups="mdm_sensor_management.group_mdm_user"/>
 </odoo>

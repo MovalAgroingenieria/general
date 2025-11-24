@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-17 13:09+0000\n"
-"PO-Revision-Date: 2025-11-17 13:09+0000\n"
+"POT-Creation-Date: 2025-11-24 15:26+0000\n"
+"PO-Revision-Date: 2025-11-24 15:26+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,7 @@ msgstr ""
 #: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:673
 #, python-format
 msgid "... and %d more errors"
-msgstr "... y %d errores más"
+msgstr "... y %d más errores"
 
 #. module: mdm_sensor_management
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
@@ -150,6 +150,11 @@ msgid "Any other field from mdm.measurement.device.sensor.reading model"
 msgstr "Cualquier otro campo del modelo mdm.measurement.device.sensor.reading"
 
 #. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_config_settings_view_form
+msgid "Apply"
+msgstr "Aplicar"
+
+#. module: mdm_sensor_management
 #: model:ir.actions.server,name:mdm_sensor_management.mdm_archive_devices
 #: model:ir.actions.server,name:mdm_sensor_management.mdm_archive_sensor_readings
 #: model:ir.actions.server,name:mdm_sensor_management.mdm_archive_sensors
@@ -208,6 +213,7 @@ msgid "Brand"
 msgstr "Marca"
 
 #. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_config_settings_view_form
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
 msgid "Cancel"
 msgstr "Cancelar"
@@ -254,6 +260,12 @@ msgid "Computed From Date"
 msgstr "Fecha desde calculada"
 
 #. module: mdm_sensor_management
+#: model:ir.ui.menu,name:mdm_sensor_management.mdm_configuration_menu
+msgid "Configuration"
+msgstr "Configuración"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_config_settings_create_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_create_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_create_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_create_uid
@@ -266,6 +278,7 @@ msgid "Created by"
 msgstr "Creado por"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_config_settings_create_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_create_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_create_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_create_date
@@ -399,6 +412,7 @@ msgid "Devices"
 msgstr "Dispositivos"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_config_settings_display_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_display_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_display_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_display_name
@@ -521,6 +535,7 @@ msgid "Group By"
 msgstr "Agrupar por"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_config_settings_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_id
@@ -615,6 +630,7 @@ msgstr "Mapeo JSON de campos del sensor a campos del modelo destino.\n"
 "Ejemplo: {\"reading_time\": \"$measurement_time\", \"volume\": \"$value * 3.6\", \"active\": true, \"notes\": \"Importado desde sensor\"}"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_config_settings___last_update
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device___last_update
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category___last_update
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor___last_update
@@ -633,6 +649,7 @@ msgid "Last Reading"
 msgstr "Última lectura"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_config_settings_write_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_write_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_write_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_write_uid
@@ -645,6 +662,7 @@ msgid "Last Updated by"
 msgstr "Última actualización por"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_config_settings_write_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_write_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_write_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_write_date
@@ -667,9 +685,19 @@ msgid "Location"
 msgstr "Ubicación"
 
 #. module: mdm_sensor_management
+#: model:ir.model,name:mdm_sensor_management.model_mdm_config_settings
+msgid "MDM Configuration Settings"
+msgstr "Configuración MDM"
+
+#. module: mdm_sensor_management
 #: model:res.groups,name:mdm_sensor_management.group_mdm_manager
 msgid "MDM Manager"
 msgstr "Administrador"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_config_settings_view_form
+msgid "MDM Settings"
+msgstr "Configuración MDM"
 
 #. module: mdm_sensor_management
 #: model:res.groups,name:mdm_sensor_management.group_mdm_user
@@ -831,11 +859,6 @@ msgstr "Registros normales creados"
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_uom_view_form
 msgid "Notes"
 msgstr "Notas"
-
-#. module: mdm_sensor_management
-#: model:ir.ui.menu,name:mdm_sensor_management.mdm_parameters_menu
-msgid "Parameters"
-msgstr "Parámetros"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_photo
@@ -1014,6 +1037,12 @@ msgstr "Sensórica"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_serial_number
 msgid "Serial Number"
 msgstr "Nº serie"
+
+#. module: mdm_sensor_management
+#: model:ir.actions.act_window,name:mdm_sensor_management.mdm_config_settings_action
+#: model:ir.ui.menu,name:mdm_sensor_management.mdm_config_settings_menu
+msgid "Settings"
+msgstr "Configuración"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_short_name
