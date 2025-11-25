@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 {
     "name": "Project Task Forum Link",
     "summary": "This module adds link between project tasks and forum posts.",
-    "version": '16.0.1.1.0',
+    "version": "17.0.1.0.0",
     "category": "Moval General Addons",
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",
