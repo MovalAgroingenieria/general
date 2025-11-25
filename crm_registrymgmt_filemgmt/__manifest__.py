@@ -4,7 +4,7 @@
 {
     'name': 'Entry Registry and File Management',
     'summary': 'Tracking for entry registries and file management relation',
-    'version': '16.0.1.1.0',
+    'version': "17.0.1.0.0",
     'category': 'Customer Relationship Management',
     'website': 'https://odoo-community.org/',
     'author': 'Moval Agroingeniería',
