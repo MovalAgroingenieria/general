@@ -3,7 +3,7 @@
 
 {
     "name": "MRP Mobile View",
-    'version': '16.0.1.0.0',
+    'version': "17.0.1.0.0",
     'website': 'http://www.moval.es',
     "author": "Moval Agroingeniería",
     "category": "Moval General Addons",
