@@ -19,10 +19,10 @@ class AccountPaymentOrder(models.Model):
 
     @api.depends("grouped_move_ids")
     def _compute_grouped_move_count(self):
-        rg_res = self.env["account.move"].read_group(
+        rg_res = self.env["account.move"]._read_group(
             [("grouped_payment_order_id", "in", self.ids)],
-            ["grouped_payment_order_id"],
-            ["grouped_payment_order_id"],
+            ['grouped_payment_order_id'],
+            ['__count'],
         )
         mapped_data = {
             x["grouped_payment_order_id"][0]: x[
