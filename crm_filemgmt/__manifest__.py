@@ -12,12 +12,12 @@
     'application': True,
     'installable': True,
     'post_init_hook': 'post_init_hook',
-    'depends': [
+    'depends_old': [
         'base_gen',
         'mail',
         'base_comment_template',
     ],
-    'data': [
+    'data_old': [
         'security/security.xml',
         'security/ir.model.access.csv',
         'data/res_file_category_data.xml',

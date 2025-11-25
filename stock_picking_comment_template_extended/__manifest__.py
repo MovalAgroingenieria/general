@@ -11,10 +11,10 @@
     'category': 'Warehouse Management',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'stock_picking_comment_template',
     ],
-    'data': [
+    'data_old': [
         'views/stock_picking_view.xml',
         'reports/report_picking.xml',
         'reports/report_delivery_document.xml',

@@ -10,9 +10,9 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'website_blog',
     ],
-    'data': [
+    'data_old': [
     ],
 }

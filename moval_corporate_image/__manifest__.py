@@ -11,11 +11,11 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'web_responsive',
         'fontawesome_ext',
     ],
-    'data': [
+    'data_old': [
         'views/webclient_templates.xml'
     ],
     'assets': {

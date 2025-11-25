@@ -10,10 +10,10 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    "depends": [
+    "depends_old": [
         "mrp",
     ],
-    "data": [
+    "data_old": [
         "views/mrp_production_view.xml",
     ],
     "license": "AGPL-3",

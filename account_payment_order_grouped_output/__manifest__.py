@@ -10,10 +10,10 @@
     'category': 'Banking addons',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'account_payment_order',
     ],
-    'data': [
+    'data_old': [
         'views/account_payment_mode_views.xml',
         'views/account_payment_order_views.xml',
     ],

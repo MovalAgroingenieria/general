@@ -8,13 +8,13 @@
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "category": "Human Resources/Attendances",
-    "depends": [
+    "depends_old": [
         'project',
         'hr_timesheet',
         'analytic',
         'hr_timesheet_sheet',
     ],
-    "data": [
+    "data_old": [
         'views/project_task_time.xml',
     ],
     "installable": True,

@@ -10,7 +10,7 @@
     "category": "Hidden",
     "application": False,
     "installable": True,
-    "depends": [
+    "depends_old": [
         "base_technical_user",
         "base_fontawesome",
         "disable_odoo_online",
@@ -38,6 +38,6 @@
         "web_widget_one2many_tree_line_duplicate",
         # "web_disable_export_group", # Install later all
     ],
-    "data": [
+    "data_old": [
     ],
 }

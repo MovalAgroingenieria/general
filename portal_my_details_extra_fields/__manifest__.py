@@ -11,10 +11,10 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'portal',
     ],
-    'data': [
+    'data_old': [
         'views/portal_templates.xml',
     ],
     'assets': {

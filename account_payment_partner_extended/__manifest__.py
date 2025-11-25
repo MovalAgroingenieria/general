@@ -11,10 +11,10 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'account_payment_partner',
     ],
-    'data': [
+    'data_old': [
         'views/res_partner_view.xml',
     ],
 }

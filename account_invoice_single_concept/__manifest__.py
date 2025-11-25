@@ -11,10 +11,10 @@
     "license": "AGPL-3",
     "installable": True,
     "application": False,
-    "depends": [
+    "depends_old": [
         "account",
     ],
-    "data": [
+    "data_old": [
         "security/ir.model.access.csv",
         "views/account_move_single_concept_views.xml",
         "views/account_move_views.xml",

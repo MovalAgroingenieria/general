@@ -11,11 +11,11 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'hr_holidays',
         'hr_holidays_public',
     ],
-    'data': [
+    'data_old': [
         'security/ir.model.access.csv',
         'wizard/hr_employee_attendance_leave_wizard_views.xml',
         'report/hr_employee_attendance_leave_report_views.xml',

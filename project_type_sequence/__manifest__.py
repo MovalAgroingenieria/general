@@ -9,10 +9,10 @@
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
-    "depends": [
+    "depends_old": [
         "project_type",
     ],
-    "data": [
+    "data_old": [
         "views/project_type_views.xml",
     ],
     "installable": True,

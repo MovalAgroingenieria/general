@@ -11,10 +11,10 @@
     'license': 'AGPL-3',
     'installable': True,
     'application': False,
-    'depends': [
+    'depends_old': [
         'account',
     ],
-    'data': [
+    'data_old': [
         'views/account_move_views.xml',
     ],
 }

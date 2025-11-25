@@ -10,7 +10,7 @@
     "category": "Hidden",
     "application": False,
     "installable": True,
-    "depends": [
+    "depends_old": [
         "account",
         "account_asset_management",
         "account_banking_mandate",
@@ -61,6 +61,6 @@
         "partner_vat_unique",
         "payment",
     ],
-    "data": [
+    "data_old": [
     ],
 }

@@ -15,10 +15,10 @@
         number_of_days field above the number_of_days_display field for
         better visibility and debugging purposes.
     """,
-    "depends": [
+    "depends_old": [
         "hr_holidays",
         ],
-    "data": [
+    "data_old": [
         "views/hr_leave_views.xml",
     ],
 }

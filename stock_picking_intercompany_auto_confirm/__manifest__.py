@@ -6,10 +6,10 @@
     "author": "Avanzosc",
     "category": "Inventory/Inventory",
     "website": "https://www.moval.es",
-    "depends": [
+    "depends_old": [
         "stock_intercompany",
     ],
-    "data": [
+    "data_old": [
         "views/stock_picking_views.xml",
         "views/res_partner_views.xml",
     ],

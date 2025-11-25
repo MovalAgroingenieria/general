@@ -11,10 +11,10 @@
     'category': 'Hidden',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'base_gen',
     ],
-    'data': [
+    'data_old': [
         'views/res_region_views.xml',
         'views/res_province_views.xml',
         'views/res_municipality_views.xml',

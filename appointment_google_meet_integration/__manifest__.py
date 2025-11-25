@@ -11,7 +11,7 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'base',
         'calendar',
         'website',
@@ -25,7 +25,7 @@
             'google-api-python-client',
         ]
     },
-    'data': [
+    'data_old': [
         'security/ir.model.access.csv',
         'data/mail_template.xml',
         'views/res_config_settings_views.xml',

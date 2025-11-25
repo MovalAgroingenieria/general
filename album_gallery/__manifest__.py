@@ -14,11 +14,11 @@
     'price': 10,
     'currency': 'EUR',
     'images': ['static/description/banner.png'],
-    'depends': [
+    'depends_old': [
         'website',
         'mail',
     ],
-    'data': [
+    'data_old': [
         'security/ir.model.access.csv',
         'data/album_gallery_menu_views.xml',
         'views/album_gallery_view.xml',

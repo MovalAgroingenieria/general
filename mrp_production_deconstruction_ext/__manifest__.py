@@ -5,10 +5,10 @@
     'version': "17.0.1.0.0",
     "author": "Avanzosc",
     "category": "MRP",
-    "depends": [
+    "depends_old": [
         "mrp",
     ],
-    "data": [
+    "data_old": [
         "views/mrp_production_view.xml",
         "views/mrp_bom_view.xml",
     ],

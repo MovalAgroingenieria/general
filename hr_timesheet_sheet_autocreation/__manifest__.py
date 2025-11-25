@@ -10,10 +10,10 @@
     "website": "https://moval.es",
     "license": "AGPL-3",
     "category": "Human Resources",
-    "depends": [
+    "depends_old": [
         "hr_timesheet_sheet",
     ],
-    "data": [
+    "data_old": [
         "data/ir_cron.xml",
     ],
     "assets": {

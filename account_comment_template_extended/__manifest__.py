@@ -11,10 +11,10 @@
     "category": "Reporting",
     "application": False,
     "installable": True,
-    "depends": [
+    "depends_old": [
         "account_comment_template",
     ],
-    "data": [
+    "data_old": [
         "views/account_move_view.xml",
         "reports/report_invoice.xml",
     ],

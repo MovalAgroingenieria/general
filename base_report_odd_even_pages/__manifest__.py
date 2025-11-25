@@ -17,10 +17,10 @@
     'images': [
         'static/description/banner.png'
     ],
-    'depends': [
+    'depends_old': [
         'base',
     ],
-    'data': [
+    'data_old': [
         'views/ir_actions_views.xml',
     ],
 }

@@ -11,11 +11,11 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'account',
         'account_statement_base',
     ],
-    'data': [
+    'data_old': [
         'views/account_bank_statement_views.xml',
     ],
     'post_init_hook': 'post_init_hook',

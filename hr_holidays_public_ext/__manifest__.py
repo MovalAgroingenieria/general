@@ -11,10 +11,10 @@
     "license": "AGPL-3",
     "application": False,
     "installable": True,
-    "depends": [
+    "depends_old": [
         "hr_holidays_public",
     ],
-    "data": [
+    "data_old": [
     ],
     "assets": {
     },

@@ -9,11 +9,11 @@
     'website': 'https://odoo-community.org/',
     'author': 'Moval Agroingeniería',
     'license': 'AGPL-3',
-    'depends': [
+    'depends_old': [
         'crm_filemgmt',
         'crm_registrymgmt',
     ],
-    'data': [
+    'data_old': [
         'views/res_registry_view.xml',
         'views/res_file_views.xml',
         'reports/res_registry_report.xml',

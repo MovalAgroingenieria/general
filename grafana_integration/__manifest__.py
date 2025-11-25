@@ -11,10 +11,10 @@
     "license": "AGPL-3",
     "application": False,
     "installable": True,
-    "depends": [
+    "depends_old": [
         "board",
     ],
-    "data": [
+    "data_old": [
         "security/ir.model.access.csv",
         "views/board_grafana_view.xml",
         "views/res_config_settings_view.xml",

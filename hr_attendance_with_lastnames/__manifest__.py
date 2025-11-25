@@ -10,10 +10,10 @@
     'category': 'Human Resources/Attendances',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'hr_attendance',
         'hr_employee_lastnames',
     ],
-    'data': [
+    'data_old': [
     ],
 }

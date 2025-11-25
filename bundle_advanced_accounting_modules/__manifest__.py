@@ -10,13 +10,13 @@
     "category": "Hidden",
     "application": False,
     "installable": True,
-    "depends": [
+    "depends_old": [
         "bundle_common_accounting_modules",
         "analytic",
         "mis_builder",
         "mis_builder_budget",
         "payment",
     ],
-    "data": [
+    "data_old": [
     ],
 }

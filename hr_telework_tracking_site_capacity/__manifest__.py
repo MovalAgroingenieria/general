@@ -11,14 +11,14 @@
     "website": "https://moval.es",
     "license": "AGPL-3",
     "category": "Human Resources",
-    "depends": [
+    "depends_old": [
         "hr",
         "hr_holidays",
         "hr_timesheet",
         "hr_timesheet_sheet",
         "mail",
     ],
-    "data": [
+    "data_old": [
         "security/security.xml",
         "security/ir.model.access.csv",
         "data/telework_bot.xml",

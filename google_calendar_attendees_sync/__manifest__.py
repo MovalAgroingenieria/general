@@ -16,12 +16,12 @@
     ''',
     'author': 'Moval Development',
     'website': 'https://www.moval.com',
-    'depends': [
+    'depends_old': [
         'base',
         'calendar',
         'google_calendar',
     ],
-    'data': [
+    'data_old': [
         'security/ir.model.access.csv',
         'data/ir_cron_data.xml',
         'views/calendar_event_views.xml',

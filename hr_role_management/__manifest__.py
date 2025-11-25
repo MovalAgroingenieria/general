@@ -10,11 +10,11 @@
     'category': 'Human Resources/Attendances',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'hr',
         'mail',
     ],
-    'data': [
+    'data_old': [
         'security/security.xml',
         'security/ir.model.access.csv',
         'views/res_users_view.xml',

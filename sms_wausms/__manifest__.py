@@ -11,11 +11,11 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'sms_alternatives',
         'sms',
     ],
-    'data': [
+    'data_old': [
         'views/res_config_settings_views.xml',
         'views/sms_sms_views.xml',
     ],

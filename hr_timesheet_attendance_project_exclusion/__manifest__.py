@@ -8,11 +8,11 @@
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "category": "Human Resources/Attendances",
-    "depends": [
+    "depends_old": [
         "hr_timesheet_attendance",
         "project",
     ],
-    "data": [
+    "data_old": [
         "views/project_view.xml",
     ],
     "images":  ["static/description/banner.png"],

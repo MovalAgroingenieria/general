@@ -11,10 +11,10 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'web',
     ],
-    'data': [
+    'data_old': [
         'views/report_templates.xml',
     ],
     'assets': {

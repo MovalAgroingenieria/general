@@ -12,10 +12,10 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'partner_address_street_type',
     ],
-    'data': [
+    'data_old': [
         'data/res_street_type_data.xml',
     ],
 }

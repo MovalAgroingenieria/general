@@ -6,11 +6,11 @@
     "author": "Avanzosc",
     "category": "Inventory/Inventory",
     "website": "https://github.com/avanzosc/odoo-addons",
-    "depends": [
+    "depends_old": [
         "stock",
         "contacts"
     ],
-    "data": [
+    "data_old": [
         "report/stock_picking_cmr_report.xml",
         "views/stock_picking_views.xml",
     ],

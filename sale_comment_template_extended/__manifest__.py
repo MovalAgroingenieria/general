@@ -11,10 +11,10 @@
     "category": "Reporting",
     "application": False,
     "installable": True,
-    "depends": [
+    "depends_old": [
         "sale_comment_template",
     ],
-    "data": [
+    "data_old": [
         "views/sale_order_view.xml",
         "reports/report_saleorder.xml",
     ],

@@ -13,9 +13,9 @@
     "installable": True,
     "post_init_hook": "post_init_hook",
     "uninstall_hook": "uninstall_hook",
-    "depends": [
+    "depends_old": [
     ],
-    "data": [
+    "data_old": [
         "views/res_partner_views.xml",
     ],
 }

@@ -8,9 +8,9 @@
     'application': False,
     'installable': True,
 
-    'depends': [
+    'depends_old': [
         'account',
     ],
-    'data': [
+    'data_old': [
     ],
 }

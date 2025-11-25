@@ -12,10 +12,10 @@
     'application': False,
     'installable': True,
     'post_init_hook': 'update_bank_journals',
-    'depends': [
+    'depends_old': [
         'account_banking_pain_base'
     ],
-    'data': [
+    'data_old': [
         'data/account_payment_method.xml',
         'security/ir.model.access.csv',
     ],

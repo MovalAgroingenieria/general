@@ -9,13 +9,13 @@
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",
     "category": "Human Resources/Attendance",
-    "depends": [
+    "depends_old": [
         "web",
         "hr_attendance",
         "bus",
         "project",
     ],
-    "data": [],
+    "data_old": [],
     "assets": {
         "web.assets_backend": [
             "/worker_activity_self_monitoring/static/src/css/tray_icons.css",

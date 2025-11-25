@@ -12,10 +12,10 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'sms',
     ],
-    'data': [
+    'data_old': [
         'views/res_config_settings_views.xml',
     ],
     'assets': {

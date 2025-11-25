@@ -13,10 +13,10 @@
     "installable": True,
     "post_init_hook": "post_init_hook",
     "uninstall_hook": "uninstall_hook",
-    "depends": [
+    "depends_old": [
         "contacts",
     ],
-    "data": [
+    "data_old": [
         "security/ir.model.access.csv",
         "views/res_street_type_views.xml",
         "views/res_street_type_menus.xml",

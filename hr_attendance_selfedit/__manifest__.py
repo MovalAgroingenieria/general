@@ -10,10 +10,10 @@
     "category": "Human Resources/Attendances",
     "application": False,
     "installable": True,
-    "depends": [
+    "depends_old": [
         "hr_attendance",
     ],
-    "data": [
+    "data_old": [
         "views/hr_attendance_view.xml",
         "views/custom_views.xml",
     ],

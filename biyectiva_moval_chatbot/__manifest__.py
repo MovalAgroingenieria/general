@@ -11,14 +11,14 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    'depends': [
+    'depends_old': [
         'base',
         'mail',
         'project',
         'project_task_reviewer',
         'project_type',
     ],
-    'data': [
+    'data_old': [
         'security/chatbot_groups.xml',
         'security/ir.model.access.csv',
         'data/ir_cron.xml',
