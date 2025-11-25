@@ -124,7 +124,7 @@
                         </page>
                         <page name="attachments" string="Attachments">
                             <field name="file_attachment_ids">
-                                <tree string="Attachments" editable="top">
+                                <tree editable="top">
                                     <field name="name"/>
                                     <field name="mimetype"/>
                                     <field name="datas"/>
@@ -150,7 +150,7 @@
         <field name="name">Files (tree view)</field>
         <field name="model">res.file</field>
         <field name="arch" type="xml">
-            <tree string="Files" class="o_res_file" default_order="name desc">
+            <tree class="o_res_file" default_order="name desc">
                 <field name="image" widget="image" optional="hide" class="o_res_file_image"/>
                 <field name="alphanum_code" class="align-middle"/>
                 <field name="partner_id" optional="show" class="align-middle"/>
@@ -169,7 +169,7 @@
         <field name="name">Files (tree related view)</field>
         <field name="model">res.file</field>
         <field name="arch" type="xml">
-            <tree string="Files" create="false" edit="false" default_order="name desc">
+            <tree create="false" edit="false" default_order="name desc">
                 <field name="active" invisible="1"/>
                 <field name="alphanum_code" class="align-middle"/>
                 <field name="partner_id" optional="show" class="align-middle"/>
@@ -356,7 +356,7 @@
         <field name="name">File Partnerlink (tree view)</field>
         <field name="model">res.file.partnerlink</field>
         <field name="arch" type="xml">
-            <tree string="Partnerlinks" editable="bottom" class="o_res_file_partnerlink">
+            <tree editable="bottom" class="o_res_file_partnerlink">
                 <field name="partner_id" class="align-middle"/>
                 <field name="is_main" class="align-middle o_res_file_partnerlink_is_main"/>
             </tree>
@@ -367,7 +367,7 @@
         <field name="name">File Partnerlink of partner (tree view)</field>
         <field name="model">res.file.partnerlink</field>
         <field name="arch" type="xml">
-            <tree string="Partnerlinks" create="false" edit="false" delete="false" class="o_res_file_partnerlink">
+            <tree create="false" edit="false" delete="false" class="o_res_file_partnerlink">
                 <field name="date_file" class="align-middle o_res_file_partnerlink_of_partner_date_file"/>
                 <field name="file_id" class="align-middle"/>
                 <field name="stage_id" class="align-middle o_res_file_partnerlink_of_partner_stage_id"/>

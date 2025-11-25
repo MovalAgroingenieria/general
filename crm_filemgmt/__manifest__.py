@@ -4,7 +4,7 @@
 {
     'name': 'File Management',
     'summary': 'Documentary management through Files.',
-    'version': '16.0.0.0.0',
+    'version': "17.0.1.0.0",
     'category': 'Customer Relationship Management',
     'website': 'https://www.moval.es',
     'author': 'Moval Agroingeniería',
