@@ -4,7 +4,7 @@
 {
     "name": "Bundle common accounting modules",
     "summary": "Install at once all common modules related to the accounting.",
-    "version": "16.0.1.0.0",
+    "version": "17.0.1.0.0",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "category": "Hidden",
