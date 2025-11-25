@@ -4,7 +4,7 @@
 {
     "name": "Project Partner Shortcut",
     "summary": "Adds a shortcut on the contact form with related projects.",
-    "version": '16.0.1.0.0',
+    "version": "17.0.1.0.0",
     "category": "Project Management",
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",
