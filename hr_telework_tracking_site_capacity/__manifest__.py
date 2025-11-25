@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
@@ -6,7 +5,7 @@
     "name": "Telework and Site Capacity Tracking",
     "summary": "Daily work mode declaration and department capacity "
                "control",
-    "version": "16.0.1.4.2",
+    "version": "17.0.1.0.0",
     "author": "Moval Agroingeniería",
     "maintainers": ["MovalAgroingenieria"],
     "website": "https://moval.es",
