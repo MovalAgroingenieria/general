@@ -5,7 +5,7 @@
     'name': 'Localization Management',
     'summary': 'Localization based on a hierarchy of territories '
                '(regions, provinces and municipalities)',
-    'version': '16.0.1.0.0',
+    'version': "17.0.1.0.0",
     'author': 'Moval Agroingeniería',
     'license': 'AGPL-3',
     'category': 'Hidden',
