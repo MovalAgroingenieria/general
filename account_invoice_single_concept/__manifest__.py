@@ -4,7 +4,7 @@
 {
     "name": "Account Invoice Single Concept",
     "summary": "Adds a invoice report with a single concept and no details.",
-    "version": "16.0.1.0.0",
+    "version": "17.0.1.0.0",
     "category": "Project Management",
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",
