@@ -5,7 +5,7 @@
     'name': 'Base Report Odd Even Pages',
     'summary': 'Functionality to modify report generated ensuring and odd or \
         even number of pages.',
-    'version': '16.0.1.0.0',
+    'version': "17.0.1.0.0",
     'category': 'Tools',
     'website': 'https://moval.es',
     'author': 'Moval Agroingeniería',
