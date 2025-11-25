@@ -4,7 +4,7 @@
 {
     "name": "INE codes",
     "summary": "National Statistics Institute codes for Spanish cities",
-    "version": "16.0.1.0.0",
+    "version": "17.0.1.0.0",
     "category": "Localization",
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",
