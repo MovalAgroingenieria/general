@@ -4,7 +4,7 @@
 {
     "name": "Attendances Self Edit",
     "summary": "Allow employees to edit their own attendances",
-    "version": "16.0.1.0.0",
+    "version": "17.0.1.0.0",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "category": "Human Resources/Attendances",
