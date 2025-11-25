@@ -5,7 +5,7 @@
 
     'name': 'SMS Alternatives',
     'summary': 'Prepare settings for SMS alternatives',
-    'version': '16.0.0.0.0',
+    'version': "17.0.1.0.0",
     'category': 'Hidden',
     'website': 'https://www.moval.es',
     'author': 'Moval Agroingeniería',
