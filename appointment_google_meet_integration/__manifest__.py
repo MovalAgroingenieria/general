@@ -4,7 +4,7 @@
 {
     'name': 'Appointment Google Meet Integration',
     'summary': 'Integration between appointments and Google Meet',
-    'version': '16.0.1.0.0',
+    'version': "17.0.1.0.0",
     'category': 'Website',
     'website': 'https://www.moval.es',
     'author': 'Moval Agroingeniería',
