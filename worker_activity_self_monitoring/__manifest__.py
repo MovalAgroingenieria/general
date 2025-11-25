@@ -4,7 +4,7 @@
 {
     "name": "Worker Activity Self Monitoring",
     "summary": "Worker will be able to monitor his own activity.",
-    "version": "16.0.1.0.0",
+    "version": "17.0.1.0.0",
     "license": "AGPL-3",
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",
