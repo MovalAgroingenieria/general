@@ -4,7 +4,7 @@
 {
     "name": "Bundle advanced user experience modules",
     "summary": "Install at once all advanted modules related to the user experience",
-    "version": "16.0.1.0.0",
+    "version": "17.0.1.0.0",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "category": "Hidden",
