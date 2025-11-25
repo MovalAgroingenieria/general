@@ -1,6 +1,6 @@
 {
     'name': 'HR Timesheet Sheet Creation and Edit Fix',
-    'version': '16.0.1.0.0',
+    'version': "17.0.1.0.0",
     'category': 'Human Resources',
     'website': 'https://www.moval.es',
     'author': 'Moval Agroingeniería',
