@@ -4,7 +4,7 @@
 {
     'name': 'Blogs Add Default Oder BY published date',
     'category': 'Website/Website',
-    'version': '16.0.1.0.0',
+    'version': "17.0.1.0.0",
     'author': 'Moval Agroingeniería',
     'website': 'https://moval.es',
     'license': 'AGPL-3',
