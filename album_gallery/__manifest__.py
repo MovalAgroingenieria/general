@@ -4,7 +4,7 @@
 {
     'name': 'Album Gallery',
     'summary': 'Organize photos and videos in albums in your webpages',
-    'version': '16.0.1.1.0',
+    'version': "17.0.1.0.0",
     'category': 'Moval General Addons',
     'website': 'http://www.moval.es',
     'author': 'Moval Agroingeniería',
