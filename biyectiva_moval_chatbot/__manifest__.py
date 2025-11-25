@@ -4,7 +4,7 @@
 {
     'name': 'Biyectiva Moval Chatbot',
     'summary': 'Biyectiva Chatbot Integration for Odoo 16',
-    'version': '16.0.2.0.0',
+    'version': "17.0.1.0.0",
     'category': 'Hidden',
     'website': 'https://www.moval.es',
     'author': 'Moval Agroingeniería',
