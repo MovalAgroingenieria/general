@@ -4,7 +4,7 @@
 {
     "name": "HR Holidays Fix Computed",
     "summary": "Adds number_of_days field to hr.leave form view above number_of_days_display",
-    "version": "16.0.1.0.0",
+    "version": "17.0.1.0.0",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "category": "Human Resources",
