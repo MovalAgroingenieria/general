@@ -3,7 +3,7 @@
 
 {
     'name': 'Employee Feedback Notes',
-    'version': '16.0.1.0.0',
+    'version': "17.0.1.0.0",
     'summary': 'Private feedback notes linked to employees',
     'author': 'Moval Agroingeniería',
     'category': 'Human Resources',
