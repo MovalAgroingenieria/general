@@ -5,7 +5,7 @@
 
     'name': 'Transform database in demo',
     'summary': 'DANGER: it transforms all records in demo records',
-    'version': '16.0.1.0.0',
+    'version': "17.0.1.0.0",
     'category': 'Moval General Addons',
     'website': 'https://www.moval.es',
     'author': 'Moval Agroingeniería',
