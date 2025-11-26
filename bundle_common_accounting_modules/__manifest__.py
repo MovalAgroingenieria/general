@@ -25,7 +25,7 @@
         "account_financial_report",
         "account_lock_date_update",
         "account_payment",
-        "account_payment_invoice_online_payment_patch",
+        #"account_payment_invoice_online_payment_patch",
         "account_payment_mode",
         "account_payment_order",
         "account_payment_order_return",
