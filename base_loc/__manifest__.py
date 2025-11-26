@@ -11,7 +11,7 @@
     'category': 'Hidden',
     'application': False,
     'installable': True,
-    'depends_old': [
+    'depends': [
         'base_gen',
     ],
     'data_old': [
