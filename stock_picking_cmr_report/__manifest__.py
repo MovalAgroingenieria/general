@@ -6,7 +6,7 @@
     "author": "Avanzosc",
     "category": "Inventory/Inventory",
     "website": "https://github.com/avanzosc/odoo-addons",
-    "depends_old": [
+    "depends": [
         "stock",
         "contacts"
     ],

@@ -10,7 +10,7 @@
     "category": "Hidden",
     "application": False,
     "installable": True,
-    "depends_old": [
+    "depends": [
         "base_technical_user",
         "base_fontawesome",
         "disable_odoo_online",

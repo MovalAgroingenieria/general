@@ -11,7 +11,7 @@
     'category': 'Warehouse Management',
     'application': False,
     'installable': True,
-    'depends_old': [
+    'depends': [
         'stock_picking_comment_template',
     ],
     'data_old': [

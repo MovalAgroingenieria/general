@@ -5,7 +5,7 @@
     'version': "17.0.1.0.0",
     "author": "Avanzosc",
     "category": "MRP",
-    "depends_old": [
+    "depends": [
         "mrp",
     ],
     "data_old": [

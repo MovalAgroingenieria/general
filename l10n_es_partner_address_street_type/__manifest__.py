@@ -12,7 +12,7 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    'depends_old': [
+    'depends': [
         'partner_address_street_type',
     ],
     'data_old': [

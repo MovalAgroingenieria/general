@@ -9,7 +9,7 @@
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
-    "depends_old": [],
+    "depends": [],
     "data_old": [
         "data/ine_code_data.xml",
         "security/ir.model.access.csv",

@@ -11,7 +11,7 @@
     "category": "Reporting",
     "application": False,
     "installable": True,
-    "depends_old": [
+    "depends": [
         "sale_comment_template",
     ],
     "data_old": [

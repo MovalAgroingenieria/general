@@ -8,7 +8,7 @@
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "category": "Human Resources/Attendances",
-    "depends_old": [
+    "depends": [
         'project',
         'fleet',
         'mail',

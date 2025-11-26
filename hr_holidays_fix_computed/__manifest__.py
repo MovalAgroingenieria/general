@@ -15,7 +15,7 @@
         number_of_days field above the number_of_days_display field for
         better visibility and debugging purposes.
     """,
-    "depends_old": [
+    "depends": [
         "hr_holidays",
         ],
     "data_old": [

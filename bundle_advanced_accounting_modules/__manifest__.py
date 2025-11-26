@@ -10,7 +10,7 @@
     "category": "Hidden",
     "application": False,
     "installable": True,
-    "depends_old": [
+    "depends": [
         "bundle_common_accounting_modules",
         "analytic",
         "mis_builder",

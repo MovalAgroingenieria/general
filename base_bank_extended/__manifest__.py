@@ -10,7 +10,7 @@
     'category': 'Hidden',
     'application': False,
     'installable': True,
-    'depends_old': [
+    'depends': [
         'base',
     ],
     'data_old': [

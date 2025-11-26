@@ -16,7 +16,7 @@
     ''',
     'author': 'Moval Development',
     'website': 'https://www.moval.com',
-    'depends_old': [
+    'depends': [
         'base',
         'calendar',
         'google_calendar',

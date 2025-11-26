@@ -11,7 +11,7 @@
     "website": "https://moval.es",
     "license": "AGPL-3",
     "category": "Human Resources",
-    "depends_old": [
+    "depends": [
         "hr",
         "hr_holidays",
         "hr_timesheet",

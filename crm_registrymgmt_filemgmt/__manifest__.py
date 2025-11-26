@@ -9,7 +9,7 @@
     'website': 'https://odoo-community.org/',
     'author': 'Moval Agroingeniería',
     'license': 'AGPL-3',
-    'depends_old': [
+    'depends': [
         'crm_filemgmt',
         'crm_registrymgmt',
     ],

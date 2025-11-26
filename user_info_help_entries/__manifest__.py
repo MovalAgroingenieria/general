@@ -8,7 +8,7 @@
     'website': 'http://www.moval.es',
     'author': 'Moval Agroingeniería',
     'license': 'AGPL-3',
-    'depends_old': [
+    'depends': [
         "web",
     ],
     'data_old': [

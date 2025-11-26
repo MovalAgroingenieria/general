@@ -17,7 +17,7 @@
     'images': [
         'static/description/banner.png'
     ],
-    'depends_old': [
+    'depends': [
         'base',
     ],
     'data_old': [

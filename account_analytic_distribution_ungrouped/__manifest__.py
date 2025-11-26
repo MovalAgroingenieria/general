@@ -27,7 +27,7 @@
     'author': 'Moval',
     'website': 'https://www.moval.es',
     'license': 'AGPL-3',
-    'depends_old': [
+    'depends': [
         'account', 'analytic', 'account_reconcile_oca', 'sale',
         'purchase', 'project', 'contract', 'hr_expense',
         'account_asset_management'

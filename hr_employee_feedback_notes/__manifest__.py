@@ -7,7 +7,7 @@
     'summary': 'Private feedback notes linked to employees',
     'author': 'Moval Agroingeniería',
     'category': 'Human Resources',
-    'depends_old': ['hr'],
+    'depends': ['hr'],
     'data_old': [
         'security/feedback_security.xml',
         'security/ir.model.access.csv',

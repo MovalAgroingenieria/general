@@ -13,7 +13,7 @@
     "installable": True,
     "post_init_hook": "post_init_hook",
     "uninstall_hook": "uninstall_hook",
-    "depends_old": [
+    "depends": [
         "contacts",
     ],
     "data_old": [

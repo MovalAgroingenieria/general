@@ -9,7 +9,7 @@
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",
     "category": "Human Resources/Attendance",
-    "depends_old": [
+    "depends": [
         "web",
         "hr_attendance",
         "bus",

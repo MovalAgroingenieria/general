@@ -8,7 +8,7 @@
     'application': False,
     'installable': True,
 
-    'depends_old': [
+    'depends': [
         'account',
     ],
     'data_old': [

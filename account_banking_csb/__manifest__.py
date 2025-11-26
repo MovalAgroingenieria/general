@@ -12,7 +12,7 @@
     'application': False,
     'installable': True,
     'post_init_hook': 'update_bank_journals',
-    'depends_old': [
+    'depends': [
         'account_banking_pain_base'
     ],
     'data_old': [

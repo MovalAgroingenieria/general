@@ -14,7 +14,7 @@
     'price': 10,
     'currency': 'EUR',
     'images': ['static/description/banner.png'],
-    'depends_old': [
+    'depends': [
         'website',
         'mail',
     ],

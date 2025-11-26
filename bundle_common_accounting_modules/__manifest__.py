@@ -10,7 +10,7 @@
     "category": "Hidden",
     "application": False,
     "installable": True,
-    "depends_old": [
+    "depends": [
         "account",
         "account_asset_management",
         "account_banking_mandate",

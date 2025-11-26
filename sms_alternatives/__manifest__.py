@@ -12,7 +12,7 @@
     'license': 'AGPL-3',
     'application': False,
     'installable': True,
-    'depends_old': [
+    'depends': [
         'sms',
     ],
     'data_old': [

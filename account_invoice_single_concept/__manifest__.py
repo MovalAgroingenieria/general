@@ -11,7 +11,7 @@
     "license": "AGPL-3",
     "installable": True,
     "application": False,
-    "depends_old": [
+    "depends": [
         "account",
     ],
     "data_old": [

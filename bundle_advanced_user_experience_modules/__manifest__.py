@@ -10,7 +10,7 @@
     "category": "Hidden",
     "application": False,
     "installable": True,
-    "depends_old": [
+    "depends": [
         "ultimate_list_view",
     ],
     "data_old": [

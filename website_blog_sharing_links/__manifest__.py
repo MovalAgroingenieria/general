@@ -10,7 +10,7 @@
     'website': 'https://moval.es',
     'application': False,
     'installable': True,
-    'depends_old': [
+    'depends': [
         'website_blog',
     ],
     'data_old': [

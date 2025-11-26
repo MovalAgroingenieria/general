@@ -8,7 +8,7 @@
     'application': False,
     'installable': True,
 
-    'depends_old': [
+    'depends': [
         'hr_timesheet_sheet',
     ],
     'data_old': [
