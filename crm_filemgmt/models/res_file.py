@@ -324,6 +324,15 @@ class ResFile(models.Model):
 
     @api.model
     def _default_stage_id(self):
+        # 1) Do not use this default during module install / upgrade
+        if self.env.context.get('install_mode'):
+            return False
+
+        # 2) Make sure the table exists before doing any search
+        if not tools.table_exists(self.env.cr, 'res_file_stage'):
+            return False
+
+        # 3) Normal default when everything is ready
         return self.env['res.file.stage'].search([], limit=1)
 
     @api.model
