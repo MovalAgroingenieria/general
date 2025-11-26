@@ -35,7 +35,7 @@
         "account_payment_return_import",
         "account_payment_sale",
         "account_reconcile_oca",
-        "account_sequence",
+        #"account_sequence",
         "account_statement_base",
         "account_statement_import_base",
         "account_statement_import_file",
