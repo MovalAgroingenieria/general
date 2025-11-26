@@ -8,7 +8,7 @@
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "category": "Hidden",
-    "depends_old": [
+    "depends": [
         "base",
     ],
     "data_old": [],
