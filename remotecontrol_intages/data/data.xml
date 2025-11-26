@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="remotecontrol_intages" model="remotecontrol">
+            <field name="name">Intages</field>
+            <field name="remotecontrol_type">sql</field>
+            <field name="base_url">bigquery://</field>
+            <field name="timeout">300</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="is_intages">True</field>
+            <field name="connection_params"><![CDATA[
+            {
+                "project_id": "",
+                "credentials_json": "",
+                "dataset_id": "",
+                "table_name": ""
+            }]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>Intages · BigQuery Integration Help</h2>
+<p><strong>Type:</strong> SQL Database Connection (BigQuery)</p>
+
+<hr/>
+
+<h3>1) BigQuery Connection</h3>
+<p>Uses <strong>google-cloud-bigquery</strong> library to connect to Google Cloud BigQuery containing sensor measurement data.</p>
+
+<h4>Standard connection_params (JSON):</h4>
+<pre>{
+  "project_id": "",
+  "credentials_json": "key.json",
+  "dataset_id": "",
+  "table_name": ""
+}</pre>
+
+<h4>Required parameters:</h4>
+<ul>
+  <li><code>project_id</code>: Google Cloud Project ID containing the BigQuery dataset</li>
+  <li><code>credentials_json</code>: Name of the attachment containing Google Cloud service account JSON credentials</li>
+  <li><code>dataset_id</code>: BigQuery dataset name</li>
+  <li><code>table_name</code>: BigQuery table name containing sensor data</li>
+</ul>
+
+<h4>⚠️ Authentication Setup</h4>
+<p><strong>IMPORTANT:</strong> Upload the Google Cloud service account JSON credentials file as an attachment to this remotecontrol record. The attachment name must match the <code>credentials_json</code> parameter value.</p>
+
+<h3>2) Available Procedures</h3>
+
+<h4>A) Daily Sync (Scheduled)</h4>
+<p>Synchronizes sensor readings from BigQuery to Odoo:</p>
+<ol>
+  <li><strong>Build Device/Sensor Plan</strong> - Loads configured devices/sensors from Odoo with remotecontrol_params</li>
+  <li><strong>Fetch and Parse Rows</strong> - Queries BigQuery table for new data since last sync</li>
+  <li><strong>Upsert Readings</strong> - Processes data and creates/updates readings in mdm.measurement.device.sensor.reading</li>
+</ol>
+
+<h3>3) BigQuery Table Structure</h3>
+<p>Expected table schema with the following columns:</p>
+
+<pre>
+fechahora              : TIMESTAMP - Reading timestamp
+EstacionBombeo         : STRING    - Pumping station identifier
+NombreSensorPresion    : STRING    - Pressure sensor name (nullable)
+NombreSensorCaudal     : STRING    - Flow sensor name (nullable)
+ValorSensorPresion     : FLOAT     - Pressure sensor value (nullable)
+ValorSensorCaudal      : FLOAT     - Flow sensor value (nullable)
+ValorVolumen           : FLOAT     - Volume value (nullable)
+</pre>
+
+<h3>4) Device Configuration</h3>
+<p>Each <strong>mdm.measurement.device</strong> needs <code>remotecontrol_params</code> (JSON) with device identifiers:</p>
+
+<h4>Required fields:</h4>
+<ul>
+  <li><code>device_id</code>: Device identifier that matches EstacionBombeo in BigQuery</li>
+</ul>
+
+<h4>Optional fields:</h4>
+<ul>
+  <li><code>start_date</code>: Initial sync date (default: last reading or current year start)</li>
+</ul>
+
+<h4>Example device configuration:</h4>
+<pre>{
+  "device_id": "Estación de bombeo 4",
+  "start_date": "2025-01-01"
+}</pre>
+
+<h3>5) Sensor Configuration</h3>
+<p>Each <strong>mdm.measurement.device.sensor</strong> needs <code>remotecontrol_params</code> (JSON):</p>
+
+<h4>Required fields:</h4>
+<ul>
+  <li><code>type</code>: Sensor type determining which BigQuery field to read from</li>
+  <li><code>sensor_id</code>: Sensor identifier that matches sensor names in BigQuery</li>
+</ul>
+
+<h4>Optional fields:</h4>
+<ul>
+  <li><code>start_date</code>: Override device start_date for this specific sensor</li>
+</ul>
+
+<h4>Sensor Types and Data Mapping:</h4>
+<ul>
+  <li><code>"pressure"</code> → Reads from NombreSensorPresion + ValorSensorPresion</li>
+  <li><code>"flow"</code> → Reads from NombreSensorCaudal + ValorSensorCaudal</li>
+  <li><code>"volume"</code> → Reads from NombreSensorCaudal + ValorVolumen</li>
+</ul>
+
+<h4>Example sensor configurations:</h4>
+
+<h5>Pressure sensor:</h5>
+<pre>{
+  "type": "pressure",
+  "sensor_id": "SC 1 EB4 a EB3",
+  "start_date": "2025-01-01"
+}</pre>
+
+<h5>Flow sensor:</h5>
+<pre>{
+  "type": "flow",
+  "sensor_id": "SC 1 EB4 a EB3",
+  "start_date": "2025-01-01"
+}</pre>
+
+<h5>Volume sensor:</h5>
+<pre>{
+  "type": "volume",
+  "sensor_id": "SC 1 EB4 a EB3",
+  "start_date": "2025-01-01"
+}</pre>
+
+<h3>6) Data Processing Logic</h3>
+
+<h4>Smart Sensor Matching</h4>
+<p>The system intelligently matches BigQuery data to Odoo sensors using:</p>
+<ol>
+  <li><strong>Device matching:</strong> EstacionBombeo = device.remotecontrol_params.device_id</li>
+  <li><strong>Sensor matching:</strong> Sensor name field = sensor.remotecontrol_params.sensor_id</li>
+  <li><strong>Type validation:</strong> sensor.remotecontrol_params.type determines which data fields to use</li>
+</ol>
+
+<h3>7) Setup Workflow</h3>
+<ol>
+  <li><strong>Upload credentials:</strong> Attach Google Cloud service account JSON to this remotecontrol record</li>
+  <li><strong>Configure connection:</strong> Set connection_params with project, dataset, table, and credentials file name</li>
+  <li><strong>Create devices:</strong> Create mdm.measurement.device records with device_id in remotecontrol_params</li>
+  <li><strong>Create sensors:</strong> Create mdm.measurement.device.sensor records with type in remotecontrol_params</li>
+  <li><strong>Test sync:</strong> Run "Daily Sync" procedure manually to verify configuration</li>
+  <li><strong>Schedule:</strong> Enable automatic scheduling if desired</li>
+</ol>
+
+<h3>8) Troubleshooting</h3>
+
+<h4>Common Issues:</h4>
+<ul>
+  <li><strong>Attachment not found:</strong> Ensure credentials JSON file is uploaded with exact name matching credentials_json parameter</li>
+  <li><strong>No sensors found:</strong> Verify device_id and sensor_id in remotecontrol_params match BigQuery data exactly</li>
+  <li><strong>Type mismatch:</strong> Ensure sensor type matches available data (pressure sensors need NombreSensorPresion data)</li>
+  <li><strong>No data:</strong> Check start_date configuration and BigQuery table time range</li>
+</ul>
+
+<h4>Debugging:</h4>
+<p>Each procedure run creates audit attachments with detailed execution information and sample data for troubleshooting.</p>
+            ]]></field>
+        </record>
+        <record id="remotecontrol_intages_action_build_plan" model="remotecontrol.action">
+    <field name="name">Intages: Build Device/Sensor Plan</field>
+    <field name="remote_id" ref="remotecontrol_intages"/>
+    <field name="active">True</field>
+    <field name="rate_limit_seconds">0.0</field>
+    <field name="max_retries">1</field>
+    <field name="readonly">True</field>
+    <field name="code"><![CDATA[
+import json
+from datetime import timedelta
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+sensors = Sensor.search([
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id)
+])
+sensor_ids = [s.id for s in sensors]
+last_readings_map = {}
+if sensors:
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for sid, mtime in cr.fetchall():
+        last_readings_map[sid] = mtime
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+    try:
+        scfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except:
+        scfg = {}
+    try:
+        dcfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except:
+        dcfg = {}
+    station_name = dcfg.get('device_id' or '')
+    sensor_name = scfg.get('sensor_id' or '')
+    start_cfg = scfg.get('start_date') or dcfg.get('start_date')
+    last_m = last_readings_map.get(sensor.id)
+    if last_m:
+        try:
+            initial_date = fields.Date.to_string(
+                fields.Datetime.from_string(last_m) + timedelta(days=1)
+            )
+        except:
+            initial_date = str(last_m)[:10]
+    else:
+        if start_cfg:
+            initial_date = start_cfg[:10]
+        else:
+            year = today_str[:4]
+            initial_date = '%s-01-01' % year
+    stype = scfg.get('type', '').strip().lower()
+    if stype not in ('pressure', 'flow', 'volume'):
+        stype = 'unknown'
+    plan.append({
+        'sensor_id': sensor.id,
+        'device_id': device.id,
+        'station_name': station_name,
+        'sensor_type': stype,
+        'sensor_name': sensor_name,
+        'initial_date': initial_date,
+    })
+bag['intages_plan'] = plan
+bag['intages_plan_count'] = len(plan)
+    ]]></field>
+</record>
+        <record id="remotecontrol_intages_action_fetch_rows" model="remotecontrol.action">
+            <field name="name">Intages: Fetch and Parse Rows</field>
+            <field name="remote_id" ref="remotecontrol_intages"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import os
+from datetime import datetime
+from google.cloud import bigquery
+Remote = self.remote_id
+plan = bag.get('intages_plan') or []
+rows = []
+errors = []
+try:
+    cfg = json.loads(Remote.connection_params or '{}') or {}
+    project_id = cfg.get('project_id', '').strip()
+    key_filename = cfg.get('credentials_json', '').strip()
+    dataset_id = cfg.get('dataset_id', '').strip()
+    table_name = cfg.get('table_name', '').strip()
+    attachment = env['ir.attachment'].search([
+        ('res_model', '=', 'remotecontrol'),
+        ('res_id', '=', Remote.id),
+        ('name', '=', key_filename)
+    ], limit=1)
+    if not attachment:
+        raise Exception("Attachment '%s' not found for remotecontrol" % key_filename)
+    credentials_json = base64.b64decode(attachment.datas).decode('utf-8')
+    credentials_info = json.loads(credentials_json)
+    client = bigquery.Client.from_service_account_info(credentials_info)
+    full_table_id = "%s.%s.%s" % (project_id, dataset_id, table_name)
+    for item in plan:
+        device_id    = item["device_id"]
+        initial_date = item["initial_date"]
+        start_dt = datetime.strptime(initial_date, "%Y-%m-%d")
+        start_ts_str = start_dt.strftime("%Y-%m-%dT00:00:00Z")
+        end_ts_str = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        query = (
+            "SELECT * FROM `%s` "
+            "WHERE fechahora >= TIMESTAMP('%s') "
+            "AND fechahora <  TIMESTAMP('%s') "
+            "ORDER BY fechahora ASC"
+        ) % (full_table_id, start_ts_str, end_ts_str)
+        try:
+            query_job = client.query(query)
+            results = list(query_job.result())
+            for row in results:
+                raw_ts = row.fechahora
+                if hasattr(raw_ts, "strftime"):
+                    ts = raw_ts.strftime("%Y-%m-%d %H:%M:%S")
+                else:
+                    ts = str(raw_ts)
+                rows.append({
+                    "device_id": device_id,
+                    "timestamp": ts,
+                    "EstacionBombeo": row.EstacionBombeo,
+                    "NombreSensorPresion": row.NombreSensorPresion,
+                    "NombreSensorCaudal": row.NombreSensorCaudal,
+                    "ValorSensorPresion": row.ValorSensorPresion,
+                    "ValorSensorCaudal": row.ValorSensorCaudal,
+                    "ValorVolumen": row.ValorVolumen,
+                })
+        except Exception as e:
+            errors.append({
+                "device_id": device_id,
+                "error": str(e),
+                "query": query
+            })
+except Exception as ex:
+    errors.append({"fatal_error": str(ex)})
+audit = {
+    "executed_at": fields.Datetime.now(),
+    "total_rows": len(rows),
+    "total_errors": len(errors),
+    "sample_rows": rows[:10],
+}
+audit_json = json.dumps(audit, indent=2, ensure_ascii=True, default=str)
+audit_b64 = base64.b64encode(audit_json)
+fname = "intages_fetch_%s.json" % fields.Datetime.now().replace(":", "").replace("-", "").replace(" ", "_")
+att = env["ir.attachment"].create({
+    "name": fname,
+    "datas_fname": fname,
+    "datas": audit_b64,
+    "mimetype": "application/json",
+    "res_model": "remotecontrol",
+    "res_id": Remote.id
+})
+Remote.message_post(
+    body="[Intages] Fetch: %s rows, %s errors" % (len(rows), len(errors)),
+    attachment_ids=[att.id]
+)
+bag["intages_rows"] = rows
+bag["intages_fetch_errors"] = errors
+bag["intages_fetch_filename"] = fname
+            ]]></field>
+        </record>
+        <record id="remotecontrol_intages_action_upsert_rows" model="remotecontrol.action">
+            <field name="name">Intages: Upsert Readings</field>
+            <field name="remote_id" ref="remotecontrol_intages"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import json
+import pytz
+from datetime import datetime
+Remote = self.remote_id
+Device = env['mdm.measurement.device']
+Sensor = env['mdm.measurement.device.sensor']
+def parse_js_number(v):
+    if v is None: return None
+    if isinstance(v, dict):
+        for k in ('$numberDecimal', '$numberLong', '$numberInt'):
+            if k in v:
+                v = v[k]; break
+    if isinstance(v, str):
+        v = v.strip().replace(",", ".")
+        if v.lower() == "nan": return None
+        try: return float(v)
+        except: return None
+    if isinstance(v, (int, float)): return float(v)
+    return None
+rows = bag.get("intages_rows") or []
+total_processed = 0
+total_upserts = 0
+total_errors = 0
+details = []
+for r in rows:
+    total_processed += 1
+    device_id = r.get("device_id")
+    ts        = r.get("timestamp")
+    if not device_id or not ts:
+        total_errors += 1
+        if len(details) < 20:
+            details.append({
+                "device_id": device_id,
+                "timestamp": ts,
+                "status": "error",
+                "error": "Missing fields"
+            })
+        continue
+
+    pres_name = r.get("NombreSensorPresion")
+    caud_name = r.get("NombreSensorCaudal")
+    pres_val  = parse_js_number(r.get("ValorSensorPresion"))
+    caud_val  = parse_js_number(r.get("ValorSensorCaudal"))
+    vol_val   = parse_js_number(r.get("ValorVolumen"))
+    sensor_candidates = []
+    if pres_name and pres_val is not None:
+        sensor_candidates.append({
+            'name': pres_name,
+            'value': pres_val,
+            'expected_type': 'pressure'
+        })
+    if caud_name and vol_val is not None:
+        sensor_candidates.append({
+            'name': caud_name,
+            'value': vol_val,
+            'expected_type': 'volume'
+        })
+    if caud_name and caud_val is not None:
+        sensor_candidates.append({
+            'name': caud_name,
+            'value': caud_val,
+            'expected_type': 'flow'
+        })
+    if not sensor_candidates:
+        continue
+    sensor_found = None
+    final_sensor_name = None
+    final_value = None
+    for candidate in sensor_candidates:
+        potential_sensors = Sensor.search([
+            ("device_id", "=", device_id)
+        ])
+        for ps in potential_sensors:
+            try:
+                scfg = json.loads(ps.remotecontrol_params or '{}') or {}
+                stype = scfg.get('type', '').strip().lower()
+                sensor_name_from_config = scfg.get('sensor_id' or '')
+                if (stype == candidate['expected_type'] and
+                    sensor_name_from_config == candidate['name']):
+                    sensor_found = ps
+                    final_sensor_name = candidate['name']
+                    final_value = candidate['value']
+                    break
+            except:
+                pass
+        if sensor_found:
+            break
+    if not sensor_found:
+        total_errors += 1
+        if len(details) < 20:
+            details.append({
+                "device_id": device_id,
+                "timestamp": ts,
+                "sensor_name": final_sensor_name or "unknown",
+                "status": "error",
+                "error": "Sensor not found or type mismatch"
+            })
+        continue
+
+    device = Device.browse(device_id)
+    if not device.exists():
+        total_errors += 1
+        if len(details) < 20:
+            details.append({
+                "device_id": device_id,
+                "timestamp": ts,
+                "sensor_name": final_sensor_name,
+                "status": "error",
+                "error": "Device not found"
+            })
+        continue
+
+    try:
+        try:
+            date_time_read = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
+            date_time_read = pytz.timezone('Europe/Madrid').localize(date_time_read)
+            date_time_read = date_time_read.astimezone(pytz.timezone('UTC'))
+            ts_utc = date_time_read.strftime("%Y-%m-%d %H:%M:%S")
+        except:
+            ts_utc = ts
+        Remote.upsert(
+            "mdm.measurement.device.sensor.reading",
+            {
+                "sensor_id": sensor_found.id,
+                "measurement_time": ts_utc,
+            },
+            {
+                "value": final_value,
+                "device_id": device.id,
+            }
+        )
+        total_upserts += 1
+
+        if len(details) < 20:
+            details.append({
+                "device_id": device_id,
+                "sensor_id": sensor_found.id,
+                "sensor_name": sensor_found.name,
+                "timestamp": ts,
+                "value": final_value,
+                "status": "success"
+            })
+    except Exception as e:
+        total_errors += 1
+        if len(details) < 20:
+            details.append({
+                "device_id": device_id,
+                "sensor_id": sensor_found.id,
+                "timestamp": ts,
+                "value": final_value,
+                "status": "error",
+                "error": str(e)
+            })
+success_rate = "0.0%"
+if total_processed:
+    success_rate = "%.1f%%" % (float(total_upserts) / float(total_processed) * 100.0)
+bag["intages_upsert_summary"] = {
+    "executed_at": fields.Datetime.now(),
+    "total_rows_processed": total_processed,
+    "total_upserts": total_upserts,
+    "total_errors": total_errors,
+    "success_rate": success_rate,
+}
+bag["intages_upsert_details"] = details
+Remote.message_post(
+    body="[Intages] Upsert: %s processed, %s upserts, %s errors (success_rate=%s)" %
+         (total_processed, total_upserts, total_errors, success_rate)
+)
+            ]]></field>
+        </record>
+        <record id="remotecontrol_intages_procedure" model="remotecontrol.procedure">
+            <field name="name">Intages: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_intages"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+        <record id="remotecontrol_intages_step_20_fetch" model="remotecontrol.step">
+            <field name="name">Fetch and Parse Rows</field>
+            <field name="procedure_id" ref="remotecontrol_intages_procedure"/>
+            <field name="action_id" ref="remotecontrol_intages_action_fetch_rows"/>
+            <field name="sequence">20</field>
+        </record>
+        <record id="remotecontrol_intages_step_30_upsert" model="remotecontrol.step">
+            <field name="name">Upsert Readings</field>
+            <field name="procedure_id" ref="remotecontrol_intages_procedure"/>
+            <field name="action_id" ref="remotecontrol_intages_action_upsert_rows"/>
+            <field name="sequence">30</field>
+        </record>
+        <record id="remotecontrol_intages_step_10_plan" model="remotecontrol.step">
+    <field name="name">Build Device/Sensor Plan</field>
+    <field name="procedure_id" ref="remotecontrol_intages_procedure"/>
+    <field name="action_id" ref="remotecontrol_intages_action_build_plan"/>
+    <field name="sequence">10</field>
+</record>
+    </data>
+</odoo>
