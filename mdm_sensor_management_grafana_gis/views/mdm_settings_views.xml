@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mdm_config_settings_view_form" model="ir.ui.view">
+        <field name="name">mdm.config.settings.form</field>
+        <field name="model">mdm.config.settings</field>
+        <field name="inherit_id" ref="mdm_sensor_management_gis.mdm_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='refresh_interval_gis_devices_group']" position="after">
+                <group>
+                    <label for="gis_sensorreading_dashboard_id"/>
+                    <div>
+                        <field name="gis_sensorreading_dashboard_id" class="oe_inline"/>
+                    </div>
+                </group>
+                <group>
+                    <label for="gis_sensorreading_dashboard_histogram_id"/>
+                    <div>
+                        <field name="gis_sensorreading_dashboard_histogram_id" class="oe_inline"/>
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

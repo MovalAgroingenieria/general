@@ -47,26 +47,29 @@ class MDMGisController(http.Controller):
             'default_interval': refresh_interval * 1000,
         }
 
+    def _format_sensor_data(self, sensor):
+        # Get last reading
+        last_reading = request.env[
+            'mdm.measurement.device.sensor.reading'].search([
+                ('sensor_id', '=', sensor.id),
+            ], limit=1, order='measurement_time desc')
+        sensor_info = {
+            'id': sensor.id,
+            'name': sensor.name,
+            'sensor_type': (sensor.type_id.name
+                            if sensor.type_id else ''),
+            'last_value': last_reading.value if last_reading else None,
+            'last_date': last_reading.measurement_time if last_reading else
+            None,
+            'uom': sensor.uom_id.name if sensor.uom_id else '',
+        }
+        return sensor_info
+
     def _format_device_data(self, device):
         # Get latest sensor readings
         sensor_data = []
         for sensor in device.sensor_ids:
-            # Get last reading
-            last_reading = request.env[
-                'mdm.measurement.device.sensor.reading'].search([
-                    ('sensor_id', '=', sensor.id),
-                ], limit=1, order='measurement_time desc')
-            sensor_info = {
-                'id': sensor.id,
-                'name': sensor.name,
-                'sensor_type': (sensor.type_id.name
-                                if sensor.type_id else ''),
-                'last_value': last_reading.value if last_reading else None,
-                'last_date': last_reading.measurement_time if last_reading else
-                None,
-                'uom': sensor.uom_id.name if sensor.uom_id else '',
-            }
-            sensor_data.append(sensor_info)
+            sensor_data.append(self._format_sensor_data(sensor))
         photo_url = None
         if device.photo:
             photo_url = '/web/image/mdm.measurement.device/%s/photo' % (
