@@ -329,7 +329,7 @@ class ResFile(models.Model):
             return False
 
         # 2) Make sure the table exists before doing any search
-        if not tools.table_exists(self.env.cr, 'res_file_stage'):
+        if 'res.file.stage' not in self.env:
             return False
 
         # 3) Normal default when everything is ready
