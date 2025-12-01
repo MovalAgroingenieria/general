@@ -3,7 +3,8 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 
-from odoo import models, fields, _
+from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
 
 
 class MeasurementDeviceSensor(models.Model):
@@ -55,13 +56,29 @@ class MeasurementDeviceSensor(models.Model):
         string="Retention (days)",
         default=-1,
         help="Maximum number of days to keep readings linked to this device. "
-             "Older readings should be cleaned up automatically by cron."
+             "Older readings should be cleaned up automatically by cron.",
     )
 
     active = fields.Boolean(
         string='Active',
         default=True,
     )
+
+    @api.constrains('name', 'device_id')
+    def _check_unique_sensor_per_device(self):
+        for sensor in self:
+            if sensor.device_id and sensor.name:
+                duplicate = self.search([
+                    ('id', '!=', sensor.id),
+                    ('device_id', '=', sensor.device_id.id),
+                    ('name', '=', sensor.name),
+                ], limit=1)
+                if duplicate:
+                    raise ValidationError(
+                        _("A sensor with name '%s' already exists for "
+                          "device '%s'.\nPlease use a different name or "
+                          "check for duplicates.") % (
+                            sensor.name, sensor.device_id.name))
 
     def write(self, vals):
         res = super(MeasurementDeviceSensor, self).write(vals)

@@ -391,9 +391,15 @@ class RemoteControlAction(models.Model):
                 u"[Action %s] executed successfully." % (action_name,))
         except Exception as e:
             traceback_info = traceback.format_exc()
+            # Create ASCII-safe error message
+            try:
+                error_str = unicode(e).encode('ascii', 'replace') if \
+                    isinstance(e, Exception) else str(e)
+            except Exception:
+                error_str = 'Unicode error in exception message'
             raise UserError(
                 _("Execution error (%s) in action '%s':\n%s") % (
-                    action_name, traceback_info, str(e)))
+                    error_str, action_name, traceback_info))
         # Return the bag from context as it may have been modified by exec
         return context.get('bag', bag)
 
