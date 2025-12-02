@@ -54,6 +54,14 @@ class HrTeleworkDay(models.Model):
         help='Workstation assigned for this day',
     )
 
+    office_id = fields.Many2one(
+        comodel_name='office.location',
+        string='Office',
+        related='workstation_id.office_id',
+        store=True,
+        index=True,
+    )
+
     date = fields.Date(
         string='Date',
         required=True,
@@ -135,6 +143,12 @@ class HrTeleworkDay(models.Model):
         string='Total Overbooked',
         default=False,
         help='Total company capacity exceeded',
+    )
+
+    office_daily_availability = fields.Char(
+        string='Office Avail.',
+        help='Availability for the assigned office',
+        readonly=True,
     )
 
     office_availability = fields.Text(
@@ -905,6 +919,7 @@ class HrTeleworkDay(models.Model):
                     'total_availability',
                     'total_status_color',
                     'total_overbooked',
+                    'office_daily_availability',
                 ])
 
                 all_affected._update_availability_info()
@@ -985,6 +1000,33 @@ class HrTeleworkDay(models.Model):
             records_sudo.with_context(
                 skip_pending_review_transition=True
             ).write(availability_values)
+
+            # Update per-office availability
+            offices = records_sudo.mapped('office_id')
+            for office in offices:
+                if not office:
+                    continue
+
+                office_capacity = workstation_model.search_count([
+                    ('office_id', '=', office.id),
+                    ('active', '=', True)
+                ])
+
+                office_occupied = telework_day.search_count([
+                    ('date', '=', target_date),
+                    ('mode', '=', 'onsite'),
+                    ('state', 'in', ['confirmed', 'draft', 'pending_review']),
+                    ('workstation_id.office_id', '=', office.id)
+                ])
+
+                avail_str = f"{office_occupied}/{office_capacity}"
+
+                office_recs = records_sudo.filtered(
+                    lambda r: r.office_id == office
+                )
+                office_recs.with_context(
+                    skip_pending_review_transition=True
+                ).write({'office_daily_availability': avail_str})
 
         except Exception:
             pass

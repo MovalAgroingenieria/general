@@ -11,3 +11,4 @@ from . import office
 from . import workstation
 from . import account_analytic_line
 from . import timesheets_analysis
+from . import telework_availability_report

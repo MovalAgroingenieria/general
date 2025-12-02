@@ -26,6 +26,8 @@
                options="{'no_create': True, 'no_quick_create': True}"
                context="{'show_address': False, 'date_context': date}"/>
 
+        <field name="office_id" string="Office" optional="show"/>
+
         <field name="has_workstation_conflict" invisible="1"/>
 
         <field name="date" string="Date"/>
@@ -34,6 +36,8 @@
                decoration-success="total_status_color=='green'"
                decoration-warning="total_status_color=='yellow'"
                decoration-danger="total_status_color=='red'"/>
+
+        <field name="office_daily_availability" string="Office Avail." optional="hide"/>
 
         <field name="total_status_color" invisible="1"/>
         <field name="mode_icon" invisible="1"/>
@@ -79,6 +83,7 @@
                    attrs="{'invisible': [('mode', '=', 'remote')], 'required': [('mode', '=', 'onsite')]}"
                    options="{'no_create': True, 'no_quick_create': True}"
                    context="{'show_address': False, 'date_context': date}"/>
+            <field name="office_id" string="Office" colspan="2" readonly="1" attrs="{'invisible': [('mode', '=', 'remote')]}"/>
             <field name="create_date" readonly="1" colspan="2"/>
           </group>
 
@@ -128,6 +133,7 @@
         <field name="date"/>
         <field name="employee_id"/>
         <field name="department_id"/>
+        <field name="office_id"/>
         <field name="create_date"/>
 
         <filter string="Today" name="today"
@@ -161,6 +167,7 @@
           <filter string="Month" name="group_month" context="{'group_by': 'date:month'}"/>
           <separator/>
           <filter string="Department" name="group_department" context="{'group_by': 'department_id'}"/>
+          <filter string="Office" name="group_office" context="{'group_by': 'office_id'}"/>
           <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
           <separator/>
           <filter string="Mode" name="group_mode" context="{'group_by': 'mode'}"/>
@@ -197,6 +204,7 @@
     <field name="model">hr.telework.day</field>
     <field name="arch" type="xml">
       <pivot string="Telework Table">
+        <field name="office_id" type="row"/>
         <field name="department_id" type="row"/>
         <field name="employee_id" type="row"/>
         <field name="date" interval="day" type="col"/>
