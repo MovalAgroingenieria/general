@@ -20,6 +20,12 @@ class MDMConfigSettings(models.TransientModel):
         ondelete='restrict',
     )
 
+    gis_sensorreading_dashboard_multisensor_id = fields.Many2one(
+        string='GIS Sensorreading Multisensor dashboard',
+        comodel_name='board.grafana.dashboard.storage',
+        ondelete='restrict',
+    )
+
     @api.multi
     def set_default_values(self):
         values = self.env["ir.values"].sudo()
@@ -31,3 +37,7 @@ class MDMConfigSettings(models.TransientModel):
             "mdm.config.settings",
             "gis_sensorreading_dashboard_histogram_id",
             self.gis_sensorreading_dashboard_histogram_id.id)
+        values.set_default(
+            "mdm.config.settings",
+            "gis_sensorreading_dashboard_multisensor_id",
+            self.gis_sensorreading_dashboard_multisensor_id.id)
