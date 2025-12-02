@@ -45,6 +45,17 @@ class MailNotificationChatbot(models.Model):
     task_recurring = fields.Boolean(string="Recurring Task")
     task_type_id = fields.Many2one("project.type", string="Task Type")
     task_type_name = fields.Char(string="Task Type Name")
+    write_date = fields.Datetime(string="Last Modified on")
+
+    timesheet_last_date = fields.Date(string="Last Timesheet Date")
+    timesheet_last_user_id = fields.Many2one(
+        "res.users", string="Last Timesheet User"
+    )
+    timesheet_last_user_name = fields.Char(string="Last Timesheet User Name")
+    timesheet_total_hours = fields.Float(string="Total Hours")
+    timesheet_last_description = fields.Char(
+        string="Last Timesheet Description"
+    )
 
     def init(self):
         self._drop_materialized_view()
@@ -84,9 +95,28 @@ class MailNotificationChatbot(models.Model):
                 FROM project_tags_project_task_rel r
                 JOIN project_tags t ON t.id = r.project_tags_id
                 GROUP BY r.project_task_id
+            ),
+            timesheet_aggregates AS (
+                SELECT
+                    task_id,
+                    SUM(unit_amount) as total_hours,
+                    MAX(date) as last_date
+                FROM account_analytic_line
+                WHERE task_id IS NOT NULL
+                GROUP BY task_id
+            ),
+            timesheet_last_details AS (
+                SELECT DISTINCT ON (task_id)
+                    task_id,
+                    user_id,
+                    name
+                FROM account_analytic_line
+                WHERE task_id IS NOT NULL
+                ORDER BY task_id, date DESC, id DESC
             )
             SELECT
                 notif.id,
+                msg.write_date AS write_date,
                 notif.author_id,
                 COALESCE(author.name, '') AS author_name,
                 notif.is_read,
@@ -119,7 +149,14 @@ class MailNotificationChatbot(models.Model):
                 task.type_id AS task_type_id,
                 COALESCE(task_type.name::text, '') AS task_type_name,
                 COALESCE(ua.user_names, '') AS task_user_names,
-                COALESCE(ta.tag_names, '') AS task_tag_names
+                COALESCE(ta.tag_names, '') AS task_tag_names,
+                ts_agg.last_date AS timesheet_last_date,
+                ts_agg.total_hours AS timesheet_total_hours,
+                ts_last.user_id AS timesheet_last_user_id,
+                COALESCE(
+                    ts_user_partner.name, ts_user.login
+                ) AS timesheet_last_user_name,
+                COALESCE(ts_last.name, '') AS timesheet_last_description
             FROM mail_notification notif
             INNER JOIN mail_message msg
                 ON msg.id = notif.mail_message_id
@@ -140,7 +177,13 @@ class MailNotificationChatbot(models.Model):
             LEFT JOIN project_type task_type ON task_type.id = task.type_id
             LEFT JOIN user_aggregates ua ON ua.task_id = task.id
             LEFT JOIN tag_aggregates ta ON ta.project_task_id = task.id
-            """
+            LEFT JOIN timesheet_aggregates ts_agg ON ts_agg.task_id = task.id
+            LEFT JOIN timesheet_last_details ts_last
+                ON ts_last.task_id = task.id
+            LEFT JOIN res_users ts_user ON ts_user.id = ts_last.user_id
+            LEFT JOIN res_partner ts_user_partner
+                ON ts_user_partner.id = ts_user.partner_id
+        """
         )
 
     def _create_indexes(self):

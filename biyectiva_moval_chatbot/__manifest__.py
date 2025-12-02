@@ -17,6 +17,7 @@
         'project',
         'project_task_reviewer',
         'project_type',
+        'hr_timesheet',
     ],
     'data': [
         'security/chatbot_groups.xml',
