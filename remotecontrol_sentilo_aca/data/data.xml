@@ -203,10 +203,10 @@ for sensor in sensors:
     except Exception:
         cfg = {}
 
-    sensor = (cfg.get('sensor') or '').strip()
+    sensor_code = (cfg.get('sensor') or '').strip()
     provider = (cfg.get('provider') or '').strip()
 
-    if not sensor or not provider:
+    if not sensor_code or not provider:
         continue
 
     last_reading = env['mdm.measurement.device.sensor.reading'].search(
@@ -228,7 +228,7 @@ for sensor in sensors:
     plan.append({
         'sensor_id': sensor.id,
         'device_id': sensor.device_id.id,
-        'sensor': sensor,
+        'sensor_code': sensor_code,
         'provider': provider,
         'initial_date': initial_date,
     })
@@ -261,7 +261,7 @@ to_str = to_date_str + "T23:59:59"
 for sensor_plan in plan:
     sensor_id = sensor_plan['sensor_id']
     device_id = sensor_plan['device_id']
-    sensor = sensor_plan.get('sensor')
+    sensor = sensor_plan.get('sensor_code')
     provider = sensor_plan.get('provider') or ""
     initial_date = sensor_plan.get('initial_date')
     if not initial_date:
