@@ -4,6 +4,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 from odoo.addons.google_calendar.models.google_sync import google_calendar_token
+from odoo.addons.google_calendar.utils.google_calendar import GoogleCalendarService
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -310,7 +311,7 @@ class CalendarEvent(models.Model):
             if not google_values:
                 return
 
-            google_service = self.env['google.service']
+            google_service = GoogleCalendarService(self.env['google.service'])
 
             with google_calendar_token(user.sudo()) as token:
                 if token:
