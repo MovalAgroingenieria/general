@@ -13,7 +13,8 @@
         "account_comment_template",
     ],
     "data": [
-        "views/account_move_view.xml",
-        "reports/report_invoice.xml",
+        # TODO : Review migration
+        #"views/account_move_view.xml",
+        #"reports/report_invoice.xml",
     ],
 }
