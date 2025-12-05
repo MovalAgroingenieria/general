@@ -45,7 +45,7 @@ if all_sensor_ids:
         'FROM mdm_measurement_device_sensor_reading '
         'WHERE sensor_id IN %s AND active = TRUE '
         'ORDER BY sensor_id, measurement_time DESC',
-        (tuple(all_sensor_ids))
+        (tuple(all_sensor_ids),)
     )
     for row in cr.fetchall():
         last_readings_map[row[0]] = row[1]
