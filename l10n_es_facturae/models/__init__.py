@@ -10,3 +10,4 @@ from . import account_invoice_integration
 from . import account_invoice_integration_method
 from . import account_invoice_integration_log
 from . import account_invoice
+from . import report_facturae

@@ -19,12 +19,12 @@
             <Name
                 t-length="40"
                 t-esc="partner.firstname"
-                t-if="not partner.is_company"
+                t-if="not partner.is_company and partner.firstname"
             />
             <FirstSurname
                 t-length="40"
                 t-esc="partner.lastname"
-                t-if="not partner.is_company"
+                t-if="not partner.is_company and partner.lastname"
             />
             <SecondSurname t-if="False"/>
             <t t-call="l10n_es_facturae.address_contact">
@@ -34,7 +34,7 @@
             <LogicalOperationalPoint t-if="False"/>
             <CentreDescription
                 t-length="2500"
-                t-esc="partner.name"
+                t-esc="partner.name or ''"
             />
         </AdministrativeCentre>
     </template>
@@ -50,7 +50,7 @@
             <TaxIdentificationNumber
                 t-minlength="3"
                 t-length="30"
-                t-esc="partner.vat"
+                t-esc="partner.vat or ''"
             />
         </TaxIdentification>
         <PartyIdentification t-if="False"/>
@@ -86,8 +86,8 @@
             </t>
         </AdministrativeCentres>
         <LegalEntity t-if="buyer_type == 'J'">
-            <CorporateName t-length="80" t-esc="partner.name"/>
-            <TradeName t-length="40" t-esc="partner.name"/>
+            <CorporateName t-length="80" t-esc="partner.name or ''"/>
+            <TradeName t-length="40" t-esc="partner.name or ''"/>
             <RegistrationData t-if="False"/>
             <t t-call="l10n_es_facturae.address_contact">
             </t>
@@ -95,11 +95,13 @@
         <Individual t-if="buyer_type == 'F'">
             <Name
                 t-length="40"
-                t-esc="partner.firstname"
+                t-esc="partner.firstname or ''"
+                t-if="partner.firstname"
             />
             <FirstSurname
                 t-length="40"
-                t-esc="partner.lastname"
+                t-esc="partner.lastname or ''"
+                t-if="partner.lastname"
             />
             <SecondSurname t-length="40" t-esc="''"/>
             <t t-call="l10n_es_facturae.address_contact">
@@ -111,24 +113,24 @@
         <AddressInSpain t-if="partner.country_id.code == 'ES'">
             <Address
                 t-length="80"
-                t-esc="partner.street + (partner.street2 or '')"
+                t-esc="(partner.street or '') + (partner.street2 or '')"
             />
-            <PostCode t-length="5" t-esc="partner.zip.zfill(5)"/>
-            <Town t-length="50" t-esc="partner.city"/>
-            <Province t-length="20" t-esc="partner.state_id.name"/>
-            <CountryCode t-esc="partner.country_id.code_alpha3"/>
+            <PostCode t-length="5" t-esc="(partner.zip or '').zfill(5)"/>
+            <Town t-length="50" t-esc="partner.city or ''"/>
+            <Province t-length="20" t-esc="partner.state_id.name or ''"/>
+            <CountryCode t-esc="partner.country_id.code_alpha3 or ''"/>
         </AddressInSpain>
         <OverseasAddress t-if="partner.country_id.code != 'ES'">
             <Address
                 t-length="80"
-                t-esc="partner.street + (partner.street2 or '')"
+                t-esc="(partner.street or '') + (partner.street2 or '')"
             />
             <PostCodeAndTown
                 t-length="50"
                 t-esc="(partner.zip or '') + (partner.city or '')"
             />
-            <Province t-length="20" t-esc="partner.state_id.name"/>
-            <CountryCode t-esc="partner.country_id.code_alpha3"/>
+            <Province t-length="20" t-esc="partner.state_id.name or ''"/>
+            <CountryCode t-esc="partner.country_id.code_alpha3 or ''"/>
         </OverseasAddress>
         <ContactDetails>
             <Telephone
@@ -149,7 +151,8 @@
             />
             <ContactPersons
                 t-length="40"
-                t-esc="partner.name"
+                t-esc="partner.name or ''"
+                t-if="partner.name"
             />
             <CnoCnae t-if="False"/>
             <INETownCode t-if="False"/>
@@ -257,7 +260,7 @@
                         </t>
                     </t>
                     <InvoiceHeader>
-                        <InvoiceNumber t-length="20" t-esc="invoice.number"/>
+                        <InvoiceNumber t-length="20" t-esc="invoice.number or ''"/>
                         <InvoiceSeriesCode t-length="20" t-esc="''"/>
                         <InvoiceDocumentType t-esc="'FC'"/>
                         <InvoiceClass
@@ -266,7 +269,8 @@
                         <Corrective t-if="invoice.refund_invoice_id">
                             <InvoiceNumber
                                 t-length="20"
-                                t-esc="invoice.refund_invoice_id.number"
+                                t-esc="invoice.refund_invoice_id.number or ''"
+                                t-if="invoice.refund_invoice_id.number"
                             />
                             <InvoiceSeriesCode t-length="20" t-esc="''"/>
                             <ReasonCode t-esc="invoice.facturae_refund_reason"/>
@@ -751,17 +755,20 @@
                                     <IBAN
                                         t-minlength="5"
                                         t-length="34"
-                                        t-esc="invoice.mandate_id.partner_bank_id.acc_number"
+                                        t-esc="invoice.mandate_id.partner_bank_id.acc_number or ''"
+                                        t-if="invoice.mandate_id.partner_bank_id.acc_number"
                                     />
                                     <BankCode
                                         t-length="60"
-                                        t-esc="invoice.partner_bank_id.bank_id.code"
+                                        t-esc="invoice.partner_bank_id.bank_id.code or ''"
+                                        t-if="invoice.partner_bank_id.bank_id.code"
                                     />
                                     <BranchCode t-length="60" t-if="False"/>
                                     <BIC
                                         t-minlength="11"
                                         t-length="11"
-                                        t-esc="invoice.mandate_id.partner_bank_id.bank_id.bic"
+                                        t-esc="invoice.mandate_id.partner_bank_id.bank_id.bic or ''"
+                                        t-if="invoice.mandate_id.partner_bank_id.bank_id.bic"
                                     />
                                     <PaymentReconciliationReference
                                         t-length="60"
@@ -772,18 +779,19 @@
                                     <IBAN
                                         t-minlength="5"
                                         t-length="34"
-                                        t-esc="invoice.partner_bank_id.acc_number"
+                                        t-esc="invoice.partner_bank_id.acc_number or ''"
+                                        t-if="invoice.partner_bank_id.acc_number"
                                     />
                                     <BankCode
                                         t-length="60"
-                                        t-esc="invoice.partner_bank_id.bank_id.code"
+                                        t-esc="invoice.partner_bank_id.bank_id.code or ''"
                                         t-if="invoice.partner_bank_id.bank_id.code"
                                     />
                                     <BranchCode t-length="60" t-if="False"/>
                                     <BIC
                                         t-minlength="11"
                                         t-length="11"
-                                        t-esc="invoice.partner_bank_id.bank_id.bic"
+                                        t-esc="invoice.partner_bank_id.bank_id.bic or ''"
                                         t-if="invoice.partner_bank_id.bank_id.bic"
                                     />
                                 </AccountToBeCredited>

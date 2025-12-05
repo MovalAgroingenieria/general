@@ -244,7 +244,80 @@ class AccountInvoice(models.Model):
                                     'invoices that have been validated.'))
         return
 
+    def _validate_facturae_data(self):
+        errors = []
+        partner = self.partner_id
+        company = self.company_id.partner_id
+        if not partner.name:
+            errors.append(_('- Partner name is required'))
+        if not partner.vat:
+            errors.append(_('- Partner VAT/NIF is required'))
+        elif len(partner.vat) < 3:
+            errors.append(_('- Partner VAT/NIF is too short (minimum 3 characters)'))
+        if not partner.street:
+            errors.append(_('- Partner street address is required'))
+        elif isinstance(partner.street, bool):
+            errors.append(_('- Partner street address is required'))
+        else:
+            try:
+                if not str(partner.street).strip():
+                    errors.append(_('- Partner street address is required'))
+            except:
+                errors.append(_('- Partner street address is required'))
+        if not partner.city:
+            errors.append(_('- Partner city is required'))
+
+        if not partner.zip:
+            errors.append(_('- Partner postal code is required'))
+
+        if not partner.country_id:
+            errors.append(_('- Partner country is required'))
+        elif not partner.country_id.code_alpha3:
+            errors.append(_('- Partner country must have Alpha-3 code configured'))
+        if not partner.state_id:
+            errors.append(_('- Partner state/province is required'))
+        if not company.name:
+            errors.append(_('- Company name is required'))
+        if not company.vat:
+            errors.append(_('- Company VAT/NIF is required'))
+        elif len(company.vat) < 3:
+            errors.append(_('- Company VAT/NIF is too short (minimum 3 characters)'))
+        if not company.street:
+            errors.append(_('- Company street address is required'))
+        elif isinstance(company.street, bool):
+            errors.append(_('- Company street address is required'))
+        else:
+            try:
+                if not str(company.street).strip():
+                    errors.append(_('- Company street address is required'))
+            except:
+                errors.append(_('- Company street address is required'))
+        if not company.city:
+            errors.append(_('- Company city is required'))
+        if not company.zip:
+            errors.append(_('- Company postal code is required'))
+        if not company.country_id:
+            errors.append(_('- Company country is required'))
+        elif not company.country_id.code_alpha3:
+            errors.append(_('- Company country must have Alpha-3 code configured'))
+        if not company.state_id:
+            errors.append(_('- Company state/province is required'))
+        if self.payment_mode_id:
+            if self.payment_mode_id.facturae_code == '02':
+                if self.mandate_id and self.mandate_id.partner_bank_id:
+                    if not self.mandate_id.partner_bank_id.acc_number:
+                        errors.append(_('- Mandate bank account (IBAN) is required for direct debit payment'))
+                else:
+                    errors.append(_('- Payment mandate is required for direct debit payment'))
+            elif self.payment_mode_id.facturae_code != '02':
+                if not self.partner_bank_id or not self.partner_bank_id.acc_number:
+                    errors.append(_('- Partner bank account (IBAN) is required for the selected payment method'))
+        if errors:
+            error_msg = _('Cannot generate Factura-E. Missing required data:\n\n') + '\n'.join(errors)
+            raise ValidationError(error_msg)
+
     def get_facturae(self, firmar_facturae):
+        self._validate_facturae_data()
 
         def _sign_file(public_crt, private_key, request):
             rand_min = 1
