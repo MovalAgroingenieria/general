@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+        <!-- Override Additional Attendees text for proper translation -->
+        <template id="booking_form_attendees_translation" inherit_id="appointment_booking_ce.booking_form">
+            <xpath expr="//div[@class='header']/h2[text()='Additional Attendees']" position="replace">
+                <h2 t-esc="_('Additional Attendees')"/>
+            </xpath>
+        </template>
+
         <template id="booking_validated_custom_template" inherit_id="appointment_booking_ce.booking_validated">
             <xpath expr="//div[hasclass('col-sm-8')]" position="replace">
                 <div class="col-sm-8">
