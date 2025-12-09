@@ -10,5 +10,100 @@
         <record id="appointment_booking_ce.calendar_template_meeting_invitation_public" model="mail.template">
             <field name="subject">{"en_US": "Appointment with {{ object.event_id.user_id.partner_id.name }}", "es_ES": "Cita con {{ object.event_id.user_id.partner_id.name }}"}</field>
         </record>
+
+        <!-- New Appointment Booking Notification Template for Professional -->
+        <record id="mail_template_appointment_booking_notification" model="mail.template">
+            <field name="name">{"en_US": "New Appointment Booking Notification", "es_ES": "Notificación de nueva reserva de cita"}</field>
+            <field name="subject">{"en_US": "New appointment booked: {{ object.name }}", "es_ES": "Nueva cita reservada: {{ object.name }}"}</field>
+            <field name="model">calendar.event</field>
+            <field name="email_to">{{ object.user_id.partner_id.email }}</field>
+            <field name="lang">{{ object.partner_ids and object.partner_ids[0].lang or user.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html" type="html">
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <h2 style="color: #2E7D32;">Nueva cita reservada</h2>
+
+    <p>Estimado/a {{ object.user_id.name }},</p>
+
+    <p><strong>Tiene una nueva cita reservada en su calendario.</strong></p>
+
+    <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="margin-top: 0; color: #1976D2;">Detalles de la cita</h3>
+
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px 0; font-weight: bold; width: 120px;">Cliente:</td>
+                <td style="padding: 8px 0;">{{ object.partner_ids and object.partner_ids[0].name or 'No especificado' }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Email:</td>
+                <td style="padding: 8px 0;">{{ object.partner_ids and object.partner_ids[0].email or 'No especificado' }}</td>
+            </tr>
+            <tr t-if="object.partner_ids and object.partner_ids[0].phone">
+                <td style="padding: 8px 0; font-weight: bold;">Teléfono:</td>
+                <td style="padding: 8px 0;">{{ object.partner_ids[0].phone }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Evento:</td>
+                <td style="padding: 8px 0;">{{ object.name }}</td>
+            </tr>
+            <tr t-if="object.booking_type_id">
+                <td style="padding: 8px 0; font-weight: bold;">Tipo de cita:</td>
+                <td style="padding: 8px 0;">{{ object.booking_type_id.name }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; font-weight: bold;">Cuándo:</td>
+                <td style="padding: 8px 0;">
+                    {{ object.start }} - {{ object.stop }}
+                    <br/>
+                    <small style="color: #666;">
+                        Duración: {{ object.duration }} horas
+                    </small>
+                </td>
+            </tr>
+            <tr t-if="object.location">
+                <td style="padding: 8px 0; font-weight: bold;">Lugar:</td>
+                <td style="padding: 8px 0;">{{ object.location }}</td>
+            </tr>
+            <tr t-if="object.google_meet_url">
+                <td style="padding: 8px 0; font-weight: bold;">Google Meet:</td>
+                <td style="padding: 8px 0;">
+                    <a t-att-href="object.google_meet_url" style="color: #1976D2; text-decoration: none; background-color: #e3f2fd; padding: 8px 16px; border-radius: 4px; display: inline-block;">
+                        Unirse a la reunión
+                    </a>
+                    <br/>
+                    <small style="color: #666; font-size: 11px;">
+                        Enlace: {{ object.google_meet_url }}
+                    </small>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div t-if="object.description" style="margin: 20px 0;">
+        <h4>Notas del cliente:</h4>
+        <div style="background-color: #fafafa; padding: 15px; border-left: 4px solid #2E7D32;">
+            {{ object.description }}
+        </div>
+    </div>
+
+    <p>Puede gestionar esta cita desde su panel de administración.</p>
+
+    <p>Saludos,<br/>
+    Sistema de reservas</p>
+</div>
+            </field>
+        </record>
+
+        <!-- Automated Action to send notification when new booking is created -->
+        <record id="base_automation_booking_notification" model="base.automation">
+            <field name="name">Send notification on new appointment booking</field>
+            <field name="model_id" ref="calendar.model_calendar_event"/>
+            <field name="trigger">on_create</field>
+            <field name="state">mail_post</field>
+            <field name="template_id" ref="mail_template_appointment_booking_notification"/>
+            <field name="filter_pre_domain">[('booking_type_id', '!=', False)]</field>
+            <field name="active" eval="True"/>
+        </record>
     </data>
 </odoo>
