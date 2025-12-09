@@ -81,7 +81,6 @@ class BaseCommentTemplate(models.Model):
         comodel_name="ir.model",
         compute="_compute_model_ids",
         compute_sudo=True,
-        string="Models",
         help=(
             "Models where this comment template is available. Only models "
             "allowed to use comment templates are shown."

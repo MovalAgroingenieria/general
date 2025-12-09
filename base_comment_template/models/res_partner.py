@@ -13,7 +13,6 @@ class ResPartner(models.Model):
         relation="base_comment_template_res_partner_rel",
         column1="res_partner_id",
         column2="base_comment_template_id",
-        string="Comment Templates",
         domain=[("global_template", "=", False)],
         help="Partner-specific comment templates that can be included in reports.",
     )
