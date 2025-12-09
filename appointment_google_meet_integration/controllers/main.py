@@ -221,26 +221,53 @@ class GoogleMeetWebsiteCalendar(WebsiteCalendar):
                 is_spanish = lang.startswith('es')
 
                 module = 'appointment_google_meet_integration'
+
+                # Send email to the professional/service provider
                 if is_spanish:
-                    template_name = (
-                        'google_meet_appointment_booking_confirmation_mail_'
-                        'template_es'
-                    )
+                    # Get the professional notification template (ID 115)
+                    provider_template = event.env['mail.template'].sudo().search([
+                        ('id', '=', 115)
+                    ], limit=1)
                 else:
-                    template_name = (
+                    provider_template_name = (
                         'google_meet_appointment_booking_confirmation_mail_'
                         'template'
                     )
+                    provider_template_ref = f'{module}.{provider_template_name}'
+                    provider_template = event.env.ref(
+                        provider_template_ref, raise_if_not_found=False
+                    )
 
-                template_ref = f'{module}.{template_name}'
-                template = event.env.ref(
-                    template_ref, raise_if_not_found=False
-                )
+                if provider_template:
+                    # Send to professional only (user_id.partner_id)
+                    professional_email = event.user_id.partner_id.email
+                    if professional_email:
+                        provider_template.with_context(
+                            email_to=professional_email,
+                            lang='es_ES'
+                        ).send_mail(event.id, force_send=True)
 
-                if template:
-                    template.send_mail(event.id, force_send=True)
-                    return True
-            except Exception:
+                # Send email to the client who booked
+                if is_spanish:
+                    # Get the client template (ID 114)
+                    client_template = event.env['mail.template'].sudo().search([
+                        ('id', '=', 114)
+                    ], limit=1)
+
+                    if client_template:
+                        # Send to the client who booked (use booking fields)
+                        client_email = getattr(event, 'partner_email', None)
+                        if client_email:
+                            client_template.with_context(
+                                email_to=client_email,
+                                lang='es_ES'
+                            ).send_mail(event.id, force_send=True)
+
+                return True
+            except Exception as e:
+                import logging
+                _logger = logging.getLogger(__name__)
+                _logger.error("Error sending appointment emails: %s", str(e))
                 pass
 
         # Fallback (should not be reached if interceptor works)

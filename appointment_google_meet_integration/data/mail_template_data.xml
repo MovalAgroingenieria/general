@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Override calendar template with proper Spanish subject -->
+        <record id="calendar.calendar_template_meeting_invitation" model="mail.template">
+            <field name="subject">{"en_US": "Appointment with {{ object.event_id.user_id.partner_id.name }}", "es_ES": "Cita con {{ object.event_id.user_id.partner_id.name }}"}</field>
+        </record>
+
+        <!-- Override appointment booking template with proper Spanish subject -->
+        <record id="appointment_booking_ce.calendar_template_meeting_invitation_public" model="mail.template">
+            <field name="subject">{"en_US": "Appointment with {{ object.event_id.user_id.partner_id.name }}", "es_ES": "Cita con {{ object.event_id.user_id.partner_id.name }}"}</field>
+        </record>
+    </data>
+</odoo>
