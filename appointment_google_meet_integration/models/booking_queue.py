@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
+# 2025 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import models, fields, api, _
+from odoo import models, api
 import logging
-import json
 
 _logger = logging.getLogger(__name__)
 
@@ -32,25 +32,37 @@ class BookingQueue(models.Model):
 
         return super(BookingQueue, self).create_from_web(event_data_dict)
 
-    @api.model
-    def create(self, vals):
+    @api.model_create_multi
+    def create(self, vals_list):
         """
         Override create to add additional duplicate checks at database level
         """
-        if 'partner_email' in vals and 'start_datetime' in vals and 'booking_type_id' in vals:
-            # Check for duplicate in database
-            existing = self.search([
-                ('partner_email', '=', vals['partner_email']),
-                ('booking_type_id', '=', vals['booking_type_id']),
-                ('start_datetime', '=', vals['start_datetime']),
-                ('state', 'in', ['pending', 'processing', 'done'])
-            ], limit=1)
+        records_to_create = []
+        existing_records = self.browse()
 
-            if existing:
-                _logger.warning(
-                    f"Attempted to create duplicate booking queue entry. "
-                    f"Email: {vals['partner_email']}, Start: {vals['start_datetime']}. "
-                    f"Returning existing record: {existing.name}")
-                return existing
+        for vals in vals_list:
+            if 'partner_email' in vals and 'start_datetime' in vals and 'booking_type_id' in vals:
+                # Check for duplicate in database
+                existing = self.search([
+                    ('partner_email', '=', vals['partner_email']),
+                    ('booking_type_id', '=', vals['booking_type_id']),
+                    ('start_datetime', '=', vals['start_datetime']),
+                    ('state', 'in', ['pending', 'processing', 'done'])
+                ], limit=1)
 
-        return super(BookingQueue, self).create(vals)
+                if existing:
+                    _logger.warning(
+                        f"Attempted to create duplicate booking queue entry. "
+                        f"Email: {vals['partner_email']}, Start: {vals['start_datetime']}. "
+                        f"Using existing record: {existing.name}")
+                    existing_records |= existing
+                    continue
+
+            records_to_create.append(vals)
+
+        # Create new records if any
+        new_records = self.browse()
+        if records_to_create:
+            new_records = super().create(records_to_create)
+
+        return existing_records | new_records

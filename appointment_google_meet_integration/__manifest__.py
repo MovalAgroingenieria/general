@@ -29,6 +29,7 @@
         'security/ir.model.access.csv',
         'data/mail_template.xml',
         'data/mail_template_data.xml',
+        'data/ir_cron_data.xml',
         'views/res_config_settings_views.xml',
         'views/calendar_booking_views.xml',
         'views/calendar_event_views.xml',

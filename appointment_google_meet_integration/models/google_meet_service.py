@@ -2,7 +2,9 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import logging
+import uuid
 from datetime import datetime
+from googleapiclient.errors import HttpError
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -148,6 +150,9 @@ class GoogleMeetService(models.Model):
 
             timezone = 'UTC'
 
+            # Generate unique request ID to avoid duplicates
+            unique_request_id = f"meet-{uuid.uuid4().hex[:16]}-{int(datetime.now().timestamp())}"
+
             event_body = {
                 'summary': event_data.get('summary', 'Appointment'),
                 'description': event_data.get('description', ''),
@@ -161,7 +166,7 @@ class GoogleMeetService(models.Model):
                 },
                 'conferenceData': {
                     'createRequest': {
-                        'requestId': f"meet-{datetime.now().timestamp()}",
+                        'requestId': unique_request_id,
                         'conferenceSolutionKey': {
                             'type': 'hangoutsMeet'
                         }
@@ -181,14 +186,57 @@ class GoogleMeetService(models.Model):
             }
 
             _logger.info("Inserting event into Google Calendar")
-            created_event = service.events().insert(
-                calendarId=calendar_id,
-                body=event_body,
-                conferenceDataVersion=1,
-                sendUpdates='none'
-            ).execute()
+            try:
+                created_event = service.events().insert(
+                    calendarId=calendar_id,
+                    body=event_body,
+                    conferenceDataVersion=1,
+                    sendUpdates='none'
+                ).execute()
 
-            _logger.info("Event created: %s", created_event.get('id'))
+                _logger.info("Event created: %s", created_event.get('id'))
+
+            except HttpError as http_err:
+                if http_err.resp.status == 409:
+                    # Handle duplicate error - try to find existing event
+                    _logger.warning("Duplicate event detected, trying to recover...")
+
+                    # Try to find existing event with similar details
+                    summary = event_data.get('summary', 'Appointment')
+                    start_time = event_data['start_datetime']
+
+                    # Search for events in a time window around the desired time
+                    time_min = start_time
+                    time_max = event_data['end_datetime']
+
+                    try:
+                        events_result = service.events().list(
+                            calendarId=calendar_id,
+                            timeMin=time_min,
+                            timeMax=time_max,
+                            q=summary,
+                            singleEvents=True,
+                            maxResults=10
+                        ).execute()
+
+                        events = events_result.get('items', [])
+
+                        # Look for matching event
+                        for existing_event in events:
+                            if (existing_event.get('summary') == summary and
+                                existing_event.get('start', {}).get('dateTime') == start_time):
+                                _logger.info("Found existing event: %s", existing_event.get('id'))
+                                created_event = existing_event
+                                break
+                        else:
+                            # No matching event found, re-raise the error
+                            raise http_err
+                    except Exception:
+                        # If search fails, re-raise original error
+                        raise http_err
+                else:
+                    # Non-duplicate error, re-raise
+                    raise http_err
 
             meet_link = None
             if 'conferenceData' in created_event:

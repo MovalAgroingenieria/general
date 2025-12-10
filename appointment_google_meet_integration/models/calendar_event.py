@@ -37,6 +37,14 @@ class CalendarEvent(models.Model):
                 should_use = event.booking_type_id._should_use_google_meet()
 
                 if should_use and not event.google_meet_generated:
+                    # Check if there's already a Google event for this Odoo event
+                    if event.google_event_id and event.google_meet_url:
+                        _logger.info(
+                            "Event %s already has Google event ID: %s",
+                            event.id, event.google_event_id
+                        )
+                        continue
+
                     try:
                         meet_link = event._generate_google_meet_link()
 
@@ -52,8 +60,11 @@ class CalendarEvent(models.Model):
                             event.videocall_location = meet_link
                             event.google_meet_url = meet_link
 
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        _logger.error(
+                            "Failed to generate Google Meet for event %s: %s",
+                            event.id, str(e)
+                        )
         return events
 
     def write(self, vals):
@@ -144,6 +155,14 @@ class CalendarEvent(models.Model):
                 "Event %s: No booking type or not using Google Meet", self.id
             )
             return False
+
+        # Check if event already has Google Meet link
+        if self.google_meet_url and self.google_event_id:
+            _logger.info(
+                "Event %s already has Google Meet link: %s",
+                self.id, self.google_meet_url
+            )
+            return self.google_meet_url
 
         _logger.info("Getting Google Meet service")
         try:
@@ -306,3 +325,54 @@ class CalendarEvent(models.Model):
                 'type': 'success',
             }
         }
+
+    @api.model
+    def cleanup_duplicate_google_events(self):
+        """Cleanup duplicate Google Calendar events"""
+        _logger.info("Starting cleanup of duplicate Google events")
+
+        # Find events with Google event IDs but similar details
+        events_with_google = self.search([
+            ('google_event_id', '!=', False),
+            ('booking_type_id', '!=', False)
+        ])
+
+        # Group by name, start time, and partner to find potential duplicates
+        event_groups = {}
+        for event in events_with_google:
+            key = (
+                event.name or '',
+                event.start.isoformat() if event.start else '',
+                ','.join(sorted([p.email or '' for p in event.partner_ids]))
+            )
+
+            if key not in event_groups:
+                event_groups[key] = []
+            event_groups[key].append(event)
+
+        # Process groups with multiple events
+        cleaned_count = 0
+        for key, group in event_groups.items():
+            if len(group) > 1:
+                _logger.info("Found %d duplicate events for key: %s", len(group), key)
+
+                # Keep the first event, remove Google events for others
+                main_event = group[0]
+                for duplicate_event in group[1:]:
+                    try:
+                        if duplicate_event.google_event_id:
+                            duplicate_event._delete_google_meet_event()
+                            duplicate_event.write({
+                                'google_event_id': False,
+                                'google_meet_generated': False,
+                            })
+                            cleaned_count += 1
+                            _logger.info("Cleaned duplicate event %s", duplicate_event.id)
+                    except Exception as e:
+                        _logger.error(
+                            "Error cleaning duplicate event %s: %s",
+                            duplicate_event.id, str(e)
+                        )
+
+        _logger.info("Cleanup completed, processed %d duplicate events", cleaned_count)
+        return cleaned_count
