@@ -1,56 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="res_config_settings_view_form" model="ir.ui.view">
+    <!-- NUEVA vista propia, SIN inherit_id -->
+    <record id="crm_filemgmt_res_config_settings_view_form" model="ir.ui.view">
         <field name="name">crm_filemgmt.res.config.settings.view.form</field>
         <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="priority">1000</field>
         <field name="arch" type="xml">
-            <!-- Contenedor genérico para bloques de settings -->
-            <xpath expr="//form" position="inside">
-                <div class="app_settings_block" data-key="crm_filemgmt"
-                     string="Files" groups="base.group_system">
-                    <h2>File Management</h2>
-                    <div class="row mt16 o_settings_container">
-                        <div class="col-12 col-lg-6 o_setting_box">
-                            <div class="o_setting_right_pane">
-                                <span class="o_form_label">Prefix for Files code
-                                </span>
-                                <div class="text-muted">
-                                    Format:
-                                    <b>prefix-year/4-digit-number</b>
-                                    <br/>
-                                    Example: FILE → FILE-2025/0001
-                                </div>
-                                <div class="content-group">
-                                    <div class="mt16 row align-items-center">
-                                        <label for="file_prefix"
-                                               class="col-12 col-lg-4 o_light_label">
-                                            File Prefix
-                                        </label>
-                                        <div class="col-12 col-lg-8">
-                                            <field name="file_prefix"/>
+            <form string="File Management Settings">
+                <sheet>
+                    <div class="app_settings_block" data-key="crm_filemgmt"
+                         string="Files" groups="base.group_system">
+                        <h2>File Management</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_right_pane">
+                                    <span class="o_form_label">
+                                        Prefix for Files code
+                                    </span>
+                                    <div class="text-muted">
+                                        Format:
+                                        <b>prefix-year/4-digit-number</b>
+                                        <br/>
+                                        Example: FILE → FILE-2025/0001
+                                    </div>
+                                    <div class="content-group">
+                                        <div class="mt16 row align-items-center">
+                                            <label for="file_prefix"
+                                                   class="col-12 col-lg-4 o_light_label">
+                                                File Prefix
+                                            </label>
+                                            <div class="col-12 col-lg-8">
+                                                <field name="file_prefix"/>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </xpath>
+                </sheet>
+            </form>
         </field>
     </record>
 
+    <!-- Acción que abre SOLO esta vista -->
     <record id="action_res_config_settings_files" model="ir.actions.act_window">
         <field name="name">Configure File Management</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">res.config.settings</field>
-        <field name="view_id" ref="res_config_settings_view_form"/>
         <field name="view_mode">form</field>
+        <field name="view_id" ref="crm_filemgmt_res_config_settings_view_form"/>
         <field name="target">inline</field>
         <field name="context">{'module': 'crm_filemgmt'}</field>
     </record>
 
+    <!-- Menú que apunta a esa acción -->
     <menuitem id="menu_parameters"
               name="Parameters"
               parent="crm_filemgmt.menu_configuration"
