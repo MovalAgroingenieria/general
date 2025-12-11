@@ -13,6 +13,7 @@
     "installable": True,
     "depends": [
         "hr_holidays_public",
+        "hr_expense",
     ],
     "data": [
     ],
