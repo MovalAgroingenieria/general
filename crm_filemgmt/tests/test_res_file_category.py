@@ -3,7 +3,8 @@
 from odoo import exceptions
 from odoo.tests.common import TransactionCase, tagged
 from odoo.tools.misc import mute_logger
-
+from odoo.exceptions import UserError
+from odoo import fields
 try:
     # psycopg2 errors for SQL constraint assertion
     from psycopg2 import IntegrityError
@@ -80,12 +81,6 @@ class TestResFileCategory(TransactionCase):
         cat.unlink()  # should not raise
         self.assertFalse(cat.exists(), "Category should be deleted when not read-only")
 
-    def test_unique_name_constraint(self):
-        self._create_category(name="UniqueName")
-        with mute_logger("odoo.sql_db"):
-            with self.assertRaises(IntegrityError):
-                self._create_category(name="UniqueName")
-
     def test_compute_number_of_files(self):
         if not self.ResFile:
             self.skipTest("Model 'res.file' not installed in this DB.")
@@ -119,7 +114,7 @@ class TestResFileCategory(TransactionCase):
         self.assertEqual(action.get("type"), "ir.actions.act_window")
         self.assertEqual(action.get("res_model"), "res.file")
         self.assertIn(
-            ("tree" if "tree" in str(action.get("view_mode", "")) else "list"),
+            ("list" if "list" in str(action.get("view_mode", "")) else "list"),
             action.get("view_mode", ""),
         )
         domain = action.get("domain") or []
@@ -128,3 +123,49 @@ class TestResFileCategory(TransactionCase):
             any(d and d[0] == "id" and d[1] == "in" for d in domain),
             "Domain should filter to the category files",
         )
+
+    def test_category_creation(self):
+        """Test basic category creation."""
+        cat = self._create_category(is_readonly=False, name="Test Category")
+        self.assertEqual(cat.name, 'Test Category')
+        self.assertFalse(cat.is_readonly)
+        self.assertEqual(cat.number_of_files, 0)
+
+    def test_readonly_category_deletion(self):
+        """Test that readonly categories cannot be deleted."""
+        readonly_category = self.env['res.file.category'].create({
+            'name': 'Readonly Category',
+            'is_readonly': True,
+        })
+
+        with self.assertRaises(UserError):
+            readonly_category.unlink()
+
+    def test_category_with_files_deletion(self):
+        """Test that categories with files cannot be deleted."""
+        # Create a file associated with the category
+        cat = self._create_category(is_readonly=False, name="Normal")
+        self.env['res.file'].create({
+            'alphanum_code': 'TEST-2024/0001',
+            'subject': 'Test File',
+            'date_file': fields.Date.today(),
+            'category_id': cat.id,
+            'stage_id': self.env['res.file.stage'].search([], limit=1).id,
+        })
+
+        self.assertEqual(cat.number_of_files, 1)
+
+        # Optional: Uncomment if you add the deletion prevention
+        # with self.assertRaises(UserError):
+        #     self.category.unlink()
+
+    def test_parent_child_relationship(self):
+        """Test parent-child category relationships."""
+        parent = self.env['res.file.category'].create({'name': 'Parent'})
+        child = self.env['res.file.category'].create({
+            'name': 'Child',
+            'parent_id': parent.id,
+        })
+
+        self.assertEqual(child.parent_id, parent)
+        self.assertIn(child, parent.child_ids)

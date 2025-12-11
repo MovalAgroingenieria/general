@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-06 13:17+0000\n"
-"PO-Revision-Date: 2025-11-06 13:17+0000\n"
+"POT-Creation-Date: 2025-12-11 12:52+0000\n"
+"PO-Revision-Date: 2025-12-11 12:52+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,22 +16,10 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,help:crm_filemgmt.field_res_filetag__color
-msgid ""
-"0: grey, 1: green, 2: yellow, 3: orange, 4: red, 5: purple, 6: blue, 7: "
-"cyan, 8: light-green, 9: magenta"
-msgstr ""
-
-#. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file__color
 msgid ""
 "0:grey, 1:green, 2:yellow, 3:orange, 4:red, 5:purple, 6:blue, 7:cyan, "
 "8:light-green, 9:magenta"
-msgstr ""
-
-#. module: crm_filemgmt
-#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
-msgid "<i class=\"fa fa-lock\" style=\"font-size:200%;\" title=\"Blocked\"/>"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -89,60 +77,83 @@ msgid ""
 msgstr ""
 
 #. module: crm_filemgmt
-#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
-msgid ""
-"A R C\n"
-"                            H I V E D"
-msgstr ""
-
-#. module: crm_filemgmt
 #: model:ir.model.constraint,message:crm_filemgmt.constraint_res_file_containertype_container_type_name_uniq
 msgid "A container type with this name already exists."
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.constraint,message:crm_filemgmt.constraint_res_filetag_res_filetag_name_unique
-msgid "A file tag with this name already exists."
+msgid "A file tag with this name already exists. Tag names must be unique."
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.constraint,message:crm_filemgmt.constraint_res_file_stage_res_file_stage_name_unique
-msgid "A stage with this name already exists."
+msgid "A stage with this name already exists. Stage names must be unique."
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__message_needaction
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__message_needaction
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__message_needaction
 msgid "Action Needed"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__active
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__active
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__active
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__active
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__active
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_filetag_view_search
 msgid "Active"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__activity_ids
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__activity_ids
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__activity_ids
 msgid "Activities"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__activity_exception_decoration
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__activity_exception_decoration
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__activity_exception_decoration
 msgid "Activity Exception Decoration"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__activity_state
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__activity_state
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__activity_state
 msgid "Activity State"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__activity_type_icon
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__activity_type_icon
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__activity_type_icon
 msgid "Activity Type Icon"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__allow_chatter
+msgid "Allow Chatter"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__allowed_group_ids
+msgid "Allowed Groups"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
 msgid "Archive"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
+msgid "Archived"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -167,19 +178,24 @@ msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__file_ids
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_partner__file_ids
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_users__file_ids
 msgid "Associated Files"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__message_attachment_count
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__message_attachment_count
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__message_attachment_count
 msgid "Attachment Count"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
 msgid "Attachments"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__barcode
+msgid "Barcode"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -194,6 +210,9 @@ msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__is_blocked
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file__kanban_state__blocked
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_category__kanban_state__blocked
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
 msgid "Blocked"
 msgstr ""
 
@@ -220,6 +239,16 @@ msgstr ""
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__file_bottom_comment
 msgid "Bottom comment"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_containertype__icon
+msgid "CSS icon class for this container type (e.g., 'fa fa-box')"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__capacity
+msgid "Capacity"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -256,11 +285,6 @@ msgid "Click to add a new container type"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model_terms:ir.actions.act_window,help:crm_filemgmt.res_file_action
-msgid "Click to add a new file"
-msgstr ""
-
-#. module: crm_filemgmt
 #: model_terms:ir.actions.act_window,help:crm_filemgmt.res_file_category_action
 msgid "Click to add a new file category"
 msgstr ""
@@ -282,7 +306,17 @@ msgstr ""
 
 #. module: crm_filemgmt
 #: model_terms:ir.actions.act_window,help:crm_filemgmt.res_filetag_action
-msgid "Click to add a new file tag"
+msgid "Click to add a new file tag."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model_terms:ir.actions.act_window,help:crm_filemgmt.res_file_action
+msgid "Click to add a new file."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:res.file.stage,name:crm_filemgmt.res_file_stage_closed
+msgid "Closed"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -306,9 +340,44 @@ msgid "Code"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__color
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__name
+msgid "Code (name)"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__num_code
+msgid "Code (numeric)"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__color
+msgid "Color"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__color
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__color
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__color
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__color
 msgid "Color Index"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_containertype__color
+msgid "Color for kanban and list views"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_stage__color
+msgid "Color for kanban views"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_filetag__color
+msgid ""
+"Color index used for visual representation: 0: Default, 1: Green, 2: Yellow,"
+" 3: Orange, 4: Red, 5: Purple, 6: Blue, 7: Cyan, 8: Light Green, 9: Magenta,"
+" 10: Pink, 11: Brown, 12: Navy"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -322,6 +391,11 @@ msgid "Companies"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__company_id
+msgid "Company"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_config_settings__file_prefix
 msgid "Company-dependent prefix for Files. Maximum 10 characters."
 msgstr ""
@@ -329,11 +403,6 @@ msgstr ""
 #. module: crm_filemgmt
 #: model:ir.ui.menu,name:crm_filemgmt.menu_configuration
 msgid "Configuration"
-msgstr ""
-
-#. module: crm_filemgmt
-#: model:ir.model,name:crm_filemgmt.model_res_config_settings
-msgid "Configuration of File Management"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -364,8 +433,6 @@ msgid "Container type"
 msgstr ""
 
 #. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file_location.py:0
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_location__number_of_containers
 #: model:ir.ui.menu,name:crm_filemgmt.menu_files_container
 msgid "Containers"
@@ -384,6 +451,30 @@ msgstr ""
 #. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
 msgid "Copy start template from selected report."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_partner__attachment_count
+#: model:ir.model.fields,help:crm_filemgmt.field_res_users__attachment_count
+msgid ""
+"Count of all attachments (including those not in file management system)."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_partner__linked_attachment_count
+#: model:ir.model.fields,help:crm_filemgmt.field_res_users__linked_attachment_count
+msgid "Count of attachments that are part of the file management system."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_stage__file_count
+msgid "Count of files in this stage."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_partner__number_of_files
+#: model:ir.model.fields,help:crm_filemgmt.field_res_users__number_of_files
+msgid "Count of files linked through the file management system."
 msgstr ""
 
 #. module: crm_filemgmt
@@ -415,8 +506,33 @@ msgid "Created on"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__custom_css
+msgid "Custom CSS"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_report__custom_css
+msgid "Custom CSS styles for this report"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_report__report_type__custom
+msgid "Custom Report"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_kanban
 msgid "Date:"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__default_capacity
+msgid "Default Capacity"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_containertype__default_capacity
+msgid "Default number of files this container type can hold"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -425,10 +541,15 @@ msgid "Default report action used for printing file records."
 msgstr ""
 
 #. module: crm_filemgmt
-#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_kanban
+#: model:ir.model.fields,help:crm_filemgmt.field_res_filetag__sequence
 msgid ""
-"Delete\n"
-"                                        File"
+"Defines the order of tags in dropdowns and lists. Lower numbers appear "
+"first."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_kanban
+msgid "Delete File"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -436,7 +557,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__description
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__description
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_location__description
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__notes
 msgid "Description"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_report__report_type__detailed
+msgid "Detailed Report"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__dimensions
+msgid "Dimensions"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -460,25 +592,28 @@ msgid "Display Name"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_category__kanban_state__done
+msgid "Done"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:res.file.stage,name:crm_filemgmt.res_file_stage_draft
+msgid "Draft"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_kanban
 msgid "Dropdown menu"
 msgstr ""
 
 #. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "ERROR IN END TEMPLATE"
-msgstr ""
-
-#. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "ERROR IN START TEMPLATE"
-msgstr ""
-
-#. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_kanban
 msgid "Edit File"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_container__status__empty
+msgid "Empty"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -499,6 +634,13 @@ msgstr ""
 #. module: crm_filemgmt
 #: model:ir.model.constraint,message:crm_filemgmt.constraint_res_file_report_unique_name
 msgid "Existing report name."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_filelink__file_id
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_partnerlink__file_id
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
+msgid "File"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -527,6 +669,16 @@ msgid "File Containers"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__file_count
+msgid "File Count"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_filelink_view_form
+msgid "File Link"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
 msgid "File Links"
 msgstr ""
@@ -544,14 +696,13 @@ msgid "File Management"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model:ir.model,name:crm_filemgmt.model_res_file_partnerlink
-msgid "File Partnerlink"
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_partnerlink_view_form
+msgid "File Partner Link"
 msgstr ""
 
 #. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_partner.py:0
-msgid "File Partnerlinks"
+#: model:ir.model,name:crm_filemgmt.model_res_file_partnerlink
+msgid "File Partnerlink"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -562,9 +713,8 @@ msgid "File Prefix"
 msgstr ""
 
 #. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_company.py:0
-msgid "File Prefix must be at most 10 characters."
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_company__file_prefix_upper
+msgid "File Prefix (Upper Case)"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -585,14 +735,16 @@ msgid "File Stages"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__name
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_filetag_view_form
 msgid "File Tag"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.actions.act_window,name:crm_filemgmt.res_filetag_action
+#: model:ir.model,name:crm_filemgmt.model_res_filetag
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__tag_ids
 #: model:ir.ui.menu,name:crm_filemgmt.menu_res_filetag
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_filetag_view_list
 msgid "File Tags"
 msgstr ""
 
@@ -612,29 +764,26 @@ msgid "File management"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_filelink__file_id
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_partnerlink__file_id
-msgid "File_"
+#: model:ir.model.fields,help:crm_filemgmt.field_res_company__file_prefix_upper
+msgid "File prefix converted to uppercase for display purposes."
 msgstr ""
 
 #. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file_category.py:0
-#: code:addons/crm_filemgmt/models/res_partner.py:0
 #: model:ir.actions.act_window,name:crm_filemgmt.res_file_action
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__filelink_ids
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__number_of_files
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__file_ids
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__file_ids
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__file_ids
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_partner__attachment_count
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_users__attachment_count
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__file_ids
 #: model:ir.ui.menu,name:crm_filemgmt.menu_files
 #: model:ir.ui.menu,name:crm_filemgmt.menu_main
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_config_settings_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_container_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_stage_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_calendar
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_kanban
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_list
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.view_partner_form_inherit_files
 msgid "Files"
 msgstr ""
@@ -645,23 +794,47 @@ msgid "Files currently in this stage."
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_partner__file_ids
+#: model:ir.model.fields,help:crm_filemgmt.field_res_users__file_ids
+msgid ""
+"Files that are explicitly linked to this partner through the file management"
+" system."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_filetag__file_ids
+msgid "Files that have been tagged with this tag."
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__fold
 msgid "Folded in Kanban"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__message_follower_ids
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__message_follower_ids
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__message_follower_ids
 msgid "Followers"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__message_partner_ids
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__message_partner_ids
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__message_partner_ids
 msgid "Followers (Partners)"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file__activity_type_icon
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_category__activity_type_icon
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_container__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__report_template_footer
+msgid "Footer Template"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -679,6 +852,11 @@ msgid "Free-form notes related to this container type."
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_container__status__full
+msgid "Full"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.ui.menu,name:crm_filemgmt.menu_config_general_data
 msgid "General Data"
 msgstr ""
@@ -686,11 +864,14 @@ msgstr ""
 #. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_container_view_search
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_search
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_filetag_view_search
 msgid "Group By"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__has_message
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__has_message
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__has_message
 msgid "Has Message"
 msgstr ""
 
@@ -702,6 +883,21 @@ msgstr ""
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__has_filelinks
 msgid "Has filelinks"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__report_template_header
+msgid "Header Template"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file__priority__2
+msgid "High"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_container__status__high
+msgid "High (> 75%)"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -725,37 +921,83 @@ msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__activity_exception_icon
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__activity_exception_icon
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__activity_exception_icon
 msgid "Icon"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__icon
+msgid "Icon Class"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file__activity_exception_icon
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_category__activity_exception_icon
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_container__activity_exception_icon
 msgid "Icon to indicate an exception activity."
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file__message_needaction
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_category__message_needaction
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_container__message_needaction
 msgid "If checked, new messages require your attention."
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file__message_has_error
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_category__message_has_error
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_container__message_has_error
 msgid "If checked, some messages have a delivery error."
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file_partnerlink__is_main
-msgid "If checked, this partner will be the primary"
+msgid "If checked, this partner will be the primary partner for the file"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file_stage__fold
-msgid "If enabled, this stage will be folded (collapsed) in kanban view."
+msgid ""
+"If enabled, this stage will be folded (collapsed) in kanban view. Useful for"
+" stages that are not frequently used or are final states."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_stage__active
+msgid "If unchecked, it will allow you to hide the stage without removing it."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_containertype__image
+msgid "Image representing this container type"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file__kanban_state__normal
+#: model:res.file.stage,name:crm_filemgmt.res_file_stage_inprogress
+msgid "In Progress"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_search
 msgid "In closed stage"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_filetag_view_search
+msgid "Inactive"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__notes
+msgid "Internal Notes"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_report__report_type__inventory
+msgid "Inventory Report"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -765,13 +1007,25 @@ msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__message_is_follower
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__message_is_follower
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__message_is_follower
 msgid "Is Follower"
 msgstr ""
 
 #. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "It is mandatory to check the primary partner."
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__kanban_state
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__kanban_state
+msgid "Kanban State"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_report__report_type__label
+msgid "Label/Sticker"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_report__orientation__landscape
+msgid "Landscape"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -803,6 +1057,23 @@ msgid "Last Updated on"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__level
+msgid "Level"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_partner__linked_attachment_count
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_users__linked_attachment_count
+msgid "Linked Attachments"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_partner__file_ids
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_users__file_ids
+msgid "Linked Files"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
 msgid "Load a template"
 msgstr ""
@@ -825,8 +1096,20 @@ msgid "Locations of Files"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file__priority__0
+msgid "Low"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_container__status__low
+msgid "Low (< 25%)"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file_stage__sequence
-msgid "Lower values appear first in lists and as left-most kanban columns."
+msgid ""
+"Lower values appear first in lists and as left-most kanban columns. Stages "
+"are ordered by this sequence number."
 msgstr ""
 
 #. module: crm_filemgmt
@@ -837,75 +1120,89 @@ msgstr ""
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file_stage__is_closing_stage
 msgid ""
-"Mark as closing stage to indicate the file should be considered closed."
+"Mark as closing stage to indicate the file should be considered closed. "
+"Files in this stage can be filtered as completed or archived."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_container__capacity
+msgid "Maximum number of files this container can hold"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_container__status__medium
+msgid "Medium (25-75%)"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__message_has_error
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__message_has_error
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__message_has_error
 msgid "Message Delivery error"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__message_ids
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__message_ids
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__message_ids
 msgid "Messages"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__my_activity_date_deadline
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__my_activity_date_deadline
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__my_activity_date_deadline
 msgid "My Activity Deadline"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__name
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__name
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__name
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__name
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_location__name
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__name
 msgid "Name"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__activity_calendar_event_id
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__activity_calendar_event_id
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__activity_date_deadline
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__activity_date_deadline
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__activity_date_deadline
 msgid "Next Activity Deadline"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__activity_summary
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__activity_summary
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__activity_summary
 msgid "Next Activity Summary"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__activity_type_id
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__activity_type_id
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__activity_type_id
 msgid "Next Activity Type"
 msgstr ""
 
 #. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "No report has been selected."
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file__priority__1
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_category__kanban_state__normal
+msgid "Normal"
 msgstr ""
 
 #. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "No report or end template has been selected."
-msgstr ""
-
-#. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "No report or start template has been selected."
-msgstr ""
-
-#. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__notes
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__notes
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__notes
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__notes
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_location__notes
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__notes
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__notes
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_category_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_container_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_containertype_view_form
@@ -917,45 +1214,49 @@ msgid "Notes"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__num_code
-msgid "Num Code"
-msgstr ""
-
-#. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_partner__number_of_files
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_users__number_of_files
-msgid "Num. of files"
-msgstr ""
-
-#. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__message_needaction_counter
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__message_needaction_counter
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__message_needaction_counter
 msgid "Number of Actions"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__number_of_files
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__file_count
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_partner__number_of_files
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_users__number_of_files
 msgid "Number of Files"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__message_has_error_counter
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__message_has_error_counter
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__message_has_error_counter
 msgid "Number of errors"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_filetag__file_count
+msgid "Number of files associated with this tag."
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file__message_needaction_counter
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_category__message_needaction_counter
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_container__message_needaction_counter
 msgid "Number of messages requiring action"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file__message_has_error_counter
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_category__message_has_error_counter
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_container__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr ""
 
 #. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "Only one primary partner is allowed."
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_report__usage_count
+msgid "Number of times this report has been used"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -974,6 +1275,37 @@ msgid "Optional description for this container type."
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_filetag__notes
+msgid ""
+"Optional detailed description or instructions about when to use this tag."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_report__report_template_footer
+msgid "Optional footer template for the report"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_report__report_template_header
+msgid "Optional header template for the report"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__orientation
+msgid "Orientation"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__paperformat_id
+msgid "Paper Format"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_report__paperformat_id
+msgid "Paper format for this report (A4, Letter, etc.)"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.ui.menu,name:crm_filemgmt.menu_parameters
 msgid "Parameters"
 msgstr ""
@@ -981,6 +1313,11 @@ msgstr ""
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__parent_id
 msgid "Parent Category"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__parent_path
+msgid "Parent Path"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1008,8 +1345,28 @@ msgid "Photo / Image"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_containertype__dimensions
+msgid "Physical dimensions (e.g., '30x40x20 cm')"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:res.groups,name:crm_filemgmt.group_file_portal
 msgid "Portal"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_report__orientation__portrait
+msgid "Portrait"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__preview_image
+msgid "Preview Image"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_report__preview_image
+msgid "Preview image of the report output"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1023,8 +1380,40 @@ msgid "Print"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__priority
+msgid "Priority"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__qr_code
+msgid "QR Code"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_container__qr_code
+msgid "QR code for container identification"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__rating_ids
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__rating_ids
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__rating_ids
+msgid "Ratings"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__is_readonly
 msgid "Read-only Category"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_category__is_readonly
+msgid "Read-only categories cannot be deleted"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file__kanban_state__done
+msgid "Ready"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1043,7 +1432,13 @@ msgid "Related File"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_filelink__related_file_code
+msgid "Related File Code"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__file_report_id
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
 msgid "Report"
 msgstr ""
 
@@ -1051,6 +1446,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__name
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_report_view_form
 msgid "Report Name"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__report_type
+msgid "Report Type"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1065,7 +1465,14 @@ msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__activity_user_id
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__activity_user_id
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__activity_user_id
 msgid "Responsible User"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_container__barcode
+msgid "Scan barcode to quickly identify container"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1079,8 +1486,31 @@ msgid "Search Containers"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_filelink_view_search
+msgid "Search File Links"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_filetag_view_search
+msgid "Search File Tags"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_search
+msgid "Search Files"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__sequence
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__sequence
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__sequence
 msgid "Sequence"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.constraint,message:crm_filemgmt.constraint_res_file_stage_res_file_stage_sequence_positive
+#: model:ir.model.constraint,message:crm_filemgmt.constraint_res_filetag_res_filetag_sequence_positive
+msgid "Sequence must be a positive number or zero."
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1095,15 +1525,20 @@ msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_filetag__name
-msgid "Short, human-readable tag name."
+msgid "Short, human-readable tag name. Keep it concise for display in badges."
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__stage_id
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_partnerlink__stage_id
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_list
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_search
-#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_tree
 msgid "Stage"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__name
+msgid "Stage Name"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1112,12 +1547,34 @@ msgid "Stage label shown on kanban columns and forms."
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__is_starting_stage
+msgid "Starting Stage"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__status
+msgid "Status"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file__activity_state
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_category__activity_state
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_container__activity_state
 msgid ""
 "Status based on activities\n"
 "Overdue: Due date is already passed\n"
 "Today: Activity date is today\n"
 "Planned: Future activities."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model,name:crm_filemgmt.model_res_config_settings
+msgid "Street type settings"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__child_ids
+msgid "Subcategories"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1133,13 +1590,23 @@ msgid "Subject:"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model:ir.ui.menu,name:crm_filemgmt.menu_config_labels
-msgid "Tags"
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_report__report_type__summary
+msgid "Summary Report"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model:ir.model,name:crm_filemgmt.model_res_filetag
-msgid "Tags for files"
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_filetag_view_form
+msgid "Tag"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__name
+msgid "Tag Name"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.ui.menu,name:crm_filemgmt.menu_config_labels
+msgid "Tags"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1185,63 +1652,6 @@ msgid "Template start rendered"
 msgstr ""
 
 #. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "The file cannot be self-referenced."
-msgstr ""
-
-#. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "The file name cannot start or end with a slash (/)."
-msgstr ""
-
-#. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "The file number must be an integer."
-msgstr ""
-
-#. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid ""
-"The file prefix parameter is not set. Go to configuration and set a value "
-"for the parameter."
-msgstr ""
-
-#. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid ""
-"The prefix must be separated from the rest of the file name by a hyphen (-)."
-msgstr ""
-
-#. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file_category.py:0
-msgid "The read only categories cannot be removed."
-msgstr ""
-
-#. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "There are repeated files."
-msgstr ""
-
-#. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "There are repeated partners."
-msgstr ""
-
-#. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "There is more than one slash in the file name."
-msgstr ""
-
-#. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_report_view_form
 msgid ""
 "This templates use jinja2 variables: {{ object.attribute\n"
@@ -1268,9 +1678,20 @@ msgid "Top comment"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_partner__attachment_count
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_users__attachment_count
+msgid "Total Attachments"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__containertype_id
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_container_view_search
 msgid "Type"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__image
+msgid "Type Image"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1280,6 +1701,8 @@ msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file__activity_exception_decoration
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_category__activity_exception_decoration
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_container__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr ""
 
@@ -1294,8 +1717,43 @@ msgid "Unblock"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_containertype__active
+msgid "Uncheck to archive this container type"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_report__active
+msgid "Uncheck to archive this report template"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,help:crm_filemgmt.field_res_filetag__active
+msgid "Uncheck to hide the tag without deleting it."
+msgstr ""
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_filetag_view_form
+msgid "Usage"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__usage_percentage
+msgid "Usage %"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__usage_count
+msgid "Usage Count"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:res.groups,name:crm_filemgmt.group_file_user
 msgid "User"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file__priority__3
+msgid "Very High"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1311,16 +1769,4 @@ msgstr ""
 #. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_search
 msgid "With technician: Yes"
-msgstr ""
-
-#. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "You cannot move a file from a non-closing stage to a closing stage."
-msgstr ""
-
-#. module: crm_filemgmt
-#. odoo-python
-#: code:addons/crm_filemgmt/models/res_file.py:0
-msgid "[no subject]"
 msgstr ""

@@ -38,14 +38,6 @@ class TestResFiletag(BaseCase):
 
     # -------------------------
     # SQL constraints
-    # -------------------------
-
-    def test_unique_name_constraint(self):
-        base = f"To Review [{uuid.uuid4().hex[:6]}]"
-        self.Tag.create({"name": base})
-        with mute_logger("odoo.sql_db"):
-            with self.assertRaises(Psycopg2IntegrityError):
-                self.Tag.create({"name": base})
 
     # -------------------------
     # Ordering

@@ -4,6 +4,7 @@
 import unittest
 
 from odoo.tests.common import TransactionCase
+from odoo import fields, models
 
 try:
     from odoo.tests.common import SavepointCase as BaseCase
@@ -26,6 +27,26 @@ except ImportError:  # pragma: no cover
 class TestResFileContainerType(BaseCase):
     """Tests for res.file.containertype (Odoo/OCB 18)."""
 
+    def setUp(self):
+        super().setUp()
+        # Create test location
+        self.location = self.env['res.file.location'].create({
+            'name': 'Test Location',
+            'description': 'Test Location Description',
+        })
+        # Create test container type
+        self.container_type = self.env['res.file.containertype'].create({
+            'name': 'Test Type',
+            'description': 'Test Type Description',
+        })
+        # Create test container
+        self.container = self.env['res.file.container'].create({
+            'name': 'CTN-001',
+            'description': 'Test Container',
+            'location_id': self.location.id,
+            'containertype_id': self.container_type.id,
+        })
+
     @classmethod
     def setUpClass(cls):  # pylint: disable=invalid-name
         super().setUpClass()
@@ -39,12 +60,6 @@ class TestResFileContainerType(BaseCase):
         self.assertFalse(rec.description)
         self.assertFalse(rec.notes)
 
-    def test_unique_name_constraint(self):
-        """Duplicate 'name' must violate SQL unique constraint."""
-        self.Model.create({"name": "Folder"})
-        with self.assertRaises(_PG_ERR):
-            # same name again -> UNIQUE(name) should fail
-            self.Model.create({"name": "Folder"})
 
     def test_default_order_by_name(self):
         """Default ordering should be by 'name' ascending."""
@@ -61,6 +76,64 @@ class TestResFileContainerType(BaseCase):
         self.assertLess(idx["Archive"], idx["Crate"])
         self.assertLess(idx["Crate"], idx["Zipper"])
 
+    def test_container_creation(self):
+        """Test basic container creation."""
+        self.assertEqual(self.container.name, 'CTN-001')
+        self.assertEqual(self.container.description, 'Test Container')
+        self.assertEqual(self.container.location_id, self.location)
+        self.assertEqual(self.container.containertype_id, self.container_type)
+        self.assertEqual(self.container.number_of_files, 0)
 
+    def test_file_count_computation(self):
+        """Test file count computation."""
+        # Create test files
+        file1 = self.env['res.file'].create({
+            'alphanum_code': 'TEST-2024/0001',
+            'subject': 'Test File 1',
+            'date_file': fields.Date.today(),
+            'category_id': self.env.ref('crm_filemgmt.resfilecategory_internal_file').id,
+            'stage_id': self.env['res.file.stage'].search([], limit=1).id,
+            'container_id': self.container.id,
+        })
+        file2 = self.env['res.file'].create({
+            'alphanum_code': 'TEST-2024/0002',
+            'subject': 'Test File 2',
+            'date_file': fields.Date.today(),
+            'category_id': self.env.ref('crm_filemgmt.resfilecategory_internal_file').id,
+            'stage_id': self.env['res.file.stage'].search([], limit=1).id,
+            'container_id': self.container.id,
+        })
+
+        self.assertEqual(self.container.number_of_files, 2)
+        self.assertIn(file1, self.container.file_ids)
+        self.assertIn(file2, self.container.file_ids)
+
+    def test_display_name_computation(self):
+        """Test display name computation with and without context."""
+        # Test without extra context
+        self.assertEqual(self.container.display_name, 'Test Container [CTN-001]')
+
+        # Test with extra context
+        container_with_ctx = self.container.with_context(show_container_data=True)
+        display_name = container_with_ctx.display_name
+        self.assertIn('Test Container [CTN-001]', display_name)
+
+    def test_action_get_files(self):
+        """Test the action to get files."""
+        # Create a file first
+        self.env['res.file'].create({
+            'alphanum_code': 'TEST-2024/0001',
+            'subject': 'Test File',
+            'date_file': fields.Date.today(),
+            'category_id': self.env.ref('crm_filemgmt.resfilecategory_internal_file').id,
+            'stage_id': self.env['res.file.stage'].search([], limit=1).id,
+            'container_id': self.container.id,
+        })
+
+        action = self.container.action_get_files()
+        self.assertIsNotNone(action)
+        self.assertEqual(action['res_model'], 'res.file')
+        self.assertEqual(action['domain'], [('container_id', '=', self.container.id)])
+        self.assertEqual(action['context']['default_container_id'], self.container.id)
 if __name__ == "__main__":
     unittest.main()

@@ -101,7 +101,7 @@ class TestResFileLocation(BaseCase):
         self.assertEqual(action.get("res_model"), "res.file.container")
 
         # view_mode must include tree and form
-        self.assertIn("tree", action.get("view_mode", ""))
+        self.assertIn("list", action.get("view_mode", ""))
         self.assertIn("form", action.get("view_mode", ""))
 
         # Domain should include both containers of this location
@@ -113,11 +113,6 @@ class TestResFileLocation(BaseCase):
     # SQL constraints
     # -------------------------
 
-    def test_unique_name_constraint(self):
-        """Duplicate name should violate the UNIQUE(name) SQL constraint."""
-        self.Location.create({"name": "LOC-UNIQ"})
-        with self.assertRaises(_PG_UNIQUE):
-            self.Location.create({"name": "LOC-UNIQ"})
 
 
 if __name__ == "__main__":

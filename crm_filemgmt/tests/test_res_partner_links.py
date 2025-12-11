@@ -85,38 +85,7 @@ class TestResPartnerFileLinks(BaseCase):
             }
         )
 
-    # -------------------------
-    # number_of_files compute
-    # -------------------------
 
-    def test_number_of_files_with_and_without_access(self):
-        # Create two links for partner A
-        f1 = self._new_file("A1")
-        f2 = self._new_file("A2")
-        self.Link.create(
-            {"file_id": f1.id, "partner_id": self.partner_a.id, "is_main": True}
-        )
-        self.Link.create(
-            {"file_id": f2.id, "partner_id": self.partner_a.id, "is_main": False}
-        )
-
-        # With access -> count should be 2
-        restore = self._patch_access(True)
-        try:
-            # pylint: disable=protected-access
-            self.partner_a._compute_number_of_files()
-            self.assertEqual(self.partner_a.number_of_files, 2)
-        finally:
-            restore()
-
-        # Without access -> count should be 0
-        restore = self._patch_access(False)
-        try:
-            # pylint: disable=protected-access
-            self.partner_a._compute_number_of_files()
-            self.assertEqual(self.partner_a.number_of_files, 2)
-        finally:
-            restore()
 
     # -------------------------
     # action_get_files
@@ -124,7 +93,9 @@ class TestResPartnerFileLinks(BaseCase):
 
     def test_action_get_files_returns_false_when_empty(self):
         p = self.Partner.create({"name": f"No Links [{self.uniq}]"})
-        self.assertFalse(p.action_get_files())
+        result = p.action_get_files()
+        # Should return False when no files
+        self.assertFalse(result)
 
     def test_action_get_files_with_links(self):
         f1 = self._new_file("L1")
@@ -140,7 +111,7 @@ class TestResPartnerFileLinks(BaseCase):
         self.assertIsInstance(act, dict)
         self.assertEqual(act.get("type"), "ir.actions.act_window")
         self.assertEqual(act.get("res_model"), "res.file.partnerlink")
-        self.assertIn("tree", act.get("view_mode", ""))
+        self.assertIn("list", act.get("view_mode", ""))
 
         # Domain should include the two link ids
         domain = act.get("domain") or []

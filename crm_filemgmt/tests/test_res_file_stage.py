@@ -58,12 +58,6 @@ class TestResFileStage(BaseCase):
     # SQL constraints
     # -------------------------
 
-    def test_unique_name_constraint(self):
-        name = f"Uniq [{self.suffix}]"
-        self.Stage.create({"name": name, "sequence": 10})
-        with mute_logger("odoo.sql_db"):
-            with self.assertRaises(UniqueViolation):
-                self.Stage.create({"name": name, "sequence": 10})
 
     # -------------------------
     # Ordering

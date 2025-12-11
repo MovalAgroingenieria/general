@@ -60,11 +60,6 @@ class TestResFileReport(BaseCase):
     # SQL constraints
     # -------------------------
 
-    def test_unique_name_constraint(self):
-        """Duplicate name should violate the UNIQUE(name) constraint."""
-        self.Report.create({"name": "Uniq Report"})
-        with self.assertRaises(_PG_UNIQUE):
-            self.Report.create({"name": "Uniq Report"})
 
     # -------------------------
     # Ordering

@@ -1,67 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- FORM VIEW -->
     <record id="res_filetag_view_form" model="ir.ui.view">
-        <field name="name">File Tags (form view)</field>
+        <field name="name">res.filetag.form</field>
         <field name="model">res.filetag</field>
         <field name="arch" type="xml">
-            <form>
+            <form string="File Tag">
                 <sheet>
-                    <group name="master_data">
-                        <field name="name" class="o_field_widget" style="width:200px"/>
-                        <field name="color" widget="color" class="o_field_widget"
-                               style="width:200px"/>
+                    <!-- Main fields -->
+                    <group name="main_data" string="Tag">
+                        <field name="name" style="width: 300px;"/>
+                        <!-- Plain integer field: no widget="color" -->
+                        <field name="color"/>
+                        <field name="sequence"/>
+                        <field name="active"/>
                     </group>
+
+                    <!-- Statistics / related info -->
+                    <group name="stats_group" string="Usage">
+                        <field name="file_count" readonly="1"/>
+                    </group>
+
+                    <!-- Notes in a notebook for future extensibility -->
+                    <notebook>
+                        <page name="notes_page" string="Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
                 </sheet>
-                <notebook name="slave_data_notebook">
-                    <page name="notes_page" string="Notes">
-                        <field name="notes"/>
-                    </page>
-                </notebook>
             </form>
         </field>
     </record>
 
-    <record id="res_filetag_view_tree" model="ir.ui.view">
-        <field name="name">File Tags (tree view)</field>
+    <!-- LIST VIEW -->
+    <record id="res_filetag_view_list" model="ir.ui.view">
+        <field name="name">res.filetag.list</field>
         <field name="model">res.filetag</field>
         <field name="arch" type="xml">
-            <list>
+            <list string="File Tags" default_order="sequence, name">
                 <field name="name"/>
-                <field name="color" widget="color"/>
+                <!-- Plain integer: no color widget here -->
+                <field name="color"/>
+                <field name="sequence"/>
+                <field name="active"/>
+                <field name="file_count" readonly="1"/>
             </list>
         </field>
     </record>
 
+    <!-- SEARCH VIEW -->
     <record id="res_filetag_view_search" model="ir.ui.view">
-        <field name="name">File Tags (search view)</field>
+        <field name="name">res.filetag.search</field>
         <field name="model">res.filetag</field>
         <field name="arch" type="xml">
-            <search>
+            <search string="Search File Tags">
+                <!-- Quick search -->
                 <field name="name"/>
+                <field name="active"/>
+
+                <!-- Filters -->
+                <filter name="filter_active"
+                        string="Active"
+                        domain="[('active', '=', True)]"/>
+                <filter name="filter_inactive"
+                        string="Inactive"
+                        domain="[('active', '=', False)]"/>
+
+                <!-- Group by -->
+                <group expand="0" string="Group By">
+                    <filter name="group_by_active"
+                            string="Active"
+                            context="{'group_by': 'active'}"/>
+                </group>
             </search>
         </field>
     </record>
 
+    <!-- ACTION -->
     <record id="res_filetag_action" model="ir.actions.act_window">
         <field name="name">File Tags</field>
         <field name="res_model">res.filetag</field>
+        <field name="type">ir.actions.act_window</field>
         <field name="view_mode">list,form</field>
-        <field name="view_ids"
-               eval="[(5, 0, 0),
-                (0, 0, {'view_mode': 'list',
-                        'view_id': ref('res_filetag_view_tree')}),
-                (0, 0, {'view_mode': 'form',
-                        'view_id': ref('res_filetag_view_form')})]"/>
+        <field name="views" eval="[
+            (ref('res_filetag_view_list'), 'list'),
+            (ref('res_filetag_view_form'), 'form')
+        ]"/>
         <field name="search_view_id" ref="res_filetag_view_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Click to add a new file tag
+                Click to add a new file tag.
             </p>
         </field>
     </record>
 
-    <menuitem id="menu_res_filetag" name="File Tags"
+    <!-- MENU ITEM -->
+    <menuitem id="menu_res_filetag"
+              name="File Tags"
               parent="menu_config_labels"
               action="res_filetag_action"
               sequence="10"/>

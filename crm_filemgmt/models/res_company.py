@@ -14,13 +14,33 @@ class ResCompany(models.Model):
         company_dependent=True,
     )
 
+    # Add a computed field that shows the prefix in uppercase
+    file_prefix_upper = fields.Char(
+        string="File Prefix (Upper Case)",
+        compute="_compute_file_prefix_upper",
+        store=False,
+        help="File prefix converted to uppercase for display purposes."
+    )
+
+    @api.constrains("file_prefix")
+    def _check_file_prefix_allowed_chars(self):
+        """Optionally restrict to alphanumeric characters."""
+        for rec in self:
+            if rec.file_prefix:
+                # Check if contains only letters, numbers, and underscores
+                import re
+                if not re.match(r'^[A-Za-z0-9_]*$', rec.file_prefix):
+                    raise ValidationError(
+                        rec.env._("File Prefix can only contain letters, numbers, and underscores.")
+                    )
+
     @api.constrains("file_prefix")
     def _check_file_prefix_length(self):
         """Enforce a hard limit of 10 characters."""
         for rec in self:
             if rec.file_prefix and len(rec.file_prefix) > 10:
                 raise ValidationError(
-                    self.env._("File Prefix must be at most 10 characters.")
+                    rec.env._("File Prefix must be at most 10 characters.")
                 )
 
     @api.model_create_multi

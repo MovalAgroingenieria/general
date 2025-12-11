@@ -68,7 +68,7 @@ class ResFileLocation(models.Model):
 
         views = []
         if tree:
-            views.append((tree.id, "tree"))
+            views.append((tree.id, "list"))
         if form:
             views.append((form.id, "form"))
 
@@ -76,8 +76,8 @@ class ResFileLocation(models.Model):
             "type": "ir.actions.act_window",
             "name": self.env._("Containers"),
             "res_model": "res.file.container",
-            "views": views or [(False, "tree"), (False, "form")],
-            "view_mode": "tree,form",
+            "views": views or [(False, "list"), (False, "form")],
+            "view_mode": "list,form",
             "search_view_id": search.id if search else False,
             "target": "current",
             "domain": [("id", "in", self.container_ids.ids)],

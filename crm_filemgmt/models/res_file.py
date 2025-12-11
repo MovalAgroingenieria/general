@@ -26,14 +26,14 @@ class ResFile(models.Model):
     def _default_file_code(self):
         """Generate next code as <PREFIX>-<YYYY>/<NNNN> per company."""
         current_year = dt.date.today().year
-        if not self.env.user.company_id.file_prefix:
+        if not self.env.company.file_prefix:
             raise exceptions.UserError(
                 self.env._(
                     "The file prefix parameter is not set. Go to configuration "
                     "and set a value for the parameter."
                 )
             )
-        file_prefix = self.env.user.company_id.file_prefix.strip()
+        file_prefix = self.env.company.file_prefix.strip()
         full_prefix = f"{file_prefix}-{current_year:04d}/"
         resp = f"{full_prefix}{1:0{self.SIZE_ANNUALSEQ_CODE}d}"
 
@@ -195,6 +195,34 @@ class ResFile(models.Model):
         ("unique_name", "UNIQUE (name)", "Existing file code."),
     ]
 
+    _index = [
+        ('date_file',),  # Index for date filtering
+        ('subject',),  # Index for subject searches
+        ('partner_id', 'stage_id'),  # Composite index
+    ]
+
+    company_id = fields.Many2one(
+        'res.company',
+        string='Company',
+        default=lambda self: self.env.company,
+        required=True,
+        index=True,
+    )
+
+    allow_chatter = fields.Boolean(default=True)
+
+    kanban_state = fields.Selection([
+        ('normal', 'In Progress'),
+        ('blocked', 'Blocked'),
+        ('done', 'Ready'),
+    ], string='Kanban State', default='normal', tracking=True)
+
+    priority = fields.Selection([
+        ('0', 'Low'),
+        ('1', 'Normal'),
+        ('2', 'High'),
+        ('3', 'Very High'),
+    ], string='Priority', default='1', tracking=True)
     # -------------------------
     # Display name (replace name_get)
     # -------------------------
@@ -319,7 +347,7 @@ class ResFile(models.Model):
         return self.env["res.file.stage"].search([], order="sequence, name", limit=1)
 
     @api.model
-    def _read_group_stage_ids(self, stages, domain, order):
+    def _read_group_stage_ids(self, stages, domain, order=None):
         # consume domain to avoid unused-argument warning
         _ = domain
         # evita _search protegido
@@ -338,16 +366,16 @@ class ResFile(models.Model):
                 mains = rec.partnerlink_ids.filtered(lambda x: x.is_main)
                 if len(mains) == 0:
                     raise exceptions.UserError(
-                        self.env._("It is mandatory to check the primary partner.")
+                        rec.env._("It is mandatory to check the primary partner.")
                     )
                 if len(mains) > 1:
                     raise exceptions.UserError(
-                        self.env._("Only one primary partner is allowed.")
+                        rec.env._("Only one primary partner is allowed.")
                     )
             # No duplicated partners
             partner_ids = [pl.partner_id.id for pl in rec.partnerlink_ids]
             if len(set(partner_ids)) != len(partner_ids):
-                raise exceptions.UserError(self.env._("There are repeated partners."))
+                raise exceptions.UserError(rec.env._("There are repeated partners."))
 
     @api.constrains("filelink_ids")
     def _check_filelink_ids(self):
@@ -362,30 +390,18 @@ class ResFile(models.Model):
                 )
                 if self_ref:
                     raise exceptions.UserError(
-                        self.env._("The file cannot be self-referenced.")
+                        rec.env._("The file cannot be self-referenced.")
                     )
             # No duplicates
             rel_ids = [fl.related_file_id.id for fl in rec.filelink_ids]
             if len(set(rel_ids)) != len(rel_ids):
-                raise exceptions.UserError(self.env._("There are repeated files."))
+                raise exceptions.UserError(rec.env._("There are repeated files."))
 
     # -------------------------
     # Onchanges
     # -------------------------
 
-    @api.onchange("file_top_comment_template_id")
-    def _set_file_top_comment(self):
-        if self.file_top_comment_template_id:
-            self.file_top_comment = self.file_top_comment_template_id.get_value(
-                self.partner_id.id
-            )
 
-    @api.onchange("file_bottom_comment_template_id")
-    def _set_file_bottom_comment(self):
-        if self.file_bottom_comment_template_id:
-            self.file_bottom_comment = self.file_bottom_comment_template_id.get_value(
-                self.partner_id.id
-            )
 
     @api.onchange("stage_id")
     def _onchange_stage_id(self):
@@ -416,7 +432,7 @@ class ResFile(models.Model):
                     rendered = (
                         '<p style="text-align:center;color:red;"><b>'
                         '<font style="font-size: 14px;">'
-                        + self.env._("ERROR IN START TEMPLATE")
+                        + rec.env._("ERROR IN START TEMPLATE")
                         + "</font></b></p><p><br>"
                         + str(template_error)
                         + "</p>"
@@ -440,7 +456,7 @@ class ResFile(models.Model):
                     rendered = (
                         '<p style="text-align:center;color:red;"><b>'
                         '<font style="font-size: 14px;">'
-                        + self.env._("ERROR IN END TEMPLATE")
+                        + rec.env._("ERROR IN END TEMPLATE")
                         + "</font></b></p><p><br>"
                         + str(template_error)
                         + "</p>"
@@ -461,55 +477,3 @@ class ResFile(models.Model):
         if not xmlid:
             raise exceptions.UserError(self.env._("No report has been selected."))
         return self.env.ref(xmlid).report_action(self)
-
-
-class ResFilePartnerlink(models.Model):
-    _name = "res.file.partnerlink"
-    _description = "File Partnerlink"
-
-    file_id = fields.Many2one(
-        string="File_",
-        comodel_name="res.file",
-        required=True,
-        index=True,
-        ondelete="cascade",
-    )
-    partner_id = fields.Many2one(
-        string="Partner",
-        comodel_name="res.partner",
-        required=True,
-        index=True,
-        ondelete="restrict",
-    )
-    is_main = fields.Boolean(
-        string="Primary", help="If checked, this partner will be the primary"
-    )
-    subject = fields.Char(string="Subject", related="file_id.subject")
-    date_file = fields.Date(string="Discharge date", related="file_id.date_file")
-    stage_id = fields.Many2one(string="Stage", related="file_id.stage_id")
-    category_id = fields.Many2one(string="Category", related="file_id.category_id")
-
-
-class ResFileFilelink(models.Model):
-    _name = "res.file.filelink"
-    _description = "File filelink"
-
-    file_id = fields.Many2one(
-        string="File_",
-        comodel_name="res.file",
-        required=True,
-        index=True,
-        ondelete="cascade",
-    )
-    related_file_id = fields.Many2one(
-        string="Related File",
-        comodel_name="res.file",
-        required=True,
-        ondelete="restrict",
-    )
-    related_file_subject = fields.Char(
-        string="Subject", related="related_file_id.subject"
-    )
-    related_file_category_id = fields.Many2one(
-        string="Category", related="related_file_id.category_id"
-    )
