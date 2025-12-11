@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- NUEVA vista propia, SIN inherit_id -->
     <record id="crm_filemgmt_res_config_settings_view_form" model="ir.ui.view">
         <field name="name">crm_filemgmt.res.config.settings.view.form</field>
         <field name="model">res.config.settings</field>
@@ -44,7 +43,6 @@
         </field>
     </record>
 
-    <!-- Acción que abre SOLO esta vista -->
     <record id="action_res_config_settings_files" model="ir.actions.act_window">
         <field name="name">Configure File Management</field>
         <field name="type">ir.actions.act_window</field>
@@ -55,7 +53,6 @@
         <field name="context">{'module': 'crm_filemgmt'}</field>
     </record>
 
-    <!-- Menú que apunta a esa acción -->
     <menuitem id="menu_parameters"
               name="Parameters"
               parent="crm_filemgmt.menu_configuration"
