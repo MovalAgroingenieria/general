@@ -7,11 +7,14 @@
         <xpath expr="//p[@name='payment_communication']" position="before">
             <t t-set="scrap_total" t-value="o.scrap_contribution_total or 0.0"/>
             <t t-if="scrap_total > 0.0">
-                <t t-set="scrap_total_str" t-value="format_amount(scrap_total, o.currency_id)"/>
-                <p name="scrap_contribution_notice" class="scrap-notice" style="margin-bottom: 10px;">
+                <p name="scrap_contribution_notice"
+                   class="scrap-notice"
+                   style="margin-bottom: 10px;">
                     <span style="font-weight: bold;">SCRAP contribution:</span>
                     <strong style="float: right;">
-                        <t t-esc="scrap_total_str"/>
+                        <span t-esc="scrap_total"
+                              t-options='{"widget": "monetary",
+                                          "display_currency": o.currency_id}'/>
                     </strong>
                 </p>
             </t>
