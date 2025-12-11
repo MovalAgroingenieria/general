@@ -1,43 +1,72 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="customer_purchase_follow_up_res_config_settings_view" model="ir.ui.view">
-        <field name="name">customer.purchase.follow.up.settings</field>
+
+    <!-- Inherit ONLY the Sale Stock settings composite view -->
+    <record id="res_config_settings_view_form_stock" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.sale.stock.stock</field>
         <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <!-- Inherit from sale_stock aggregated settings view -->
+        <field name="inherit_id" ref="sale_stock.res_config_settings_view_form_stock"/>
         <field name="arch" type="xml">
-            <!-- Base form is empty in your build; inject our section inside the <form> root -->
-            <xpath expr="//form" position="inside">
-                <sheet>
-                    <div id="settings">
-                        <div class="app_settings_block" string="Display Precision">
-                            <h2>Display Precision</h2>
-                            <div class="row mt16 o_settings_container">
 
-                                <div class="col-12 col-lg-6 o_setting_box">
-                                    <div class="o_setting_left_pane">
-                                        <field name="dp_product_price"/>
-                                    </div>
-                                    <div class="o_setting_right_pane">
-                                        <label for="dp_product_price"/>
-                                        <div class="text-muted">Decimal places for product price display.</div>
-                                    </div>
+            <!-- Extra setting after warning_info (if that id exists in parent) -->
+            <setting id="warning_info" position="after">
+                <setting help="When to start shipping">
+                    <field name="default_picking_policy"
+                           class="o_light_label w-auto"
+                           widget="selection"/>
+                </setting>
+            </setting>
+
+            <!-- Ensure schedule_info block is visible -->
+            <xpath expr="//block[@id='schedule_info']" position="attributes">
+                <attribute name="invisible">0</attribute>
+            </xpath>
+
+            <!-- Inject Display Precision block ONLY in this Sale Stock settings view -->
+            <!-- Placed after the schedule_info block -->
+            <xpath expr="//block[@id='schedule_info']" position="after">
+                <div class="app_settings_block"
+                     data-key="display_decimal_precision"
+                     string="Display Precision">
+                    <h2>Display Precision</h2>
+
+                    <div class="row mt16 o_settings_container">
+
+                        <!-- Decimal precision for product price -->
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <!-- Field controlling number of decimals for product price -->
+                                <field name="dp_product_price"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <!-- Label linked to the field above -->
+                                <label for="dp_product_price"/>
+                                <!-- Helper text for the user -->
+                                <div class="text-muted">
+                                    Decimal places for product price display.
                                 </div>
-
-                                <div class="col-12 col-lg-6 o_setting_box">
-                                    <div class="o_setting_left_pane">
-                                        <field name="dp_product_uom"/>
-                                    </div>
-                                    <div class="o_setting_right_pane">
-                                        <label for="dp_product_uom"/>
-                                        <div class="text-muted">Decimal places for quantity display.</div>
-                                    </div>
-                                </div>
-
                             </div>
                         </div>
+
+                        <!-- Decimal precision for product quantity (UoM) -->
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="dp_product_uom"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="dp_product_uom"/>
+                                <div class="text-muted">
+                                    Decimal places for quantity display.
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
-                </sheet>
+                </div>
             </xpath>
+
         </field>
     </record>
+
 </odoo>
