@@ -2,6 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from . import models
+from .hooks import post_load
 
 def post_init_hook(cr, registry):
     """Post-init hook to recreate hr_employee_public view with all fields."""
