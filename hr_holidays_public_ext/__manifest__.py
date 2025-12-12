@@ -14,6 +14,8 @@
     "depends": [
         "hr_holidays_public",
         "hr_expense",
+        "hr_attendance_reason",
+        "hr_attendance_report_theoretical_time",
     ],
     "data": [
     ],
