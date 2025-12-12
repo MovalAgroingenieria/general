@@ -26,7 +26,7 @@ def post_load():
         )""" % field_select)
 
         # Force registry reload to pick up new view structure
-        self.env.registry.clear_cache()
+        self.env.registry.clear_caches()
 
     # Monkey patch the init method of the base class
     HrEmployeePublic.init = init
