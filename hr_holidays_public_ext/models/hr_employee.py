@@ -13,17 +13,17 @@ class HrEmployeePublic(models.Model):
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
-        
+
         # Get all stored fields from hr.employee
         employee_fields = self.env['hr.employee']._fields
         select_fields = []
-        
+
         for name, field in employee_fields.items():
             if field.store and field.type not in ['one2many', 'many2many']:
                 select_fields.append(f'"{name}"')
-                
+
         fields_str = ', '.join(select_fields)
-        
+
         self.env.cr.execute("""
             CREATE or REPLACE VIEW %s as (
                 SELECT
@@ -32,6 +32,6 @@ class HrEmployeePublic(models.Model):
                     hr_employee
             )
         """ % (self._table, fields_str))
-        
+
         # Clear cache to ensure new fields are recognized
         self.env.registry.clear_cache()
