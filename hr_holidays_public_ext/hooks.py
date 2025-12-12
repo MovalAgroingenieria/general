@@ -13,7 +13,7 @@ def post_load():
         fields_list = []
 
         for name, field in employee_model._fields.items():
-            if field.store and field.type not in ['many2many', 'one2many']:
+            if field.store and field.type not in ['many2many', 'one2many', 'binary']:
                 fields_list.append('emp.%s' % name)
 
         field_select = ','.join(fields_list)

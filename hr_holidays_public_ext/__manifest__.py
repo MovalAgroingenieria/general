@@ -3,7 +3,7 @@
 
 {
     "name": "HR Holidays Public Extended",
-    "version": "16.0.2.0.7",
+    "version": "16.0.2.0.8",
     "license": "AGPL-3",
     "category": "Human Resources",
     "website": "https://www.moval.es",
