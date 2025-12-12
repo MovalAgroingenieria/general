@@ -10,25 +10,3 @@ class HrEmployeePublic(models.Model):
     def _register_hook(self):
         super()._register_hook()
         self.init()
-
-    def init(self):
-        """Force recreate hr_employee_public view with ALL hr_employee fields."""
-        # Get all stored fields from hr_employee model dynamically
-        employee_model = self.env['hr.employee']
-        fields_list = []
-
-        for name, field in employee_model._fields.items():
-            if field.store and field.type not in ['many2many', 'one2many']:
-                fields_list.append('emp.%s' % name)
-
-        field_select = ','.join(fields_list)
-
-        # Recreate the view with ALL available fields
-        tools.drop_view_if_exists(self.env.cr, 'hr_employee_public')
-        self.env.cr.execute("""CREATE or REPLACE VIEW hr_employee_public as (
-            SELECT %s
-            FROM hr_employee emp
-        )""" % field_select)
-
-        # Force registry reload to pick up new view structure
-        self.env.registry.clear_cache()
