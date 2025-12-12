@@ -35,6 +35,16 @@ class HrEmployeePublic(models.Model):
         "will be used (the greatest of both)."
     )
 
+    @tools.ormcache()
+    def _get_fields(self):
+        """Override to include all our custom fields."""
+        # Get all stored fields from the model
+        fields_list = []
+        for name, field in self._fields.items():
+            if field.store and field.type not in ['many2many', 'one2many']:
+                fields_list.append('emp.%s' % name)
+        return ','.join(fields_list)
+
     def init(self):
         """Override init to recreate the view with all fields after all modules are loaded."""
         # Call parent init first to ensure proper inheritance
