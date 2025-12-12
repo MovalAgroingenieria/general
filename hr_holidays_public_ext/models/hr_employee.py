@@ -7,6 +7,13 @@ from odoo import models, api
 class HrEmployeePublic(models.Model):
     _inherit = 'hr.employee.public'
 
+    def _register_hook(self):
+        super()._register_hook()
+        # Re-initialize the view after the registry is fully loaded
+        # This ensures that even if 'hr' module reset the view during its update,
+        # we recreate it here with all columns from all installed modules.
+        self.init()
+
     @api.model
     def _get_fields(self):
         """
