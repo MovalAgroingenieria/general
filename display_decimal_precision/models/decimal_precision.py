@@ -1,13 +1,21 @@
 # 2023-2026 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import api, fields, models, tools
+import logging
+
+from odoo import api, fields, models
+
+_logger = logging.getLogger(__name__)
 
 
 class DecimalPrecision(models.Model):
     _inherit = "decimal.precision"
 
-    display_digits = fields.Integer(string="Display Digits", required=True, default=2)
+    display_digits = fields.Integer(
+        required=True,
+        default=2,
+        help="Number of digits to display (for formatting purposes)",
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -28,10 +36,15 @@ class DecimalPrecision(models.Model):
             if val not in (None, False, ""):
                 try:
                     return (16, int(val))
-                except (TypeError, ValueError):
-                    pass
+                except (TypeError, ValueError) as e:
+                    _logger.warning(
+                        "Invalid decimal precision value for %s: %s. Error: %s",
+                        application,
+                        val,
+                        str(e),
+                    )
 
-        # fallback a la tabla decimal_precision (si mantienes display_digits)
+        # fallback to decimal_precision table (if display_digits is maintained)
         self.env.cr.execute(
             "SELECT display_digits FROM decimal_precision WHERE name=%s",
             (application,),

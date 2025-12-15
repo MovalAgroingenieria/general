@@ -15,7 +15,7 @@ class DummyModel(models.Model):
 class TestFieldDescription(TransactionCase):
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls):  # pylint: disable=invalid-name
         super().setUpClass()
         cls.env.registry.setup_models(cls.env.cr)
 

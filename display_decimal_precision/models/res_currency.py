@@ -10,10 +10,12 @@ class ResCurrency(models.Model):
     _inherit = "res.currency"
 
     display_rounding = fields.Float("Display Rounding Factor", digits=(12, 6))
-    display_decimal_places = fields.Integer(compute="_get_display_decimal_places")
+    display_decimal_places = fields.Integer(
+        compute="_compute_get_display_decimal_places"
+    )
 
     @api.depends("rounding", "display_rounding")
-    def _get_display_decimal_places(self):
+    def _compute_get_display_decimal_places(self):
         for record in self:
             if not record.display_rounding:
                 record.display_decimal_places = record.decimal_places

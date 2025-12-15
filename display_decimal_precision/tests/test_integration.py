@@ -11,7 +11,6 @@ class TestIntegration(TransactionCase):
         icp.set_param("display_decimal_precision.dp.Test Precision 2", "2")
 
         model = self.env["display.decimal.dummy"]
-        rec = model.create({"value_2": 1.23456})
 
         field = model._fields["value_2"]
         desc = field.get_description(self.env)

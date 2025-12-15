@@ -1,102 +1,79 @@
-#
-msgid ""
-msgstr ""
-"Project-Id-Version: Odoo Server 18.0\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-11 13:37+0000\n"
-"PO-Revision-Date: 2025-12-11 13:37+0000\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
-"Plural-Forms: \n"
+#. module: display_decimal_precision
+#: model_terms:ir.ui.view,arch_db:display_decimal_precision.res_config_settings_view_form_display_decimal_precision
+msgid "Configure how many decimals are shown for product prices."
+msgstr "Configura quants decimals es mostren per als preus dels productes."
 
 #. module: display_decimal_precision
-#: model:ir.model,name:display_decimal_precision.model_res_currency
-msgid "Currency"
-msgstr "Divisa"
+#: model_terms:ir.ui.view,arch_db:display_decimal_precision.res_config_settings_view_form_display_decimal_precision
+msgid "Configure how many decimals are shown for product quantities."
+msgstr "Configura quants decimals es mostren per a les quantitats dels productes."
 
 #. module: display_decimal_precision
-#: model_terms:ir.ui.view,arch_db:display_decimal_precision.res_config_settings_view_form_stock
-msgid "Decimal places for product price display."
-msgstr "Posicions decimals per mostrar el preu del producte."
+#: model:ir.model.fields,field_description:display_decimal_precision.field_display_decimal_dummy__create_uid
+msgid "Created by"
+msgstr "Creat per"
 
 #. module: display_decimal_precision
-#: model_terms:ir.ui.view,arch_db:display_decimal_precision.res_config_settings_view_form_stock
-msgid "Decimal places for quantity display."
-msgstr "Posicions decimals per mostrar la quantitat."
+#: model:ir.model.fields,field_description:display_decimal_precision.field_display_decimal_dummy__create_date
+msgid "Created on"
+msgstr "Creat el"
 
 #. module: display_decimal_precision
-#: model:ir.model.fields,help:display_decimal_precision.field_res_currency__display_decimal_places
-msgid ""
-"Derived number of decimals used for display: ceil(log10(1/display_rounding))"
-" when 0 < display_rounding < 1; otherwise falls back to the currency's "
-"decimal_places (or 0 if rounding >= 1)."
-msgstr ""
-"Nombre derivat de decimals utilitzats per a la visualització: "
-"ceil(log10(1/display_rounding)) quan 0 < display_rounding < 1; en cas "
-"contrari, s'utilitza el nombre de decimals de la divisa (o 0 si "
-"l'arrodoniment és >= 1)."
+#: model_terms:ir.ui.view,arch_db:display_decimal_precision.res_config_settings_view_form_display_decimal_precision
+msgid "Decimal display precision"
+msgstr "Precisió decimal de visualització"
 
 #. module: display_decimal_precision
-#: model:ir.model.fields,field_description:display_decimal_precision.field_res_currency__display_decimal_places
-msgid "Display Decimal Places"
-msgstr "Mostrar Posicions Decimals"
+#: model:ir.model.fields,field_description:display_decimal_precision.field_decimal_precision__display_digits
+msgid "Display Digits"
+msgstr "Dígits a mostrar"
 
 #. module: display_decimal_precision
-#: model_terms:ir.ui.view,arch_db:display_decimal_precision.res_config_settings_view_form_stock
-msgid "Display Precision"
-msgstr "Precisió de Visualització"
+#: model:ir.model.fields,field_description:display_decimal_precision.field_display_decimal_dummy__display_name
+msgid "Display Name"
+msgstr "Nom mostrat"
 
 #. module: display_decimal_precision
-#: model:ir.model.fields,field_description:display_decimal_precision.field_res_currency__display_rounding
-msgid "Display Rounding"
-msgstr "Arrodoniment Visual"
+#: model:ir.model,name:display_decimal_precision.model_display_decimal_dummy
+msgid "Dummy model for display decimal precision tests"
+msgstr "Model fictici per a proves de precisió decimal de visualització"
 
 #. module: display_decimal_precision
-#: model:ir.model,name:display_decimal_precision.model_ir_http
-msgid "HTTP Routing"
-msgstr "Enrutament HTTP"
+#: model:ir.model.fields,field_description:display_decimal_precision.field_display_decimal_dummy__id
+msgid "ID"
+msgstr "ID"
 
 #. module: display_decimal_precision
-#: model:ir.model.fields,help:display_decimal_precision.field_res_currency__display_rounding
-msgid ""
-"Optional visual rounding. If set between 0 and 1 (e.g. 0.01), the UI will "
-"prefer that many decimal places for display. If empty or 0, the currency's "
-"own decimal places are used."
-msgstr ""
-"Arrodoniment visual opcional. Si s'estableix entre 0 i 1 (per exemple, "
-"0.01), la interfície mostrarà aquesta quantitat de posicions decimals. Si "
-"està buit o és 0, s'utilitzen les posicions decimals pròpies de la divisa."
+#: model:ir.model.fields,field_description:display_decimal_precision.field_display_decimal_dummy__write_uid
+msgid "Last Updated by"
+msgstr "Darrera modificació per"
 
 #. module: display_decimal_precision
-#: model:ir.model.fields,field_description:display_decimal_precision.field_res_config_settings__dp_product_price
-msgid "Product Price Display Digits"
-msgstr "Dígits per Mostrar el Preu del Producte"
+#: model:ir.model.fields,field_description:display_decimal_precision.field_display_decimal_dummy__write_date
+msgid "Last Updated on"
+msgstr "Darrera modificació el"
 
 #. module: display_decimal_precision
-#: model:ir.model.fields,field_description:display_decimal_precision.field_res_config_settings__dp_product_uom
-msgid "Product UoM Display Digits"
-msgstr "Dígits per Mostrar la UdM del Producte"
+#: model:ir.model.fields,help:display_decimal_precision.field_decimal_precision__display_digits
+msgid "Number of digits to display (for formatting purposes)"
+msgstr "Nombre de dígits a mostrar (amb finalitats de format)"
 
 #. module: display_decimal_precision
-#: model:ir.model.fields,help:display_decimal_precision.field_res_config_settings__dp_product_price
-msgid "Scale (number of decimals) for displaying product prices."
-msgstr "Escala (nombre de decimals) per mostrar els preus dels productes."
+#: model_terms:ir.ui.view,arch_db:display_decimal_precision.res_config_settings_view_form_display_decimal_precision
+msgid "Product Price"
+msgstr "Preu del producte"
 
 #. module: display_decimal_precision
-#: model:ir.model.fields,help:display_decimal_precision.field_res_config_settings__dp_product_uom
-msgid "Scale (number of decimals) for displaying product quantities."
-msgstr ""
-"Escala (nombre de decimals) per mostrar les quantitats dels productes."
+#: model_terms:ir.ui.view,arch_db:display_decimal_precision.res_config_settings_view_form_display_decimal_precision
+msgid "Product Quantity"
+msgstr "Quantitat del producte"
 
 #. module: display_decimal_precision
-#: model:ir.model,name:display_decimal_precision.model_res_config_settings
-msgid "Street type settings"
-msgstr "Configuració del Tipus de Carrer"
+#: model:ir.model.fields,field_description:display_decimal_precision.field_display_decimal_dummy__value_2
+msgid "Value 2"
+msgstr "Valor 2"
 
 #. module: display_decimal_precision
-#: model_terms:ir.ui.view,arch_db:display_decimal_precision.res_config_settings_view_form_stock
-msgid "When to start shipping"
-msgstr "Quan començar a enviar"
+#: model:ir.model.fields,field_description:display_decimal_precision.field_display_decimal_dummy__value_3
+msgid "Value 3"
+msgstr "Valor 3"

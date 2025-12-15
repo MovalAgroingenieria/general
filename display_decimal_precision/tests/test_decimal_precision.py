@@ -7,7 +7,7 @@ from odoo.tests.common import TransactionCase, tagged
 class TestDecimalPrecision(TransactionCase):
 
     def test_display_precision_from_decimal_precision(self):
-        dp = self.env["decimal.precision"].create(
+        self.env["decimal.precision"].create(
             {
                 "name": "Test Precision",
                 "digits": 6,
