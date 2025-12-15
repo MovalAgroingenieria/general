@@ -1,72 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <!-- Inherit ONLY the Sale Stock settings composite view -->
-    <record id="res_config_settings_view_form_stock" model="ir.ui.view">
-        <field name="name">res.config.settings.view.form.inherit.sale.stock.stock</field>
+    <record id="res_config_settings_view_form_display_decimal_precision" model="ir.ui.view">
+        <field name="name">Display Decimal Precision Settings</field>
         <field name="model">res.config.settings</field>
-        <!-- Inherit from sale_stock aggregated settings view -->
-        <field name="inherit_id" ref="sale_stock.res_config_settings_view_form_stock"/>
+        <!-- In Odoo 18, settings form is in base_setup -->
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-
-            <!-- Extra setting after warning_info (if that id exists in parent) -->
-            <setting id="warning_info" position="after">
-                <setting help="When to start shipping">
-                    <field name="default_picking_policy"
-                           class="o_light_label w-auto"
-                           widget="selection"/>
-                </setting>
-            </setting>
-
-            <!-- Ensure schedule_info block is visible -->
-            <xpath expr="//block[@id='schedule_info']" position="attributes">
-                <attribute name="invisible">0</attribute>
-            </xpath>
-
-            <!-- Inject Display Precision block ONLY in this Sale Stock settings view -->
-            <!-- Placed after the schedule_info block -->
-            <xpath expr="//block[@id='schedule_info']" position="after">
+            <xpath expr="//form" position="inside">
                 <div class="app_settings_block"
-                     data-key="display_decimal_precision"
-                     string="Display Precision">
-                    <h2>Display Precision</h2>
+                     data-string="Decimal display precision"
+                     string="Decimal display precision"
+                     name="display_decimal_precision_settings_block">
+                    <h2>Decimal display precision</h2>
 
-                    <div class="row mt16 o_settings_container">
-
-                        <!-- Decimal precision for product price -->
-                        <div class="col-12 col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane">
-                                <!-- Field controlling number of decimals for product price -->
-                                <field name="dp_product_price"/>
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <!-- Label linked to the field above -->
-                                <label for="dp_product_price"/>
-                                <!-- Helper text for the user -->
+                    <div class="row mt16 o_settings_container" name="display_decimal_precision_settings_container">
+                        <div class="col-xs-12 col-md-6 o_setting_box" id="dp_product_price_box">
+                            <div class="o_setting_right_pane" id="dp_product_price_settings">
+                                <div class="o_form_label">Product Price</div>
                                 <div class="text-muted">
-                                    Decimal places for product price display.
+                                    Configure how many decimals are shown for product prices.
+                                </div>
+                                <div class="mt8">
+                                    <field name="dp_product_price"/>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Decimal precision for product quantity (UoM) -->
-                        <div class="col-12 col-lg-6 o_setting_box">
-                            <div class="o_setting_left_pane">
-                                <field name="dp_product_uom"/>
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="dp_product_uom"/>
+                        <div class="col-xs-12 col-md-6 o_setting_box" id="dp_product_uom_box">
+                            <div class="o_setting_right_pane" id="dp_product_uom_settings">
+                                <div class="o_form_label">Product Quantity</div>
                                 <div class="text-muted">
-                                    Decimal places for quantity display.
+                                    Configure how many decimals are shown for product quantities.
+                                </div>
+                                <div class="mt8">
+                                    <field name="dp_product_uom"/>
                                 </div>
                             </div>
                         </div>
-
                     </div>
+
                 </div>
             </xpath>
-
         </field>
     </record>
-
 </odoo>

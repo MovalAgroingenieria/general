@@ -16,27 +16,58 @@ Display Decimal Precision
 Description
 ===========
 
-This module allows you to distinguish between **computation digits** and
-**display digits** for decimal precision in numeric fields.
+This module allows separating **calculation precision** from
+**display precision** for decimal (float) fields in Odoo.
 
-In Odoo 18, the legacy *decimal.precision* model has been removed.
-This module reproduces its functionality by storing display-digit
-preferences in system parameters and exposing them in *Settings*.
+While Odoo internally computes values using a fixed precision,
+the number of decimals shown to the user is often required to be different
+(e.g. show 2 decimals while computing with 6).
 
-> Note that currencies are managed separately through their own rounding
-> and decimal-place configuration.
+This module introduces:
+
+* A configurable **display precision layer** based on logical categories
+  (e.g. *Product Price*, *Unit of Measure*).
+* Global configuration through **Settings** (`res.config.settings`),
+  stored in system parameters.
+* Automatic application of display precision to:
+  - Field metadata sent to the UI
+  - QWeb reports
+
+The stored value is **never altered**: only the way decimals are *displayed*
+is affected.
+
+.. note::
+
+   Currency rounding and monetary precision are **not modified** by this
+   module and remain governed by standard Odoo currency settings.
+
+How it works
+============
+
+* Display precisions are defined per logical *application name*
+  (e.g. ``Product Price``).
+* Values are stored in ``ir.config_parameter`` and can be edited from
+  *General Settings*.
+* Float fields declared with ``digits="Application Name"`` automatically
+  receive the configured display precision.
+* A lightweight override ensures consistent behavior across:
+  - Views
+  - Field descriptions
+  - QWeb rendering
 
 Usage
 =====
 
-To edit a display precision:
+To configure display precision:
 
-1. Go to **Settings → General Settings → Display Precision** section.
-2. Adjust the number of decimals you want to display for each category,
-   such as *Product Price* or *Unit of Measure*.
-3. Save the settings.
-4. The configured values will automatically apply to fields that use
-   those display precisions across the system.
+1. Go to **Settings → General Settings**.
+2. Locate the **Decimal display precision** section.
+3. Set the number of decimals to display for each category
+   (e.g. *Product Price*, *Product Quantity*).
+4. Save the settings.
+
+All fields using the corresponding precision category will immediately
+reflect the new display precision throughout the system.
 
 Credits
 =======
@@ -54,6 +85,7 @@ Contributors
 * Juanu Sandoval <jsandoval@moval.es>
 * Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
+* César Andrés <candres@moval.es>
 
 Maintainer
 ~~~~~~~~~~

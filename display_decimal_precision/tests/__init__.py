@@ -1,5 +1,3 @@
-from . import (
-    test_fields_monkeypatch,
-    test_ir_http_currencies,
-    test_res_currency_display_rounding,
-)
+# 2023-2026 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+from . import test_res_config_settings, test_integration, test_decimal_precision, test_fields_description
