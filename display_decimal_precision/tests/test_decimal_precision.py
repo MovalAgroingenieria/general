@@ -7,11 +7,13 @@ from odoo.tests.common import TransactionCase, tagged
 class TestDecimalPrecision(TransactionCase):
 
     def test_display_precision_from_decimal_precision(self):
-        dp = self.env["decimal.precision"].create({
-            "name": "Test Precision",
-            "digits": 6,
-            "display_digits": 3,
-        })
+        dp = self.env["decimal.precision"].create(
+            {
+                "name": "Test Precision",
+                "digits": 6,
+                "display_digits": 3,
+            }
+        )
 
         precision = self.env["decimal.precision"].get_display_precision(
             "Test Precision"
@@ -22,5 +24,7 @@ class TestDecimalPrecision(TransactionCase):
         icp = self.env["ir.config_parameter"].sudo()
         icp.set_param("display_decimal_precision.dp.Test Precision", "4")
 
-        precision = self.env["decimal.precision"].get_display_precision("Test Precision")
+        precision = self.env["decimal.precision"].get_display_precision(
+            "Test Precision"
+        )
         self.assertEqual(precision, (16, 4))

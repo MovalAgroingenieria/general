@@ -5,11 +5,9 @@ from odoo import api, fields, models, tools
 
 
 class DecimalPrecision(models.Model):
-    _inherit = 'decimal.precision'
+    _inherit = "decimal.precision"
 
-    display_digits = fields.Integer(
-        string='Display Digits',
-        required=True, default=2)
+    display_digits = fields.Integer(string="Display Digits", required=True, default=2)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -23,8 +21,8 @@ class DecimalPrecision(models.Model):
     def get_display_precision(self, application):
         icp = self.env["ir.config_parameter"].sudo()
         for key in (
-                f"display_decimal_precision.dp.{application}",
-                f"customer_purchase_follow_up.dp.{application}",  # legacy
+            f"display_decimal_precision.dp.{application}",
+            f"customer_purchase_follow_up.dp.{application}",  # legacy
         ):
             val = icp.get_param(key)
             if val not in (None, False, ""):

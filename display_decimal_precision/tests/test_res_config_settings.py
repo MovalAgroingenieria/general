@@ -7,10 +7,12 @@ from odoo.tests.common import TransactionCase, tagged
 class TestResConfigSettings(TransactionCase):
 
     def test_settings_store_parameters(self):
-        settings = self.env["res.config.settings"].create({
-            "dp_product_price": 5,
-            "dp_product_uom": 2,
-        })
+        settings = self.env["res.config.settings"].create(
+            {
+                "dp_product_price": 5,
+                "dp_product_uom": 2,
+            }
+        )
         settings.set_values()
 
         icp = self.env["ir.config_parameter"].sudo()
