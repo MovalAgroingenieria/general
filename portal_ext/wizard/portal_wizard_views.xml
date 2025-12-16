@@ -6,6 +6,11 @@
         <field name="model">portal.wizard</field>
         <field name="inherit_id" ref="portal.wizard_view"/>
         <field name="arch" type="xml">
+            <xpath expr="//field[@name='portal_id']" position="attributes">
+                <attribute name="default" eval="ref('base.group_portal')"/>
+                <attribute name="readonly">1</attribute>
+            </xpath>
+
             <xpath expr="//field[@name='portal_id']" position="after">
                 <field name="send_email"/>
             </xpath>
