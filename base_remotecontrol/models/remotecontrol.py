@@ -213,6 +213,9 @@ class RemoteControl(models.Model):
             connection_string += ';TDS_Version=%s' % params['tds_version']
         if params.get('trusted_connection'):
             connection_string += ';Trusted_Connection=yes'
+        # Add MariaDB Unicode specific parameters
+        if 'MariaDB' in driver_name:
+            connection_string += ';NoCatalog=1;UseServerSidePrepare=1'
         connection = pyodbc.connect(connection_string)
         # Configure pyodbc to return UTF-8 strings for SQL Server
         # (avoids encoding issues in Python 2.7 when working with CSV)
