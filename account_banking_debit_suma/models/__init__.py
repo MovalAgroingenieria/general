@@ -3,3 +3,4 @@
 
 from . import account_payment_order
 from . import account_invoice
+from . import res_partner_bank

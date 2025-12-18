@@ -1263,9 +1263,11 @@ class AccountPaymentOrder(models.Model):
         # Reset variables
         db_lines = ""
         entry_num = 0
+        partner_bank_ids = []
 
         # Iterate over bank lines (dynamic fields)
-        for line in self.bank_line_ids:
+        for line in self.bank_line_ids.filtered(
+                lambda l: not l.partner_bank_id.suma_notified):
 
             # Value number - Position [090-095] Length 6
             # @INFO: It must contain the receipt reference within the register
@@ -1313,6 +1315,9 @@ class AccountPaymentOrder(models.Model):
                     ccc_control_digits = str(iban[12:14])
                     # Bank account number - Position [011-020]Length 10
                     ccc_account_num = str(iban[14:]).ljust(10)
+
+                    # Add to partner_bank_ids only if IBAN
+                    partner_bank_ids.append(line.partner_bank_id.id)
                 else:
                     ccc_bank_entity_code = str(' ' * 4)
                     ccc_bank_office_code = str(' ' * 4)
@@ -1477,6 +1482,15 @@ class AccountPaymentOrder(models.Model):
 
             # Add line to db_lines
             db_lines += db_line
+
+        # Set suma_notified to partner_bank_ids or warn if none
+        if partner_bank_ids:
+            self.env['res.partner.bank'].browse(partner_bank_ids).write({
+                'suma_notified': True
+            })
+        else:
+            raise ValidationError(
+                _("All the bank lines have been previously notified to SUMA."))
 
         # Add db_lines to file and encode
         direct_debit_str = db_lines.encode(self.ENCODING_NAME,

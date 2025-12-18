@@ -26,6 +26,7 @@
         "views/account_payment_order_views.xml",
         "views/account_invoice_view.xml",
         "views/resources.xml",
+        "views/res_partner_bank_view.xml",
     ],
     "installable": True,
     "application": False,

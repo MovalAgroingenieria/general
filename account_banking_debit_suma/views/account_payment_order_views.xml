@@ -24,6 +24,13 @@
         <field name="inherit_id" ref="account_payment_order.account_payment_order_form"/>
         <field name="arch" type="xml">
             <data>
+                <xpath expr="//field[@name='name']/.." position="after">
+                    <field name="state" invisible="1"/>
+                    <div style="display: inline-block;color:red;padding-top: 5px;padding-bottom: 5px;padding-left: 10px;"
+                         attrs="{'invisible':[('state','!=','generated')]}">
+                         Accounts marked as sent to SUMA will not be restored even if the file is rolled back.
+                    </div>
+                </xpath>
                 <!-- Add resume_suma and direct_debit buttons -->
                 <xpath expr="//button[@name='generated2uploaded']" position="after">
                     <button name="print_direct_debit_file"

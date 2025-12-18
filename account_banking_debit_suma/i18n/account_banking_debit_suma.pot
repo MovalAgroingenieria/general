@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-11 09:57+0000\n"
-"PO-Revision-Date: 2025-07-11 09:57+0000\n"
+"POT-Creation-Date: 2025-12-18 15:40+0000\n"
+"PO-Revision-Date: 2025-12-18 15:40+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1138,6 +1138,17 @@ msgid "AP - DRINKING WATERS"
 msgstr ""
 
 #. module: account_banking_debit_suma
+#: model:ir.ui.view,arch_db:account_banking_debit_suma.account_payment_order_form_suma
+msgid "Accounts marked as sent to SUMA will not be restored even if the file is rolled back."
+msgstr ""
+
+#. module: account_banking_debit_suma
+#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1493
+#, python-format
+msgid "All the bank lines have been previously notified to SUMA."
+msgstr ""
+
+#. module: account_banking_debit_suma
 #: code:addons/account_banking_debit_suma/models/account_payment_order.py:1213
 #, python-format
 msgid "Amount: "
@@ -1151,6 +1162,11 @@ msgstr ""
 #. module: account_banking_debit_suma
 #: selection:account.payment.order,periodicity:0
 msgid "BIMONTHLY"
+msgstr ""
+
+#. module: account_banking_debit_suma
+#: model:ir.model,name:account_banking_debit_suma.model_res_partner_bank
+msgid "Bank Accounts (for WUA)"
 msgstr ""
 
 #. module: account_banking_debit_suma
@@ -1267,7 +1283,7 @@ msgid "D7 - FEES MAINTENANCE ACUEDUCTSS"
 msgstr ""
 
 #. module: account_banking_debit_suma
-#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1513
+#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1527
 #, python-format
 msgid "Direct Debit File"
 msgstr ""
@@ -1310,7 +1326,7 @@ msgid "Errors"
 msgstr ""
 
 #. module: account_banking_debit_suma
-#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1488
+#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1502
 #, python-format
 msgid "Errors in direct debit file "
 msgstr ""
@@ -1574,6 +1590,21 @@ msgid "Strict mode does not allow errors. The permissive mode allows but they ar
 msgstr ""
 
 #. module: account_banking_debit_suma
+#: model:ir.model.fields,field_description:account_banking_debit_suma.field_res_partner_bank_suma_notified
+msgid "Suma Notified"
+msgstr ""
+
+#. module: account_banking_debit_suma
+#: model:ir.ui.view,arch_db:account_banking_debit_suma.view_partner_bank_search
+msgid "Suma Notified: No"
+msgstr ""
+
+#. module: account_banking_debit_suma
+#: model:ir.ui.view,arch_db:account_banking_debit_suma.view_partner_bank_search
+msgid "Suma Notified: Yes"
+msgstr ""
+
+#. module: account_banking_debit_suma
 #: code:addons/account_banking_debit_suma/models/account_payment_order.py:1224
 #, python-format
 msgid "Surface: "
@@ -1610,8 +1641,8 @@ msgid "The entity has not been configured. Set it in Accounting/Settings."
 msgstr ""
 
 #. module: account_banking_debit_suma
-#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1420
 #: code:addons/account_banking_debit_suma/models/account_payment_order.py:1425
+#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1430
 #, python-format
 msgid "The entry number %s has failed, bank BIC not found. For foreign IBANs the BIC is mandatory."
 msgstr ""
@@ -1624,8 +1655,8 @@ msgid "The entry number %s has failed, debtor city not found for partner %s"
 msgstr ""
 
 #. module: account_banking_debit_suma
-#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1397
 #: code:addons/account_banking_debit_suma/models/account_payment_order.py:1402
+#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1407
 #, python-format
 msgid "The entry number %s has failed, suma reference not found."
 msgstr ""
@@ -1641,8 +1672,8 @@ msgstr ""
 #. module: account_banking_debit_suma
 #: code:addons/account_banking_debit_suma/models/account_payment_order.py:706
 #: code:addons/account_banking_debit_suma/models/account_payment_order.py:711
-#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1373
-#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1379
+#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1378
+#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1384
 #, python-format
 msgid "The entry number %s has failed, taxpayer name not found."
 msgstr ""
@@ -1678,8 +1709,8 @@ msgstr ""
 #. module: account_banking_debit_suma
 #: code:addons/account_banking_debit_suma/models/account_payment_order.py:694
 #: code:addons/account_banking_debit_suma/models/account_payment_order.py:699
-#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1360
-#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1366
+#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1365
+#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1371
 #, python-format
 msgid "The entry number %s has failed, the firstname for partner %s not found."
 msgstr ""
@@ -1692,8 +1723,8 @@ msgid "The entry number %s has failed, the format type %s is not supported."
 msgstr ""
 
 #. module: account_banking_debit_suma
-#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1345
-#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1351
+#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1350
+#: code:addons/account_banking_debit_suma/models/account_payment_order.py:1356
 #, python-format
 msgid "The entry number %s has failed, the lastname for partner %s not found."
 msgstr ""
@@ -1844,3 +1875,4 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_banking_debit_suma.field_account_payment_order_suma_filename
 msgid "suma filename"
 msgstr ""
+
