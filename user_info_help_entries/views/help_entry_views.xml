@@ -5,11 +5,11 @@
         <field name="name">Help Entry Tree</field>
         <field name="model">user.menu.help.entry</field>
         <field name="arch" type="xml">
-            <tree string="Help Entries">
+            <list>
                 <field name="name" string="Name"/>
                 <field name="url" string="URL"/>
                 <field name="groups" string="Groups"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -55,7 +55,7 @@
     <record id="help_entries_menu_action" model="ir.actions.act_window">
         <field name="name">Help Entries</field>
         <field name="res_model">user.menu.help.entry</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="view_id" ref="help_entry_tree_view"/>
         <field name="target">current</field>
     </record>
