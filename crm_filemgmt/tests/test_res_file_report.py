@@ -60,7 +60,6 @@ class TestResFileReport(BaseCase):
     # SQL constraints
     # -------------------------
 
-
     # -------------------------
     # Ordering
     # -------------------------

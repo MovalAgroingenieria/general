@@ -14,46 +14,40 @@ class ResFileContainerType(models.Model):
         string="Type Image",
         max_width=1024,
         max_height=1024,
-        help="Image representing this container type"
+        help="Image representing this container type",
     )
 
     # Add icon for UI representation
     icon = fields.Char(
         string="Icon Class",
-        help="CSS icon class for this container type (e.g., 'fa fa-box')"
+        help="CSS icon class for this container type (e.g., 'fa fa-box')",
     )
 
     # Add color for visual distinction
     color = fields.Integer(
-        string="Color Index",
-        default=0,
-        help="Color for kanban and list views"
+        string="Color Index", default=0, help="Color for kanban and list views"
     )
 
     # Add dimensions or specifications
     dimensions = fields.Char(
-        string="Dimensions",
-        help="Physical dimensions (e.g., '30x40x20 cm')"
+        string="Dimensions", help="Physical dimensions (e.g., '30x40x20 cm')"
     )
 
     # Add capacity reference
     default_capacity = fields.Integer(
         string="Default Capacity",
         default=100,
-        help="Default number of files this container type can hold"
+        help="Default number of files this container type can hold",
     )
 
     # Add active flag for archiving
-    active = fields.Boolean(
-        default=True,
-        help="Uncheck to archive this container type"
-    )
+    active = fields.Boolean(default=True, help="Uncheck to archive this container type")
 
     # Track creation and modification
-    create_uid = fields.Many2one('res.users', string='Created by', readonly=True)
-    create_date = fields.Datetime(string='Created on', readonly=True)
-    write_uid = fields.Many2one('res.users', string='Last Updated by', readonly=True)
-    write_date = fields.Datetime(string='Last Updated on', readonly=True)
+    create_uid = fields.Many2one("res.users", string="Created by", readonly=True)
+    create_date = fields.Datetime(string="Created on", readonly=True)
+    write_uid = fields.Many2one("res.users", string="Last Updated by", readonly=True)
+    write_date = fields.Datetime(string="Last Updated on", readonly=True)
 
     name = fields.Char(
         required=True,

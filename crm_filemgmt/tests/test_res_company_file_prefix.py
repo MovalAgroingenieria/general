@@ -92,7 +92,7 @@ class TestResCompanyFilePrefix(BaseCase):
         self.assertEqual(c.file_prefix, "ABC")
 
     def test_file_prefix_length_validation(self):
-        company = self.env['res.company'].create({'name': 'Test Company'})
+        company = self.env["res.company"].create({"name": "Test Company"})
 
         # Valid prefix
         company.file_prefix = "ABC123"
@@ -103,15 +103,15 @@ class TestResCompanyFilePrefix(BaseCase):
             company.file_prefix = "A" * 11  # 11 characters > 10 limit
 
     def test_file_prefix_trimming(self):
-        company = self.env['res.company'].create({
-            'name': 'Test Company',
-            'file_prefix': '  TEST  '
-        })
-        self.assertEqual(company.file_prefix, 'TEST')
+        company = self.env["res.company"].create(
+            {"name": "Test Company", "file_prefix": "  TEST  "}
+        )
+        self.assertEqual(company.file_prefix, "TEST")
 
         # Test write with trimming
-        company.write({'file_prefix': '  NEW  '})
-        self.assertEqual(company.file_prefix, 'NEW')
+        company.write({"file_prefix": "  NEW  "})
+        self.assertEqual(company.file_prefix, "NEW")
+
 
 if __name__ == "__main__":
     unittest.main()

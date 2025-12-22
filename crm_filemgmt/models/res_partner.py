@@ -4,7 +4,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from lxml import etree
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError
 
 
@@ -16,6 +16,7 @@ class ResPartner(models.Model):
     - Attachment counting and management
     - File-related actions and views
     """
+
     _inherit = "res.partner"
 
     # ==========================
@@ -54,13 +55,13 @@ class ResPartner(models.Model):
     # COMPUTE METHODS
     # ==========================
 
-    @api.depends('file_ids')
+    @api.depends("file_ids")
     def _compute_number_of_files(self):
         """Compute the number of files linked through res.file.partnerlink."""
         for partner in self:
             partner.number_of_files = len(partner.file_ids)
 
-    @api.depends_context('uid')
+    @api.depends_context("uid")
     @api.model
     def _compute_attachment_count(self):
         """Compute the total number of attachments for each partner.
@@ -68,7 +69,7 @@ class ResPartner(models.Model):
         Uses read_group for performance with large datasets.
         Respects access rights by not using sudo() unless necessary.
         """
-        attachment_obj = self.env['ir.attachment']
+        attachment_obj = self.env["ir.attachment"]
 
         if not self.ids:
             for partner in self:
@@ -79,32 +80,31 @@ class ResPartner(models.Model):
         try:
             data = attachment_obj.read_group(
                 domain=[
-                    ('res_model', '=', 'res.partner'),
-                    ('res_id', 'in', self.ids),
-                    ('type', '!=', 'url'),  # Exclude URL attachments
+                    ("res_model", "=", "res.partner"),
+                    ("res_id", "in", self.ids),
+                    ("type", "!=", "url"),  # Exclude URL attachments
                 ],
-                fields=['res_id'],
-                groupby=['res_id'],
+                fields=["res_id"],
+                groupby=["res_id"],
                 lazy=False,
             )
-            counts = {d['res_id'][0]: d['__count'] for d in data}
+            counts = {d["res_id"][0]: d["__count"] for d in data}
         except AccessError:
             # If user doesn't have access to attachments, use sudo
             data = attachment_obj.sudo().read_group(
                 domain=[
-                    ('res_model', '=', 'res.partner'),
-                    ('res_id', 'in', self.ids),
-                    ('type', '!=', 'url'),
+                    ("res_model", "=", "res.partner"),
+                    ("res_id", "in", self.ids),
+                    ("type", "!=", "url"),
                 ],
-                fields=['res_id'],
-                groupby=['res_id'],
+                fields=["res_id"],
+                groupby=["res_id"],
                 lazy=False,
             )
-            counts = {d['res_id'][0]: d['__count'] for d in data}
+            counts = {d["res_id"][0]: d["__count"] for d in data}
 
         for partner in self:
             partner.attachment_count = counts.get(partner.id, 0)
-
 
     # ==========================
     # ACTION METHODS
@@ -122,9 +122,9 @@ class ResPartner(models.Model):
             "res_model": "ir.attachment",
             "view_mode": "kanban,list,form",
             "views": [
-                (self.env.ref('base.view_attachment_kanban').id, 'kanban'),
-                (self.env.ref('base.view_attachment_tree').id, 'list'),
-                (False, 'form'),
+                (self.env.ref("base.view_attachment_kanban").id, "kanban"),
+                (self.env.ref("base.view_attachment_tree").id, "list"),
+                (False, "form"),
             ],
             "domain": [
                 ("res_model", "=", "res.partner"),
@@ -146,13 +146,15 @@ class ResPartner(models.Model):
 
         # Check if user has access to file management using Odoo 18's check_access()
         try:
-            self.env['res.file.partnerlink'].check_access('read')
+            self.env["res.file.partnerlink"].check_access("read")
         except AccessError:
             # Convert AccessError to UserError for better user experience
-            raise UserError(_(
-                "You don't have permission to access the file management system. "
-                "Please contact your administrator."
-            ))
+            raise UserError(
+                _(
+                    "You don't have permission to access the file management system. "
+                    "Please contact your administrator."
+                )
+            )
 
         if not self.file_ids:
             # Return False to maintain backward compatibility
@@ -180,7 +182,9 @@ class ResPartner(models.Model):
         self.ensure_one()
 
         # Check if we should show file links or direct attachments
-        if self.file_ids and self.env.user.has_group('crm_filemgmt.group_filemgmt_user'):
+        if self.file_ids and self.env.user.has_group(
+            "crm_filemgmt.group_filemgmt_user"
+        ):
             return self.action_get_files()
         else:
             return self.action_open_partner_files()
@@ -190,7 +194,7 @@ class ResPartner(models.Model):
     # ==========================
 
     @api.model
-    def get_view(self, view_id=None, view_type='form', **options):
+    def get_view(self, view_id=None, view_type="form", **options):
         """Customize the view based on user permissions and context.
 
         Overrides the base method to:
@@ -200,40 +204,45 @@ class ResPartner(models.Model):
         """
         res = super().get_view(view_id=view_id, view_type=view_type, **options)
 
-        if view_type != 'form':
+        if view_type != "form":
             return res
 
-        doc = etree.XML(res['arch'])
+        doc = etree.XML(res["arch"])
 
         # Check if user has access to file management
-        has_filemgmt_access = self.env.user.has_group('crm_filemgmt.group_filemgmt_user')
+        has_filemgmt_access = self.env.user.has_group(
+            "crm_filemgmt.group_filemgmt_user"
+        )
 
         # Process file-related buttons
         for node in doc.xpath("//button[@name='action_get_files']"):
             if not has_filemgmt_access:
                 # Hide button if no access
-                modifiers = node.get('modifiers', '{}')
+                modifiers = node.get("modifiers", "{}")
                 modifiers_dict = eval(modifiers) if modifiers else {}
-                modifiers_dict['invisible'] = True
-                node.set('modifiers', str(modifiers_dict))
+                modifiers_dict["invisible"] = True
+                node.set("modifiers", str(modifiers_dict))
 
         # Add smart file button if not present
-        if has_filemgmt_access and not doc.xpath("//button[@name='action_open_file_management']"):
+        if has_filemgmt_access and not doc.xpath(
+            "//button[@name='action_open_file_management']"
+        ):
             # Find a good place to insert the button (typically in header or sheet)
             header = doc.xpath("//header")[0] if doc.xpath("//header") else None
             if header:
-                smart_button = etree.Element('button',
-                                             name='action_open_file_management',
-                                             type='object',
-                                             string='Files',
-                                             class_='btn-primary',
-                                             context="{'default_partner_id': active_id}",
-                                             modifiers=str({'invisible': [('number_of_files', '=', 0)]})
-                                             )
+                smart_button = etree.Element(
+                    "button",
+                    name="action_open_file_management",
+                    type="object",
+                    string="Files",
+                    class_="btn-primary",
+                    context="{'default_partner_id': active_id}",
+                    modifiers=str({"invisible": [("number_of_files", "=", 0)]}),
+                )
                 header.insert(0, smart_button)
 
         # Update the arch with modifications
-        res['arch'] = etree.tostring(doc, encoding='unicode')
+        res["arch"] = etree.tostring(doc, encoding="unicode")
 
         return res
 
@@ -249,23 +258,31 @@ class ResPartner(models.Model):
         self.ensure_one()
 
         stats = {
-            'total_files': self.number_of_files,
-            'total_attachments': self.attachment_count,
-            'linked_attachments': self.linked_attachment_count,
-            'by_type': {},
-            'by_stage': {},
+            "total_files": self.number_of_files,
+            "total_attachments": self.attachment_count,
+            "linked_attachments": self.linked_attachment_count,
+            "by_type": {},
+            "by_stage": {},
         }
 
         # Count files by type and stage
         if self.file_ids:
             # Group by file type
             for file_link in self.file_ids:
-                file_type = file_link.file_id.type_id.name if file_link.file_id.type_id else 'Unknown'
-                stats['by_type'][file_type] = stats['by_type'].get(file_type, 0) + 1
+                file_type = (
+                    file_link.file_id.type_id.name
+                    if file_link.file_id.type_id
+                    else "Unknown"
+                )
+                stats["by_type"][file_type] = stats["by_type"].get(file_type, 0) + 1
 
                 # Group by stage
-                stage = file_link.file_id.stage_id.name if file_link.file_id.stage_id else 'Unknown'
-                stats['by_stage'][stage] = stats['by_stage'].get(stage, 0) + 1
+                stage = (
+                    file_link.file_id.stage_id.name
+                    if file_link.file_id.stage_id
+                    else "Unknown"
+                )
+                stats["by_stage"][stage] = stats["by_stage"].get(stage, 0) + 1
 
         return stats
 
@@ -276,7 +293,7 @@ class ResPartner(models.Model):
         """
         if default is None:
             default = {}
-        default['file_ids'] = False  # Don't copy file links
+        default["file_ids"] = False  # Don't copy file links
         return super(ResPartner, self).copy(default)
 
     # ==========================
@@ -296,10 +313,10 @@ class ResPartner(models.Model):
         domain = []
 
         if file_type:
-            domain.append(('file_ids.file_id.type_id.name', 'ilike', file_type))
+            domain.append(("file_ids.file_id.type_id.name", "ilike", file_type))
 
         if stage:
-            domain.append(('file_ids.file_id.stage_id.name', 'ilike', stage))
+            domain.append(("file_ids.file_id.stage_id.name", "ilike", stage))
 
         return self.search(domain)
 
@@ -312,4 +329,4 @@ class ResPartner(models.Model):
         Returns: Recordset of recent file links
         """
         self.ensure_one()
-        return self.file_ids.sorted(key='create_date', reverse=True)[:limit]
+        return self.file_ids.sorted(key="create_date", reverse=True)[:limit]

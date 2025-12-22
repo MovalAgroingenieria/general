@@ -19,7 +19,7 @@ class ResCompany(models.Model):
         string="File Prefix (Upper Case)",
         compute="_compute_file_prefix_upper",
         store=False,
-        help="File prefix converted to uppercase for display purposes."
+        help="File prefix converted to uppercase for display purposes.",
     )
 
     @api.constrains("file_prefix")
@@ -29,9 +29,12 @@ class ResCompany(models.Model):
             if rec.file_prefix:
                 # Check if contains only letters, numbers, and underscores
                 import re
-                if not re.match(r'^[A-Za-z0-9_]*$', rec.file_prefix):
+
+                if not re.match(r"^[A-Za-z0-9_]*$", rec.file_prefix):
                     raise ValidationError(
-                        rec.env._("File Prefix can only contain letters, numbers, and underscores.")
+                        rec.env._(
+                            "File Prefix can only contain letters, numbers, and underscores."
+                        )
                     )
 
     @api.constrains("file_prefix")

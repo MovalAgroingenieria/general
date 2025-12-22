@@ -2,7 +2,7 @@
 # Copyright 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models, api, _
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -12,6 +12,7 @@ class ResFileStage(models.Model):
     Stages represent different statuses that files can go through in their lifecycle.
     This model supports kanban views with foldable columns and marking closing stages.
     """
+
     _name = "res.file.stage"
     _description = "File Stage"
     _order = "sequence, name, id"
@@ -32,21 +33,21 @@ class ResFileStage(models.Model):
     sequence = fields.Integer(
         default=10,
         help="Lower values appear first in lists and as left-most kanban columns. "
-             "Stages are ordered by this sequence number.",
+        "Stages are ordered by this sequence number.",
     )
 
     fold = fields.Boolean(
         string="Folded in Kanban",
         default=False,
         help="If enabled, this stage will be folded (collapsed) in kanban view. "
-             "Useful for stages that are not frequently used or are final states.",
+        "Useful for stages that are not frequently used or are final states.",
     )
 
     is_closing_stage = fields.Boolean(
         string="Closing Stage",
         default=False,
         help="Mark as closing stage to indicate the file should be considered closed. "
-             "Files in this stage can be filtered as completed or archived.",
+        "Files in this stage can be filtered as completed or archived.",
     )
 
     active = fields.Boolean(
@@ -73,21 +74,19 @@ class ResFileStage(models.Model):
         help="Count of files in this stage.",
     )
 
-    color = fields.Integer(string='Color Index', help='Color for kanban views')
-    is_starting_stage = fields.Boolean(string='Starting Stage', default=False)
-    allowed_group_ids = fields.Many2many('res.groups', string='Allowed Groups')
-
+    color = fields.Integer(string="Color Index", help="Color for kanban views")
+    is_starting_stage = fields.Boolean(string="Starting Stage", default=False)
+    allowed_group_ids = fields.Many2many("res.groups", string="Allowed Groups")
 
     # ==========================
     # COMPUTE METHODS
     # ==========================
 
-    @api.depends('file_ids')
+    @api.depends("file_ids")
     def _compute_file_count(self):
         """Compute the number of files in each stage."""
         for stage in self:
             stage.file_count = len(stage.file_ids)
-
 
     _sql_constraints = [
         (
@@ -114,8 +113,8 @@ class ResFileStage(models.Model):
         self.ensure_one()
         if default is None:
             default = {}
-        if 'name' not in default:
-            default['name'] = _("%s (copy)") % self.name
+        if "name" not in default:
+            default["name"] = _("%s (copy)") % self.name
         return super(ResFileStage, self).copy(default)
 
     def name_get(self):
@@ -142,12 +141,12 @@ class ResFileStage(models.Model):
         """
         self.ensure_one()
         return {
-            'name': _('Files in %s') % self.name,
-            'type': 'ir.actions.act_window',
-            'res_model': 'res.file',
-            'view_mode': 'list,form',
-            'domain': [('stage_id', '=', self.id)],
-            'context': {'default_stage_id': self.id},
+            "name": _("Files in %s") % self.name,
+            "type": "ir.actions.act_window",
+            "res_model": "res.file",
+            "view_mode": "list,form",
+            "domain": [("stage_id", "=", self.id)],
+            "context": {"default_stage_id": self.id},
         }
 
     # ==========================
@@ -173,4 +172,4 @@ class ResFileStage(models.Model):
 
         Returns: Recordset of the default stage or empty recordset.
         """
-        return self.search([], order='sequence', limit=1)
+        return self.search([], order="sequence", limit=1)

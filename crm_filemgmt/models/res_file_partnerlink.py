@@ -1,7 +1,7 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models,api
+from odoo import api, fields, models
 
 
 class ResFilePartnerlink(models.Model):
@@ -12,7 +12,7 @@ class ResFilePartnerlink(models.Model):
     _order = "is_main desc, partner_id"
 
     # Add default ordering for search
-    _rec_name = 'partner_id'
+    _rec_name = "partner_id"
 
     file_id = fields.Many2one(
         string="File",
@@ -27,12 +27,12 @@ class ResFilePartnerlink(models.Model):
         required=True,
         index=True,
         ondelete="restrict",
-        domain=[('is_company', '=', True)],  # Optional: Restrict to company partners
+        domain=[("is_company", "=", True)],  # Optional: Restrict to company partners
     )
     is_main = fields.Boolean(
         string="Primary",
         default=False,
-        help="If checked, this partner will be the primary partner for the file"
+        help="If checked, this partner will be the primary partner for the file",
     )
 
     # Related fields with store=True for better performance if frequently accessed
@@ -68,7 +68,7 @@ class ResFilePartnerlink(models.Model):
         store=True,
     )
 
-    @api.depends('partner_id', 'is_main')
+    @api.depends("partner_id", "is_main")
     def _compute_display_name(self):
         for record in self:
             name = record.partner_id.name or ""

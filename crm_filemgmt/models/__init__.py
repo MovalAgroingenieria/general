@@ -8,11 +8,11 @@ from . import (
     res_file_category,
     res_file_container,
     res_file_containertype,
+    res_file_filelink,
     res_file_location,
     res_file_partnerlink,
     res_file_report,
     res_file_stage,
     res_filetag,
     res_partner,
-    res_file_filelink,
 )

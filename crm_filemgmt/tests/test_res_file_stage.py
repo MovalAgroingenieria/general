@@ -58,7 +58,6 @@ class TestResFileStage(BaseCase):
     # SQL constraints
     # -------------------------
 
-
     # -------------------------
     # Ordering
     # -------------------------

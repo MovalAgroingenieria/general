@@ -1,10 +1,10 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-from odoo import exceptions
+from odoo import exceptions, fields
+from odoo.exceptions import UserError
 from odoo.tests.common import TransactionCase, tagged
 from odoo.tools.misc import mute_logger
-from odoo.exceptions import UserError
-from odoo import fields
+
 try:
     # psycopg2 errors for SQL constraint assertion
     from psycopg2 import IntegrityError
@@ -127,16 +127,18 @@ class TestResFileCategory(TransactionCase):
     def test_category_creation(self):
         """Test basic category creation."""
         cat = self._create_category(is_readonly=False, name="Test Category")
-        self.assertEqual(cat.name, 'Test Category')
+        self.assertEqual(cat.name, "Test Category")
         self.assertFalse(cat.is_readonly)
         self.assertEqual(cat.number_of_files, 0)
 
     def test_readonly_category_deletion(self):
         """Test that readonly categories cannot be deleted."""
-        readonly_category = self.env['res.file.category'].create({
-            'name': 'Readonly Category',
-            'is_readonly': True,
-        })
+        readonly_category = self.env["res.file.category"].create(
+            {
+                "name": "Readonly Category",
+                "is_readonly": True,
+            }
+        )
 
         with self.assertRaises(UserError):
             readonly_category.unlink()
@@ -145,13 +147,15 @@ class TestResFileCategory(TransactionCase):
         """Test that categories with files cannot be deleted."""
         # Create a file associated with the category
         cat = self._create_category(is_readonly=False, name="Normal")
-        self.env['res.file'].create({
-            'alphanum_code': 'TEST-2024/0001',
-            'subject': 'Test File',
-            'date_file': fields.Date.today(),
-            'category_id': cat.id,
-            'stage_id': self.env['res.file.stage'].search([], limit=1).id,
-        })
+        self.env["res.file"].create(
+            {
+                "alphanum_code": "TEST-2024/0001",
+                "subject": "Test File",
+                "date_file": fields.Date.today(),
+                "category_id": cat.id,
+                "stage_id": self.env["res.file.stage"].search([], limit=1).id,
+            }
+        )
 
         self.assertEqual(cat.number_of_files, 1)
 
@@ -161,11 +165,13 @@ class TestResFileCategory(TransactionCase):
 
     def test_parent_child_relationship(self):
         """Test parent-child category relationships."""
-        parent = self.env['res.file.category'].create({'name': 'Parent'})
-        child = self.env['res.file.category'].create({
-            'name': 'Child',
-            'parent_id': parent.id,
-        })
+        parent = self.env["res.file.category"].create({"name": "Parent"})
+        child = self.env["res.file.category"].create(
+            {
+                "name": "Child",
+                "parent_id": parent.id,
+            }
+        )
 
         self.assertEqual(child.parent_id, parent)
         self.assertIn(child, parent.child_ids)

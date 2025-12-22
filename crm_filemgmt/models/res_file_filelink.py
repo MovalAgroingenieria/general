@@ -39,5 +39,5 @@ class ResFileFilelink(models.Model):
     )
 
     _index = [
-        ('file_id', 'related_file_id'),  # Composite index for common queries
+        ("file_id", "related_file_id"),  # Composite index for common queries
     ]

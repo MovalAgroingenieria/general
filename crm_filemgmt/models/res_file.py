@@ -196,14 +196,14 @@ class ResFile(models.Model):
     ]
 
     _index = [
-        ('date_file',),  # Index for date filtering
-        ('subject',),  # Index for subject searches
-        ('partner_id', 'stage_id'),  # Composite index
+        ("date_file",),  # Index for date filtering
+        ("subject",),  # Index for subject searches
+        ("partner_id", "stage_id"),  # Composite index
     ]
 
     company_id = fields.Many2one(
-        'res.company',
-        string='Company',
+        "res.company",
+        string="Company",
         default=lambda self: self.env.company,
         required=True,
         index=True,
@@ -211,18 +211,29 @@ class ResFile(models.Model):
 
     allow_chatter = fields.Boolean(default=True)
 
-    kanban_state = fields.Selection([
-        ('normal', 'In Progress'),
-        ('blocked', 'Blocked'),
-        ('done', 'Ready'),
-    ], string='Kanban State', default='normal', tracking=True)
+    kanban_state = fields.Selection(
+        [
+            ("normal", "In Progress"),
+            ("blocked", "Blocked"),
+            ("done", "Ready"),
+        ],
+        string="Kanban State",
+        default="normal",
+        tracking=True,
+    )
 
-    priority = fields.Selection([
-        ('0', 'Low'),
-        ('1', 'Normal'),
-        ('2', 'High'),
-        ('3', 'Very High'),
-    ], string='Priority', default='1', tracking=True)
+    priority = fields.Selection(
+        [
+            ("0", "Low"),
+            ("1", "Normal"),
+            ("2", "High"),
+            ("3", "Very High"),
+        ],
+        string="Priority",
+        default="1",
+        tracking=True,
+    )
+
     # -------------------------
     # Display name (replace name_get)
     # -------------------------
@@ -400,8 +411,6 @@ class ResFile(models.Model):
     # -------------------------
     # Onchanges
     # -------------------------
-
-
 
     @api.onchange("stage_id")
     def _onchange_stage_id(self):

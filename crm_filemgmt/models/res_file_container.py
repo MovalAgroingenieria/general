@@ -6,7 +6,7 @@ from odoo import _, api, fields, models
 
 class ResFileContainer(models.Model):
     _name = "res.file.container"
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ["mail.thread", "mail.activity.mixin"]
     _description = "Container of Files"
     _order = "name"
 
@@ -58,9 +58,7 @@ class ResFileContainer(models.Model):
     )
 
     qr_code = fields.Binary(
-        string="QR Code",
-        attachment=True,
-        help="QR code for container identification"
+        string="QR Code", attachment=True, help="QR code for container identification"
     )
 
     capacity = fields.Integer(
@@ -76,13 +74,18 @@ class ResFileContainer(models.Model):
         digits=(5, 2),
     )
 
-    status = fields.Selection([
-        ('empty', 'Empty'),
-        ('low', 'Low (< 25%)'),
-        ('medium', 'Medium (25-75%)'),
-        ('high', 'High (> 75%)'),
-        ('full', 'Full'),
-    ], string="Status", compute="_compute_status", store=True)
+    status = fields.Selection(
+        [
+            ("empty", "Empty"),
+            ("low", "Low (< 25%)"),
+            ("medium", "Medium (25-75%)"),
+            ("high", "High (> 75%)"),
+            ("full", "Full"),
+        ],
+        string="Status",
+        compute="_compute_status",
+        store=True,
+    )
 
     # -------------------------
     # Computes
@@ -93,27 +96,29 @@ class ResFileContainer(models.Model):
         for rec in self:
             rec.number_of_files = len(rec.file_ids)
 
-    @api.depends('number_of_files', 'capacity')
+    @api.depends("number_of_files", "capacity")
     def _compute_usage_percentage(self):
         for container in self:
             if container.capacity > 0:
-                container.usage_percentage = (container.number_of_files / container.capacity) * 100
+                container.usage_percentage = (
+                    container.number_of_files / container.capacity
+                ) * 100
             else:
                 container.usage_percentage = 0.0
 
-    @api.depends('usage_percentage')
+    @api.depends("usage_percentage")
     def _compute_status(self):
         for container in self:
             if container.number_of_files == 0:
-                container.status = 'empty'
+                container.status = "empty"
             elif container.usage_percentage < 25:
-                container.status = 'low'
+                container.status = "low"
             elif container.usage_percentage <= 75:
-                container.status = 'medium'
+                container.status = "medium"
             elif container.usage_percentage < 100:
-                container.status = 'high'
+                container.status = "high"
             else:
-                container.status = 'full'
+                container.status = "full"
 
     @api.depends("name", "description", "location_id", "containertype_id")
     def _compute_display_name(self):

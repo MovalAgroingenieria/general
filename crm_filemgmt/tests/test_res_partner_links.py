@@ -85,8 +85,6 @@ class TestResPartnerFileLinks(BaseCase):
             }
         )
 
-
-
     # -------------------------
     # action_get_files
     # -------------------------

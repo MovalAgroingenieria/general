@@ -138,9 +138,9 @@ class TestResFileContainer(BaseCase):
                 self.assertEqual(container_id, self.container.id)
 
                 # Verificar que los archivos están en ese contenedor
-                files = self.env["res.file"].search([
-                    ("container_id", "=", container_id)
-                ])
+                files = self.env["res.file"].search(
+                    [("container_id", "=", container_id)]
+                )
                 file_ids = {f1.id, f2.id}
                 found_ids = {f.id for f in files}
                 self.assertTrue(file_ids.issubset(found_ids))
@@ -191,9 +191,9 @@ class TestResFileContainer(BaseCase):
         self.assertEqual(domain[0][2], self.container.id)
 
         # Verificar que los archivos esperados están en el contenedor
-        container_files = self.env["res.file"].search([
-            ("container_id", "=", self.container.id)
-        ])
+        container_files = self.env["res.file"].search(
+            [("container_id", "=", self.container.id)]
+        )
 
         expected_ids = {f.id for f in expected_files}
         actual_ids = {f.id for f in container_files}
@@ -205,6 +205,7 @@ class TestResFileContainer(BaseCase):
         context = action.get("context", {})
         self.assertEqual(context.get("default_container_id"), self.container.id)
         self.assertEqual(context.get("search_default_container_id"), self.container.id)
+
 
 if __name__ == "__main__":
     unittest.main()

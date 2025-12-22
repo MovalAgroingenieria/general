@@ -3,7 +3,7 @@
 # Copyright 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models, api, _
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -13,6 +13,7 @@ class ResFiletag(models.Model):
     Tags allow categorizing and filtering files across different stages and workflows.
     Each tag can have a color for visual identification in kanban and list views.
     """
+
     _name = "res.filetag"
     _description = "File Tags"
     _order = "sequence, name, id"
@@ -85,7 +86,7 @@ class ResFiletag(models.Model):
     # COMPUTE METHODS
     # ==========================
 
-    @api.depends('file_ids')
+    @api.depends("file_ids")
     def _compute_file_count(self):
         """Compute the number of files tagged with each tag."""
         for tag in self:
@@ -95,23 +96,21 @@ class ResFiletag(models.Model):
     # CONSTRAINTS
     # ==========================
 
-    @api.constrains('name')
+    @api.constrains("name")
     def _check_name_length(self):
         """Ensure tag name is not too long for UI display."""
         for tag in self:
             if len(tag.name) > 50:
-                raise ValidationError(_(
-                    "Tag name should not exceed 50 characters for proper display."
-                ))
+                raise ValidationError(
+                    _("Tag name should not exceed 50 characters for proper display.")
+                )
 
-    @api.constrains('color')
+    @api.constrains("color")
     def _check_color_range(self):
         """Ensure color index is within a reasonable range."""
         for tag in self:
             if tag.color < 0 or tag.color > 99:  # Odoo typically supports 0-11
-                raise ValidationError(_(
-                    "Color index must be between 0 and 99."
-                ))
+                raise ValidationError(_("Color index must be between 0 and 99."))
 
     _sql_constraints = [
         (
@@ -138,8 +137,8 @@ class ResFiletag(models.Model):
         self.ensure_one()
         if default is None:
             default = {}
-        if 'name' not in default:
-            default['name'] = _("%s (copy)") % self.name
+        if "name" not in default:
+            default["name"] = _("%s (copy)") % self.name
         return super(ResFiletag, self).copy(default)
 
     def name_get(self):
@@ -165,20 +164,23 @@ class ResFiletag(models.Model):
         """
         self.ensure_one()
         return {
-            'name': _('Files Tagged "%s"') % self.name,
-            'type': 'ir.actions.act_window',
-            'res_model': 'res.file',
-            'view_mode': 'list,form,kanban',
-            'domain': [('tag_ids', 'in', self.ids)],
-            'context': {
-                'default_tag_ids': [(4, self.id)],
-                'search_default_tag_id': self.id,
+            "name": _('Files Tagged "%s"') % self.name,
+            "type": "ir.actions.act_window",
+            "res_model": "res.file",
+            "view_mode": "list,form,kanban",
+            "domain": [("tag_ids", "in", self.ids)],
+            "context": {
+                "default_tag_ids": [(4, self.id)],
+                "search_default_tag_id": self.id,
             },
-            'help': _('''
+            "help": _(
+                """
                 <p class="o_view_nocontent_smiling_face">
                     View all files tagged with "%s"
                 </p>
-            ''') % self.name,
+            """
+            )
+            % self.name,
         }
 
     def get_tag_badge_class(self):
@@ -188,25 +190,37 @@ class ResFiletag(models.Model):
         """
         self.ensure_one()
         color_map = {
-            0: 'default', 1: 'success', 2: 'warning', 3: 'warning',
-            4: 'danger', 5: 'info', 6: 'primary', 7: 'info',
-            8: 'success', 9: 'danger', 10: 'danger', 11: 'default', 12: 'primary'
+            0: "default",
+            1: "success",
+            2: "warning",
+            3: "warning",
+            4: "danger",
+            5: "info",
+            6: "primary",
+            7: "info",
+            8: "success",
+            9: "danger",
+            10: "danger",
+            11: "default",
+            12: "primary",
         }
-        return color_map.get(self.color, 'default')
+        return color_map.get(self.color, "default")
 
     # ==========================
     # SEARCH METHODS
     # ==========================
 
     @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(
+        self, name="", args=None, operator="ilike", limit=100, name_get_uid=None
+    ):
         """Enhanced search for tags.
 
         Searches in both name and notes fields.
         """
         if args is None:
             args = []
-        domain = args + ['|', ('name', operator, name), ('notes', operator, name)]
+        domain = args + ["|", ("name", operator, name), ("notes", operator, name)]
         return self._search(domain, limit=limit, access_rights_uid=name_get_uid)
 
     # ==========================
@@ -221,17 +235,17 @@ class ResFiletag(models.Model):
         self.ensure_one()
         # This is a simplified example - Odoo has its own color system
         color_map = {
-            1: 'background-color: #21b799;',  # Green
-            2: 'background-color: #ffc107;',  # Yellow
-            3: 'background-color: #fd7e14;',  # Orange
-            4: 'background-color: #dc3545;',  # Red
-            5: 'background-color: #6f42c1;',  # Purple
-            6: 'background-color: #007bff;',  # Blue
-            7: 'background-color: #17a2b8;',  # Cyan
-            8: 'background-color: #28a745;',  # Light Green
-            9: 'background-color: #e83e8c;',  # Magenta
+            1: "background-color: #21b799;",  # Green
+            2: "background-color: #ffc107;",  # Yellow
+            3: "background-color: #fd7e14;",  # Orange
+            4: "background-color: #dc3545;",  # Red
+            5: "background-color: #6f42c1;",  # Purple
+            6: "background-color: #007bff;",  # Blue
+            7: "background-color: #17a2b8;",  # Cyan
+            8: "background-color: #28a745;",  # Light Green
+            9: "background-color: #e83e8c;",  # Magenta
         }
-        return color_map.get(self.color, 'background-color: #6c757d;')  # Default grey
+        return color_map.get(self.color, "background-color: #6c757d;")  # Default grey
 
     # ==========================
     # STATIC METHODS
