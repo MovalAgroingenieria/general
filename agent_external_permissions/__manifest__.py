@@ -53,7 +53,6 @@ This module does not alter standard Sales permissions for internal users.
         "views/crm_lead_views.xml",
         "views/crm_menu_access.xml",
     ],
-    "post_init_hook": "post_init_sync_agents",
     "installable": True,
     "application": False,
 }
