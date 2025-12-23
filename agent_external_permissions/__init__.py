@@ -3,4 +3,4 @@
 
 from . import models
 from . import wizards
-from . import hooks  # noqa: F401
+from .hooks import post_init_sync_agents
