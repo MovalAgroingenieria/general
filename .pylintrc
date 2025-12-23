@@ -1,7 +1,12 @@
 [MASTER]
 load-plugins=pylint_odoo
 score=n
-init-hook='import sys; sys.path.append("/home/ssanchez/workspace/v18/ocb")'
+init-hook=
+    import os, sys;
+    here = os.path.dirname(os.path.abspath(__file__));
+    ocb = os.path.abspath(os.path.join(here, "..", "ocb"));
+    sys.path.insert(0, ocb)
+
 
 [ODOOLINT]
 readme-template-url="https://github.com/OCA/maintainer-tools/blob/master/template/module/README.rst"
