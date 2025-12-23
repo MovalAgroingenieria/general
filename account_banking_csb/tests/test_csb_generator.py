@@ -165,7 +165,7 @@ class TestCSBGenerator(TransactionCase):
         self.partner = self.partner_obj.create(
             {
                 "name": "Beneficiario de Prueba Ñ",
-                "vat": "ES12345678",
+                "vat": "ESA12345674",
                 "street": "C/ Alcalá 1",
                 "street2": "Piso 3",
                 "zip": "28001",
