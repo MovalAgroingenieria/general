@@ -19,12 +19,3 @@ class TestDecimalPrecision(TransactionCase):
             "Test Precision"
         )
         self.assertEqual(precision, (16, 3))
-
-    def test_display_precision_from_config_parameter(self):
-        icp = self.env["ir.config_parameter"].sudo()
-        icp.set_param("display_decimal_precision.dp.Test Precision", "4")
-
-        precision = self.env["decimal.precision"].get_display_precision(
-            "Test Precision"
-        )
-        self.assertEqual(precision, (16, 4))

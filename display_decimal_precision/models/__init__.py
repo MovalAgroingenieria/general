@@ -5,7 +5,5 @@ from . import (
     decimal_precision,
     fields,
     ir_http,
-    res_config_settings,
     res_currency,
-    test_dummy,
 )

@@ -1,5 +1,5 @@
-# 2023-2026 Moval Agroingeniería
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+# Copyright 2023-2026 Moval Agroingeniería
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl-3.0.html).
 
 import logging
 
@@ -9,16 +9,25 @@ _logger = logging.getLogger(__name__)
 
 
 class DecimalPrecision(models.Model):
+    """Add a display precision on top of the standard decimal precision model.
+
+    Odoo uses ``decimal.precision.digits`` as the computation precision.
+    This module introduces ``display_digits`` to format values with a different
+    number of decimals than the computation precision.
+    """
+
     _inherit = "decimal.precision"
 
     display_digits = fields.Integer(
+        string="Display Digits",
         required=True,
         default=2,
-        help="Number of digits to display (for formatting purposes)",
+        help="Number of decimal digits to use when formatting values.",
     )
 
     @api.model_create_multi
     def create(self, vals_list):
+        """Default display_digits to digits when not explicitly provided."""
         for vals in vals_list:
             if "digits" in vals and "display_digits" not in vals:
                 vals["display_digits"] = vals["digits"]
@@ -26,28 +35,25 @@ class DecimalPrecision(models.Model):
         return super().create(vals_list)
 
     @api.model
-    def get_display_precision(self, application):
-        icp = self.env["ir.config_parameter"].sudo()
-        for key in (
-            f"display_decimal_precision.dp.{application}",
-            f"customer_purchase_follow_up.dp.{application}",  # legacy
-        ):
-            val = icp.get_param(key)
-            if val not in (None, False, ""):
-                try:
-                    return (16, int(val))
-                except (TypeError, ValueError) as e:
-                    _logger.warning(
-                        "Invalid decimal precision value for %s: %s. Error: %s",
-                        application,
-                        val,
-                        str(e),
-                    )
+    def get_display_precision(self, name):
+        """Return the display precision tuple for a given decimal precision name.
 
-        # fallback to decimal_precision table (if display_digits is maintained)
+        :param str name: decimal precision name (e.g. "Product Price")
+        :return: (total_digits, decimal_digits)
+        :rtype: tuple(int, int)
+        """
         self.env.cr.execute(
-            "SELECT display_digits FROM decimal_precision WHERE name=%s",
-            (application,),
+            "SELECT display_digits FROM decimal_precision WHERE name = %s",
+            (name,),
         )
         row = self.env.cr.fetchone()
-        return (16, row[0] if row and row[0] is not None else 2)
+        digits = row[0] if row and row[0] is not None else 2
+        try:
+            return (16, int(digits))
+        except (TypeError, ValueError):
+            _logger.warning(
+                "Invalid display_digits for decimal precision %s: %r. Falling back to 2.",
+                name,
+                digits,
+            )
+            return (16, 2)
