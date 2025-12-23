@@ -44,13 +44,6 @@ class ResPartner(models.Model):
         help="Count of all attachments (including those not in file management system).",
     )
 
-    linked_attachment_count = fields.Integer(
-        string="Linked Attachments",
-        compute="_compute_linked_attachment_count",
-        store=False,
-        help="Count of attachments that are part of the file management system.",
-    )
-
     # ==========================
     # COMPUTE METHODS
     # ==========================
@@ -62,46 +55,38 @@ class ResPartner(models.Model):
             partner.number_of_files = len(partner.file_ids)
 
     @api.depends_context("uid")
-    @api.model
     def _compute_attachment_count(self):
-        """Compute the total number of attachments for each partner.
+        """Compute total number of attachments per partner (excluding URL)."""
+        Attachment = self.env["ir.attachment"]
 
-        Uses read_group for performance with large datasets.
-        Respects access rights by not using sudo() unless necessary.
-        """
-        attachment_obj = self.env["ir.attachment"]
-
-        if not self.ids:
-            for partner in self:
-                partner.attachment_count = 0
+        if not self:
             return
 
-        # Try to compute with user's access rights first
+        # Default to 0
+        for partner in self:
+            partner.attachment_count = 0
+
+        domain = [
+            ("res_model", "=", "res.partner"),
+            ("res_id", "in", self.ids),
+            ("type", "!=", "url"),
+        ]
+
+        def _read_group(env):
+            return env["ir.attachment"].read_group(
+                domain=domain,
+                fields=["res_id"],
+                groupby=["res_id"],
+                lazy=False,
+            )
+
         try:
-            data = attachment_obj.read_group(
-                domain=[
-                    ("res_model", "=", "res.partner"),
-                    ("res_id", "in", self.ids),
-                    ("type", "!=", "url"),  # Exclude URL attachments
-                ],
-                fields=["res_id"],
-                groupby=["res_id"],
-                lazy=False,
-            )
-            counts = {d["res_id"][0]: d["__count"] for d in data}
+            data = _read_group(self.env)
         except AccessError:
-            # If user doesn't have access to attachments, use sudo
-            data = attachment_obj.sudo().read_group(
-                domain=[
-                    ("res_model", "=", "res.partner"),
-                    ("res_id", "in", self.ids),
-                    ("type", "!=", "url"),
-                ],
-                fields=["res_id"],
-                groupby=["res_id"],
-                lazy=False,
-            )
-            counts = {d["res_id"][0]: d["__count"] for d in data}
+            data = _read_group(self.env.sudo())
+
+        # In read_group, res_id is an int for Many2one groupby
+        counts = {d["res_id"]: d["__count"] for d in data if d.get("res_id")}
 
         for partner in self:
             partner.attachment_count = counts.get(partner.id, 0)
@@ -183,7 +168,7 @@ class ResPartner(models.Model):
 
         # Check if we should show file links or direct attachments
         if self.file_ids and self.env.user.has_group(
-            "crm_filemgmt.group_filemgmt_user"
+                "crm_filemgmt.group_filemgmt_user"
         ):
             return self.action_get_files()
         else:
@@ -225,7 +210,7 @@ class ResPartner(models.Model):
 
         # Add smart file button if not present
         if has_filemgmt_access and not doc.xpath(
-            "//button[@name='action_open_file_management']"
+                "//button[@name='action_open_file_management']"
         ):
             # Find a good place to insert the button (typically in header or sheet)
             header = doc.xpath("//header")[0] if doc.xpath("//header") else None
@@ -234,9 +219,8 @@ class ResPartner(models.Model):
                     "button",
                     name="action_open_file_management",
                     type="object",
-                    string="Files",
+                    string=_("Files"),
                     class_="btn-primary",
-                    context="{'default_partner_id': active_id}",
                     modifiers=str({"invisible": [("number_of_files", "=", 0)]}),
                 )
                 header.insert(0, smart_button)
