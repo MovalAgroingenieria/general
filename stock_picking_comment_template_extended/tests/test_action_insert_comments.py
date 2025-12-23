@@ -18,7 +18,7 @@ class FakeTemplate:
 class TestActionInsertComments(TransactionCase):
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls):  # pylint: disable=invalid-name
         super().setUpClass()
         cls.partner = cls.env["res.partner"].create(
             {"name": "Test Partner", "lang": "es_ES"}
@@ -38,14 +38,16 @@ class TestActionInsertComments(TransactionCase):
         picking_cls = self.picking.__class__
 
         with patch.object(
-                picking_cls, "comment_template_ids", new_callable=PropertyMock
+            picking_cls, "comment_template_ids", new_callable=PropertyMock
         ) as mock_templates, patch.object(
             picking_cls, "render_comment", autospec=True, return_value=""
         ) as mock_render:
             mock_templates.return_value = []
 
             # Preload values and verify they get cleared
-            self.picking.write({"top_comment": "<p>OLD</p>", "bottom_comment": "<p>OLD</p>"})
+            self.picking.write(
+                {"top_comment": "<p>OLD</p>", "bottom_comment": "<p>OLD</p>"}
+            )
 
             self.picking.action_insert_comments()
 
@@ -57,7 +59,8 @@ class TestActionInsertComments(TransactionCase):
             mock_render.assert_not_called()
 
     def test_templates_render_and_split_top_bottom_using_partner_language(self):
-        """Templates are rendered and split into top/bottom using partner language context."""
+        """Templates are rendered and split into top/bottom
+        using partner language context."""
         fake_top_1 = FakeTemplate(position="before_lines", name="Top A")
         fake_top_2 = FakeTemplate(position="before_lines", name="Top B")
         fake_bottom = FakeTemplate(position="after_lines", name="Bottom X")
@@ -71,7 +74,7 @@ class TestActionInsertComments(TransactionCase):
         picking_cls = self.picking.__class__
 
         with patch.object(
-                picking_cls, "comment_template_ids", new_callable=PropertyMock
+            picking_cls, "comment_template_ids", new_callable=PropertyMock
         ) as mock_templates, patch.object(
             picking_cls, "render_comment", autospec=True, side_effect=fake_render
         ) as mock_render:
