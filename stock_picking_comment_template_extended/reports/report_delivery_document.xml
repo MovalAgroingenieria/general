@@ -1,33 +1,22 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Inherit delivery document report to inject top and bottom comments -->
+    <!-- Replace dynamic template rendering with stored HTML fields in Delivery Slip -->
     <template id="report_delivery_document_comments"
               inherit_id="stock_picking_comment_template.report_delivery_document_comments">
 
-        <!-- Hide the original top comment block -->
-        <xpath expr="//t[@t-as='comment_template_top']" position="attributes">
-            <attribute name="t-if">False</attribute>
-        </xpath>
-        <!-- Insert the rendered top comment right after -->
-        <xpath expr="//t[@t-as='comment_template_top']" position="after">
-            <!-- Render stored HTML from the top_comment field -->
-            <t t-raw="o.top_comment"/>
-            <!-- Alternative:
-            <span t-field="o.top_comment" t-options='{"widget": "html"}'/>
-            -->
+        <!-- TOP: replace the block inserted right before the move table -->
+        <xpath expr="//table[@name='stock_move_table']/preceding-sibling::t[1]" position="replace">
+            <t t-if="o.top_comment">
+                <div class="mt-2" t-raw="o.top_comment"/>
+            </t>
         </xpath>
 
-        <!-- Hide the original bottom comment block -->
-        <xpath expr="//t[@t-as='comment_template_bottom']" position="attributes">
-            <attribute name="t-if">False</attribute>
-        </xpath>
-        <!-- Insert the rendered bottom comment right after -->
-        <xpath expr="//t[@t-as='comment_template_bottom']" position="after">
-            <!-- Render stored HTML from the bottom_comment field -->
-            <t t-raw="o.bottom_comment"/>
-            <!-- Alternative:
-            <span t-field="o.bottom_comment" t-options='{"widget": "html"}'/>
-            -->
+        <!-- BOTTOM: replace the after_lines loop (inserted after external_layout in the base module) -->
+        <xpath expr="//t[contains(@t-foreach, 'o.comment_template_ids') and contains(@t-foreach, 'after_lines')]"
+               position="replace">
+            <t t-if="o.bottom_comment">
+                <div class="mt-2" t-raw="o.bottom_comment"/>
+            </t>
         </xpath>
 
     </template>

@@ -1,3 +1,6 @@
+# Copyright 2025 Moval Agroingeniería
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+
 from unittest.mock import PropertyMock, patch
 
 from odoo.tests.common import TransactionCase
@@ -5,19 +8,18 @@ from odoo.tools import html2plaintext
 
 
 class FakeTemplate:
+    """Lightweight object to simulate a template record."""
+
     def __init__(self, position, name):
         self.position = position
         self.name = name
-
-    def with_context(self, **_kwargs):
-        return self
 
 
 class TestActionInsertComments(TransactionCase):
 
     @classmethod
-    def setUpClass(cls):  # pylint: disable=invalid-name
-        super().setUpClass()  # <-- nombre correcto
+    def setUpClass(cls):
+        super().setUpClass()
         cls.partner = cls.env["res.partner"].create(
             {"name": "Test Partner", "lang": "es_ES"}
         )
@@ -31,51 +33,61 @@ class TestActionInsertComments(TransactionCase):
             }
         )
 
-    def test_no_templates_does_nothing_and_clears_fields(self):
+    def test_no_templates_clears_fields_and_does_not_render(self):
+        """If there are no templates, the method clears both comment fields."""
+        picking_cls = self.picking.__class__
+
         with patch.object(
-            type(self.picking), "comment_template_ids", new_callable=PropertyMock
+                picking_cls, "comment_template_ids", new_callable=PropertyMock
         ) as mock_templates, patch.object(
-            type(self.picking), "render_comment", autospec=True, return_value=""
+            picking_cls, "render_comment", autospec=True, return_value=""
         ) as mock_render:
             mock_templates.return_value = []
-            # precargar valores para verificar que se vacían
-            self.picking.write({"top_comment": "OLD", "bottom_comment": "OLD"})
+
+            # Preload values and verify they get cleared
+            self.picking.write({"top_comment": "<p>OLD</p>", "bottom_comment": "<p>OLD</p>"})
 
             self.picking.action_insert_comments()
 
             top_txt = html2plaintext(self.picking.top_comment or "").strip()
             bottom_txt = html2plaintext(self.picking.bottom_comment or "").strip()
+
             self.assertEqual(top_txt, "")
             self.assertEqual(bottom_txt, "")
             mock_render.assert_not_called()
 
-    def test_templates_render_and_split_top_bottom_with_lang(self):
+    def test_templates_render_and_split_top_bottom_using_partner_language(self):
+        """Templates are rendered and split into top/bottom using partner language context."""
         fake_top_1 = FakeTemplate(position="before_lines", name="Top A")
         fake_top_2 = FakeTemplate(position="before_lines", name="Top B")
         fake_bottom = FakeTemplate(position="after_lines", name="Bottom X")
         fake_templates = [fake_top_1, fake_bottom, fake_top_2]
 
-        def fake_render(_self, template):
-            # comprueba que usa el idioma del partner
-            return f"[{self.picking.partner_id.lang}] {template.name}"
+        def fake_render(picking, template):
+            # Ensure the partner language is applied through the picking context
+            lang = picking.env.context.get("lang")
+            return f"[{lang}] {template.name}"
+
+        picking_cls = self.picking.__class__
 
         with patch.object(
-            type(self.picking), "comment_template_ids", new_callable=PropertyMock
+                picking_cls, "comment_template_ids", new_callable=PropertyMock
         ) as mock_templates, patch.object(
-            type(self.picking), "render_comment", autospec=True, side_effect=fake_render
+            picking_cls, "render_comment", autospec=True, side_effect=fake_render
         ) as mock_render:
             mock_templates.return_value = fake_templates
 
-            self.picking.write({"top_comment": "", "bottom_comment": ""})
+            self.picking.write({"top_comment": False, "bottom_comment": False})
             self.picking.action_insert_comments()
 
             self.assertEqual(mock_render.call_count, len(fake_templates))
 
-            # normaliza HTML -> texto plano para comparar contenido
             top_txt = html2plaintext(self.picking.top_comment or "").strip()
             bottom_txt = html2plaintext(self.picking.bottom_comment or "").strip()
 
+            # Order must be preserved: Top A, Bottom X, Top B (split by position)
             expected_top = "[es_ES] Top A[es_ES] Top B"
             expected_bottom = "[es_ES] Bottom X"
+
             self.assertEqual(top_txt, expected_top)
             self.assertEqual(bottom_txt, expected_bottom)

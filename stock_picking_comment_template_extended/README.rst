@@ -1,6 +1,6 @@
 .. |badge1| image:: https://img.shields.io/badge/licence-AGPL--3-blue.png
-    :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
-    :alt: License: AGPL-3
+   :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
+   :alt: License: AGPL-3
 
 |badge1|
 
@@ -17,55 +17,75 @@ Picking Comments Extended
 Description
 ===========
 
-This module changes how comment templates are added to stock picking reports.
+This module extends the behavior of comment templates on stock picking reports.
 
-- Comment templates (top/bottom) are **not** injected automatically into the report.
+By default, comment templates are injected automatically by the base module.
+This extension changes that workflow to give users explicit control.
+
+Key changes introduced by this module:
+
+- Comment templates (top and bottom) are **not** injected automatically.
 - Users must explicitly click the **Insert comments** button on the picking form.
-- The action renders the selected templates (respecting their order and position)
-  and writes the resulting HTML into two editable fields: **Top Comment** and **Bottom Comment**.
+- The action renders the selected templates (respecting order and position)
+  and stores the resulting HTML in two editable fields:
+  **Top Comment** and **Bottom Comment**.
 - Editing these fields **does not affect** the original templates.
+
 
 Why this is useful
 ------------------
 
-- Full control over when comments appear on each picking.
-- Ability to fine-tune the generated text per document, without altering templates.
+- Full control over **when** comments are applied to a picking.
+- Ability to fine-tune the generated text per document.
+- Templates remain reusable and unchanged.
 
 
 Compatibility
 =============
 
 - **Odoo:** 18.0
-- **Depends on:** ``stock`` and the base comment template module
-  (e.g. ``stock_picking_comment_template`` or your equivalent).
+- **Depends on:**
+  - ``stock``
+  - ``stock_picking_comment_template`` (or an equivalent base module providing comment templates)
 
 
 Usage
 =====
 
 1. Go to **Inventory → Operations → Transfers** and open a picking.
-2. In the **Comments** tab, select the desired comment templates.
-3. Click **Insert comments**.
-4. Optionally edit **Top Comment** and/or **Bottom Comment** fields before printing.
-5. Print the picking report (Delivery Slip / Picking Operations) to see the result.
+2. Open the **Comments** tab.
+3. Select the desired comment templates.
+4. Click **Insert comments**.
+5. Optionally edit **Top Comment** and/or **Bottom Comment**.
+6. Print the picking report (Delivery Slip or Picking Operations).
+
+The rendered comments will appear in the corresponding report sections.
+
 
 Notes
 -----
 
-- The HTML in **Top Comment** and **Bottom Comment** is rendered in the report.
-- The fields are read-only when the picking is **Done** or **Cancelled** (v18 uses JSON ``modifiers``).
+- The HTML stored in **Top Comment** and **Bottom Comment** is rendered directly
+  in the report.
+- These fields become read-only when the picking is **Done** or **Cancelled**
+  (Odoo 18 uses JSON ``modifiers`` for this behavior).
 
 
 Configuration
 =============
 
-No special configuration is required. Install the module and use the action from the picking form.
+No special configuration is required.
+
+Install the module and use the **Insert comments** action from the picking form.
 
 
 Uninstallation
 ==============
 
-On uninstall, no data migration is performed. Existing values in the comment fields remain in the database but will no longer be injected by this module’s views/reports.
+No data migration is performed on uninstall.
+
+Existing values stored in the comment fields remain in the database but will no
+longer be injected into reports by this module.
 
 
 Credits
@@ -87,6 +107,7 @@ Contributors
 * Juanu Sandoval <jsandoval@moval.es>
 * Jorge Vera <jvera@moval.es>
 
+
 Maintainers
 ~~~~~~~~~~~
 
@@ -94,4 +115,4 @@ This module is maintained by Moval Agroingeniería.
 
 .. image:: https://services.moval.es/static/images/logo_moval_small.png
    :alt: Moval Agroingeniería
-   :target: http://moval.es
+   :target: https://www.moval.es
