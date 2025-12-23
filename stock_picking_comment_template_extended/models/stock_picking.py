@@ -1,18 +1,16 @@
 # Copyright 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-from odoo import api, fields, models
+from odoo import fields, models
 
 
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
     top_comment = fields.Html(
-        string="Top Comment",
         help="Rendered comment content displayed above the move lines.",
     )
     bottom_comment = fields.Html(
-        string="Bottom Comment",
         help="Rendered comment content displayed below the move lines.",
     )
 
@@ -42,7 +40,9 @@ class StockPicking(models.Model):
 
             for template in templates:
                 # Ensure language context during rendering.
-                rendered = picking.with_context(lang=lang).render_comment(template) or ""
+                rendered = (
+                    picking.with_context(lang=lang).render_comment(template) or ""
+                )
 
                 # Place rendered HTML depending on template position.
                 if template.position == "before_lines":
