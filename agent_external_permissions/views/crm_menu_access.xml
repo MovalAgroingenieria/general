@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- CRM root menu visible only for these groups -->
+    <record id="crm.crm_menu_root" model="ir.ui.menu">
+        <field name="groups_id" eval="[
+            (4, ref('agent_external_permissions.group_external_agent')),
+            (4, ref('agent_external_permissions.group_internal_salesperson'))
+        ]"/>
+    </record>
+
+</odoo>

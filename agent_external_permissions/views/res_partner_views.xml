@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_external_agent" model="ir.ui.view">
+        <field name="name">res.partner.form.external.agent</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//sheet//group" position="after">
+                <group string="External Agents Assignment" col="2" groups="base.group_user">
+                    <field name="external_agent_ids" widget="many2many_tags"/>
+
+                    <button
+                            name="%(agent_external_permissions.action_update_agents_wizard)d"
+                            type="action"
+                            string="Update Opportunities Agents"
+                            class="btn-primary mt-2"
+                            icon="fa-refresh"
+                            context="{'default_partner_id': id}"
+                            groups="agent_external_permissions.group_external_agent,agent_external_permissions.group_internal_salesperson"
+                    />
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
