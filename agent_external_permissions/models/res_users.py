@@ -1,7 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import models, fields, api
+from odoo import api, fields, models
 
 MODULE = "agent_external_permissions"
 
@@ -10,12 +10,10 @@ class ResUsers(models.Model):
     _inherit = "res.users"
 
     is_external_agent = fields.Boolean(
-        string="Is External Agent",
         help="Check this if the user is an external agent.",
     )
 
     is_internal_salesperson = fields.Boolean(
-        string="Is Internal Salesperson",
         help="Check this if the user is an internal salesperson.",
     )
 
@@ -32,8 +30,12 @@ class ResUsers(models.Model):
 
     def _sync_agent_groups(self):
         """Ensure group membership matches the boolean flags."""
-        group_external = self.env.ref(f"{MODULE}.group_external_agent", raise_if_not_found=False)
-        group_internal = self.env.ref(f"{MODULE}.group_internal_salesperson", raise_if_not_found=False)
+        group_external = self.env.ref(
+            f"{MODULE}.group_external_agent", raise_if_not_found=False
+        )
+        group_internal = self.env.ref(
+            f"{MODULE}.group_internal_salesperson", raise_if_not_found=False
+        )
 
         if not group_external or not group_internal:
             # If groups are not loaded yet (e.g., during install), do nothing safely.

@@ -13,18 +13,20 @@ class TestAgentExternalPermissions(TransactionCase):
         cls.company = cls.env.company
 
         # Groups
-        cls.group_external = cls.env.ref("agent_external_permissions.group_external_agent")
-        cls.group_internal = cls.env.ref("agent_external_permissions.group_internal_salesperson")
+        cls.group_external = cls.env.ref(
+            "agent_external_permissions.group_external_agent"
+        )
+        cls.group_internal = cls.env.ref(
+            "agent_external_permissions.group_internal_salesperson"
+        )
 
         # Sale groups can vary by build
-        cls.group_sale_user = (
-                cls.env.ref("sales_team.group_sale_salesman", raise_if_not_found=False)
-                or cls.env.ref("sale.group_sale_salesman", raise_if_not_found=False)
-        )
-        cls.group_sale_all = (
-                cls.env.ref("sales_team.group_sale_salesman_all_leads", raise_if_not_found=False)
-                or cls.env.ref("sale.group_sale_salesman_all_leads", raise_if_not_found=False)
-        )
+        cls.group_sale_user = cls.env.ref(
+            "sales_team.group_sale_salesman", raise_if_not_found=False
+        ) or cls.env.ref("sale.group_sale_salesman", raise_if_not_found=False)
+        cls.group_sale_all = cls.env.ref(
+            "sales_team.group_sale_salesman_all_leads", raise_if_not_found=False
+        ) or cls.env.ref("sale.group_sale_salesman_all_leads", raise_if_not_found=False)
 
         # Models
         cls.Partner = cls.env["res.partner"]
@@ -181,13 +183,17 @@ class TestAgentExternalPermissions(TransactionCase):
         Validate the internal salesperson crm.lead ir.rule exists, is attached to the
         internal group, and enforces own opportunities only.
         """
-        rule = self.env.ref("agent_external_permissions.rule_crm_lead_internal_salesperson")
+        rule = self.env.ref(
+            "agent_external_permissions.rule_crm_lead_internal_salesperson"
+        )
         self.assertTrue(rule)
         self.assertIn(self.group_internal, rule.groups)
 
         # tolerant compare (ignore whitespace)
         normalized = "".join((rule.domain_force or "").split())
-        expected = "".join("[('type','=','opportunity'),('user_id','=',user.id)]".split())
+        expected = "".join(
+            "[('type','=','opportunity'),('user_id','=',user.id)]".split()
+        )
         self.assertEqual(normalized, expected)
 
     def test_internal_salesperson_can_read_own_opportunity(self):
@@ -199,7 +205,10 @@ class TestAgentExternalPermissions(TransactionCase):
     # -------------------------
     def test_internal_salesperson_sales_not_restricted_by_this_module(self):
         rules = self.IrRule.search(
-            [("model_id.model", "=", "sale.order"), ("groups", "in", self.group_internal.id)]
+            [
+                ("model_id.model", "=", "sale.order"),
+                ("groups", "in", self.group_internal.id),
+            ]
         )
         self.assertFalse(rules)
 
@@ -215,7 +224,9 @@ class TestAgentExternalPermissions(TransactionCase):
     # WIZARD
     # -------------------------
     def test_update_agents_wizard_updates_existing_opportunities(self):
-        self.partner_allowed.write({"external_agent_ids": [(6, 0, [self.user_external.id])]})
+        self.partner_allowed.write(
+            {"external_agent_ids": [(6, 0, [self.user_external.id])]}
+        )
 
         self.opp_ext_assigned.write({"external_agent_ids": [(5, 0, 0)]})
         self.assertFalse(self.opp_ext_assigned.external_agent_ids)
@@ -230,7 +241,9 @@ class TestAgentExternalPermissions(TransactionCase):
         wizard.action_update_agents()
 
         self.opp_ext_assigned.invalidate_recordset()
-        self.assertEqual(set(self.opp_ext_assigned.external_agent_ids.ids), {self.user_external.id})
+        self.assertEqual(
+            set(self.opp_ext_assigned.external_agent_ids.ids), {self.user_external.id}
+        )
 
     def test_update_agents_wizard_raises_if_no_agents_on_contact(self):
         self.partner_denied.write({"external_agent_ids": [(5, 0, 0)]})

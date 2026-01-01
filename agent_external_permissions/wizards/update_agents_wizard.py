@@ -35,9 +35,9 @@ class UpdateAgentsWizard(models.TransientModel):
         res = super().default_get(fields_list)
         ctx = self.env.context
         if (
-                "partner_id" in fields_list
-                and ctx.get("active_model") == "res.partner"
-                and ctx.get("active_id")
+            "partner_id" in fields_list
+            and ctx.get("active_model") == "res.partner"
+            and ctx.get("active_id")
         ):
             res["partner_id"] = ctx["active_id"]
         return res

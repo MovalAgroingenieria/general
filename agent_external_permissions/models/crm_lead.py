@@ -31,7 +31,7 @@ class CrmLead(models.Model):
         if not partner:
             return
         if not self.env.user.has_group(
-                "agent_external_permissions.group_external_agent"
+            "agent_external_permissions.group_external_agent"
         ):
             return
         if self.env.user not in partner.external_agent_ids:
@@ -65,9 +65,12 @@ class CrmLead(models.Model):
 
                 # Guardrail: prevent create with forbidden partner (clean error message)
                 # Using a "virtual" record for check: create has no record yet.
-                if self.env.user.has_group(
+                if (
+                    self.env.user.has_group(
                         "agent_external_permissions.group_external_agent"
-                ) and self.env.user not in partner.external_agent_ids:
+                    )
+                    and self.env.user not in partner.external_agent_ids
+                ):
                     raise UserError(
                         _(
                             "You can only create opportunities for contacts where you are assigned "
