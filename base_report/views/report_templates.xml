@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <!-- Paperformats for reports -->
+    <!-- Paper formats for reports -->
     <record id="paperformat_euro_reports" model="report.paperformat">
         <field name="name">European A4 Reports</field>
         <field name="default" eval="True"/>
@@ -19,8 +18,9 @@
     </record>
 
     <record id="paperformat_euro_reports_max" model="report.paperformat">
-        <field name="name">European A4 Reports Max</field>
-        <field name="default" eval="True"/>
+        <field name="name">European A4 Reports (Max)</field>
+        <!-- Only one paperformat can be default. Keep this one as non-default. -->
+        <field name="default" eval="False"/>
         <field name="format">A4</field>
         <field name="page_height">0</field>
         <field name="page_width">0</field>
@@ -34,31 +34,34 @@
         <field name="dpi">90</field>
     </record>
 
-    <!-- External layouts styles -->
-    <template id="external_layout_standard" inherit_id="web.external_layout_standard">
+    <!-- External layout customizations -->
+    <!-- NOTE: We use position="replace" intentionally to fully control the footer.
+         OCA pre-commit flags replace at low priority, so we set priority >= 99. -->
+
+    <template id="external_layout_standard" inherit_id="web.external_layout_standard" priority="100">
         <!-- Footer -->
-        <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout" position="replace">
+        <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="replace">
             <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
                 <div class="text-center" style="border-top: 1px solid black;">
-                    <ul class="list-inline mb4">
-                        <div t-field="company.report_footer" style="font-size: 8px; margin-top: 2px; text-align: justify;"/>
-                    </ul>
+                    <div t-field="company.report_footer"
+                         style="font-size: 8px; margin-top: 2px; text-align: justify;"/>
                     <div t-if="report_type == 'pdf'" class="text-muted text-end" style="font-size: 8px;">
                         <span class="page"/>
                         <span>/</span>
                         <span class="topage"/>
                     </div>
-                    <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted" style="font-size: 8px;">
+                    <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted"
+                         style="font-size: 8px;">
                         <span t-field="o.name"/>
                     </div>
                 </div>
             </div>
-        </div>
+        </xpath>
     </template>
 
-    <template id="external_layout_boxed" inherit_id="web.external_layout_boxed">
+    <template id="external_layout_boxed" inherit_id="web.external_layout_boxed" priority="100">
         <!-- Footer -->
-        <div t-attf-class="footer o_boxed_footer o_company_#{company.id}_layout" position="replace">
+        <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="replace">
             <div t-attf-class="footer o_boxed_footer o_company_#{company.id}_layout">
                 <div>
                     <div t-field="company.report_footer" style="font-size: 8px;"/>
@@ -67,58 +70,65 @@
                         <span>/</span>
                         <span class="topage"/>
                     </div>
-                    <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted" style="font-size: 8px;">
+                    <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted"
+                         style="font-size: 8px;">
                         <span t-field="o.name"/>
                     </div>
                 </div>
             </div>
-        </div>
+        </xpath>
     </template>
 
-    <template id="external_layout_bold" inherit_id="web.external_layout_bold">
+    <template id="external_layout_bold" inherit_id="web.external_layout_bold" priority="100">
         <!-- Footer -->
-        <div t-attf-class="footer o_clean_footer o_company_#{company.id}_layout" position="replace">
+        <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="replace">
             <div t-attf-class="footer o_clean_footer o_company_#{company.id}_layout">
                 <div class="row">
                     <div class="col-4">
                         <span t-field="company.report_footer" style="font-size: 8px;"/>
                     </div>
                     <div class="col-4">
-                        <span t-if="company.is_company_details_empty" t-field="company.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
+                        <span t-if="company.is_company_details_empty"
+                              t-field="company.partner_id"
+                              t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
                         <span t-else="" t-field="company.company_details"/>
                     </div>
                     <div class="col-3">
                         <div class="mt0 mb0 h5" t-field="company.report_header" style="font-size: 8px;"/>
                     </div>
                     <div class="col-1">
-                        <ul t-if="report_type == 'pdf'" class="list-inline pagenumber float-end text-center" style="font-size: 8px;">
-                            <li class="list-inline-item"><strong><span class="page"/></strong></li>
+                        <ul t-if="report_type == 'pdf'" class="list-inline pagenumber float-end text-center"
+                            style="font-size: 8px;">
+                            <li class="list-inline-item">
+                                <strong>
+                                    <span class="page"/>
+                                </strong>
+                            </li>
                         </ul>
                     </div>
                 </div>
             </div>
-        </div>
+        </xpath>
     </template>
 
-    <template id="external_layout_striped" inherit_id="web.external_layout_striped">
+    <template id="external_layout_striped" inherit_id="web.external_layout_striped" priority="100">
         <!-- Footer -->
-        <div t-attf-class="o_company_#{company.id}_layout footer o_background_footer" position="replace">
+        <xpath expr="//div[contains(@t-attf-class, 'footer')]" position="replace">
             <div t-attf-class="o_company_#{company.id}_layout footer o_background_footer">
                 <div class="text-center">
-                    <ul class="list-inline">
-                        <div t-field="company.report_footer" style="font-size: 8px; margin-top: 2px; text-align: justify;"/>
-                    </ul>
+                    <div t-field="company.report_footer"
+                         style="font-size: 8px; margin-top: 2px; text-align: justify;"/>
                     <div t-if="report_type == 'pdf'" class="text-muted text-end" style="font-size: 8px;">
                         <span class="page"/>
                         <span>/</span>
                         <span class="topage"/>
                     </div>
-                    <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted" style="font-size: 8px;">
+                    <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted"
+                         style="font-size: 8px;">
                         <span t-field="o.name"/>
                     </div>
                 </div>
             </div>
-        </div>
+        </xpath>
     </template>
-
 </odoo>
