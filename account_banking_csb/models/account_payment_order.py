@@ -273,8 +273,7 @@ class AccountPaymentOrder(models.Model):
         # Header
         txt_file += self._cabecera_ordenante_68()
 
-        # Beneficiaries (assume self.payment_ids are the payment lines on this order)
-        for line in self.payment_ids:
+        for line in self.payment_line_ids:
             seq += 1
             txt_file += self._registro_beneficiario_68(line, seq)
             total_payments += 1
