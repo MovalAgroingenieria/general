@@ -1,4 +1,4 @@
-.. |badge1| image:: https://img.shields.io/badge/licence-AGPL--3-blue.png
+.. |badge1| image:: https://img.shields.io/badge/license-AGPL--3-blue.png
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
 
@@ -16,24 +16,28 @@ SMS Alternatives
 Description
 ===========
 
-This module introduces a configuration parameter to choose the SMS service to
-use.
+This module adds a configuration option to select which SMS service should be
+used.
 
-Other SMS modules must add their option to the selection field and a link to
-their configuration parameters.
+SMS provider modules are expected to extend the selection field with their own
+entry and provide the corresponding configuration settings.
 
 For developers
 ~~~~~~~~~~~~~~
 
-To add your SMS service to the selection field:
-|
+To add your SMS service to the selection field, extend ``res.config.settings``
+and use ``selection_add``:
+
 .. code-block:: python
 
+   from odoo import fields, models
+
    class ResConfigSettings(models.TransientModel):
-       _inherit = 'res.config.settings'
+       _inherit = "res.config.settings"
 
        sms_service = fields.Selection(
-           selection_add=[("yoursms_service", "Your SMS")])
+           selection_add=[("yoursms_service", "Your SMS")],
+       )
 
 Credits
 =======
@@ -56,6 +60,7 @@ Contributors
 * Juanu Sandoval <jsandoval@moval.es>
 * Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
+* César Andrés <candres@moval.es>
 
 Maintainers
 ~~~~~~~~~~~
