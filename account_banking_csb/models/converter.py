@@ -1,11 +1,18 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+import logging
+import re
+import traceback
 from decimal import Decimal
 from unicodedata import combining, normalize
 
 from odoo import api, models
 from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
+
+_FLOAT_RE = re.compile(r"^[+-]?\d+([.,]\d+)?([eE][+-]?\d+)?$")
 
 
 class PaymentConverterSpain(models.Model):
@@ -67,6 +74,13 @@ class PaymentConverterSpain(models.Model):
             try:
                 number = Decimal(number)
             except Exception as exc:
+                _logger.exception(
+                    "Invalid float string in convert_float. "
+                    "value=%r size=%s\nSTACK:\n%s",
+                    number,
+                    size,
+                    "".join(traceback.format_stack(limit=25)),
+                )
                 raise UserError(
                     self.env._("Invalid float string: %(value)s", value=number)
                 ) from exc
@@ -126,24 +140,33 @@ class PaymentConverterSpain(models.Model):
         """
         if value in (None, "", False):
             return self.convert_text("", size, justified)
+
         if isinstance(value, int) or (isinstance(value, str) and value.isdigit()):
             return self.convert_int(value, size)
+
         if isinstance(value, (float, Decimal, str)) and self._looks_numeric_float(
             value
         ):
-            # Route floats/decimals/float-like strings to convert_float
+            _logger.debug(
+                "Routing value to convert_float. value=%r type=%s "
+                "size=%s justified=%s\nSTACK:\n%s",
+                value,
+                type(value).__name__,
+                size,
+                justified,
+                "".join(traceback.format_stack(limit=25)),
+            )
             return self.convert_float(value, size)
+
         return self.convert_text(value, size, justified)
 
     @api.model
     def _looks_numeric_float(self, value) -> bool:
-        """Detect float-like strings; numbers with dot/comma."""
-        if isinstance(value, (float, Decimal)):
+        if isinstance(value, (float, Decimal, int)):
             return True
         if isinstance(value, str):
-            v = value.strip().replace(",", ".")
-            # Accept plain ints here too (float path still OK)
-            return any(ch in v for ch in ".eE") or v.replace(".", "", 1).isdigit()
+            v = value.strip()
+            return bool(_FLOAT_RE.match(v))
         return False
 
     # --------------------------- bank helpers --------------------------------

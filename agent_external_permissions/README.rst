@@ -116,7 +116,7 @@ Authors
 
 Contributors
 ~~~~~~~~~~~~
-* César Andrés Sánchez <candres@moval.es>
+* César Andrés <candres@moval.es>
 
 Maintainers
 ~~~~~~~~~~~
