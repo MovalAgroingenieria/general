@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-02 20:39+0000\n"
-"PO-Revision-Date: 2025-03-02 20:39+0000\n"
+"POT-Creation-Date: 2026-01-02 07:08+0000\n"
+"PO-Revision-Date: 2026-01-02 07:08+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,37 +16,13 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: sms_wausms
-#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__wausms_service_api_passwd
-msgid "API Password"
+#: model:ir.model,name:sms_wausms.model_res_company
+msgid "Companies"
 msgstr ""
 
 #. module: sms_wausms
-#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__wausms_service_api_user
-msgid "API User"
-msgstr ""
-
-#. module: sms_wausms
-#: model:ir.model,name:sms_wausms.model_res_config_settings
-msgid "Configuration of WauSMS"
-msgstr ""
-
-#. module: sms_wausms
-#: model_terms:ir.ui.view,arch_db:sms_wausms.res_config_settings_view_form
-msgid "Limit to 15 numbers or 11 alphanumeric characters"
-msgstr ""
-
-#. module: sms_wausms
-#. odoo-python
-#: code:addons/sms_wausms/models/sms_api.py:0
-#, python-format
-msgid "Not all WauSMS config parameters have been set."
-msgstr ""
-
-#. module: sms_wausms
-#. odoo-python
-#: code:addons/sms_wausms/models/sms_api.py:0
-#, python-format
-msgid "Not implemented yet"
+#: model_terms:ir.ui.view,arch_db:sms_wausms.res_config_settings_view_form_inherit_sms_wausms
+msgid "Limit to 15 numbers or 11 alphanumeric characters."
 msgstr ""
 
 #. module: sms_wausms
@@ -55,67 +31,66 @@ msgid "Outgoing SMS"
 msgstr ""
 
 #. module: sms_wausms
-#: model:ir.model,name:sms_wausms.model_sms_api
-msgid "SMS API"
+#: model:ir.model.fields,help:sms_wausms.field_sms_sms__wausms_response
+msgid "Raw response returned by WauSMS for debugging purposes."
 msgstr ""
 
 #. module: sms_wausms
-#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__sms_service
-msgid "SMS Service"
+#: model:ir.model.fields.selection,name:sms_wausms.selection__res_company__sms_provider__iap
+msgid "Send via Odoo"
 msgstr ""
 
 #. module: sms_wausms
-#. odoo-python
-#: code:addons/sms_wausms/models/sms_api.py:0
-#: code:addons/sms_wausms/models/sms_api.py:0
-#, python-format
-msgid "SMS service %s not found."
+#: model:ir.model.fields.selection,name:sms_wausms.selection__res_company__sms_provider__wausms
+msgid "Send via WauSMS"
 msgstr ""
 
 #. module: sms_wausms
-#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__wausms_service_sender
-msgid "Sender"
+#: model:ir.model.fields,field_description:sms_wausms.field_res_company__sms_provider
+#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__sms_provider
+msgid "Sms Provider"
 msgstr ""
 
 #. module: sms_wausms
-#. odoo-python
-#: code:addons/sms_wausms/models/res_config_settings.py:0
-#, python-format
-msgid "Sender size is limited to 15 numbers or 11 alphanumeric characters."
+#: model:ir.model.fields,field_description:sms_wausms.field_res_company__sms_wausms_api_passwd
+#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__sms_wausms_api_passwd
+msgid "Sms Wausms Api Passwd"
 msgstr ""
 
 #. module: sms_wausms
-#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__wausms_service_url
-msgid "Service URL"
+#: model:ir.model.fields,field_description:sms_wausms.field_res_company__sms_wausms_api_user
+#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__sms_wausms_api_user
+msgid "Sms Wausms Api User"
 msgstr ""
 
 #. module: sms_wausms
-#: model_terms:ir.ui.view,arch_db:sms_wausms.res_config_settings_view_form
-msgid "Settings"
+#: model:ir.model.fields,field_description:sms_wausms.field_res_company__sms_wausms_sender
+#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__sms_wausms_sender
+msgid "Sms Wausms Sender"
 msgstr ""
 
 #. module: sms_wausms
-#: model:ir.model.fields,help:sms_wausms.field_res_config_settings__sms_service
-msgid "The SMS service to be used."
+#: model:ir.model.fields,field_description:sms_wausms.field_res_company__sms_wausms_service_url
+#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__sms_wausms_service_url
+msgid "Sms Wausms Service Url"
 msgstr ""
 
 #. module: sms_wausms
-#: model:ir.model.fields.selection,name:sms_wausms.selection__res_config_settings__sms_service__wausms_service
-#: model_terms:ir.ui.view,arch_db:sms_wausms.res_config_settings_view_form
-msgid "WauSMS"
+#: model:ir.model.fields,help:sms_wausms.field_res_company__sms_wausms_sender
+#: model:ir.model.fields,help:sms_wausms.field_res_config_settings__sms_wausms_sender
+msgid ""
+"Up to 15 digits for numeric sender, or up to 11 alphanumeric characters."
 msgstr ""
 
 #. module: sms_wausms
-#: model_terms:ir.ui.view,arch_db:sms_wausms.res_config_settings_view_form
-msgid "WauSMS logo"
+#: model:ir.model.fields,help:sms_wausms.field_res_company__sms_wausms_service_url
+#: model:ir.model.fields,help:sms_wausms.field_res_config_settings__sms_wausms_service_url
+msgid ""
+"WauSMS REST endpoint. The official endpoint is used by default (POST "
+"/Api/rest/message)."
 msgstr ""
 
 #. module: sms_wausms
 #: model:ir.model.fields,field_description:sms_wausms.field_sms_sms__wausms_response
-msgid "WausSMS Response"
-msgstr ""
-
-#. module: sms_wausms
-#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__wausms_website
-msgid "Website"
+msgid "WauSMS Response"
 msgstr ""

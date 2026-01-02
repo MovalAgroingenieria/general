@@ -1,26 +1,27 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <record id="sms_tsms_view_form" model="ir.ui.view">
-        <field name="name">sms.sms.view.form</field>
+    <record id="sms_sms_view_form_inherit_wausms" model="ir.ui.view">
+        <field name="name">sms.sms.view.form.inherit.wausms</field>
         <field name="model">sms.sms</field>
         <field name="inherit_id" ref="sms.sms_tsms_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='failure_type']" position="after">
-                 <field name="wausms_response" readonly="1"  attrs="{'invisible': [('failure_type', '=', False)]}"/>
+                <field name="wausms_response"
+                       readonly="1"
+                       invisible="not wausms_response"/>
             </xpath>
         </field>
     </record>
 
-    <record id="sms_sms_view_tree" model="ir.ui.view">
-        <field name="name">sms.sms.view.list</field>
+    <!-- Tree: optional column for troubleshooting -->
+    <record id="sms_sms_view_tree_inherit_wausms" model="ir.ui.view">
+        <field name="name">sms.sms.view.tree.inherit.wausms</field>
         <field name="model">sms.sms</field>
         <field name="inherit_id" ref="sms.sms_sms_view_tree"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='failure_type']" position="after">
-                 <field name="wausms_response"/>
+                <field name="wausms_response" optional="hide"/>
             </xpath>
         </field>
     </record>
-
 </odoo>

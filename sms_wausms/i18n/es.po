@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-02 20:40+0000\n"
-"PO-Revision-Date: 2025-03-02 20:40+0000\n"
+"POT-Creation-Date: 2026-01-02 07:08+0000\n"
+"PO-Revision-Date: 2026-01-02 07:08+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,39 +16,14 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: sms_wausms
-#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__wausms_service_api_passwd
-msgid "API Password"
-msgstr "Contraseña API"
+#: model:ir.model,name:sms_wausms.model_res_company
+msgid "Companies"
+msgstr "Compañías"
 
 #. module: sms_wausms
-#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__wausms_service_api_user
-msgid "API User"
-msgstr "Usuario API"
-
-#. module: sms_wausms
-#: model:ir.model,name:sms_wausms.model_res_config_settings
-msgid "Configuration of WauSMS"
-msgstr "Ajustes de configuración"
-
-#. module: sms_wausms
-#: model_terms:ir.ui.view,arch_db:sms_wausms.res_config_settings_view_form
-msgid "Limit to 15 numbers or 11 alphanumeric characters"
-msgstr "Lmitado a 15 números o 11 caracteres alfanuméricos"
-
-#. module: sms_wausms
-#. odoo-python
-#: code:addons/sms_wausms/models/sms_api.py:0
-#, python-format
-msgid "Not all WauSMS config parameters have been set."
-msgstr ""
-"No todos los parámetros de configuración de WauSMS han sido establecidos."
-
-#. module: sms_wausms
-#. odoo-python
-#: code:addons/sms_wausms/models/sms_api.py:0
-#, python-format
-msgid "Not implemented yet"
-msgstr "No se ha implementado todavía"
+#: model_terms:ir.ui.view,arch_db:sms_wausms.res_config_settings_view_form_inherit_sms_wausms
+msgid "Limit to 15 numbers or 11 alphanumeric characters."
+msgstr "Limitar a 15 números o 11 caracteres alfanuméricos."
 
 #. module: sms_wausms
 #: model:ir.model,name:sms_wausms.model_sms_sms
@@ -56,55 +31,75 @@ msgid "Outgoing SMS"
 msgstr "SMS salientes"
 
 #. module: sms_wausms
-#: model:ir.model,name:sms_wausms.model_sms_api
-msgid "SMS API"
-msgstr "API de SMS"
+#: model:ir.model.fields,help:sms_wausms.field_sms_sms__wausms_response
+msgid "Raw response returned by WauSMS for debugging purposes."
+msgstr "Respuesta sin procesar devuelta por WauSMS para fines de depuración."
 
 #. module: sms_wausms
-#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__sms_service
-msgid "SMS Service"
-msgstr "Servicio SMS"
+#: model:ir.model.fields.selection,name:sms_wausms.selection__res_company__sms_provider__iap
+msgid "Send via Odoo"
+msgstr "Enviar mediante Odoo"
 
 #. module: sms_wausms
-#. odoo-python
-#: code:addons/sms_wausms/models/sms_api.py:0
-#: code:addons/sms_wausms/models/sms_api.py:0
-#, python-format
-msgid "SMS service %s not found."
-msgstr "El servicio de SMS %s no se ha encontrado."
+#: model:ir.model.fields.selection,name:sms_wausms.selection__res_company__sms_provider__wausms
+msgid "Send via WauSMS"
+msgstr "Enviar mediante WauSMS"
 
 #. module: sms_wausms
-#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__wausms_service_sender
-msgid "Sender"
-msgstr "Remitente"
+#: model:ir.model.fields,field_description:sms_wausms.field_res_company__sms_provider
+#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__sms_provider
+msgid "Sms Provider"
+msgstr "Proveedor de SMS"
 
 #. module: sms_wausms
-#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__wausms_service_url
-msgid "Service URL"
-msgstr "Servicio URL"
+#: model:ir.model.fields,field_description:sms_wausms.field_res_company__sms_wausms_api_passwd
+#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__sms_wausms_api_passwd
+msgid "Sms Wausms Api Passwd"
+msgstr "Contraseña de la API de WauSMS"
 
 #. module: sms_wausms
-#: model_terms:ir.ui.view,arch_db:sms_wausms.res_config_settings_view_form
-msgid "Settings"
-msgstr "Parámetros"
+#: model:ir.model.fields,field_description:sms_wausms.field_res_company__sms_wausms_api_user
+#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__sms_wausms_api_user
+msgid "Sms Wausms Api User"
+msgstr "Usuario de la API de WauSMS"
 
 #. module: sms_wausms
-#: model:ir.model.fields,help:sms_wausms.field_res_config_settings__sms_service
-msgid "The SMS service to be used."
-msgstr "El servicio de SMS utilizado."
+#: model:ir.model.fields,field_description:sms_wausms.field_res_company__sms_wausms_sender
+#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__sms_wausms_sender
+msgid "Sms Wausms Sender"
+msgstr "Remitente WauSMS"
 
 #. module: sms_wausms
-#: model:ir.model.fields.selection,name:sms_wausms.selection__res_config_settings__sms_service__wausms_service
-#: model_terms:ir.ui.view,arch_db:sms_wausms.res_config_settings_view_form
-msgid "WauSMS"
+#: model:ir.model.fields,field_description:sms_wausms.field_res_company__sms_wausms_service_url
+#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__sms_wausms_service_url
+msgid "Sms Wausms Service Url"
+msgstr "URL del servicio WauSMS"
+
+#. module: sms_wausms
+#: model:ir.model,name:sms_wausms.model_res_config_settings
+msgid "Street type settings"
+msgstr "Configuración"
+
+#. module: sms_wausms
+#: model:ir.model.fields,help:sms_wausms.field_res_company__sms_wausms_sender
+#: model:ir.model.fields,help:sms_wausms.field_res_config_settings__sms_wausms_sender
+msgid ""
+"Up to 15 digits for numeric sender, or up to 11 alphanumeric characters."
 msgstr ""
+"Hasta 15 dígitos para remitente numérico o hasta 11 caracteres "
+"alfanuméricos."
+
+#. module: sms_wausms
+#: model:ir.model.fields,help:sms_wausms.field_res_company__sms_wausms_service_url
+#: model:ir.model.fields,help:sms_wausms.field_res_config_settings__sms_wausms_service_url
+msgid ""
+"WauSMS REST endpoint. The official endpoint is used by default (POST "
+"/Api/rest/message)."
+msgstr ""
+"Endpoint REST de WauSMS. Por defecto se utiliza el endpoint oficial (POST "
+"/Api/rest/message)."
 
 #. module: sms_wausms
 #: model:ir.model.fields,field_description:sms_wausms.field_sms_sms__wausms_response
-msgid "WausSMS Response"
-msgstr "Respuesta WauSMS"
-
-#. module: sms_wausms
-#: model:ir.model.fields,field_description:sms_wausms.field_res_config_settings__wausms_website
-msgid "Website"
-msgstr "Sitio web"
+msgid "WauSMS Response"
+msgstr "Respuesta de WauSMS"
