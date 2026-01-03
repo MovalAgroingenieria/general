@@ -217,7 +217,6 @@ class ResFile(models.Model):
             ("blocked", "Blocked"),
             ("done", "Ready"),
         ],
-        string="Kanban State",
         default="normal",
         tracking=True,
     )
@@ -229,7 +228,6 @@ class ResFile(models.Model):
             ("2", "High"),
             ("3", "Very High"),
         ],
-        string="Priority",
         default="1",
         tracking=True,
     )

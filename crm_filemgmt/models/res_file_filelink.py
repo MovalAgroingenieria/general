@@ -1,10 +1,7 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-import datetime as dt
-
-from jinja2 import Template, TemplateError
-from odoo import api, exceptions, fields, models
+from odoo import fields, models
 
 
 class ResFileFilelink(models.Model):
