@@ -8,6 +8,7 @@ from odoo import models, fields, _
 class MeasurementDevice(models.Model):
     _name = 'mdm.measurement.device'
     _description = 'Measurement Device'
+    _inherit = 'mail.thread'
     _order = 'name'
 
     name = fields.Char(
