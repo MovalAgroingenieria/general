@@ -93,14 +93,14 @@
   <template id="login_footer" inherit_id="web.login"
     name="Login Footer">
     <xpath expr="//form[last()]" position="inside">
-      <div class="text-center" style="margin-top: 20px;">
-        <img src="/client_connect/static/description/logo.png" style="width: 100px;"/>
-      </div>
-      <!--
-      <div class="text-center" style="margin-top: 20px;">
+      <!-- Christmas logo: from December 21st to January 6th -->
+      <div class="text-center" style="margin-top: 20px;" t-if="(datetime.datetime.now().month == 12 and datetime.datetime.now().day &gt;= 21) or (datetime.datetime.now().month == 1 and datetime.datetime.now().day &lt;= 6)">
         <img src="/client_connect/static/description/logo_xmas.gif" style="width: 250px;"/>
       </div>
-      -->
+      <!-- Normal logo: rest of the year -->
+      <div class="text-center" style="margin-top: 20px;" t-if="not ((datetime.datetime.now().month == 12 and datetime.datetime.now().day &gt;= 21) or (datetime.datetime.now().month == 1 and datetime.datetime.now().day &lt;= 6))">
+        <img src="/client_connect/static/description/logo.png" style="width: 100px;"/>
+      </div>
     </xpath>
   </template>
 
