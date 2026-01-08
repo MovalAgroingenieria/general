@@ -1,0 +1,926 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+    <!-- Remotecontrol definition for SCADA Mula -->
+    <record id="remotecontrol_scada_mula" model="remotecontrol">
+        <field name="name">SCADA Mula</field>
+        <field name="remotecontrol_type">sql</field>
+        <field name="active" eval="True"/>
+        <field name="timeout">30</field>
+        <field name="rate_limit_seconds">0.0</field>
+        <field name="max_retries">1</field>
+        <field name="backoff">1.5</field>
+        <field name="readonly" eval="True"/>
+        <field name="connection_params"><![CDATA[
+{
+  "driver_name": "MariaDB",
+  "host": "localhost",
+  "port": 3306,
+  "database_prefix": "mula",
+  "user": "username",
+  "password": "",
+  "charset": "utf8mb4"
+}
+            ]]></field>
+        <field name="remotecontrol_help"><![CDATA[
+<h2>SCADA Mula · Odoo Integration Help</h2>
+<p><strong>Type:</strong> MariaDB Database Connection with Hydrological Year Support</p>
+<hr/>
+<h3>1) Database Connection</h3>
+<p>Uses <strong>mysql-connector-python</strong> or <strong>pymysql</strong> library to connect to SCADA MariaDB databases.</p>
+<h4>Connection Parameters (JSON):</h4>
+<pre>{
+  "driver_name": "MariaDB",
+  "host": "192.168.1.100",
+  "port": 3306,
+  "database_prefix": "mula",
+  "user": "scada_user",
+  "password": "password",
+  "charset": "utf8mb4"
+}</pre>
+<h4>Important Notes:</h4>
+<ul>
+  <li><strong>database_prefix</strong>: Base name for databases (e.g., "mula" for mula_2025_26)</li>
+  <li><strong>Hydrological Year</strong>: System automatically selects database based on date</li>
+  <li><strong>charset</strong>: utf8mb4 for full Unicode support</li>
+</ul>
+
+<h3>2) Hydrological Year Logic</h3>
+<p>SCADA Mula uses separate databases for each hydrological year:</p>
+<ul>
+  <li><strong>Format</strong>: {prefix}_{year1}_{year2} (e.g., mula_2025_26)</li>
+  <li><strong>Period</strong>: September 1st 00:00:00 - August 31st 23:59:59</li>
+  <li><strong>Examples</strong>:
+    <ul>
+      <li>2025-09-01 to 2026-08-31 → mula_2025_26</li>
+      <li>2024-09-01 to 2025-08-31 → mula_2024_25</li>
+      <li>2026-09-01 to 2027-08-31 → mula_2026_27</li>
+    </ul>
+  </li>
+</ul>
+
+<h4>Automatic Database Selection:</h4>
+<p>The system automatically determines which database to query based on:</p>
+<ul>
+  <li>Last reading date from the sensor</li>
+  <li>Current date</li>
+  <li>Date range being queried</li>
+</ul>
+<p><em>Note: If a query spans multiple hydrological years, the system will execute multiple queries across the relevant databases.</em></p>
+
+<h3>3) Database Structure</h3>
+<p>Each database contains tables with sensor readings. Example table structure:</p>
+
+<h4>Table: estacion_meteorologica</h4>
+<pre>
+id | FechaHora              | EstacionNr | VelocidadViento | DireccionViento | Temperatura | Humedad | PrecipitacionDiaria | RadiacionSolar
+---+------------------------+------------+-----------------+-----------------+-------------+---------+---------------------+---------------
+ 1 | 2025-12-23 03:38:08.000|          0 |            2.00 |          304.00 |        6.00 |   63.00 |                0.00 |           0.00
+ 2 | 2025-12-23 03:39:08.000|          0 |            2.10 |          305.00 |        6.10 |   62.50 |                0.00 |           0.00
+</pre>
+
+<h4>Field Descriptions:</h4>
+<ul>
+  <li><strong>id</strong>: Auto-increment primary key</li>
+  <li><strong>FechaHora</strong>: Timestamp of the reading</li>
+  <li><strong>EstacionNr</strong>: Weather station identifier (device ID)</li>
+  <li><strong>VelocidadViento</strong>: Wind speed (sensor variable)</li>
+  <li><strong>DireccionViento</strong>: Wind direction (sensor variable)</li>
+  <li><strong>Temperatura</strong>: Temperature (sensor variable)</li>
+  <li><strong>Humedad</strong>: Humidity (sensor variable)</li>
+  <li><strong>PrecipitacionDiaria</strong>: Daily precipitation (sensor variable)</li>
+  <li><strong>RadiacionSolar</strong>: Solar radiation (sensor variable)</li>
+</ul>
+
+<h3>4) Device Configuration</h3>
+<p>Each <strong>mdm.measurement.device</strong> requires:</p>
+<ul>
+  <li>Set <code>remotecontrol_id</code> to "SCADA Mula"</li>
+  <li>No device-level <code>remotecontrol_params</code> needed</li>
+</ul>
+
+<h3>5) Sensor Configuration</h3>
+<p>Each <strong>mdm.measurement.device.sensor</strong> needs <code>remotecontrol_params</code> (JSON):</p>
+
+<h4>Required fields:</h4>
+<ul>
+  <li><code>table</code>: Table name (e.g., "estacion_meteorologica")</li>
+  <li><code>device_field</code>: Column name for device identifier (e.g., "EstacionNr")</li>
+  <li><code>device_id</code>: Device identifier value (e.g., 0, 1, 2...)</li>
+  <li><code>date_field</code>: Column name for timestamp (e.g., "FechaHora")</li>
+  <li><code>value_field</code>: Column name for sensor value (e.g., "Temperatura", "VelocidadViento")</li>
+</ul>
+
+<h4>Optional fields:</h4>
+<ul>
+  <li><code>start_date</code>: Initial sync date (default: last reading or current hydrological year start)</li>
+  <li><code>is_cumulative</code>: Boolean (true/false). Set to true for daily cumulative values like precipitation (default: false)</li>
+  <li><code>cumulative_reset</code>: Reset period for cumulative values ("daily" only, default: "daily")</li>
+</ul>
+
+<h4>Example sensor configuration (Temperature):</h4>
+<pre>{
+  "table": "estacion_meteorologica",
+  "device_field": "EstacionNr",
+  "device_id": 0,
+  "date_field": "FechaHora",
+  "value_field": "Temperatura",
+  "start_date": "2025-09-01"
+}</pre>
+
+<h4>Another example (Wind Speed):</h4>
+<pre>{
+  "table": "estacion_meteorologica",
+  "device_field": "EstacionNr",
+  "device_id": 0,
+  "date_field": "FechaHora",
+  "value_field": "VelocidadViento"
+}</pre>
+
+<h4>Example with cumulative values (Daily Precipitation):</h4>
+<pre>{
+  "table": "estacion_meteorologica",
+  "device_field": "EstacionNr",
+  "device_id": 0,
+  "date_field": "FechaHora",
+  "value_field": "PrecipitacionDiaria",
+  "is_cumulative": true
+}</pre>
+<p><strong>How cumulative values work:</strong></p>
+<ul>
+  <li>Database stores daily accumulated values (e.g., 01:00→10mm, 03:00→40mm, 23:00→45mm)</li>
+  <li>System converts to incremental values (01:00→10mm, 03:00→30mm, 23:00→5mm)</li>
+  <li>Reset occurs at 00:00 Europe/Madrid timezone (start of new day)</li>
+  <li>Each day starts fresh from zero accumulation</li>
+</ul>
+
+<h3>6) SQL Query Example</h3>
+<p>For a temperature sensor configured as above, the system generates:</p>
+<pre>SELECT Temperatura AS value, FechaHora AS timestamp
+FROM estacion_meteorologica
+WHERE EstacionNr = 0
+  AND FechaHora >= '2025-09-01 00:00:00'
+  AND FechaHora <= '2026-01-08 23:59:59'
+  AND Temperatura IS NOT NULL
+ORDER BY FechaHora ASC</pre>
+
+<h4>Multi-Database Query Example:</h4>
+<p>If querying data from August 2025 to October 2025 (spans two hydrological years):</p>
+<ol>
+  <li>Query database <strong>mula_2024_25</strong> for 2025-08-01 to 2025-08-31</li>
+  <li>Query database <strong>mula_2025_26</strong> for 2025-09-01 to 2025-10-31</li>
+  <li>Combine and deduplicate results</li>
+</ol>
+
+<h3>7) Export Sensors Catalog</h3>
+<p>Before configuring sensors, export the complete catalog from SCADA database:</p>
+<ol>
+  <li>Execute action <strong>"SCADA Mula: Export sensors catalog"</strong></li>
+  <li>Download CSV file from attachments</li>
+  <li>Use table names, device fields, and value fields to configure sensors in Odoo</li>
+</ol>
+
+<p>The CSV shows all available tables, their columns, and sample data from the current hydrological year database.</p>
+
+<h3>8) Execution</h3>
+<p>Run the procedure <strong>"SCADA Mula: Daily Sync"</strong> to import readings from all configured sensors.</p>
+
+<h3>9) Available Tables</h3>
+<p>Common tables in SCADA Mula databases:</p>
+<ul>
+  <li><strong>estacion_meteorologica</strong>: Weather station measurements</li>
+  <li><em>Additional tables can be added as needed</em></li>
+</ul>
+
+<h3>10) Technical Features</h3>
+<ul>
+  <li><strong>Hydrological Year Detection</strong>: Automatically calculates database name from date</li>
+  <li><strong>Multi-Database Support</strong>: Queries span multiple databases when needed</li>
+  <li><strong>Timezone Conversion</strong>: Automatic Europe/Madrid → UTC conversion</li>
+  <li><strong>UTF-8 Encoding</strong>: Full Unicode support with utf8mb4 charset</li>
+  <li><strong>CSV Export</strong>: Generates sensor catalog from current database</li>
+  <li><strong>Audit Trail</strong>: Creates JSON attachments with detailed import results</li>
+  <li><strong>Flexible Schema</strong>: Configurable table, device field, date field, and value field</li>
+  <li><strong>Cumulative Values Processing</strong>: Automatically converts daily accumulated values to incremental readings with proper timezone-aware daily reset</li>
+</ul>
+
+<h3>11) Troubleshooting</h3>
+<ul>
+  <li><strong>Connection refused</strong> → Check host/port/firewall/VPN</li>
+  <li><strong>Login failed</strong> → Verify credentials</li>
+  <li><strong>Database not found</strong> → Verify database exists for the hydrological year being queried</li>
+  <li><strong>Driver not found</strong> → Install mysql-connector-python or pymysql</li>
+  <li><strong>No data returned</strong> → Verify table name, device_field, device_id, and value_field in sensor config</li>
+  <li><strong>Wrong database selected</strong> → Check date ranges and hydrological year calculation</li>
+  <li><strong>Encoding errors</strong> → Ensure charset is set to utf8mb4 in connection params</li>
+  <li><strong>Empty CSV export</strong> → Check that current hydrological year database exists and has tables</li>
+</ul>
+            ]]></field>
+    </record>
+
+    <!-- Action: Export sensors catalog -->
+    <record id="remotecontrol_scada_mula_action_export_sensors_catalog" model="remotecontrol.action">
+        <field name="name">SCADA Mula: Export sensors catalog</field>
+        <field name="remote_id" ref="remotecontrol_scada_mula"/>
+        <field name="sequence">5</field>
+        <field name="active" eval="True"/>
+        <field name="readonly" eval="False"/>
+        <field name="code"><![CDATA[
+# Export sensors catalog from SCADA Mula database to CSV
+# Shows all tables and their columns from current hydrological year database
+import csv
+from io import BytesIO
+Remote = self.remote_id
+
+# Helper function: Calculate hydrological year database name
+def get_hydro_year_db(date_str, db_prefix):
+    """
+    Calculate database name for hydrological year.
+    Hydrological year: Sept 1 - Aug 31
+    Examples:
+      2025-09-01 to 2026-08-31 -> mula_2025_26
+      2024-09-01 to 2025-08-31 -> mula_2024_25
+    """
+    from datetime import datetime
+    dt = datetime.strptime(date_str[:10], '%Y-%m-%d')
+    year = dt.year
+    month = dt.month
+    if month >= 9:  # September to December
+        year1 = year
+        year2 = year + 1
+    else:  # January to August
+        year1 = year - 1
+        year2 = year
+    year2_short = str(year2)[2:]  # Last 2 digits
+    return '%s_%s_%s' % (db_prefix, year1, year2_short)
+
+# Get current date and determine database
+today_str = fields.Date.today()
+conn_params = json.loads(Remote.connection_params or '{}')
+db_prefix = conn_params.get('database_prefix', 'mula')
+current_db = get_hydro_year_db(today_str, db_prefix)
+
+# Update connection params with specific database name
+conn_params['database'] = current_db
+Remote.write({'connection_params': json.dumps(conn_params)})
+
+# Connect to MariaDB database
+cursor = sql_connect()
+bag['_sql_cursor'] = cursor
+
+try:
+    # Get all tables in the database
+    sql_execute(cursor, "SHOW TABLES", ())
+    tables = sql_fetchall(cursor)
+
+    # Create CSV in memory
+    output = BytesIO()
+    writer = csv.writer(output, delimiter=';', quoting=csv.QUOTE_MINIMAL)
+
+    # Write header
+    writer.writerow([
+        'TABLE_NAME',
+        'COLUMN_NAME',
+        'DATA_TYPE',
+        'SAMPLE_VALUES'
+    ])
+
+    # For each table, get column information and sample data
+    for table_row in tables:
+        table_name = table_row[0]
+
+        # Skip system tables
+        if table_name.startswith('_'):
+            continue
+
+        # Get column information
+        sql_execute(cursor, "DESCRIBE `%s`" % table_name, ())
+        columns = sql_fetchall(cursor)
+
+        # Get sample row
+        try:
+            sql_execute(cursor, "SELECT * FROM `%s` LIMIT 1" % table_name, ())
+            sample_row = sql_fetchone(cursor)
+        except Exception:
+            sample_row = None
+
+        # Write each column
+        for idx, col_info in enumerate(columns):
+            col_name = col_info[0]
+            col_type = col_info[1]
+            sample_value = ''
+
+            if sample_row and idx < len(sample_row) and sample_row[idx] is not None:
+                sample_value = str(sample_row[idx])[:50]  # Limit length
+
+            # Encode for Python 2.7 compatibility
+            def encode_value(val):
+                if val is None:
+                    return ''
+                if isinstance(val, unicode):
+                    return val.encode('utf-8')
+                return str(val)
+
+            writer.writerow([
+                encode_value(table_name),
+                encode_value(col_name),
+                encode_value(col_type),
+                encode_value(sample_value)
+            ])
+
+    # Get CSV content as bytes
+    csv_bytes = output.getvalue()
+    output.close()
+
+    # Create attachment
+    attachment = env['ir.attachment'].create({
+        'name': 'scada_mula_sensors_catalog_%s_%s.csv' % (
+            current_db,
+            fields.Datetime.now().replace(' ', '_').replace(':', '-')
+        ),
+        'datas': base64.b64encode(csv_bytes),
+        'datas_fname': 'scada_mula_sensors_catalog.csv',
+        'res_model': 'remotecontrol',
+        'res_id': Remote.id,
+        'type': 'binary',
+    })
+
+    result = "Exported catalog from database '%s' to CSV: %s" % (current_db, attachment.name)
+
+finally:
+    # Always close the connection
+    cursor = bag.get('_sql_cursor')
+    if cursor:
+        sql_close(cursor)
+    # Restore original connection params
+    conn_params = json.loads(Remote.connection_params or '{}')
+    if 'database' in conn_params:
+        del conn_params['database']
+    Remote.write({'connection_params': json.dumps(conn_params)})
+
+bag['result'] = result
+        ]]></field>
+    </record>
+
+    <!-- Action: Get devices (plan) -->
+    <record id="remotecontrol_scada_mula_action_get_devices" model="remotecontrol.action">
+        <field name="name">SCADA Mula: Get devices (plan)</field>
+        <field name="remote_id" ref="remotecontrol_scada_mula"/>
+        <field name="sequence">10</field>
+        <field name="active" eval="True"/>
+        <field name="readonly" eval="True"/>
+        <field name="code"><![CDATA[
+# Build sensors plan from sensor remotecontrol_params
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+
+# Helper function: Calculate hydrological year database name
+def get_hydro_year_db(date_str, db_prefix):
+    """Calculate database name for hydrological year (Sept 1 - Aug 31)"""
+    from datetime import datetime
+    dt = datetime.strptime(date_str[:10], '%Y-%m-%d')
+    year = dt.year
+    month = dt.month
+    if month >= 9:
+        year1 = year
+        year2 = year + 1
+    else:
+        year1 = year - 1
+        year2 = year
+    year2_short = str(year2)[2:]
+    return '%s_%s_%s' % (db_prefix, year1, year2_short)
+
+def get_hydro_year_start(date_str):
+    """Get start of hydrological year for a given date"""
+    from datetime import datetime
+    dt = datetime.strptime(date_str[:10], '%Y-%m-%d')
+    year = dt.year
+    month = dt.month
+    if month >= 9:
+        return '%s-09-01' % year
+    else:
+        return '%s-09-01' % (year - 1)
+
+# Get connection params
+conn_params = json.loads(Remote.connection_params or '{}')
+db_prefix = conn_params.get('database_prefix', 'mula')
+
+# Get all sensors with remotecontrol_params configured for THIS remote control
+sensors = Sensor.search([
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id)
+])
+
+# Build map of sensor_id -> most recent reading (single query optimization)
+last_readings_map = {}
+if sensors:
+    sensor_ids = [s.id for s in sensors]
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for row in cr.fetchall():
+        last_readings_map[row[0]] = row[1]
+
+# Build execution plan
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+
+    # Parse sensor configuration
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+
+    # Get configuration from sensor
+    table_name = sensor_cfg.get('table')
+    device_field = sensor_cfg.get('device_field')
+    device_id = sensor_cfg.get('device_id')
+    date_field = sensor_cfg.get('date_field')
+    value_field = sensor_cfg.get('value_field')
+
+    # Validate required parameters
+    if not table_name or not device_field or device_id is None or not date_field or not value_field:
+        continue
+
+    # Determine initial date for this sensor
+    last_reading_time = last_readings_map.get(sensor.id)
+    if last_reading_time:
+        try:
+            initial_date = fields.Date.to_string(
+                fields.Datetime.from_string(last_reading_time) +
+                timedelta(days=1))
+        except Exception:
+            initial_date = str(last_reading_time)[:10]
+    else:
+        # Use start_date from sensor config or start of current hydrological year
+        start_cfg = sensor_cfg.get('start_date')
+        if start_cfg:
+            initial_date = start_cfg[:10]
+        else:
+            initial_date = get_hydro_year_start(today_str)
+
+    # Calculate which databases are needed based on date range
+    databases = []
+    start_db = get_hydro_year_db(initial_date, db_prefix)
+    end_db = get_hydro_year_db(today_str, db_prefix)
+
+    # For now, collect unique databases needed
+    db_set = set([start_db, end_db])
+    databases = sorted(list(db_set))
+
+    plan.append({
+        'sensor_id': sensor.id,
+        'device_id': device.id,
+        'table': table_name,
+        'device_field': device_field,
+        'device_id_value': device_id,
+        'date_field': date_field,
+        'value_field': value_field,
+        'initial_date': initial_date,
+        'databases': databases,
+    })
+
+bag['sensors_plan'] = plan
+bag['plan_count'] = len(plan)
+bag['db_prefix'] = db_prefix
+        ]]></field>
+    </record>
+
+    <!-- Action: Get readings -->
+    <record id="remotecontrol_scada_mula_action_get_readings" model="remotecontrol.action">
+        <field name="name">SCADA Mula: Get readings</field>
+        <field name="remote_id" ref="remotecontrol_scada_mula"/>
+        <field name="sequence">20</field>
+        <field name="active" eval="True"/>
+        <field name="readonly" eval="True"/>
+        <field name="code"><![CDATA[
+# Fetch readings from SCADA Mula MariaDB databases and upsert into Odoo
+Remote = self.remote_id
+SensorModel = env['mdm.measurement.device.sensor']
+plan = bag.get('sensors_plan') or []
+db_prefix = bag.get('db_prefix', 'mula')
+
+if not plan:
+    raise Exception("No sensors in plan. Run 'Get devices (plan)' first.")
+
+final_date = fields.Date.today()
+initial_date = None
+total_upserts = 0
+total_errors = 0
+items = []
+
+# Helper function: Calculate hydrological year database name
+def get_hydro_year_db(date_str, prefix):
+    """Calculate database name for hydrological year (Sept 1 - Aug 31)"""
+    from datetime import datetime
+    dt = datetime.strptime(date_str[:10], '%Y-%m-%d')
+    year = dt.year
+    month = dt.month
+    if month >= 9:
+        year1 = year
+        year2 = year + 1
+    else:
+        year1 = year - 1
+        year2 = year
+    year2_short = str(year2)[2:]
+    return '%s_%s_%s' % (prefix, year1, year2_short)
+
+def get_date_ranges_by_hydro_year(start_date, end_date, prefix):
+    """
+    Split date range into segments by hydrological year.
+    Returns list of (database_name, start_date, end_date) tuples.
+    """
+    from datetime import datetime, timedelta
+    start_dt = datetime.strptime(start_date[:10], '%Y-%m-%d')
+    end_dt = datetime.strptime(end_date[:10], '%Y-%m-%d')
+
+    ranges = []
+    current_dt = start_dt
+
+    while current_dt <= end_dt:
+        # Get database for current date
+        current_date_str = current_dt.strftime('%Y-%m-%d')
+        db_name = get_hydro_year_db(current_date_str, prefix)
+
+        # Find end of this hydrological year (Aug 31)
+        year = current_dt.year
+        month = current_dt.month
+        if month >= 9:
+            hydro_end = datetime(year + 1, 8, 31, 23, 59, 59)
+        else:
+            hydro_end = datetime(year, 8, 31, 23, 59, 59)
+
+        # Use the minimum of hydrological year end and query end
+        segment_end = min(hydro_end, end_dt)
+
+        ranges.append((
+            db_name,
+            current_dt.strftime('%Y-%m-%d %H:%M:%S'),
+            segment_end.strftime('%Y-%m-%d %H:%M:%S')
+        ))
+
+        # Move to next hydrological year (Sept 1)
+        current_dt = hydro_end + timedelta(seconds=1)
+
+    return ranges
+
+# Process each sensor in the plan
+for sensor_plan in plan:
+    sensor_id = sensor_plan['sensor_id']
+    device_id = sensor_plan['device_id']
+    table_name = sensor_plan['table']
+    device_field = sensor_plan['device_field']
+    device_id_value = sensor_plan['device_id_value']
+    date_field = sensor_plan['date_field']
+    value_field = sensor_plan['value_field']
+    initial_date = sensor_plan['initial_date']
+
+    sensor_record = SensorModel.browse(sensor_id)
+
+    # Check if this sensor has cumulative values
+    try:
+        sensor_cfg = json.loads(sensor_record.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+    is_cumulative = sensor_cfg.get('is_cumulative', False)
+
+    try:
+        # Get date ranges split by hydrological year
+        date_ranges = get_date_ranges_by_hydro_year(
+            initial_date + ' 00:00:00',
+            final_date + ' 23:59:59',
+            db_prefix
+        )
+
+        total_rows = 0
+        upserts = 0
+        errs = 0
+        readings_summary = []
+        databases_used = []
+
+        # Dictionary to track last cumulative value per day (key: YYYY-MM-DD in Madrid timezone)
+        day_cumulative_values = {}
+
+        # For cumulative sensors, pre-load existing readings from Odoo to calculate accumulated values
+        if is_cumulative:
+            # Query all readings for this sensor in the date range
+            # IMPORTANT: Convert date range from local dates to UTC for Odoo search
+            # Odoo stores measurement_time in UTC, but initial_date/final_date are date strings
+            from datetime import datetime
+            madrid_tz = pytz.timezone('Europe/Madrid')
+
+            # Convert initial_date (Madrid) to UTC - start at 00:00:00 Madrid time
+            initial_madrid = madrid_tz.localize(datetime.strptime(initial_date, '%Y-%m-%d'))
+            initial_utc = initial_madrid.astimezone(pytz.UTC)
+            initial_utc_str = fields.Datetime.to_string(initial_utc.replace(tzinfo=None))
+
+            # Convert final_date (Madrid) to UTC - end at 23:59:59 Madrid time
+            final_madrid = madrid_tz.localize(
+                datetime.strptime(final_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+            )
+            final_utc = final_madrid.astimezone(pytz.UTC)
+            final_utc_str = fields.Datetime.to_string(final_utc.replace(tzinfo=None))
+
+            Reading = env['mdm.measurement.device.sensor.reading']
+            existing_readings = Reading.search([
+                ('sensor_id', '=', sensor_record.id),
+                ('measurement_time', '>=', initial_utc_str),
+                ('measurement_time', '<=', final_utc_str),
+                ('active', '=', True)
+            ], order='measurement_time ASC')
+
+            # Group by day (Madrid timezone) and sum incremental values to get accumulated
+            for reading in existing_readings:
+                # Convert UTC timestamp to Madrid timezone
+                utc_dt = fields.Datetime.from_string(reading.measurement_time)
+                utc_dt = pytz.UTC.localize(utc_dt)
+                madrid_dt = utc_dt.astimezone(madrid_tz)
+                day_key = madrid_dt.strftime('%Y-%m-%d')
+
+                # Accumulate incremental values for this day
+                if day_key not in day_cumulative_values:
+                    day_cumulative_values[day_key] = reading.value
+                else:
+                    day_cumulative_values[day_key] += reading.value
+
+        # Query each database for its date range
+        for db_name, range_start, range_end in date_ranges:
+            databases_used.append(db_name)
+
+            try:
+                # Modify connection params to use specific database
+                conn_params = json.loads(Remote.connection_params or '{}')
+                original_db = conn_params.get('database', conn_params.get('database_prefix', 'mula'))
+
+                # Temporarily update connection params with specific database name
+                conn_params['database'] = db_name
+                Remote.write({'connection_params': json.dumps(conn_params)})
+
+                # Connect to database
+                cursor = sql_connect()
+                bag['_sql_cursor'] = cursor
+
+                # Build query for this sensor
+                query = """
+                    SELECT `%s` AS value, `%s` AS timestamp
+                    FROM `%s`
+                    WHERE `%s` = ?
+                      AND `%s` >= ?
+                      AND `%s` <= ?
+                      AND `%s` IS NOT NULL
+                    ORDER BY `%s` ASC
+                """ % (
+                    value_field, date_field,
+                    table_name,
+                    device_field,
+                    date_field,
+                    date_field,
+                    value_field,
+                    date_field
+                )
+
+                query_params = (
+                    device_id_value,
+                    range_start,
+                    range_end
+                )
+
+                sql_execute(cursor, query, query_params)
+                rows = sql_fetchall(cursor)
+                total_rows += len(rows)
+
+                # Process each row
+                for row in rows:
+                    try:
+                        raw_value = float(row[0]) if row[0] is not None else 0.0
+                        fecha_value = row[1]
+
+                        # Convert timestamp to Odoo format (UTC)
+                        # MariaDB stores timestamps in Europe/Madrid timezone
+                        if hasattr(fecha_value, 'strftime'):
+                            # It's a datetime object (naive, assumed Europe/Madrid)
+                            local_tz = pytz.timezone('Europe/Madrid')
+                            local_dt = local_tz.localize(fecha_value)
+                            utc_dt = local_dt.astimezone(pytz.UTC)
+                            timestamp = fields.Datetime.to_string(utc_dt.replace(tzinfo=None))
+                        else:
+                            # It's a string
+                            from datetime import datetime
+                            local_tz = pytz.timezone('Europe/Madrid')
+                            fecha_str = str(fecha_value)[:19]
+                            naive_dt = datetime.strptime(fecha_str, '%Y-%m-%d %H:%M:%S')
+                            local_dt = local_tz.localize(naive_dt)
+                            utc_dt = local_dt.astimezone(pytz.UTC)
+                            timestamp = fields.Datetime.to_string(utc_dt.replace(tzinfo=None))
+
+                        # Process cumulative values (e.g., daily precipitation)
+                        if is_cumulative:
+                            # Get day key in Madrid timezone for daily reset
+                            day_key = local_dt.strftime('%Y-%m-%d')
+
+                            if day_key not in day_cumulative_values:
+                                # First value of the day - use as is
+                                final_value = raw_value
+                                day_cumulative_values[day_key] = raw_value
+                            else:
+                                # Calculate increment from last value of the day
+                                previous_value = day_cumulative_values[day_key]
+                                if raw_value >= previous_value:
+                                    # Normal increment
+                                    final_value = raw_value - previous_value
+                                else:
+                                    # Value decreased (manual reset or error) - use current value
+                                    final_value = raw_value
+                                day_cumulative_values[day_key] = raw_value
+                        else:
+                            # Non-cumulative value - use as is
+                            final_value = raw_value
+
+                        # Upsert reading into Odoo
+                        Remote.upsert(
+                            'mdm.measurement.device.sensor.reading',
+                            {
+                                'sensor_id': sensor_record.id,
+                                'measurement_time': timestamp
+                            },
+                            {
+                                'value': final_value,
+                                'remotecontrol_origin_id': Remote.id
+                            }
+                        )
+                        upserts += 1
+
+                        # Keep sample for audit (limit to first 5)
+                        if len(readings_summary) < 5:
+                            reading_info = {
+                                'time': timestamp,
+                                'value': final_value,
+                                'database': db_name
+                            }
+                            if is_cumulative:
+                                reading_info['raw_value'] = raw_value
+                                reading_info['is_cumulative'] = True
+                            readings_summary.append(reading_info)
+                    except Exception as e:
+                        errs += 1
+                        if len(readings_summary) < 5:
+                            readings_summary.append({
+                                'row': str(row),
+                                'error': str(e),
+                                'database': db_name
+                            })
+
+                # Close connection to this database
+                sql_close(cursor)
+
+                # Restore original connection params for next iteration
+                conn_params = json.loads(Remote.connection_params or '{}')
+                if 'database' in conn_params:
+                    del conn_params['database']
+                if db_prefix:
+                    conn_params['database_prefix'] = db_prefix
+                Remote.write({'connection_params': json.dumps(conn_params)})
+
+            except Exception as db_error:
+                # Database might not exist for this hydrological year - that's OK
+                if 'Unknown database' not in str(db_error) and 'database' not in str(db_error).lower():
+                    raise db_error
+
+        total_upserts += upserts
+        total_errors += errs
+
+        items.append({
+            'sensor_id': sensor_id,
+            'device_id': device_id,
+            'table': table_name,
+            'device_field': device_field,
+            'device_id_value': device_id_value,
+            'value_field': value_field,
+            'status': 'success',
+            'databases': databases_used,
+            'points_found': total_rows,
+            'upserts': upserts,
+            'errors': errs,
+            'readings': readings_summary
+        })
+
+    except Exception as e:
+        total_errors += 1
+        items.append({
+            'sensor_id': sensor_id,
+            'device_id': device_id,
+            'table': table_name,
+            'device_field': device_field,
+            'device_id_value': device_id_value,
+            'value_field': value_field,
+            'status': 'error',
+            'error': str(e)
+        })
+
+# Create audit attachment
+audit = {
+    'executed_at': str(fields.Datetime.now()),
+    'initial_date': initial_date if plan else None,
+    'final_date': final_date,
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'sensors_processed': len(plan),
+    'items': items
+}
+
+try:
+    audit_json = json.dumps(audit, ensure_ascii=True, indent=2, default=str)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+except Exception as json_error:
+    simple_audit = {
+        'executed_at': str(fields.Datetime.now()),
+        'total_upserts': total_upserts,
+        'total_errors': total_errors,
+        'error': str(json_error)
+    }
+    audit_json = json.dumps(simple_audit, ensure_ascii=True, indent=2)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+
+fname = 'scada_mula_readings_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+)
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+
+Remote.message_post(
+    body="[SCADA Mula Readings] upserts=%s errors=%s sensors=%s" % (
+        total_upserts, total_errors, len(plan)
+    ),
+    attachment_ids=[att.id]
+)
+
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+
+# Restore original connection params (remove database field)
+conn_params = json.loads(Remote.connection_params or '{}')
+if 'database' in conn_params:
+    del conn_params['database']
+Remote.write({'connection_params': json.dumps(conn_params)})
+        ]]></field>
+    </record>
+
+    <!-- Procedure: Daily Sync -->
+    <record id="remotecontrol_scada_mula_procedure_daily_sync" model="remotecontrol.procedure">
+        <field name="name">SCADA Mula: Daily Sync</field>
+        <field name="remote_id" ref="remotecontrol_scada_mula"/>
+        <field name="active" eval="True"/>
+        <field name="readonly" eval="True"/>
+    </record>
+
+    <!-- Procedure Step 1: Get devices -->
+    <record id="remotecontrol_scada_mula_step_10_devices" model="remotecontrol.step">
+        <field name="name">Get devices (plan)</field>
+        <field name="procedure_id" ref="remotecontrol_scada_mula_procedure_daily_sync"/>
+        <field name="action_id" ref="remotecontrol_scada_mula_action_get_devices"/>
+        <field name="sequence">10</field>
+    </record>
+
+    <!-- Procedure Step 2: Get readings -->
+    <record id="remotecontrol_scada_mula_step_20_readings" model="remotecontrol.step">
+        <field name="name">Get readings</field>
+        <field name="procedure_id" ref="remotecontrol_scada_mula_procedure_daily_sync"/>
+        <field name="action_id" ref="remotecontrol_scada_mula_action_get_readings"/>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- Procedure: Export Sensors Catalog -->
+    <record id="remotecontrol_scada_mula_procedure_export_catalog" model="remotecontrol.procedure">
+        <field name="name">SCADA Mula: Export Sensors Catalog</field>
+        <field name="remote_id" ref="remotecontrol_scada_mula"/>
+        <field name="active" eval="True"/>
+        <field name="readonly" eval="True"/>
+    </record>
+
+    <!-- Procedure Step: Export CSV -->
+    <record id="remotecontrol_scada_mula_step_10_export_csv" model="remotecontrol.step">
+        <field name="name">Export sensors catalog</field>
+        <field name="procedure_id" ref="remotecontrol_scada_mula_procedure_export_catalog"/>
+        <field name="action_id" ref="remotecontrol_scada_mula_action_export_sensors_catalog"/>
+        <field name="sequence">10</field>
+    </record>
+
+    </data>
+</odoo>
