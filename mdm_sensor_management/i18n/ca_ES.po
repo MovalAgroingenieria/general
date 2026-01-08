@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-24 15:25+0000\n"
-"PO-Revision-Date: 2025-11-24 15:25+0000\n"
+"POT-Creation-Date: 2026-01-08 12:17+0000\n"
+"PO-Revision-Date: 2026-01-08 12:17+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,7 @@ msgstr ""
 #: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:673
 #, python-format
 msgid "... and %d more errors"
-msgstr "... i %d més errors"
+msgstr "... i %d errors més"
 
 #. module: mdm_sensor_management
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
@@ -120,6 +120,14 @@ msgstr "<strong>Diferència de volum (només lectures negatives):</strong> Utili
 "                                            <br/><span style=\"color: #666;\">Exemple:</span> <code>\"volume\": \"$volume_diff\"</code> (diferència quan el comptador va enrere)"
 
 #. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:78
+#, python-format
+msgid "A sensor with name '%s' already exists for device '%s'.\n"
+"Please use a different name or check for duplicates."
+msgstr "Ja existeix un sensor amb nom '%s' per al dispositiu '%s'.\n"
+"Si us plau, utilitzeu un nom diferent o verifiqueu duplicats."
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_active
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_active
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_active
@@ -216,10 +224,10 @@ msgstr "Marca"
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_config_settings_view_form
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
 msgid "Cancel"
-msgstr "Treure validació"
+msgstr "Cancel·la"
 
 #. module: mdm_sensor_management
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_id_19107
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_id_12845
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_device_view_search
 msgid "Category"
 msgstr "Categoria"
@@ -296,6 +304,11 @@ msgid "Cubic meters"
 msgstr "Metres cúbics"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_measurement_date_madrid
+msgid "Date (Europe/Madrid)"
+msgstr "Data (Madrid)"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_date_field_for_last_reading
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_field_for_last_reading
 msgid "Date Field for Last Reading"
@@ -321,6 +334,11 @@ msgid "Date Range mode requires both From Date and To Date"
 msgstr "El mode de rang de dates requereix tant data des de com data fins a"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_measurement_date_madrid
+msgid "Date in Europe/Madrid timezone"
+msgstr "Data en zona horària Europe/Madrid"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_target_date_field_id
 #: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_target_date_field_id
 msgid "Date/Datetime field in target model to use for auto date calculation"
@@ -335,6 +353,11 @@ msgstr "Configuració de data/hora"
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
 msgid "Date/Time Selection"
 msgstr "Selecció de data/hora"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_search
+msgid "Day"
+msgstr "Dia"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_date_from
@@ -519,7 +542,7 @@ msgstr "Filtre per restringir quins sensors es processen. Aplicat a tots els sen
 #: selection:mdm.sensor.reading.transform.template,selection_mode:0
 #: selection:mdm.sensor.reading.transform.wizard,selection_mode:0
 msgid "From Date"
-msgstr "Desde la fecha"
+msgstr "Des de la data"
 
 #. module: mdm_sensor_management
 #: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:345
@@ -540,8 +563,8 @@ msgstr "Agrupar per"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_id
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_id_18152
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_id_18164
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_id_10602
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_id_10614
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_id
 msgid "ID"
@@ -890,7 +913,7 @@ msgid "Reading Selection Mode"
 msgstr "Mode de selecció de lectures"
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/models/measurement_device.py:112
+#: code:addons/mdm_sensor_management/models/measurement_device.py:113
 #: model:ir.actions.act_window,name:mdm_sensor_management.mdm_sensor_reading_action
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_reading_ids
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_sensor_readings
@@ -972,7 +995,7 @@ msgid "Sensor Reading Transform Template"
 msgstr "Plantilla de transformació de lectures de sensor"
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:84
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:101
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_graph
 #, python-format
 msgid "Sensor Readings"
@@ -1008,7 +1031,7 @@ msgid "Sensor Units"
 msgstr "Unitats de sensors"
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/models/measurement_device.py:101
+#: code:addons/mdm_sensor_management/models/measurement_device.py:102
 #: code:addons/mdm_sensor_management/models/measurement_device_sensor_type.py:63
 #: model:ir.actions.act_window,name:mdm_sensor_management.mdm_sensor_action
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_ids
@@ -1152,7 +1175,7 @@ msgstr "La unitat de mesura ha de ser única."
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_date_to
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_to
 msgid "To Date"
-msgstr "Hasta la fecha"
+msgstr "Fins la data"
 
 #. module: mdm_sensor_management
 #: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:648

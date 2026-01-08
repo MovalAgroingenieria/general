@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-24 15:24+0000\n"
-"PO-Revision-Date: 2025-11-24 15:24+0000\n"
+"POT-Creation-Date: 2026-01-08 12:17+0000\n"
+"PO-Revision-Date: 2026-01-08 12:17+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -113,6 +113,13 @@ msgid "<strong>Volume difference (negative readings only):</strong> Use <code>$v
 msgstr ""
 
 #. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:78
+#, python-format
+msgid "A sensor with name '%s' already exists for device '%s'.\n"
+"Please use a different name or check for duplicates."
+msgstr ""
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_active
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_active
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_active
@@ -212,7 +219,7 @@ msgid "Cancel"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_id_19107
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_id_12845
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_device_view_search
 msgid "Category"
 msgstr ""
@@ -289,6 +296,11 @@ msgid "Cubic meters"
 msgstr ""
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_measurement_date_madrid
+msgid "Date (Europe/Madrid)"
+msgstr ""
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_date_field_for_last_reading
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_field_for_last_reading
 msgid "Date Field for Last Reading"
@@ -314,6 +326,11 @@ msgid "Date Range mode requires both From Date and To Date"
 msgstr ""
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_measurement_date_madrid
+msgid "Date in Europe/Madrid timezone"
+msgstr ""
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_target_date_field_id
 #: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_target_date_field_id
 msgid "Date/Datetime field in target model to use for auto date calculation"
@@ -327,6 +344,11 @@ msgstr ""
 #. module: mdm_sensor_management
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
 msgid "Date/Time Selection"
+msgstr ""
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_search
+msgid "Day"
 msgstr ""
 
 #. module: mdm_sensor_management
@@ -533,8 +555,8 @@ msgstr ""
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_id
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_id_18152
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_id_18164
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_id_10602
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_id_10614
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_id
 msgid "ID"
@@ -878,7 +900,7 @@ msgid "Reading Selection Mode"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/models/measurement_device.py:112
+#: code:addons/mdm_sensor_management/models/measurement_device.py:113
 #: model:ir.actions.act_window,name:mdm_sensor_management.mdm_sensor_reading_action
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_reading_ids
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_sensor_readings
@@ -960,7 +982,7 @@ msgid "Sensor Reading Transform Template"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:84
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:101
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_graph
 #, python-format
 msgid "Sensor Readings"
@@ -996,7 +1018,7 @@ msgid "Sensor Units"
 msgstr ""
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/models/measurement_device.py:101
+#: code:addons/mdm_sensor_management/models/measurement_device.py:102
 #: code:addons/mdm_sensor_management/models/measurement_device_sensor_type.py:63
 #: model:ir.actions.act_window,name:mdm_sensor_management.mdm_sensor_action
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_ids

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-# 2025 Moval Agroingeniería
+# 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import models, fields, api
 from datetime import datetime, timedelta
+import pytz
 
 
 class MeasurementDeviceSensorReading(models.Model):
@@ -67,9 +68,29 @@ class MeasurementDeviceSensorReading(models.Model):
         default=True,
     )
 
+    measurement_date_madrid = fields.Date(
+        string='Date (Europe/Madrid)',
+        compute='_compute_measurement_dates',
+        store=True,
+        index=True,
+        help='Date in Europe/Madrid timezone',
+    )
+
     _sql_constraints = [
         ('unique_name', 'unique(name)', 'The sensor reading must be unique.'),
     ]
+
+    @api.depends('measurement_time')
+    def _compute_measurement_dates(self):
+        madrid_tz = pytz.timezone('Europe/Madrid')
+        for record in self:
+            if record.measurement_time:
+                dt_utc = fields.Datetime.from_string(record.measurement_time)
+                dt_utc_aware = pytz.UTC.localize(dt_utc)
+                dt_madrid = dt_utc_aware.astimezone(madrid_tz)
+                record.measurement_date_madrid = dt_madrid.strftime('%Y-%m-%d')
+            else:
+                record.measurement_date_madrid = False
 
     @api.depends('device_id.name', 'sensor_id.name', 'measurement_time')
     def _compute_name(self):
