@@ -2,9 +2,9 @@
    :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
    :alt: License: AGPL-3
 
-===============================
-Partner Address Street Type (18)
-===============================
+===========================
+Partner Address Street Type
+===========================
 
 This module adds a *street type* field to partner addresses. The street type can be displayed
 before the street in forms, list views, and printable documents. The display mode
