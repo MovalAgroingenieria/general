@@ -13,6 +13,7 @@
         "web",
     ],
     "data": [
+        "data/report_paperformat_data.xml",
         "views/report_templates.xml",
     ],
 }
