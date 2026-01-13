@@ -1,0 +1,33 @@
+# -*- coding: utf-8 -*-
+{
+    "name": "Timesheet Compliance Daily",
+    "summary": "Daily compliance per employee: attendance vs timesheets, telework and generic allocation quality.",
+    "version": "16.0.1.0.0",
+    "category": "Human Resources",
+    "license": "AGPL-3",
+    "author": "Moval Agroingeniería",
+    "website": "https://moval.es",
+    "depends": [
+        "hr",
+        "hr_attendance",
+        "hr_timesheet",
+        "project",
+        "mail",
+        "analytic",
+        "hr_telework_tracking_site_capacity",
+    ],
+    "data": [
+        "security/security.xml",
+        "security/ir.model.access.csv",
+        "data/mail_template.xml",
+        "data/ir_cron.xml",
+        "views/hr_department_views.xml",
+        "views/res_config_settings_views.xml",
+        "views/timesheet_compliance_views.xml",
+        "views/account_analytic_line_views.xml",
+    ],
+    "demo": [],
+    "installable": True,
+    "application": False,
+    "auto_install": False,
+}

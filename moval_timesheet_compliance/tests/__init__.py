@@ -1,0 +1,15 @@
+from . import (
+    common,
+    test_a1_compliance_daily,
+    test_a2_generic_projects,
+    test_a3_telework_day,
+    test_a4_cron_compute_compliance,
+    test_b1_email_daily,
+    test_b2_email_template_render,
+    test_b2_manager_daily_email,
+    test_b3_escalation,
+    test_e3_weekly_generic_quality,
+    test_f1_timer_watchdog,
+    test_f2_timer_checkout_hook,
+    test_links_domain_serialization,
+)

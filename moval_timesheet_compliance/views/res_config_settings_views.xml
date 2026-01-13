@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Moval
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+<odoo>
+    <record id="res_config_settings_view_form_timesheet_compliance" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.timesheet.compliance</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="priority" eval="90"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='user_default_rights']" position="after">
+                <h2>Timesheet Compliance</h2>
+
+                <div class="row mt16 o_settings_container" name="timesheet_compliance_settings">
+                    <div class="col-12 col-lg-6 o_setting_box" id="generic_projects_setting">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">Generic Projects</div>
+                            <div class="text-muted">
+                                Projects considered generic for quality evaluation.
+                            </div>
+                            <div class="content-group mt8">
+                                <field name="x_generic_project_ids" widget="many2many_tags"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6 o_setting_box" id="generic_min_hours_setting">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">Minimum Hours for Evaluation</div>
+                            <div class="text-muted">
+                                Minimum total timesheet hours required to evaluate generic allocation.
+                            </div>
+                            <div class="content-group mt8">
+                                <field name="x_generic_min_hours" class="w-auto"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6 o_setting_box" id="generic_warn_pct_setting">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">Generic Warning Threshold (%)</div>
+                            <div class="text-muted">
+                                Generic allocation percentage triggering a warning.
+                            </div>
+                            <div class="content-group mt8">
+                                <field name="x_generic_warn_pct" class="w-auto"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6 o_setting_box" id="generic_issue_pct_setting">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">Generic Issue Threshold (%)</div>
+                            <div class="text-muted">
+                                Generic allocation percentage triggering an issue.
+                            </div>
+                            <div class="content-group mt8">
+                                <field name="x_generic_issue_pct" class="w-auto"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>Timer Watchdog</h2>
+
+                <div class="row mt16 o_settings_container" name="timesheet_timer_watchdog_settings">
+                    <div class="col-12 col-lg-6 o_setting_box" id="timer_max_active_hours_setting">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">Max Active Timer Hours</div>
+                            <div class="text-muted">
+                                Trigger an incident when a timer stays active longer than this limit.
+                            </div>
+                            <div class="content-group mt8">
+                                <field name="x_timer_max_active_hours" class="w-auto"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6 o_setting_box" id="timer_notify_cooldown_hours_setting">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">Notification Cooldown (hours)</div>
+                            <div class="text-muted">
+                                Avoid spam: at most one notification per timer within this cooldown window.
+                            </div>
+                            <div class="content-group mt8">
+                                <field name="x_timer_notify_cooldown_hours" class="w-auto"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6 o_setting_box" id="timer_check_no_attendance_setting">
+                        <div class="o_setting_left_pane">
+                            <field name="x_timer_check_no_attendance"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">Check Active Timers Without Attendance</div>
+                            <div class="text-muted">
+                                Detect active timers when there is no active attendance session.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6 o_setting_box" id="timer_stop_on_checkout_setting">
+                        <div class="o_setting_left_pane">
+                            <field name="x_timer_stop_on_checkout"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">Stop Timers on Checkout</div>
+                            <div class="text-muted">
+                                When an employee checks out, stop any running timers and register the incident.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6 o_setting_box" id="timer_escalation_enabled_setting">
+                        <div class="o_setting_left_pane">
+                            <field name="x_timer_escalation_enabled"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">Enable Escalation for Repeated Incidents</div>
+                            <div class="text-muted">
+                                Escalate to the department manager when the employee repeats incidents.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6 o_setting_box" id="timer_escalation_after_count_setting">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">Escalate After (count)</div>
+                            <div class="text-muted">
+                                Number of incidents within the time window required to escalate.
+                            </div>
+                            <div class="content-group mt8">
+                                <field name="x_timer_escalation_after_count" class="w-auto"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6 o_setting_box" id="timer_escalation_window_days_setting">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">Escalation Window (days)</div>
+                            <div class="text-muted">
+                                Time window used to count repeated incidents per employee.
+                            </div>
+                            <div class="content-group mt8">
+                                <field name="x_timer_escalation_window_days" class="w-auto"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6 o_setting_box" id="timer_escalation_cooldown_hours_setting">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">Escalation Cooldown (hours)</div>
+                            <div class="text-muted">
+                                Avoid spamming managers with repeated escalations for the same employee.
+                            </div>
+                            <div class="content-group mt8">
+                                <field name="x_timer_escalation_cooldown_hours" class="w-auto"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,1545 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* moval_timesheet_compliance
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-13 09:37+0000\n"
+"PO-Revision-Date: 2026-01-13 09:37+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: moval_timesheet_compliance
+#: model:mail.template,body_html:moval_timesheet_compliance.mail_template_timesheet_compliance_b2_manager
+msgid ""
+"<div>\n"
+"                <p>Hello,</p>\n"
+"\n"
+"                <p>\n"
+"                    Here is the timesheet compliance incidents summary for\n"
+"                    <b>\n"
+"                        <t t-esc=\"ctx.get('department_name', '')\"></t>\n"
+"                    </b>\n"
+"                    on\n"
+"                    <b>\n"
+"                        <t t-esc=\"ctx.get('target_date', '')\"></t>\n"
+"                    </b>\n"
+"                    .\n"
+"                </p>\n"
+"\n"
+"                <h3>Incidents</h3>\n"
+"                <table border=\"1\" cellspacing=\"0\" cellpadding=\"6\">\n"
+"                    <thead>\n"
+"                        <tr>\n"
+"                            <th align=\"left\">Employee</th>\n"
+"                            <th align=\"left\">Telework</th>\n"
+"                            <th align=\"right\">Attendance</th>\n"
+"                            <th align=\"right\">Timesheet</th>\n"
+"                            <th align=\"right\">Delta</th>\n"
+"                            <th align=\"left\">State</th>\n"
+"                            <th align=\"right\">Generic %</th>\n"
+"                            <th align=\"left\">Generic state</th>\n"
+"                            <th align=\"left\">Detail</th>\n"
+"                        </tr>\n"
+"                    </thead>\n"
+"                    <tbody>\n"
+"                        <t t-set=\"incident_rows\" t-value=\"ctx.get('incident_rows', [])\"></t>\n"
+"                        <t t-if=\"incident_rows\">\n"
+"                            <t t-foreach=\"incident_rows\" t-as=\"row\">\n"
+"                                <tr>\n"
+"                                    <td>\n"
+"                                        <t t-esc=\"row.get('employee_name', '')\"></t>\n"
+"                                    </td>\n"
+"                                    <td>\n"
+"                                        <t t-esc=\"row.get('telework', '')\"></t>\n"
+"                                    </td>\n"
+"                                    <td align=\"right\">\n"
+"                                        <t t-esc=\"row.get('attendance_hours', 0)\"></t>\n"
+"                                    </td>\n"
+"                                    <td align=\"right\">\n"
+"                                        <t t-esc=\"row.get('timesheet_hours', 0)\"></t>\n"
+"                                    </td>\n"
+"                                    <td align=\"right\">\n"
+"                                        <t t-esc=\"row.get('delta_hours', 0)\"></t>\n"
+"                                    </td>\n"
+"                                    <td>\n"
+"                                        <t t-esc=\"row.get('state', '')\"></t>\n"
+"                                    </td>\n"
+"                                    <td align=\"right\">\n"
+"                                        <t t-set=\"gp\" t-value=\"row.get('generic_pct', 0)\"></t>\n"
+"                                        <t t-if=\"gp and gp &lt;= 1\">\n"
+"                                            <t t-esc=\"'%.2f' % (gp * 100.0)\"></t>%\n"
+"                                        </t>\n"
+"                                        <t t-else=\"\">\n"
+"                                            <t t-esc=\"gp or 0\"></t>%\n"
+"                                        </t>\n"
+"                                    </td>\n"
+"                                    <td>\n"
+"                                        <t t-esc=\"row.get('generic_state', '')\"></t>\n"
+"                                    </td>\n"
+"                                    <td>\n"
+"                                        <t t-if=\"row.get('detail_url')\">\n"
+"                                            <a t-att-href=\"row.get('detail_url')\">Open</a>\n"
+"                                        </t>\n"
+"                                        <t t-else=\"\">-</t>\n"
+"                                    </td>\n"
+"                                </tr>\n"
+"                            </t>\n"
+"                        </t>\n"
+"                        <t t-else=\"\">\n"
+"                            <tr>\n"
+"                                <td colspan=\"9\">No incidents.</td>\n"
+"                            </tr>\n"
+"                        </t>\n"
+"                    </tbody>\n"
+"                </table>\n"
+"\n"
+"                <p>\n"
+"                    <t t-if=\"ctx.get('department_timesheets_url')\">\n"
+"                        <a t-att-href=\"ctx.get('department_timesheets_url')\">Open department timesheets (filtered)</a>\n"
+"                    </t>\n"
+"                </p>\n"
+"\n"
+"                <p>Regards,</p>\n"
+"                <p>\n"
+"                    <t t-esc=\"object.company_id.name\"></t>\n"
+"                </p>\n"
+"            </div>\n"
+"        "
+msgstr ""
+"<div>\n"
+"                <p>Hola,</p>\n"
+"\n"
+"                <p>\n"
+"                    A continuación se muestra el resumen de incidencias de cumplimiento de partes de horas del\n"
+"                    <b>{{ ctx.get('department_name', '') }}</b>\n"
+"                    correspondientes al día <b>{{ ctx.get('target_date', '') }}</b>.\n"
+"                </p>\n"
+"\n"
+"                <h3>Incidencias</h3>\n"
+"                <table border=\"1\" cellspacing=\"0\" cellpadding=\"6\">\n"
+"                    <thead>\n"
+"                        <tr>\n"
+"                            <th align=\"left\">Empleado</th>\n"
+"                            <th align=\"left\">Teletrabajo</th>\n"
+"                            <th align=\"right\">Asistencia</th>\n"
+"                            <th align=\"right\">Parte de horas</th>\n"
+"                            <th align=\"right\">Diferencia</th>\n"
+"                            <th align=\"left\">Estado</th>\n"
+"                            <th align=\"right\">% genérico</th>\n"
+"                            <th align=\"left\">Estado genérico</th>\n"
+"                            <th align=\"left\">Detalle</th>\n"
+"                        </tr>\n"
+"                    </thead>\n"
+"                    <tbody>\n"
+"                        {% for row in ctx.get('incident_rows', []) %}\n"
+"                        <tr>\n"
+"                            <td>{{ row.get('employee_name', '') }}</td>\n"
+"                            <td>{{ row.get('telework', '') }}</td>\n"
+"                            <td align=\"right\">{{ row.get('attendance_hours', 0) }}</td>\n"
+"                            <td align=\"right\">{{ row.get('timesheet_hours', 0) }}</td>\n"
+"                            <td align=\"right\">{{ row.get('delta_hours', 0) }}</td>\n"
+"                            <td>{{ row.get('state', '') }}</td>\n"
+"                            <td align=\"right\">\n"
+"                                {% set gp = row.get('generic_pct', 0) %}\n"
+"                                \n"
+"                                {% if gp and gp &lt;= 1 %}\n"
+"                                    {{ '%.2f' % (gp * 100.0) }}%\n"
+"                                {% else %}\n"
+"                                    {{ gp or 0 }}%\n"
+"                                {% endif %}\n"
+"                            </td>\n"
+"                            <td>{{ row.get('generic_state', '') }}</td>\n"
+"                            <td>\n"
+"                                {% if row.get('detail_url') %}\n"
+"                                <a href=\"%7B%7B%20row.get('detail_url')%20%7D%7D\">Abrir</a>\n"
+"                                {% else %}\n"
+"                                -\n"
+"                                {% endif %}\n"
+"                            </td>\n"
+"                        </tr>\n"
+"                        {% endfor %}\n"
+"\n"
+"                        {% if not ctx.get('incident_rows') %}\n"
+"                        <tr>\n"
+"                            <td colspan=\"9\">No hay incidencias.</td>\n"
+"                        </tr>\n"
+"                        {% endif %}\n"
+"                    </tbody>\n"
+"                </table>\n"
+"\n"
+"                <p>\n"
+"                    {% if ctx.get('department_timesheets_url') %}\n"
+"                    <a href=\"%7B%7B%20ctx.get('department_timesheets_url')%20%7D%7D\">Abrir partes de horas del departamento (filtrados)</a>\n"
+"                    {% endif %}\n"
+"                </p>\n"
+"\n"
+"                <p>Un saludo,</p>\n"
+"                <p>{{ object.company_id.name }}</p>\n"
+"            </div>\n"
+"        "
+
+#. module: moval_timesheet_compliance
+#: model:mail.template,body_html:moval_timesheet_compliance.mail_template_timesheet_compliance_e3_weekly
+msgid ""
+"<div>\n"
+"                <p>Hello,</p>\n"
+"\n"
+"                <p>\n"
+"                    Weekly generic allocation quality for\n"
+"                    <b>\n"
+"                        <t t-esc=\"ctx.get('department_name','')\"></t>\n"
+"                    </b>\n"
+"                    (\n"
+"                    <t t-esc=\"ctx.get('date_from','')\"></t>\n"
+"                    →<t t-esc=\"ctx.get('date_to','')\"></t>).\n"
+"                </p>\n"
+"\n"
+"                <h3>By employee</h3>\n"
+"                <table border=\"1\" cellspacing=\"0\" cellpadding=\"6\">\n"
+"                    <thead>\n"
+"                        <tr>\n"
+"                            <th align=\"left\">Employee</th>\n"
+"                            <th align=\"right\">Total hours</th>\n"
+"                            <th align=\"right\">Generic hours</th>\n"
+"                            <th align=\"right\">Generic %</th>\n"
+"                        </tr>\n"
+"                    </thead>\n"
+"                    <tbody>\n"
+"                        <t t-set=\"employee_rows\" t-value=\"ctx.get('employee_rows', [])\"></t>\n"
+"                        <t t-if=\"employee_rows\">\n"
+"                            <t t-foreach=\"employee_rows\" t-as=\"row\">\n"
+"                                <tr>\n"
+"                                    <td>\n"
+"                                        <t t-esc=\"row.get('employee_name')\"></t>\n"
+"                                    </td>\n"
+"                                    <td align=\"right\">\n"
+"                                        <t t-esc=\"row.get('total_hours')\"></t>\n"
+"                                    </td>\n"
+"                                    <td align=\"right\">\n"
+"                                        <t t-esc=\"row.get('generic_hours')\"></t>\n"
+"                                    </td>\n"
+"                                    <td align=\"right\"><t t-esc=\"row.get('generic_pct')\"></t>%\n"
+"                                    </td>\n"
+"                                </tr>\n"
+"                            </t>\n"
+"                        </t>\n"
+"                        <t t-else=\"\">\n"
+"                            <tr>\n"
+"                                <td colspan=\"4\">No data.</td>\n"
+"                            </tr>\n"
+"                        </t>\n"
+"                    </tbody>\n"
+"                </table>\n"
+"\n"
+"                <p>\n"
+"                    <t t-if=\"ctx.get('pivot_url')\">\n"
+"                        <a t-att-href=\"ctx.get('pivot_url')\">Open compliance view (filtered)</a>\n"
+"                    </t>\n"
+"                </p>\n"
+"\n"
+"                <p>Regards,</p>\n"
+"                <p>\n"
+"                    <t t-esc=\"object.company_id.name\"></t>\n"
+"                </p>\n"
+"            </div>\n"
+"        "
+msgstr ""
+"<div>\n"
+"                <p>Hola,</p>\n"
+"\n"
+"                <p>\n"
+"                    Calidad semanal de la asignación genérica para\n"
+"                    <b>{{ ctx.get('department_name','') }}</b>\n"
+"                    ({{ ctx.get('date_from','') }} → {{ ctx.get('date_to','') }}).\n"
+"                </p>\n"
+"\n"
+"                <h3>Por empleado</h3>\n"
+"                <table border=\"1\" cellspacing=\"0\" cellpadding=\"6\">\n"
+"                    <thead>\n"
+"                        <tr>\n"
+"                            <th align=\"left\">Empleado</th>\n"
+"                            <th align=\"right\">Horas totales</th>\n"
+"                            <th align=\"right\">Horas genéricas</th>\n"
+"                            <th align=\"right\">% genérico</th>\n"
+"                        </tr>\n"
+"                    </thead>\n"
+"                    <tbody>\n"
+"                        {% for row in ctx.get('employee_rows', []) %}\n"
+"                        <tr>\n"
+"                            <td>{{ row.get('employee_name') }}</td>\n"
+"                            <td align=\"right\">{{ row.get('total_hours') }}</td>\n"
+"                            <td align=\"right\">{{ row.get('generic_hours') }}</td>\n"
+"                            <td align=\"right\">{{ row.get('generic_pct') }}%</td>\n"
+"                        </tr>\n"
+"                        {% endfor %}\n"
+"                        {% if not ctx.get('employee_rows') %}\n"
+"                        <tr>\n"
+"                            <td colspan=\"4\">Sin datos.</td>\n"
+"                        </tr>\n"
+"                        {% endif %}\n"
+"                    </tbody>\n"
+"                </table>\n"
+"\n"
+"                <p>\n"
+"                    {% if ctx.get('pivot_url') %}\n"
+"                    <a href=\"%7B%7B%20ctx.get('pivot_url')%20%7D%7D\">Abrir vista de cumplimiento (filtrada)</a>\n"
+"                    {% endif %}\n"
+"                </p>\n"
+"\n"
+"                <p>Un saludo,</p>\n"
+"                <p>{{ object.company_id.name }}</p>\n"
+"            </div>\n"
+"        "
+
+#. module: moval_timesheet_compliance
+#: model:mail.template,body_html:moval_timesheet_compliance.mail_template_timesheet_compliance_b3_escalation
+msgid ""
+"<div>\n"
+"                <p>Hello,</p>\n"
+"\n"
+"                <p>This is an escalation for an unresolved timesheet compliance incident older than 48 hours.</p>\n"
+"\n"
+"                <h3>Summary</h3>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <b>Employee:</b>\n"
+"                        <t t-esc=\"object.employee_id.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Date:</b>\n"
+"                        <t t-esc=\"object.date\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Department:</b>\n"
+"                        <t t-esc=\"object.department_id.display_name or ''\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Telework:</b>\n"
+"                        <t t-esc=\"'Yes' if object.telework else 'No'\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Attendance hours:</b>\n"
+"                        <t t-esc=\"object.attendance_hours\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Timesheet hours:</b>\n"
+"                        <t t-esc=\"object.timesheet_hours\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Delta:</b>\n"
+"                        <t t-esc=\"object.delta_hours\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>State:</b>\n"
+"                        <t t-esc=\"object.state\"></t>\n"
+"                    </li>\n"
+"                </ul>\n"
+"\n"
+"                <p>\n"
+"                    <t t-if=\"ctx.get('detail_url')\">\n"
+"                        <a t-att-href=\"ctx.get('detail_url')\">Open “My timesheets for this day”</a>\n"
+"                    </t>\n"
+"                </p>\n"
+"\n"
+"                <p>Regards,</p>\n"
+"                <p>\n"
+"                    <t t-esc=\"object.company_id.name\"></t>\n"
+"                </p>\n"
+"            </div>\n"
+"        "
+msgstr ""
+"<div>\n"
+"                <p>Hola,</p>\n"
+"\n"
+"                <p>\n"
+"                    Esta es una escalada de una incidencia de cumplimiento de partes de horas no resuelta con una antigüedad superior a 48 horas.\n"
+"                </p>\n"
+"\n"
+"                <h3>Resumen</h3>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <b>Empleado:</b>\n"
+"                        {{ object.employee_id.name }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Fecha:</b>\n"
+"                        {{ object.date }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Departamento:</b>\n"
+"                        {{ object.department_id.display_name or '' }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Teletrabajo:</b>\n"
+"                        {{ 'Sí' if object.telework else 'No' }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Horas de asistencia:</b>\n"
+"                        {{ object.attendance_hours }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Horas imputadas:</b>\n"
+"                        {{ object.timesheet_hours }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Diferencia:</b>\n"
+"                        {{ object.delta_hours }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Estado:</b>\n"
+"                        {{ object.state }}\n"
+"                    </li>\n"
+"                </ul>\n"
+"\n"
+"                <p>\n"
+"                    {% if ctx.get('detail_url') %}\n"
+"                    <a href=\"%7B%7B%20ctx.get('detail_url')%20%7D%7D\">Abrir “Mis partes de horas de este día”</a>\n"
+"                    {% endif %}\n"
+"                </p>\n"
+"\n"
+"                <p>Un saludo,</p>\n"
+"                <p>{{ object.company_id.name }}</p>\n"
+"            </div>\n"
+"        "
+
+#. module: moval_timesheet_compliance
+#: model:mail.template,body_html:moval_timesheet_compliance.mail_template_timesheet_compliance_daily
+msgid ""
+"<div>\n"
+"                <p>Hello<t t-esc=\"object.employee_id.name\"></t>,\n"
+"                </p>\n"
+"\n"
+"                <p>\n"
+"                    Here is your timesheet compliance summary for\n"
+"                    <b>\n"
+"                        <t t-esc=\"object.date\"></t>\n"
+"                    </b>\n"
+"                    .\n"
+"                </p>\n"
+"\n"
+"                <h3>Summary</h3>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <b>Date:</b>\n"
+"                        <t t-esc=\"object.date\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Telework:</b>\n"
+"                        <t t-esc=\"'Yes' if object.telework else 'No'\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Attendance hours:</b>\n"
+"                        <t t-esc=\"object.attendance_hours\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Timesheet hours:</b>\n"
+"                        <t t-esc=\"object.timesheet_hours\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Timesheet entries:</b>\n"
+"                        <t t-esc=\"ctx.get('timesheet_entries_count', 0)\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Delta:</b>\n"
+"                        <t t-esc=\"object.delta_hours\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>State:</b>\n"
+"                        <t t-esc=\"object.state\"></t>\n"
+"                    </li>\n"
+"                </ul>\n"
+"\n"
+"                <h3>Hours by project</h3>\n"
+"                <table border=\"1\" cellspacing=\"0\" cellpadding=\"6\">\n"
+"                    <thead>\n"
+"                        <tr>\n"
+"                            <th align=\"left\">Project</th>\n"
+"                            <th align=\"right\">Hours</th>\n"
+"                        </tr>\n"
+"                    </thead>\n"
+"                    <tbody>\n"
+"                        <t t-set=\"project_rows\" t-value=\"ctx.get('project_rows', [])\"></t>\n"
+"                        <t t-if=\"project_rows\">\n"
+"                            <t t-foreach=\"project_rows\" t-as=\"row\">\n"
+"                                <tr>\n"
+"                                    <td>\n"
+"                                        <t t-esc=\"row.get('project_name')\"></t>\n"
+"                                    </td>\n"
+"                                    <td align=\"right\">\n"
+"                                        <t t-esc=\"row.get('hours')\"></t>\n"
+"                                    </td>\n"
+"                                </tr>\n"
+"                            </t>\n"
+"                        </t>\n"
+"                        <t t-else=\"\">\n"
+"                            <tr>\n"
+"                                <td colspan=\"2\">No timesheet data for this day.</td>\n"
+"                            </tr>\n"
+"                        </t>\n"
+"                    </tbody>\n"
+"                </table>\n"
+"\n"
+"                <h3>Top tasks (max 10)</h3>\n"
+"                <table border=\"1\" cellspacing=\"0\" cellpadding=\"6\">\n"
+"                    <thead>\n"
+"                        <tr>\n"
+"                            <th align=\"left\">Task</th>\n"
+"                            <th align=\"right\">Hours</th>\n"
+"                            <th align=\"left\">Note</th>\n"
+"                        </tr>\n"
+"                    </thead>\n"
+"                    <tbody>\n"
+"                        <t t-set=\"task_rows\" t-value=\"ctx.get('task_rows', [])\"></t>\n"
+"                        <t t-if=\"task_rows\">\n"
+"                            <t t-foreach=\"task_rows[:10]\" t-as=\"row\">\n"
+"                                <tr>\n"
+"                                    <td>\n"
+"                                        <t t-esc=\"row.get('task_name')\"></t>\n"
+"                                    </td>\n"
+"                                    <td align=\"right\">\n"
+"                                        <t t-esc=\"row.get('hours')\"></t>\n"
+"                                    </td>\n"
+"                                    <td>\n"
+"                                        <t t-esc=\"row.get('note')\"></t>\n"
+"                                    </td>\n"
+"                                </tr>\n"
+"                            </t>\n"
+"                        </t>\n"
+"                        <t t-else=\"\">\n"
+"                            <tr>\n"
+"                                <td colspan=\"3\">No task details found.</td>\n"
+"                            </tr>\n"
+"                        </t>\n"
+"                    </tbody>\n"
+"                </table>\n"
+"\n"
+"                <h3>Generic allocation (\"drawer time\")</h3>\n"
+"                <t t-set=\"g_pct\" t-value=\"object.generic_pct\"></t>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <b>Generic hours:</b>\n"
+"                        <t t-esc=\"object.generic_hours\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Generic %:</b>\n"
+"                        <t t-if=\"g_pct and g_pct &lt;= 1\">\n"
+"                            <t t-esc=\"'%.2f' % (g_pct * 100.0)\"></t>%\n"
+"                        </t>\n"
+"                        <t t-else=\"\">\n"
+"                            <t t-esc=\"g_pct or 0\"></t>%\n"
+"                        </t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Min hours to evaluate:</b>\n"
+"                        <t t-esc=\"ctx.get('generic_min_hours', 0)\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Warn threshold %:</b>\n"
+"                        <t t-esc=\"ctx.get('generic_warn_pct', 0)\"></t>%\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Issue threshold %:</b>\n"
+"                        <t t-esc=\"ctx.get('generic_issue_pct', 0)\"></t>%\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Generic state:</b>\n"
+"                        <t t-esc=\"object.generic_state\"></t>\n"
+"                    </li>\n"
+"                </ul>\n"
+"\n"
+"                <p>\n"
+"                    <a t-att-href=\"ctx.get('my_timesheets_url') or '#'\">Open “My timesheets for this day”</a>\n"
+"                </p>\n"
+"\n"
+"                <p>Regards,</p>\n"
+"                <p>\n"
+"                    <t t-esc=\"object.company_id.name\"></t>\n"
+"                </p>\n"
+"            </div>\n"
+"        "
+msgstr ""
+"<div>\n"
+"                <p>Hola {{ object.employee_id.name }},</p>\n"
+"\n"
+"                <p>A continuación tienes el resumen de cumplimiento de partes de horas del día <b>{{ object.date }}</b>.\n"
+"                </p>\n"
+"\n"
+"                <h3>Resumen</h3>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <b>Fecha:</b>\n"
+"                        {{ object.date }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Teletrabajo:</b>\n"
+"                        {{ 'Sí' if object.telework else 'No' }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Horas de asistencia:</b>\n"
+"                        {{ object.attendance_hours }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Horas imputadas:</b>\n"
+"                        {{ object.timesheet_hours }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Número de imputaciones:</b>\n"
+"                        {{ ctx.get('timesheet_entries_count', 0) }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Diferencia:</b>\n"
+"                        {{ object.delta_hours }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Estado:</b>\n"
+"                        {{ object.state }}\n"
+"                    </li>\n"
+"                </ul>\n"
+"\n"
+"                <h3>Horas por proyecto</h3>\n"
+"                <table border=\"1\" cellspacing=\"0\" cellpadding=\"6\">\n"
+"                    <thead>\n"
+"                        <tr>\n"
+"                            <th align=\"left\">Proyecto</th>\n"
+"                            <th align=\"right\">Horas</th>\n"
+"                        </tr>\n"
+"                    </thead>\n"
+"                    <tbody>\n"
+"                        {% for row in ctx.get('project_rows', []) %}\n"
+"                        <tr>\n"
+"                            <td>{{ row.get('project_name') }}</td>\n"
+"                            <td align=\"right\">{{ row.get('hours') }}</td>\n"
+"                        </tr>\n"
+"                        {% endfor %}\n"
+"                        {% if not ctx.get('project_rows') %}\n"
+"                        <tr>\n"
+"                            <td colspan=\"2\">No hay datos de partes de horas para este día.</td>\n"
+"                        </tr>\n"
+"                        {% endif %}\n"
+"                    </tbody>\n"
+"                </table>\n"
+"\n"
+"                <h3>Tareas principales (máx. 10)</h3>\n"
+"                <table border=\"1\" cellspacing=\"0\" cellpadding=\"6\">\n"
+"                    <thead>\n"
+"                        <tr>\n"
+"                            <th align=\"left\">Tarea</th>\n"
+"                            <th align=\"right\">Horas</th>\n"
+"                            <th align=\"left\">Nota</th>\n"
+"                        </tr>\n"
+"                    </thead>\n"
+"                    <tbody>\n"
+"                        {% for row in ctx.get('task_rows', [])[:10] %}\n"
+"                        <tr>\n"
+"                            <td>{{ row.get('task_name') }}</td>\n"
+"                            <td align=\"right\">{{ row.get('hours') }}</td>\n"
+"                            <td>{{ row.get('note') }}</td>\n"
+"                        </tr>\n"
+"                        {% endfor %}\n"
+"                        {% if not ctx.get('task_rows') %}\n"
+"                        <tr>\n"
+"                            <td colspan=\"3\">No se han encontrado detalles de tareas.</td>\n"
+"                        </tr>\n"
+"                        {% endif %}\n"
+"                    </tbody>\n"
+"                </table>\n"
+"\n"
+"                <h3>Asignación genérica (\"tiempo cajón\")</h3>\n"
+"                {% set g_pct = object.generic_pct %}\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <b>Horas genéricas:</b>\n"
+"                        {{ object.generic_hours }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>% genérico:</b>\n"
+"                        \n"
+"                        {% if g_pct and g_pct &lt;= 1 %}\n"
+"                            {{ '%.2f' % (g_pct * 100.0) }}%\n"
+"                        {% else %}\n"
+"                            {{ g_pct or 0 }}%\n"
+"                        {% endif %}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Horas mínimas para evaluar:</b>\n"
+"                        {{ ctx.get('generic_min_hours', 0) }}\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Umbral de aviso (%):</b>\n"
+"                        {{ ctx.get('generic_warn_pct', 0) }}%\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Umbral de incidencia (%):</b>\n"
+"                        {{ ctx.get('generic_issue_pct', 0) }}%\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <b>Estado genérico:</b>\n"
+"                        {{ object.generic_state }}\n"
+"                    </li>\n"
+"                </ul>\n"
+"\n"
+"                <p>\n"
+"                    <a href=\"%7B%7B%20ctx.get('my_timesheets_url',%20'#')%20%7D%7D\">Abrir “Mis partes de horas de este día”</a>\n"
+"                </p>\n"
+"\n"
+"                <p>Un saludo,</p>\n"
+"                <p>{{ object.company_id.name }}</p>\n"
+"            </div>\n"
+"        "
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_needaction
+msgid "Action Needed"
+msgstr "Acción requerida"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_attachment_count
+msgid "Attachment Count"
+msgstr "Número de adjuntos"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model,name:moval_timesheet_compliance.model_hr_attendance
+msgid "Attendance"
+msgstr "Asistencia"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__attendance_hours
+msgid "Attendance Hours"
+msgstr "Horas de asistencia"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid ""
+"Avoid spam: at most one notification per timer within this cooldown window."
+msgstr ""
+"Evitar spam: como máximo una notificación por temporizador dentro de este "
+"período de enfriamiento."
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid ""
+"Avoid spamming managers with repeated escalations for the same employee."
+msgstr ""
+"Evitar saturar a los responsables con escalados repetidos para el mismo "
+"empleado."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__b2_manager_sent_at
+msgid "B2 Manager Sent At"
+msgstr "Enviado a responsable (B2)"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Check Active Timers Without Attendance"
+msgstr "Comprobar temporizadores activos sin asistencia"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_timer_incident__incident_type__checkout_with_timer
+msgid "Checkout with active timer"
+msgstr "Salida con temporizador activo"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model,name:moval_timesheet_compliance.model_res_company
+msgid "Companies"
+msgstr "Compañías"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__company_id
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__company_id
+msgid "Company"
+msgstr "Compañía"
+
+#. module: moval_timesheet_compliance
+#: model:ir.actions.act_window,name:moval_timesheet_compliance.action_moval_timesheet_compliance_pivot
+#: model:ir.ui.menu,name:moval_timesheet_compliance.menu_moval_timesheet_compliance_pivot
+msgid "Compliance Analysis"
+msgstr "Análisis de cumplimiento"
+
+#. module: moval_timesheet_compliance
+#: model:ir.ui.menu,name:moval_timesheet_compliance.menu_moval_timesheet_compliance_manager
+msgid "Compliance Records"
+msgstr "Registros de cumplimiento"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model,name:moval_timesheet_compliance.model_res_config_settings
+msgid "Config Settings"
+msgstr "Ajustes de configuración"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_company__x_timer_check_no_attendance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_config_settings__x_timer_check_no_attendance
+msgid ""
+"Create an incident if a timer is running while the employee has no active "
+"attendance."
+msgstr ""
+"Crear una incidencia si existe un temporizador activo mientras el empleado "
+"no tiene una sesión de asistencia activa."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__create_uid
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__create_date
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: moval_timesheet_compliance
+#: model:ir.ui.menu,name:moval_timesheet_compliance.menu_moval_timesheet_compliance
+msgid "Daily Compliance"
+msgstr "Cumplimiento diario"
+
+#. module: moval_timesheet_compliance
+#: model:ir.actions.act_window,name:moval_timesheet_compliance.action_moval_timesheet_compliance_manager
+#: model:ir.model,name:moval_timesheet_compliance.model_timesheet_compliance
+msgid "Daily Timesheet Compliance"
+msgstr "Cumplimiento diario de partes de horas"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__date
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Date"
+msgstr "Fecha"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__delta_hours
+msgid "Delta Hours"
+msgstr "Diferencia de horas"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model,name:moval_timesheet_compliance.model_hr_department
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__department_id
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__department_id
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Department"
+msgstr "Departamento"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_hr_department__x_generic_issue_pct
+msgid "Department-specific generic allocation issue threshold."
+msgstr "Umbral de incidencia de asignación genérica específico del departamento."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_hr_department__x_generic_warn_pct
+msgid "Department-specific generic allocation warning threshold."
+msgstr "Umbral de aviso de asignación genérica específico del departamento."
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Detect active timers when there is no active attendance session."
+msgstr ""
+"Detectar temporizadores activos cuando no existe una sesión de asistencia "
+"activa."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_company__x_timer_check_no_attendance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_config_settings__x_timer_check_no_attendance
+msgid "Detect timers without attendance"
+msgstr "Detectar temporizadores sin asistencia"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__display_name
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__duration_hours
+msgid "Duration Hours"
+msgstr "Horas de duración"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__email_sent_at
+msgid "Email Sent At"
+msgstr "Correo enviado el"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__employee_id
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__employee_id
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Employee"
+msgstr "Empleado"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Enable Escalation for Repeated Incidents"
+msgstr "Habilitar escalado para incidencias repetidas"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_company__x_timer_escalation_enabled
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_config_settings__x_timer_escalation_enabled
+msgid "Enable Timer Escalation"
+msgstr "Habilitar escalado de temporizadores"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Escalate After (count)"
+msgstr "Escalar después de (número)"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_company__x_timer_escalation_after_count
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_config_settings__x_timer_escalation_after_count
+msgid "Escalate After Notifications"
+msgstr "Escalar tras notificaciones"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_company__x_timer_escalation_after_count
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_config_settings__x_timer_escalation_after_count
+msgid ""
+"Escalate after this many employee notifications for the same incident type "
+"within the window."
+msgstr ""
+"Escalar tras este número de notificaciones al empleado para el mismo tipo de"
+" incidencia dentro del período."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_company__x_timer_escalation_enabled
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_config_settings__x_timer_escalation_enabled
+msgid ""
+"Escalate recurring timer incidents to the department manager (with "
+"cooldown)."
+msgstr ""
+"Escalar incidencias recurrentes de temporizadores al responsable del "
+"departamento (con tiempo de espera)."
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid ""
+"Escalate to the department manager when the employee repeats incidents."
+msgstr ""
+"Escalar al responsable del departamento cuando el empleado repite "
+"incidencias."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_compliance__state__escalated
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Escalated"
+msgstr "Escalado"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__escalated_at
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__escalated_at
+msgid "Escalated At"
+msgstr "Escalado el"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__escalated_count
+msgid "Escalated Count"
+msgstr "Número de escalados"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_company__x_timer_escalation_cooldown_hours
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_config_settings__x_timer_escalation_cooldown_hours
+msgid "Escalation Cooldown (Hours)"
+msgstr "Tiempo de espera de escalado (horas)"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Escalation Cooldown (hours)"
+msgstr "Tiempo de espera de escalado (horas)"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_company__x_timer_escalation_window_days
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_config_settings__x_timer_escalation_window_days
+msgid "Escalation Window (Days)"
+msgstr "Ventana de escalado (días)"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Escalation Window (days)"
+msgstr "Ventana de escalado (días)"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__first_seen_at
+msgid "First Seen At"
+msgstr "Detectado por primera vez el"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_compliance__state__fixed
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Fixed"
+msgstr "Corregido"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_follower_ids
+msgid "Followers"
+msgstr "Seguidores"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Seguidores (contactos)"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_form
+msgid "Generic Allocation Quality"
+msgstr "Calidad de asignación genérica"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__generic_hours
+msgid "Generic Hours"
+msgstr "Horas genéricas"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Generic Issue"
+msgstr "Incidencia genérica"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_hr_department__x_generic_issue_pct
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_company__x_generic_issue_pct
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_config_settings__x_generic_issue_pct
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Generic Issue Threshold (%)"
+msgstr "Umbral de incidencia genérica (%)"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Generic OK"
+msgstr "Genérico correcto"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__generic_pct
+msgid "Generic Pct"
+msgstr "Porcentaje genérico"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_company__x_generic_project_ids
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_config_settings__x_generic_project_ids
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Generic Projects"
+msgstr "Proyectos genéricos"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__generic_state
+msgid "Generic State"
+msgstr "Estado genérico"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Generic Warning"
+msgstr "Aviso genérico"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_hr_department__x_generic_warn_pct
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_company__x_generic_warn_pct
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_config_settings__x_generic_warn_pct
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Generic Warning Threshold (%)"
+msgstr "Umbral de aviso genérico (%)"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_company__x_generic_warn_pct
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_config_settings__x_generic_warn_pct
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Generic allocation percentage triggering a warning."
+msgstr "Porcentaje de imputación genérica que dispara un aviso."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_company__x_generic_issue_pct
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_config_settings__x_generic_issue_pct
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Generic allocation percentage triggering an issue."
+msgstr "Porcentaje de imputación genérica que dispara una incidencia."
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Generic state"
+msgstr "Estado genérico"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Group By"
+msgstr "Agrupar por"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__has_message
+msgid "Has Message"
+msgstr "Tiene mensajes"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_form
+msgid "Hours"
+msgstr "Horas"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__id
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__id
+msgid "ID"
+msgstr "ID"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_timesheet_compliance__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Si está marcado, hay nuevos mensajes que requieren su atención."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_timesheet_compliance__message_has_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Si está marcado, algunos mensajes tienen un error de entrega."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_company__x_timer_stop_on_checkout
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_config_settings__x_timer_stop_on_checkout
+msgid ""
+"If enabled, attempt to stop/pause the timer automatically on employee "
+"checkout."
+msgstr ""
+"Si está habilitado, se intentará detener o pausar el temporizador "
+"automáticamente al registrar la salida del empleado."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__incident_type
+msgid "Incident Type"
+msgstr "Tipo de incidencia"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_is_follower
+msgid "Is Follower"
+msgstr "Es seguidor"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__is_resolved
+msgid "Is Resolved"
+msgstr "Está resuelta"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_compliance__generic_state__issue
+#: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_compliance__state__issue
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Issue"
+msgstr "Incidencia"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_compliance__state__justified
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Justified"
+msgstr "Justificado"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance____last_update
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident____last_update
+msgid "Last Modified on"
+msgstr "Última modificación el"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__last_notified_at
+msgid "Last Notified At"
+msgstr "Última notificación el"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__last_seen_at
+msgid "Last Seen At"
+msgstr "Visto por última vez el"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__write_uid
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__write_date
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "Adjunto principal"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_form
+msgid "Mark as justified"
+msgstr "Marcar como justificado"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Max Active Timer Hours"
+msgstr "Horas máximas de temporizador activo"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_company__x_timer_max_active_hours
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_config_settings__x_timer_max_active_hours
+msgid "Maximum allowed running time (in hours) for an active timer."
+msgstr "Tiempo máximo permitido (en horas) para un temporizador activo."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_has_error
+msgid "Message Delivery error"
+msgstr "Error de entrega del mensaje"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_ids
+msgid "Messages"
+msgstr "Mensajes"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Minimum Hours for Evaluation"
+msgstr "Horas mínimas para evaluar"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_company__x_generic_min_hours
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_config_settings__x_generic_min_hours
+msgid "Minimum Hours for Generic Evaluation"
+msgstr "Horas mínimas para evaluación genérica"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_company__x_timer_notify_cooldown_hours
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_config_settings__x_timer_notify_cooldown_hours
+msgid ""
+"Minimum hours between employee notifications for the same incident/timer."
+msgstr ""
+"Horas mínimas entre notificaciones al empleado para la misma incidencia o "
+"temporizador."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_company__x_timer_escalation_cooldown_hours
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_config_settings__x_timer_escalation_cooldown_hours
+msgid "Minimum hours between escalations for the same open incident."
+msgstr "Horas mínimas entre escalados para la misma incidencia abierta."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_company__x_generic_min_hours
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_config_settings__x_generic_min_hours
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Minimum total timesheet hours required to evaluate generic allocation."
+msgstr "Horas totales mínimas de partes requeridas para evaluar la asignación genérica."
+
+#. module: moval_timesheet_compliance
+#: model:ir.actions.act_window,name:moval_timesheet_compliance.action_moval_my_timesheets_by_date
+#: model:ir.ui.menu,name:moval_timesheet_compliance.menu_moval_my_timesheets_by_date
+msgid "My timesheets (by date)"
+msgstr "Mis partes (por fecha)"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__note
+msgid "Note"
+msgstr "Nota"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Notification Cooldown (hours)"
+msgstr "Tiempo de espera de notificación (horas)"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__notify_count
+msgid "Notify Count"
+msgstr "Número de notificaciones"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Número de acciones"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_has_error_counter
+msgid "Number of errors"
+msgstr "Número de errores"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Number of incidents within the time window required to escalate."
+msgstr ""
+"Número de incidencias dentro de la ventana de tiempo necesario para escalar."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_timesheet_compliance__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Número de mensajes que requieren una acción"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_timesheet_compliance__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Número de mensajes con error de entrega"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_compliance__generic_state__ok
+#: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_compliance__state__ok
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "OK"
+msgstr "Correcto"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Pending incidents"
+msgstr "Incidencias pendientes"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Projects considered generic for quality evaluation."
+msgstr "Proyectos considerados genéricos para la evaluación de calidad."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_company__x_generic_project_ids
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_config_settings__x_generic_project_ids
+msgid "Projects considered generic for timesheet quality evaluation."
+msgstr "Proyectos considerados genéricos para la evaluación de la calidad de los partes de horas."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_timesheet_compliance__user_id
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_timesheet_timer_incident__user_id
+msgid "Related user name for the resource to manage its access."
+msgstr "Usuario relacionado con el recurso para gestionar su acceso."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__resolved_at
+msgid "Resolved At"
+msgstr "Resuelta el"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__state
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "State"
+msgstr "Estado"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Stop Timers on Checkout"
+msgstr "Detener temporizadores al registrar la salida"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_company__x_timer_stop_on_checkout
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_config_settings__x_timer_stop_on_checkout
+msgid "Stop timer on checkout"
+msgstr "Detener temporizador al registrar la salida"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__telework
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Telework"
+msgstr "Teletrabajo"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.constraint,message:moval_timesheet_compliance.constraint_timesheet_compliance_employee_date_uniq
+msgid "There is already a compliance record for this employee and date."
+msgstr ""
+"Ya existe un registro de cumplimiento para este empleado y esta fecha."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_company__x_timer_escalation_window_days
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_config_settings__x_timer_escalation_window_days
+msgid "Time window (in days) used to count notifications before escalating."
+msgstr ""
+"Ventana de tiempo (en días) usada para contar notificaciones antes de "
+"escalar."
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Time window used to count repeated incidents per employee."
+msgstr ""
+"Ventana de tiempo usada para contar incidencias repetidas por empleado."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_company__x_timer_max_active_hours
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_config_settings__x_timer_max_active_hours
+msgid "Timer Max Active Hours"
+msgstr "Horas máximas de temporizador activo"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_company__x_timer_notify_cooldown_hours
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_config_settings__x_timer_notify_cooldown_hours
+msgid "Timer Notify Cooldown (Hours)"
+msgstr "Tiempo de espera de notificación del temporizador (horas)"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__timer_ref
+msgid "Timer Ref"
+msgstr "Referencia del temporizador"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__timer_started_at
+msgid "Timer Started At"
+msgstr "Temporizador iniciado el"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Timer Watchdog"
+msgstr "Vigilante de temporizadores"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_timer_incident__incident_type__long_running
+msgid "Timer running too long"
+msgstr "Temporizador activo demasiado tiempo"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_timer_incident__incident_type__no_attendance
+msgid "Timer running without attendance"
+msgstr "Temporizador activo sin asistencia"
+
+#. module: moval_timesheet_compliance
+#: model:ir.ui.menu,name:moval_timesheet_compliance.menu_moval_timesheet_compliance_root
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_hr_department_form_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Timesheet Compliance"
+msgstr "Cumplimiento de partes"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_pivot
+msgid "Timesheet Compliance Analysis"
+msgstr "Análisis de cumplimiento de partes"
+
+#. module: moval_timesheet_compliance
+#: model:res.groups,name:moval_timesheet_compliance.group_timesheet_compliance_manager
+msgid "Timesheet Compliance Manager"
+msgstr "Responsable de cumplimiento de partes"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_graph
+msgid "Timesheet Compliance Trends"
+msgstr "Tendencias de cumplimiento de partes"
+
+#. module: moval_timesheet_compliance
+#: model:res.groups,name:moval_timesheet_compliance.group_timesheet_compliance_user
+msgid "Timesheet Compliance User"
+msgstr "Usuario de cumplimiento de partes"
+
+#. module: moval_timesheet_compliance
+#: model:ir.actions.server,name:moval_timesheet_compliance.ir_cron_timesheet_compliance_b1_employee_email_ir_actions_server
+#: model:ir.cron,cron_name:moval_timesheet_compliance.ir_cron_timesheet_compliance_b1_employee_email
+msgid "Timesheet Compliance: B1 Employee Daily Email"
+msgstr "Cumplimiento de partes: correo diario al empleado (B1)"
+
+#. module: moval_timesheet_compliance
+#: model:ir.actions.server,name:moval_timesheet_compliance.ir_cron_timesheet_compliance_b2_manager_email_ir_actions_server
+#: model:ir.cron,cron_name:moval_timesheet_compliance.ir_cron_timesheet_compliance_b2_manager_email
+msgid "Timesheet Compliance: B2 Manager Daily Email"
+msgstr "Cumplimiento de partes: correo diario al responsable (B2)"
+
+#. module: moval_timesheet_compliance
+#: model:ir.actions.server,name:moval_timesheet_compliance.ir_cron_timesheet_compliance_b3_escalation_ir_actions_server
+#: model:ir.cron,cron_name:moval_timesheet_compliance.ir_cron_timesheet_compliance_b3_escalation
+msgid "Timesheet Compliance: B3 Escalation"
+msgstr "Cumplimiento de partes: escalado (B3)"
+
+#. module: moval_timesheet_compliance
+#: model:ir.actions.server,name:moval_timesheet_compliance.ir_cron_compute_timesheet_compliance_ir_actions_server
+#: model:ir.cron,cron_name:moval_timesheet_compliance.ir_cron_compute_timesheet_compliance
+msgid "Timesheet Compliance: Compute"
+msgstr "Cumplimiento de partes: cálculo"
+
+#. module: moval_timesheet_compliance
+#: model:ir.actions.server,name:moval_timesheet_compliance.ir_cron_timesheet_compliance_e3_weekly_quality_ir_actions_server
+#: model:ir.cron,cron_name:moval_timesheet_compliance.ir_cron_timesheet_compliance_e3_weekly_quality
+msgid "Timesheet Compliance: E3 Weekly Generic Quality"
+msgstr "Cumplimiento de partes: calidad genérica semanal (E3)"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__timesheet_hours
+msgid "Timesheet Hours"
+msgstr "Horas de partes"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model,name:moval_timesheet_compliance.model_timesheet_timer_incident
+msgid "Timesheet Timer Incident"
+msgstr "Incidencia de temporizador de partes"
+
+#. module: moval_timesheet_compliance
+#: model:ir.actions.server,name:moval_timesheet_compliance.ir_cron_timer_watchdog_ir_actions_server
+#: model:ir.cron,cron_name:moval_timesheet_compliance.ir_cron_timer_watchdog
+#: model:ir.model,name:moval_timesheet_compliance.model_timesheet_timer_watchdog
+msgid "Timesheet Timer Watchdog"
+msgstr "Vigilante de temporizadores de partes"
+
+#. module: moval_timesheet_compliance
+#: model:mail.template,name:moval_timesheet_compliance.mail_template_timesheet_compliance_b2_manager
+msgid "Timesheet compliance (B2 manager daily)"
+msgstr "Cumplimiento de partes (B2 correo diario al responsable)"
+
+#. module: moval_timesheet_compliance
+#: model:mail.template,name:moval_timesheet_compliance.mail_template_timesheet_compliance_b3_escalation
+msgid "Timesheet compliance (B3 escalation)"
+msgstr "Cumplimiento de partes (B3 escalado)"
+
+#. module: moval_timesheet_compliance
+#: model:mail.template,name:moval_timesheet_compliance.mail_template_timesheet_compliance_e3_weekly
+msgid "Timesheet compliance (E3 weekly generic quality)"
+msgstr "Cumplimiento de partes (E3 calidad genérica semanal)"
+
+#. module: moval_timesheet_compliance
+#: model:mail.template,name:moval_timesheet_compliance.mail_template_timesheet_compliance_daily
+msgid "Timesheet compliance (daily)"
+msgstr "Cumplimiento de partes (diario)"
+
+#. module: moval_timesheet_compliance
+#: model:mail.template,subject:moval_timesheet_compliance.mail_template_timesheet_compliance_daily
+msgid "Timesheet compliance - ${object.date}"
+msgstr "Cumplimiento de partes - {{ object.date }}"
+
+#. module: moval_timesheet_compliance
+#: model:mail.template,subject:moval_timesheet_compliance.mail_template_timesheet_compliance_b3_escalation
+msgid ""
+"Timesheet compliance escalation - ${object.employee_id.name} - "
+"${object.date}"
+msgstr ""
+"Escalado de cumplimiento de partes - {{ object.employee_id.name }} - {{ object.date }}\n"
+"        "
+
+#. module: moval_timesheet_compliance
+#: model:mail.template,subject:moval_timesheet_compliance.mail_template_timesheet_compliance_b2_manager
+msgid "Timesheet compliance incidents"
+msgstr ""
+"Incidencias de cumplimiento de partes - {{ ctx.get('department_name', '') }} - {{\n"
+"            ctx.get('target_date', '') }}\n"
+"        "
+
+#. module: moval_timesheet_compliance
+#: model:mail.template,subject:moval_timesheet_compliance.mail_template_timesheet_compliance_e3_weekly
+msgid "Timesheet generic allocation"
+msgstr ""
+"\n"
+"            Asignación genérica de partes de horas - {{ ctx.get('department_name','') }} - {{ ctx.get('date_from','') }} a {{\n"
+"            ctx.get('date_to','') }}\n"
+"        "
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Trigger an incident when a timer stays active longer than this limit."
+msgstr ""
+"Generar una incidencia cuando un temporizador permanezca activo más allá de "
+"este límite."
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__user_id
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__user_id
+msgid "User"
+msgstr "Usuario"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_compliance__generic_state__warn
+#: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_compliance__state__warn
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
+msgid "Warning"
+msgstr "Aviso"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__website_message_ids
+msgid "Website Messages"
+msgstr "Mensajes del sitio web"
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_timesheet_compliance__website_message_ids
+msgid "Website communication history"
+msgstr "Historial de comunicaciones del sitio web"
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid ""
+"When an employee checks out, stop any running timers and register the "
+"incident."
+msgstr ""
+"Cuando un empleado registre su salida, detener cualquier temporizador activo"
+" y registrar la incidencia."

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- A) Compute compliance (creates/updates daily records) -->
+        <record id="ir_cron_compute_timesheet_compliance" model="ir.cron">
+            <field name="name">Timesheet Compliance: Compute</field>
+            <field name="model_id" ref="model_timesheet_compliance"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_compute_compliance()</field>
+            <field name="interval_number" eval="1"/>
+            <field name="interval_type">days</field>
+            <field name="numbercall" eval="-1"/>
+            <field name="active" eval="True"/>
+            <field name="doall" eval="False"/>
+            <field name="nextcall"
+                   eval="(DateTime.now().replace(hour=6, minute=30, second=0, microsecond=0) + (DateTime.now().hour &gt;= 6 and DateTime.now().minute &gt;= 30 and relativedelta(days=1) or relativedelta())).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+        <!-- B1) Employee daily email (07:00) -->
+        <record id="ir_cron_timesheet_compliance_b1_employee_email" model="ir.cron">
+            <field name="name">Timesheet Compliance: B1 Employee Daily Email</field>
+            <field name="model_id" ref="model_timesheet_compliance"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_send_b1_employee_daily_emails()</field>
+            <field name="interval_number" eval="1"/>
+            <field name="interval_type">days</field>
+            <field name="numbercall" eval="-1"/>
+            <field name="active" eval="True"/>
+            <field name="doall" eval="False"/>
+            <field name="nextcall"
+                   eval="(DateTime.now().replace(hour=7, minute=0, second=0, microsecond=0) + (DateTime.now().hour &gt;= 7 and relativedelta(days=1) or relativedelta())).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+        <!-- B2) Manager daily email by department - only incidents (07:05) -->
+        <record id="ir_cron_timesheet_compliance_b2_manager_email" model="ir.cron">
+            <field name="name">Timesheet Compliance: B2 Manager Daily Email</field>
+            <field name="model_id" ref="model_timesheet_compliance"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_send_b2_manager_daily_emails()</field>
+            <field name="interval_number" eval="1"/>
+            <field name="interval_type">days</field>
+            <field name="numbercall" eval="-1"/>
+            <field name="active" eval="True"/>
+            <field name="doall" eval="False"/>
+            <field name="nextcall"
+                   eval="(DateTime.now().replace(hour=7, minute=5, second=0, microsecond=0) + ((DateTime.now().hour &gt; 7 or (DateTime.now().hour == 7 and DateTime.now().minute &gt;= 5)) and relativedelta(days=1) or relativedelta())).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+        <!-- B3) Escalation for unresolved incidents > 48h (07:15) -->
+        <record id="ir_cron_timesheet_compliance_b3_escalation" model="ir.cron">
+            <field name="name">Timesheet Compliance: B3 Escalation</field>
+            <field name="model_id" ref="model_timesheet_compliance"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_send_b3_escalate_unresolved()</field>
+            <field name="interval_number" eval="1"/>
+            <field name="interval_type">days</field>
+            <field name="numbercall" eval="-1"/>
+            <field name="active" eval="True"/>
+            <field name="doall" eval="False"/>
+            <field name="nextcall"
+                   eval="(DateTime.now().replace(hour=7, minute=15, second=0, microsecond=0) + ((DateTime.now().hour &gt; 7 or (DateTime.now().hour == 7 and DateTime.now().minute &gt;= 15)) and relativedelta(days=1) or relativedelta())).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+        <record id="ir_cron_timesheet_compliance_e3_weekly_quality" model="ir.cron">
+            <field name="name">Timesheet Compliance: E3 Weekly Generic Quality</field>
+            <field name="model_id" ref="model_timesheet_compliance"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_send_e3_weekly_generic_quality()</field>
+            <field name="interval_number" eval="1"/>
+            <field name="interval_type">days</field>
+            <field name="numbercall" eval="-1"/>
+            <field name="active" eval="True"/>
+            <field name="doall" eval="False"/>
+            <field name="nextcall"
+                   eval="(DateTime.now().replace(hour=7, minute=10, second=0, microsecond=0) + ((DateTime.now().hour &gt; 7 or (DateTime.now().hour == 7 and DateTime.now().minute &gt;= 10)) and relativedelta(days=1) or relativedelta())).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+        <record id="ir_cron_timer_watchdog" model="ir.cron">
+            <field name="name">Timesheet Timer Watchdog</field>
+            <field name="model_id" ref="base.model_ir_actions_server"/>
+            <field name="state">code</field>
+            <field name="code">env["timesheet.timer.watchdog"].cron_watchdog_timers()</field>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+        </record>
+
+    </data>
+</odoo>
