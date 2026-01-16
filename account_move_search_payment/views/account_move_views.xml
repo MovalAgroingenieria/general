@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    account.
+    <record id="view_account_invoice_filter_inherit_paid_unpaid" model="ir.ui.view">
+        <field name="name">account.move.search.inherit.paid.unpaid</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter
+                        string="Paid"
+                        name="filter_paid"
+                        domain="[('payment_state', '=', 'paid')]"
+                />
+                <filter
+                        string="Not Paid"
+                        name="filter_not_paid"
+                        domain="[('payment_state', 'in', ('not_paid', 'partial', 'in_payment'))]"
+                />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_move_filter_inherit_paid_unpaid" model="ir.ui.view">
+        <field name="name">account.move.search.inherit.paid.unpaid</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_move_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter
+                        string="Paid"
+                        name="filter_paid"
+                        domain="[('payment_state', '=', 'paid')]"
+                />
+                <filter
+                        string="Not Paid"
+                        name="filter_not_paid"
+                        domain="[('payment_state', 'in', ('not_paid', 'partial', 'in_payment'))]"
+                />
+            </xpath>
+        </field>
+    </record>
+</odoo>
