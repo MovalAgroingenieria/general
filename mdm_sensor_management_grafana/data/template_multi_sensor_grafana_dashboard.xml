@@ -140,7 +140,7 @@
                         "format": "time_series",
                         "hide": false,
                         "rawQuery": true,
-                        "rawSql": "   SELECT reading.measurement_time AS \"time\",\n          reading.value AS \"Lecturas\",\n          device.name AS \"Dispostivo\",\n          sensor.name AS \"Sensor\"\n     FROM mdm_measurement_device_sensor_reading reading\nLEFT JOIN mdm_measurement_device device ON device.id = reading.device_id\nLEFT JOIN mdm_measurement_device_sensor sensor ON sensor.id = reading.sensor_id\n    WHERE device.name IN (${devices})\n      AND sensor.name IN (${sensors})\n      AND $__timeFilter(reading.measurement_time)\n GROUP BY reading.measurement_time, reading.value, device.name, sensor.name\n ORDER BY reading.measurement_time;",
+                        "rawSql": "   SELECT reading.measurement_time AS \"time\",\n          reading.value AS \"Lecturas\",\n          device.name AS \"Dispostivo\",\n          sensor.name AS \"Sensor\"\n     FROM mdm_measurement_device_sensor_reading reading\nLEFT JOIN mdm_measurement_device device ON device.id = reading.device_id\nLEFT JOIN mdm_measurement_device_sensor sensor ON sensor.id = reading.sensor_id\n    WHERE device.name IN (${devices:sqlstring})\n      AND sensor.name IN (${sensors:sqlstring})\n      AND $__timeFilter(reading.measurement_time)\n GROUP BY reading.measurement_time, reading.value, device.name, sensor.name\n ORDER BY reading.measurement_time;",
                         "refId": "A",
                         "sql": {
                             "columns": [
@@ -272,7 +272,7 @@
                         "format": "time_series",
                         "hide": false,
                         "rawQuery": true,
-                        "rawSql": "   SELECT reading.measurement_time AS \"time\",\n          reading.value AS \"Lecturas\",\n          sensor.name AS \"Sensor\"\n     FROM mdm_measurement_device_sensor_reading reading\nLEFT JOIN mdm_measurement_device device ON device.id = reading.device_id\nLEFT JOIN mdm_measurement_device_sensor sensor ON sensor.id = reading.sensor_id\n    WHERE device.name IN (${devices})\n      AND sensor.name IN (${sensors})\n      AND $__timeFilter(reading.measurement_time)\n GROUP BY reading.measurement_time, reading.value, sensor.name\n ORDER BY reading.measurement_time;",
+                        "rawSql": "   SELECT reading.measurement_time AS \"time\",\n          reading.value AS \"Lecturas\",\n          sensor.name AS \"Sensor\"\n     FROM mdm_measurement_device_sensor_reading reading\nLEFT JOIN mdm_measurement_device device ON device.id = reading.device_id\nLEFT JOIN mdm_measurement_device_sensor sensor ON sensor.id = reading.sensor_id\n    WHERE device.name IN (${devices:sqlstring})\n      AND sensor.name IN (${sensors:sqlstring})\n      AND $__timeFilter(reading.measurement_time)\n GROUP BY reading.measurement_time, reading.value, sensor.name\n ORDER BY reading.measurement_time;",
                         "refId": "A",
                         "sql": {
                             "columns": [
@@ -404,7 +404,7 @@
                         "format": "time_series",
                         "hide": false,
                         "rawQuery": true,
-                        "rawSql": "   SELECT reading.measurement_time AS \"time\",\n          reading.value AS \"Lecturas\",\n          device.name AS \"Dispositivo\"\n     FROM mdm_measurement_device_sensor_reading reading\nLEFT JOIN mdm_measurement_device device ON device.id = reading.device_id\nLEFT JOIN mdm_measurement_device_sensor sensor ON sensor.id = reading.sensor_id\n    WHERE device.name IN (${devices})\n      AND sensor.name IN (${sensors})\n      AND $__timeFilter(reading.measurement_time)\n GROUP BY reading.measurement_time, reading.value, device.name\n ORDER BY reading.measurement_time;",
+                        "rawSql": "   SELECT reading.measurement_time AS \"time\",\n          reading.value AS \"Lecturas\",\n          device.name AS \"Dispositivo\"\n     FROM mdm_measurement_device_sensor_reading reading\nLEFT JOIN mdm_measurement_device device ON device.id = reading.device_id\nLEFT JOIN mdm_measurement_device_sensor sensor ON sensor.id = reading.sensor_id\n    WHERE device.name IN (${devices:sqlstring})\n      AND sensor.name IN (${sensors:sqlstring})\n      AND $__timeFilter(reading.measurement_time)\n GROUP BY reading.measurement_time, reading.value, device.name\n ORDER BY reading.measurement_time;",
                         "refId": "A",
                         "sql": {
                             "columns": [
