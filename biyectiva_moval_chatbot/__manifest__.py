@@ -23,6 +23,7 @@
         'security/chatbot_groups.xml',
         'security/ir.model.access.csv',
         'data/ir_cron.xml',
+        'views/project_task_views.xml',
         'views/mail_notification_chatbot_views.xml',
     ],
 }

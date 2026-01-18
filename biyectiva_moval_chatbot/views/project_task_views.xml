@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Hide duplicate reviewer_id field from project_task_reviewer module -->
+    <record id="view_task_form2_hide_duplicate_reviewer" model="ir.ui.view">
+        <field name="name">project.task.form.hide.duplicate.reviewer</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project_task_reviewer.view_task_form2"/>
+        <field name="arch" type="xml">
+            <field name="reviewer_id" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+        </field>
+    </record>
+</odoo>
