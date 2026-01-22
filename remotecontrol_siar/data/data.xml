@@ -6,7 +6,7 @@
         <record id="remotecontrol_siar" model="remotecontrol">
             <field name="name">Web API SiAR</field>
             <field name="remotecontrol_type">rest</field>
-            <field name="base_url">https://servicio.mapama.gob.es/apisiar/API/v1/Datos</field>
+            <field name="base_url">https://servicio.mapa.gob.es/siarapi/API/V1</field>
             <field name="timeout">10</field>
             <field name="verify_ssl">True</field>
             <field name="rate_limit_seconds">0.0</field>
@@ -15,9 +15,68 @@
             <field name="readonly">True</field>
             <field name="connection_params"><![CDATA[
 {
-  "api_key": ""
+  "username": "",
+  "password": ""
 }
             ]]></field>
+        </record>
+
+        <record id="remotecontrol_siar_action_get_token" model="remotecontrol.action">
+            <field name="name">SiAR: Get authentication token</field>
+            <field name="remote_id" ref="remotecontrol_siar"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[# Action: Get SiAR authentication token
+import json
+
+remotecontrol = self.remote_id
+base_url = (remotecontrol.base_url or '').rstrip('/')
+
+# Get credentials from connection_params
+remotecontrol_cfg = json.loads(remotecontrol.connection_params or '{}') or {}
+username = (remotecontrol_cfg.get('username') or '').strip()
+password = (remotecontrol_cfg.get('password') or '').strip()
+
+if not username or not password:
+    raise Exception('Username and password must be configured in connection_params')
+
+# Step 1: Encrypt username
+url_encrypt_user = base_url + '/Autenticacion/cifrarCadena?cadena=' + username
+resp_user = request_retry('GET', url_encrypt_user, timeout=timeout)
+
+if resp_user.status_code != 200:
+    raise Exception('Failed to encrypt username. Status: %s' % resp_user.status_code)
+
+encrypted_username = resp_user.text.strip().strip('"')
+
+# Step 2: Encrypt password
+url_encrypt_pass = base_url + '/Autenticacion/cifrarCadena?cadena=' + password
+resp_pass = request_retry('GET', url_encrypt_pass, timeout=timeout)
+
+if resp_pass.status_code != 200:
+    raise Exception('Failed to encrypt password. Status: %s' % resp_pass.status_code)
+
+encrypted_password = resp_pass.text.strip().strip('"')
+
+# Step 3: Get token
+url_token = (base_url + '/Autenticacion/obtenerToken?Usuario=' +
+             encrypted_username + '&Password=' + encrypted_password)
+resp_token = request_retry('GET', url_token, timeout=timeout)
+
+if resp_token.status_code != 200:
+    raise Exception('Failed to get token. Status: %s, Response: %s' %
+                   (resp_token.status_code, resp_token.text[:200]))
+
+token = resp_token.text.strip().strip('"')
+
+if not token or token.lower() == 'null':
+    raise Exception('Invalid token received: %s' % resp_token.text[:200])
+
+# Store token in bag for next actions
+bag['siar_token'] = token]]></field>
         </record>
 
         <record id="remotecontrol_siar_action_get_devices" model="remotecontrol.action">
@@ -28,25 +87,21 @@
             <field name="max_retries">1</field>
             <field name="backoff">0</field>
             <field name="readonly">True</field>
-            <field name="code"><![CDATA[# Action A: build sensors plan (robust JSON parsing)
+            <field name="code"><![CDATA[# Action A: build sensors plan
 import json
 from datetime import datetime, timedelta
 plan = []
-api_key = ''
+siar_token = bag.get('siar_token')
+if not siar_token:
+    raise Exception('No SiAR token found. Token must be obtained first.')
 condition = []
 if selected_device_ids:
     condition.append(('id', 'in', selected_device_ids))
 else:
     condition.append(('remotecontrol_id', '=', self.remote_id.id))
 devices = env['mdm.measurement.device'].search(condition)
-if devices:
-    remotecontrol_cfg = \
-        json.loads(self.remote_id.connection_params or '{}') or {}
-    api_key = (remotecontrol_cfg.get('api_key') or '').strip()
-else:
+if not devices:
     raise Exception('There is no SiAR device.')
-if not api_key:
-    raise Exception('There is no API key.')
 yesterday_str = (datetime.strptime(fields.Date.today(), "%Y-%m-%d") -
                  timedelta(days=1)).strftime("%Y-%m-%d")
 default_initial_date = '%s-%s-01' % (yesterday_str[:4], yesterday_str[5:7])
@@ -89,7 +144,7 @@ for device in (devices or []):
         if not magnitude:
             continue
         sensor_plan = {
-            'api_key': api_key,
+            'siar_token': siar_token,
             'device_id': device.id,
             'sensor_id': sensor.id,
             'station': station,
@@ -123,8 +178,11 @@ bag['sensors_plan'] = plan]]></field>
             <field name="backoff">1.5</field>
             <field name="readonly">True</field>
             <field name="code"><![CDATA[# Action B: fetch readings by group/key, upsert (generic), and attach audit
-import json, base64
+import json
+import base64
+import pytz
 from datetime import datetime, timedelta
+
 remotecontrol = self.remote_id
 plan = bag.get('sensors_plan') or []
 final_date = (datetime.strptime(fields.Date.today(), "%Y-%m-%d") -
@@ -132,34 +190,47 @@ final_date = (datetime.strptime(fields.Date.today(), "%Y-%m-%d") -
 total_upserts = 0
 total_errors = 0
 items = []
+
 for sensor_plan in (plan or []):
-    api_key = sensor_plan['api_key']
+    siar_token = sensor_plan['siar_token']
     device_id = sensor_plan['device_id']
     sensor_id = sensor_plan['sensor_id']
     station = sensor_plan['station']
     magnitude = sensor_plan['magnitude']
     initial_date = sensor_plan['initial_date']
     final_date = sensor_plan['final_date']
+
     url_request = (
-        (remotecontrol.base_url or '').rstrip('/')
-        + '/Diarios/Estacion?Id=%s&FechaInicial=%s&FechaFinal=%s&ClaveAPI=%s'
-          % (station, initial_date, final_date, api_key)
+        (remotecontrol.base_url or '').rstrip('/') + '/Datos'
+        + '/Diarios/ESTACION?Id=%s&FechaInicial=%s&FechaFinal=%s&token=%s'
+          % (station, initial_date, final_date, siar_token)
     )
+
     try:
         resp = request_retry('GET', url_request, timeout=timeout)
-        payload = resp.json() or {}
-        mensaje_respuesta = (payload.get('MensajeRespuesta') or '').strip()
         code = resp.status_code
+
+        try:
+            payload = resp.json() or {}
+        except ValueError:
+            # Response is not valid JSON (empty or malformed)
+            payload = {}
+
+        mensaje_respuesta = (payload.get('MensajeRespuesta') or '').strip()
+
         if code < 400:
-            data_list = payload['Datos'] or []
+            # Try both 'datos' (lowercase) and 'Datos' (uppercase) for compatibility
+            data_list = payload.get('datos') or payload.get('Datos') or []
             upserts = 0
             errs = 0
             readings_summary = []
             spanish_tz = pytz.timezone('Europe/Madrid')
             utc_tz = pytz.timezone('UTC')
+
             for reading in data_list:
                 # Parse SiAR datetime (Spanish local time) and convert to UTC
-                siar_datetime = datetime.strptime(reading['Fecha'], "%Y-%m-%dT%H:%M:%S")
+                siar_datetime = datetime.strptime(
+                    reading['Fecha'], "%Y-%m-%dT%H:%M:%S")
                 # 1. Localize naive datetime to Spanish timezone
                 spanish_dt = spanish_tz.localize(siar_datetime)
                 # 2. Convert to UTC
@@ -167,6 +238,7 @@ for sensor_plan in (plan or []):
                 # 3. Convert to UTC string for database storage
                 measurement_time_utc = fields.Datetime.to_string(utc_dt)
                 value = float(reading[magnitude])
+
                 try:
                     remotecontrol.upsert(
                         'mdm.measurement.device.sensor.reading',
@@ -184,39 +256,75 @@ for sensor_plan in (plan or []):
                         'measurement_time': reading['Fecha'],
                         'value': reading[magnitude],
                         'error': str(e)})
+
             total_upserts = total_upserts + upserts
             total_errors = total_errors + errs
-            items.append({'sensor_id': sensor_id, 'device_id': device_id,
-                          'station': station, 'magnitude': magnitude,
-                          'url': url_request, 'status': 200,
-                          'points_found': len(data_list),
-                          'upserts': total_upserts, 'errors': total_errors,
-                          'readings': readings_summary})
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'station': station,
+                'magnitude': magnitude,
+                'url': url_request,
+                'status': 200,
+                'points_found': len(data_list),
+                'upserts': total_upserts,
+                'errors': total_errors,
+                'readings': readings_summary})
         else:
-            items.append({'sensor_id': sensor_id, 'device_id': device_id,
-                          'station': station, 'magnitude': magnitude,
-                          'status': code, 'error': mensaje_respuesta,
-                          'url': url_request})
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'station': station,
+                'magnitude': magnitude,
+                'status': code,
+                'error': mensaje_respuesta,
+                'url': url_request})
     except Exception as e:
-        items.append({'sensor_id': sensor_id, 'device_id': device_id,
-                      'station': station, 'magnitude': magnitude,
-                      'status': -1, 'error': str(e),
-                      'url': url_request})
+        items.append({
+            'sensor_id': sensor_id,
+            'device_id': device_id,
+            'station': station,
+            'magnitude': magnitude,
+            'status': -1,
+            'error': str(e),
+            'url': url_request})
+
 local_dt = fields.Datetime.to_string(fields.Datetime.context_timestamp(
     self, fields.Datetime.from_string(fields.Datetime.now())))
-audit = {'executed_at': local_dt, 'final_date': final_date, 'total_upserts': total_upserts, 'total_errors': total_errors, 'items': items}
+audit = {
+    'executed_at': local_dt,
+    'final_date': final_date,
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'items': items}
+
 try:
     # Added ensure_ascii to avoid issues with special chars in JSON
     audit_json = json.dumps(audit, ensure_ascii=True, indent=2, default=str)
     b64 = base64.b64encode(audit_json.encode('utf-8'))
 except Exception as json_error:
     # Fallback: create a simplified audit if there are issues
-    simple_audit = {'executed_at': local_dt, 'total_upserts': total_upserts, 'total_errors': total_errors, 'error': str(json_error)}
+    simple_audit = {
+        'executed_at': local_dt,
+        'total_upserts': total_upserts,
+        'total_errors': total_errors,
+        'error': str(json_error)}
     audit_json = json.dumps(simple_audit, ensure_ascii=True, indent=2)
     b64 = base64.b64encode(audit_json.encode('utf-8'))
-fname = 'readings_fetch_%s.json' % local_dt.replace('-','').replace(' ','_').replace(':','')
-att = env['ir.attachment'].create({'name': fname, 'datas_fname': fname, 'datas': b64, 'mimetype': 'application/json', 'res_model': 'remotecontrol', 'res_id': remotecontrol.id})
-remotecontrol.message_post(body=u"[Readings] upserts=%s errors=%s" % (total_upserts, total_errors), attachment_ids=[att.id])
+
+fname = 'readings_fetch_%s.json' % local_dt.replace(
+    '-', '').replace(' ', '_').replace(':', '')
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': remotecontrol.id})
+remotecontrol.message_post(
+    body=u"[Readings] upserts=%s errors=%s" % (total_upserts, total_errors),
+    attachment_ids=[att.id])
+
 bag['upserts'] = total_upserts
 bag['errors'] = total_errors
 bag['audit_attachment_id'] = att.id]]></field>
@@ -229,6 +337,13 @@ bag['audit_attachment_id'] = att.id]]></field>
             <field name="schedule_cron">False</field>
             <field name="readonly">True</field>
             <field name="procedure_for_readings">True</field>
+        </record>
+
+        <record id="remotecontrol_siar_step_05_token" model="remotecontrol.step">
+            <field name="name">Get authentication token</field>
+            <field name="procedure_id" ref="remotecontrol_siar_procedure"/>
+            <field name="action_id" ref="remotecontrol_siar_action_get_token"/>
+            <field name="sequence">5</field>
         </record>
 
         <record id="remotecontrol_siar_step_10_devices" model="remotecontrol.step">
@@ -259,22 +374,29 @@ bag['audit_attachment_id'] = att.id]]></field>
 <h3>1) Reading Acquisition Procedure (default)</h3><br>
 <p>The procedure to be executed to obtain readings is <strong>SiAR: Daily Sync</strong>, and it consists of the following actions:</p><br>
 <ol>
+<li>Action <strong>SiAR: Get authentication token</strong> → obtains the authentication token using the username and password configured in <code>connection_params</code>. This token is required for all subsequent API calls.</li><br>
 <li>Action <strong>SiAR: Get devices (plan)</strong> → instantiates <code>bag['sensors_plan']</code> based on the configuration of devices and sensors. If the variable <code>selected_device_id</code> is instantiated, only that device will be taken into account.</li><br>
-<li>Action <strong>SiAR: Get readings</strong> → performs the call to the <code>Web API SiAR</code>, using the data from <code>bag['sensors_plan']</code>, and after obtaining the readings, persists them in the table <code>mdm_measurement_device_sensor_reading</code>.</li><br>
+<li>Action <strong>SiAR: Get readings</strong> → performs the call to the <code>Web API SiAR</code>, using the data from <code>bag['sensors_plan']</code> and the authentication token, and after obtaining the readings, persists them in the table <code>mdm_measurement_device_sensor_reading</code>.</li><br>
 </ol>
 
 <h3>2) Remotecontrol Configuration</h3><br>
-<p>Communication with the remotecontrol is carried out through a <code>REST API</code>, whose base URL is <code>https://servicio.mapama.gob.es/apisiar/API/v1/Datos</code></p><br>
-<p>It is important that each remote control installation has its own API key. This API key can be obtained as follows:</p><br>
+<p>Communication with the remotecontrol is carried out through a <code>REST API</code>, whose base URL is <code>https://servicio.mapama.gob.es/apisiar/API/v1</code></p><br>
+<p>It is important that each remote control installation has valid REGEUS credentials. These credentials can be obtained as follows:</p><br>
 <ol>
 <li>Go to <a href="https://servicio.mapa.gob.es/websiar" target="_blank" rel="noopener">https://servicio.mapa.gob.es/websiar</a>, click on <strong>API SIAR</strong>, and select <strong>Register new user in CAS</strong> (follow the instructions).</li><br>
-<li>Once you have a username and password, repeat the previous step, but this time select <strong>Registered user in CAS</strong>.</li><br>
-<li>In the <strong>SIAR API Data</strong> form, note down the content of the <strong>API KEY</strong> text box.</li><br>
-  <li>Once you have the API key, go to the remotecontrol form (<strong>Settings / Remote Control / Remotes</strong> menu) and edit the <strong>Connection Parameters</strong> field (<code>connection_params</code>), entering the API key in the <code>api_key</code> entry.</li><br>
+<li>Once you have a username (NIF) and password, go to the remotecontrol form (<strong>Settings / Remote Control / Remotes</strong> menu) and edit the <strong>Connection Parameters</strong> field (<code>connection_params</code>), entering your username and password:</li><br>
 <pre>{
-  "api_key": [API_key_value]
+  "username": "12345678A",
+  "password": "your_password"
 }</pre>
 </ol>
+<br><strong>Note:</strong> The system automatically handles the token authentication flow:
+<ul>
+<li>Step 1: Encrypts the username (NIF) using <code>/Autenticacion/cifrarCadena</code></li>
+<li>Step 2: Encrypts the password using <code>/Autenticacion/cifrarCadena</code></li>
+<li>Step 3: Obtains the authentication token using <code>/Autenticacion/obtenerToken</code></li>
+<li>Step 4: Uses the token for all data requests</li>
+</ul>
 <br>Example:<br><br>
 <div style="text-align: center;">
     <img src="/remotecontrol_siar/static/img/remotecontrol_configuration.png"
