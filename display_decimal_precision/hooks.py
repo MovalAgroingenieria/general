@@ -1,10 +1,7 @@
-from odoo import SUPERUSER_ID, api
-
 # pylint: disable=unused-argument
 
 
-def post_init_hook(cr, registry):
-    env = api.Environment(cr, SUPERUSER_ID, {})
+def post_init_hook(env):
     env.cr.execute(
         """
         UPDATE decimal_precision
