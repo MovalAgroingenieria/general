@@ -313,7 +313,19 @@ class MailNotificationChatbot(models.Model):
         which already has proper ir.rules that check access to the
         parent record (project.task in this case).
         """
-        # Get base IDs first (applies any domain from args)
+        # If superuser, use default behavior
+        user = self.env.user
+        if user._is_superuser():
+            return super()._search(
+                args,
+                offset=offset,
+                limit=limit,
+                order=order,
+                count=count,
+                access_rights_uid=access_rights_uid,
+            )
+
+        # Get ALL base IDs first (no offset/limit yet)
         base_query = super()._search(
             args,
             offset=0,
@@ -323,19 +335,10 @@ class MailNotificationChatbot(models.Model):
             access_rights_uid=access_rights_uid,
         )
 
-        # If superuser, skip security filtering
-        user = self.env.user
-        if user._is_superuser():
-            if count:
-                return len(base_query)
-            base_ids = list(base_query)
-            end_idx = offset + limit if limit else None
-            return self.browse(base_ids[offset:end_idx])
-
         # Handle empty results
         base_ids = list(base_query)
         if not base_ids:
-            return 0 if count else self.browse()
+            return 0 if count else base_query
 
         # Get the mail_message_ids from the notifications
         self.env.cr.execute(
@@ -350,10 +353,9 @@ class MailNotificationChatbot(models.Model):
         message_ids = list(set(notif_to_msg.values()))
 
         if not message_ids:
-            return 0 if count else self.browse()
+            return 0 if count else self.env["mail.notification.chatbot"]
 
         # Use mail.message security to filter accessible messages
-        # This leverages the existing ir.rules on mail.message
         accessible_messages = self.env["mail.message"]._search(
             [("id", "in", message_ids)]
         )
@@ -382,7 +384,8 @@ class MailNotificationChatbot(models.Model):
             len(secure_ids),
             len(final_ids),
         )
-        return self.browse(final_ids)
+        # Return the IDs directly - Odoo will handle browsing
+        return final_ids
 
     @api.model
     def refresh_materialized_view(self, concurrently=False):
