@@ -1,8 +1,12 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
+import logging
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 
 class MailNotificationChatbot(models.Model):
@@ -46,6 +50,18 @@ class MailNotificationChatbot(models.Model):
     task_type_id = fields.Many2one("project.type", string="Task Type")
     task_type_name = fields.Char(string="Task Type Name")
     write_date = fields.Datetime(string="Last Modified on")
+    # Security fields for efficient filtering
+    project_privacy_visibility = fields.Selection(
+        [
+            ("followers", "Invited internal users"),
+            ("employees", "All internal users"),
+            ("portal", "Invited portal users and all internal users"),
+        ],
+        string="Project Visibility",
+    )
+    project_company_id = fields.Many2one(
+        "res.company", string="Project Company"
+    )
 
     timesheet_last_date = fields.Date(string="Last Timesheet Date")
     timesheet_last_user_id = fields.Many2one(
@@ -156,7 +172,10 @@ class MailNotificationChatbot(models.Model):
                 COALESCE(
                     ts_user_partner.name, ts_user.login
                 ) AS timesheet_last_user_name,
-                COALESCE(ts_last.name, '') AS timesheet_last_description
+                COALESCE(ts_last.name, '') AS timesheet_last_description,
+                -- Security fields for efficient filtering
+                project.privacy_visibility AS project_privacy_visibility,
+                project.company_id AS project_company_id
             FROM mail_notification notif
             INNER JOIN mail_message msg
                 ON msg.id = notif.mail_message_id
@@ -216,6 +235,28 @@ class MailNotificationChatbot(models.Model):
                 f"CREATE INDEX IF NOT EXISTS {self._table}_is_read_idx "
                 f"ON {self._table} (is_read)"
             ),
+            # Security-related indexes for _search filtering
+            (
+                f"CREATE INDEX IF NOT EXISTS {self._table}_privacy_idx "
+                f"ON {self._table} (project_privacy_visibility)"
+            ),
+            (
+                f"CREATE INDEX IF NOT EXISTS {self._table}_company_idx "
+                f"ON {self._table} (project_company_id)"
+            ),
+            (
+                f"CREATE INDEX IF NOT EXISTS "
+                f"{self._table}_security_combined_idx "
+                f"ON {self._table} "
+                "(project_privacy_visibility, task_project_id, "
+                "message_res_id)"
+            ),
+            # mail_followers index for security checks
+            (
+                "CREATE INDEX IF NOT EXISTS "
+                "idx_mail_followers_security "
+                "ON mail_followers (partner_id, res_model, res_id)"
+            ),
             (
                 "CREATE INDEX IF NOT EXISTS "
                 "idx_mail_message_task_filter "
@@ -254,6 +295,94 @@ class MailNotificationChatbot(models.Model):
             self.env.cr.execute(gin_statement)
         except Exception:
             pass
+
+    @api.model
+    def _search(
+        self,
+        args,
+        offset=0,
+        limit=None,
+        order=None,
+        count=False,
+        access_rights_uid=None,
+    ):
+        """Override _search to apply mail.message security.
+
+        A user can see a notification if they can see the associated
+        mail.message. This delegates security to the mail.message model
+        which already has proper ir.rules that check access to the
+        parent record (project.task in this case).
+        """
+        # Get base IDs first (applies any domain from args)
+        base_query = super()._search(
+            args,
+            offset=0,
+            limit=None,
+            order=order,
+            count=False,
+            access_rights_uid=access_rights_uid,
+        )
+
+        # If superuser, skip security filtering
+        user = self.env.user
+        if user._is_superuser():
+            if count:
+                return len(base_query)
+            base_ids = list(base_query)
+            end_idx = offset + limit if limit else None
+            return self.browse(base_ids[offset:end_idx])
+
+        # Handle empty results
+        base_ids = list(base_query)
+        if not base_ids:
+            return 0 if count else self.browse()
+
+        # Get the mail_message_ids from the notifications
+        self.env.cr.execute(
+            """
+            SELECT id, mail_message_id
+            FROM mail_notification_chatbot_mv
+            WHERE id = ANY(%s)
+            """,
+            (base_ids,),
+        )
+        notif_to_msg = {r[0]: r[1] for r in self.env.cr.fetchall()}
+        message_ids = list(set(notif_to_msg.values()))
+
+        if not message_ids:
+            return 0 if count else self.browse()
+
+        # Use mail.message security to filter accessible messages
+        # This leverages the existing ir.rules on mail.message
+        accessible_messages = self.env["mail.message"]._search(
+            [("id", "in", message_ids)]
+        )
+        accessible_msg_ids = set(accessible_messages)
+
+        # Filter notifications to only those with accessible messages
+        secure_ids = [
+            notif_id
+            for notif_id in base_ids
+            if notif_to_msg.get(notif_id) in accessible_msg_ids
+        ]
+
+        if count:
+            return len(secure_ids)
+
+        # Apply offset and limit
+        end_idx = offset + limit if limit else None
+        final_ids = secure_ids[offset:end_idx]
+
+        _logger.debug(
+            "mail.notification.chatbot._search: "
+            "base=%d, messages=%d, accessible=%d, secure=%d, final=%d",
+            len(base_ids),
+            len(message_ids),
+            len(accessible_msg_ids),
+            len(secure_ids),
+            len(final_ids),
+        )
+        return self.browse(final_ids)
 
     @api.model
     def refresh_materialized_view(self, concurrently=False):
