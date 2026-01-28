@@ -211,7 +211,7 @@ class ResFiletag(models.Model):
     # ==========================
 
     @api.model
-    def _name_search(
+    def name_search(
         self, name="", args=None, operator="ilike", limit=100, name_get_uid=None
     ):
         """Enhanced search for tags.

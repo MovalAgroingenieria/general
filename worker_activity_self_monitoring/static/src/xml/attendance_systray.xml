@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="worker_activity_self_monitoring.AttendanceIcon" owl="1">
+        <li class="o_systray_attendance_icon" t-on-click="navigateToAttendances">
+            <div class="d-flex align-items-center">
+                <i t-if="state.isPresent" class="fa fa-clock-o icon-with-background attendance-active" title="Ver mis asistencias" />
+                <i t-else="state.isPresent" class="fa fa-clock-o icon-with-background attendance-inactive" title="Ver mis asistencias" />
+                <span t-if="state.attendanceTime" class="attendance-time text-white">
+                    <t t-esc="state.attendanceTime" />
+                </span>
+            </div>
+        </li>
+    </t>
+</templates>
