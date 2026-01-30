@@ -20,10 +20,25 @@ class ReportLabelWizardLine(models.TransientModel):
 
     @api.depends("wizard_id.model_id", "res_id")
     def _compute_res_name(self):
-        wizard = self.mapped("wizard_id")
-        wizard.ensure_one()
-        res_model = wizard.model_id.sudo().model
-        res_ids = self.mapped("res_id")
-        names_map = dict(self.env[res_model].browse(res_ids).name_get())
         for rec in self:
-            rec.res_name = names_map.get(rec.res_id)
+            rec.res_name = False
+
+        recs = self.filtered(
+            lambda r: r.wizard_id and r.wizard_id.model_id and r.res_id
+        )
+        if not recs:
+            return
+
+        grouped = {}
+        for rec in recs:
+            model_name = rec.wizard_id.model_id.sudo().model
+            grouped.setdefault(model_name, set()).add(rec.res_id)
+
+        names_by_model = {}
+        for model_name, ids in grouped.items():
+            data = self.env[model_name].browse(list(ids)).sudo().read(["display_name"])
+            names_by_model[model_name] = {d["id"]: d["display_name"] for d in data}
+
+        for rec in recs:
+            model_name = rec.wizard_id.model_id.sudo().model
+            rec.res_name = names_by_model.get(model_name, {}).get(rec.res_id) or False
