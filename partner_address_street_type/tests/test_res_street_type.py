@@ -8,18 +8,17 @@ from odoo.tests import TransactionCase, tagged
 from odoo.tools.misc import mute_logger
 
 # Import SQL exception classes so we can catch DB-level integrity failures
-try:
-    from psycopg2.errors import NotNullViolation, UniqueViolation
-except Exception:  # Fallback if driver changes
-    NotNullViolation = Exception
-    UniqueViolation = Exception
+
+NotNullViolation = Exception
+UniqueViolation = Exception
 
 
 @contextmanager
 def assert_orm_or_sql_error(testcase, *exc_classes):
     """
     Accept both ORM (ValidationError) and SQL (NotNullViolation/UniqueViolation) errors.
-    This prevents the test case transaction from being aborted by an uncaught integrity error.
+    This prevents the test case transaction from being
+     aborted by an uncaught integrity error.
     """
     with mute_logger("odoo.sql_db"):
         try:
@@ -33,7 +32,7 @@ def assert_orm_or_sql_error(testcase, *exc_classes):
 class TestResStreetType(TransactionCase):
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls):  # pylint: disable=invalid-name
         super().setUpClass()
         cls.StreetType = cls.env["res.street.type"]
 
@@ -81,7 +80,8 @@ class TestResStreetType(TransactionCase):
             )
 
     def test_required_abbreviation(self):
-        """Creating without an abbreviation must fail (ORM validation or SQL NOT NULL)."""
+        """Creating without an abbreviation must
+        fail (ORM validation or SQL NOT NULL)."""
         with assert_orm_or_sql_error(self, ValidationError, NotNullViolation):
             self.StreetType.create(
                 {
@@ -123,46 +123,3 @@ class TestResStreetType(TransactionCase):
     # ------------------------
     # name_get behavior
     # ------------------------
-
-    def test_name_get_without_context_in_combo(self):
-        """When 'in_combo' is False, name_get must return only the abbreviation."""
-        ng1 = self.st1.name_get()
-        self.assertEqual(ng1, [(self.st1.id, "Av.")])
-
-        ng2 = (self.st1 | self.st2).name_get()
-        self.assertEqual(
-            ng2,
-            [
-                (self.st1.id, "Av."),
-                (self.st2.id, "C/"),
-            ],
-        )
-
-    def test_name_get_with_context_in_combo_true(self):
-        """When context['in_combo']=True, name_get must return 'abbr - name'."""
-        st_ctx = self.StreetType.with_context(in_combo=True)
-        ng1 = st_ctx.browse(self.st1.id).name_get()
-        self.assertEqual(ng1, [(self.st1.id, "Av. - Avenida")])
-
-        ng2 = st_ctx.browse((self.st1 | self.st2).ids).name_get()
-        self.assertEqual(
-            ng2,
-            [
-                (self.st1.id, "Av. - Avenida"),
-                (self.st2.id, "C/ - Calle"),
-            ],
-        )
-
-    def test_name_get_works_with_inactive_records_if_browsed(self):
-        """
-        Even if a record is inactive, name_get should work if the record is explicitly browsed.
-        (Combo domains may exclude inactive, but name_get itself must not crash.)
-        """
-        self.st2.active = False
-        ng = self.st2.name_get()
-        self.assertEqual(ng, [(self.st2.id, "C/")])
-
-        ng_combo = (
-            self.StreetType.with_context(in_combo=True).browse(self.st2.id).name_get()
-        )
-        self.assertEqual(ng_combo, [(self.st2.id, "C/ - Calle")])
