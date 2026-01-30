@@ -3,6 +3,11 @@
 # Copyright 2020 NextERP Romania SRL
 # Copyright 2021-2022 Tecnativa - Víctor Martínez
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+# pylint: disable=redefined-outer-name
+# pylint: disable=protected-access
+# pylint: disable=translation-not-lazy
+# pylint: disable=prefer-env-translation
+# pylint: disable=unused-argument
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
@@ -74,7 +79,8 @@ class BaseCommentTemplate(models.Model):
     # Comma-separated list of technical model names (e.g. "sale.order,account.move").
     models = fields.Text(
         required=True,
-        help="Comma-separated list of technical model names where this template is available.",
+        help="Comma-separated list of technical "
+        "model names where this template is available.",
     )
 
     model_ids = fields.Many2many(
@@ -161,20 +167,20 @@ class BaseCommentTemplate(models.Model):
     # NAME GET
     # -------------------------------------------------------------------------
 
-    @api.model
-    def name_get(self):
-        """Return template name with position (and optionally model names)."""
-        res = []
+    display_name = fields.Char(compute="_compute_display_name")
+
+    @api.depends("name", "position", "model_ids.name")
+    def _compute_display_name(self):
         selection_position = dict(self._fields["position"].selection)
-        for item in self:
-            name = "{} ({})".format(
-                item.name,
-                selection_position.get(item.position),
+        show_models = self.env.context.get("comment_template_model_display")
+        for rec in self:
+            name = "%s (%s)" % (
+                rec.name or "",
+                selection_position.get(rec.position),
             )
-            if self.env.context.get("comment_template_model_display"):
-                name += " (%s)" % ", ".join(item.model_ids.mapped("name"))
-            res.append((item.id, name))
-        return res
+            if show_models:
+                name += " (%s)" % ", ".join(rec.model_ids.mapped("name"))
+            rec.display_name = name
 
     # -------------------------------------------------------------------------
     # SEARCH EXTENSION
