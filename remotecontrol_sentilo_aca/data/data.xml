@@ -220,7 +220,7 @@ for sensor in sensors:
 
     if last_reading:
         dt = fields.Datetime.from_string(last_reading.measurement_time) + timedelta(days=1)
-        initial_date = fields.Date.to_string(dt)
+        initial_date = dt.strftime('%d/%m/%Y')
     else:
         year_str = today_str[:4]
         initial_date = '01/01/%s' % year_str
@@ -268,6 +268,14 @@ for sensor_plan in plan:
         initial_date = fields.Date.today().strftime('%Y-%m-%d')
 
     sensor_record = SensorModel.browse(sensor_id)
+
+    # Ensure initial_date is in DD/MM/YYYY format
+    if '-' in initial_date:
+        # Convert from YYYY-MM-DD to DD/MM/YYYY
+        parts = initial_date.split('-')
+        if len(parts) == 3:
+            initial_date = "%s/%s/%s" % (parts[2], parts[1], parts[0])
+
     from_str = initial_date + "T00:00:00"
 
     url = "%s/data/%s/%s?limit=999999&from=%s&to=%s" % (
