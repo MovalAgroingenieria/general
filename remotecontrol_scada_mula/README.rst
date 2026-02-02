@@ -293,3 +293,12 @@ Contributors
 * Juanu Sandoval <jsandoval@moval.es>
 * Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
+
+Maintainer
+----------
+
+.. image:: https://services.moval.es/static/images/logo_moval_small.png
+   :target: http://moval.es
+   :alt: Moval Agroingeniería
+
+This module is maintained by Moval Agroingeniería.

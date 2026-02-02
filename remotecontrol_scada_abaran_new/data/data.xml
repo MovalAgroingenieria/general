@@ -1,0 +1,685 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+    <!-- Remotecontrol definition for SCADA Abaran New -->
+    <record id="remotecontrol_scada_abaran_new" model="remotecontrol">
+        <field name="name">SCADA Abaran New</field>
+        <field name="remotecontrol_type">sql</field>
+        <field name="active" eval="True"/>
+        <field name="timeout">30</field>
+        <field name="rate_limit_seconds">0.0</field>
+        <field name="max_retries">1</field>
+        <field name="backoff">1.5</field>
+        <field name="readonly" eval="True"/>
+        <field name="connection_params"><![CDATA[
+{
+  "driver_name": "MariaDB",
+  "host": "localhost",
+  "port": 3306,
+  "database": "scada_abaran_new",
+  "user": "username",
+  "password": "",
+  "charset": "utf8mb4"
+}
+            ]]></field>
+        <field name="remotecontrol_help"><![CDATA[
+<h2>SCADA Abaran New · Odoo Integration Help</h2>
+<p><strong>Type:</strong> MariaDB Database Connection (Native)</p>
+<hr/>
+<h3>1) Database Connection</h3>
+<p>Uses <strong>mysql-connector-python</strong> or <strong>pymysql</strong> library to connect to SCADA MariaDB database.</p>
+<h4>Connection Parameters (JSON):</h4>
+<pre>{
+  "driver_name": "MariaDB",
+  "host": "192.168.1.100",
+  "port": 3306,
+  "database": "scada_abaran_new",
+  "user": "scada_user",
+  "password": "password",
+  "charset": "utf8mb4"
+}</pre>
+<h4>Important Notes:</h4>
+<ul>
+  <li><strong>driver_name</strong>: Must be "MariaDB" (native connection, NOT ODBC)</li>
+  <li><strong>charset</strong>: utf8mb4 for full Unicode support</li>
+  <li><strong>Single database</strong>: All devices in one database</li>
+</ul>
+
+<h3>2) Database Structure</h3>
+<p>Each device has its own table in the MariaDB database.</p>
+<h4>Table Structure:</h4>
+<ul>
+  <li><strong>ID_MEDIDA</strong>: Auto-increment primary key</li>
+  <li><strong>FECHA_HORA</strong>: Timestamp in format DD/MM/YYYY HH:MM (e.g., "19/11/2025 13:45")</li>
+  <li><strong>Sensor columns</strong>: CAUDAL, VOLUMEN, PRESION, etc. (varies by device)</li>
+</ul>
+
+<h4>Example table: a1_2</h4>
+<pre>
+ID_MEDIDA | FECHA_HORA       | CAUDAL | VOLUMEN | PRESION
+----------+------------------+--------+---------+--------
+        1 | 19/11/2025 13:45 |   12.5 |  1250.0 |    2.3
+        2 | 19/11/2025 14:00 |   11.8 |  1261.8 |    2.2
+        3 | 19/11/2025 14:15 |   13.2 |  1275.0 |    2.4
+</pre>
+
+<h3>3) Date Format (FIXED)</h3>
+<p><strong>All dates use FIXED format:</strong></p>
+<ul>
+  <li><strong>Format</strong>: DD/MM/YYYY HH:MM (e.g., "19/11/2025 13:45")</li>
+  <li><strong>Timezone</strong>: Europe/Madrid → Automatically converted to UTC for Odoo</li>
+  <li><strong>strptime format</strong>: '%d/%m/%Y %H:%M'</li>
+  <li><strong>NOT configurable</strong>: This format is hardcoded in the system</li>
+</ul>
+<p><em>Note: Do NOT include datetime_format in sensor configuration - it's always DD/MM/YYYY HH:MM</em></p>
+
+<h3>4) Device Configuration</h3>
+<p>Each <strong>mdm.measurement.device</strong> requires:</p>
+<ul>
+  <li>Set <code>remotecontrol_id</code> to "SCADA Abaran New"</li>
+  <li>Configure <code>remotecontrol_params</code> (JSON):</li>
+</ul>
+
+<h4>Device Parameters (JSON):</h4>
+<pre>{
+  "table_name": "a1_2"
+}</pre>
+
+<h4>Required fields:</h4>
+<ul>
+  <li><code>table_name</code>: Name of the device table (e.g., "a1_2", "b3_1")</li>
+</ul>
+
+<h3>5) Sensor Configuration</h3>
+<p>Each <strong>mdm.measurement.device.sensor</strong> needs <code>remotecontrol_params</code> (JSON):</p>
+
+<h4>Required fields:</h4>
+<ul>
+  <li><code>datetime_column</code>: Column name for timestamp (usually "FECHA_HORA")</li>
+  <li><code>value_column</code>: Column name for sensor value (e.g., "CAUDAL", "VOLUMEN", "PRESION")</li>
+</ul>
+
+<h4>Optional fields:</h4>
+<ul>
+  <li><code>start_date</code>: Initial sync date in YYYY-MM-DD format (default: last reading or current year start)</li>
+</ul>
+
+<h4>Example sensor configuration (Flow sensor):</h4>
+<pre>{
+  "datetime_column": "FECHA_HORA",
+  "value_column": "CAUDAL",
+  "start_date": "2025-01-01"
+}</pre>
+
+<h4>Another example (Volume sensor):</h4>
+<pre>{
+  "datetime_column": "FECHA_HORA",
+  "value_column": "VOLUMEN"
+}</pre>
+
+<h4>Another example (Pressure sensor):</h4>
+<pre>{
+  "datetime_column": "FECHA_HORA",
+  "value_column": "PRESION",
+  "start_date": "2024-09-01"
+}</pre>
+
+<h3>6) SQL Query Example</h3>
+<p>For a flow sensor in device table "a1_2", the system generates:</p>
+<pre>SELECT ID_MEDIDA, FECHA_HORA, CAUDAL
+FROM a1_2
+WHERE FECHA_HORA >= '01/01/2025 00:00'
+  AND FECHA_HORA <= '08/02/2026 23:59'
+  AND CAUDAL IS NOT NULL
+ORDER BY FECHA_HORA ASC</pre>
+
+<h3>7) Export Table Schema</h3>
+<p>Before configuring sensors, export the database schema to understand available tables and columns:</p>
+<ol>
+  <li>Execute action <strong>"SCADA Abaran New: Export table schema"</strong></li>
+  <li>Download CSV file from attachments</li>
+  <li>Review available tables and their columns</li>
+  <li>Use this information to configure device and sensor parameters</li>
+</ol>
+
+<p>The CSV shows:</p>
+<ul>
+  <li><strong>TABLE_NAME</strong>: Name of each table (use for device table_name)</li>
+  <li><strong>COLUMN_NAME</strong>: Name of each column (use for datetime_column and value_column)</li>
+  <li><strong>DATA_TYPE</strong>: SQL data type of the column</li>
+  <li><strong>SAMPLE_VALUES</strong>: Example values from the first row</li>
+</ul>
+
+<h3>8) Get Devices Plan</h3>
+<p>Use action <strong>"SCADA Abaran New: Get devices (plan)"</strong> to build an execution plan:</p>
+<ul>
+  <li>Scans all configured devices and sensors</li>
+  <li>Determines date ranges to query for each sensor</li>
+  <li>Validates configuration parameters</li>
+  <li>Prepares the plan for the "Get readings" action</li>
+</ul>
+
+<h3>9) Get Readings</h3>
+<p>Use action <strong>"SCADA Abaran New: Get readings"</strong> to import sensor data:</p>
+<ul>
+  <li>Requires a plan from "Get devices (plan)" action</li>
+  <li>Queries each device table for configured sensors</li>
+  <li>Converts DD/MM/YYYY HH:MM format to UTC timestamps</li>
+  <li>Upserts readings into Odoo (no duplicates)</li>
+  <li>Creates detailed JSON audit attachment</li>
+</ul>
+
+<h3>10) Daily Sync Procedure</h3>
+<p>Run the procedure <strong>"SCADA Abaran New: Daily Sync"</strong> to automatically:</p>
+<ol>
+  <li>Get devices plan</li>
+  <li>Get readings for all sensors</li>
+</ol>
+<p>This procedure can be scheduled to run daily via cron job.</p>
+
+<h3>11) Export Schema Procedure</h3>
+<p>Run the procedure <strong>"SCADA Abaran New: Export Schema"</strong> to export the database schema to CSV.</p>
+
+<h3>12) Technical Features</h3>
+<ul>
+  <li><strong>Native MariaDB Connection</strong>: Uses mysql-connector-python or pymysql (NOT ODBC)</li>
+  <li><strong>Fixed Date Format</strong>: Always DD/MM/YYYY HH:MM (hardcoded, not configurable)</li>
+  <li><strong>Timezone Conversion</strong>: Automatic Europe/Madrid → UTC conversion</li>
+  <li><strong>UTF-8 Encoding</strong>: Full Unicode support with utf8mb4 charset</li>
+  <li><strong>Per-Device Tables</strong>: Each device has its own table structure</li>
+  <li><strong>Flexible Columns</strong>: Configurable datetime and value column names</li>
+  <li><strong>CSV Schema Export</strong>: Generates complete database schema documentation</li>
+  <li><strong>Audit Trail</strong>: Creates JSON attachments with detailed import results</li>
+  <li><strong>Error Handling</strong>: Robust error handling with detailed error messages</li>
+</ul>
+
+<h3>13) Troubleshooting</h3>
+<ul>
+  <li><strong>Connection refused</strong> → Check host/port/firewall/VPN</li>
+  <li><strong>Login failed</strong> → Verify credentials and database name</li>
+  <li><strong>Driver not found</strong> → Install mysql-connector-python or pymysql</li>
+  <li><strong>No data returned</strong> → Verify table_name, datetime_column, and value_column in configuration</li>
+  <li><strong>Date parsing errors</strong> → Ensure database uses DD/MM/YYYY HH:MM format exactly</li>
+  <li><strong>Encoding errors</strong> → Ensure charset is set to utf8mb4 in connection params</li>
+  <li><strong>Table not found</strong> → Use "Export table schema" action to verify table names</li>
+  <li><strong>Column not found</strong> → Use "Export table schema" action to verify column names</li>
+  <li><strong>Empty CSV export</strong> → Check database connection and permissions</li>
+</ul>
+            ]]></field>
+    </record>
+
+    <!-- Action: Export table schema -->
+    <record id="remotecontrol_scada_abaran_new_action_export_schema" model="remotecontrol.action">
+        <field name="name">SCADA Abaran New: Export table schema</field>
+        <field name="remote_id" ref="remotecontrol_scada_abaran_new"/>
+        <field name="sequence">5</field>
+        <field name="active" eval="True"/>
+        <field name="readonly" eval="False"/>
+        <field name="code"><![CDATA[
+# Export table schema from SCADA Abaran New MariaDB database to CSV
+# Shows all tables and their columns with sample data
+import csv
+from io import BytesIO
+Remote = self.remote_id
+
+# Connect to MariaDB database
+cursor = sql_connect()
+bag['_sql_cursor'] = cursor
+
+try:
+    # Get all tables in the database
+    sql_execute(cursor, "SHOW TABLES", ())
+    tables = sql_fetchall(cursor)
+
+    # Create CSV in memory
+    output = BytesIO()
+    writer = csv.writer(output, delimiter=';', quoting=csv.QUOTE_MINIMAL)
+
+    # Write header
+    writer.writerow([
+        'TABLE_NAME',
+        'COLUMN_NAME',
+        'DATA_TYPE',
+        'SAMPLE_VALUES'
+    ])
+
+    # For each table, get column information and sample data
+    for table_row in tables:
+        table_name = table_row[0]
+
+        # Skip system tables
+        if table_name.startswith('_'):
+            continue
+
+        # Get column information
+        sql_execute(cursor, "DESCRIBE `%s`" % table_name, ())
+        columns = sql_fetchall(cursor)
+
+        # Get sample row
+        try:
+            sql_execute(cursor, "SELECT * FROM `%s` LIMIT 1" % table_name, ())
+            sample_row = sql_fetchone(cursor)
+        except Exception:
+            sample_row = None
+
+        # Write each column
+        for idx, col_info in enumerate(columns):
+            col_name = col_info[0]
+            col_type = col_info[1]
+            sample_value = ''
+
+            if sample_row and idx < len(sample_row) and sample_row[idx] is not None:
+                sample_value = str(sample_row[idx])[:50]  # Limit length
+
+            # Encode for Python 2.7 compatibility
+            def encode_value(val):
+                if val is None:
+                    return ''
+                if isinstance(val, unicode):
+                    return val.encode('utf-8')
+                return str(val)
+
+            writer.writerow([
+                encode_value(table_name),
+                encode_value(col_name),
+                encode_value(col_type),
+                encode_value(sample_value)
+            ])
+
+    # Get CSV content as bytes
+    csv_bytes = output.getvalue()
+    output.close()
+
+    # Create attachment
+    attachment = env['ir.attachment'].create({
+        'name': 'scada_abaran_new_schema_%s.csv' % (
+            fields.Datetime.now().replace(' ', '_').replace(':', '-')
+        ),
+        'datas': base64.b64encode(csv_bytes),
+        'datas_fname': 'scada_abaran_new_schema.csv',
+        'res_model': 'remotecontrol',
+        'res_id': Remote.id,
+        'type': 'binary',
+    })
+
+    result = "Exported database schema to CSV: %s" % attachment.name
+
+finally:
+    # Always close the connection
+    cursor = bag.get('_sql_cursor')
+    if cursor:
+        sql_close(cursor)
+
+bag['result'] = result
+        ]]></field>
+    </record>
+
+    <!-- Action: Get devices (plan) -->
+    <record id="remotecontrol_scada_abaran_new_action_get_devices" model="remotecontrol.action">
+        <field name="name">SCADA Abaran New: Get devices (plan)</field>
+        <field name="remote_id" ref="remotecontrol_scada_abaran_new"/>
+        <field name="sequence">10</field>
+        <field name="active" eval="True"/>
+        <field name="readonly" eval="True"/>
+        <field name="code"><![CDATA[
+# Build sensors plan from device and sensor remotecontrol_params
+Remote = self.remote_id
+Device = env['mdm.measurement.device']
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+
+# Get all devices with remotecontrol_params configured for THIS remote control
+devices = Device.search([
+    ('remotecontrol_params', '!=', False),
+    ('remotecontrol_id', '=', Remote.id)
+])
+
+# Build map of sensor_id -> most recent reading (single query optimization)
+all_sensors = Sensor.search([('device_id', 'in', devices.ids)])
+last_readings_map = {}
+if all_sensors:
+    sensor_ids = [s.id for s in all_sensors]
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for row in cr.fetchall():
+        last_readings_map[row[0]] = row[1]
+
+# Build execution plan
+plan = []
+for device in devices:
+    # Parse device configuration
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+
+    # Get table name from device config
+    table_name = device_cfg.get('table_name')
+    if not table_name:
+        continue
+
+    # Get all sensors for this device with remotecontrol_params
+    sensors = Sensor.search([
+        ('device_id', '=', device.id),
+        ('remotecontrol_params', '!=', False)
+    ])
+
+    for sensor in sensors:
+        # Parse sensor configuration
+        try:
+            sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+        except Exception:
+            sensor_cfg = {}
+
+        # Get configuration from sensor
+        datetime_column = sensor_cfg.get('datetime_column')
+        value_column = sensor_cfg.get('value_column')
+
+        # Validate required parameters
+        if not datetime_column or not value_column:
+            continue
+
+        # Determine initial date for this sensor
+        last_reading_time = last_readings_map.get(sensor.id)
+        if last_reading_time:
+            try:
+                initial_date = fields.Date.to_string(
+                    fields.Datetime.from_string(last_reading_time) +
+                    timedelta(days=1))
+            except Exception:
+                initial_date = str(last_reading_time)[:10]
+        else:
+            # Use start_date from sensor config or Jan 1 of current year
+            start_cfg = sensor_cfg.get('start_date')
+            if start_cfg:
+                initial_date = start_cfg[:10]
+            else:
+                year_str = today_str[:4]
+                initial_date = '%s-01-01' % year_str
+
+        plan.append({
+            'sensor_id': sensor.id,
+            'device_id': device.id,
+            'table_name': table_name,
+            'datetime_column': datetime_column,
+            'value_column': value_column,
+            'initial_date': initial_date,
+        })
+
+bag['sensors_plan'] = plan
+bag['plan_count'] = len(plan)
+        ]]></field>
+    </record>
+
+    <!-- Action: Get readings -->
+    <record id="remotecontrol_scada_abaran_new_action_get_readings" model="remotecontrol.action">
+        <field name="name">SCADA Abaran New: Get readings</field>
+        <field name="remote_id" ref="remotecontrol_scada_abaran_new"/>
+        <field name="sequence">20</field>
+        <field name="active" eval="True"/>
+        <field name="readonly" eval="True"/>
+        <field name="code"><![CDATA[
+# Fetch readings from SCADA Abaran New MariaDB database and upsert into Odoo
+Remote = self.remote_id
+SensorModel = env['mdm.measurement.device.sensor']
+plan = bag.get('sensors_plan') or []
+
+if not plan:
+    raise Exception("No sensors in plan. Run 'Get devices (plan)' first.")
+
+final_date = fields.Date.today()
+initial_date = None
+total_upserts = 0
+total_errors = 0
+items = []
+
+# Connect to SCADA database and store cursor in bag
+cursor = sql_connect()
+bag['_sql_cursor'] = cursor
+
+try:
+    for sensor_plan in plan:
+        sensor_id = sensor_plan['sensor_id']
+        device_id = sensor_plan['device_id']
+        table_name = sensor_plan['table_name']
+        datetime_column = sensor_plan['datetime_column']
+        value_column = sensor_plan['value_column']
+        initial_date = sensor_plan['initial_date']
+
+        sensor_record = SensorModel.browse(sensor_id)
+
+        try:
+            # Convert date range from YYYY-MM-DD to DD/MM/YYYY HH:MM format
+            # Initial date: 01/01/2025 00:00
+            from datetime import datetime
+            initial_dt = datetime.strptime(initial_date, '%Y-%m-%d')
+            initial_str = initial_dt.strftime('%d/%m/%Y 00:00')
+
+            # Final date: 08/02/2026 23:59
+            final_dt = datetime.strptime(final_date, '%Y-%m-%d')
+            final_str = final_dt.strftime('%d/%m/%Y 23:59')
+
+            # Build query
+            query = """
+                SELECT ID_MEDIDA, `%s`, `%s`
+                FROM `%s`
+                WHERE `%s` >= ?
+                  AND `%s` <= ?
+                  AND `%s` IS NOT NULL
+                ORDER BY `%s` ASC
+            """ % (
+                datetime_column, value_column,
+                table_name,
+                datetime_column,
+                datetime_column,
+                value_column,
+                datetime_column
+            )
+
+            query_params = (
+                initial_str,
+                final_str
+            )
+
+            sql_execute(cursor, query, query_params)
+            rows = sql_fetchall(cursor)
+
+            upserts = 0
+            errs = 0
+            readings_summary = []
+
+            for row in rows:
+                try:
+                    id_medida = row[0]
+                    fecha_hora_value = row[1]
+                    raw_value = float(row[2]) if row[2] is not None else 0.0
+
+                    # Parse DD/MM/YYYY HH:MM format (FIXED format, not configurable)
+                    # Example: "19/11/2025 13:45"
+                    if hasattr(fecha_hora_value, 'strftime'):
+                        # It's already a datetime object
+                        naive_dt = fecha_hora_value
+                    else:
+                        # It's a string - parse with FIXED format
+                        fecha_str = str(fecha_hora_value).strip()
+                        # Handle both DD/MM/YYYY HH:MM and DD/MM/YYYY HH:MM:SS formats
+                        try:
+                            naive_dt = datetime.strptime(fecha_str, '%d/%m/%Y %H:%M')
+                        except ValueError:
+                            try:
+                                naive_dt = datetime.strptime(fecha_str, '%d/%m/%Y %H:%M:%S')
+                            except ValueError:
+                                # Try with single digit day/month
+                                naive_dt = datetime.strptime(fecha_str, '%d/%m/%Y %H:%M')
+
+                    # Convert from Europe/Madrid to UTC
+                    madrid_tz = pytz.timezone('Europe/Madrid')
+                    local_dt = madrid_tz.localize(naive_dt)
+                    utc_dt = local_dt.astimezone(pytz.UTC)
+                    timestamp = fields.Datetime.to_string(utc_dt.replace(tzinfo=None))
+
+                    # Upsert reading into Odoo
+                    Remote.upsert(
+                        'mdm.measurement.device.sensor.reading',
+                        {
+                            'sensor_id': sensor_record.id,
+                            'measurement_time': timestamp
+                        },
+                        {
+                            'value': raw_value,
+                            'remotecontrol_origin_id': Remote.id
+                        }
+                    )
+                    upserts += 1
+
+                    # Keep sample for audit (limit to first 10)
+                    if len(readings_summary) < 10:
+                        readings_summary.append({
+                            'id_medida': id_medida,
+                            'fecha_hora_original': str(fecha_hora_value),
+                            'time_utc': timestamp,
+                            'value': raw_value
+                        })
+
+                except Exception as e:
+                    errs += 1
+                    if len(readings_summary) < 10:
+                        readings_summary.append({
+                            'row': str(row),
+                            'error': str(e)
+                        })
+
+            total_upserts += upserts
+            total_errors += errs
+
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'table_name': table_name,
+                'datetime_column': datetime_column,
+                'value_column': value_column,
+                'status': 'success',
+                'points_found': len(rows),
+                'upserts': upserts,
+                'errors': errs,
+                'readings': readings_summary
+            })
+
+        except Exception as e:
+            total_errors += 1
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'table_name': table_name,
+                'datetime_column': datetime_column,
+                'value_column': value_column,
+                'status': 'error',
+                'error': str(e)
+            })
+
+finally:
+    # Always close the connection
+    cursor = bag.get('_sql_cursor')
+    if cursor:
+        sql_close(cursor)
+
+# Create audit attachment
+audit = {
+    'executed_at': str(fields.Datetime.now()),
+    'initial_date': initial_date if plan else None,
+    'final_date': final_date,
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'sensors_processed': len(plan),
+    'items': items
+}
+
+try:
+    audit_json = json.dumps(audit, ensure_ascii=True, indent=2, default=str)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+except Exception as json_error:
+    simple_audit = {
+        'executed_at': str(fields.Datetime.now()),
+        'total_upserts': total_upserts,
+        'total_errors': total_errors,
+        'error': str(json_error)
+    }
+    audit_json = json.dumps(simple_audit, ensure_ascii=True, indent=2)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+
+fname = 'scada_abaran_new_readings_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+)
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+
+Remote.message_post(
+    body="[SCADA Abaran New Readings] upserts=%s errors=%s sensors=%s" % (
+        total_upserts, total_errors, len(plan)
+    ),
+    attachment_ids=[att.id]
+)
+
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+        ]]></field>
+    </record>
+
+    <!-- Procedure: Daily Sync -->
+    <record id="remotecontrol_scada_abaran_new_procedure_daily_sync" model="remotecontrol.procedure">
+        <field name="name">SCADA Abaran New: Daily Sync</field>
+        <field name="remote_id" ref="remotecontrol_scada_abaran_new"/>
+        <field name="active" eval="True"/>
+        <field name="readonly" eval="True"/>
+    </record>
+
+    <!-- Procedure Step 1: Get devices -->
+    <record id="remotecontrol_scada_abaran_new_step_10_devices" model="remotecontrol.step">
+        <field name="name">Get devices (plan)</field>
+        <field name="procedure_id" ref="remotecontrol_scada_abaran_new_procedure_daily_sync"/>
+        <field name="action_id" ref="remotecontrol_scada_abaran_new_action_get_devices"/>
+        <field name="sequence">10</field>
+    </record>
+
+    <!-- Procedure Step 2: Get readings -->
+    <record id="remotecontrol_scada_abaran_new_step_20_readings" model="remotecontrol.step">
+        <field name="name">Get readings</field>
+        <field name="procedure_id" ref="remotecontrol_scada_abaran_new_procedure_daily_sync"/>
+        <field name="action_id" ref="remotecontrol_scada_abaran_new_action_get_readings"/>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- Procedure: Export Schema -->
+    <record id="remotecontrol_scada_abaran_new_procedure_export_schema" model="remotecontrol.procedure">
+        <field name="name">SCADA Abaran New: Export Schema</field>
+        <field name="remote_id" ref="remotecontrol_scada_abaran_new"/>
+        <field name="active" eval="True"/>
+        <field name="readonly" eval="True"/>
+    </record>
+
+    <!-- Procedure Step: Export schema -->
+    <record id="remotecontrol_scada_abaran_new_step_10_export_schema" model="remotecontrol.step">
+        <field name="name">Export table schema</field>
+        <field name="procedure_id" ref="remotecontrol_scada_abaran_new_procedure_export_schema"/>
+        <field name="action_id" ref="remotecontrol_scada_abaran_new_action_export_schema"/>
+        <field name="sequence">10</field>
+    </record>
+
+    </data>
+</odoo>
