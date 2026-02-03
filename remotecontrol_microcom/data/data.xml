@@ -1,0 +1,871 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_microcom" model="remotecontrol">
+            <field name="name">MICROCOM</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://zeus.microcom.es:4040/api/v1</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[{
+    "user": "",
+    "password": "",
+    "authPass": ""
+}]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>MICROCOM · Odoo Integration Help</h2>
+<p><strong>Official API base URL:</strong> <code>https://zeus.microcom.es:4040/api/v1</code></p>
+<p><strong>Type:</strong> REST API with AES-256-CBC encryption</p>
+
+<hr/>
+
+<h3>1) Authentication</h3>
+<p>MICROCOM Zeus API uses encrypted password authentication with AES-256-CBC cipher.</p>
+
+<h4>Required connection_params (JSON):</h4>
+<pre>{
+  "user": "base64_encoded_username",
+  "password": "plain_text_password",
+  "authPass": "base64_encoded_aes_key"
+}</pre>
+
+<h4>Parameters:</h4>
+<ul>
+  <li><code>user</code>: Username encoded in Base64 (may be URL-encoded)</li>
+  <li><code>password</code>: Plain text password (encrypted at runtime with AES-256-CBC)</li>
+  <li><code>authPass</code>: Base64-encoded 256-bit AES encryption key (32 bytes)</li>
+</ul>
+
+<h4>Authentication flow:</h4>
+<ol>
+  <li>Generate random 16-byte IV</li>
+  <li>Encrypt password with AES-256-CBC using authPass as key</li>
+  <li>Concatenate IV + encrypted password (both Base64 encoded)</li>
+  <li>URL-encode the result</li>
+  <li>Call: <code>GET /accounts/{user}?authentication={encrypted_password}</code></li>
+  <li>Receive Bearer token for subsequent requests</li>
+</ol>
+
+<hr/>
+
+<h3>2) Response Decryption</h3>
+<p>All API responses are encrypted and compressed using a multi-layer format:</p>
+
+<h4>Decryption process:</h4>
+<ol>
+  <li>Extract IV (first 24 Base64 characters = 16 bytes)</li>
+  <li>Extract ciphertext (remaining Base64 string)</li>
+  <li>Decode both from Base64</li>
+  <li>Decrypt with AES-256-CBC using authPass key and extracted IV</li>
+  <li>Remove PKCS7 padding</li>
+  <li>Decompress with gzip</li>
+  <li>If result starts with "H4sI", decode Base64 again and decompress (double gzip)</li>
+  <li>Parse JSON</li>
+</ol>
+
+<hr/>
+
+<h3>3) Device &amp; Sensor Configuration</h3>
+<p>Uses standard Odoo models:</p>
+<ul>
+  <li><strong>Device</strong>: <code>mdm.measurement.device</code></li>
+  <li><strong>Sensor</strong>: <code>mdm.measurement.device.sensor</code></li>
+</ul>
+
+<h4>Device remotecontrol_params (JSON):</h4>
+<pre>{
+  "station_id": "0UZ4DPQS",
+  "start_date": "2026-02-01"
+}</pre>
+
+<p><strong>Parameters:</strong></p>
+<ul>
+  <li><code>station_id</code>: MICROCOM station identifier</li>
+  <li><code>start_date</code>: (optional) Initial sync date (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS)</li>
+</ul>
+
+<h4>Sensor remotecontrol_params (JSON):</h4>
+<pre>{
+  "channel_id": 0
+}</pre>
+
+<p><strong>Parameters:</strong></p>
+<ul>
+  <li><code>channel_id</code>: Channel index (0-based) matching station configuration</li>
+  <li><code>start_date</code>: (optional) Initial sync date, overrides device start_date</li>
+</ul>
+
+<hr/>
+
+<h3>4) Available Procedures</h3>
+
+<h4>A) Daily Sync (Scheduled)</h4>
+<p>Synchronizes readings from configured devices/sensors:</p>
+<ol>
+  <li><strong>Get Token</strong> - Authenticates and obtains Bearer token</li>
+  <li><strong>Build Sensor Plan</strong> - Loads configured sensors with start dates</li>
+  <li><strong>Get Readings and Upsert</strong> - Fetches historical data and stores readings</li>
+</ol>
+
+<h4>B) Get Devices (One-time setup)</h4>
+<p>Discovers station configuration for bulk device/sensor setup:</p>
+<ol>
+  <li><strong>Get Token</strong> - Authenticates</li>
+  <li><strong>Get Station Configuration</strong> - Queries all stations and generates JSON with:
+    <ul>
+      <li>Station ID</li>
+      <li>Model and Serial number</li>
+      <li>Channels list with: channel_id, name, unit</li>
+    </ul>
+  </li>
+</ol>
+
+<p>Generated JSON file is attached to the Remote Control record for manual device/sensor creation.</p>
+
+<hr/>
+
+<h3>5) API Endpoints Used</h3>
+
+<h4>Authentication:</h4>
+<pre>GET /accounts/{user}?authentication={encrypted_password}</pre>
+
+<h4>Historical data:</h4>
+<pre>GET /historical/{station_id}?Accept-Encoding=gzip&amp;startDate={dd-mm-yyyy;HH:MM:SS}&amp;endDate={dd-mm-yyyy;HH:MM:SS}&amp;channelView=CUSTOM&amp;channels={channel_id}</pre>
+
+<h4>Station discovery:</h4>
+<pre>GET /stations?status=all&amp;Accept-Encoding=gzip</pre>
+
+<h4>Station properties:</h4>
+<pre>GET /stations/{station_id}/properties?Accept-Encoding=gzip</pre>
+
+<hr/>
+
+<h3>6) Date Format Conversion</h3>
+<p>MICROCOM uses non-standard date format:</p>
+<ul>
+  <li><strong>API format:</strong> <code>dd-mm-yyyy;HH:MM:SS</code> (semicolon separator)</li>
+  <li><strong>Odoo format:</strong> <code>YYYY-MM-DD HH:MM:SS</code></li>
+</ul>
+
+<p>The integration automatically converts between formats in both directions.</p>
+
+<hr/>
+
+<h3>7) Required Headers</h3>
+<p>All authenticated requests must include:</p>
+<ul>
+  <li><code>User-Agent: ZeusClient ApiREST</code></li>
+  <li><code>Date: {RFC-1123 format}</code> - e.g., "Mon, 03 Feb 2026 14:30:00 GMT"</li>
+  <li><code>Authorization: Bearer {token}</code></li>
+  <li><code>Accept-Encoding: gzip</code> (optional, for compressed responses)</li>
+</ul>
+
+<hr/>
+
+<h3>8) Audit Files</h3>
+<p>Both procedures generate JSON audit files attached to the Remote Control record:</p>
+<ul>
+  <li><strong>Daily Sync:</strong> <code>microcom_readings_YYYYMMDD_HHMMSS.json</code> with upsert statistics</li>
+  <li><strong>Get Devices:</strong> <code>microcom_stations_YYYYMMDD_HHMMSS.json</code> with station configurations</li>
+</ul>
+
+]]></field>
+        </record>
+
+        <record id="remotecontrol_microcom_action_get_token" model="remotecontrol.action">
+            <field name="name">MICROCOM: Get Token</field>
+            <field name="remote_id" ref="remotecontrol_microcom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[import json
+import os
+import urllib
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import padding
+
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+password = (cfg.get('password') or '').strip()
+auth_account = (cfg.get('user') or '').strip()
+auth_pass_b64 = (cfg.get('authPass') or '').strip()
+
+if not password or password.strip() == '':
+    raise Exception("Missing environment variable 'password' in connection_params")
+
+if not auth_account or auth_account.strip() == '':
+    raise Exception("Missing environment variable 'user' in connection_params")
+
+if not auth_pass_b64 or auth_pass_b64.strip() == '':
+    raise Exception("Missing environment variable 'authPass' in connection_params")
+
+try:
+    iv = os.urandom(16)
+    key = base64.b64decode(auth_pass_b64)
+    if not key or len(key) == 0:
+        raise Exception('Failed to parse authPass as Base64 key')
+    backend = default_backend()
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+    encryptor = cipher.encryptor()
+    padder = padding.PKCS7(128).padder()
+    padded_data = padder.update(password.encode('utf-8')) + padder.finalize()
+    encrypted = encryptor.update(padded_data) + encryptor.finalize()
+    if not encrypted:
+        raise Exception('Encryption failed - no ciphertext generated')
+    iv_b64 = base64.b64encode(iv)
+    encrypted_b64 = base64.b64encode(encrypted)
+    if not iv_b64 or not encrypted_b64:
+        raise Exception('Base64 encoding failed')
+    final_encrypted = iv_b64 + encrypted_b64
+    try:
+        encrypted_password = urllib.quote(final_encrypted, safe='')
+    except AttributeError:
+        raise Exception('Encryption error: %s' % str(encryption_error))
+
+except Exception as encryption_error:
+    raise Exception('Encryption error: %s' % str(encryption_error))
+
+try:
+    encoded_user = urllib.quote(auth_account, safe='')
+except AttributeError:
+    raise Exception('Encryption error: %s' % str(encryption_error))
+
+base = (base_url or '').rstrip('/')
+
+auth_url = '%s/accounts/%s?authentication=%s' % (
+    base,
+    auth_account,
+    encrypted_password
+)
+resp = request_retry('GET', auth_url)
+
+if resp.status_code >= 400:
+    # Log detailed error
+    error_msg = "Token request failed: %s %s" % (resp.status_code, resp.text)
+    raise Exception(error_msg)
+
+token = (resp.text or '').strip()
+if not token:
+    raise Exception("Empty token received from server")
+bag['token'] = token
+bag['auth_response'] = {'token': token, 'user': auth_account}
+]]></field>
+        </record>
+
+        <record id="remotecontrol_microcom_action_build_sensor_plan" model="remotecontrol.action">
+            <field name="name">MICROCOM: Build Sensor Plan</field>
+            <field name="remote_id" ref="remotecontrol_microcom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[import json
+from datetime import timedelta
+
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+today_str = fields.Date.today()
+condition = [
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id),
+]
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+
+sensors = Sensor.search(condition)
+sensor_ids = [s.id for s in sensors]
+
+last_readings_map = {}
+if sensors:
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for sid, mtime in cr.fetchall():
+        last_readings_map[sid] = mtime
+
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+
+    station_id = device_cfg.get('station_id')
+    if station_id is not None:
+        station_id = str(station_id).strip()
+    else:
+        station_id = ''
+
+    channel_id = sensor_cfg.get('channel_id')
+    if channel_id is not None:
+        channel_id = str(channel_id).strip()
+    else:
+        channel_id = ''
+
+    if not station_id or channel_id == '':
+        continue
+
+    last_reading = last_readings_map.get(sensor.id)
+
+    if last_reading:
+        start_date = str(last_reading)
+    else:
+        start_cfg = sensor_cfg.get('start_date') or device_cfg.get('start_date')
+        if start_cfg:
+            start_date = start_cfg
+        else:
+            year = today_str[:4]
+            start_date = '%s-01-01' % year
+
+    plan.append({
+        'sensor_id': sensor.id,
+        'device_id': device.id,
+        'station_id': station_id,
+        'channel_id': channel_id,
+        'start_date': start_date,
+        'sensor_name': sensor.name or '',
+        'device_name': device.name or '',
+    })
+
+bag['sensors_plan'] = plan
+bag['sensors_plan_count'] = len(plan)
+]]></field>
+        </record>
+
+        <record id="remotecontrol_microcom_action_get_readings" model="remotecontrol.action">
+            <field name="name">MICROCOM: Get Readings and Upsert</field>
+            <field name="remote_id" ref="remotecontrol_microcom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[import json
+import zlib
+import pytz
+from datetime import datetime
+
+try:
+    import StringIO
+except ImportError:
+    from io import BytesIO as StringIO
+
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import padding as crypto_padding
+
+Remote = self.remote_id
+plan = bag.get('sensors_plan') or []
+token = bag.get('token') or ''
+
+if not token:
+    raise Exception("No token available. Run 'Get Token' action first.")
+
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+auth_pass_b64 = (cfg.get('authPass') or '').strip()
+if not auth_pass_b64:
+    raise Exception("Missing authPass in connection_params for decryption")
+
+total_upserts = 0
+total_errors = 0
+items = []
+
+now = datetime.utcnow()
+end_date_str = now.strftime('%d-%m-%Y;%H:%M:%S')
+date_header = now.strftime('%a, %d %b %Y %H:%M:%S GMT')
+base = (base_url or '').rstrip('/')
+
+for sensor_plan in plan:
+    sensor_id = sensor_plan['sensor_id']
+    device_id = sensor_plan['device_id']
+    station_id = sensor_plan['station_id']
+    channel_id = sensor_plan['channel_id']
+    start_date = sensor_plan['start_date']
+    sensor_name = sensor_plan.get('sensor_name', '')
+    device_name = sensor_plan.get('device_name', '')
+    if len(start_date) == 10:
+        try:
+            dt = datetime.strptime(start_date, '%Y-%m-%d')
+            start_date_str = dt.strftime('%d-%m-%Y;%H:%M:%S')
+        except Exception:
+            start_date_str = start_date.replace('-', '/') + ';00:00:00'
+    else:
+        try:
+            dt = datetime.strptime(start_date[:19], '%Y-%m-%d %H:%M:%S')
+            start_date_str = dt.strftime('%d-%m-%Y;%H:%M:%S')
+        except Exception:
+            start_date_str = start_date.replace('-', '/').replace(' ', ';')
+
+    url = '%s/historical/%s?Accept-Encoding=gzip&startDate=%s&endDate=%s&channelView=CUSTOM&channels=%s' % (
+        base,
+        station_id,
+        start_date_str,
+        end_date_str,
+        channel_id
+    )
+    headers = {
+        'User-Agent': 'ZeusClient ApiREST',
+        'Date': date_header,
+        'Authorization': 'Bearer %s' % token,
+    }
+    try:
+        resp = request_retry('GET', url, headers=headers)
+        if resp.status_code >= 400:
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'station_id': station_id,
+                'channel_id': channel_id,
+                'status': resp.status_code,
+                'error': (resp.text or '')[:400],
+                'url': url.split('?')[0]  # Hide params
+            })
+            total_errors += 1
+            continue
+        try:
+            response_text = resp.text.strip()
+            if not response_text:
+                items.append({
+                    'sensor_id': sensor_id,
+                    'device_id': device_id,
+                    'station_id': station_id,
+                    'channel_id': channel_id,
+                    'status': 0,
+                    'points_found': 0,
+                    'upserts': 0,
+                    'errors': 0,
+                })
+                continue
+            iv_b64 = response_text[:24]
+            ciphertext_b64 = response_text[24:]
+            iv = base64.b64decode(iv_b64)
+            ciphertext = base64.b64decode(ciphertext_b64)
+            key = base64.b64decode(auth_pass_b64)
+            backend = default_backend()
+            cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+            decryptor = cipher.decryptor()
+            decrypted_padded = decryptor.update(ciphertext) + decryptor.finalize()
+            unpadder = crypto_padding.PKCS7(128).unpadder()
+            decrypted_bytes = unpadder.update(decrypted_padded) + unpadder.finalize()
+            decompressed_text = None
+            decompress_method = None
+            try:
+                decompressed_text = zlib.decompress(decrypted_bytes, 16 + zlib.MAX_WBITS).decode('utf-8')
+                decompress_method = 'gzip'
+            except Exception as e1:
+                try:
+                    decompressed_text = zlib.decompress(decrypted_bytes).decode('utf-8')
+                    decompress_method = 'zlib'
+                except Exception as e2:
+                    try:
+                        decompressed_text = zlib.decompress(decrypted_bytes, -zlib.MAX_WBITS).decode('utf-8')
+                        decompress_method = 'deflate'
+                    except Exception as e3:
+                        try:
+                            decompressed_text = decrypted_bytes.decode('utf-8')
+                            decompress_method = 'none'
+                        except Exception as e4:
+                            raise Exception('All decompression methods failed. Gzip: %s, Zlib: %s, Raw: %s, NoComp: %s' % (
+                                str(e1), str(e2), str(e3), str(e4)
+                            ))
+            if decompressed_text and decompressed_text.startswith('H4sI'):
+                try:
+                    inner_gzip_bytes = base64.b64decode(decompressed_text)
+                    decompressed_text = zlib.decompress(inner_gzip_bytes, 16 + zlib.MAX_WBITS).decode('utf-8')
+                    decompress_method = decompress_method + '+gzip_inner'
+                except Exception as e_inner:
+                    pass
+            try:
+                data = json.loads(decompressed_text)
+            except ValueError as json_error:
+                raise Exception('Not valid JSON. First 200 chars: %s' % decompressed_text[:200])
+
+        except Exception as decode_error:
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'station_id': station_id,
+                'channel_id': channel_id,
+                'status': -1,
+                'error': 'Decrypt/Decompress/Parse error: %s' % str(decode_error),
+                'response_preview': (resp.text or '')[:200]
+            })
+            total_errors += 1
+            continue
+        upserts = 0
+        errs = 0
+        readings_summary = []
+
+        if not isinstance(data, list):
+            data = [data] if data else []
+        for record in data:
+            date_of_record = record.get('DateOfRecord')
+            value_str = record.get('Value')
+
+            if not date_of_record or value_str is None:
+                continue
+            try:
+                value = float(value_str)
+            except Exception:
+                errs += 1
+                continue
+            try:
+                date_part, time_part = date_of_record.split(';')
+                day, month, year = date_part.split('-')
+                time_components = time_part.split(':')
+                hour = time_components[0]
+                minute = time_components[1]
+                second_raw = time_components[2] if len(time_components) > 2 else '00'
+                if '.' in second_raw:
+                    second = second_raw.split('.')[0]
+                else:
+                    second = second_raw
+                date_time_read = datetime(
+                    int(year),
+                    int(month),
+                    int(day),
+                    int(hour),
+                    int(minute),
+                    int(second)
+                )
+                madrid_tz = pytz.timezone('Europe/Madrid')
+                date_time_read = madrid_tz.localize(date_time_read)
+                utc_tz = pytz.timezone('UTC')
+                date_time_read = date_time_read.astimezone(utc_tz)
+                measurement_time = date_time_read.strftime('%Y-%m-%d %H:%M:%S')
+
+            except Exception as date_error:
+                errs += 1
+                readings_summary.append({
+                    'date': date_of_record,
+                    'value': value,
+                    'error': 'Date parse error: %s' % str(date_error)
+                })
+                continue
+            try:
+                Remote.upsert(
+                    'mdm.measurement.device.sensor.reading',
+                    {'sensor_id': sensor_id, 'measurement_time': measurement_time},
+                    {'value': value, 'remotecontrol_origin_id': Remote.id}
+                )
+                upserts += 1
+                readings_summary.append({
+                    'time': measurement_time,
+                    'value': value
+                })
+            except Exception as upsert_error:
+                errs += 1
+                readings_summary.append({
+                    'time': measurement_time,
+                    'value': value,
+                    'error': str(upsert_error)
+                })
+        total_upserts += upserts
+        total_errors += errs
+        items.append({
+            'sensor_id': sensor_id,
+            'device_id': device_id,
+            'station_id': station_id,
+            'channel_id': channel_id,
+            'sensor_name': sensor_name,
+            'device_name': device_name,
+            'status': resp.status_code,
+            'points_found': len(data),
+            'upserts': upserts,
+            'errors': errs,
+            'readings_preview': readings_summary[:5],  # First 5 readings
+        })
+
+    except Exception as e:
+        total_errors += 1
+        items.append({
+            'sensor_id': sensor_id,
+            'device_id': device_id,
+            'station_id': station_id,
+            'channel_id': channel_id,
+            'status': -1,
+            'error': str(e),
+        })
+
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'sensors_processed': len(items),
+    'items': items,
+}
+try:
+    audit_json = json.dumps(audit, ensure_ascii=True, indent=2, default=str)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+except Exception as json_error:
+    simple_audit = {
+        'executed_at': str(fields.Datetime.now()),
+        'total_upserts': total_upserts,
+        'total_errors': total_errors,
+        'error': str(json_error),
+    }
+    audit_json = json.dumps(simple_audit, ensure_ascii=True, indent=2)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+fname = 'microcom_readings_fetch_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id,
+})
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+]]></field>
+        </record>
+
+        <record id="remotecontrol_microcom_action_get_station_config" model="remotecontrol.action">
+            <field name="name">MICROCOM: Get Station Configuration</field>
+            <field name="remote_id" ref="remotecontrol_microcom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[import json
+import zlib
+from datetime import datetime
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import padding as crypto_padding
+
+Remote = self.remote_id
+token = bag.get('token') or ''
+if not token:
+    raise Exception("No token available. Run 'Get Token' action first.")
+
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+auth_pass_b64 = (cfg.get('authPass') or '').strip()
+if not auth_pass_b64:
+    raise Exception("Missing authPass in connection_params for decryption")
+
+base = (base_url or '').rstrip('/')
+now = datetime.utcnow()
+date_header = now.strftime('%a, %d %b %Y %H:%M:%S GMT')
+url = '%s/stations?status=all&Accept-Encoding=gzip' % base
+headers = {
+    'User-Agent': 'ZeusClient ApiREST',
+    'Date': date_header,
+    'Authorization': 'Bearer %s' % token,
+}
+resp = request_retry('GET', url, headers=headers)
+if resp.status_code >= 400:
+    raise Exception("Get stations failed: %s %s" % (resp.status_code, resp.text))
+response_text = resp.text.strip()
+
+if response_text:
+    iv_b64 = response_text[:24]
+    ciphertext_b64 = response_text[24:]
+    iv = base64.b64decode(iv_b64)
+    ciphertext = base64.b64decode(ciphertext_b64)
+    key = base64.b64decode(auth_pass_b64)
+    backend = default_backend()
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+    decryptor = cipher.decryptor()
+    decrypted_padded = decryptor.update(ciphertext) + decryptor.finalize()
+    unpadder = crypto_padding.PKCS7(128).unpadder()
+    decrypted_bytes = unpadder.update(decrypted_padded) + unpadder.finalize()
+    try:
+        decompressed_text = zlib.decompress(decrypted_bytes, 16 + zlib.MAX_WBITS).decode('utf-8')
+    except Exception:
+        try:
+            decompressed_text = zlib.decompress(decrypted_bytes).decode('utf-8')
+        except Exception:
+            decompressed_text = decrypted_bytes.decode('utf-8')
+    if decompressed_text and decompressed_text.startswith('H4sI'):
+        inner_gzip_bytes = base64.b64decode(decompressed_text)
+        decompressed_text = zlib.decompress(inner_gzip_bytes, 16 + zlib.MAX_WBITS).decode('utf-8')
+    stations = json.loads(decompressed_text)
+    stations = stations if isinstance(stations, list) else [stations]
+    station_configs = []
+    for station in stations:
+        if isinstance(station, dict):
+            station_id = station.get('Id') or station.get('id') or station.get('StationId') or station.get('station_id')
+        else:
+            station_id = station
+        if not station_id:
+            continue
+        station_id = str(station_id).strip()
+        if not station_id:
+            continue
+
+        url = '%s/stations/%s/properties?Accept-Encoding=gzip' % (base, station_id)
+        headers = {
+            'User-Agent': 'ZeusClient ApiREST',
+            'Date': now.strftime('%a, %d %b %Y %H:%M:%S GMT'),
+            'Authorization': 'Bearer %s' % token,
+        }
+        try:
+            resp = request_retry('GET', url, headers=headers)
+            if resp.status_code >= 400:
+                continue
+            response_text = resp.text.strip()
+            if not response_text:
+                continue
+            iv_b64 = response_text[:24]
+            ciphertext_b64 = response_text[24:]
+            iv = base64.b64decode(iv_b64)
+            ciphertext = base64.b64decode(ciphertext_b64)
+            key = base64.b64decode(auth_pass_b64)
+            backend = default_backend()
+            cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+            decryptor = cipher.decryptor()
+            decrypted_padded = decryptor.update(ciphertext) + decryptor.finalize()
+            unpadder = crypto_padding.PKCS7(128).unpadder()
+            decrypted_bytes = unpadder.update(decrypted_padded) + unpadder.finalize()
+            try:
+                decompressed_text = zlib.decompress(decrypted_bytes, 16 + zlib.MAX_WBITS).decode('utf-8')
+            except Exception:
+                try:
+                    decompressed_text = zlib.decompress(decrypted_bytes).decode('utf-8')
+                except Exception:
+                    decompressed_text = decrypted_bytes.decode('utf-8')
+
+            if decompressed_text and decompressed_text.startswith('H4sI'):
+                inner_gzip_bytes = base64.b64decode(decompressed_text)
+                decompressed_text = zlib.decompress(inner_gzip_bytes, 16 + zlib.MAX_WBITS).decode('utf-8')
+
+            properties = json.loads(decompressed_text)
+            channel_names = properties.get('ChannelsNames', [])
+            channel_units = properties.get('ChannelUnits', [])
+
+            channels = []
+            for i, name in enumerate(channel_names):
+                if not name or str(name).strip() == '':
+                    continue
+                unit = ''
+                if i < len(channel_units):
+                    raw_unit = channel_units[i]
+                    if raw_unit is not None and str(raw_unit).strip() != '':
+                        unit = str(raw_unit).strip()
+                channel_data = {
+                    'channel_id': i,  # Keep original index as channel_id
+                    'name': str(name).strip(),
+                    'unit': unit
+                }
+                channels.append(channel_data)
+            station_config = {
+                'station_id': station_id,
+                'model': properties.get('Model', ''),
+                'serial': properties.get('Serial', ''),
+                'channels': channels,
+                'total_channels': len(channels)
+            }
+            station_configs.append(station_config)
+        except Exception:
+            continue
+
+    config_json = json.dumps(station_configs, ensure_ascii=False, indent=2, default=str)
+    b64 = base64.b64encode(config_json.encode('utf-8'))
+    fname = 'microcom_stations_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+    att = env['ir.attachment'].create({
+        'name': fname,
+        'datas_fname': fname,
+        'datas': b64,
+        'mimetype': 'application/json',
+        'res_model': 'remotecontrol',
+        'res_id': Remote.id,
+    })
+    bag['station_configs'] = station_configs
+    bag['config_attachment_id'] = att.id
+else:
+    bag['station_configs'] = []
+    bag['config_attachment_id'] = False
+]]></field>
+        </record>
+
+        <record id="remotecontrol_microcom_procedure" model="remotecontrol.procedure">
+            <field name="name">MICROCOM: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_microcom"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+
+        <record id="remotecontrol_microcom_step_10_token" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_microcom_procedure"/>
+            <field name="action_id" ref="remotecontrol_microcom_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_microcom_step_20_sensor_plan" model="remotecontrol.step">
+            <field name="name">Build Sensor Plan</field>
+            <field name="procedure_id" ref="remotecontrol_microcom_procedure"/>
+            <field name="action_id" ref="remotecontrol_microcom_action_build_sensor_plan"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_microcom_step_30_readings" model="remotecontrol.step">
+            <field name="name">Get Readings and Upsert</field>
+            <field name="procedure_id" ref="remotecontrol_microcom_procedure"/>
+            <field name="action_id" ref="remotecontrol_microcom_action_get_readings"/>
+            <field name="sequence">30</field>
+        </record>
+
+        <record id="remotecontrol_microcom_procedure_config" model="remotecontrol.procedure">
+            <field name="name">MICROCOM: Get Devices</field>
+            <field name="remote_id" ref="remotecontrol_microcom"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_microcom_config_step_10_token" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_microcom_procedure_config"/>
+            <field name="action_id" ref="remotecontrol_microcom_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_microcom_config_step_20_config" model="remotecontrol.step">
+            <field name="name">Get Station Configuration</field>
+            <field name="procedure_id" ref="remotecontrol_microcom_procedure_config"/>
+            <field name="action_id" ref="remotecontrol_microcom_action_get_station_config"/>
+            <field name="sequence">20</field>
+        </record>
+    </data>
+</odoo>
