@@ -60,12 +60,16 @@ class CreateFacturae(models.TransientModel):
         elif len(partner.vat) < 3:
             errors.append(_('- Partner VAT/NIF is too short (minimum 3 characters)'))
 
-        # Ensure street is a non-empty string (not False, not None, not empty)
-        if not partner.street or not isinstance(partner.street, six.string_types) or not partner.street.strip():
+        partner_street = partner.street
+        if not partner_street or \
+           not isinstance(partner_street, six.string_types) or \
+           not partner_street.strip():
             errors.append(_('- Partner street address is required'))
 
-        # Validate street2 is also a string if present (to avoid concatenation issues)
-        if partner.street2 and not isinstance(partner.street2, six.string_types):
+        partner_street2 = partner.street2
+        if partner_street2 and \
+           partner_street2 is not False and \
+           not isinstance(partner_street2, six.string_types):
             errors.append(_('- Partner street2 must be a text value'))
 
         if not partner.city:
@@ -91,12 +95,16 @@ class CreateFacturae(models.TransientModel):
         elif len(company.vat) < 3:
             errors.append(_('- Company VAT/NIF is too short (minimum 3 characters)'))
 
-        # Ensure street is a non-empty string (not False, not None, not empty)
-        if not company.street or not isinstance(company.street, six.string_types) or not company.street.strip():
+        company_street = company.street
+        if not company_street or \
+           not isinstance(company_street, six.string_types) or \
+           not company_street.strip():
             errors.append(_('- Company street address is required'))
 
-        # Validate street2 is also a string if present (to avoid concatenation issues)
-        if company.street2 and not isinstance(company.street2, six.string_types):
+        company_street2 = company.street2
+        if company_street2 and \
+           company_street2 is not False and \
+           not isinstance(company_street2, six.string_types):
             errors.append(_('- Company street2 must be a text value'))
 
         if not company.city:

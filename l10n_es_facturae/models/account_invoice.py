@@ -16,6 +16,7 @@ import random
 import base64
 import hashlib
 import logging
+import six
 
 try:
     import xmlsig
@@ -254,16 +255,12 @@ class AccountInvoice(models.Model):
             errors.append(_('- Partner VAT/NIF is required'))
         elif len(partner.vat) < 3:
             errors.append(_('- Partner VAT/NIF is too short (minimum 3 characters)'))
-        if not partner.street:
+
+        partner_street = partner.street
+        if not partner_street or \
+           not isinstance(partner_street, six.string_types) or \
+           not partner_street.strip():
             errors.append(_('- Partner street address is required'))
-        elif isinstance(partner.street, bool):
-            errors.append(_('- Partner street address is required'))
-        else:
-            try:
-                if not str(partner.street).strip():
-                    errors.append(_('- Partner street address is required'))
-            except:
-                errors.append(_('- Partner street address is required'))
         if not partner.city:
             errors.append(_('- Partner city is required'))
 
@@ -282,16 +279,11 @@ class AccountInvoice(models.Model):
             errors.append(_('- Company VAT/NIF is required'))
         elif len(company.vat) < 3:
             errors.append(_('- Company VAT/NIF is too short (minimum 3 characters)'))
-        if not company.street:
+        company_street = company.street
+        if not company_street or \
+           not isinstance(company_street, six.string_types) or \
+           not company_street.strip():
             errors.append(_('- Company street address is required'))
-        elif isinstance(company.street, bool):
-            errors.append(_('- Company street address is required'))
-        else:
-            try:
-                if not str(company.street).strip():
-                    errors.append(_('- Company street address is required'))
-            except:
-                errors.append(_('- Company street address is required'))
         if not company.city:
             errors.append(_('- Company city is required'))
         if not company.zip:
