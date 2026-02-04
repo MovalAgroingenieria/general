@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_general_configuration" model="ir.ui.view">
+        <field name="name">portal_ext.base.config.settings.form</field>
+        <field name="model">base.config.settings</field>
+        <field name="inherit_id" ref="base_setup.view_general_configuration" />
+        <field name="arch" type="xml">
+            <group name="report" position="before">
+                <group name="portal" string="Portal">
+                    <label for="partner_child_portal"/>
+                    <div>
+                        <field name="partner_child_portal" class="oe_inline"/>
+                    </div>
+                </group>
+            </group>
+        </field>
+    </record>
+
+
+</odoo>

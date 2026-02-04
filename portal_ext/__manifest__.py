@@ -13,7 +13,9 @@
         'portal',
     ],
     "data": [
+        'data/res_config_settings_data.xml',
         'wizard/portal_wizard_views.xml',
+        'views/base_config_settings.xml',
     ],
     "installable": True,
     "application": False,
