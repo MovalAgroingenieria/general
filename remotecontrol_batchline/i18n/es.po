@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-20 09:45+0000\n"
-"PO-Revision-Date: 2025-10-20 09:45+0000\n"
+"POT-Creation-Date: 2026-02-05 11:14+0000\n"
+"PO-Revision-Date: 2026-02-05 11:14+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -27,8 +27,13 @@ msgstr "/api/elementos/historico?inicio=YYYY-MM-DD&amp;fin=YYYY-MM-DD&amp;elemen
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "/api/presiones/historico?inicio=YYYY-MM-DD&amp;fin=YYYY-MM-DD&amp;hidrante=HIDRANTE&amp;electronica=N&amp;canal=N"
+msgstr "/api/presiones/historico?inicio=YYYY-MM-DD&amp;fin=YYYY-MM-DD&amp;hidrante=HIDRANTE&amp;electronica=N&amp;canal=N"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
 msgid "1) Connection (Remote Control)"
-msgstr "1) Conexión (Remote control)"
+msgstr "1) Conexión (Control Remoto)"
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
@@ -52,13 +57,18 @@ msgstr "2.2 Batchline: Sincronización diaria"
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "2.3 Batchline: Import pressure devices"
+msgstr "2.3 Batchline: Importar dispositivos de presión"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
 msgid "3) Device Configuration"
-msgstr "3) Configuración del dispositivo"
+msgstr "3) Configuración del Dispositivo"
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
 msgid "4) Sensor Configuration"
-msgstr "4) Configuración del sensor"
+msgstr "4) Configuración del Sensor"
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
@@ -102,12 +112,27 @@ msgstr "<code>/api/hidrantes</code>"
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "<code>/api/presiones/historico</code>"
+msgstr "<code>/api/presiones/historico</code>"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "<code>/api/presiones</code>"
+msgstr "<code>/api/presiones</code>"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
 msgid "<code>/token</code>"
 msgstr "<code>/token</code>"
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
-msgid "<code>tag</code> must match the “Nombre” of a <code>Tag</code> entry returned by the device’s <code>/api/elementos</code> response."
+msgid "<code>sensor_type</code> must be set to <code>\"H_PRESSURE\"</code> to indicate this sensor uses the <code>/api/presiones/historico</code> endpoint."
+msgstr "<code>sensor_type</code> debe establecerse en <code>\«H_PRESSURE\»</code> para indicar que este sensor utiliza el punto final <code>/api/presiones/historico</code> endpoint."
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "<code>tag</code> must match the \"Nombre\" of a <code>Tag</code> entry returned by the device's <code>/api/elementos</code> response."
 msgstr "La etiqueta <code>tag</code> debe coincidir con el “Nombre” de una entrada <code>Tag</code> devuelta por la respuesta del dispositivo en <code>/api/elementos</code>."
 
 #. module: remotecontrol_batchline
@@ -117,15 +142,20 @@ msgstr "<em>Obtener Token</em> llama a <code>/token</code> usando datos de formu
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "<em>Get devices (plan)</em> and <em>Get pressure devices (plan)</em> compute <code>initial_date</code> for each sensor:\n"
+"    last stored reading → else <code>sensor.start_date</code> → else <code>device.start_date</code> → else Jan 1 of current year."
+msgstr "<em>Obtener dispositivos (plan)</em> calcula <code>initial_date</code> para cada sensor:\n"
+"    última lectura almacenada → si no, <code>sensor.start_date</code> → si no, <code>device.start_date</code> → si no, 1 de enero del año actual."
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
 msgid "<em>Get devices (plan)</em> and <em>Get readings</em> send <code>Authorization: Bearer &lt;token&gt;</code> in headers."
 msgstr "<em>Obtener dispositivos (plan)</em> y <em>Obtener lecturas</em> envían <code>Authorization: Bearer &lt;token&gt;</code> en las cabeceras."
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
-msgid "<em>Get devices (plan)</em> computes <code>initial_date</code> for each sensor:\n"
-"    last stored reading → else <code>sensor.start_date</code> → else <code>device.start_date</code> → else Jan 1 of current year."
-msgstr "<em>Obtener dispositivos (plan)</em> calcula <code>initial_date</code> para cada sensor:\n"
-"    última lectura almacenada → si no, <code>sensor.start_date</code> → si no, <code>device.start_date</code> → si no, 1 de enero del año actual."
+msgid "<em>Get pressure readings</em> uses <code>inicio</code> = <code>initial_date</code> and <code>fin</code> = today, calling:"
+msgstr "<em>Obtener lecturas de presión</em>utiliza<code>inicio</code> = <code>initial_date</code> y <code>fin</code> = today, llamando:"
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
@@ -134,8 +164,13 @@ msgstr "<em>Obtener lecturas</em> usa <code>inicio</code> = <code>initial_date</
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
-msgid "<em>device_id</em> corresponds to the “Identificador” returned by the <code>/api/elementos</code> endpoint."
+msgid "<em>device_id</em> corresponds to the \"Identificador\" returned by the <code>/api/elementos</code> endpoint."
 msgstr "<em>device_id</em> corresponde al “Identificador” devuelto por el endpoint <code>/api/elementos</code>."
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "<em>hidrante</em>, <em>electronica</em>, and <em>canal</em> correspond to the values returned by the <code>/api/presiones</code> endpoint."
+msgstr "<em>hidrante</em>, <em>electronica</em>, and <em>canal</em> correspond to the values returned by the <code>/api/presiones</code> endpoint."
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
@@ -164,6 +199,21 @@ msgstr "<strong>Obtener hidrantes</strong>"
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "<strong>Get pressure devices (plan)</strong> → build <code>bag[\"pressure_sensors_plan\"]</code> from Odoo sensors with <code>sensor_type</code> defined in their parameters."
+msgstr "<strong>Obtener dispositivos presión (plan)</strong> → se construye <code>bag[\"pressure_sensors_plan\"]</code> desde los sensores de odoo con <code>sensor_type</code> definido en sus parámetros"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "<strong>Get pressure readings</strong>"
+msgstr "<strong>Obtener lecturas de presión</strong>"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "<strong>Get pressure readings</strong> → iterate through plan and call <code>/api/presiones/historico</code> with filters by date, hidrante, electronica, and canal to upsert pressure readings into Odoo."
+msgstr "<strong>Obtener lecturas de presión</strong> → itera a través del plan y llama <code>/api/presiones/historico</code> con filtros por fecha, hidrante, electronica, y canal para actualizar lecturas dentro de odoo."
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
 msgid "<strong>Get readings</strong>"
 msgstr "<strong>Obtener lecturas</strong>"
 
@@ -181,6 +231,16 @@ msgstr "<strong>Importar elementos</strong>"
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
 msgid "<strong>Import elements</strong> → call <code>/api/elementos</code> and store the resulting JSON list in an attachment. Each element includes <code>Identificador</code>, <code>Descripción</code>, and a list of <code>Tags</code> with <code>Nombre</code> and <code>Unidad</code>."
 msgstr "<strong>Importar elementos</strong> → llama a <code>/api/elementos</code> y almacena la lista JSON resultante en un adjunto. Cada elemento incluye <code>Identificador</code>, <code>Descripción</code> y una lista de <code>Tags</code> con <code>Nombre</code> y <code>Unidad</code>."
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "<strong>Import pressure devices</strong>"
+msgstr "<strong>Importar dispositivos de presión</strong>"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "<strong>Import pressure devices</strong> → call <code>/api/presiones</code> and store the resulting JSON list in an attachment. Each device includes <code>Hidrante</code>, <code>Electronica</code>, <code>Canal</code>, <code>Alias</code>, <code>Unidad</code>, and current <code>Valor</code>."
+msgstr "<strong>Importar dispositivos de presión</strong> → llama a <code>/api/presiones</code> y guarda el resultado en una lista JSON. Cada dispositivo incluye <code>Hidrante</code>, <code>Electronica</code>, <code>Canal</code>, <code>Alias</code>, <code>Unidad</code>, y el actual <code>Valor</code>."
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
@@ -269,6 +329,11 @@ msgstr "Cada <strong>Sensor</strong> (<code>mdm.measurement.device.sensor</code>
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "Each pressure reading will be inserted or updated in Odoo under the corresponding sensor with <code>value</code> = <code>Valor</code>. Timestamps may include milliseconds."
+msgstr "Cada lectura de presión se insertará o actualizará en Odoo bajo el sensor correspondiente con <code>valor</code> = <code>Valor</code>. Las marcas de tiempo pueden incluir milisegundos."
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
 msgid "Each reading (<code>Valor</code>) is upserted into <code>mdm.measurement.device.sensor.reading</code> using <code>sensor_id</code> + <code>measurement_time</code> as unique key."
 msgstr "Cada lectura (<code>Valor</code>) se inserta o actualiza en <code>mdm.measurement.device.sensor.reading</code> usando <code>sensor_id</code> + <code>measurement_time</code> como clave única."
 
@@ -289,8 +354,33 @@ msgstr "Obtener la lista de dispositivos disponibles y sus etiquetas (identifica
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "Fetch list of available pressure sensors (hidrante, electronica, canal, alias)."
+msgstr "Obtener la lista de sensores de presión disponibles (hidrante, electrónica, canal, alias)."
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
 msgid "Filter washing cycle state."
 msgstr "Estado del ciclo de lavado del filtro."
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "For elements-based devices:"
+msgstr "Para dispositivos basados en elementos:"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "For elements-based sensors:"
+msgstr "Para sensores basados en elementos:"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "For pressure devices:"
+msgstr "Para dispositivos de presión:"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "For pressure sensors:"
+msgstr "Para sensores de presión:"
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
@@ -399,12 +489,12 @@ msgstr "H_VOLUMEN"
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
-msgid "If <code>start_date</code> is missing, it falls back to the device’s or the current year."
+msgid "If <code>start_date</code> is missing, it falls back to the device's or the current year."
 msgstr "Si falta <code>start_date</code>, se usa la del dispositivo o, en su defecto, el año actual."
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
-msgid "If login fails, the action raises <em>“Login failed: [code] [message]”</em>."
+msgid "If login fails, the action raises <em>\"Login failed: [code] [message]\"</em>."
 msgstr "Si el inicio de sesión falla, la acción genera <em>“Error de inicio de sesión: [código] [mensaje]”</em>."
 
 #. module: remotecontrol_batchline
@@ -469,6 +559,21 @@ msgstr "Respuesta de <code>/api/hidrantes</code>:"
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "Response from <code>/api/presiones/historico</code>:"
+msgstr "Respuesta de<code>/api/presiones/historico</code>:"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "Response from <code>/api/presiones</code>:"
+msgstr "Respuesta de <code>/api/presiones</code>:"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "Retrieve historical pressure readings filtered by date range, hidrante, electronica, and canal."
+msgstr "Recuperar lecturas históricas de presión filtradas por rango de fechas, hidrante, electrónica y canal."
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
 msgid "Retrieve historical readings filtered by date range, device, and tag."
 msgstr "Recuperar lecturas históricas filtradas por rango de fechas, dispositivo y etiqueta."
 
@@ -499,18 +604,23 @@ msgstr "Nombre de etiqueta (genérico)"
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
-msgid "The remote control posts a log message like <em>[Batchline readings] upserts=NN errors=MM</em> with the attachment."
-msgstr "El telecontrol publica un mensaje de registro como <em>[Lecturas Batchline] upserts=NN errores=MM</em> junto con el adjunto."
+msgid "The <code>hidrante</code>, <code>electronica</code>, and <code>canal</code> values are taken from the parent device configuration."
+msgstr "El <code>hidrante</code>, <code>electronica</code>, and <code>canal</code> los valores se toman de la configuración del dispositivo principal."
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
-msgid "These are all unique tag patterns and names (<code>nombre</code>) available in the Batchline system. Tags with numeric suffixes have been generalized using “X”."
+msgid "The remote control posts log messages like <em>[Batchline readings] upserts=NN errors=MM</em> and <em>[Batchline pressure readings] upserts=NN errors=MM</em> with attachments."
+msgstr "El control remoto envía mensajes de registro como <em>[Lecturas de la línea de lote] upserts=NN errores=MM</em> y <em>[Lecturas de presión de la línea de lote] upserts=NN errores=MM</em> con archivos adjuntos."
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "These are all unique tag patterns and names (<code>nombre</code>) available in the Batchline system. Tags with numeric suffixes have been generalized using \"X\"."
 msgstr "Estos son todos los patrones y nombres de etiquetas únicos (<code>nombre</code>) disponibles en el sistema Batchline. Las etiquetas con sufijos numéricos se han generalizado usando “X”."
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
-msgid "Timestamps (<code>Fecha</code>) are parsed from ISO format (<code>YYYY-MM-DDTHH:MM:SS</code>), localized to Europe/Madrid, and stored in UTC in Odoo."
-msgstr "Las marcas de tiempo (<code>Fecha</code>) se interpretan desde el formato ISO (<code>YYYY-MM-DDTHH:MM:SS</code>), se localizan a Europa/Madrid y se almacenan en UTC en Odoo."
+msgid "Timestamps (<code>Fecha</code>) are parsed from ISO format (<code>YYYY-MM-DDTHH:MM:SS</code> or <code>YYYY-MM-DDTHH:MM:SS.mmm</code> with milliseconds), localized to Europe/Madrid, and stored in UTC in Odoo."
+msgstr "Timestamps (<code>Fecha</code>) are parsed from ISO format (<code>YYYY-MM-DDTHH:MM:SS</code> or <code>YYYY-MM-DDTHH:MM:SS.mmm</code> with milliseconds), localized to Europe/Madrid, and stored in UTC in Odoo."
 
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
@@ -641,12 +751,50 @@ msgstr "[\n"
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
 msgid "[\n"
+"  {\n"
+"    \"Hidrante\": \"S1-167\",\n"
+"    \"Electronica\": 0,\n"
+"    \"Canal\": 1,\n"
+"    \"Alias\": \"Presión entrada filtros\",\n"
+"    \"Unidad\": \"bar\",\n"
+"    \"Fecha\": \"2026-02-04T10:30:00.123\",\n"
+"    \"Valor\": 2.45\n"
+"  }\n"
+"]"
+msgstr "[\n"
+"  {\n"
+"    \"Hidrante\": \"S1-167\",\n"
+"    \"Electronica\": 0,\n"
+"    \"Canal\": 1,\n"
+"    \"Alias\": \"Presión entrada filtros\",\n"
+"    \"Unidad\": \"bar\",\n"
+"    \"Fecha\": \"2026-02-04T10:30:00.123\",\n"
+"    \"Valor\": 2.45\n"
+"  }\n"
+"]"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "[\n"
 "  {\"Fecha\": \"2025-10-20T09:00:00\", \"Valor\": 2.54},\n"
 "  {\"Fecha\": \"2025-10-20T10:00:00\", \"Valor\": 2.58}\n"
 "]"
 msgstr "[\n"
 "  {\"Fecha\": \"2025-10-20T09:00:00\", \"Valor\": 2.54},\n"
 "  {\"Fecha\": \"2025-10-20T10:00:00\", \"Valor\": 2.58}\n"
+"]"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "[\n"
+"  {\"Fecha\": \"2026-02-03T00:52:09.967\", \"Valor\": 2.31},\n"
+"  {\"Fecha\": \"2026-02-03T01:52:09.123\", \"Valor\": 2.28},\n"
+"  {\"Fecha\": \"2026-02-03T02:52:09.456\", \"Valor\": 2.35}\n"
+"]"
+msgstr "[\n"
+"  {\"Fecha\": \"2026-02-03T00:52:09.967\", \"Valor\": 2.31},\n"
+"  {\"Fecha\": \"2026-02-03T01:52:09.123\", \"Valor\": 2.28},\n"
+"  {\"Fecha\": \"2026-02-03T02:52:09.456\", \"Valor\": 2.35}\n"
 "]"
 
 #. module: remotecontrol_batchline
@@ -693,6 +841,32 @@ msgstr "{\n"
 #. module: remotecontrol_batchline
 #: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
 msgid "{\n"
+"  \"hidrante\": \"S1-167\",\n"
+"  \"electronica\": 0,\n"
+"  \"canal\": 1,\n"
+"  \"start_date\": \"2025-01-01\"   // fecha de inicio alternativa opcional\n"
+"}"
+msgstr "{\n"
+"  \"hidrante\": \"S1-167\",\n"
+"  \"electronica\": 0,\n"
+"  \"canal\": 1,\n"
+"  \"start_date\": \"2025-01-01\"   // fecha de inicio alternativa opcional\n"
+"}"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "{\n"
+"  \"sensor_type\": \"H_PRESSURE\",\n"
+"  \"start_date\": \"2025-01-01\"   // opcional; de lo contrario, device.start_date; de lo contrario, 1 de enero del año en curso\n"
+"}"
+msgstr "{\n"
+"  \"sensor_type\": \"H_PRESSURE\",\n"
+"  \"start_date\": \"2025-01-01\"   // opcional; de lo contrario, device.start_date; de lo contrario, 1 de enero del año en curso\n"
+"}"
+
+#. module: remotecontrol_batchline
+#: model:remotecontrol,remotecontrol_help:remotecontrol_batchline.remotecontrol_batchline
+msgid "{\n"
 "  \"tag\": \"TAG_NAME_IN_BATCHLINE\",\n"
 "  \"start_date\": \"2025-01-01\"   // optional; else device.start_date; else Jan 1 of current year\n"
 "}"
@@ -711,3 +885,4 @@ msgstr "{\n"
 "  \"username\": \"usuario\",\n"
 "  \"password\": \"contraseña\"\n"
 "}"
+
