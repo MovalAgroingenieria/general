@@ -69,7 +69,7 @@ class CimComplaint(models.Model):
             if not root_company:
                 raise exceptions.ValidationError(_('No root company found.'))
             return root_company.id
-        
+
     def _get_choose_company(self):
         param_choose_company = self.env['ir.values'].get_default(
             'res.cim.config.settings', 'choose_company')
@@ -1342,7 +1342,7 @@ class CimComplaint(models.Model):
         if ('lang' in self.env.context and self.env.context['lang']):
             lang = self.env.context['lang']
         lang_model = self.env['res.lang'].search([('code', '=', lang)])
-        date_parsed = datetime.datetime.strptime(raw_date, '%Y-%m-%d')
+        date_parsed = datetime.strptime(raw_date, '%Y-%m-%d')
         resp = str(date_parsed)
         if (lang_model):
             resp = date_parsed.strftime(lang_model.date_format)
