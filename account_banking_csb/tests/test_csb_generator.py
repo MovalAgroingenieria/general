@@ -15,6 +15,7 @@ class TestCSBGenerator(TransactionCase):
         self._setup_models()
         self._setup_company_bank()
         self._setup_payment_method()
+        self._setup_journal_payment_method()
         self._setup_payment_mode()
         self._setup_payment_order()
         self._setup_beneficiary()
@@ -68,8 +69,35 @@ class TestCSBGenerator(TransactionCase):
             {
                 "name": "CSB Direct Debit",
                 "code": "csb_direct_debit_payments",
+                "payment_type": "outbound",
                 "active": True,
             }
+        )
+
+    def _setup_journal_payment_method(self):
+        """Attach CSB payment method to the bank journal so payment mode
+        constraint passes."""
+        if not self.method or self.method.payment_type != "outbound":
+            return
+        journal = self.bank_journal
+        existing = journal.outbound_payment_method_line_ids.filtered(
+            lambda ln: ln.payment_method_id == self.method
+        )
+        if existing:
+            return
+        payment_account_id = (
+            journal.default_account_id.id if journal.default_account_id else False
+        )
+        line = self.env["account.payment.method.line"].create(
+            {
+                "journal_id": journal.id,
+                "payment_method_id": self.method.id,
+                "payment_account_id": payment_account_id,
+            }
+        )
+        # Ensure journal's stored outbound lines include this (computed field may not)
+        journal.outbound_payment_method_line_ids = (
+            journal.outbound_payment_method_line_ids | line
         )
 
     def _setup_payment_mode(self):

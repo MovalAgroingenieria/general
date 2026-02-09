@@ -1,13 +1,13 @@
-# Traducció d'Odoo Server.
-# Aquest fitxer conté la traducció dels mòduls següents:
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
 # 	* account_banking_csb
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-05 11:41+0000\n"
-"PO-Revision-Date: 2025-11-05 11:41+0000\n"
+"POT-Creation-Date: 2026-02-09 19:39+0000\n"
+"PO-Revision-Date: 2026-02-09 19:39+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,9 +16,9 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: account_banking_csb
-#: model:account.payment.method,name:account_banking_csb.csb_direct_debit_payments
+#: model:account.payment.method,name:account_banking_csb.payment_method_csb_direct_debit
 msgid "CSB Direct Debit"
-msgstr "Domiciliació CSB"
+msgstr "Dèbit directe CSB"
 
 #. module: account_banking_csb
 #. odoo-python
@@ -38,13 +38,13 @@ msgstr ""
 msgid ""
 "Configuration error:\n"
 "\n"
-"A line in \"%s\" is not 100 characters long:\n"
-"%s"
+"A line in \"%(line_type)s\" is not 100 characters long:\n"
+"%(content)s"
 msgstr ""
 "Error de configuració:\n"
 "\n"
-"Una línia a \"%s\" no té 100 caràcters de longitud:\n"
-"%s"
+"Una línia a \"%(line_type)s\" no té 100 caràcters:\n"
+"%(content)s"
 
 #. module: account_banking_csb
 #: model:ir.model.fields,field_description:account_banking_csb.field_payment_converter_spain__create_uid
@@ -67,11 +67,11 @@ msgstr "Nom mostrat"
 msgid ""
 "Error:\n"
 "\n"
-"Can not convert float number %(number).2f to fit in %(size)d characters."
+"Can not convert float number %(num).2f to fit in %(size)d characters."
 msgstr ""
 "Error:\n"
 "\n"
-"No es pot convertir el nombre decimal %(number).2f perquè càpiguen en %(size)d caràcters."
+"No es pot convertir el nombre decimal %(num).2f perquè càpiga en %(size)d caràcters."
 
 #. module: account_banking_csb
 #. odoo-python
@@ -79,11 +79,11 @@ msgstr ""
 msgid ""
 "Error:\n"
 "\n"
-"Can not convert integer number %(number)d to fit in %(size)d characters."
+"Can not convert integer number %(num)d to fit in %(size)d characters."
 msgstr ""
 "Error:\n"
 "\n"
-"No es pot convertir el nombre enter %(number)d perquè càpiguen en %(size)d caràcters."
+"No es pot convertir el nombre enter %(num)d perquè càpiga en %(size)d caràcters."
 
 #. module: account_banking_csb
 #: model:ir.model.fields,field_description:account_banking_csb.field_payment_converter_spain__id
@@ -93,14 +93,14 @@ msgstr ""
 #. module: account_banking_csb
 #. odoo-python
 #: code:addons/account_banking_csb/models/converter.py:0
-msgid "Invalid float string: %s"
-msgstr "Cadena de nombre decimal no vàlida: %s"
+msgid "Invalid float string: %(value)s"
+msgstr "Cadena decimal no vàlida: %(value)s"
 
 #. module: account_banking_csb
 #. odoo-python
 #: code:addons/account_banking_csb/models/converter.py:0
-msgid "Invalid integer: %s"
-msgstr "Enter no vàlid: %s"
+msgid "Invalid integer: %(value)s"
+msgstr "Enter no vàlid: %(value)s"
 
 #. module: account_banking_csb
 #: model:ir.model.fields,field_description:account_banking_csb.field_payment_converter_spain__write_uid
@@ -115,8 +115,13 @@ msgstr "Darrera actualització el"
 #. module: account_banking_csb
 #. odoo-python
 #: code:addons/account_banking_csb/models/account_payment_order.py:0
-msgid "Missing VAT on partner %s"
-msgstr "Falta el NIF/CIF al partner %s"
+msgid "Missing VAT on partner %(partner)s"
+msgstr "Falta el NIF/CIF al contacte %(partner)s"
+
+#. module: account_banking_csb
+#: model:ir.model,name:account_banking_csb.model_account_payment_method
+msgid "Payment Methods"
+msgstr "Formes de pagament"
 
 #. module: account_banking_csb
 #: model:ir.model,name:account_banking_csb.model_account_payment_order
@@ -141,8 +146,8 @@ msgstr ""
 #. module: account_banking_csb
 #. odoo-python
 #: code:addons/account_banking_csb/models/converter.py:0
-msgid "Unsupported number type: %s"
-msgstr "Tipus de nombre no suportat: %s"
+msgid "Unsupported number type: %(tname)s"
+msgstr "Tipus de nombre no suportat: %(tname)s"
 
 #. module: account_banking_csb
 #. odoo-python
@@ -150,11 +155,11 @@ msgstr "Tipus de nombre no suportat: %s"
 msgid ""
 "User error:\n"
 "\n"
-"Partner %s has no invoicing or default address."
+"Partner %(partner)s has no invoicing or default address."
 msgstr ""
-"Error de l'usuari:\n"
+"Error d'usuari:\n"
 "\n"
-"El partner %s no té adreça de facturació o adreça per defecte."
+"El contacte %(partner)s no té adreça de facturació ni per defecte."
 
 #. module: account_banking_csb
 #. odoo-python
@@ -162,11 +167,11 @@ msgstr ""
 msgid ""
 "User error:\n"
 "\n"
-"The bank account number of %s does not have 20 digits."
+"The bank account number of %(partner)s does not have 20 digits."
 msgstr ""
-"Error de l'usuari:\n"
+"Error d'usuari:\n"
 "\n"
-"El número de compte bancari de %s no té 20 dígits."
+"El número de compte bancari de %(partner)s no té 20 dígits."
 
 #. module: account_banking_csb
 #. odoo-python
@@ -174,8 +179,8 @@ msgstr ""
 msgid ""
 "User error:\n"
 "\n"
-"The bank account number of %s is not defined."
+"The bank account number of %(partner)s is not defined."
 msgstr ""
-"Error de l'usuari:\n"
+"Error d'usuari:\n"
 "\n"
-"El número de compte bancari de %s no està definit."
+"El número de compte bancari de %(partner)s no està definit."

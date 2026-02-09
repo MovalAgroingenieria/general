@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-05 11:41+0000\n"
-"PO-Revision-Date: 2025-11-05 11:41+0000\n"
+"POT-Creation-Date: 2026-02-09 19:39+0000\n"
+"PO-Revision-Date: 2026-02-09 19:39+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: account_banking_csb
-#: model:account.payment.method,name:account_banking_csb.csb_direct_debit_payments
+#: model:account.payment.method,name:account_banking_csb.payment_method_csb_direct_debit
 msgid "CSB Direct Debit"
 msgstr ""
 
@@ -35,8 +35,8 @@ msgstr ""
 msgid ""
 "Configuration error:\n"
 "\n"
-"A line in \"%s\" is not 100 characters long:\n"
-"%s"
+"A line in \"%(line_type)s\" is not 100 characters long:\n"
+"%(content)s"
 msgstr ""
 
 #. module: account_banking_csb
@@ -60,7 +60,7 @@ msgstr ""
 msgid ""
 "Error:\n"
 "\n"
-"Can not convert float number %(number).2f to fit in %(size)d characters."
+"Can not convert float number %(num).2f to fit in %(size)d characters."
 msgstr ""
 
 #. module: account_banking_csb
@@ -69,7 +69,7 @@ msgstr ""
 msgid ""
 "Error:\n"
 "\n"
-"Can not convert integer number %(number)d to fit in %(size)d characters."
+"Can not convert integer number %(num)d to fit in %(size)d characters."
 msgstr ""
 
 #. module: account_banking_csb
@@ -80,13 +80,13 @@ msgstr ""
 #. module: account_banking_csb
 #. odoo-python
 #: code:addons/account_banking_csb/models/converter.py:0
-msgid "Invalid float string: %s"
+msgid "Invalid float string: %(value)s"
 msgstr ""
 
 #. module: account_banking_csb
 #. odoo-python
 #: code:addons/account_banking_csb/models/converter.py:0
-msgid "Invalid integer: %s"
+msgid "Invalid integer: %(value)s"
 msgstr ""
 
 #. module: account_banking_csb
@@ -102,7 +102,12 @@ msgstr ""
 #. module: account_banking_csb
 #. odoo-python
 #: code:addons/account_banking_csb/models/account_payment_order.py:0
-msgid "Missing VAT on partner %s"
+msgid "Missing VAT on partner %(partner)s"
+msgstr ""
+
+#. module: account_banking_csb
+#: model:ir.model,name:account_banking_csb.model_account_payment_method
+msgid "Payment Methods"
 msgstr ""
 
 #. module: account_banking_csb
@@ -126,7 +131,7 @@ msgstr ""
 #. module: account_banking_csb
 #. odoo-python
 #: code:addons/account_banking_csb/models/converter.py:0
-msgid "Unsupported number type: %s"
+msgid "Unsupported number type: %(tname)s"
 msgstr ""
 
 #. module: account_banking_csb
@@ -135,7 +140,7 @@ msgstr ""
 msgid ""
 "User error:\n"
 "\n"
-"Partner %s has no invoicing or default address."
+"Partner %(partner)s has no invoicing or default address."
 msgstr ""
 
 #. module: account_banking_csb
@@ -144,7 +149,7 @@ msgstr ""
 msgid ""
 "User error:\n"
 "\n"
-"The bank account number of %s does not have 20 digits."
+"The bank account number of %(partner)s does not have 20 digits."
 msgstr ""
 
 #. module: account_banking_csb
@@ -153,5 +158,5 @@ msgstr ""
 msgid ""
 "User error:\n"
 "\n"
-"The bank account number of %s is not defined."
+"The bank account number of %(partner)s is not defined."
 msgstr ""
