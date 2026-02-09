@@ -11,7 +11,7 @@ class TestAccountMoveComments(TransactionCase):
     """Tests for the comment insertion logic on account.move."""
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls):  # pylint: disable=invalid-name
         super().setUpClass()
 
         cls.AccountMove = cls.env["account.move"]
@@ -86,7 +86,7 @@ class TestAccountMoveComments(TransactionCase):
         move = self.move
 
         # We patch render_comment to control the output per template.
-        def fake_render_comment(self_move, template):
+        def fake_render_comment(_self_move, template):
             if template == self.template_top:
                 return "TOP-HTML;"
             if template == self.template_bottom:
@@ -116,9 +116,9 @@ class TestAccountMoveComments(TransactionCase):
         move = self.move
         seen_langs = []
 
-        def fake_render_comment(self_move, template):
-            # Capture the lang used on the template's context
-            seen_langs.append(template._context.get("lang"))
+        def fake_render_comment(_self_move, template):
+            # Capture the lang used in the template's environment context
+            seen_langs.append(template.env.context.get("lang"))
             return "DUMMY"
 
         with patch.object(

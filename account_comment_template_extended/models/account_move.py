@@ -8,11 +8,9 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     top_comment = fields.Html(
-        string="Top Comment",
         help="Comments rendered before the invoice lines.",
     )
     bottom_comment = fields.Html(
-        string="Bottom Comment",
         help="Comments rendered after the invoice lines.",
     )
 

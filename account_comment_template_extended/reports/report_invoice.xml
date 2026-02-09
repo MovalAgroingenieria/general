@@ -2,10 +2,16 @@
 <odoo>
 
     <template id="report_invoice_document_comments" inherit_id="account_comment_template.report_invoice_document_comments">
-        <xpath expr="//t[@t-foreach='before_comment_template_ids']" position="replace">
+        <xpath expr="//t[@t-foreach='before_comment_template_ids']" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+        <xpath expr="//t[@t-foreach='before_comment_template_ids']" position="after">
             <span t-field="o.top_comment"/>
         </xpath>
-        <xpath expr="//t[@t-foreach='after_comment_template_ids']" position="replace">
+        <xpath expr="//t[@t-foreach='after_comment_template_ids']" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+        <xpath expr="//t[@t-foreach='after_comment_template_ids']" position="after">
             <span t-field="o.bottom_comment"/>
         </xpath>
     </template>

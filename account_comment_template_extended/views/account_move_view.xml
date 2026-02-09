@@ -4,7 +4,7 @@
     <record id="move_form_add_comment_extended" model="ir.ui.view">
         <field name="name">account.move.form.comment.extended</field>
         <field name="model">account.move</field>
-        <!-- Solo heredamos de la vista que añade la pestaña de comentarios -->
+        <!-- Only inherit from the view that adds the comments tab -->
         <field name="inherit_id" ref="account_comment_template.move_form_add_comment"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@name='comments']/field[@name='comment_template_ids']" position="after">
