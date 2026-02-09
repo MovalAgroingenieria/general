@@ -31,6 +31,7 @@ class CommentTemplate(models.AbstractModel):
         compute="_compute_comment_template_ids",
         compute_sudo=True,
         string="Comment Templates",
+        # pylint: disable=protected-access
         domain=lambda self: [("model_ids", "in", self._name)],
         store=True,
         readonly=False,
@@ -56,12 +57,14 @@ class CommentTemplate(models.AbstractModel):
         template_model = self.env["base.comment.template"].sudo()
 
         # Pre-filter templates allowed for this model to avoid access issues.
+        # pylint: disable=no-search-all,protected-access
         allowed_templates = template_model.search([]).filtered(
             lambda t: self._name in t.model_ids.mapped("model")
         )
         base_domain = [("id", "in", allowed_templates.ids)]
 
         for record in self:
+            # pylint: disable=protected-access
             partner = record[record._comment_template_partner_field_name]
             commands = [(5,)]  # clear existing links
 
@@ -90,12 +93,12 @@ class CommentTemplate(models.AbstractModel):
     # RENDER
     # -------------------------------------------------------------------------
 
-    def render_comment(
+    def render_comment(  # pylint: disable=unused-argument
         self,
         comment,
         engine=False,
         add_context=None,
-        post_process=False,  # kept for backward compatibility, not used in v18
+        post_process=False,
     ):
         """Render a single comment for this record using the chosen engine.
 
@@ -108,6 +111,7 @@ class CommentTemplate(models.AbstractModel):
         :return: Markup-safe HTML string with the rendered comment.
         """
         self.ensure_one()
+        # pylint: disable=protected-access
         comment_texts = self.env["mail.render.mixin"]._render_template(
             template_src=comment.text,
             model=self._name,

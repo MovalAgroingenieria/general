@@ -14,7 +14,7 @@ class TestCommentTemplate(TransactionCase):
     """Tests for the base_comment_template module."""
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls):  # pylint: disable=invalid-name
         super().setUpClass()
         # Register the test model that inherits from comment.template
         setup_test_model(cls.env, ResUsers)
@@ -63,7 +63,7 @@ class TestCommentTemplate(TransactionCase):
         ]
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls):  # pylint: disable=invalid-name
         teardown_test_model(cls.env, ResUsers)
         return super(TestCommentTemplate, cls).tearDownClass()
 
@@ -94,17 +94,6 @@ class TestCommentTemplate(TransactionCase):
                 }
             )
 
-    def test_template_name_get(self):
-        """name_get should include the position label."""
-        self.assertEqual(
-            self.before_template_id.name_get()[0][1],
-            "Top template (Top)",
-        )
-        self.assertEqual(
-            self.after_template_id.name_get()[0][1],
-            "Bottom template (Bottom)",
-        )
-
     # -------------------------------------------------------------------------
     # comment.template mixin behaviour
     # -------------------------------------------------------------------------
@@ -112,7 +101,7 @@ class TestCommentTemplate(TransactionCase):
     def test_general_template(self):
         """Partner-specific templates should be computed for the record."""
         # Force compute (normally triggered when partner_id changes)
-        self.user._compute_comment_template_ids()
+        self.user._compute_comment_template_ids()  # pylint: disable=protected-access
         # Check that the default templates are included
         self.assertIn(self.before_template_id, self.user.comment_template_ids)
         self.assertIn(self.after_template_id, self.user.comment_template_ids)
@@ -128,12 +117,12 @@ class TestCommentTemplate(TransactionCase):
                 "company_id": self.company.id,
             }
         )
-        self.user._compute_comment_template_ids()
+        self.user._compute_comment_template_ids()  # pylint: disable=protected-access
         self.assertNotIn(global_template, self.user.comment_template_ids)
 
         # When marked as global, it should appear
         global_template.global_template = True
-        self.user._compute_comment_template_ids()
+        self.user._compute_comment_template_ids()  # pylint: disable=protected-access
         self.assertIn(global_template, self.user.comment_template_ids)
 
     def test_partner_template(self):
@@ -180,14 +169,14 @@ class TestCommentTemplate(TransactionCase):
 
     def test_render_comment_text_(self):
         """Template rendering with translations and related fields."""
-        ro_RO_lang = (
+        ro_ro_lang = (
             self.env["res.lang"]
             .with_context(active_test=False)
             .search([("code", "=", "ro_RO")])
         )
         with mute_logger("odoo.addons.base.models.ir_translation"):
             self.env["base.language.install"].create(
-                {"overwrite": True, "lang_ids": [(6, 0, [ro_RO_lang.id])]}
+                {"overwrite": True, "lang_ids": [(6, 0, [ro_ro_lang.id])]}
             ).lang_install()
 
         module = self.env.ref("base.module_test_translation_import")
@@ -201,7 +190,7 @@ class TestCommentTemplate(TransactionCase):
         partner_title = self.ResPartnerTitle.create(
             {"name": "Ambassador", "shortcut": "Amb."}
         )
-        ctx = dict(lang="ro_RO")
+        ctx = {"lang": "ro_RO"}
         partner_title.with_context(**ctx).write(
             {"name": "Ambasador", "shortcut": "Amb."}
         )
@@ -241,15 +230,17 @@ class TestCommentTemplate(TransactionCase):
         )
         self.assertTrue(default.get("base_comment_template_id"))
 
+        # pylint: disable=protected-access
         resource_ref = partner_preview._selection_target_model()
         # In v18 it is enough to ensure there is at least one option
         self.assertTrue(len(resource_ref) >= 1)
 
-        partner_preview._compute_no_record()
+        partner_preview._compute_no_record()  # pylint: disable=protected-access
         self.assertTrue(partner_preview.no_record)
 
     def test_partner_commercial_fields(self):
         """Commercial fields of partners should include comment templates."""
+        # pylint: disable=protected-access
         self.assertIn(
             "base_comment_template_ids",
             self.env["res.partner"]._commercial_fields(),

@@ -9,16 +9,18 @@ class BaseCommentTemplatePreview(models.TransientModel):
 
     @api.model
     def _selection_target_model(self):
-        models = self.env["ir.model"].search([("is_comment_template", "=", True)])
-        return [(model.model, model.name) for model in models]
+        target_models = self.env["ir.model"].search(
+            [("is_comment_template", "=", True)]
+        )
+        return [(m.model, m.name) for m in target_models]
 
     @api.model
-    def default_get(self, fields):
-        result = super().default_get(fields)
+    def default_get(self, fields_list):
+        result = super().default_get(fields_list)
         base_comment_template_id = self.env.context.get(
             "default_base_comment_template_id"
         )
-        if not base_comment_template_id or "resource_ref" not in fields:
+        if not base_comment_template_id or "resource_ref" not in fields_list:
             return result
         base_comment_template = self.env["base.comment.template"].browse(
             base_comment_template_id
