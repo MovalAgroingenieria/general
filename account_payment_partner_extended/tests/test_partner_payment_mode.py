@@ -62,17 +62,26 @@ class TestPartnerPaymentModeRelated(TransactionCase):
         ) or self.pay_method_obj.create({"name": "Manual", "code": "manual"})
 
     def _setup_payment_mode(self):
-        """Setup payment mode with all required fields."""
+        """Setup payment mode with all required fields.
+
+        Only include fields that exist on the model so tests run with or
+        without account_payment_order (payment_order_ok, group_lines, etc.).
+        """
         vals = {
             "name": "TEST MODE",
             "payment_method_id": self.method.id,
+            "sequence": 10,
+        }
+        optional = {
             "payment_order_ok": True,
             "group_lines": True,
             "default_payment_mode": "same",
             "default_target_move": "posted",
             "default_date_type": "due",
-            "sequence": 10,
         }
+        for key, value in optional.items():
+            if key in self.pay_mode_obj._fields:
+                vals[key] = value
 
         self._setup_show_bank_account(vals)
         self._setup_bank_account_link(vals)
@@ -144,8 +153,9 @@ class TestPartnerPaymentModeRelated(TransactionCase):
         return None
 
     def _setup_test_partner(self):
-        """Setup test partner."""
+        """Setup test partner without any payment mode (override company default)."""
         self.partner = self.partner_obj.create({"name": "Partner Test"})
+        self.partner.customer_payment_mode_id = False
 
     # ----------------------------- Tests -------------------------------------
 
