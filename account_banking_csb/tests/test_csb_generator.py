@@ -164,10 +164,10 @@ class TestCSBGenerator(TransactionCase):
         """Setup beneficiary partner."""
         self.partner = self.partner_obj.create(
             {
-                "name": "Beneficiario de Prueba Ñ",
+                "name": "Test Beneficiary N",
                 "vat": "ESA12345674",
-                "street": "C/ Alcalá 1",
-                "street2": "Piso 3",
+                "street": "Main St 1",
+                "street2": "Floor 3",
                 "zip": "28001",
                 "city": "Madrid",
                 "country_id": self.env.ref("base.es").id,
