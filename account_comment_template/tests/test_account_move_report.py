@@ -12,7 +12,8 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
     """Tests for invoice report integration with base_comment_template."""
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls):  # pylint: disable=invalid-name
+        # setUpClass is the required name from unittest.TestCase API
         # In Odoo 18, AccountTestInvoicingCommon.setUpClass() takes no params
         super().setUpClass()
 
@@ -80,6 +81,7 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
 
     def test_comments_in_invoice_report(self):
         """Ensure comments are rendered in the invoice QWeb report."""
+        # pylint: disable=protected-access
         html, _content_type = self.env["ir.actions.report"]._render_qweb_html(
             "account.report_invoice", self.invoice.ids
         )
@@ -93,6 +95,8 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
             partner=self.partner,
             products=self.product_a + self.product_b,
         )
-        new_invoice._compute_comment_template_ids()
-        self.assertIn(self.after_comment, new_invoice.comment_template_ids)
-        self.assertIn(self.before_comment, new_invoice.comment_template_ids)
+        new_invoice.invalidate_recordset(["comment_template_ids"])
+        # Reading the field triggers the compute
+        comment_ids = new_invoice.comment_template_ids
+        self.assertIn(self.after_comment, comment_ids)
+        self.assertIn(self.before_comment, comment_ids)
