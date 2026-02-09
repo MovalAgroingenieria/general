@@ -136,6 +136,7 @@ bag['location_variables_plan'] = location_variables_plan
         pass
 
     new_code_location_variables = """
+import time
 import pytz
 from datetime import datetime, timedelta
 

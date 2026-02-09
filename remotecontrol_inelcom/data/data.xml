@@ -592,6 +592,8 @@ bag['sensors_with_errors'] = [
             <field name="backoff">1.6</field>
             <field name="readonly">True</field>
             <field name="code"><![CDATA[
+import time
+import pytz
 from datetime import datetime, timedelta
 
 Remote = self.remote_id
