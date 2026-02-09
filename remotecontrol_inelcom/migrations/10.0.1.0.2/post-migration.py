@@ -290,56 +290,12 @@ for item in items:
                 })
 
 bag['raw_readings'] = existing_raw
-
-audit = {
-    'executed_at': fields.Datetime.now(),
-    'total_upserts': total_upserts,
-    'total_errors': total_errors,
-    'items': items
-}
-audit_json = json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8')
-b64 = base64.b64encode(audit_json)
-now_str = fields.Datetime.now().replace(':', '').replace('-', '')
-fname = 'inelcom_location_variables_readings_%s.json' % now_str.replace(' ', '_')
-att = env['ir.attachment'].create({
-    'name': fname,
-    'datas_fname': fname,
-    'datas': b64,
-    'mimetype': 'application/json',
-    'res_model': 'remotecontrol',
-    'res_id': Remote.id
-})
-
-Remote.message_post(
-    body=u"[Inelcom Location Variables] upserts=%s errors=%s" % (total_upserts, total_errors),
-    attachment_ids=[att.id]
-)
-
-bag['location_variables_fetch_errors'] = total_errors
-bag['location_variables_audit_attachment_id'] = att.id
-bag['location_variables_sensors_processed'] = len(items)
-
-success_items = [i for i in items if i.get('status') == 200]
-success_rate = 0
-if items:
-    success_rate = float(len(success_items)) / len(items) * 100
-
-bag['location_variables_fetch_summary'] = {
-    'executed_at': fields.Datetime.now(),
-    'total_readings_fetched': total_upserts,
-    'total_errors': total_errors,
-    'sensors_in_plan': len(plan),
-    'sensors_processed': len(items),
-    'success_rate': '%.1f%%' % success_rate
-}
 """
 
     try:
-        # Try to get existing action
         action_location_vars = env.ref(
             'remotecontrol_inelcom.remotecontrol_inelcom_action_get_location_variables_readings')
     except Exception:
-        # Create it if it doesn't exist
         try:
             remote = env.ref('remotecontrol_inelcom.remotecontrol_inelcom')
             action_location_vars = env['remotecontrol.action'].create({
@@ -352,7 +308,6 @@ bag['location_variables_fetch_summary'] = {
                 'readonly': True,
                 'code': new_code_location_variables,
             })
-            # Create ir_model_data record for the new action
             env['ir.model.data'].create({
                 'name': 'remotecontrol_inelcom_action_get_location_variables_readings',
                 'module': 'remotecontrol_inelcom',
