@@ -3,7 +3,7 @@
 
 from collections import defaultdict
 
-from odoo import api, fields, models
+from odoo import fields, models
 
 
 class ResPartner(models.Model):
@@ -32,11 +32,11 @@ class ResPartner(models.Model):
         if self.env.context.get("skip_external_agent_propagation"):
             return
 
-        Lead = self.env["crm.lead"]
+        lead_obj = self.env["crm.lead"]
         if self.env.context.get("force_external_agent_propagation_sudo"):
-            Lead = Lead.sudo()
+            lead_obj = lead_obj.sudo()
 
-        leads = Lead.search(
+        leads = lead_obj.search(
             [
                 ("type", "=", "opportunity"),
                 ("partner_id", "in", self.ids),
@@ -55,7 +55,7 @@ class ResPartner(models.Model):
             if not partner_lead_ids:
                 continue
 
-            Lead.browse(partner_lead_ids).write(
+            lead_obj.browse(partner_lead_ids).write(
                 {"external_agent_ids": [(6, 0, partner.external_agent_ids.ids)]}
             )
 

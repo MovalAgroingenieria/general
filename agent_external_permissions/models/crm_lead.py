@@ -1,7 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -36,8 +36,9 @@ class CrmLead(models.Model):
             return
         if self.env.user not in partner.external_agent_ids:
             raise UserError(
-                _(
-                    "You can only use contacts where you are assigned as an External Agent."
+                self.env._(
+                    "You can only use contacts where you are assigned as an "
+                    "External Agent."
                 )
             )
 
@@ -53,7 +54,7 @@ class CrmLead(models.Model):
         if self.env.context.get("disable_external_agent_sync"):
             return super().create(vals_list)
 
-        Partner = self.env["res.partner"]
+        partner_obj = self.env["res.partner"]
         new_vals_list = []
 
         for vals in vals_list:
@@ -61,9 +62,9 @@ class CrmLead(models.Model):
             partner = False
 
             if vals.get("partner_id"):
-                partner = Partner.browse(vals["partner_id"]).exists()
+                partner = partner_obj.browse(vals["partner_id"]).exists()
 
-                # Guardrail: prevent create with forbidden partner (clean error message)
+                # Guardrail: prevent create with forbidden partner (clean error)
                 # Using a "virtual" record for check: create has no record yet.
                 if (
                     self.env.user.has_group(
@@ -72,9 +73,9 @@ class CrmLead(models.Model):
                     and self.env.user not in partner.external_agent_ids
                 ):
                     raise UserError(
-                        _(
-                            "You can only create opportunities for contacts where you are assigned "
-                            "as an External Agent."
+                        self.env._(
+                            "You can only create opportunities for contacts "
+                            "where you are assigned as an External Agent."
                         )
                     )
 
@@ -105,6 +106,7 @@ class CrmLead(models.Model):
 
             # Guardrail first, so the user doesn't lose access mid-write
             for lead in self:
+                # pylint: disable=protected-access
                 lead._check_external_agent_partner_allowed(partner)
 
             if partner and "external_agent_ids" not in vals:

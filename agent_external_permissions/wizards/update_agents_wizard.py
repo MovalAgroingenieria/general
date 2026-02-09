@@ -1,7 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -17,12 +17,18 @@ class UpdateAgentsWizard(models.TransientModel):
     update_existing = fields.Boolean(
         string="Update existing opportunities",
         default=True,
-        help="If enabled, update external agents on all existing opportunities for this contact.",
+        help=(
+            "If enabled, update external agents on all existing opportunities "
+            "for this contact."
+        ),
     )
     create_new_opportunities = fields.Boolean(
         string="Create a new opportunity if none exist",
         default=False,
-        help="If enabled and the contact has no opportunities, create one opportunity.",
+        help=(
+            "If enabled and the contact has no opportunities, create one "
+            "opportunity."
+        ),
     )
     opportunity_count = fields.Integer(
         string="Existing opportunities",
@@ -44,10 +50,10 @@ class UpdateAgentsWizard(models.TransientModel):
 
     @api.depends("partner_id")
     def _compute_opportunity_count(self):
-        Lead = self.env["crm.lead"]
+        lead_obj = self.env["crm.lead"]
         for wizard in self:
             if wizard.partner_id:
-                wizard.opportunity_count = Lead.search_count(
+                wizard.opportunity_count = lead_obj.search_count(
                     [
                         ("partner_id", "=", wizard.partner_id.id),
                         ("type", "=", "opportunity"),
@@ -66,14 +72,14 @@ class UpdateAgentsWizard(models.TransientModel):
 
         if not self.partner_id.external_agent_ids:
             raise UserError(
-                _(
+                self.env._(
                     "This contact has no external agents assigned. "
                     "Please assign agents to the contact first."
                 )
             )
 
-        Lead = self.env["crm.lead"]
-        opportunities = Lead.search(
+        lead_obj = self.env["crm.lead"]
+        opportunities = lead_obj.search(
             [
                 ("partner_id", "=", self.partner_id.id),
                 ("type", "=", "opportunity"),
@@ -91,9 +97,9 @@ class UpdateAgentsWizard(models.TransientModel):
             updated_count = len(opportunities)
 
         if self.create_new_opportunities and not opportunities:
-            Lead.with_context(skip_external_agent_propagation=True).create(
+            lead_obj.with_context(skip_external_agent_propagation=True).create(
                 {
-                    "name": _("Opportunity for %s") % self.partner_id.name,
+                    "name": self.env._("Opportunity for %s", self.partner_id.name),
                     "partner_id": self.partner_id.id,
                     "type": "opportunity",
                     "external_agent_ids": agent_m2m_cmd,
@@ -103,19 +109,19 @@ class UpdateAgentsWizard(models.TransientModel):
 
         if not (updated_count or created_count):
             return self._notification(
-                title=_("Information"),
-                message=_("No opportunities were updated or created."),
+                title=self.env._("Information"),
+                message=self.env._("No opportunities were updated or created."),
                 notif_type="info",
             )
 
         parts = []
         if updated_count:
-            parts.append(_("Updated %s opportunities") % updated_count)
+            parts.append(self.env._("Updated %s opportunities", updated_count))
         if created_count:
-            parts.append(_("Created %s opportunity") % created_count)
+            parts.append(self.env._("Created %s opportunity", created_count))
 
         return self._notification(
-            title=_("Success"),
+            title=self.env._("Success"),
             message=" | ".join(parts),
             notif_type="success",
         )

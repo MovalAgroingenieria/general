@@ -42,8 +42,7 @@ class ResUsers(models.Model):
             return
 
         for user in self:
-            # If both are ticked, external wins? Better: external has priority OR enforce exclusivity.
-            # Here we enforce exclusivity: if one is True, we unset the other.
+            # If both are ticked, enforce exclusivity: unset the other.
             if user.is_external_agent and user.is_internal_salesperson:
                 user.is_internal_salesperson = False
 
@@ -57,14 +56,14 @@ class ResUsers(models.Model):
                 # none selected -> remove both
                 cmds += [(3, group_external.id), (3, group_internal.id)]
 
-            # Use sudo to avoid permission issues when normal users are edited by admins
+            # Use sudo to avoid permission issues when admins edit normal users
             user.sudo().write({"groups_id": cmds})
 
     @api.model_create_multi
     def create(self, vals_list):
         users = super().create(vals_list)
         # Only sync if flags are present in create vals or defaults might apply
-        users._sync_agent_groups()
+        users._sync_agent_groups()  # pylint: disable=protected-access
         return users
 
     def write(self, vals):

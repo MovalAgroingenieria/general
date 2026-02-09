@@ -4,7 +4,7 @@
 from odoo import SUPERUSER_ID, api
 
 
-def post_init_sync_agents(cr, registry):
+def post_init_sync_agents(cr, _registry):
     """Post-init hook.
 
     On install, propagate ``res.partner.external_agent_ids`` to
@@ -16,15 +16,15 @@ def post_init_sync_agents(cr, registry):
     """
     env = api.Environment(cr, SUPERUSER_ID, {"active_test": False})
 
-    Partner = env["res.partner"].sudo()
-    Lead = env["crm.lead"].sudo()
+    partner_obj = env["res.partner"].sudo()
+    lead_obj = env["crm.lead"].sudo()
 
-    partners = Partner.search([("external_agent_ids", "!=", False)])
+    partners = partner_obj.search([("external_agent_ids", "!=", False)])
     if not partners:
         return
 
     for partner in partners:
-        leads = Lead.search(
+        leads = lead_obj.search(
             [
                 ("type", "=", "opportunity"),
                 ("partner_id", "=", partner.id),

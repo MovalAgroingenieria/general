@@ -57,9 +57,7 @@ Configuration
 ~~~~~~~~~~~~~
 1. **User Configuration**:
    - Go to *Settings → Users & Companies → Users*
-   - Edit a user and enable:
-     - **Is External Agent**, or
-     - **Is Internal Salesperson**
+   - Edit a user and enable **Is External Agent** or **Is Internal Salesperson**
    - Required group membership is handled automatically
 
 2. **Contact Configuration**:
@@ -111,17 +109,22 @@ Credits
 =======
 
 Authors
--------
+~~~~~~~~
 * Moval Agroingeniería S.L.
 
 Contributors
 ~~~~~~~~~~~~
-* César Andrés <candres@moval.es>
+* Alberto Hernández <ahernandez@moval.es>
+* Eduardo Iniesta <einiesta@moval.es>
+* Miguel Mora <mmora@moval.es>
+* Salvador Sánchez <ssanchez@moval.es>
+* Juanu Sandoval <jsandoval@moval.es>
+* Jorge Vera <jvera@moval.es>
 
 Maintainers
 ~~~~~~~~~~~
-This module is maintained by Moval Agroingeniería S.L.
+This module is maintained by Moval Agroingeniería.
 
 .. image:: https://services.moval.es/static/images/logo_moval_small.png
    :alt: Moval Agroingeniería
-   :target: https://www.moval.es
+   :target: http://moval.es
