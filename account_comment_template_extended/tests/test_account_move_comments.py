@@ -51,6 +51,10 @@ class TestAccountMoveComments(TransactionCase):
             )
         cls.CommentTemplate = cls.env[comment_field.comodel_name]
 
+        # Mark account.move as supporting comment templates (base_comment_template
+        # constraint _check_models requires ir.model.is_comment_template = True)
+        cls.env.ref("account.model_account_move").is_comment_template = True
+
         # Create two templates with different positions
         cls.template_top = cls.CommentTemplate.create(
             {
