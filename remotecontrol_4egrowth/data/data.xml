@@ -288,7 +288,8 @@ for sensor_plan in plan:
             for reading in data_list:
                 try:
                     ts_s = reading['ts']
-                    valf = float(reading['value'])
+                    raw_value = reading.get('value')
+                    valf = float(raw_value) if raw_value is not None else 0.0
                     if (ts_s >= window_start) and (ts_s <= window_end):
                         Remote.upsert(
                             'mdm.measurement.device.sensor.reading',
