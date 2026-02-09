@@ -4,21 +4,21 @@
 from io import BytesIO
 
 import xlsxwriter
-from odoo import _, http
+from odoo import http
 from odoo.http import content_disposition, request
 
 
 class ReportController(http.Controller):
 
-    def get_group_by_header_and_field(self, group_by):
+    def get_group_by_header_and_field(self, env, group_by):
         group_by_map = {
-            "product_id": _("Product"),
-            "partner_id": _("Partner"),
-            "journal_id": _("Journal"),
-            "tag": _("Tag"),
-            "analytic_account_id": _("Analytic Account"),
+            "product_id": env._("Product"),
+            "partner_id": env._("Partner"),
+            "journal_id": env._("Journal"),
+            "tag": env._("Tag"),
+            "analytic_account_id": env._("Analytic Account"),
         }
-        return group_by_map.get(group_by, _("N/A")), group_by
+        return group_by_map.get(group_by, env._("N/A")), group_by
 
     @http.route(
         "/report/trial_balance_excel/<int:wizard_id>",
@@ -26,10 +26,10 @@ class ReportController(http.Controller):
         auth="user",
         website=True,
     )
-    def report_trial_balance_excel(self, wizard_id, **kw):
-        wizard = (
-            request.env["trial.balance.report.grouped.wizard"].sudo().browse(wizard_id)
-        )
+    def report_trial_balance_excel(self, wizard_id, **_kw):
+        # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+        env = request.env
+        wizard = env["trial.balance.report.grouped.wizard"].sudo().browse(wizard_id)
         if not wizard:
             return request.not_found()
 
@@ -45,7 +45,7 @@ class ReportController(http.Controller):
             {"bold": True, "num_format": "#,##0.00"}
         )
 
-        headers = [_("Date From"), _("Date To"), _("Company")]
+        headers = [env._("Date From"), env._("Date To"), env._("Company")]
         for col_num, header in enumerate(headers):
             worksheet.write(0, col_num, header, bold_format)
 
@@ -55,7 +55,7 @@ class ReportController(http.Controller):
         worksheet.write(row, 2, wizard.company_id.name)
         row += 2
         if wizard.account_ids:
-            worksheet.write(row, 0, _("Accounts:"), bold_format)
+            worksheet.write(row, 0, env._("Accounts:"), bold_format)
             row += 1
             row_count = 0
             for account_num, account in enumerate(wizard.account_ids):
@@ -75,20 +75,20 @@ class ReportController(http.Controller):
         accounts = wizard.get_accounts()
         if accounts:
             line_headers = [
-                _("Account"),
-                _("Group By"),
-                _("Initial Balance"),
-                _("Debit"),
-                _("Credit"),
-                _("Period Balance"),
-                _("Final Balance"),
+                env._("Account"),
+                env._("Group By"),
+                env._("Initial Balance"),
+                env._("Debit"),
+                env._("Credit"),
+                env._("Period Balance"),
+                env._("Final Balance"),
             ]
             for col_num, header in enumerate(line_headers):
                 worksheet.write(row, col_num, header, bold_format)
             row += 1
             for account in accounts:
                 group_by_header, group_by_field = self.get_group_by_header_and_field(
-                    account.user_type_id.group_by
+                    env, account.group_by
                 )
 
                 # Escribir encabezados de las cuentas
@@ -107,7 +107,7 @@ class ReportController(http.Controller):
                     total_period_balance = sum(item["balance"] for item in items)
                     total_final_balance = sum(item["final_balance"] for item in items)
                     header_line = [
-                        _("Account") + " - " + account.code,
+                        env._("Account") + " - " + account.code,
                         group_by_header,
                         total_initial_balance,
                         total_debit,

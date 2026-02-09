@@ -12,4 +12,10 @@
         "account_financial_report",
         "account",
     ],
+    "data": [
+        "security/ir.model.access.csv",
+        "views/account_views.xml",
+        "wizard/trial_balance_wizard_view.xml",
+        "report/general_ledger_balance.xml",
+    ],
 }

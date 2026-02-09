@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
-        <template id="report_general_ledger_balance_grouped">
+    <template id="report_general_ledger_balance_grouped">
             <t t-call="report.external_layout">
                 <t t-set="o" t-value="o.with_context(lang=es_ES)" />
                 <div class="page">
@@ -15,11 +14,11 @@
                             </tr>
                         </thead>
                         <tbody name="principal_tbody">
-                            <!-- Iterar sobre las cuentas -->
+                            <!-- Iterate over accounts -->
                             <t t-foreach="o.get_accounts()" t-as="account">
-                                <!-- Almacenar los items obtenidos del método en una variable -->
+                                <!-- Store items from method in a variable -->
                                 <t t-set="items" t-value="o.get_item_ids(account, o.date_from, o.date_to)"/>
-                                <!-- Verificar si hay registros -->
+                                <!-- Check if there are records -->
                                 <t t-if="not items and o.show_account_zero or items">
                                     <tr style="page-break-before: always; page-break-after: auto; page-break-inside: avoid;">
                                         <td name="account_td">
@@ -28,24 +27,24 @@
                                             <span t-esc="account.name or ''"/>
                                         </td>
                                         <td colspan="6" name="columns_td">
-                                            <!-- Tabla anidada -->
+                                            <!-- Nested table -->
                                             <table class="table table-condensed" name="internal_table">
                                                 <thead name="internal_thead">
                                                     <tr style="page-break-before: always; page-break-after: auto; page-break-inside: avoid;">
                                                         <th style="width: 20%;">
-                                                            <t t-if="account.user_type_id.group_by == 'product_id'">
+                                                            <t t-if="account.group_by == 'product_id'">
                                                                 Product
                                                             </t>
-                                                            <t t-elif="account.user_type_id.group_by == 'partner_id'">
+                                                            <t t-elif="account.group_by == 'partner_id'">
                                                                 Partner
                                                             </t>
-                                                            <t t-elif="account.user_type_id.group_by == 'journal_id'">
+                                                            <t t-elif="account.group_by == 'journal_id'">
                                                                 Journal
                                                             </t>
-                                                            <t t-elif="account.user_type_id.group_by == 'tag'">
+                                                            <t t-elif="account.group_by == 'tag'">
                                                                 Tag
                                                             </t>
-                                                            <t t-elif="account.user_type_id.group_by == 'analytic_account'">
+                                                            <t t-elif="account.group_by == 'analytic_account_id'">
                                                                 Analytic Account
                                                             </t>
                                                             <t t-else="">
@@ -60,23 +59,23 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody name="internal_tbody">
-                                                    <!-- Iterar sobre los campos de agrupación relacionados con la cuenta -->
+                                                    <!-- Iterate over grouping fields related to the account -->
                                                     <t t-foreach="o.get_item_ids(account, o.date_from, o.date_to)" t-as="item_line">
                                                         <tr style="page-break-before: always; page-break-after: auto; page-break-inside: avoid;">
                                                             <td>
-                                                                <t t-if="account.user_type_id.group_by == 'product_id'">
+                                                                <t t-if="account.group_by == 'product_id'">
                                                                     <span t-esc="item_line['product_id']"/>
                                                                 </t>
-                                                                <t t-elif="account.user_type_id.group_by == 'partner_id' and item_line['partner_id']">
+                                                                <t t-elif="account.group_by == 'partner_id' and item_line['partner_id']">
                                                                     <span t-esc="item_line['partner_id'][1] or False"/>
                                                                 </t>
-                                                                <t t-elif="account.user_type_id.group_by == 'journal_id' and item_line['journal_id']">
+                                                                <t t-elif="account.group_by == 'journal_id' and item_line['journal_id']">
                                                                     <span t-esc="item_line['journal_id'][1] or False"/>
                                                                 </t>
-                                                                <t t-elif="account.user_type_id.group_by == 'tag'">
+                                                                <t t-elif="account.group_by == 'tag'">
                                                                     <span t-esc="item_line['tag']"/>
                                                                 </t>
-                                                                <t t-elif="account.user_type_id.group_by == 'analytic_account_id'">
+                                                                <t t-elif="account.group_by == 'analytic_account_id'">
                                                                     <span t-esc="item_line['analytic_account_id']"/>
                                                                 </t>
                                                                 <t t-else="">
@@ -157,5 +156,4 @@
         <field name="dpi">110</field>
     </record>
 
-    </data>
 </odoo>

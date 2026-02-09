@@ -4,11 +4,13 @@
 from odoo import fields, models
 
 
-class AccountAccountType(models.Model):
-    _inherit = "account.account.type"
+class AccountAccount(models.Model):
+    """Add group_by for trial balance report (Odoo 18: type is on account.account)."""
+
+    _inherit = "account.account"
 
     group_by = fields.Selection(
-        [
+        selection=[
             ("partner_id", "Partner"),
             ("product_id", "Product"),
             ("journal_id", "Journal"),
@@ -60,16 +62,14 @@ class AccountAccountGroup(models.Model):
 
     account_group_01_id = fields.Char(
         string="Level 1 Account Group",
-        comodel_name="account.account.group",
         index=True,
         compute="_compute_account_group_id_01",
     )
 
     def _compute_account_group_id_01(self):
         for record in self:
-            # Encuentra el grupo de nivel 1 correspondiente a la cuenta actual
-            parent_groups = self.env["account.group"].search(
-                [("id", "parent_of", record.id)]
-            )
-            level_1_group = parent_groups.filtered(lambda g: g.level == 1)[:1]
-            record.account_group_01_id = level_1_group.code_prefix
+            # Root group (level 1): walk up parent_id until no parent
+            group = record
+            while group.parent_id:
+                group = group.parent_id
+            record.account_group_01_id = group.code_prefix_start or ""

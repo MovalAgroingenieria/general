@@ -6,7 +6,7 @@
 
 import logging
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
@@ -51,14 +51,6 @@ class TrialBalanceReportWizard(models.TransientModel):
     @api.onchange("company_id")
     def onchange_company_id(self):
         """Handle company change."""
-        account_type = self.env.ref("account.data_unaffected_earnings")
-        count = self.env["account.account"].search_count(
-            [
-                ("user_type_id", "=", account_type.id),
-                ("company_id", "=", self.company_id.id),
-            ]
-        )
-        # self.not_only_one_unaffected_earnings_account = count != 1
         if (
             self.company_id
             and self.date_range_id.company_id
@@ -90,21 +82,20 @@ class TrialBalanceReportWizard(models.TransientModel):
         }
         if not self.company_id:
             return res
-        else:
-            res["domain"]["account_ids"] += [("company_id", "=", self.company_id.id)]
-            res["domain"]["partner_ids"] += [
-                "&",
-                "|",
-                ("company_id", "=", self.company_id.id),
-                ("company_id", "=", False),
-                ("parent_id", "=", False),
-            ]
-            res["domain"]["date_range_id"] += [
-                "|",
-                ("company_id", "=", self.company_id.id),
-                ("company_id", "=", False),
-            ]
-            res["domain"]["journal_ids"] += [("company_id", "=", self.company_id.id)]
+        res["domain"]["account_ids"] += [("company_id", "=", self.company_id.id)]
+        res["domain"]["partner_ids"] += [
+            "&",
+            "|",
+            ("company_id", "=", self.company_id.id),
+            ("company_id", "=", False),
+            ("parent_id", "=", False),
+        ]
+        res["domain"]["date_range_id"] += [
+            "|",
+            ("company_id", "=", self.company_id.id),
+            ("company_id", "=", False),
+        ]
+        res["domain"]["journal_ids"] += [("company_id", "=", self.company_id.id)]
         return res
 
     @api.depends("date_from")
@@ -115,11 +106,8 @@ class TrialBalanceReportWizard(models.TransientModel):
                     # Convierte la fecha y calcula el ejercicio fiscal
                     date = fields.Date.from_string(wiz.date_from)
                     res = wiz.company_id.compute_fiscalyear_dates(date)
-                    wiz.fy_start_date = res.get(
-                        "date_from"
-                    )  # Asegúrate de que 'date_from' existe en el dict
-                except Exception as e:
-                    # Log para depuración
+                    wiz.fy_start_date = res.get("date_from")
+                except (ValueError, TypeError, KeyError, AttributeError) as e:
                     _logger.error("Error calculating fiscal year start date: %s", e)
                     wiz.fy_start_date = False
             else:
@@ -142,7 +130,7 @@ class TrialBalanceReportWizard(models.TransientModel):
                 and rec.company_id != rec.date_range_id.company_id
             ):
                 raise ValidationError(
-                    _(
+                    rec.env._(
                         "The Company in the Trial Balance Report Wizard and in "
                         "Date Range must be the same."
                     )
@@ -160,21 +148,23 @@ class TrialBalanceReportWizard(models.TransientModel):
         return accounts
 
     def get_group_by_field(self, account):
-        """Determine the field to group by based on account type."""
-        if account.user_type_id.group_by == "product_id":
+        """Determine the field to group by based on account setting."""
+        group_by = account.group_by
+        if group_by == "product_id":
             return "product_id"
-        elif account.user_type_id.group_by == "partner_id":
+        if group_by == "partner_id":
             return "partner_id"
-        elif account.user_type_id.group_by == "journal_id":
+        if group_by == "journal_id":
             return "journal_id"
-        elif account.user_type_id.group_by == "tag":
+        if group_by == "tag":
             return "name"
-        elif account.user_type_id.group_by == "analytic_account_id":
+        if group_by == "analytic_account_id":
             return "analytic_account_id"
         return None
 
     # @api.multi
     def get_item_ids(self, account, start_date, end_date):
+        # pylint: disable=too-many-locals
         group_by_field = self.get_group_by_field(account)
 
         # Construir el dominio de búsqueda
@@ -193,6 +183,7 @@ class TrialBalanceReportWizard(models.TransientModel):
 
         if group_by_field:
             # Usar read_group si se especifica un campo de agrupación
+            # pylint: disable=protected-access
             move_lines = self.env["account.move.line"]._read_group(
                 domain=domain,
                 groupby=[group_by_field],
@@ -246,37 +237,6 @@ class TrialBalanceReportWizard(models.TransientModel):
                         and line.get("debit") == 0
                     ):
                         continue
-                    else:
-                        item_lines.append(
-                            {
-                                "credit": line.get("credit", 0.0),
-                                "debit": line.get("debit", 0.0),
-                                "balance": line.get("balance", 0.0),
-                                "initial_balance": initial_balance,
-                                "final_balance": final_balance,
-                                "product_id": line.get("product_id", False),
-                                "partner_id": line.get("partner_id", False),
-                                "journal_id": line.get("journal_id", False),
-                                "tag": line.get("name", False),
-                                "analytic_account_id": line.get(
-                                    "analytic_account_id", False
-                                ),
-                            }
-                        )
-            for line in move_lines:
-                group_value = line.get(group_by_field)
-                initial_balance = self.get_initial_balance(
-                    account, group_value, start_date
-                )
-                final_balance = initial_balance + line["balance"]
-                if (
-                    not self.show_account_zero
-                    and not initial_balance
-                    and line.get("credit") == 0
-                    and line.get("debit") == 0
-                ):
-                    continue
-                else:
                     item_lines.append(
                         {
                             "credit": line.get("credit", 0.0),
@@ -293,6 +253,33 @@ class TrialBalanceReportWizard(models.TransientModel):
                             ),
                         }
                     )
+            for line in move_lines:
+                group_value = line.get(group_by_field)
+                initial_balance = self.get_initial_balance(
+                    account, group_value, start_date
+                )
+                final_balance = initial_balance + line["balance"]
+                if (
+                    not self.show_account_zero
+                    and not initial_balance
+                    and line.get("credit") == 0
+                    and line.get("debit") == 0
+                ):
+                    continue
+                item_lines.append(
+                    {
+                        "credit": line.get("credit", 0.0),
+                        "debit": line.get("debit", 0.0),
+                        "balance": line.get("balance", 0.0),
+                        "initial_balance": initial_balance,
+                        "final_balance": final_balance,
+                        "product_id": line.get("product_id", False),
+                        "partner_id": line.get("partner_id", False),
+                        "journal_id": line.get("journal_id", False),
+                        "tag": line.get("name", False),
+                        "analytic_account_id": line.get("analytic_account_id", False),
+                    }
+                )
         else:
             # Devolver líneas individuales si no hay campo de agrupación
             move_lines = self.env["account.move.line"].search(domain, order="id")
@@ -307,24 +294,16 @@ class TrialBalanceReportWizard(models.TransientModel):
                 and total_credit == 0
                 and total_debit == 0
             ):
-                return
-            else:
-                item_lines.append(
-                    {
-                        "credit": total_credit,
-                        "debit": total_debit,
-                        "balance": total_debit - total_credit,
-                        "initial_balance": initial_balance,
-                        "final_balance": final_balance,
-                        # 'product_id': line.product_id.name,
-                        # 'partner_id': line.partner_id.name,
-                        # 'journal_id': line.journal_id.name,
-                        # 'tag': line.name,
-                        # 'analytic_account_id': line.analytic_account_id.name
-                        # Utiliza el ID de la línea como identificador único
-                    }
-                )
-                # initial_balance = final_balance
+                return []
+            item_lines.append(
+                {
+                    "credit": total_credit,
+                    "debit": total_debit,
+                    "balance": total_debit - total_credit,
+                    "initial_balance": initial_balance,
+                    "final_balance": final_balance,
+                }
+            )
 
         return item_lines if item_lines else []
 

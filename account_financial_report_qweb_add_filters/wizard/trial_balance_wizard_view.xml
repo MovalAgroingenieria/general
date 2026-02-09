@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
-        <!-- Definición del wizard -->
+    <!-- Wizard definition -->
         <record id="trial_balance_grouped_wizard" model="ir.ui.view">
             <field name="name">Trial Balance Grouped</field>
             <field name="model">trial.balance.report.grouped.wizard</field>
@@ -33,7 +32,7 @@
             </field>
         </record>
 
-        <!-- Acción para el wizard -->
+        <!-- Action for the wizard -->
         <record id="action_trial_balance_grouped_wizard" model="ir.actions.act_window">
             <field name="name">Trial Balance Grouped</field>
             <field name="res_model">trial.balance.report.grouped.wizard</field>
@@ -43,7 +42,7 @@
         </record>
 
 
-        <!-- Definición del submenu que usa el menú principal -->
+        <!-- Submenu definition under main menu -->
         <menuitem
             id="trial_balance_grouped_wizard_menu"
             name="General Ledger Balance Grouped"
@@ -52,5 +51,4 @@
             sequence="2"
             groups="base.group_user"/>
 
-    </data>
 </odoo>
