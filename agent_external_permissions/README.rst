@@ -24,25 +24,13 @@ groups, and ACLs**, avoiding fragile view inheritance or hard-coded logic.
 
 Key Features
 ============
-* **External Agents**:
-  - Can only access contacts where they are assigned as external agents
-  - Can only access CRM opportunities linked to those contacts
-  - Have **no access** to Sales Orders
-  - External agents assigned to contacts are automatically propagated to opportunities
+* **External Agents** — Can only access contacts where they are assigned as external agents; Can only access CRM opportunities linked to those contacts; Have **no access** to Sales Orders; External agents assigned to contacts are automatically propagated to opportunities.
 
-* **Internal Salespeople**:
-  - Can only access their own CRM opportunities
-  - Are **not restricted** on Sales Orders (standard Odoo behavior applies)
-  - Contact visibility is not modified by this module
+* **Internal Salespeople** — Can only access their own CRM opportunities; Are **not restricted** on Sales Orders (standard Odoo behavior applies); Contact visibility is not modified by this module.
 
-* **Automatic Agent Management**:
-  - Agents assigned to a contact are automatically propagated to new opportunities
-  - A wizard allows bulk synchronization of agents on existing opportunities
+* **Automatic Agent Management** — Agents assigned to a contact are automatically propagated to new opportunities; A wizard allows bulk synchronization of agents on existing opportunities.
 
-* **Clean UI Integration**:
-  - External agent assignment field added to contacts
-  - Agent visibility added to the opportunity form
-  - Synchronization wizard accessible directly from the contact form
+* **Clean UI Integration** — External agent assignment field added to contacts; Agent visibility added to the opportunity form; Synchronization wizard accessible directly from the contact form.
 
 Usage
 =====
@@ -55,20 +43,11 @@ Installation
 
 Configuration
 ~~~~~~~~~~~~~
-1. **User Configuration**:
-   - Go to *Settings → Users & Companies → Users*
-   - Edit a user and enable **Is External Agent** or **Is Internal Salesperson**
-   - Required group membership is handled automatically
+1. **User Configuration** — Go to *Settings → Users & Companies → Users*; Edit a user and enable **Is External Agent** or **Is Internal Salesperson**; Required group membership is handled automatically.
 
-2. **Contact Configuration**:
-   - Open a contact
-   - Assign users in the **External Agents** field
-   - Use the **Update Opportunities Agents** button to propagate changes
+2. **Contact Configuration** — Open a contact; Assign users in the **External Agents** field; Use the **Update Opportunities Agents** button to propagate changes.
 
-3. **Opportunity Management**:
-   - New opportunities inherit agents from the related contact
-   - Existing opportunities can be updated using the wizard
-   - External agents only see opportunities linked to contacts where they are assigned
+3. **Opportunity Management** — New opportunities inherit agents from the related contact; Existing opportunities can be updated using the wizard; External agents only see opportunities linked to contacts where they are assigned.
 
 Permissions Matrix
 ~~~~~~~~~~~~~~~~~~

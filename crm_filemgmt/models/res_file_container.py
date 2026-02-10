@@ -1,7 +1,7 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 
 
 class ResFileContainer(models.Model):
@@ -52,17 +52,15 @@ class ResFileContainer(models.Model):
     notes = fields.Html()
 
     barcode = fields.Char(
-        string="Barcode",
         help="Scan barcode to quickly identify container",
         copy=False,
     )
 
     qr_code = fields.Binary(
-        string="QR Code", attachment=True, help="QR code for container identification"
+        attachment=True, help="QR code for container identification"
     )
 
     capacity = fields.Integer(
-        string="Capacity",
         help="Maximum number of files this container can hold",
         default=100,
     )
@@ -82,7 +80,6 @@ class ResFileContainer(models.Model):
             ("high", "High (> 75%)"),
             ("full", "Full"),
         ],
-        string="Status",
         compute="_compute_status",
         store=True,
     )
@@ -175,7 +172,7 @@ class ResFileContainer(models.Model):
 
         return {
             "type": "ir.actions.act_window",
-            "name": _("Files in Container: %s") % self.name,
+            "name": self.env._("Files in Container: %s", self.name),
             "res_model": "res.file",
             "views": views or [(False, "list"), (False, "form")],
             "view_mode": "list,form",

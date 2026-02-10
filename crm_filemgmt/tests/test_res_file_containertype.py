@@ -3,7 +3,7 @@
 
 import unittest
 
-from odoo import fields, models
+from odoo import fields
 from odoo.tests.common import TransactionCase
 
 try:
@@ -27,7 +27,7 @@ except ImportError:  # pragma: no cover
 class TestResFileContainerType(BaseCase):
     """Tests for res.file.containertype (Odoo/OCB 18)."""
 
-    def setUp(self):
+    def setUp(self):  # pylint: disable=invalid-name
         super().setUp()
         # Create test location
         self.location = self.env["res.file.location"].create(

@@ -10,8 +10,6 @@
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
-    "application": False,
-    "installable": True,
     "depends": [
         "partner_address_street_type",
     ],

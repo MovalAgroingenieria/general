@@ -1,6 +1,7 @@
 [MASTER]
 load-plugins=pylint_odoo
 score=n
+extension-pkg-allow-list=lxml
 init-hook=
     import os, sys;
     here = os.path.dirname(os.path.abspath(__file__));
@@ -27,7 +28,8 @@ disable=missing-module-docstring,
     abstract-method,
     no-member,
     import-error,
-    manifest-required-author
+    manifest-required-author,
+    duplicate-code
 
 # Explicitly enable important rules
 enable=super-with-arguments,

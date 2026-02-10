@@ -44,8 +44,7 @@ Configuration
 =============
 
 * Go to :menuselection:`Settings --> Configuration --> File Management`.
-* Set **File Prefix** (company dependent). The generated code format is
-  ``<prefix>-<year>/<4-digit-number>``.
+* Set **File Prefix** (company dependent). The generated code format is ``<prefix>-<year>/<4-digit-number>``.
 
 Usage
 =====

@@ -9,7 +9,7 @@ from odoo.tests import TransactionCase, tagged
 class TestStreetTypeSettings(TransactionCase):
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls):  # pylint: disable=invalid-name
         super().setUpClass()
         cls.Config = cls.env["res.config.settings"]
         cls.IrConfig = cls.env["ir.config_parameter"]
@@ -18,7 +18,9 @@ class TestStreetTypeSettings(TransactionCase):
         # Ensure the company has a country for the address_format test
         country_es = cls.env["res.country"].search([("code", "=", "ES")], limit=1)
         if not country_es:
-            raise MissingError("Country 'ES' not found in the test environment.")
+            raise MissingError(
+                cls.env._("Country 'ES' not found in the test environment.")
+            )
         cls.env.company.country_id = country_es
 
         # XML IDs used by your views/actions
@@ -33,7 +35,7 @@ class TestStreetTypeSettings(TransactionCase):
         )
 
     def test_action_open_street_types_returns_expected_view(self):
-        """open_street_types must return the forced 'tree' view configured in the method."""
+        """open_street_types must return the forced 'tree' view set in the method."""
         wizard = self.Config.create({})
         action = wizard.open_street_types()
         self.assertEqual(action["type"], "ir.actions.act_window")
@@ -77,7 +79,7 @@ class TestStreetTypeSettings(TransactionCase):
         # Change to 'short' and verify the parameter is persisted
         key = "partner_address_street_type.street_type_shown"
         wizard = self.Config.create({"street_type_shown": "short"})
-        wizard.execute()  # ensures settings values are saved; executes set_values internally
+        wizard.execute()  # executes set_values internally
         param_val = self.IrConfig.get_param(key)
         self.assertEqual(param_val, "short")
 

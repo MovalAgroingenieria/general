@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="report_picking_document_comments"
-              inherit_id="stock_picking_comment_template.report_picking_document_comments">
+              inherit_id="stock_picking_comment_template.report_picking_document_comments"
+              priority="99">
 
         <!-- TOP: replace the original dynamic rendering (before_lines) -->
         <xpath expr="//div[@t-out='o.render_comment(comment_template_top)']/ancestor::t[1]"
                position="replace">
             <t t-if="o.top_comment">
-                <div class="mt-2" t-raw="o.top_comment"/>
+                <div class="mt-2" t-out="o.top_comment"/>
             </t>
         </xpath>
 
@@ -21,7 +22,7 @@
         <xpath expr="//table[@t-if='o.move_line_ids and o.move_ids_without_package']"
                position="after">
             <t t-if="o.bottom_comment">
-                <div class="mt-2" t-raw="o.bottom_comment"/>
+                <div class="mt-2" t-out="o.bottom_comment"/>
             </t>
         </xpath>
 

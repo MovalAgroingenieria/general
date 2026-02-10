@@ -19,7 +19,6 @@ class DecimalPrecision(models.Model):
     _inherit = "decimal.precision"
 
     display_digits = fields.Integer(
-        string="Display Digits",
         required=True,
         default=2,
         help="Number of decimal digits to use when formatting values.",
@@ -52,7 +51,8 @@ class DecimalPrecision(models.Model):
             return (16, int(digits))
         except (TypeError, ValueError):
             _logger.warning(
-                "Invalid display_digits for decimal precision %s: %r. Falling back to 2.",
+                "Invalid display_digits for decimal precision %s: %r. "
+                "Falling back to 2.",
                 name,
                 digits,
             )

@@ -12,7 +12,7 @@ class TestSaleOrderReport(TransactionCase):
     """Tests for sale order report integration with base_comment_template."""
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls):  # pylint: disable=invalid-name
         super().setUpClass()
 
         # Disable mail/notifications noise in tests
@@ -101,6 +101,7 @@ class TestSaleOrderReport(TransactionCase):
 
     def test_comments_in_sale_order_report(self):
         """Ensure comments are rendered in the sale order QWeb report."""
+        # pylint: disable=protected-access
         html, _content_type = self.env["ir.actions.report"]._render_qweb_html(
             "sale.report_saleorder", self.sale_order.ids
         )
@@ -109,6 +110,7 @@ class TestSaleOrderReport(TransactionCase):
 
     def test_comments_in_sale_order_record(self):
         """Ensure comment templates are computed on the sale order record."""
+        # pylint: disable=protected-access
         self.sale_order._compute_comment_template_ids()
         self.assertIn(self.sale_before_comment, self.sale_order.comment_template_ids)
         self.assertIn(self.sale_after_comment, self.sale_order.comment_template_ids)

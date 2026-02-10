@@ -25,13 +25,9 @@ the number of decimals shown to the user is often required to be different
 
 This module introduces:
 
-* A configurable **display precision layer** based on logical categories
-  (e.g. *Product Price*, *Unit of Measure*).
-* Global configuration through **Settings** (`res.config.settings`),
-  stored in system parameters.
-* Automatic application of display precision to:
-  - Field metadata sent to the UI
-  - QWeb reports
+* A configurable **display precision layer** based on logical categories (e.g. *Product Price*, *Unit of Measure*).
+* Global configuration through **Settings** (`res.config.settings`), stored in system parameters.
+* Automatic application of display precision to field metadata sent to the UI and to QWeb reports.
 
 The stored value is **never altered**: only the way decimals are *displayed*
 is affected.
@@ -44,16 +40,10 @@ is affected.
 How it works
 ============
 
-* Display precisions are defined per logical *application name*
-  (e.g. ``Product Price``).
-* Values are stored in ``ir.config_parameter`` and can be edited from
-  *General Settings*.
-* Float fields declared with ``digits="Application Name"`` automatically
-  receive the configured display precision.
-* A lightweight override ensures consistent behavior across:
-  - Views
-  - Field descriptions
-  - QWeb rendering
+* Display precisions are defined per logical *application name* (e.g. ``Product Price``).
+* Values are stored in ``ir.config_parameter`` and can be edited from *General Settings*.
+* Float fields declared with ``digits="Application Name"`` automatically receive the configured display precision.
+* A lightweight override ensures consistent behavior across views, field descriptions, and QWeb rendering.
 
 Usage
 =====

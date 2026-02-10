@@ -83,27 +83,14 @@ Contributors
 -  Yannick Vaucher <yannick.vaucher@camptocamp.com>
 -  Simone Rubino <simone.rubino@agilebg.com>
 -  Xavier Jimenez <xavier.jimenez@qubiq.es>
--  `Tecnativa <https://www.tecnativa.com>`__:
+-  `Tecnativa <https://www.tecnativa.com>`__ — Pedro M. Baeza, Vicent Cubells, Vicent Martínez
 
-   -  Pedro M. Baeza
-   -  Vicent Cubells
-   -  Vicent Martínez
+-  `DynApps <https://www.dynapps.be>`__ — Raf Ven <raf.ven@dynapps.be>
 
--  `DynApps <https://www.dynapps.be>`__:
+-  `ForgeFlow <https://www.forgeflow.com>`__ — Miquel Raïch <miquel.raich@forgeflow.com>, Pierre Verkest <pierreverkest84@gmail.com>
+-  `Jarsa <https://www.jarsa.com>`__ — Alan Ramos <alan.ramos@jarsa.com>
 
-   -  Raf Ven <raf.ven@dynapps.be>
-
--  `ForgeFlow <https://www.forgeflow.com>`__:
--  Miquel Raïch <miquel.raich@forgeflow.com>
--  Pierre Verkest <pierreverkest84@gmail.com>
--  `Jarsa <https://www.jarsa.com>`__:
-
-   -  Alan Ramos <alan.ramos@jarsa.com>
-
--  `Sygel <https://www.sygel.es>`__:
-
-   -  Valentín Vinagre <valentin.vinagre@sygel.es>
-   -  Roger Sans <roger.sans@sygel.es>
+-  `Sygel <https://www.sygel.es>`__ — Valentín Vinagre <valentin.vinagre@sygel.es>, Roger Sans <roger.sans@sygel.es>
 
 Maintainers
 -----------

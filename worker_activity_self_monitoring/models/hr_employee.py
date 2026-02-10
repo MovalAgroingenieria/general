@@ -1,47 +1,49 @@
-# models/hr_employee.py
-from datetime import datetime
+# 2026 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import api, models
-from pytz import timezone
+from odoo import models
 
 
 class HrEmployee(models.Model):
     _inherit = "hr.employee"
 
-    @api.model
     def get_current_attendance_time(self):
-        """
-        Calculate the hours worked today for the current user.
-        Independent of timezone handling.
-        """
-        # Get current employee
-        employee = self.search([("user_id", "=", self.env.user.id)], limit=1)
+        """Return worked time today for the current user employee."""
+        employee = self.env["hr.employee"].search(
+            [("user_id", "=", self.env.user.id)],
+            limit=1,
+        )
         if not employee:
             return {"hours": 0, "minutes": 0, "display": "0h 0m"}
 
-        # Get last check-in
         if not employee.last_attendance_id or employee.attendance_state != "checked_in":
             return {"hours": 0, "minutes": 0, "display": "0h 0m"}
 
-        # Get check-in time in server timezone
         check_in = employee.last_attendance_id.check_in
         if not check_in:
             return {"hours": 0, "minutes": 0, "display": "0h 0m"}
 
-        # Get current time in server timezone
-        now = datetime.now(timezone(self.env.user.tz or "UTC"))
-        user_tz = timezone(self.env.user.tz or "UTC")
-        check_in_tz = check_in.replace(tzinfo=user_tz)
+        # pylint: disable=protected-access
+        now = employee._get_today_now_user_tz()
+        check_in_user_tz = employee._to_user_tz(check_in)
 
-        # Calculate difference
-        diff = now - check_in_tz
-        total_seconds = int(diff.total_seconds())
-
-        # Ensure we don't have negative times
-        if total_seconds < 0:
-            total_seconds = 0
+        total_seconds = max(int((now - check_in_user_tz).total_seconds()), 0)
 
         hours = total_seconds // 3600
         minutes = (total_seconds % 3600) // 60
 
-        return {"hours": hours, "minutes": minutes, "display": f"{hours}h {minutes}m"}
+        return {
+            "hours": hours,
+            "minutes": minutes,
+            "display": "%sh %sm" % (hours, minutes),
+        }
+
+    def _to_user_tz(self, dt_value):
+        """Convert a naive/UTC datetime to user timezone-aware datetime."""
+        self.ensure_one()
+        return self.env.context_timestamp(self, dt_value)
+
+    def _get_today_now_user_tz(self):
+        """Return current datetime in user timezone (aware)."""
+        self.ensure_one()
+        return self.env.context_timestamp(self, self.env["ir.fields.datetime"].now())

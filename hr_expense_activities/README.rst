@@ -40,17 +40,11 @@ Usage
 
 Technical Details
 =================
-- The boolean setting is persisted via the config parameter:
+- The boolean setting is persisted via the config parameter — Key: ``hr_expense_activities.with_activity``; Type: stringified boolean in ``ir.config_parameter`` (handled transparently by field ``config_parameter`` or cast with ``str2bool`` in Python code).
 
-  - Key: ``hr_expense_activities.with_activity``
-  - Type: stringified boolean in ``ir.config_parameter`` (handled transparently by field ``config_parameter`` or cast with ``str2bool`` in Python code).
+- Views — ``views/res_config_settings_views.xml`` adds the field to the Settings UI.
 
-- Views:
-  - ``views/res_config_settings_views.xml`` adds the field to the Settings UI.
-
-- Python:
-  - ``res.config.settings`` contains the boolean field bound to the config parameter.
-  - ``hr.expense.sheet`` overrides submission to honor the setting.
+- Python — ``res.config.settings`` contains the boolean field bound to the config parameter; ``hr.expense.sheet`` overrides submission to honor the setting.
 
 Uninstallation
 ==============
@@ -79,6 +73,7 @@ Contributors
 * Juanu Sandoval <jsandoval@moval.es>
 * Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
+* César Andrés <candres@moval.es>
 
 Maintainer
 ----------

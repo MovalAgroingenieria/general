@@ -44,24 +44,24 @@ export class TaskIcon extends Component {
 
     navigateToTask() {
         if (this.state.taskRunning && this.state.taskId) {
-            // Cuando hay tarea activa: crear breadcrumb vista_actual -> panel_tareas -> tarea_especifica
+            // When there is an active task: create breadcrumb current_view -> task_panel -> specific_task
             this.action.doAction('project.action_view_task', {
-                stackPosition: 'new'  // Añadir al stack en lugar de reemplazar
+                stackPosition: 'new'  // Add to stack instead of replacing
             }).then(() => {
-                // Navegar a la tarea específica manteniendo el breadcrumb
+                // Navigate to the specific task keeping the breadcrumb
                 this.action.doAction({
                     type: 'ir.actions.act_window',
                     res_model: 'project.task',
                     res_id: this.state.taskId,
                     views: [[false, 'form']],
                     target: 'current',
-                    stackPosition: 'new'  // Añadir al stack para mantener navegación
+                    stackPosition: 'new'  // Add to stack to preserve navigation
                 });
             });
         } else {
-            // Cuando no hay tarea activa: ir al panel de tareas manteniendo vista previa
+            // When no active task: go to task panel keeping previous view
             this.action.doAction('project.action_view_task', {
-                stackPosition: 'new'  // Añadir al stack para mantener la vista anterior
+                stackPosition: 'new'  // Add to stack to keep previous view
             });
         }
     }

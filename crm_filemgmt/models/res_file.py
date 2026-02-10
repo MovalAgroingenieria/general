@@ -89,7 +89,7 @@ class ResFile(models.Model):
         string="Stage",
         comodel_name="res.file.stage",
         required=True,
-        # usa una lambda "pública" para evitar W0212
+        # use a "public" lambda to avoid W0212
         default=lambda self: self.env["res.file.stage"]
         .search([], order="sequence, name", limit=1)
         .id,

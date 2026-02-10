@@ -26,9 +26,7 @@ Key changes introduced by this module:
 
 - Comment templates (top and bottom) are **not** injected automatically.
 - Users must explicitly click the **Insert comments** button on the picking form.
-- The action renders the selected templates (respecting order and position)
-  and stores the resulting HTML in two editable fields:
-  **Top Comment** and **Bottom Comment**.
+- The action renders the selected templates (respecting order and position) and stores the resulting HTML in two editable fields — **Top Comment** and **Bottom Comment**.
 - Editing these fields **does not affect** the original templates.
 
 
@@ -44,9 +42,7 @@ Compatibility
 =============
 
 - **Odoo:** 18.0
-- **Depends on:**
-  - ``stock``
-  - ``stock_picking_comment_template`` (or an equivalent base module providing comment templates)
+- **Depends on:** ``stock`` and ``stock_picking_comment_template`` (or an equivalent base module providing comment templates).
 
 
 Usage
@@ -106,6 +102,7 @@ Contributors
 * Salvador Sánchez <ssanchez@moval.es>
 * Juanu Sandoval <jsandoval@moval.es>
 * Jorge Vera <jvera@moval.es>
+* César Andrés <candres@moval.es>
 
 
 Maintainers

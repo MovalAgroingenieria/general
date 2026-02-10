@@ -32,8 +32,7 @@ Usage
 =====
 1. Open **Contacts** and pick any partner.
 2. Set **Customer Payment Mode** as usual.
-3. Use the stored helper field **Computed Customer Payment Mode** in search
-   domains, filters, or record rules for efficient lookups.
+3. Use the stored helper field **Computed Customer Payment Mode** in search domains, filters, or record rules for efficient lookups.
 
 Configuration
 =============
@@ -45,8 +44,7 @@ Compatibility
 
 Known Limitations
 =================
-* This module does not alter payment generation; it only exposes a stored mirror
-  of the configured mode to improve filtering and performance.
+* This module does not alter payment generation; it only exposes a stored mirror of the configured mode to improve filtering and performance.
 
 Bug Tracker
 ===========

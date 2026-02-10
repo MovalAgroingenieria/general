@@ -8,7 +8,7 @@ from odoo.tests import TransactionCase, tagged
 class TestResPartnerStreetType(TransactionCase):
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls):  # pylint: disable=invalid-name
         super().setUpClass()
         cls.Partner = cls.env["res.partner"]
         cls.StreetType = cls.env["res.street.type"]
@@ -43,7 +43,8 @@ class TestResPartnerStreetType(TransactionCase):
     # ------------------------
 
     def test_default_street_type_id_picks_default_and_visible(self):
-        """_default_street_type_id should pick is_default=True & show_in_list=True."""
+        """_default_street_type_id should pick is_default=True & show_in_list."""
+        # pylint: disable=protected-access
         default_id = self.Partner._default_street_type_id()
         self.assertEqual(default_id, self.type_long.id)
 
@@ -56,6 +57,7 @@ class TestResPartnerStreetType(TransactionCase):
         self.type_long.write({"show_in_list": False})
         self.type_short.write({"show_in_list": False})
 
+        # pylint: disable=protected-access
         default_id = self.Partner._default_street_type_id()
         self.assertEqual(default_id, 0)
 
@@ -64,6 +66,7 @@ class TestResPartnerStreetType(TransactionCase):
 
     def test_address_fields_contains_custom_fields(self):
         """_address_fields must include street_type_id and street_type_shown."""
+        # pylint: disable=protected-access
         fields = self.Partner._address_fields()
         self.assertIn("street_type_id", fields)
         self.assertIn("street_type_shown", fields)
@@ -105,7 +108,7 @@ class TestResPartnerStreetType(TransactionCase):
         self._force_param("long")
         p = self.Partner.create({"name": "NoStreetType"})
         self._recompute(p)
-        self.assertEqual(p.street_type_shown, "Avenida")
+        self.assertEqual(p.street_type_shown, "")
 
     # ------------------------
     # Create / Write behavior

@@ -5,15 +5,15 @@
          - BEFORE the main lines table (class includes 'o_main_table') for TOP comments.
          - AFTER the fiscal position remark paragraph (#fiscal_position_remark) for BOTTOM comments.
          Rendering:
-         - Use t-raw because render_comment returns HTML. -->
+         - render_comment returns Markup, so t-out renders HTML without escaping. -->
     <template id="report_saleorder_document_comments"
               inherit_id="sale.report_saleorder_document">
 
         <!-- TOP comments: insert before the main lines table -->
-        <xpath expr="//table[contains(@class, 'o_main_table')]" position="before">
+        <xpath expr="//table[hasclass('o_main_table')]" position="before">
             <t t-foreach="doc.comment_template_ids.filtered(lambda x: x.position == 'before_lines')"
                t-as="comment_template_top">
-                <div t-raw="doc.render_comment(comment_template_top)"/>
+                <div t-out="doc.render_comment(comment_template_top)"/>
             </t>
         </xpath>
 
@@ -21,7 +21,7 @@
         <xpath expr="//p[@id='fiscal_position_remark']" position="after">
             <t t-foreach="doc.comment_template_ids.filtered(lambda x: x.position == 'after_lines')"
                t-as="comment_template_bottom">
-                <div class="mt16" t-raw="doc.render_comment(comment_template_bottom)"/>
+                <div class="mt16" t-out="doc.render_comment(comment_template_bottom)"/>
             </t>
         </xpath>
 

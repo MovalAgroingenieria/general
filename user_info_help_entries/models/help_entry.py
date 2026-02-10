@@ -1,3 +1,6 @@
+# 2026 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
 from odoo import fields, models
 
 
@@ -17,4 +20,4 @@ class HelpEntry(models.Model):
         column2="group_id",
     )
 
-    active = fields.Boolean(string="Active", default=True)
+    active = fields.Boolean(default=True)

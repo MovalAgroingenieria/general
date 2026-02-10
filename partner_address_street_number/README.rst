@@ -17,15 +17,9 @@ That configuration only affects the **company’s country**.
 Features
 ========
 - New field `street_num` on **res.partner**.
-- View extensions for:
-  - Main partner form and address edit form (v18 compliant, using ``modifiers``).
-  - Optional partner list (tree) column.
-  - Embedded child address form under ``child_ids`` (with context propagation).
-- Address formatting:
-  - Hook injects ``%(street_num)s`` into the **company country** ``res.country.address_format``.
-  - Safe, idempotent injection with per-country backup on uninstall.
-- Context defaults:
-  - ``default_street_num`` is propagated when creating child addresses from a partner.
+- View extensions for main partner form and address edit form (v18 compliant, using ``modifiers``), optional partner list (tree) column, and embedded child address form under ``child_ids`` (with context propagation).
+- Address formatting — hook injects ``%(street_num)s`` into the **company country** ``res.country.address_format``; safe, idempotent injection with per-country backup on uninstall.
+- Context defaults — ``default_street_num`` is propagated when creating child addresses from a partner.
 
 Compatibility
 =============
@@ -38,18 +32,15 @@ Installation
 1. Add the addon to your addons path.
 2. Update the app list and install **Partner Address Street Number**.
 
-   Example (CLI):
-   ::
+   Example (CLI)::
+
      odoo-bin -d <db> -i partner_address_street_number
+
 
 Configuration
 =============
-- Country address format:
-  - Go to *Contacts → Localization → Countries → (open your country)* and include
-    ``%(street)s %(street_num)s`` (or any desired position).
-  - The module’s post-init hook injects this token for the company country automatically.
-- Optional list column:
-  - In list (tree) views, the ``street_num`` column is marked ``optional="show"`` so users can toggle it.
+- Country address format — Go to *Contacts → Localization → Countries → (open your country)* and include ``%(street)s %(street_num)s`` (or any desired position). The module's post-init hook injects this token for the company country automatically.
+- Optional list column — In list (tree) views, the ``street_num`` column is marked ``optional="show"`` so users can toggle it.
 
 Usage
 =====
@@ -62,15 +53,17 @@ Uninstall
 
 Testing
 =======
-- Run the test suite (recommended with workers=0):
-  ::
+- Run the test suite (recommended with workers=0)::
+
      odoo-bin -d <db> -u partner_address_street_number --test-enable --workers=0 --stop-after-init
+
 
 Internationalization
 ====================
-- Export/update translations as usual:
-  ::
+- Export/update translations as usual::
+
      odoo-bin -d <db> --i18n-export=partner_address_street_number/i18n/es.po --language=es_ES --modules=partner_address_street_number
+
 
 Known Limitations
 =================
@@ -97,6 +90,7 @@ Contributors
 * Juanu Sandoval <jsandoval@moval.es>
 * Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
+* César Andrés <candres@moval.es>
 
 Maintainer
 ----------

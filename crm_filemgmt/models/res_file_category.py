@@ -1,7 +1,7 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -22,7 +22,6 @@ class ResFileCategory(models.Model):
             ("done", "Done"),
             ("blocked", "Blocked"),
         ],
-        string="Kanban State",
         default="normal",
         tracking=True,
     )
@@ -81,14 +80,19 @@ class ResFileCategory(models.Model):
     def unlink(self):
         for record in self:
             if record.is_readonly:
-                raise UserError(_("The read only categories cannot be removed."))
-            # Optional: Prevent deletion if category has files
-            if record.file_ids:
+                # pylint: disable=no-raise-unlink
                 raise UserError(
-                    _(
-                        "Cannot delete category '%s' because it has %d files associated. "
-                        "Please reassign the files first."
-                        % (record.name, len(record.file_ids))
+                    record.env._("The read only categories cannot be removed.")
+                )
+            if record.file_ids:
+                # pylint: disable=no-raise-unlink
+                raise UserError(
+                    record.env._(
+                        "Cannot delete category '%(name)s' because it has "
+                        "%(count)d files associated. Please reassign the "
+                        "files first.",
+                        name=record.name,
+                        count=len(record.file_ids),
                     )
                 )
         return super().unlink()
@@ -124,7 +128,7 @@ class ResFileCategory(models.Model):
 
             return {
                 "type": "ir.actions.act_window",
-                "name": _("Files in category: %s") % self.name,
+                "name": self.env._("Files in category: %s", self.name),
                 "res_model": "res.file",
                 "target": "current",
                 "domain": [("category_id", "=", self.id)],

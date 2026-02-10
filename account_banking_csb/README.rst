@@ -34,8 +34,7 @@ Compatibility
 =============
 
 - **Odoo**: 18.0
-- **Depends**: OCA *bank-payment* (e.g. ``account_payment_order``,
-  ``account_payment_mode``)
+- **Depends**: OCA *bank-payment* (e.g. ``account_payment_order``, ``account_payment_mode``)
 - **Payment method code**: ``csb_direct_debit_payments``
 
 Installation
@@ -53,19 +52,12 @@ Payment Method & Mode
 
 - Ensure the payment method **CSB Direct Debit** (``csb_direct_debit_payments``)
   is available (loaded from this module’s data).
-- Create a **Payment Mode** and set:
-  - *Payment Method*: ``csb_direct_debit_payments``
-  - *Initiating Party Identifier* (or Issuer): your company identifier (e.g. NIF)
-  - *Bank Account Link*: choose a strategy your OCA branch validates.
-  - If you use **Fixed**, set a **fixed bank journal** pointing to a company bank account.
-  - If you use **Company**, make sure the company has a bank account.
+- Create a **Payment Mode** and set *Payment Method* to ``csb_direct_debit_payments``, *Initiating Party Identifier* (or Issuer) to your company identifier (e.g. NIF), and *Bank Account Link* to a strategy your OCA branch validates. If you use **Fixed**, set a **fixed bank journal** pointing to a company bank account. If you use **Company**, make sure the company has a bank account.
 
 Company Bank Account
 --------------------
 
-- On the company partner, create a **Bank Account**:
-  - Prefer a **20-digit CCC** for CSB lines that expect digits-only.
-  - IBANs are accepted elsewhere but some CSB fields require clean numeric data.
+- On the company partner, create a **Bank Account**. Prefer a **20-digit CCC** for CSB lines that expect digits-only. IBANs are accepted elsewhere but some CSB fields require clean numeric data.
 
 Usage
 =====

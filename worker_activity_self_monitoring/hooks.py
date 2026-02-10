@@ -1,7 +1,14 @@
+# 2026 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
+import logging
+
 from odoo import SUPERUSER_ID, api
 
+_logger = logging.getLogger(__name__)
 
-def uninstall_hook(cr, registry):
+
+def uninstall_hook(cr, _registry):
     env = api.Environment(cr, SUPERUSER_ID, {})
 
     server_actions = env["ir.actions.server"].search(
@@ -34,4 +41,4 @@ def uninstall_hook(cr, registry):
     if crons:
         crons.unlink()
 
-    print("Worker Activity Self Monitoring module uninstalled successfully.")
+    _logger.info("Worker Activity Self Monitoring module uninstalled successfully.")

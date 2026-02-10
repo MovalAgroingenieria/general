@@ -5,10 +5,10 @@
               priority="100">
 
         <!-- TOP comments: before the main lines table -->
-        <xpath expr="//table[contains(@class, 'o_main_table')]" position="before">
+        <xpath expr="//table[hasclass('o_main_table')]" position="before">
             <t t-foreach="doc.comment_template_ids.filtered(lambda x: x.position == 'before_lines')"
                t-as="comment_template_top">
-                <div t-raw="doc.render_comment(comment_template_top)"/>
+                <div t-out="doc.render_comment(comment_template_top)"/>
             </t>
         </xpath>
 
@@ -16,7 +16,7 @@
         <xpath expr="//p[@id='fiscal_position_remark']" position="after">
             <t t-foreach="doc.comment_template_ids.filtered(lambda x: x.position == 'after_lines')"
                t-as="comment_template_bottom">
-                <div class="mt16" t-raw="doc.render_comment(comment_template_bottom)"/>
+                <div class="mt16" t-out="doc.render_comment(comment_template_bottom)"/>
             </t>
         </xpath>
 

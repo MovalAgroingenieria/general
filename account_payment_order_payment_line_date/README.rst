@@ -24,8 +24,7 @@ Features
 
 * New field on payment lines to store the requested payment date.
 * Form inheritance on **account.payment.order** to open the lines with a specific list view.
-* List inheritance on **account.payment** to display the requested payment date
-  right after the *name* column.
+* List inheritance on **account.payment** to display the requested payment date right after the *name* column.
 
 Usage
 =====
@@ -44,8 +43,7 @@ Installation
 ============
 
 1. Install the module as usual from *Apps*.
-2. Make sure the module **account_payment_order** (or your distribution’s equivalent)
-   is installed and available, as this module inherits its views.
+2. Make sure the module **account_payment_order** (or your distribution’s equivalent) is installed and available, as this module inherits its views.
 
 Known issues / Roadmap
 ======================

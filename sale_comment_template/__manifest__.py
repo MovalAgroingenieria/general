@@ -12,7 +12,6 @@
     "website": "https://github.com/OCA/sale-reporting",
     "author": "Camptocamp, Tecnativa, Odoo Community Association (OCA)",
     "license": "AGPL-3",
-    "installable": True,
     "depends": [
         "sale",
         "account_comment_template",

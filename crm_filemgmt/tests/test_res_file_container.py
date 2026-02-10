@@ -118,55 +118,14 @@ class TestResFileContainer(BaseCase):
 
     def test_action_get_files_with_records(self):
         """Window action must target res.file with correct domain and view_mode."""
-        f1 = self._new_file("A")
-        f2 = self._new_file("B")
-
-        action = self.container.action_get_files()
-        self.assertIsInstance(action, dict)
-        self.assertEqual(action.get("type"), "ir.actions.act_window")
-        self.assertEqual(action.get("res_model"), "res.file")
-        self.assertIn("list", action.get("view_mode", ""))
-        self.assertIn("form", action.get("view_mode", ""))
-
-        # Verificar dominio - ADAPTADO para ambas posibilidades
-        domain = action.get("domain") or []
-
-        if domain:
-            # Caso 1: Dominio por container_id (recomendado)
-            if domain[0][0] == "container_id" and domain[0][1] == "=":
-                container_id = domain[0][2]
-                self.assertEqual(container_id, self.container.id)
-
-                # Verificar que los archivos están en ese contenedor
-                files = self.env["res.file"].search(
-                    [("container_id", "=", container_id)]
-                )
-                file_ids = {f1.id, f2.id}
-                found_ids = {f.id for f in files}
-                self.assertTrue(file_ids.issubset(found_ids))
-
-            # Caso 2: Dominio por lista de IDs (antiguo formato)
-            elif domain[0][0] == "id" and domain[0][1] == "in":
-                ids_in_domain = set(domain[0][2])
-                self.assertTrue({f1.id, f2.id}.issubset(ids_in_domain))
-
-            else:
-                self.fail(f"Unexpected domain format: {domain}")
-        else:
-            # Si no hay dominio, al menos verificar asociación
-            self.assertEqual(f1.container_id, self.container)
-            self.assertEqual(f2.container_id, self.container)
-
-    def test_action_get_files_with_records(self):
-        """Window action must target res.file with correct domain and view_mode."""
-        # Crear archivos de prueba
+        # Create test files
         f1 = self._new_file("File A")
         f2 = self._new_file("File B")
 
-        # Obtener acción
+        # Get action
         action = self.container.action_get_files()
 
-        # Validaciones
+        # Validations
         self._validate_action_structure(action)
         self._validate_action_domain(action, [f1, f2])
         self._validate_action_context(action)
@@ -184,13 +143,13 @@ class TestResFileContainer(BaseCase):
         """Validate action domain includes expected files."""
         domain = action.get("domain", [])
 
-        # El dominio debe filtrar por container_id
+        # Domain must filter by container_id
         self.assertEqual(len(domain), 1)
         self.assertEqual(domain[0][0], "container_id")
         self.assertEqual(domain[0][1], "=")
         self.assertEqual(domain[0][2], self.container.id)
 
-        # Verificar que los archivos esperados están en el contenedor
+        # Check that expected files are in the container
         container_files = self.env["res.file"].search(
             [("container_id", "=", self.container.id)]
         )

@@ -5,7 +5,9 @@
 
 import json
 from contextlib import contextmanager
+from unittest.mock import patch
 
+import requests
 from odoo.addons.sms.tests.common import SMSCase
 from odoo.tests.common import TransactionCase
 from requests import Response
@@ -52,42 +54,55 @@ class MockSmsWauSmsApi(SMSCase):
             cls._mock_error_description = error_description
 
     @classmethod
-    def _request_handler(cls, session, request, **kwargs):
-        url = request.url or ""
-        if url.startswith(cls._WAUSMS_ENDPOINT):
-            response = Response()
-            response.status_code = cls._mock_http_code
+    def _request_handler(cls, _session, request, **_kwargs):
+        """Build a mock Response for WauSMS endpoint requests."""
+        url = getattr(request, "url", None) or ""
+        if not str(url).startswith(cls._WAUSMS_ENDPOINT):
+            raise ValueError("_request_handler only handles WauSMS URLs")
+        response = Response()
+        response.status_code = cls._mock_http_code
 
-            # Auto: error body for non-OK HTTP statuses
-            if cls._mock_error_in_body is None:
-                error_in_body = cls._mock_http_code not in (202, 207)
-            else:
-                error_in_body = bool(cls._mock_error_in_body)
+        # Auto: error body for non-OK HTTP statuses
+        if cls._mock_error_in_body is None:
+            error_in_body = cls._mock_http_code not in (202, 207)
+        else:
+            error_in_body = bool(cls._mock_error_in_body)
 
-            if error_in_body:
-                payload = {"error": {"description": cls._mock_error_description}}
-            else:
-                payload = cls._mock_ok_json
+        if error_in_body:
+            payload = {"error": {"description": cls._mock_error_description}}
+        else:
+            payload = cls._mock_ok_json
 
-            response._content = json.dumps(payload).encode("utf-8")
-            response.headers["Content-Type"] = "application/json"
-            response.json = lambda: json.loads(response.content.decode("utf-8"))
-            return response
-
-        return super()._request_handler(session, request, **kwargs)
+        response._content = json.dumps(payload).encode("utf-8")
+        response.headers["Content-Type"] = "application/json"
+        response.json = lambda: json.loads(response.content.decode("utf-8"))
+        return response
 
     @contextmanager
     def mock_sms_wausms_gateway(
         self, http_code=202, error_in_body=None, error_description="Bad request"
     ):
-        """Enable WauSMS mocked gateway (wraps SMSCase.mockSMSGateway())."""
+        """WauSMS mocked gateway (mockSMSGateway + HTTP patch)."""
         self._clear_sms_sent()
         self._update_mock(
             http_code=http_code,
             error_in_body=error_in_body,
             error_description=error_description,
         )
-        with self.mockSMSGateway():
+        original_send = requests.Session.send
+
+        def _patched_send(session, request, **kwargs):
+            url = getattr(request, "url", None) or ""
+            if str(url).startswith(self._WAUSMS_ENDPOINT):
+                return self._request_handler(session, request, **kwargs)
+            return original_send(session, request, **kwargs)
+
+        with patch.object(
+            requests.Session,
+            "send",
+            autospec=True,
+            side_effect=_patched_send,
+        ), self.mockSMSGateway():
             yield
 
 

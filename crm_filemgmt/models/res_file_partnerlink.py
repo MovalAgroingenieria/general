@@ -63,7 +63,6 @@ class ResFilePartnerlink(models.Model):
 
     # Add computed field for display
     display_name = fields.Char(
-        string="Display Name",
         compute="_compute_display_name",
         store=True,
     )

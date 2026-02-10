@@ -5,6 +5,11 @@ from odoo import fields, models
 class IrActionsServer(models.Model):
     _inherit = "ir.actions.server"
 
+    def _valid_field_parameter(self, field, name):
+        if name == "states":
+            return True
+        return super()._valid_field_parameter(field, name)
+
     state = fields.Selection(
         selection_add=[("report_label", "Print self-adhesive labels")],
         ondelete={"report_label": "cascade"},
@@ -22,7 +27,7 @@ class IrActionsServer(models.Model):
         states={"report_label": [("required", True)]},
     )
 
-    def _run_action_report_label_multi(self, eval_context=None):
+    def _run_action_report_label_multi(self, _eval_context=None):
         """Show report label wizard"""
         context = dict(self.env.context)
         context.update(

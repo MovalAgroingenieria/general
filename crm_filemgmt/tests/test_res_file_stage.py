@@ -5,8 +5,6 @@ import unittest
 import uuid
 
 from odoo.tests.common import TransactionCase
-from odoo.tools.misc import mute_logger
-from psycopg2.errors import UniqueViolation
 
 try:
     # pylint: disable=ungrouped-imports
@@ -16,14 +14,13 @@ except ImportError:
 
 # psycopg2 exception for UNIQUE constraint
 try:
-    # pylint: disable=ungrouped-imports
+    from psycopg2.errors import UniqueViolation as PgUniqueViolation  # noqa: I001
 
-    _PG_UNIQUE = UniqueViolation
+    _PG_UNIQUE = PgUniqueViolation
 except ImportError:  # pragma: no cover
-    # Fallback for older psycopg2 versions
-    from psycopg2 import IntegrityError
+    from psycopg2 import IntegrityError as PgIntegrityError
 
-    _PG_UNIQUE = IntegrityError
+    _PG_UNIQUE = PgIntegrityError
 
 
 class TestResFileStage(BaseCase):

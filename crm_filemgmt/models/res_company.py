@@ -1,6 +1,8 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+import re
+
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -26,16 +28,13 @@ class ResCompany(models.Model):
     def _check_file_prefix_allowed_chars(self):
         """Optionally restrict to alphanumeric characters."""
         for rec in self:
-            if rec.file_prefix:
-                # Check if contains only letters, numbers, and underscores
-                import re
-
-                if not re.match(r"^[A-Za-z0-9_]*$", rec.file_prefix):
-                    raise ValidationError(
-                        rec.env._(
-                            "File Prefix can only contain letters, numbers, and underscores."
-                        )
+            if rec.file_prefix and not re.match(r"^[A-Za-z0-9_]*$", rec.file_prefix):
+                raise ValidationError(
+                    rec.env._(
+                        "File Prefix can only contain letters, numbers, "
+                        "and underscores."
                     )
+                )
 
     @api.constrains("file_prefix")
     def _check_file_prefix_length(self):

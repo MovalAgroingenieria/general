@@ -22,7 +22,7 @@ def _coerce_env(*args):
         return env, env.cr
     if len(args) >= 2:
         cr = args[0]
-        # registry no se usa, pero podríamos validarlo si quisiéramos
+        # registry is not used, but we could validate it if needed
         env = api.Environment(cr, SUPERUSER_ID, {})
         return env, cr
     raise TypeError("Invalid hook signature")
@@ -46,10 +46,10 @@ def post_init_hook(*args):
     env, _cr = _coerce_env(*args)
     icp = env["ir.config_parameter"].sudo()
 
-    # Parámetro por defecto del módulo
+    # Default module parameter
     icp.set_param(PARAM_KEY, "long")
 
-    # Países de todas las compañías (hook sin usuario real => sudo)
+    # Countries of all companies (hook without real user => sudo)
     companies = env["res.company"].sudo().search([])
     countries = companies.mapped("country_id").filtered(lambda c: c)
 
@@ -63,7 +63,7 @@ def post_init_hook(*args):
             old_fmt = country.address_format or ""
             new_fmt = _inject_token(old_fmt)
             if new_fmt != old_fmt:
-                # Backup por país para desinstalar limpio
+                # Backup per country for clean uninstall
                 icp.set_param(BACKUP_KEY_FMT.format(country_id=country.id), old_fmt)
                 country.sudo().write({"address_format": new_fmt})
                 _logger.info(
@@ -72,7 +72,7 @@ def post_init_hook(*args):
                     country.code,
                 )
         except (ValueError, TypeError, AttributeError) as e:
-            # Errores específicos que pueden ocurrir durante la manipulación de strings
+            # Specific errors that can occur during string manipulation
             _logger.warning(
                 "partner_address_street_type: could not update %s (%s): %s",
                 country.name,
@@ -92,7 +92,7 @@ def uninstall_hook(*args):
             backup = icp.get_param(key, default=None)
             if backup is not None:
                 country.sudo().write({"address_format": backup})
-                icp.set_param(key, "")  # limpiamos backup
+                icp.set_param(key, "")  # clear backup
                 _logger.info(
                     "partner_address_street_type: restored backup for %s (%s)",
                     country.name,
@@ -104,7 +104,7 @@ def uninstall_hook(*args):
                 if new_fmt != old_fmt:
                     country.sudo().write({"address_format": new_fmt})
         except (ValueError, TypeError, AttributeError) as e:
-            # Errores específicos que pueden ocurrir durante la manipulación de strings
+            # Specific errors that can occur during string manipulation
             _logger.warning(
                 "partner_address_street_type: could not restore %s (%s): %s",
                 country.name,

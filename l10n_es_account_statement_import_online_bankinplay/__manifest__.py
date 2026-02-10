@@ -14,10 +14,11 @@
         "account_statement_import_online",
     ],
     "data": [
-        #  "data/ir_cron_delete_old_responses.xml",
-        #  "views/online_bank_statement_provider.xml",
-        #  "views/res_config_settings_views.xml",
+        "security/ir.model.access.csv",
     ],
-    "installable": True,
-    "application": False,
+    "oca_data_manual": [
+        "data/ir_cron_delete_old_responses.xml",
+        "views/online_bank_statement_provider.xml",
+        "views/res_config_settings_views.xml",
+    ],
 }

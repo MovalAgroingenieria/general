@@ -14,13 +14,8 @@ Key Features
 ============
 * Registers a webhook in BankInPlay for *close readings* (``lectura_cierre``).
 * Automatically creates or updates bank statements upon callback reception.
-* Supports two modes of operation:
-  - **Same endpoint** (this database receives callbacks).
-  - **Remote endpoint** (callbacks are forwarded to another Odoo instance).
-* Journal-level configuration:
-  - Date field mapping (Operation Date / Value Date).
-  - Delay days to adjust date ranges for provider latency.
-  - Option to skip empty statements.
+* Supports two modes of operation — **Same endpoint** (this database receives callbacks) or **Remote endpoint** (callbacks are forwarded to another Odoo instance).
+* Journal-level configuration — Date field mapping (Operation Date / Value Date), delay days to adjust date ranges for provider latency, and option to skip empty statements.
 
 Compatibility
 =============
@@ -45,31 +40,26 @@ System Settings
 ---------------
 Navigate to **Settings → Accounting → Bank & Cash** (or search “BankInPlay”):
 
-* **BankInPlay Integration**: enable.
-* **Callback URL**: the public base URL of your Odoo (e.g. ``https://odoo.example.com``).
-* **API Key / API Secret**: credentials provided by BankInPlay.
+* **BankInPlay Integration** — enable.
+* **Callback URL** — the public base URL of your Odoo (e.g. ``https://odoo.example.com``).
+* **API Key / API Secret** — credentials provided by BankInPlay.
 * Click **Register Callbacks** to register the webhook in BankInPlay.
 
 Journal Configuration
 ---------------------
 In your **Bank Journal** → *Online Synchronization*:
 
-* **Service**: ``BankInPlay.com``.
-* **API Key / API Secret**: only needed in **Same Endpoint** mode.
-* **Endpoint Type**:
-  - **Same Endpoint**: this database receives callbacks at
-    ``<base_url>/webhook/bankinplay_callback``.
-  - **Remote Endpoint**: specify the remote Odoo base URL to forward callbacks.
-* **BankInPlay Date Field**: choose **Operation Date** or **Value Date**.
-* **Delay Days**: adjust for potential provider delays.
+* **Service** — ``BankInPlay.com``.
+* **API Key / API Secret** — only needed in **Same Endpoint** mode.
+* **Endpoint Type** — **Same Endpoint** (this database receives callbacks at ``<base_url>/webhook/bankinplay_callback``) or **Remote Endpoint** (specify the remote Odoo base URL to forward callbacks).
+* **BankInPlay Date Field** — choose **Operation Date** or **Value Date**.
+* **Delay Days** — adjust for potential provider delays.
 
 How It Works
 ============
 1. A scheduled action (or manual run) requests statement data for a given period.
 2. A *close reading* is registered in BankInPlay, returning a ``responseId`` and ``signature``.
-3. When BankInPlay sends the callback:
-   - In **Same Endpoint** mode: the module decrypts and creates/updates the statement.
-   - In **Remote Endpoint** mode: the decrypted payload is forwarded to the target database.
+3. When BankInPlay sends the callback — in **Same Endpoint** mode the module decrypts and creates/updates the statement; in **Remote Endpoint** mode the decrypted payload is forwarded to the target database.
 
 Security
 ========
@@ -110,6 +100,7 @@ Contributors
 * Juanu Sandoval <jsandoval@moval.es>
 * Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
+* César Andrés <candres@moval.es>
 
 Maintainer
 ----------

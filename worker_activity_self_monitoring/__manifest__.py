@@ -15,7 +15,7 @@
         "bus",
         "project",
     ],
-    "data": [],
+    "oca_data_manual": ["views/resources.xml"],
     "assets": {
         "web.assets_backend": [
             "/worker_activity_self_monitoring/static/src/css/tray_icons.css",
@@ -25,7 +25,5 @@
             "/worker_activity_self_monitoring/static/src/xml/attendance_systray.xml",
         ],
     },
-    "application": False,
-    "installable": True,
     "uninstall_hook": "uninstall_hook",
 }

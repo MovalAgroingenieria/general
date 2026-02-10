@@ -3,7 +3,7 @@
 # Copyright 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -33,7 +33,6 @@ class ResFiletag(models.Model):
     )
 
     color = fields.Integer(
-        string="Color",
         default=0,
         help=(
             "Color index used for visual representation: "
@@ -44,22 +43,25 @@ class ResFiletag(models.Model):
     )
 
     sequence = fields.Integer(
-        string="Sequence",
         default=10,
-        help="Defines the order of tags in dropdowns and lists. Lower numbers appear first.",
+        help=(
+            "Defines the order of tags in dropdowns and lists. "
+            "Lower numbers appear first."
+        ),
     )
 
     active = fields.Boolean(
-        string="Active",
         default=True,
         help="Uncheck to hide the tag without deleting it.",
     )
 
     notes = fields.Html(
-        string="Description",
         sanitize=True,
         strip_style=False,
-        help="Optional detailed description or instructions about when to use this tag.",
+        help=(
+            "Optional detailed description or instructions about when to use "
+            "this tag."
+        ),
     )
 
     # ==========================
@@ -67,7 +69,6 @@ class ResFiletag(models.Model):
     # ==========================
 
     file_ids = fields.Many2many(
-        string="Files",
         comodel_name="res.file",
         relation="res_file_filetag_rel",
         column1="filetag_id",
@@ -76,7 +77,6 @@ class ResFiletag(models.Model):
     )
 
     file_count = fields.Integer(
-        string="File Count",
         compute="_compute_file_count",
         store=False,
         help="Number of files associated with this tag.",
@@ -102,15 +102,20 @@ class ResFiletag(models.Model):
         for tag in self:
             if len(tag.name) > 50:
                 raise ValidationError(
-                    _("Tag name should not exceed 50 characters for proper display.")
+                    tag.env._(
+                        "Tag name should not exceed 50 characters for "
+                        "proper display."
+                    )
                 )
 
     @api.constrains("color")
     def _check_color_range(self):
         """Ensure color index is within a reasonable range."""
         for tag in self:
-            if tag.color < 0 or tag.color > 99:  # Odoo typically supports 0-11
-                raise ValidationError(_("Color index must be between 0 and 99."))
+            if tag.color < 0 or tag.color > 99:
+                raise ValidationError(
+                    tag.env._("Color index must be between 0 and 99.")
+                )
 
     _sql_constraints = [
         (
@@ -138,10 +143,10 @@ class ResFiletag(models.Model):
         if default is None:
             default = {}
         if "name" not in default:
-            default["name"] = _("%s (copy)") % self.name
-        return super(ResFiletag, self).copy(default)
+            default["name"] = self.env._("%s (copy)", self.name)
+        return super().copy(default)
 
-    def name_get(self):
+    def name_get(self):  # pylint: disable=deprecated-name-get
         """Custom display name showing tag with color indicator.
 
         Returns: List of tuples (id, display_name)
@@ -164,7 +169,7 @@ class ResFiletag(models.Model):
         """
         self.ensure_one()
         return {
-            "name": _('Files Tagged "%s"') % self.name,
+            "name": self.env._('Files Tagged "%s"', self.name),
             "type": "ir.actions.act_window",
             "res_model": "res.file",
             "view_mode": "list,form,kanban",
@@ -173,14 +178,11 @@ class ResFiletag(models.Model):
                 "default_tag_ids": [(4, self.id)],
                 "search_default_tag_id": self.id,
             },
-            "help": _(
-                """
-                <p class="o_view_nocontent_smiling_face">
-                    View all files tagged with "%s"
-                </p>
-            """
-            )
-            % self.name,
+            "help": self.env._(
+                '<p class="o_view_nocontent_smiling_face">'
+                'View all files tagged with "%(name)s"</p>',
+                name=self.name,
+            ),
         }
 
     def get_tag_badge_class(self):
@@ -211,7 +213,7 @@ class ResFiletag(models.Model):
     # ==========================
 
     @api.model
-    def name_search(
+    def name_search(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self, name="", args=None, operator="ilike", limit=100, name_get_uid=None
     ):
         """Enhanced search for tags.

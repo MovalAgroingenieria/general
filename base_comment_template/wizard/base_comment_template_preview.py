@@ -1,3 +1,6 @@
+# 2026 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
 from odoo import api, fields, models
 from odoo.addons.base.models.res_partner import _lang_get
 from odoo.tools.safe_eval import safe_eval
@@ -51,9 +54,14 @@ class BaseCommentTemplatePreview(models.TransientModel):
         default="inline_template",
     )
     model_ids = fields.Many2many(
-        "ir.model", related="base_comment_template_id.model_ids"
+        "ir.model",
+        related="base_comment_template_id.model_ids",
+        string="Applicable models",
     )
-    model_id = fields.Many2one("ir.model")
+    model_id = fields.Many2one(
+        "ir.model",
+        string="Preview model",
+    )
     body = fields.Char(compute="_compute_base_comment_template_fields")
     resource_ref = fields.Reference(
         string="Record reference", selection="_selection_target_model"

@@ -3,7 +3,10 @@
 
 {
     "name": "Picking Comments Extended",
-    "summary": "Extend stock picking comment templates with pre-rendered top and bottom comments",
+    "summary": (
+        "Extend stock picking comment templates with pre-rendered "
+        "top and bottom comments"
+    ),
     "version": "18.0.1.0.0",
     "license": "AGPL-3",
     "author": "Moval Agroingeniería",
@@ -18,6 +21,4 @@
         "reports/report_picking.xml",
         "reports/report_delivery_document.xml",
     ],
-    "installable": True,
-    "application": False,
 }

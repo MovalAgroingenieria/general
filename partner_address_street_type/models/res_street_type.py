@@ -8,33 +8,19 @@ class ResStreetType(models.Model):
     _name = "res.street.type"
     _description = "Types of street"
 
-    name = fields.Char(
-        string="Street Type",
-        required=True,
-    )
-
-    abbreviation = fields.Char(
-        string="Abbreviation",
-        required=True,
-    )
-
-    show_in_list = fields.Boolean(
-        string="Show in list",
-        default=True,
-    )
-
-    is_default = fields.Boolean(
-        string="Default Type",
-        default=False,
-    )
-
+    name = fields.Char(required=True)
+    abbreviation = fields.Char(required=True)
+    show_in_list = fields.Boolean(default=True)
+    is_default = fields.Boolean(default=False)
     active = fields.Boolean(
-        "Active",
         default=True,
-        help="By unchecking the active field, you may hide a type of address you will not use.",
+        help=(
+            "By unchecking the active field, you may hide a type of address "
+            "you will not use."
+        ),
     )
 
-    def name_get(self):
+    def name_get(self):  # pylint: disable=deprecated-name-get
         result = []
         if self.env.context.get("in_combo", False):
             for record in self:

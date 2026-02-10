@@ -2,12 +2,13 @@
 <odoo>
     <!-- Replace dynamic template rendering with stored HTML fields in Delivery Slip -->
     <template id="report_delivery_document_comments"
-              inherit_id="stock_picking_comment_template.report_delivery_document_comments">
+              inherit_id="stock_picking_comment_template.report_delivery_document_comments"
+              priority="99">
 
         <!-- TOP: replace the block inserted right before the move table -->
         <xpath expr="//table[@name='stock_move_table']/preceding-sibling::t[1]" position="replace">
             <t t-if="o.top_comment">
-                <div class="mt-2" t-raw="o.top_comment"/>
+                <div class="mt-2" t-out="o.top_comment"/>
             </t>
         </xpath>
 
@@ -15,7 +16,7 @@
         <xpath expr="//t[contains(@t-foreach, 'o.comment_template_ids') and contains(@t-foreach, 'after_lines')]"
                position="replace">
             <t t-if="o.bottom_comment">
-                <div class="mt-2" t-raw="o.bottom_comment"/>
+                <div class="mt-2" t-out="o.bottom_comment"/>
             </t>
         </xpath>
 

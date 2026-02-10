@@ -67,28 +67,15 @@ Contributors
 -  Nicolas Bessi <nicolas.bessi@camptocamp.com>
 -  Yannick Vaucher <yannick.vaucher@camptocamp.com>
 -  Simone Rubino <simone.rubino@agilebg.com>
--  `Tecnativa <https://www.tecnativa.com>`__:
+-  `Tecnativa <https://www.tecnativa.com>`__ — Pedro M. Baeza, Víctor Martínez
 
-   -  Pedro M. Baeza
-   -  Víctor Martínez
+-  `DynApps <https://www.dynapps.be>`__ — Raf Ven <raf.ven@dynapps.be>
 
--  `DynApps <https://www.dynapps.be>`__:
+-  `Druidoo <https://www.druidoo.io>`__ — Iván Todorovich <ivan.todorovich@druidoo.io>
 
-   -  Raf Ven <raf.ven@dynapps.be>
+-  `Jarsa <https://www.jarsa.com>`__ — Alan Ramos <alan.ramos@jarsa.com>
 
--  `Druidoo <https://www.druidoo.io>`__:
-
-   -  Iván Todorovich <ivan.todorovich@druidoo.io>
-
--  `Jarsa <https://www.jarsa.com>`__:
-
-   -  Alan Ramos <alan.ramos@jarsa.com>
-
--  `Sygel <https://www.sygel.es>`__
-
-   -  Harald Panten <harald.panten@sygel.es>
-   -  Valentín Vinagre <valentin.vinagre@sygel.es>
-   -  Roger Sans <roger.sans@sygel.es>
+-  `Sygel <https://www.sygel.es>`__ — Harald Panten <harald.panten@sygel.es>, Valentín Vinagre <valentin.vinagre@sygel.es>, Roger Sans <roger.sans@sygel.es>
 
 Maintainers
 -----------

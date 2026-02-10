@@ -1,7 +1,7 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import api, fields, models
+from odoo import fields, models
 
 
 class ResConfigSettings(models.TransientModel):
@@ -43,7 +43,7 @@ class ResConfigSettings(models.TransientModel):
         return action
 
     def set_values(self):
-        super(ResConfigSettings, self).set_values()
+        res = super().set_values()
         if self.address_format_set:
             company_country_code = (
                 self.env["res.country"]
@@ -51,7 +51,8 @@ class ResConfigSettings(models.TransientModel):
                 .code
             )
             new_format = self.address_format_set
-            query = f"""UPDATE res_country
-                        SET address_format = '{new_format}'
-                        WHERE code = '{company_country_code}';"""
-            self.env.cr.execute(query)
+            self.env.cr.execute(
+                "UPDATE res_country SET address_format = %s WHERE code = %s",
+                (new_format, company_country_code),
+            )
+        return res

@@ -18,7 +18,7 @@ class TestBankinplayStatementFields(TransactionCase):
         cls.company = cls.env.company
         cls.currency_eur = cls.env.ref("base.EUR")
 
-        # Crea un diario bancario mínimo para poder crear extractos
+        # Create a minimal bank journal so we can create statements
         cls.journal = cls.env["account.journal"].create(
             {
                 "name": "BankInPlay Test Bank",
@@ -40,7 +40,7 @@ class TestBankinplayStatementFields(TransactionCase):
         return self.env["account.bank.statement"].create(values)
 
     def test_create_statement_with_bankinplay_fields(self):
-        """Debe poder crear un extracto con los campos BankInPlay informados."""
+        """Must be able to create a statement with BankInPlay fields set."""
         st = self._create_statement(
             "-A",
             {
@@ -56,15 +56,15 @@ class TestBankinplayStatementFields(TransactionCase):
         self.assertTrue(st.bankinplay_date_until)
 
     def test_allow_multiple_null_pairs(self):
-        """La restricción única permite múltiples filas con (NULL, NULL)."""
+        """Unique constraint allows multiple rows with (NULL, NULL)."""
         st1 = self._create_statement("-N1")
         st2 = self._create_statement("-N2")
         self.assertTrue(st1)
         self.assertTrue(st2)
 
     def test_allow_partial_duplicates(self):
-        """Duplicados parciales (solo uno de los dos campos) están permitidos."""
-        # Mismo responseid, distinta signature
+        """Partial duplicates (only one of the two fields matching) are allowed."""
+        # Same responseid, different signature
         self._create_statement(
             "-P1",
             {"bankinplay_responseid": "RID-100", "bankinplay_signature": "SIG-100"},
@@ -74,7 +74,7 @@ class TestBankinplayStatementFields(TransactionCase):
             {"bankinplay_responseid": "RID-100", "bankinplay_signature": "SIG-101"},
         )
 
-        # Misma signature, distinto responseid
+        # Same signature, different responseid
         self._create_statement(
             "-P3",
             {"bankinplay_responseid": "RID-200", "bankinplay_signature": "SIG-200"},
@@ -85,15 +85,15 @@ class TestBankinplayStatementFields(TransactionCase):
         )
 
     def test_block_exact_duplicate_pair(self):
-        """No debe permitir crear dos extractos con el mismo (responseid, signature)."""
+        """Must not allow creating two statements with the same (responseid, signature)."""
         self._create_statement(
             "-D1",
             {"bankinplay_responseid": "RID-XYZ", "bankinplay_signature": "SIG-XYZ"},
         )
 
         with mute_logger("odoo.sql_db"), self.assertRaises(Exception):
-            # El tipo concreto es IntegrityError de psycopg2; usamos Exception
-            # para evitar dependencia directa. Odoo lo re-lanza como excepción SQL.
+            # The concrete type is psycopg2 IntegrityError; we use Exception
+            # to avoid a direct dependency. Odoo re-raises it as an SQL exception.
             self._create_statement(
                 "-D2",
                 {"bankinplay_responseid": "RID-XYZ", "bankinplay_signature": "SIG-XYZ"},

@@ -19,23 +19,17 @@ class ResFileContainerType(models.Model):
 
     # Add icon for UI representation
     icon = fields.Char(
-        string="Icon Class",
         help="CSS icon class for this container type (e.g., 'fa fa-box')",
     )
 
     # Add color for visual distinction
-    color = fields.Integer(
-        string="Color Index", default=0, help="Color for kanban and list views"
-    )
+    color = fields.Integer(default=0, help="Color for kanban and list views")
 
     # Add dimensions or specifications
-    dimensions = fields.Char(
-        string="Dimensions", help="Physical dimensions (e.g., '30x40x20 cm')"
-    )
+    dimensions = fields.Char(help="Physical dimensions (e.g., '30x40x20 cm')")
 
     # Add capacity reference
     default_capacity = fields.Integer(
-        string="Default Capacity",
         default=100,
         help="Default number of files this container type can hold",
     )

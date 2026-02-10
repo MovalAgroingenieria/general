@@ -21,6 +21,6 @@
         "views/decimal_precision_view.xml",
         "views/res_currency_view.xml",
     ],
+    "oca_data_manual": ["views/res_config_settings_view.xml"],
     "post_init_hook": "post_init_hook",
-    "installable": True,
 }

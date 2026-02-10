@@ -20,15 +20,14 @@ This module allows tracking customers who haven't made recent purchases and send
 - **Last Notification Date**: Date of the last notification sent
 
 ### Automation:
-### Automatización:
-- **Cron Job**: Se ejecuta diariamente para verificar clientes que superan el límite de días sin compra
-- **Notificaciones automáticas**: Se envían una sola vez hasta resetear el estado
-- **Reset automático**: Cuando un cliente hace una nueva compra confirmada, se resetea automáticamente el estado de notificación
+- **Cron Job**: Runs daily to check customers that exceed the days-without-purchase limit
+- **Automatic notifications**: Sent once until the status is reset
+- **Automatic reset**: When a customer makes a new confirmed purchase, the notification status is reset automatically
 
-### Acciones manuales:
-- **Send Notification**: Botón para enviar notificación manual (con confirmación)
-- **Reset Status**: Botón para resetear el estado de notificación (con confirmación, permite volver a notificar)
-- **Auto-refresh**: Los campos se actualizan automáticamente sin necesidad de recargar la página
+### Manual actions:
+- **Send Notification**: Button to send manual notification (with confirmation)
+- **Reset Status**: Button to reset notification status (with confirmation, allows notifying again)
+- **Auto-refresh**: Fields update automatically without reloading the page
 
 ### Menus:
 - **Sales > Purchase Follow-up > Customers with Follow-up**: List of customers with follow-up enabled
@@ -65,22 +64,20 @@ The module includes an email template with detailed customer information:
 
 ## Technical Notes
 
-## Notas técnicas
+- Dates are calculated from confirmed sale orders (`state` in 'sale' or 'done')
+- The cron job runs once per day
+- Notifications are sent only once until the status is reset manually
+- **Automatic reset**: Status is reset automatically when a new sale order is confirmed
+- **Automatic refresh**: Fields are refreshed automatically after each action
+- **Custom JavaScript**: Includes a handler to reload the view without losing context
+- **Confirmations**: Buttons include confirmation dialogs to avoid accidental actions
+- **QWeb email template**: Uses QWeb syntax for multi-language compatibility
+- Compatible with Odoo 14.0
 
-- Las fechas se calculan basándose en órdenes de venta confirmadas (`state` en 'sale' o 'done')
-- El cron job se ejecuta una vez por día
-- Las notificaciones se envían solo una vez hasta resetear el estado manualmente
-- **Reset automático**: El estado se resetea automáticamente cuando se confirma una nueva orden de venta
-- **Actualización automática**: Los campos se refrescan automáticamente después de cada acción
-- **JavaScript personalizado**: Incluye handler para recargar la vista sin pérdida de contexto
-- **Confirmaciones**: Botones incluyen diálogos de confirmación para evitar acciones accidentales
-- **Plantilla de email QWeb**: Usa sintaxis QWeb para compatibilidad multiidioma
-- Compatible con Odoo 14.0
+## JavaScript Files
 
-## Archivos JavaScript
-
-El módulo incluye JavaScript personalizado (`notification_handler.js`) que:
-- Detecta cuando se ejecutan las acciones de notificación
-- Recarga automáticamente la vista después de la acción
-- Mantiene el contexto del formulario
-- No requiere refrescar manualmente la página
+The module includes custom JavaScript (`notification_handler.js`) that:
+- Detects when notification actions are executed
+- Reloads the view automatically after the action
+- Preserves the form context
+- Does not require manually refreshing the page

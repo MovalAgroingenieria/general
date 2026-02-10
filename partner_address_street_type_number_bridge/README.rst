@@ -18,13 +18,10 @@ overwrite the other’s context in the partner form view.
 Features
 ========
 - Merges the ``child_ids`` context of both modules.
-- Ensures that child address creation receives:
-  - ``default_street_type_id`` (from *Partner Address Street Type*).
-  - ``default_street_num`` (from *Partner Address Street Number*).
+- Ensures that child address creation receives ``default_street_type_id`` (from *Partner Address Street Type*) and ``default_street_num`` (from *Partner Address Street Number*).
 - Compatible with Odoo **v18.0+**.
 - Does **not** alter business logic or models — it only unifies view definitions.
-- Loads with high priority so it safely overrides the partial contexts from
-  the individual modules.
+- Loads with high priority so it safely overrides the partial contexts from the individual modules.
 
 Dependencies
 ============
@@ -37,9 +34,8 @@ Installation
 2. Update the app list.
 3. Install *Street Type  Street Number Bridge*.
 
-Example (CLI)
--------------
-::
+Example (CLI)::
+
    odoo-bin -d <db> -i partner_address_street_type_number_bridge
 
 Technical Details
@@ -96,6 +92,7 @@ Contributors
 * Juanu Sandoval <jsandoval@moval.es>
 * Salvador Sánchez <ssanchez@moval.es>
 * Jorge Vera <jvera@moval.es>
+* César Andrés <candres@moval.es>
 
 Maintainer
 ----------

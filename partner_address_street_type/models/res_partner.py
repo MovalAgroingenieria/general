@@ -36,6 +36,15 @@ class ResPartner(models.Model):
             record.street_type_shown = street_type_shown
 
     @api.model
+    def _default_street_type_id(self):
+        """Return the default street type (is_default=True, show_in_list=True), or 0."""
+        st = self.env["res.street.type"].search(
+            [("is_default", "=", True), ("show_in_list", "=", True)],
+            limit=1,
+        )
+        return st.id if st else 0
+
+    @api.model
     def _address_fields(self):
         afields = super()._address_fields()
         afields.append("street_type_id")

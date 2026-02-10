@@ -2,8 +2,7 @@
 # Copyright 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo import api, fields, models
 
 
 class ResFileStage(models.Model):
@@ -44,14 +43,12 @@ class ResFileStage(models.Model):
     )
 
     is_closing_stage = fields.Boolean(
-        string="Closing Stage",
         default=False,
         help="Mark as closing stage to indicate the file should be considered closed. "
         "Files in this stage can be filtered as completed or archived.",
     )
 
     active = fields.Boolean(
-        string="Active",
         default=True,
         help="If unchecked, it will allow you to hide the stage without removing it.",
     )
@@ -74,7 +71,7 @@ class ResFileStage(models.Model):
         help="Count of files in this stage.",
     )
 
-    color = fields.Integer(string="Color Index", help="Color for kanban views")
+    color = fields.Integer(help="Color for kanban views")
     is_starting_stage = fields.Boolean(string="Starting Stage", default=False)
     allowed_group_ids = fields.Many2many("res.groups", string="Allowed Groups")
 
@@ -114,10 +111,10 @@ class ResFileStage(models.Model):
         if default is None:
             default = {}
         if "name" not in default:
-            default["name"] = _("%s (copy)") % self.name
-        return super(ResFileStage, self).copy(default)
+            default["name"] = self.env._("%s (copy)", self.name)
+        return super().copy(default)
 
-    def name_get(self):
+    def name_get(self):  # pylint: disable=deprecated-name-get
         """Custom display name for stages.
 
         Returns: List of tuples (id, display_name)
@@ -141,7 +138,7 @@ class ResFileStage(models.Model):
         """
         self.ensure_one()
         return {
-            "name": _("Files in %s") % self.name,
+            "name": self.env._("Files in %s", self.name),
             "type": "ir.actions.act_window",
             "res_model": "res.file",
             "view_mode": "list,form",
@@ -161,10 +158,9 @@ class ResFileStage(models.Model):
         self.ensure_one()
         if self.is_closing_stage:
             return 10  # Green
-        elif self.fold:
+        if self.fold:
             return 2  # Grey
-        else:
-            return 0  # Default
+        return 0  # Default
 
     @api.model
     def get_default_stage(self):

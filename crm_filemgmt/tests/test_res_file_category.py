@@ -1,15 +1,8 @@
 # 2025 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
-from odoo import exceptions, fields
+from odoo import fields
 from odoo.exceptions import UserError
 from odoo.tests.common import TransactionCase, tagged
-from odoo.tools.misc import mute_logger
-
-try:
-    # psycopg2 errors for SQL constraint assertion
-    from psycopg2 import IntegrityError
-except ImportError:  # pragma: no cover - fallback if psycopg2 aliasing differs
-    IntegrityError = Exception
 
 
 @tagged("post_install", "-at_install")
@@ -73,7 +66,7 @@ class TestResFileCategory(TransactionCase):
     # ---------------------------
     def test_unlink_blocks_readonly(self):
         cat = self._create_category(is_readonly=True, name="ReadOnly")
-        with self.assertRaises(exceptions.UserError):
+        with self.assertRaises(UserError):
             cat.unlink()
 
     def test_unlink_allows_non_readonly(self):

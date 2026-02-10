@@ -21,6 +21,4 @@
             "/user_info_help_entries/static/src/js/help_entry.js",
         ],
     },
-    "installable": True,
-    "application": False,
 }

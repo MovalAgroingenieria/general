@@ -23,7 +23,6 @@ class ResFileReport(models.Model):
             ("inventory", "Inventory Report"),
             ("custom", "Custom Report"),
         ],
-        string="Report Type",
         default="custom",
         required=True,
     )
@@ -41,7 +40,6 @@ class ResFileReport(models.Model):
             ("portrait", "Portrait"),
             ("landscape", "Landscape"),
         ],
-        string="Orientation",
         default="portrait",
     )
 
@@ -59,13 +57,10 @@ class ResFileReport(models.Model):
     )
 
     # Add CSS styles
-    custom_css = fields.Text(
-        string="Custom CSS", help="Custom CSS styles for this report"
-    )
+    custom_css = fields.Text(help="Custom CSS styles for this report")
 
     # Add preview image
     preview_image = fields.Image(
-        string="Preview Image",
         max_width=800,
         max_height=600,
         help="Preview image of the report output",
@@ -73,7 +68,6 @@ class ResFileReport(models.Model):
 
     # Add usage counter
     usage_count = fields.Integer(
-        string="Usage Count",
         compute="_compute_usage_count",
         store=True,
         help="Number of times this report has been used",
