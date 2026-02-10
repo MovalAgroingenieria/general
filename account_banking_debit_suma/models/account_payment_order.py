@@ -1263,11 +1263,12 @@ class AccountPaymentOrder(models.Model):
         # Reset variables
         db_lines = ""
         entry_num = 0
-        partner_bank_ids = []
 
         # Iterate over bank lines (dynamic fields)
-        for line in self.bank_line_ids.filtered(
-                lambda l: not l.partner_bank_id.suma_notified):
+        for line in self.bank_line_ids:
+
+            # Get notified to SUMA
+            suma_notified = line.partner_bank_id.suma_notified
 
             # Value number - Position [090-095] Length 6
             # @INFO: It must contain the receipt reference within the register
@@ -1307,6 +1308,13 @@ class AccountPaymentOrder(models.Model):
                         bic = line.mandate_id.partner_bank_id.bank_bic
                     except:
                         bic = ""
+
+                    # Add SUMA notified
+                    if suma_notified:
+                        suma_notified_marker = "-Y]"
+                    else:
+                        suma_notified_marker = "-N]"
+
                     # Bank entity code - Position [001-004] Length 4
                     ccc_bank_entity_code = str(iban[4:8])
                     # Bank office code - Position [005-008] Length 4
@@ -1316,8 +1324,6 @@ class AccountPaymentOrder(models.Model):
                     # Bank account number - Position [011-020]Length 10
                     ccc_account_num = str(iban[14:]).ljust(10)
 
-                    # Add to partner_bank_ids only if IBAN
-                    partner_bank_ids.append(line.partner_bank_id.id)
                 else:
                     ccc_bank_entity_code = str(' ' * 4)
                     ccc_bank_office_code = str(' ' * 4)
@@ -1475,13 +1481,30 @@ class AccountPaymentOrder(models.Model):
                 ccc_control_digits + ccc_account_num + taxpayer_name_padded + \
                 alicante_province_ine_code + entity_code + concept_code + \
                 charge_issuance + entry_num_padded + internal_ref + \
-                iban_num + iban_bic + '\r\n'
+                iban_num + iban_bic
 
             _log.info('FULL DB LINE                      (length %s [156]): %s'
                       % (str(len(db_line)).zfill(3), db_line))
 
+            # Add notified marker and account_partner_bank_id to bank line
+            db_line += '[' + str(line.partner_bank_id.id) + \
+                suma_notified_marker + '\n'
+
             # Add line to db_lines
             db_lines += db_line
+
+        # Delete lines already notified to SUMA and set suma_notified
+        partner_bank_ids = []
+        db_lines_to_keep = ""
+        for db_line in db_lines.splitlines():
+            if db_line.endswith('-N]'):
+                partner_bank_id = int(db_line.split('[')[-1].split('-')[0])
+                partner_bank_ids.append(partner_bank_id)
+                db_line_to_keep = db_line.split('[')[0].rstrip() + '\r\n'
+                db_lines_to_keep += db_line_to_keep
+                _log.info(
+                    'DB LINE TO KEEP                    (length %s [156]): %s'
+                    % (str(len(db_line_to_keep)).zfill(3), db_line_to_keep))
 
         # Set suma_notified to partner_bank_ids or warn if none
         if partner_bank_ids:
@@ -1493,8 +1516,8 @@ class AccountPaymentOrder(models.Model):
                 _("All the bank lines have been previously notified to SUMA."))
 
         # Add db_lines to file and encode
-        direct_debit_str = db_lines.encode(self.ENCODING_NAME,
-                                           self.ENCODING_TYPE)
+        direct_debit_str = db_lines_to_keep.encode(
+            self.ENCODING_NAME, self.ENCODING_TYPE)
 
         # Fill error tab
         if self.error_mode == 'permissive':
