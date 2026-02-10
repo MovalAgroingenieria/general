@@ -102,7 +102,7 @@ class TestSmsWauSms(MockSmsWauSms):
                 self.number_ok,
                 "error",
                 content=body,
-                failure_type="sms_credit",
+                failure_type="sms_server",
                 fields_values={"to_delete": False},
             )
 

@@ -69,7 +69,14 @@ class MockSmsWauSmsApi(SMSCase):
             error_in_body = bool(cls._mock_error_in_body)
 
         if error_in_body:
-            payload = {"error": {"description": cls._mock_error_description}}
+            # 401 -> code 103 (unregistered) so provider maps to sms_acc
+            error_code = 103 if cls._mock_http_code == 401 else None
+            payload = {
+                "error": {
+                    "description": cls._mock_error_description,
+                    **({"code": error_code} if error_code is not None else {}),
+                }
+            }
         else:
             payload = cls._mock_ok_json
 

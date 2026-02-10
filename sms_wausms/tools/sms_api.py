@@ -171,9 +171,13 @@ class SmsApiWauSms(SmsApiBase):
 
             # Handle error
             err_desc, err_code = self._extract_rest_error(response)
+            http_status = getattr(response, "status_code", None)
             provider_state = self._map_rest_http_to_provider_state(
-                response.status_code, err_code
+                http_status, err_code
             )
+            # Ensure 401 is always mapped to unregistered (sms_acc)
+            if http_status == 401:
+                provider_state = "unregistered"
             results.extend(
                 self._results_error(
                     uuids=number_uuid.values(),
@@ -390,6 +394,16 @@ class SmsApiWauSms(SmsApiBase):
 
         raw = (response.text or "").strip() or None
         ok, provider_state, failure_reason = self._parse_get_response(raw)
+        # When gateway returns JSON (e.g. REST-style mock), map HTTP status
+        if not ok and provider_state == "server_error":
+            http_status = getattr(response, "status_code", None)
+            if http_status == 401:
+                provider_state = "unregistered"
+                failure_reason = failure_reason or self.env._(
+                    "Authentication failed (WauSMS account not recognized)."
+                )
+            elif http_status == 402:
+                provider_state = "insufficient_credit"
 
         if ok:
             return self._result_ok(uuid, wausms_response=raw)
