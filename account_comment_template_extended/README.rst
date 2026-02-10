@@ -27,9 +27,7 @@ This action will:
 
 * Render each selected template,
 * Split them by their configured position (before or after invoice lines),
-* Insert them into two editable HTML fields:
-  * **Top Comment**
-  * **Bottom Comment**
+* Insert them into two editable HTML fields — **Top Comment** and **Bottom Comment**.
 
 The rendered comments can then be edited freely in the invoice, without
 modifying the original templates.
