@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# 2026 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
 from odoo import models, fields, api
 
 
@@ -11,6 +14,7 @@ class ClientData(models.Model):
     phone = fields.Char(name='phone', string='Phone')
     company = fields.Char(name='company', string='Company')
     country = fields.Char(name='country', string='Country')
+    ip_address = fields.Char(string='IP Address')
 
     @api.model
     def create(self, vals):

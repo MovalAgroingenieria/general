@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Scheduled action: cleanup expired verification codes -->
+        <record id="ir_cron_cleanup_login_verification"
+                model="ir.cron">
+            <field name="name">Cleanup Expired Login Verification
+                Codes</field>
+            <field name="model_id"
+                   ref="model_login_verification"/>
+            <field name="state">code</field>
+            <field name="code">model.cleanup_expired()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+        </record>
+    </data>
+</odoo>

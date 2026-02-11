@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Step 2: Verification code input page -->
+  <template id="login_verify" name="Login Email Verification">
+    <t t-call="web.login_layout">
+      <form class="oe_login_form" role="form"
+            action="/web/login/verify" method="post">
+        <input type="hidden" name="csrf_token"
+               t-att-value="request.csrf_token()"/>
+        <input type="hidden" name="token" t-att-value="token"/>
+
+        <!-- Header icon and instructions -->
+        <div class="text-center" style="margin-bottom: 20px;">
+          <i class="fa fa-envelope-o text-primary"
+             style="font-size: 48px;"/>
+          <h3>Email Verification</h3>
+          <t t-if="not hide_form">
+            <p>A verification code has been sent to:<br/>
+              <strong t-esc="contact_mail"/></p>
+            <p style="color: #888; font-size: 12px;">
+              The code will expire in 10 minutes.</p>
+          </t>
+        </div>
+
+        <!-- Code input (only shown when form is active) -->
+        <t t-if="not hide_form">
+          <div class="form-group">
+            <label for="verification_code" class="control-label">
+              Verification Code</label>
+            <input type="text" name="verification_code"
+                   id="verification_code" class="form-control"
+                   required="required" autofocus="autofocus"
+                   placeholder="Enter 6-digit code"
+                   maxlength="6" pattern="[0-9]{6}"
+                   style="text-align: center; font-size: 14px;
+                          letter-spacing: 8px;"
+                   autocomplete="off"/>
+          </div>
+        </t>
+
+        <!-- Error message -->
+        <p class="alert alert-danger" t-if="error" style="margin-top: 10px;">
+          <t t-esc="error"/>
+        </p>
+
+        <!-- Submit button (only when form is active) -->
+        <t t-if="not hide_form">
+          <div class="clearfix oe_login_buttons"
+               style="display: flex; justify-content: center;">
+            <button type="submit" class="btn btn-primary">
+              Verify</button>
+          </div>
+
+          <!-- Resend and back links -->
+          <div class="text-center" style="margin-top: 15px;">
+            <a t-attf-href="/web/login/verify/resend?token={{token}}"
+               class="text-primary">
+              Resend code</a>
+            <span style="margin: 0 10px; color: #ccc;">|</span>
+            <a href="/web/login" class="text-primary">
+              Back to login</a>
+          </div>
+        </t>
+
+        <!-- Back to login button (when form is hidden due to failure) -->
+        <t t-if="hide_form">
+          <div class="text-center" style="margin-top: 15px;">
+            <a href="/web/login" class="btn btn-primary">
+              Back to login</a>
+          </div>
+        </t>
+
+      </form>
+    </t>
+  </template>
+
+</odoo>

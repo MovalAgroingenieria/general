@@ -3,41 +3,48 @@
 
   <template id="login_form_inherit" inherit_id="web.login" name="Client Connect Login">
     <xpath expr="//div[@class='clearfix oe_login_buttons']" position="before">
-      <!-- Mandatory: Contact Mail -->
-      <label class="control-label" for="mail">Contact Mail <span style="color: #757575;">
-        (Mandatory)</span></label>
-      <div class="form-group field-mail">
-        <input type="email" name="mail" t-att-value="mail" id="mail" class="form-control"
-          required="required" autofocus="autofocus" autocapitalize="off"/>
-      </div>
+      <!-- Hidden field to propagate internal mode through the form POST -->
+      <input type="hidden" name="internal"
+             t-att-value="'1' if internal else '0'"/>
 
-      <!-- Optional: Phone Number -->
-      <label class="control-label" for="phone">Phone Number <span style="color: #757575;">(Optional)</span></label>
-      <div class="form-group field-phone">
-        <input type="text" name="phone" t-att-value="phone" id="phone" class="form-control"
-         autofocus="autofocus" autocapitalize="off"/>
-      </div>
+      <!-- Contact fields: only shown in external (non-internal) mode -->
+      <t t-if="not internal">
+        <!-- Mandatory: Contact Mail -->
+        <label class="control-label" for="mail">Contact Mail <span style="color: #757575;">
+          (Mandatory)</span></label>
+        <div class="form-group field-mail">
+          <input type="email" name="mail" t-att-value="mail" id="mail" class="form-control"
+            required="required" autofocus="autofocus" autocapitalize="off"/>
+        </div>
 
-      <!-- Optional : Company Name -->
-      <label class="control-label" for="company">Company Name <span style="color: #757575;">
-        (Optional)</span></label>
-      <div class="form-group field-company">
-        <input type="text" name="company" t-att-value="company" id="company" class="form-control"
-         autofocus="autofocus" autocapitalize="off"/>
-      </div>
+        <!-- Optional: Phone Number -->
+        <label class="control-label" for="phone">Phone Number <span style="color: #757575;">(Optional)</span></label>
+        <div class="form-group field-phone">
+          <input type="text" name="phone" t-att-value="phone" id="phone" class="form-control"
+           autofocus="autofocus" autocapitalize="off"/>
+        </div>
 
-      <!-- Optional : Country -->
-      <label class="control-label" for="country">Country <span style="color: #757575;">(Optional)</span></label>
-      <div class="form-group field-country">
-        <select name="country" id="country" class="form-control">
-          <option value=""></option>
-          <t t-foreach="countries" t-as="country">
-            <option t-att-value="country.name" t-att-selected="country.name == request.params.get('country_name')">
-                <t t-esc="country.name"/>
-            </option>
-          </t>
-        </select>
-      </div>
+        <!-- Optional : Company Name -->
+        <label class="control-label" for="company">Company Name <span style="color: #757575;">
+          (Optional)</span></label>
+        <div class="form-group field-company">
+          <input type="text" name="company" t-att-value="company" id="company" class="form-control"
+           autofocus="autofocus" autocapitalize="off"/>
+        </div>
+
+        <!-- Optional : Country -->
+        <label class="control-label" for="country">Country <span style="color: #757575;">(Optional)</span></label>
+        <div class="form-group field-country">
+          <select name="country" id="country" class="form-control">
+            <option value=""></option>
+            <t t-foreach="countries" t-as="country">
+              <option t-att-value="country.name" t-att-selected="country.name == request.params.get('country_name')">
+                  <t t-esc="country.name"/>
+              </option>
+            </t>
+          </select>
+        </div>
+      </t>
     </xpath>
   </template>
 

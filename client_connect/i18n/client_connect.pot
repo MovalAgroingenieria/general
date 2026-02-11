@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-30 18:43+0000\n"
-"PO-Revision-Date: 2024-01-30 18:43+0000\n"
+"POT-Creation-Date: 2026-02-11 10:10+0000\n"
+"PO-Revision-Date: 2026-02-11 10:10+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,40 +16,23 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: client_connect
-#: model:mail.template,body_html:client_connect.new_user_mail_template
-msgid "\n"
-"                <table style=\"border-collapse: collapse;\">\n"
-"                    <tr>\n"
-"                        <th style=\"border: 1px solid black; padding: 5px;\n"
-"                        text-align: center;\">Database</th>\n"
-"                        <th style=\"border: 1px solid black; padding: 5px;\n"
-"                        text-align: center;\">Email</th>\n"
-"                        <th style=\"border: 1px solid black; padding: 5px;\n"
-"                        text-align: center;\">Phone</th>\n"
-"                        <th style=\"border: 1px solid black; padding: 5px;\n"
-"                        text-align: center;\">Company</th>\n"
-"                        <th style=\"border: 1px solid black; padding: 5px;\n"
-"                        text-align: center;\">Country</th>\n"
-"                    </tr>\n"
-"                    <tr>\n"
-"                        <td style=\"border: 1px solid black; padding: 5px;\n"
-"                        text-align: center;\">ClientTest</td>\n"
-"                        <td style=\"border: 1px solid black; padding: 5px;\n"
-"                        text-align: center;\">jmartinez@gmail.es</td>\n"
-"                        <td style=\"border: 1px solid black; padding: 5px;\n"
-"                        text-align: center;\"></td>\n"
-"                        <td style=\"border: 1px solid black; padding: 5px;\n"
-"                        text-align: center;\"></td>\n"
-"                        <td style=\"border: 1px solid black; padding: 5px;\n"
-"                        text-align: center;\"></td>\n"
-"                    </tr>\n"
-"                </table>\n"
-"            "
+#: model:mail.template,subject:client_connect.new_user_mail_template
+msgid " New user in demo instance"
 msgstr ""
 
 #. module: client_connect
-#: model:mail.template,subject:client_connect.new_user_mail_template
-msgid " New user in demo instance"
+#: model:ir.ui.view,arch_db:client_connect.login_verify
+msgid "A verification code has been sent to:<br/>"
+msgstr ""
+
+#. module: client_connect
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_attempts
+msgid "Attempts"
+msgstr ""
+
+#. module: client_connect
+#: model:ir.ui.view,arch_db:client_connect.login_verify
+msgid "Back to login"
 msgstr ""
 
 #. module: client_connect
@@ -58,24 +41,36 @@ msgid "Client Connect Information"
 msgstr ""
 
 #. module: client_connect
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_code_expiry
+msgid "Code Expiry"
+msgstr ""
+
+#. module: client_connect
 #: model:ir.model.fields,field_description:client_connect.field_client_data_company
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_company
 msgid "Company"
 msgstr ""
 
 #. module: client_connect
 #: model:ir.ui.view,arch_db:client_connect.login_form_inherit
 msgid "Company Name <span style=\"color: #757575;\">\n"
-"        (Optional)</span>"
+"          (Optional)</span>"
+msgstr ""
+
+#. module: client_connect
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_contact_mail
+msgid "Contact Email"
 msgstr ""
 
 #. module: client_connect
 #: model:ir.ui.view,arch_db:client_connect.login_form_inherit
 msgid "Contact Mail <span style=\"color: #757575;\">\n"
-"        (Mandatory)</span>"
+"          (Mandatory)</span>"
 msgstr ""
 
 #. module: client_connect
 #: model:ir.model.fields,field_description:client_connect.field_client_data_country
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_country
 msgid "Country"
 msgstr ""
 
@@ -86,21 +81,25 @@ msgstr ""
 
 #. module: client_connect
 #: model:ir.model.fields,field_description:client_connect.field_client_data_create_uid
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_create_uid
 msgid "Created by"
 msgstr ""
 
 #. module: client_connect
 #: model:ir.model.fields,field_description:client_connect.field_client_data_create_date
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_create_date
 msgid "Created on"
 msgstr ""
 
 #. module: client_connect
 #: model:ir.model.fields,field_description:client_connect.field_client_data_database
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_database
 msgid "Database"
 msgstr ""
 
 #. module: client_connect
 #: model:ir.model.fields,field_description:client_connect.field_client_data_display_name
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_display_name
 msgid "Display Name"
 msgstr ""
 
@@ -110,32 +109,128 @@ msgid "Email"
 msgstr ""
 
 #. module: client_connect
+#: model:ir.ui.view,arch_db:client_connect.login_verify
+msgid "Email Verification"
+msgstr ""
+
+#. module: client_connect
+#: model:ir.ui.view,arch_db:client_connect.login_verify
+msgid "Enter 6-digit code"
+msgstr ""
+
+#. module: client_connect
+#: selection:login.verification,state:0
+msgid "Expired"
+msgstr ""
+
+#. module: client_connect
+#: selection:login.verification,state:0
+msgid "Failed"
+msgstr ""
+
+#. module: client_connect
 #: model:ir.model.fields,field_description:client_connect.field_client_data_id
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_id
 msgid "ID"
 msgstr ""
 
 #. module: client_connect
+#: model:ir.model.fields,field_description:client_connect.field_client_data_ip_address
+msgid "IP Address"
+msgstr ""
+
+#. module: client_connect
 #: model:ir.model.fields,field_description:client_connect.field_client_data___last_update
+#: model:ir.model.fields,field_description:client_connect.field_login_verification___last_update
 msgid "Last Modified on"
 msgstr ""
 
 #. module: client_connect
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_last_sent
+msgid "Last Sent"
+msgstr ""
+
+#. module: client_connect
 #: model:ir.model.fields,field_description:client_connect.field_client_data_write_uid
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_write_uid
 msgid "Last Updated by"
 msgstr ""
 
 #. module: client_connect
 #: model:ir.model.fields,field_description:client_connect.field_client_data_write_date
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_write_date
 msgid "Last Updated on"
 msgstr ""
 
 #. module: client_connect
+#: model:ir.model,name:client_connect.model_login_verification
+msgid "Login Verification Code"
+msgstr ""
+
+#. module: client_connect
+#: selection:login.verification,state:0
+msgid "Pending"
+msgstr ""
+
+#. module: client_connect
 #: model:ir.model.fields,field_description:client_connect.field_client_data_phone
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_phone
 msgid "Phone"
 msgstr ""
 
 #. module: client_connect
 #: model:ir.ui.view,arch_db:client_connect.login_form_inherit
 msgid "Phone Number <span style=\"color: #757575;\">(Optional)</span>"
+msgstr ""
+
+#. module: client_connect
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_redirect
+msgid "Redirect URL"
+msgstr ""
+
+#. module: client_connect
+#: model:ir.ui.view,arch_db:client_connect.login_verify
+msgid "Resend code"
+msgstr ""
+
+#. module: client_connect
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_state
+msgid "State"
+msgstr ""
+
+#. module: client_connect
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_user_password
+msgid "Temporary Auth Token"
+msgstr ""
+
+#. module: client_connect
+#: model:ir.ui.view,arch_db:client_connect.login_verify
+msgid "The code will expire in 10 minutes."
+msgstr ""
+
+#. module: client_connect
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_token
+msgid "Token"
+msgstr ""
+
+#. module: client_connect
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_user_login
+msgid "User Login"
+msgstr ""
+
+#. module: client_connect
+#: model:ir.model.fields,field_description:client_connect.field_login_verification_verification_code
+#: model:ir.ui.view,arch_db:client_connect.login_verify
+msgid "Verification Code"
+msgstr ""
+
+#. module: client_connect
+#: selection:login.verification,state:0
+msgid "Verified"
+msgstr ""
+
+#. module: client_connect
+#: model:ir.ui.view,arch_db:client_connect.login_verify
+msgid "Verify"
 msgstr ""
 
