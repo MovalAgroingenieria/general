@@ -18,7 +18,7 @@
           <t t-if="not hide_form">
             <p>A verification code has been sent to:<br/>
               <strong t-esc="contact_mail"/></p>
-            <p style="color: #888; font-size: 12px;">
+            <p style="color: #888; font-size: 14px;">
               The code will expire in 10 minutes.</p>
           </t>
         </div>
@@ -34,7 +34,7 @@
                    placeholder="Enter 6-digit code"
                    maxlength="6" pattern="[0-9]{6}"
                    style="text-align: center; font-size: 14px;
-                          letter-spacing: 8px;"
+                          letter-spacing: 6px;"
                    autocomplete="off"/>
           </div>
         </t>
@@ -55,12 +55,51 @@
           <!-- Resend and back links -->
           <div class="text-center" style="margin-top: 15px;">
             <a t-attf-href="/web/login/verify/resend?token={{token}}"
-               class="text-primary">
+               id="resend_link" class="text-primary"
+               style="display: none;">
               Resend code</a>
+            <span id="resend_countdown" style="color: #888;"></span>
+            <span id="resend_label" style="display: none;">Resend code</span>
+            <span id="resend_remaining" style="display: none;"
+                  t-esc="seconds_remaining"/>
             <span style="margin: 0 10px; color: #ccc;">|</span>
             <a href="/web/login" class="text-primary">
               Back to login</a>
           </div>
+
+          <script type="text/javascript">
+            (function() {
+              var countdown = document.getElementById('resend_countdown');
+              var link = document.getElementById('resend_link');
+              var label = document.getElementById('resend_label').textContent;
+              var remaining = parseInt(
+                document.getElementById('resend_remaining').textContent) || 0;
+
+              function showLink() {
+                link.style.display = 'inline';
+                countdown.style.display = 'none';
+              }
+
+              function updateCountdown() {
+                countdown.textContent = label + ' (' + remaining + 's)';
+              }
+
+              if (remaining &lt;= 0) {
+                showLink();
+              } else {
+                updateCountdown();
+                var timer = setInterval(function() {
+                  remaining--;
+                  if (remaining &lt;= 0) {
+                    clearInterval(timer);
+                    showLink();
+                  } else {
+                    updateCountdown();
+                  }
+                }, 1000);
+              }
+            })();
+          </script>
         </t>
 
         <!-- Back to login button (when form is hidden due to failure) -->
