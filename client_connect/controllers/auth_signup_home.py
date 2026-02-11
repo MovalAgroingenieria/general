@@ -243,10 +243,9 @@ class CustomSessionController(Home):
                 return http.redirect_with_hash(
                     '/web/login/verify?token=%s' % token)
 
-        import secrets
         # Generate new code and reset attempts
         new_code = ''.join(
-            [secrets.choice(string.digits) for _ in range(6)])
+            [random.choice(string.digits) for _ in range(6)])
         now_dt = fields.Datetime.from_string(fields.Datetime.now())
         verification.write({
             'verification_code': new_code,
