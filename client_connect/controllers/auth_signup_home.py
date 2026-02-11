@@ -208,6 +208,15 @@ class CustomSessionController(Home):
                     RATE_LIMIT_SECONDS - elapsed)
         values['seconds_remaining'] = seconds_remaining
 
+        # Translate resend label for JS countdown
+        user = request.env['res.users'].sudo().search(
+            [('login', '=', verification.user_login)], limit=1)
+        ulang = user.lang if user else 'es_ES'
+        resend_trans = request.env[
+            'ir.translation'].sudo()._get_source(
+            None, ('code', 'model'), ulang, 'Resend code')
+        values['resend_label'] = resend_trans or 'Resend code'
+
         if request.httprequest.method == 'POST':
             submitted_code = kw.get('verification_code', '')
 
