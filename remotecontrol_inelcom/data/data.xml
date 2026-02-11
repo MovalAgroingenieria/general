@@ -880,11 +880,70 @@ for sector in sectors_list:
         errors.append({'sector': sector_id, 'error': str(e)})
     time.sleep(0.5)
 
+locations = []
+locations_url = "https://smart2.inelcom.com:28081/restws/webresources/emplazamientos?sesion=%s" % id_session
+try:
+    resp_locations = request_retry('GET', locations_url)
+    if resp_locations.status_code >= 400:
+        errors.append({'type': 'locations', 'error': 'HTTP Error %d' % resp_locations.status_code})
+    else:
+        locations_list = resp_locations.json() or []
+        for location in locations_list:
+            location_id = location.get("idEmplazamiento")
+            location_name = location.get("nombreEmplazamiento")
+            sector_name = location.get("nombreSector")
+            header_name = location.get("nombreCabezal")
+
+            variables = []
+            if location_id:
+                variables_url = (
+                    "https://smart2.inelcom.com:28081/restws/webresources/emplazamientos/variables"
+                    "?sesion=%s&emplazamiento=%s"
+                ) % (id_session, location_id)
+                try:
+                    resp_vars = request_retry('GET', variables_url)
+                    if resp_vars.status_code >= 400:
+                        errors.append({
+                            'type': 'location_variables',
+                            'location_id': location_id,
+                            'error': 'HTTP Error %d' % resp_vars.status_code
+                        })
+                    else:
+                        variables_list = resp_vars.json() or []
+                        for var in variables_list:
+                            variables.append({
+                                'variable_id': var.get('id'),
+                                'variable_name': var.get('nombre')
+                            })
+                except Exception as e:
+                    errors.append({
+                        'type': 'location_variables',
+                        'location_id': location_id,
+                        'error': str(e)
+                    })
+                time.sleep(0.5)
+
+            locations.append({
+                'location_id': location_id,
+                'location_name': location_name,
+                'sector_name': sector_name,
+                'header_name': header_name,
+                'sector_code': location.get("codSector"),
+                'header_code': location.get("codCabezal"),
+                'variables': variables,
+                'total_variables': len(variables)
+            })
+        time.sleep(0.5)
+except Exception as e:
+    errors.append({'type': 'locations', 'error': str(e)})
+
 result = {
     'executed_at': fields.Datetime.now(),
     'total_devices': len(devices),
+    'total_locations': len(locations),
     'total_errors': len(errors),
     'devices': devices,
+    'locations': locations,
     'errors': errors,
 }
 
@@ -901,10 +960,11 @@ att = env['ir.attachment'].create({
     'res_id': Remote.id
 })
 
-msg = "[Inelcom] Devices fetched: %d errors=%d" % (len(devices), len(errors))
+msg = "[Inelcom] Devices: %d, Locations: %d, Errors: %d" % (len(devices), len(locations), len(errors))
 Remote.message_post(body=msg, attachment_ids=[att.id])
 
 bag['inelcom_devices'] = devices
+bag['inelcom_locations'] = locations
 bag['inelcom_devices_errors'] = errors
 bag['inelcom_devices_filename'] = fname
     ]]></field>
