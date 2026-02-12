@@ -86,7 +86,6 @@ class ResFile(models.Model):
     image = fields.Image(string="Photo / Image")
 
     stage_id = fields.Many2one(
-        string="Stage",
         comodel_name="res.file.stage",
         required=True,
         # use a "public" lambda to avoid W0212
@@ -104,7 +103,6 @@ class ResFile(models.Model):
     notes = fields.Html()
 
     category_id = fields.Many2one(
-        string="Category",
         comodel_name="res.file.category",
         index=True,
         required=True,
@@ -113,11 +111,10 @@ class ResFile(models.Model):
     )
 
     partnerlink_ids = fields.One2many(
-        string="Partners", comodel_name="res.file.partnerlink", inverse_name="file_id"
+        comodel_name="res.file.partnerlink", inverse_name="file_id"
     )
 
     partner_id = fields.Many2one(
-        string="Partner",
         comodel_name="res.partner",
         index=True,
         ondelete="restrict",
@@ -141,9 +138,7 @@ class ResFile(models.Model):
         string="Closing date", compute="_compute_closing_date", store=True
     )
 
-    container_id = fields.Many2one(
-        string="Container", comodel_name="res.file.container"
-    )
+    container_id = fields.Many2one(comodel_name="res.file.container")
 
     file_attachment_ids = fields.One2many(
         string="File attachments",
@@ -159,9 +154,7 @@ class ResFile(models.Model):
         string="Has attachments", compute="_compute_has_attachments", default=False
     )
 
-    technician_id = fields.Many2one(
-        string="Technician", comodel_name="res.partner", index=True
-    )
+    technician_id = fields.Many2one(comodel_name="res.partner", index=True)
 
     with_technician = fields.Boolean(
         string="With technician", compute="_compute_with_technician", store=True
@@ -203,7 +196,6 @@ class ResFile(models.Model):
 
     company_id = fields.Many2one(
         "res.company",
-        string="Company",
         default=lambda self: self.env.company,
         required=True,
         index=True,
@@ -372,19 +364,34 @@ class ResFile(models.Model):
             if not rec:
                 continue
             if rec.partnerlink_ids:
-                mains = rec.partnerlink_ids.filtered(lambda x: x.is_main)
+                mains = rec.partnerlink_ids.filtered(lambda link: link.is_main)
                 if len(mains) == 0:
                     raise exceptions.UserError(
-                        rec.env._("It is mandatory to check the primary partner.")
+                        rec.env._(
+                            "You must select a primary contact for file '%(file)s'. "
+                            "Please check the 'Primary' checkbox on one of the "
+                            "contacts in the Partner Links section.",
+                            file=rec.name or rec.subject,
+                        )
                     )
                 if len(mains) > 1:
                     raise exceptions.UserError(
-                        rec.env._("Only one primary partner is allowed.")
+                        rec.env._(
+                            "File '%(file)s' has multiple primary contacts. "
+                            "Only one contact can be marked as primary.",
+                            file=rec.name or rec.subject,
+                        )
                     )
             # No duplicated partners
-            partner_ids = [pl.partner_id.id for pl in rec.partnerlink_ids]
+            partner_ids = [link.partner_id.id for link in rec.partnerlink_ids]
             if len(set(partner_ids)) != len(partner_ids):
-                raise exceptions.UserError(rec.env._("There are repeated partners."))
+                raise exceptions.UserError(
+                    rec.env._(
+                        "File '%(file)s' has duplicate contacts. "
+                        "Each contact can only appear once.",
+                        file=rec.name or rec.subject,
+                    )
+                )
 
     @api.constrains("filelink_ids")
     def _check_filelink_ids(self):

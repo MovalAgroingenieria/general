@@ -9,14 +9,12 @@ class ResFileFilelink(models.Model):
     _description = "File filelink"
 
     file_id = fields.Many2one(
-        string="File",
         comodel_name="res.file",
         required=True,
         index=True,
         ondelete="cascade",
     )
     related_file_id = fields.Many2one(
-        string="Related File",
         comodel_name="res.file",
         required=True,
         ondelete="restrict",

@@ -15,14 +15,12 @@ class ResFilePartnerlink(models.Model):
     _rec_name = "partner_id"
 
     file_id = fields.Many2one(
-        string="File",
         comodel_name="res.file",
         required=True,
         index=True,
         ondelete="cascade",
     )
     partner_id = fields.Many2one(
-        string="Partner",
         comodel_name="res.partner",
         required=True,
         index=True,
@@ -74,3 +72,29 @@ class ResFilePartnerlink(models.Model):
             if record.is_main:
                 name = f"{name} (Primary)"
             record.display_name = name
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Auto-set is_main=True if this is the first/only partnerlink for a file."""
+        records = super().create(vals_list)
+        self._auto_set_main(records)
+        return records
+
+    def write(self, vals):
+        """Handle is_main changes and auto-set when needed."""
+        res = super().write(vals)
+        # If is_main was set to True, unset it on other links for the same file
+        if vals.get("is_main"):
+            for record in self:
+                siblings = record.file_id.partnerlink_ids - record
+                siblings.filtered(lambda link: link.is_main).write({"is_main": False})
+        return res
+
+    def _auto_set_main(self, records):
+        """Set is_main=True if file has exactly one partnerlink and none is main."""
+        for record in records:
+            if not record.file_id:
+                continue
+            links = record.file_id.partnerlink_ids
+            if len(links) == 1 and not links.is_main:
+                links.write({"is_main": True})

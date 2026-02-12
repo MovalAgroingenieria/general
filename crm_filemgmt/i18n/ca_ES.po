@@ -1,16 +1,26 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* crm_filemgmt
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-11 12:51+0000\n"
-"PO-Revision-Date: 2025-12-11 12:51+0000\n"
+"POT-Creation-Date: 2026-02-12 13:16+0000\n"
+"PO-Revision-Date: 2026-02-12 13:16+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file_stage.py:0
+#: code:addons/crm_filemgmt/models/res_filetag.py:0
+msgid "%s (copy)"
+msgstr "%s (còpia)"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file__color
@@ -22,13 +32,89 @@ msgstr ""
 "cian, 8: verd clar, 9: magenta"
 
 #. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_kanban
+msgid ""
+"<i style=\"color:red; float:right; margin-right:3%;\" title=\"lock\" "
+"class=\"fa fa-lock fa-lg\"/>"
+msgstr ""
+"<i style=\"color:red; float:right; margin-right:3%;\" title=\"Bloquejat\" "
+"class=\"fa fa-lock fa-lg\"/>"
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_kanban
+msgid ""
+"<i style=\"float:right; margin-right:3%;\" title=\"attachment\" class=\"fa "
+"fa-paperclip o_button_icon\"/>"
+msgstr ""
+"<i style=\"float:right; margin-right:3%;\" title=\"Adjunt\" class=\"fa "
+"fa-paperclip o_button_icon\"/>"
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_kanban
+msgid ""
+"<i style=\"float:right; margin-right:3%;\" title=\"files\" class=\"fa fa-"
+"copy o_button_icon\"/>"
+msgstr ""
+"<i style=\"float:right; margin-right:3%;\" title=\"Fitxers\" class=\"fa fa-"
+"copy o_button_icon\"/>"
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_filetag.py:0
+msgid ""
+"<p class=\"o_view_nocontent_smiling_face\">View all files tagged with "
+"\"%(name)s\"</p>"
+msgstr ""
+"<p class=\"o_view_nocontent_smiling_face\">Veure tots els fitxers etiquetats amb "
+"\"%(name)s\"</p>"
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.crm_filemgmt_res_config_settings_view_form
+msgid ""
+"<span class=\"o_form_label\">\n"
+"                                        Prefix for Files code\n"
+"                                    </span>"
+msgstr ""
+"<span class=\"o_form_label\">\n"
+"                                        Prefix per al codi de Fitxers\n"
+"                                    </span>"
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_category_view_form
+msgid ""
+"<span modifiers=\"{'invisible': [('number_of_files','&gt;', 1)]}\">\n"
+"                                    file\n"
+"                                </span>\n"
+"                                <span modifiers=\"{'invisible': [('number_of_files','=', 1)]}\">\n"
+"                                    files\n"
+"                                </span>"
+msgstr ""
+"<span modifiers=\"{'invisible': [('number_of_files','&gt;', 1)]}\">\n"
+"                                    fitxer\n"
+"                                </span>\n"
+"                                <span modifiers=\"{'invisible': [('number_of_files','=', 1)]}\">\n"
+"                                    fitxers\n"
+"                                </span>"
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_kanban
+msgid ""
+"<span style=\"color:red; float:right; margin-right:3%; font-size:10px;\">\n"
+"                                            A R C H I V E D\n"
+"                                        </span>"
+msgstr ""
+"<span style=\"color:red; float:right; margin-right:3%; font-size:10px;\">\n"
+"                                            A R X I V A T\n"
+"                                        </span>"
+
+#. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_location_view_form
 msgid ""
 "<span>container</span>\n"
-" <span>containers</span>"
+"                                <span>containers</span>"
 msgstr ""
 "<span>contenidor</span>\n"
-" <span>contenidors</span>"
+"                                <span>contenidors</span>"
 
 #. module: crm_filemgmt
 #: model:ir.model.constraint,message:crm_filemgmt.constraint_res_file_containertype_container_type_name_uniq
@@ -205,6 +291,16 @@ msgstr ""
 "Classe d'icona CSS per a aquest tipus de contenidor (p. ex., 'fa fa-box')"
 
 #. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file_category.py:0
+msgid ""
+"Cannot delete category '%(name)s' because it has %(count)d files associated."
+" Please reassign the files first."
+msgstr ""
+"No es pot eliminar la categoria '%(name)s' perquè té %(count)d fitxers associats."
+" Si us plau, reassigneu els fitxers primer."
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__capacity
 msgid "Capacity"
 msgstr "Capacitat"
@@ -212,7 +308,7 @@ msgstr "Capacitat"
 #. module: crm_filemgmt
 #: model:ir.ui.menu,name:crm_filemgmt.menu_file_category
 msgid "Categories"
-msgstr ""
+msgstr "Categories"
 
 #. module: crm_filemgmt
 #: model:ir.model,name:crm_filemgmt.model_res_file_category
@@ -278,11 +374,6 @@ msgid "Closed"
 msgstr "Tancat"
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__is_closing_stage
-msgid "Closing Stage"
-msgstr "Etapa de tancament"
-
-#. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__closing_date
 msgid "Closing date"
 msgstr "Data de tancament"
@@ -308,15 +399,15 @@ msgid "Code (numeric)"
 msgstr "Codi (numèric)"
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__color
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__color
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__color
 msgid "Color"
-msgstr ""
+msgstr "Índex de color"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__color
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__color
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__color
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__color
 msgid "Color Index"
 msgstr "Índex de color"
 
@@ -329,6 +420,12 @@ msgstr "Color per a les vistes kanban i llista"
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file_stage__color
 msgid "Color for kanban views"
 msgstr "Color per a les vistes kanban"
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_filetag.py:0
+msgid "Color index must be between 0 and 99."
+msgstr "L'índex de color ha d'estar entre 0 i 99."
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_filetag__color
@@ -394,6 +491,8 @@ msgid "Container type"
 msgstr "Tipus de contenidor"
 
 #. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file_location.py:0
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_location__number_of_containers
 #: model:ir.ui.menu,name:crm_filemgmt.menu_files_container
 msgid "Containers"
@@ -417,17 +516,10 @@ msgstr "Copia la plantilla inicial de l'informe seleccionat."
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_partner__attachment_count
 #: model:ir.model.fields,help:crm_filemgmt.field_res_users__attachment_count
-msgid ""
-"Count of all attachments (including those not in file management system)."
+msgid "Count of all attachments (including those not in file management)."
 msgstr ""
 "Recompte de tots els adjunts (incloent-hi els que no estan al sistema de "
 "gestió de fitxers)."
-
-#. module: crm_filemgmt
-#: model:ir.model.fields,help:crm_filemgmt.field_res_partner__linked_attachment_count
-#: model:ir.model.fields,help:crm_filemgmt.field_res_users__linked_attachment_count
-msgid "Count of attachments that are part of the file management system."
-msgstr "Recompte d'adjunts que formen part del sistema de gestió de fitxers."
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file_stage__file_count
@@ -470,14 +562,14 @@ msgid "Created on"
 msgstr "Creat el"
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__custom_css
-msgid "Custom CSS"
-msgstr "CSS personalitzat"
-
-#. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file_report__custom_css
 msgid "Custom CSS styles for this report"
 msgstr "Estils CSS personalitzats per a aquest informe"
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__custom_css
+msgid "Custom Css"
+msgstr "CSS personalitzat"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_report__report_type__custom
@@ -525,7 +617,6 @@ msgstr "Suprimir fitxer"
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__description
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__description
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_location__description
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__notes
 msgid "Description"
 msgstr "Descripció"
 
@@ -537,7 +628,7 @@ msgstr "Informe detallat"
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__dimensions
 msgid "Dimensions"
-msgstr ""
+msgstr "Dimensions"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__date_file
@@ -575,6 +666,18 @@ msgid "Dropdown menu"
 msgstr "Menú desplegable"
 
 #. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "ERROR IN END TEMPLATE"
+msgstr "ERROR EN PLANTILLA FINAL"
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "ERROR IN START TEMPLATE"
+msgstr "ERROR EN PLANTILLA INICIAL"
+
+#. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_kanban
 msgid "Edit File"
 msgstr "Editar fitxer"
@@ -607,9 +710,28 @@ msgstr "Nom d'informe existent."
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_filelink__file_id
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_partnerlink__file_id
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__file_ids
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
 msgid "File"
 msgstr "Fitxer"
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid ""
+"File '%(file)s' has duplicate contacts. Each contact can only appear once."
+msgstr ""
+"L'expedient '%(file)s' té contactes duplicats. Cada contacte només pot aparèixer una vegada."
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid ""
+"File '%(file)s' has multiple primary contacts. Only one contact can be "
+"marked as primary."
+msgstr ""
+"L'expedient '%(file)s' té diversos contactes principals. Només un contacte pot "
+"estar marcat com a principal."
 
 #. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_category_view_tree
@@ -659,24 +781,29 @@ msgstr "Ubicació del fitxer"
 #. module: crm_filemgmt
 #: model:ir.module.category,name:crm_filemgmt.module_category_filemgmt
 #: model:ir.ui.menu,name:crm_filemgmt.menu_filemgmt
-#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.crm_filemgmt_res_config_settings_view_form
 msgid "File Management"
-msgstr "Gestió de fitxers"
+msgstr "Gestió d'expedients"
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.crm_filemgmt_res_config_settings_view_form
+msgid "File Management Settings"
+msgstr "Configuració de Gestió d'Expedients"
 
 #. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_partnerlink_view_form
 msgid "File Partner Link"
-msgstr "Enllaç de soci de fitxer"
+msgstr "Enllaç de contacte de fitxer"
 
 #. module: crm_filemgmt
 #: model:ir.model,name:crm_filemgmt.model_res_file_partnerlink
 msgid "File Partnerlink"
-msgstr "Enllaç de soci de fitxer"
+msgstr "Enllaç de contacte de fitxer"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_company__file_prefix
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_config_settings__file_prefix
-#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.crm_filemgmt_res_config_settings_view_form
 msgid "File Prefix"
 msgstr "Prefix del fitxer"
 
@@ -684,6 +811,18 @@ msgstr "Prefix del fitxer"
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_company__file_prefix_upper
 msgid "File Prefix (Upper Case)"
 msgstr "Prefix del fitxer (majúscules)"
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_company.py:0
+msgid "File Prefix can only contain letters, numbers, and underscores."
+msgstr "El prefix de fitxer només pot contenir lletres, números i guions baixos."
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_company.py:0
+msgid "File Prefix must be at most 10 characters."
+msgstr "El prefix de fitxer ha de tenir com a màxim 10 caràcters."
 
 #. module: crm_filemgmt
 #: model:ir.actions.act_window,name:crm_filemgmt.res_file_report_action
@@ -738,16 +877,17 @@ msgstr ""
 "Prefix del fitxer convertit a majúscules per a propòsits de visualització."
 
 #. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_partner.py:0
 #: model:ir.actions.act_window,name:crm_filemgmt.res_file_action
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__filelink_ids
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__number_of_files
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__file_ids
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__file_ids
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__file_ids
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__file_ids
 #: model:ir.ui.menu,name:crm_filemgmt.menu_files
 #: model:ir.ui.menu,name:crm_filemgmt.menu_main
-#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.crm_filemgmt_res_config_settings_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_container_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_stage_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_calendar
@@ -758,6 +898,12 @@ msgid "Files"
 msgstr "Fitxers"
 
 #. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_filetag.py:0
+msgid "Files Tagged \"%s\""
+msgstr "Fitxers etiquetats \"%s\""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file_stage__file_ids
 msgid "Files currently in this stage."
 msgstr "Fitxers actualment en aquesta etapa."
@@ -765,12 +911,28 @@ msgstr "Fitxers actualment en aquesta etapa."
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_partner__file_ids
 #: model:ir.model.fields,help:crm_filemgmt.field_res_users__file_ids
-msgid ""
-"Files that are explicitly linked to this partner through the file management"
-" system."
+msgid "Files explicitly linked to this partner through file management."
 msgstr ""
-"Fitxers que estan explícitament enllaçats amb aquest soci a través del "
+"Fitxers que estan explícitament enllaçats amb aquest contacte a través del "
 "sistema de gestió de fitxers."
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file_stage.py:0
+msgid "Files in %s"
+msgstr "Fitxers en %s"
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file_container.py:0
+msgid "Files in Container: %s"
+msgstr "Fitxers en Contenidor: %s"
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file_category.py:0
+msgid "Files in category: %s"
+msgstr "Fitxers en categoria: %s"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_filetag__file_ids
@@ -794,7 +956,7 @@ msgstr "Seguidors"
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__message_partner_ids
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Seguidors (Socis)"
+msgstr "Seguidors (Contactes)"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file__activity_type_icon
@@ -807,6 +969,19 @@ msgstr "Icona de Font awesome, p. ex. fa-tasks"
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__report_template_footer
 msgid "Footer Template"
 msgstr "Plantilla de peu de pàgina"
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.crm_filemgmt_res_config_settings_view_form
+msgid ""
+"Format:\n"
+"                                        <b>prefix-year/4-digit-number</b>\n"
+"                                        <br/>\n"
+"                                        Example: FILE → FILE-2025/0001"
+msgstr ""
+"Format:\n"
+"                                        <b>prefix-any/número-de-4-dígits</b>\n"
+"                                        <br/>\n"
+"                                        Exemple: FILE → FILE-2025/0001"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file_containertype__notes
@@ -879,19 +1054,15 @@ msgstr "Nom de l'informe llegible per a humans."
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__id
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__activity_exception_icon
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__activity_exception_icon
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__activity_exception_icon
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__icon
 msgid "Icon"
 msgstr "Icona"
-
-#. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__icon
-msgid "Icon Class"
-msgstr "Classe d'icona"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file__activity_exception_icon
@@ -917,7 +1088,7 @@ msgstr "Si està marcat, alguns missatges tenen un error de lliurament."
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file_partnerlink__is_main
 msgid "If checked, this partner will be the primary partner for the file"
-msgstr "Si està marcat, aquest soci serà el soci principal per al fitxer"
+msgstr "Si està marcat, aquest contacte serà el contacte principal del fitxer"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file_stage__fold
@@ -966,6 +1137,7 @@ msgstr "Informe d'inventari"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__is_closing_stage
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__is_closing_stage
 msgid "Is Closing Stage"
 msgstr "És etapa de tancament"
 
@@ -1026,16 +1198,16 @@ msgid "Level"
 msgstr "Nivell"
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_partner__linked_attachment_count
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_users__linked_attachment_count
-msgid "Linked Attachments"
-msgstr "Adjunts enllaçats"
-
-#. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_partner__file_ids
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_users__file_ids
 msgid "Linked Files"
 msgstr "Fitxers enllaçats"
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_partner.py:0
+msgid "Linked Files - %s"
+msgstr "Fitxers Enllaçats - %s"
 
 #. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
@@ -1161,10 +1333,28 @@ msgid "Next Activity Type"
 msgstr "Tipus de la propera activitat"
 
 #. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "No report has been selected."
+msgstr "No s'ha seleccionat cap informe."
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "No report or end template has been selected."
+msgstr "No s'ha seleccionat cap informe o plantilla final."
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "No report or start template has been selected."
+msgstr "No s'ha seleccionat cap informe o plantilla inicial."
+
+#. module: crm_filemgmt
 #: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file__priority__1
 #: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_category__kanban_state__normal
 msgid "Normal"
-msgstr ""
+msgstr "Normal"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__notes
@@ -1172,6 +1362,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__notes
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_location__notes
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__notes
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__notes
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_category_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_container_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_containertype_view_form
@@ -1180,7 +1371,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_filetag_view_form
 msgid "Notes"
-msgstr ""
+msgstr "Descripció"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__message_needaction_counter
@@ -1296,17 +1487,23 @@ msgstr "Ruta pare"
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_partnerlink__partner_id
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_search
 msgid "Partner"
-msgstr "Soci"
+msgstr "Contacte"
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_partner.py:0
+msgid "Partner Attachments"
+msgstr "Adjunts del Contacte"
 
 #. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
 msgid "Partner Links"
-msgstr "Enllaços de soci"
+msgstr "Enllaços de contacte"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__partnerlink_ids
-msgid "Partners"
-msgstr "Socis"
+msgid "Partnerlink"
+msgstr "Contactes"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__image
@@ -1323,7 +1520,7 @@ msgstr "Dimensions físiques (p. ex., '30x40x20 cm')"
 #. module: crm_filemgmt
 #: model:res.groups,name:crm_filemgmt.group_file_portal
 msgid "Portal"
-msgstr ""
+msgstr "Portal"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_report__orientation__portrait
@@ -1356,14 +1553,14 @@ msgid "Priority"
 msgstr "Prioritat"
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__qr_code
-msgid "QR Code"
-msgstr "Codi QR"
-
-#. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file_container__qr_code
 msgid "QR code for container identification"
 msgstr "Codi QR per a la identificació del contenidor"
+
+#. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__qr_code
+msgid "Qr Code"
+msgstr "Codi QR"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__rating_ids
@@ -1552,7 +1749,7 @@ msgstr "Configuració del tipus de carrer"
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__child_ids
 msgid "Subcategories"
-msgstr ""
+msgstr "Subcategories"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__subject
@@ -1580,6 +1777,12 @@ msgstr "Etiqueta"
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__name
 msgid "Tag Name"
 msgstr "Nom de l'etiqueta"
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_filetag.py:0
+msgid "Tag name should not exceed 50 characters for proper display."
+msgstr "El nom de l'etiqueta no ha de superar els 50 caràcters per a una visualització correcta."
 
 #. module: crm_filemgmt
 #: model:ir.ui.menu,name:crm_filemgmt.menu_config_labels
@@ -1627,6 +1830,69 @@ msgstr "Inici de la plantilla"
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__template_start_rendered
 msgid "Template start rendered"
 msgstr "Inici de la plantilla renderitzada"
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "The file cannot be self-referenced."
+msgstr "El fitxer no pot fer referència a si mateix."
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "The file name cannot start or end with a slash (/)."
+msgstr "El nom del fitxer no pot començar ni acabar amb una barra (/)."
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "The file number must be an integer."
+msgstr "El número del fitxer ha de ser un enter."
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid ""
+"The file prefix parameter is not set. Go to configuration and set a value "
+"for the parameter."
+msgstr ""
+"El paràmetre de prefix del fitxer no està configurat. Aneu a configuració i "
+"establiu un valor per al paràmetre."
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file_category.py:0
+msgid "The read only categories cannot be removed."
+msgstr "Les categories de només lectura no es poden eliminar."
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "There are repeated files."
+msgstr "Hi ha fitxers repetits."
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "There is more than one slash in the file name."
+msgstr "Hi ha més d'una barra en el nom del fitxer."
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_report_view_form
+msgid ""
+"This templates use jinja2 variables: {{ object.attribute\n"
+"                                }}.\n"
+"                                <br/>\n"
+"                                You can use the <i>record</i> variable with any\n"
+"                                attribute of the File.\n"
+"                                <br/>"
+msgstr ""
+"Aquestes plantilles utilitzen variables jinja2: {{ object.attribute\n"
+"                                }}.\n"
+"                                <br/>\n"
+"                                Podeu utilitzar la variable <i>record</i> amb qualsevol\n"
+"                                atribut del Fitxer.\n"
+"                                <br/>"
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__file_top_comment_template_id
@@ -1736,3 +2002,35 @@ msgstr "Amb tècnic: No"
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_search
 msgid "With technician: Yes"
 msgstr "Amb tècnic: Sí"
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "You cannot move a file from a non-closing stage to a closing stage."
+msgstr "No podeu moure un fitxer d'una etapa no final a una etapa de tancament."
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_partner.py:0
+msgid ""
+"You don't have permission to access the file management system. Please "
+"contact your administrator."
+msgstr ""
+"No teniu permís per accés al sistema de gestió de fitxers. Si us plau, "
+"contacteu amb el vostre administrador."
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid ""
+"You must select a primary contact for file '%(file)s'. Please check the "
+"'Primary' checkbox on one of the contacts in the Partner Links section."
+msgstr ""
+"Heu de seleccionar un contacte principal per al fitxer '%(file)s'. Si us plau, marqueu "
+"la casella 'Principal' en un dels contactes de la secció Enllaços de Contacte."
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "[no subject]"
+msgstr "[sense assumpte]"

@@ -21,7 +21,6 @@ class ResFileContainer(models.Model):
     )
 
     location_id = fields.Many2one(
-        string="Location",
         comodel_name="res.file.location",
         required=True,
         index=True,

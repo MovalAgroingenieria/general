@@ -6,14 +6,21 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-11 12:52+0000\n"
-"PO-Revision-Date: 2025-12-11 12:52+0000\n"
+"POT-Creation-Date: 2026-02-12 13:16+0000\n"
+"PO-Revision-Date: 2026-02-12 13:16+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file_stage.py:0
+#: code:addons/crm_filemgmt/models/res_filetag.py:0
+msgid "%s (copy)"
+msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file__color
@@ -44,10 +51,19 @@ msgid ""
 msgstr ""
 
 #. module: crm_filemgmt
-#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_config_settings_view_form
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_filetag.py:0
 msgid ""
-"<span class=\"o_form_label\">Prefix for Files code\n"
-"                                </span>"
+"<p class=\"o_view_nocontent_smiling_face\">View all files tagged with "
+"\"%(name)s\"</p>"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.crm_filemgmt_res_config_settings_view_form
+msgid ""
+"<span class=\"o_form_label\">\n"
+"                                        Prefix for Files code\n"
+"                                    </span>"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -247,6 +263,14 @@ msgid "CSS icon class for this container type (e.g., 'fa fa-box')"
 msgstr ""
 
 #. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file_category.py:0
+msgid ""
+"Cannot delete category '%(name)s' because it has %(count)d files associated."
+" Please reassign the files first."
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__capacity
 msgid "Capacity"
 msgstr ""
@@ -320,11 +344,6 @@ msgid "Closed"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__is_closing_stage
-msgid "Closing Stage"
-msgstr ""
-
-#. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__closing_date
 msgid "Closing date"
 msgstr ""
@@ -350,6 +369,8 @@ msgid "Code (numeric)"
 msgstr ""
 
 #. module: crm_filemgmt
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__color
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__color
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__color
 msgid "Color"
 msgstr ""
@@ -357,8 +378,6 @@ msgstr ""
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__color
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__color
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__color
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__color
 msgid "Color Index"
 msgstr ""
 
@@ -370,6 +389,12 @@ msgstr ""
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file_stage__color
 msgid "Color for kanban views"
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_filetag.py:0
+msgid "Color index must be between 0 and 99."
 msgstr ""
 
 #. module: crm_filemgmt
@@ -433,6 +458,8 @@ msgid "Container type"
 msgstr ""
 
 #. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file_location.py:0
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_location__number_of_containers
 #: model:ir.ui.menu,name:crm_filemgmt.menu_files_container
 msgid "Containers"
@@ -456,14 +483,7 @@ msgstr ""
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_partner__attachment_count
 #: model:ir.model.fields,help:crm_filemgmt.field_res_users__attachment_count
-msgid ""
-"Count of all attachments (including those not in file management system)."
-msgstr ""
-
-#. module: crm_filemgmt
-#: model:ir.model.fields,help:crm_filemgmt.field_res_partner__linked_attachment_count
-#: model:ir.model.fields,help:crm_filemgmt.field_res_users__linked_attachment_count
-msgid "Count of attachments that are part of the file management system."
+msgid "Count of all attachments (including those not in file management)."
 msgstr ""
 
 #. module: crm_filemgmt
@@ -506,13 +526,13 @@ msgid "Created on"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__custom_css
-msgid "Custom CSS"
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_report__custom_css
+msgid "Custom CSS styles for this report"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,help:crm_filemgmt.field_res_file_report__custom_css
-msgid "Custom CSS styles for this report"
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__custom_css
+msgid "Custom Css"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -557,7 +577,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__description
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__description
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_location__description
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__notes
 msgid "Description"
 msgstr ""
 
@@ -607,6 +626,18 @@ msgid "Dropdown menu"
 msgstr ""
 
 #. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "ERROR IN END TEMPLATE"
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "ERROR IN START TEMPLATE"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_kanban
 msgid "Edit File"
 msgstr ""
@@ -639,8 +670,24 @@ msgstr ""
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_filelink__file_id
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_partnerlink__file_id
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__file_ids
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
 msgid "File"
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid ""
+"File '%(file)s' has duplicate contacts. Each contact can only appear once."
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid ""
+"File '%(file)s' has multiple primary contacts. Only one contact can be "
+"marked as primary."
 msgstr ""
 
 #. module: crm_filemgmt
@@ -691,8 +738,13 @@ msgstr ""
 #. module: crm_filemgmt
 #: model:ir.module.category,name:crm_filemgmt.module_category_filemgmt
 #: model:ir.ui.menu,name:crm_filemgmt.menu_filemgmt
-#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.crm_filemgmt_res_config_settings_view_form
 msgid "File Management"
+msgstr ""
+
+#. module: crm_filemgmt
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.crm_filemgmt_res_config_settings_view_form
+msgid "File Management Settings"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -708,13 +760,25 @@ msgstr ""
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_company__file_prefix
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_config_settings__file_prefix
-#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.crm_filemgmt_res_config_settings_view_form
 msgid "File Prefix"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_company__file_prefix_upper
 msgid "File Prefix (Upper Case)"
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_company.py:0
+msgid "File Prefix can only contain letters, numbers, and underscores."
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_company.py:0
+msgid "File Prefix must be at most 10 characters."
 msgstr ""
 
 #. module: crm_filemgmt
@@ -769,16 +833,17 @@ msgid "File prefix converted to uppercase for display purposes."
 msgstr ""
 
 #. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_partner.py:0
 #: model:ir.actions.act_window,name:crm_filemgmt.res_file_action
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__filelink_ids
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__number_of_files
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__file_ids
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__file_ids
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__file_ids
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__file_ids
 #: model:ir.ui.menu,name:crm_filemgmt.menu_files
 #: model:ir.ui.menu,name:crm_filemgmt.menu_main
-#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.crm_filemgmt_res_config_settings_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_container_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_stage_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_calendar
@@ -789,6 +854,12 @@ msgid "Files"
 msgstr ""
 
 #. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_filetag.py:0
+msgid "Files Tagged \"%s\""
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_file_stage__file_ids
 msgid "Files currently in this stage."
 msgstr ""
@@ -796,9 +867,25 @@ msgstr ""
 #. module: crm_filemgmt
 #: model:ir.model.fields,help:crm_filemgmt.field_res_partner__file_ids
 #: model:ir.model.fields,help:crm_filemgmt.field_res_users__file_ids
-msgid ""
-"Files that are explicitly linked to this partner through the file management"
-" system."
+msgid "Files explicitly linked to this partner through file management."
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file_stage.py:0
+msgid "Files in %s"
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file_container.py:0
+msgid "Files in Container: %s"
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file_category.py:0
+msgid "Files in category: %s"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -838,12 +925,12 @@ msgid "Footer Template"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:crm_filemgmt.crm_filemgmt_res_config_settings_view_form
 msgid ""
 "Format:\n"
-"                                    <b>prefix-year/4-digit-number</b>\n"
-"                                    <br/>\n"
-"                                    Example: FILE → FILE-2025/0001"
+"                                        <b>prefix-year/4-digit-number</b>\n"
+"                                        <br/>\n"
+"                                        Example: FILE → FILE-2025/0001"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -923,12 +1010,8 @@ msgstr ""
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__activity_exception_icon
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_category__activity_exception_icon
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__activity_exception_icon
-msgid "Icon"
-msgstr ""
-
-#. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__icon
-msgid "Icon Class"
+msgid "Icon"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1002,6 +1085,7 @@ msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__is_closing_stage
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_stage__is_closing_stage
 msgid "Is Closing Stage"
 msgstr ""
 
@@ -1062,15 +1146,15 @@ msgid "Level"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_partner__linked_attachment_count
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_users__linked_attachment_count
-msgid "Linked Attachments"
-msgstr ""
-
-#. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_partner__file_ids
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_users__file_ids
 msgid "Linked Files"
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_partner.py:0
+msgid "Linked Files - %s"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1192,6 +1276,24 @@ msgid "Next Activity Type"
 msgstr ""
 
 #. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "No report has been selected."
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "No report or end template has been selected."
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "No report or start template has been selected."
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file__priority__1
 #: model:ir.model.fields.selection,name:crm_filemgmt.selection__res_file_category__kanban_state__normal
 msgid "Normal"
@@ -1203,6 +1305,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_containertype__notes
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_location__notes
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_report__notes
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_filetag__notes
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_category_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_container_view_form
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_containertype_view_form
@@ -1328,13 +1431,19 @@ msgid "Partner"
 msgstr ""
 
 #. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_partner.py:0
+msgid "Partner Attachments"
+msgstr ""
+
+#. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_form
 msgid "Partner Links"
 msgstr ""
 
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__partnerlink_ids
-msgid "Partners"
+msgid "Partnerlink"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1385,13 +1494,13 @@ msgid "Priority"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__qr_code
-msgid "QR Code"
+#: model:ir.model.fields,help:crm_filemgmt.field_res_file_container__qr_code
+msgid "QR code for container identification"
 msgstr ""
 
 #. module: crm_filemgmt
-#: model:ir.model.fields,help:crm_filemgmt.field_res_file_container__qr_code
-msgid "QR code for container identification"
+#: model:ir.model.fields,field_description:crm_filemgmt.field_res_file_container__qr_code
+msgid "Qr Code"
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1605,6 +1714,12 @@ msgid "Tag Name"
 msgstr ""
 
 #. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_filetag.py:0
+msgid "Tag name should not exceed 50 characters for proper display."
+msgstr ""
+
+#. module: crm_filemgmt
 #: model:ir.ui.menu,name:crm_filemgmt.menu_config_labels
 msgid "Tags"
 msgstr ""
@@ -1649,6 +1764,50 @@ msgstr ""
 #. module: crm_filemgmt
 #: model:ir.model.fields,field_description:crm_filemgmt.field_res_file__template_start_rendered
 msgid "Template start rendered"
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "The file cannot be self-referenced."
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "The file name cannot start or end with a slash (/)."
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "The file number must be an integer."
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid ""
+"The file prefix parameter is not set. Go to configuration and set a value "
+"for the parameter."
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file_category.py:0
+msgid "The read only categories cannot be removed."
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "There are repeated files."
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "There is more than one slash in the file name."
 msgstr ""
 
 #. module: crm_filemgmt
@@ -1769,4 +1928,32 @@ msgstr ""
 #. module: crm_filemgmt
 #: model_terms:ir.ui.view,arch_db:crm_filemgmt.res_file_view_search
 msgid "With technician: Yes"
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "You cannot move a file from a non-closing stage to a closing stage."
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_partner.py:0
+msgid ""
+"You don't have permission to access the file management system. Please "
+"contact your administrator."
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid ""
+"You must select a primary contact for file '%(file)s'. Please check the "
+"'Primary' checkbox on one of the contacts in the Partner Links section."
+msgstr ""
+
+#. module: crm_filemgmt
+#. odoo-python
+#: code:addons/crm_filemgmt/models/res_file.py:0
+msgid "[no subject]"
 msgstr ""
