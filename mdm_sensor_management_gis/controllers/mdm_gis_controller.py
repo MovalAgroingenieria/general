@@ -23,6 +23,12 @@ class MDMGisController(http.Controller):
             s = u'_' + s
         return s.encode('utf-8')
 
+    def _get_model(self, model_name, public=False):
+        """Get model, with sudo if public access."""
+        if public:
+            return request.env[model_name].sudo()
+        return request.env[model_name]
+
     def _get_geojson_from_device(self, device):
         # Check if base_wua module is installed
         # (provides with_gis_measurement_device field)
@@ -47,12 +53,13 @@ class MDMGisController(http.Controller):
             'default_interval': refresh_interval * 1000,
         }
 
-    def _format_sensor_data(self, sensor):
-        # Get last reading
-        last_reading = request.env[
-            'mdm.measurement.device.sensor.reading'].search([
-                ('sensor_id', '=', sensor.id),
-            ], limit=1, order='measurement_time desc')
+    def _format_sensor_data(self, sensor, public=False):
+        """Format sensor data."""
+        reading_model = self._get_model(
+            'mdm.measurement.device.sensor.reading', public)
+        last_reading = reading_model.search([
+            ('sensor_id', '=', sensor.id),
+        ], limit=1, order='measurement_time desc')
         sensor_info = {
             'id': sensor.id,
             'name': sensor.name,
@@ -65,13 +72,13 @@ class MDMGisController(http.Controller):
         }
         return sensor_info
 
-    def _format_device_data(self, device):
-        # Get latest sensor readings
+    def _format_device_data(self, device, public=False):
+        """Format device data."""
         sensor_data = []
         for sensor in device.sensor_ids:
-            sensor_data.append(self._format_sensor_data(sensor))
+            sensor_data.append(self._format_sensor_data(sensor, public))
         photo_url = None
-        if device.photo:
+        if not public and device.photo:
             photo_url = '/web/image/mdm.measurement.device/%s/photo' % (
                 device.id)
         return {
@@ -85,21 +92,28 @@ class MDMGisController(http.Controller):
             'sensors': sensor_data,
         }
 
-    @http.route('/devices_init_config', auth='user', type='json',
-                methods=['POST'], csrf=False)
-    def get_devices_init_config(self, *args, **kwargs):
+    def _get_devices_init_config(self, public=False):
         """Get initial configuration for devices GIS mode."""
+        category_model = self._get_model(
+            'mdm.measurement.device.category', public)
+        device_model = self._get_model('mdm.measurement.device', public)
         categories_output = {}
         # Get categories available for GIS devices mode
-        categories = request.env['mdm.measurement.device.category'].search([
+        categories = category_model.search([
             ('available_for_gis_devices', '=', True),
         ], order='name asc')
+        # Define domain field based on public/private mode
+        device_field = ('available_for_public_gis_devices' if public
+                        else 'available_for_gis_devices')
         for category in categories:
             # Count devices for this category
-            device_count = request.env['mdm.measurement.device'].search_count([
+            device_count = device_model.search_count([
                 ('category_id', '=', category.id),
-                ('available_for_gis_devices', '=', True),
+                (device_field, '=', True),
             ])
+            # For public mode, only include categories with devices
+            if public and device_count == 0:
+                continue
             geojson_style = '{}'
             if category.geojson_style:
                 geojson_style = category.geojson_style.replace(
@@ -121,9 +135,9 @@ class MDMGisController(http.Controller):
         }
         return json.dumps(output, ensure_ascii=False)
 
-    @http.route('/mdm_category_devices', auth='user', type='json',
-                methods=['POST'], csrf=False)
-    def get_mdm_category_devices(self, *args, **kwargs):
+    def _get_mdm_category_devices(self, public=False):
+        """Get devices for a category."""
+        device_model = self._get_model('mdm.measurement.device', public)
         jsonrequest = request.jsonrequest
         params = jsonrequest.get('kwargs', {})
         category_id = params.get('category_id', False)
@@ -132,22 +146,24 @@ class MDMGisController(http.Controller):
         if not category_id:
             return json.dumps(
                 {'error': 'No category_id provided'}, ensure_ascii=False)
+        # Define domain field based on public/private mode
+        device_field = ('available_for_public_gis_devices' if public
+                        else 'available_for_gis_devices')
         domain = [
             ('category_id', '=', category_id),
-            ('available_for_gis_devices', '=', True),
+            (device_field, '=', True),
         ]
         # Get total count
-        total_count = request.env['mdm.measurement.device'].search_count(
-            domain)
+        total_count = device_model.search_count(domain)
         # Get devices with pagination
-        devices = request.env['mdm.measurement.device'].search(
+        devices = device_model.search(
             domain,
             limit=limit,
             offset=offset,
         )
         devices_output = []
         for device in devices:
-            devices_output.append(self._format_device_data(device))
+            devices_output.append(self._format_device_data(device, public))
         output = {
             'devices': devices_output,
             'total_count': total_count,
@@ -155,3 +171,27 @@ class MDMGisController(http.Controller):
             'category_id': category_id,
         }
         return json.dumps(output, ensure_ascii=False)
+
+    @http.route('/devices_init_config', auth='user', type='json',
+                methods=['POST'], csrf=False)
+    def get_devices_init_config(self, *args, **kwargs):
+        """Get initial configuration for devices GIS mode (authenticated)."""
+        return self._get_devices_init_config(public=False)
+
+    @http.route('/mdm_category_devices', auth='user', type='json',
+                methods=['POST'], csrf=False)
+    def get_mdm_category_devices(self, *args, **kwargs):
+        """Get devices for a category (authenticated)."""
+        return self._get_mdm_category_devices(public=False)
+
+    @http.route('/public_devices_init_config', auth='public', type='json',
+                methods=['POST'], csrf=False)
+    def get_public_devices_init_config(self, *args, **kwargs):
+        """Get initial configuration for public devices GIS mode."""
+        return self._get_devices_init_config(public=True)
+
+    @http.route('/public_mdm_category_devices', auth='public', type='json',
+                methods=['POST'], csrf=False)
+    def get_public_mdm_category_devices(self, *args, **kwargs):
+        """Get devices for a category visible in public viewer."""
+        return self._get_mdm_category_devices(public=True)

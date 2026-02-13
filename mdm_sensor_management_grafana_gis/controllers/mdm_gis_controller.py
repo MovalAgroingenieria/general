@@ -46,9 +46,9 @@ class MDMGisControllerGrafana(MDMGisController):
         url += '&refresh=30s'
         return url
 
-    def _format_device_data(self, device):
+    def _format_device_data(self, device, public=False):
         device_info = super(
-            MDMGisControllerGrafana, self)._format_device_data(device)
+            MDMGisControllerGrafana, self)._format_device_data(device, public)
         # Group sensors by type and build multisensor URLs
         sensors_by_type = {}
         for sensor in device.sensor_ids:
@@ -72,9 +72,9 @@ class MDMGisControllerGrafana(MDMGisController):
         device_info['grafana_multisensor_urls'] = grafana_multisensor_urls
         return device_info
 
-    def _format_sensor_data(self, sensor):
+    def _format_sensor_data(self, sensor, public=False):
         sensor_info = super(
-            MDMGisControllerGrafana, self)._format_sensor_data(sensor)
+            MDMGisControllerGrafana, self)._format_sensor_data(sensor, public)
         # Add Grafana URLs
         sensor_info['grafana_url'] = sensor.grafana_url or ''
         sensor_info['grafana_histogram_url'] = (

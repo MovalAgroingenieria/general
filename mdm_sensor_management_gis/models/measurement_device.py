@@ -13,3 +13,8 @@ class MeasurementDevice(models.Model):
         default=True,
         help='Make this device available in GIS devices visualization mode',
     )
+
+    available_for_public_gis_devices = fields.Boolean(
+        string='Available in Public Viewer',
+        default=False,
+    )
