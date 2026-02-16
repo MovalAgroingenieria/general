@@ -228,16 +228,34 @@ for sensor_plan in (plan or []):
             utc_tz = pytz.timezone('UTC')
 
             for reading in data_list:
+                # Skip if magnitude key doesn't exist in the reading
+                if magnitude not in reading:
+                    continue
+
+                # Skip if value is null or empty
+                raw_value = reading.get(magnitude)
+                if raw_value is None or raw_value == '' or str(raw_value).lower() == 'null':
+                    continue
+
+                # Try to convert to float, skip if conversion fails
+                try:
+                    value = float(raw_value)
+                except (ValueError, TypeError):
+                    continue
+
                 # Parse SiAR datetime (Spanish local time) and convert to UTC
-                siar_datetime = datetime.strptime(
-                    reading['Fecha'], "%Y-%m-%dT%H:%M:%S")
-                # 1. Localize naive datetime to Spanish timezone
-                spanish_dt = spanish_tz.localize(siar_datetime)
-                # 2. Convert to UTC
-                utc_dt = spanish_dt.astimezone(utc_tz)
-                # 3. Convert to UTC string for database storage
-                measurement_time_utc = fields.Datetime.to_string(utc_dt)
-                value = float(reading[magnitude])
+                try:
+                    siar_datetime = datetime.strptime(
+                        reading['Fecha'], "%Y-%m-%dT%H:%M:%S")
+                    # 1. Localize naive datetime to Spanish timezone
+                    spanish_dt = spanish_tz.localize(siar_datetime)
+                    # 2. Convert to UTC
+                    utc_dt = spanish_dt.astimezone(utc_tz)
+                    # 3. Convert to UTC string for database storage
+                    measurement_time_utc = fields.Datetime.to_string(utc_dt)
+                except Exception:
+                    # Skip if date parsing fails
+                    continue
 
                 try:
                     remotecontrol.upsert(
@@ -253,8 +271,8 @@ for sensor_plan in (plan or []):
                 except Exception as e:
                     errs = errs + 1
                     readings_summary.append({
-                        'measurement_time': reading['Fecha'],
-                        'value': reading[magnitude],
+                        'measurement_time': reading.get('Fecha', 'unknown'),
+                        'value': raw_value,
                         'error': str(e)})
 
             total_upserts = total_upserts + upserts
