@@ -6,7 +6,7 @@
 Mail Action Resend
 ==================
 
-Integration of measurements retrieval from SALZ endpoint.
+This module provides a server action to resend mail messages. It allows users to mark failed or outgoing emails to be sent again through a simple action available in the mail.mail model.
 
 Credits
 =======

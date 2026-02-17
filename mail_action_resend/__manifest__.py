@@ -10,9 +10,8 @@
     'website': 'https://www.moval.es',
     'author': 'Moval Agroingeniería',
     'license': 'AGPL-3',
-    'depends': ['mail', 'account_credit_control'],
+    'depends': ['mail'],
     'data': [
-        'security/ir.model.access.csv',
         'data/action_mail_data.xml',
     ],
     'application': False,

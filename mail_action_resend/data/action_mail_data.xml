@@ -2,11 +2,19 @@
 <odoo>
         <record id="resend_action" model="ir.actions.server">
             <field name="name">Resend Mail Action</field>
-            <field name="model_id" ref="account_credit_control.model_mail_mail"/>
+            <field name="model_id" ref="mail.model_mail_mail"/>
             <field name="code">
                 for r in records:
                     r.mark_outgoing()
                     r.send()
             </field>
+        </record>
+
+        <record id="resend_action_values" model="ir.values">
+            <field name="name">Resend Mail Action</field>
+            <field name="model">mail.mail</field>
+            <field name="key">action</field>
+            <field name="key2">client_action_multi</field>
+            <field name="value" eval="'ir.actions.server,' + str(ref('resend_action'))"/>
         </record>
 </odoo>
