@@ -8,7 +8,7 @@
     "summary": "Adds the option to print Journal Entries",
     "author": "ForgeFlow, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/account-financial-tools",
-    "depends": ["account"],
+    "depends": ["account", "base_wua_report"],
     "data": ["report/journal_report.xml"],
     "demo": [],
     "installable": True,
