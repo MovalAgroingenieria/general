@@ -1,0 +1,819 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_icc_pro" model="remotecontrol">
+            <field name="name">ICC PRO</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">http://45.10.4.32:81</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">False</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "username": "",
+  "password": "",
+  "client_id": "",
+  "client_secret": ""
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>ICC PRO · Odoo Integration</h2>
+<p><strong>Type:</strong> REST API with OAuth2 Authentication (Password Grant)</p>
+
+<hr/>
+
+<h3>1) Connection Configuration</h3>
+<p>Type: <code>REST</code> · Base URL: <code>http://your-server:81</code></p>
+
+<h4>connection_params (JSON):</h4>
+<pre>{
+  "username": "YOUR_USERNAME",
+  "password": "YOUR_PASSWORD",
+  "client_id": "YOUR_CLIENT_ID",
+  "client_secret": "YOUR_CLIENT_SECRET"
+}</pre>
+
+<p><strong>Parameters:</strong></p>
+<ul>
+  <li><code>username</code>: ICC PRO account username (e.g., "MOVAL")</li>
+  <li><code>password</code>: ICC PRO account password</li>
+  <li><code>client_id</code>: OAuth2 client identifier (e.g., "Moval-Regadío")</li>
+  <li><code>client_secret</code>: OAuth2 client secret</li>
+</ul>
+
+<h3>2) Authentication Flow</h3>
+<p>ICC PRO uses <strong>OAuth2 Password Grant</strong> authentication:</p>
+
+<h4>Token Request:</h4>
+<pre>POST /token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password
+&amp;username=YOUR_USERNAME
+&amp;password=YOUR_PASSWORD
+&amp;client_id=YOUR_CLIENT_ID
+&amp;client_secret=YOUR_CLIENT_SECRET</pre>
+
+<h4>Token Response:</h4>
+<pre>{
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJS...",
+  "token_type": "bearer",
+  "expires_in": 86399
+}</pre>
+
+<h4>Using the Token:</h4>
+<p>All subsequent API calls must include the Authorization header:</p>
+<pre>Authorization: Bearer &lt;access_token&gt;</pre>
+
+<h3>3) Available Procedures</h3>
+<ul>
+  <li><strong>ICC PRO: Get Mainlines</strong> → Login + retrieves all mainlines (devices/meters) from ICC PRO.</li>
+  <li><strong>ICC PRO: Daily Sync</strong> → Login + Build Sensor Plan + Get Readings for daily synchronization.</li>
+  <li><strong>ICC PRO: Get Last Readings</strong> → Login + Get last reading for each configured meter.</li>
+</ul>
+
+<h3>4) API Endpoints</h3>
+<ul>
+  <li><code>POST /token</code> → OAuth2 token endpoint</li>
+  <li><code>GET /api/mainlines</code> → List all mainlines (devices with meters)</li>
+  <li><code>GET /api/accumulation/meters</code> → Get meter readings with parameters:
+    <ul>
+      <li><code>utc=true</code></li>
+      <li><code>fromdatetime=YYYYMMDDHHmmss</code></li>
+      <li><code>todatetime=YYYYMMDDHHmmss</code></li>
+      <li><code>resolution=2</code> (daily)</li>
+      <li><code>mid={Meter}</code> (meter ID from mainlines)</li>
+    </ul>
+  </li>
+</ul>
+
+<h3>5) Mainlines Response Structure</h3>
+<pre>[
+  {
+    "Id": 2536,
+    "Name": "3-L051",
+    "Description": "01003 MATEO RIQUELM, ROSARIO",
+    "FieldUnitId": 17,
+    "Meter": 1921,
+    "MainValve": 0,
+    "MeterType": 5
+  },
+  ...
+]</pre>
+<p><strong>Key fields:</strong></p>
+<ul>
+  <li><code>Id</code>: Mainline identifier</li>
+  <li><code>Name</code>: Mainline name/code</li>
+  <li><code>Description</code>: Partner/location description</li>
+  <li><code>Meter</code>: Meter ID (used for readings API)</li>
+  <li><code>FieldUnitId</code>: Field unit identifier</li>
+</ul>
+
+<h3>6) Readings Response Structure</h3>
+<pre>{
+  "Data": [
+    {
+      "Time": "20260101230000",
+      "MetersData": [
+        {
+          "Id": 1272,
+          "Volume": 0.0,
+          "AccVolume": 5477000.0
+        }
+      ],
+      "VirtualMetersData": []
+    },
+    ...
+  ]
+}</pre>
+<p><strong>Key fields:</strong></p>
+<ul>
+  <li><code>Time</code>: Timestamp in format YYYYMMDDHHmmss</li>
+  <li><code>MetersData[].Id</code>: Meter ID</li>
+  <li><code>MetersData[].Volume</code>: Period volume</li>
+  <li><code>MetersData[].AccVolume</code>: Accumulated volume (totalizer)</li>
+</ul>
+
+<h3>7) Odoo Configuration</h3>
+
+<h4>In Device (<code>mdm.measurement.device</code>) remotecontrol_params:</h4>
+<pre>{
+  "meter_id": 1921,
+  "mainline_id": 2536,
+  "start_date": "2026-01-01"
+}</pre>
+<ul>
+  <li><code>meter_id</code>: Meter ID from ICC PRO (used for readings API)</li>
+  <li><code>mainline_id</code>: Mainline ID from ICC PRO</li>
+  <li><code>start_date</code>: Initial date for historical data retrieval</li>
+</ul>
+
+<h4>In Sensor (<code>mdm.measurement.device.sensor</code>) remotecontrol_params:</h4>
+<pre>{
+  "meter_id": 1921,
+  "value_field": "AccVolume"
+}</pre>
+<ul>
+  <li><code>meter_id</code>: Meter ID (can be inherited from device)</li>
+  <li><code>value_field</code>: "AccVolume" for totalizer, "Volume" for period consumption</li>
+</ul>
+
+<h3>8) Troubleshooting</h3>
+<ul>
+  <li><strong>Connection refused</strong> → Check host/port and firewall rules</li>
+  <li><strong>Invalid grant</strong> → Verify username/password are correct</li>
+  <li><strong>Invalid client</strong> → Verify client_id/client_secret are correct</li>
+  <li><strong>401 Unauthorized</strong> → Token expired, run Get Token again</li>
+  <li><strong>Empty readings</strong> → Check meter_id exists and date range is valid</li>
+</ul>
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Get Token (OAuth2 Password Grant) -->
+        <record id="remotecontrol_icc_pro_action_get_token" model="remotecontrol.action">
+            <field name="name">ICC PRO: Get Token</field>
+            <field name="remote_id" ref="remotecontrol_icc_pro"/>
+            <field name="sequence">10</field>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# ICC PRO OAuth2 Password Grant Authentication
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+username = (cfg.get('username') or '').strip()
+password = (cfg.get('password') or '').strip()
+client_id = (cfg.get('client_id') or '').strip()
+client_secret = (cfg.get('client_secret') or '').strip()
+
+if not username or not password:
+    raise Exception("Missing ICC PRO credentials: set username/password in connection_params.")
+if not client_id or not client_secret:
+    raise Exception("Missing OAuth2 client credentials: set client_id/client_secret in connection_params.")
+
+# Build token URL
+url = (base_url or '').rstrip('/') + '/token'
+
+# OAuth2 Password Grant requires form-urlencoded data
+token_data = {
+    'grant_type': 'password',
+    'username': username,
+    'password': password,
+    'client_id': client_id,
+    'client_secret': client_secret
+}
+
+headers = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+}
+
+resp = request_retry('POST', url, data=token_data, headers=headers, timeout=timeout)
+
+if resp.status_code >= 400:
+    raise Exception("Token request failed: %s %s" % (resp.status_code, resp.text))
+
+try:
+    token_response = resp.json()
+except Exception as e:
+    raise Exception("Failed to parse token response: %s" % str(e))
+
+access_token = token_response.get('access_token')
+if not access_token:
+    raise Exception("Token response missing access_token: %s" % str(token_response))
+
+# Store token info in bag
+bag['access_token'] = access_token
+bag['token_type'] = token_response.get('token_type', 'bearer')
+bag['expires_in'] = token_response.get('expires_in')
+
+result = 'Token obtained successfully. Type: %s, Expires in: %s seconds' % (
+    bag['token_type'],
+    bag['expires_in']
+)
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Get Mainlines (Devices) -->
+        <record id="remotecontrol_icc_pro_action_get_mainlines" model="remotecontrol.action">
+            <field name="name">ICC PRO: Get Mainlines</field>
+            <field name="remote_id" ref="remotecontrol_icc_pro"/>
+            <field name="sequence">20</field>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Get all mainlines (devices/meters) from ICC PRO
+if 'access_token' not in bag:
+    raise Exception('Please run "ICC PRO: Get Token" action first')
+
+Remote = self.remote_id
+access_token = bag['access_token']
+
+auth_headers = {
+    'Authorization': 'Bearer %s' % access_token,
+    'Content-Type': 'application/x-www-form-urlencoded'
+}
+
+all_mainlines = {
+    'executed_at': fields.Datetime.now(),
+    'mainlines': [],
+    'errors': []
+}
+
+try:
+    # Get mainlines list from ICC PRO API
+    url_mainlines = (base_url or '').rstrip('/') + '/api/mainlines'
+
+    resp = request_retry('GET', url_mainlines, headers=auth_headers, timeout=timeout)
+
+    if resp.status_code == 200:
+        mainlines_list = resp.json() or []
+        all_mainlines['mainlines'] = mainlines_list
+    elif resp.status_code == 401:
+        raise Exception("Authentication failed: Token may be expired. Please run Get Token again.")
+    else:
+        all_mainlines['errors'].append('Failed to get mainlines: HTTP %d - %s' % (resp.status_code, resp.text[:500]))
+
+except Exception as e:
+    all_mainlines['errors'].append('Error getting mainlines: %s' % str(e))
+
+bag['icc_pro_mainlines'] = all_mainlines
+
+# Create JSON attachment
+timestamp = fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+fname = 'icc_pro_mainlines_%s.json' % timestamp
+b64 = base64.b64encode(json.dumps(all_mainlines, indent=2, ensure_ascii=False, default=str).encode('utf-8'))
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+
+bag['attachment_id'] = att.id
+bag['attachment_name'] = fname
+
+total_mainlines = len(all_mainlines.get('mainlines', []))
+total_errors = len(all_mainlines.get('errors', []))
+
+Remote.message_post(
+    body=u"[ICC PRO Mainlines] Found %s mainlines (%s errors). File: %s" % (
+        total_mainlines, total_errors, fname
+    ),
+    attachment_ids=[att.id]
+)
+
+result = 'Found %d mainlines (%d errors). File: %s' % (total_mainlines, total_errors, fname)
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Build Sensor Plan -->
+        <record id="remotecontrol_icc_pro_action_build_sensor_plan" model="remotecontrol.action">
+            <field name="name">ICC PRO: Build Sensor Plan</field>
+            <field name="remote_id" ref="remotecontrol_icc_pro"/>
+            <field name="sequence">30</field>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Build sensor plan from device/sensor remotecontrol_params
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+
+# Get all sensors with remotecontrol_params configured for THIS remote control
+sensors = Sensor.search([
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id),
+    ('active', '=', True)
+])
+
+# Build map of sensor_id -> most recent reading (single query optimization)
+last_readings_map = {}
+if sensors:
+    sensor_ids = [s.id for s in sensors]
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for row in cr.fetchall():
+        last_readings_map[row[0]] = row[1]
+
+# Build execution plan
+sensor_plan = []
+
+for sensor in sensors:
+    device = sensor.device_id
+
+    # Parse sensor configuration
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+
+    # Parse device configuration
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+
+    # Get meter_id from sensor or device config
+    meter_id = sensor_cfg.get('meter_id') or device_cfg.get('meter_id')
+    value_field = sensor_cfg.get('value_field', 'AccVolume')  # Default to totalizer
+
+    if not meter_id:
+        continue
+
+    # Determine initial date for this sensor
+    last_reading_time = last_readings_map.get(sensor.id)
+    if last_reading_time:
+        try:
+            initial_date = fields.Date.to_string(
+                fields.Datetime.from_string(last_reading_time) +
+                timedelta(days=1))
+        except Exception:
+            initial_date = str(last_reading_time)[:10]
+    else:
+        # Use start_date from sensor config or device config, or Jan 1 of current year
+        start_cfg = sensor_cfg.get('start_date') or device_cfg.get('start_date')
+        if start_cfg:
+            initial_date = start_cfg[:10]
+        else:
+            year_str = today_str[:4]
+            initial_date = '%s-01-01' % year_str
+
+    plan_item = {
+        'odoo_sensor_id': sensor.id,
+        'odoo_device_id': device.id,
+        'meter_id': meter_id,
+        'value_field': value_field,
+        'start_date': initial_date
+    }
+    sensor_plan.append(plan_item)
+
+bag['sensor_plan'] = sensor_plan
+bag['plan_count'] = len(sensor_plan)
+
+result = 'Built sensor plan with %d sensors' % len(sensor_plan)
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Get Readings -->
+        <record id="remotecontrol_icc_pro_action_get_readings" model="remotecontrol.action">
+            <field name="name">ICC PRO: Get Readings</field>
+            <field name="remote_id" ref="remotecontrol_icc_pro"/>
+            <field name="sequence">40</field>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Get readings from ICC PRO and upsert into Odoo
+if 'access_token' not in bag:
+    raise Exception('Please run "ICC PRO: Get Token" action first')
+if 'sensor_plan' not in bag:
+    raise Exception('Please run "ICC PRO: Build Sensor Plan" action first')
+
+Remote = self.remote_id
+access_token = bag['access_token']
+sensor_plan = bag['sensor_plan']
+
+auth_headers = {
+    'Authorization': 'Bearer %s' % access_token,
+    'Content-Type': 'application/x-www-form-urlencoded'
+}
+
+Sensor = env['mdm.measurement.device.sensor']
+today_str = fields.Date.today()
+# Format dates for ICC PRO API: YYYYMMDDHHmmss
+today_api = today_str.replace('-', '') + '235959'
+
+# Determine earliest start_date from all sensors
+earliest_date = None
+for plan_item in sensor_plan:
+    start_date = plan_item['start_date']
+    if earliest_date is None or start_date < earliest_date:
+        earliest_date = start_date
+
+if earliest_date is None:
+    earliest_date = today_str[:4] + '-01-01'  # Default to Jan 1st of current year
+
+start_date_api = earliest_date.replace('-', '') + '000000'
+
+# Single API call to get ALL meters readings
+url_readings = (base_url or '').rstrip('/') + '/api/accumulation/meters'
+params = {
+    'utc': 'true',
+    'fromdatetime': start_date_api,
+    'todatetime': today_api,
+    'resolution': '2'  # Daily resolution
+    # NO mid parameter = returns all meters
+}
+
+try:
+    resp = request_retry('GET', url_readings, headers=auth_headers, params=params, timeout=timeout)
+
+    if resp.status_code == 401:
+        raise Exception("Authentication failed: Token may be expired")
+
+    if resp.status_code >= 400:
+        raise Exception("HTTP %d: %s" % (resp.status_code, resp.text[:200]))
+
+    response_data = resp.json() or {}
+    data_list = response_data.get('Data', [])
+
+except Exception as e:
+    raise Exception("Failed to get readings from ICC PRO: %s" % str(e))
+
+# Now process readings for each sensor
+total_upserts = 0
+total_errors = 0
+items = []
+
+for plan_item in sensor_plan:
+    odoo_sensor_id = plan_item['odoo_sensor_id']
+    meter_id = plan_item['meter_id']
+    value_field = plan_item.get('value_field', 'AccVolume')
+
+    sensor = Sensor.browse(odoo_sensor_id)
+    if not sensor.exists():
+        continue
+
+    sensor_upserts = 0
+    sensor_errors = 0
+    readings_summary = []
+
+    try:
+        for data_point in data_list:
+            try:
+                # Time format: YYYYMMDDHHmmss
+                time_str = data_point.get('Time', '')
+                meters_data = data_point.get('MetersData', [])
+
+                if not time_str or not meters_data:
+                    continue
+
+                # Parse timestamp: 20260101230000 -> 2026-01-01 23:00:00
+                if len(time_str) >= 14:
+                    timestamp = '%s-%s-%s %s:%s:%s' % (
+                        time_str[0:4],   # year
+                        time_str[4:6],   # month
+                        time_str[6:8],   # day
+                        time_str[8:10],  # hour
+                        time_str[10:12], # minute
+                        time_str[12:14]  # second
+                    )
+                else:
+                    continue
+
+                # Find meter data for our meter_id
+                for meter_data in meters_data:
+                    if meter_data.get('Id') == meter_id:
+                        # Get value based on value_field (AccVolume or Volume)
+                        value = meter_data.get(value_field, 0.0)
+                        if value is None:
+                            value = 0.0
+
+                        # Upsert reading into Odoo
+                        Remote.upsert(
+                            'mdm.measurement.device.sensor.reading',
+                            {
+                                'sensor_id': odoo_sensor_id,
+                                'measurement_time': timestamp
+                            },
+                            {
+                                'value': float(value),
+                                'remotecontrol_origin_id': Remote.id
+                            }
+                        )
+                        sensor_upserts += 1
+
+                        if len(readings_summary) < 5:
+                            readings_summary.append({
+                                'timestamp': timestamp,
+                                'value': value,
+                                'field': value_field
+                            })
+                        break
+
+            except Exception as e:
+                sensor_errors += 1
+                if len(readings_summary) < 5:
+                    readings_summary.append({
+                        'error': str(e),
+                        'raw': str(data_point)[:100]
+                    })
+
+        total_upserts += sensor_upserts
+        total_errors += sensor_errors
+
+        items.append({
+            'sensor_id': odoo_sensor_id,
+            'sensor_name': sensor.name,
+            'meter_id': meter_id,
+            'value_field': value_field,
+            'status': 'success',
+            'points_found': len(data_list),
+            'upserts': sensor_upserts,
+            'errors': sensor_errors,
+            'sample_readings': readings_summary
+        })
+
+    except Exception as e:
+        total_errors += 1
+        items.append({
+            'sensor_id': odoo_sensor_id,
+            'sensor_name': sensor.name,
+            'meter_id': meter_id,
+            'status': 'error',
+            'error': str(e)
+        })
+
+# Create audit attachment
+audit = {
+    'executed_at': str(fields.Datetime.now()),
+    'end_date': today_str,
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'sensors_processed': len(sensor_plan),
+    'items': items
+}
+
+try:
+    audit_json = json.dumps(audit, ensure_ascii=True, indent=2, default=str)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+except Exception as json_error:
+    simple_audit = {
+        'executed_at': str(fields.Datetime.now()),
+        'total_upserts': total_upserts,
+        'total_errors': total_errors,
+        'error': str(json_error)
+    }
+    audit_json = json.dumps(simple_audit, ensure_ascii=True, indent=2)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+
+fname = 'icc_pro_readings_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+)
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+
+Remote.message_post(
+    body=u"[ICC PRO Readings] upserts=%s errors=%s sensors=%s" % (
+        total_upserts, total_errors, len(sensor_plan)
+    ),
+    attachment_ids=[att.id]
+)
+
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+
+result = 'Processed %d sensors, %d readings upserted, %d errors' % (len(sensor_plan), total_upserts, total_errors)
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Get Last Readings (for wua.reading integration) -->
+        <record id="remotecontrol_icc_pro_action_get_last_readings" model="remotecontrol.action">
+            <field name="name">ICC PRO: Get Last Readings</field>
+            <field name="remote_id" ref="remotecontrol_icc_pro"/>
+            <field name="sequence">50</field>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Get last readings from ICC PRO for all configured meters
+# Returns nested dictionary: {meter_id: {date: ..., value: ...}}
+if 'access_token' not in bag:
+    raise Exception('Please run "ICC PRO: Get Token" action first')
+
+Remote = self.remote_id
+access_token = bag['access_token']
+
+auth_headers = {
+    'Authorization': 'Bearer %s' % access_token,
+    'Content-Type': 'application/x-www-form-urlencoded'
+}
+
+# Get current time and last 3 hours window
+from datetime import datetime, timedelta
+now_dt = datetime.now()
+from_dt = now_dt - timedelta(hours=3)
+from_datetime_api = from_dt.strftime('%Y%m%d%H%M%S')
+to_datetime_api = now_dt.strftime('%Y%m%d%H%M%S')
+
+# Single API call to get ALL meters readings (no mid parameter)
+url_readings = (base_url or '').rstrip('/') + '/api/accumulation/meters'
+params = {
+    'utc': 'true',
+    'fromdatetime': from_datetime_api,
+    'todatetime': to_datetime_api,
+    'resolution': '2'
+    # NO mid parameter = returns all meters
+}
+
+try:
+    resp = request_retry('GET', url_readings, headers=auth_headers, params=params, timeout=timeout)
+
+    if resp.status_code == 401:
+        raise Exception("Authentication failed: Token may be expired")
+
+    if resp.status_code >= 400:
+        raise Exception("HTTP %d: %s" % (resp.status_code, resp.text[:200]))
+
+    response_data = resp.json() or {}
+    data_list = response_data.get('Data', [])
+
+except Exception as e:
+    raise Exception("Failed to get readings from ICC PRO: %s" % str(e))
+
+# Process all meters from the response
+last_readings = {}
+total_readings = 0
+
+if data_list:
+    # Get the last data point (most recent timestamp)
+    last_point = data_list[-1]
+    time_str = last_point.get('Time', '')
+    meters_data = last_point.get('MetersData', [])
+
+    # Parse timestamp once
+    if len(time_str) >= 14:
+        timestamp = '%s-%s-%s %s:%s:%s' % (
+            time_str[0:4], time_str[4:6], time_str[6:8],
+            time_str[8:10], time_str[10:12], time_str[12:14]
+        )
+    else:
+        timestamp = time_str
+
+    # Build dictionary with all meters
+    for meter_data in meters_data:
+        meter_id = meter_data.get('Id')
+        if meter_id:
+            last_readings[meter_id] = {
+                'date': timestamp,
+                'value':float(meter_data.get('AccVolume', 0.0))/1000.0,
+                'volume': meter_data.get('Volume', 0.0)
+            }
+            total_readings += 1
+
+bag['last_readings'] = last_readings
+bag['total_last_readings'] = total_readings
+
+result = 'Retrieved last readings for %d meters' % total_readings
+            ]]></field>
+        </record>
+
+        <!-- PROCEDURE: Get Mainlines -->
+        <record id="remotecontrol_icc_pro_procedure_get_mainlines" model="remotecontrol.procedure">
+            <field name="name">ICC PRO: Get Mainlines</field>
+            <field name="remote_id" ref="remotecontrol_icc_pro"/>
+            <field name="sequence">10</field>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_icc_pro_step_get_mainlines_10_token" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_icc_pro_procedure_get_mainlines"/>
+            <field name="action_id" ref="remotecontrol_icc_pro_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_icc_pro_step_get_mainlines_20_mainlines" model="remotecontrol.step">
+            <field name="name">Get Mainlines</field>
+            <field name="procedure_id" ref="remotecontrol_icc_pro_procedure_get_mainlines"/>
+            <field name="action_id" ref="remotecontrol_icc_pro_action_get_mainlines"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <!-- PROCEDURE: Daily Sync -->
+        <record id="remotecontrol_icc_pro_procedure_daily_sync" model="remotecontrol.procedure">
+            <field name="name">ICC PRO: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_icc_pro"/>
+            <field name="sequence">20</field>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_icc_pro_step_daily_sync_10_token" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_icc_pro_procedure_daily_sync"/>
+            <field name="action_id" ref="remotecontrol_icc_pro_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_icc_pro_step_daily_sync_20_plan" model="remotecontrol.step">
+            <field name="name">Build Sensor Plan</field>
+            <field name="procedure_id" ref="remotecontrol_icc_pro_procedure_daily_sync"/>
+            <field name="action_id" ref="remotecontrol_icc_pro_action_build_sensor_plan"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_icc_pro_step_daily_sync_30_readings" model="remotecontrol.step">
+            <field name="name">Get Readings</field>
+            <field name="procedure_id" ref="remotecontrol_icc_pro_procedure_daily_sync"/>
+            <field name="action_id" ref="remotecontrol_icc_pro_action_get_readings"/>
+            <field name="sequence">30</field>
+        </record>
+
+        <!-- PROCEDURE: Get Last Readings (for wua.reading) -->
+        <record id="remotecontrol_icc_pro_procedure_last_readings" model="remotecontrol.procedure">
+            <field name="name">ICC PRO: Get Last Readings</field>
+            <field name="remote_id" ref="remotecontrol_icc_pro"/>
+            <field name="sequence">30</field>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_icc_pro_step_last_readings_10_token" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_icc_pro_procedure_last_readings"/>
+            <field name="action_id" ref="remotecontrol_icc_pro_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_icc_pro_step_last_readings_20_readings" model="remotecontrol.step">
+            <field name="name">Get Last Readings</field>
+            <field name="procedure_id" ref="remotecontrol_icc_pro_procedure_last_readings"/>
+            <field name="action_id" ref="remotecontrol_icc_pro_action_get_last_readings"/>
+            <field name="sequence">20</field>
+        </record>
+
+    </data>
+</odoo>
