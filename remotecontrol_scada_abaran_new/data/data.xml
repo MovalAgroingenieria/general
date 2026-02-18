@@ -64,15 +64,17 @@ ID_MEDIDA | FECHA_HORA       | CAUDAL | VOLUMEN | PRESION
         3 | 19/11/2025 14:15 |   13.2 |  1275.0 |    2.4
 </pre>
 
-<h3>3) Date Format (FIXED)</h3>
-<p><strong>All dates use FIXED format:</strong></p>
+<h3>3) Date Format (AUTO-DETECT)</h3>
+<p><strong>Supported date formats (auto-detected):</strong></p>
 <ul>
-  <li><strong>Format</strong>: DD/MM/YYYY HH:MM (e.g., "19/11/2025 13:45")</li>
+  <li><strong>ISO Format</strong>: YYYY-MM-DD HH:MM:SS (e.g., "2026-02-03 15:00:00")</li>
+  <li><strong>ISO with milliseconds</strong>: YYYY-MM-DD HH:MM:SS.mmm (e.g., "2026-02-03 15:00:00.000")</li>
+  <li><strong>Spanish Format</strong>: DD/MM/YYYY HH:MM (e.g., "19/11/2025 13:45")</li>
+  <li><strong>Spanish with seconds</strong>: DD/MM/YYYY HH:MM:SS (e.g., "19/11/2025 13:45:30")</li>
   <li><strong>Timezone</strong>: Europe/Madrid → Automatically converted to UTC for Odoo</li>
-  <li><strong>strptime format</strong>: '%d/%m/%Y %H:%M'</li>
-  <li><strong>NOT configurable</strong>: This format is hardcoded in the system</li>
+  <li><strong>NOT configurable</strong>: Format is auto-detected from database values</li>
 </ul>
-<p><em>Note: Do NOT include datetime_format in sensor configuration - it's always DD/MM/YYYY HH:MM</em></p>
+<p><em>Note: Do NOT include datetime_format in sensor configuration - format is auto-detected</em></p>
 
 <h3>4) Device Configuration</h3>
 <p>Each <strong>mdm.measurement.device</strong> requires:</p>
@@ -457,30 +459,28 @@ try:
         sensor_record = SensorModel.browse(sensor_id)
 
         try:
-            # Convert date range from YYYY-MM-DD to DD/MM/YYYY HH:MM format
-            # Initial date: 01/01/2025 00:00
+            # Use ISO format for date filtering (YYYY-MM-DD HH:MM:SS)
+            # This works with both ISO and Spanish date formats in the database
             from datetime import datetime
             initial_dt = datetime.strptime(initial_date, '%Y-%m-%d')
-            initial_str = initial_dt.strftime('%d/%m/%Y 00:00')
+            initial_str = initial_dt.strftime('%Y-%m-%d 00:00:00')
 
-            # Final date: 08/02/2026 23:59
+            # Final date with time
             final_dt = datetime.strptime(final_date, '%Y-%m-%d')
-            final_str = final_dt.strftime('%d/%m/%Y 23:59')
+            final_str = final_dt.strftime('%Y-%m-%d 23:59:59')
 
-            # Build query
+            # Build query (without IS NOT NULL filter - allows 0 and NULL values)
             query = """
                 SELECT ID_MEDIDA, `%s`, `%s`
                 FROM `%s`
                 WHERE `%s` >= ?
                   AND `%s` <= ?
-                  AND `%s` IS NOT NULL
                 ORDER BY `%s` ASC
             """ % (
                 datetime_column, value_column,
                 table_name,
                 datetime_column,
                 datetime_column,
-                value_column,
                 datetime_column
             )
 
@@ -502,23 +502,36 @@ try:
                     fecha_hora_value = row[1]
                     raw_value = float(row[2]) if row[2] is not None else 0.0
 
-                    # Parse DD/MM/YYYY HH:MM format (FIXED format, not configurable)
-                    # Example: "19/11/2025 13:45"
+                    # Parse datetime - auto-detect format (ISO or Spanish)
+                    # Supported: YYYY-MM-DD HH:MM:SS[.mmm] or DD/MM/YYYY HH:MM[:SS]
                     if hasattr(fecha_hora_value, 'strftime'):
                         # It's already a datetime object
                         naive_dt = fecha_hora_value
                     else:
-                        # It's a string - parse with FIXED format
+                        # It's a string - auto-detect format
                         fecha_str = str(fecha_hora_value).strip()
-                        # Handle both DD/MM/YYYY HH:MM and DD/MM/YYYY HH:MM:SS formats
-                        try:
-                            naive_dt = datetime.strptime(fecha_str, '%d/%m/%Y %H:%M')
-                        except ValueError:
+                        naive_dt = None
+
+                        # Try ISO formats first (YYYY-MM-DD)
+                        for fmt in ['%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M']:
                             try:
-                                naive_dt = datetime.strptime(fecha_str, '%d/%m/%Y %H:%M:%S')
+                                naive_dt = datetime.strptime(fecha_str, fmt)
+                                break
                             except ValueError:
-                                # Try with single digit day/month
-                                naive_dt = datetime.strptime(fecha_str, '%d/%m/%Y %H:%M')
+                                continue
+
+                        # Try Spanish formats (DD/MM/YYYY)
+                        if naive_dt is None:
+                            for fmt in ['%d/%m/%Y %H:%M:%S', '%d/%m/%Y %H:%M']:
+                                try:
+                                    naive_dt = datetime.strptime(fecha_str, fmt)
+                                    break
+                                except ValueError:
+                                    continue
+
+                        # If still not parsed, raise error
+                        if naive_dt is None:
+                            raise ValueError('Cannot parse date: %s' % fecha_str)
 
                     # Convert from Europe/Madrid to UTC
                     madrid_tz = pytz.timezone('Europe/Madrid')
