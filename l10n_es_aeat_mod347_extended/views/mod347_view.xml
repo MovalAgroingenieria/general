@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record model="ir.ui.view" id="view_l10n_es_aeat_mod347_partner_record_form">
+        <field name="model">l10n.es.aeat.mod347.partner_record</field>
+        <field name="inherit_id" ref="l10n_es_aeat_mod347.view_l10n_es_aeat_mod347_partner_record_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='bussiness_real_estate_rent']" position="after">
+                <field name="visible_bdns_number" invisible="1" />
+                <field name="bdns_number" attrs="{'invisible': [('visible_bdns_number', '=', False)]}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
