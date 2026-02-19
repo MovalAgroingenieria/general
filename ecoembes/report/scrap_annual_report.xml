@@ -18,7 +18,7 @@
 
                     <div name="report_title" class="report_main_title text-center">
                         <h2>SCRAP Annual Contribution Report</h2>
-                        <h3>Year <t t-esc="year or ''"/></h3>
+                        <h3>Year <t t-out="year or ''"/></h3>
                     </div>
 
                     <div class="mt-4">
@@ -40,13 +40,13 @@
                                         <t t-foreach="report_data" t-as="material">
                                         <!-- Material Header -->
                                         <tr style="background-color: #f0f0f0; font-weight: bold;">
-                                            <td><strong t-esc="material['material_name']"/></td>
+                                            <td><strong t-out="material['material_name']"/></td>
                                             <td class="text-right">
-                                                <strong t-esc="'{:,.2f}'.format(material['total_weight_kg'])"/>
+                                                <strong t-out="'{:,.2f}'.format(material['total_weight_kg'])"/>
                                             </td>
                                             <td class="text-right">-</td>
                                             <td class="text-right">
-                                                <strong t-esc="'{:,.2f}'.format(material['total_contribution'])"/>
+                                                <strong t-out="'{:,.2f}'.format(material['total_contribution'])"/>
                                             </td>
                                         </tr>
 
@@ -56,14 +56,14 @@
                                             <!-- Submaterial Header -->
                                             <tr style="background-color: #f8f8f8; font-style: italic;">
                                                 <td style="padding-left: 20px;">
-                                                    <em t-esc="submaterial['submaterial_name']"/>
+                                                    <em t-out="submaterial['submaterial_name']"/>
                                                 </td>
                                                 <td class="text-right">
-                                                    <em t-esc="'{:,.2f}'.format(submaterial['total_weight_kg'])"/>
+                                                    <em t-out="'{:,.2f}'.format(submaterial['total_weight_kg'])"/>
                                                 </td>
                                                 <td class="text-right">-</td>
                                                 <td class="text-right">
-                                                    <em t-esc="'{:,.2f}'.format(submaterial['total_contribution'])"/>
+                                                    <em t-out="'{:,.2f}'.format(submaterial['total_contribution'])"/>
                                                 </td>
                                             </tr>
 
@@ -71,16 +71,16 @@
                                             <t t-foreach="submaterial['types']" t-as="type_data">
                                                 <tr>
                                                     <td style="padding-left: 40px;">
-                                                        <span t-esc="type_data['submaterial_type_name']"/>
+                                                        <span t-out="type_data['submaterial_type_name']"/>
                                                     </td>
                                                     <td class="text-right">
-                                                        <span t-esc="'{:,.2f}'.format(type_data['total_weight_kg'])"/>
+                                                        <span t-out="'{:,.2f}'.format(type_data['total_weight_kg'])"/>
                                                     </td>
                                                     <td class="text-right">
-                                                        <span t-esc="'{:,.4f}'.format(type_data['fee_per_kg'])"/>
+                                                        <span t-out="'{:,.4f}'.format(type_data['fee_per_kg'])"/>
                                                     </td>
                                                     <td class="text-right">
-                                                        <span t-esc="'{:,.2f}'.format(type_data['total_contribution'])"/>
+                                                        <span t-out="'{:,.2f}'.format(type_data['total_contribution'])"/>
                                                     </td>
                                                 </tr>
                                             </t>
@@ -94,11 +94,11 @@
                                     <tr style="border-top: 2px solid black; font-weight: bold;">
                                         <td class="text-right"><strong>TOTAL GENERAL:</strong></td>
                                         <td class="text-right">
-                                            <strong><span t-esc="'{:,.2f}'.format(total_weight)"/></strong>
+                                            <strong><span t-out="'{:,.2f}'.format(total_weight)"/></strong>
                                         </td>
                                         <td class="text-right">-</td>
                                         <td class="text-right">
-                                            <strong><span t-esc="'{:,.2f}'.format(total_contribution)"/></strong>
+                                            <strong><span t-out="'{:,.2f}'.format(total_contribution)"/></strong>
                                         </td>
                                     </tr>
                                     </tfoot>

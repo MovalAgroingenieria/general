@@ -6,7 +6,7 @@
                 <i t-if="state.taskRunning" class="fa fa-tasks icon-with-background task-active" title="Ver tarea actual" />
                 <i t-else="state.taskRunning" class="fa fa-tasks icon-with-background task-inactive" title="Ver tareas" />
                 <span t-if="state.taskRunning" class="task-name text-white">
-                    <t t-esc="state.taskName" />
+                    <t t-out="state.taskName" />
                 </span>
             </div>
         </li>

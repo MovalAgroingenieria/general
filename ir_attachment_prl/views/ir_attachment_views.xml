@@ -113,8 +113,8 @@
                         <div class="o_kanban_record oe_kanban_global_click">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="me-2">
-                                    <strong t-esc="record.name.value or 'Attachment'"/>
-                                    <div class="text-muted" t-esc="record.document_type.value"/>
+                                    <strong t-out="record.name.value or 'Attachment'"/>
+                                    <div class="text-muted" t-out="record.document_type.value"/>
                                 </div>
                                 <t t-if="record.state.raw_value == 'red'">
                                     <span class="badge bg-danger">Expired</span>
@@ -127,22 +127,22 @@
                             <div class="mt-2">
                                 <t t-if="record.contracting_company_id.value">
                                     <span class="text-muted">Company:</span>
-                                    <span t-esc="record.contracting_company_id.value"/>
+                                    <span t-out="record.contracting_company_id.value"/>
                                 </t>
                                 <t t-if="record.worker_id.value">
                                     <span class="ms-3 text-muted">Worker:</span>
-                                    <span t-esc="record.worker_id.value"/>
+                                    <span t-out="record.worker_id.value"/>
                                 </t>
                             </div>
 
                             <div class="mt-1">
                                 <t t-if="record.date_request.value">
                                     <span class="text-muted">Requested:</span>
-                                    <span t-esc="record.date_request.value"/>
+                                    <span t-out="record.date_request.value"/>
                                 </t>
                                 <t t-if="record.expiration_date.value">
                                     <span class="ms-3 text-muted">Expires:</span>
-                                    <span t-esc="record.expiration_date.value"/>
+                                    <span t-out="record.expiration_date.value"/>
                                 </t>
                             </div>
                         </div>

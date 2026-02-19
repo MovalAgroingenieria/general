@@ -6,7 +6,7 @@
                 <i t-if="state.isPresent" class="fa fa-clock-o icon-with-background attendance-active" title="Ver mis asistencias" />
                 <i t-else="state.isPresent" class="fa fa-clock-o icon-with-background attendance-inactive" title="Ver mis asistencias" />
                 <span t-if="state.attendanceTime" class="attendance-time text-white">
-                    <t t-esc="state.attendanceTime" />
+                    <t t-out="state.attendanceTime" />
                 </span>
             </div>
         </li>
