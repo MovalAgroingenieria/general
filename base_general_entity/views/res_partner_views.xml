@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- list view for Primary Entities -->
+    <record id="view_partner_primary_entity_list" model="ir.ui.view">
+        <field name="name">res.partner.primary.entity.list</field>
+        <field name="model">res.partner</field>
+        <field name="priority" eval="20" />
+        <field name="arch" type="xml">
+            <list>
+                <field name="is_primary_entity" column_invisible="True" />
+                <field name="company_type" column_invisible="True" />
+                <field name="name" />
+                <field name="entity_global_code" />
+                <field name="member_count" />
+                <field name="phone" />
+                <field name="email" />
+                <field name="vat" />
+            </list>
+        </field>
+    </record>
+
+    <!-- Form view for Primary Entities -->
+    <record id="view_partner_primary_entity_form" model="ir.ui.view">
+        <field name="name">res.partner.primary.entity.form</field>
+        <field name="model">res.partner</field>
+        <field name="priority" eval="20" />
+        <field name="arch" type="xml">
+            <form string="Primary Entity">
+                <header />
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+                            class="oe_stat_button"
+                            type="object"
+                            name="action_view_members"
+                            icon="fa-users"
+                            invisible="is_primary_entity == False"
+                        >
+                            <field name="member_count" widget="statinfo" string="Members" />
+                        </button>
+                    </div>
+                    <field name="image_1920" widget="image" class="oe_avatar" />
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Entity Name..." />
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="is_primary_entity" invisible="1" />
+                            <field name="company_type" invisible="1" />
+                            <field name="entity_global_code" />
+                            <field name="email" widget="email" />
+                            <field name="phone" widget="phone" />
+                        </group>
+                        <group>
+                            <field name="vat" />
+                            <field name="website" widget="url" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="internal_notes" string="Internal Notes">
+                            <field name="comment" placeholder="Internal notes..." />
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search view for Primary Entities -->
+    <record id="view_partner_primary_entity_search" model="ir.ui.view">
+        <field name="name">res.partner.primary.entity.search</field>
+        <field name="model">res.partner</field>
+        <field name="priority" eval="20" />
+        <field name="arch" type="xml">
+            <search string="Search Primary Entities">
+                <field name="name" />
+                <field name="entity_global_code" />
+                <field name="vat" />
+                <filter
+                    name="filter_active"
+                    string="Active"
+                    domain="[('active', '=', True)]"
+                />
+                <group expand="0" string="Group By">
+                    <filter
+                        name="group_by_country"
+                        string="Country"
+                        domain="[]"
+                        context="{'group_by': 'country_id'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- list view for Secondary Members -->
+    <record id="view_partner_secondary_entity_list" model="ir.ui.view">
+        <field name="name">res.partner.secondary.entity.list</field>
+        <field name="model">res.partner</field>
+        <field name="priority" eval="20" />
+        <field name="arch" type="xml">
+            <list>
+                <field name="is_secondary_entity" column_invisible="True" />
+                <field name="company_type" column_invisible="True" />
+                <field name="name" />
+                <field name="entity_global_code" />
+                <field name="phone" />
+                <field name="email" />
+                <field name="vat" />
+            </list>
+        </field>
+    </record>
+
+    <!-- Form view for Secondary Members -->
+    <record id="view_partner_secondary_entity_form" model="ir.ui.view">
+        <field name="name">res.partner.secondary.entity.form</field>
+        <field name="model">res.partner</field>
+        <field name="priority" eval="20" />
+        <field name="arch" type="xml">
+            <form string="Secondary Member">
+                <sheet>
+                    <field name="image_1920" widget="image" class="oe_avatar" />
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Member Name..." />
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="is_secondary_entity" invisible="1" />
+                            <field name="company_type" invisible="1" />
+                            <field name="entity_global_code" />
+                            <field name="email" widget="email" />
+                            <field name="phone" widget="phone" />
+                        </group>
+                        <group>
+                            <field name="vat" />
+                            <field name="website" widget="url" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="primary_entities" string="Belongs to Entities">
+                            <field
+                                name="primary_entity_ids"
+                                context="{'default_member_partner_id': id}"
+                            >
+                                <list editable="bottom">
+                                    <field
+                                        name="primary_partner_id"
+                                        context="{'form_view_ref': 'base_general_entity.view_partner_primary_entity_form'}"
+                                        options="{'no_create': True, 'no_quick_create': True}"
+                                    />
+                                    <field
+                                        name="member_partner_id"
+                                        column_invisible="True"
+                                    />
+                                    <field name="member_code_in_entity" />
+                                    <field name="company_id" column_invisible="True" />
+                                    <field name="active" column_invisible="True" />
+                                    <field name="note" />
+                                </list>
+                            </field>
+                        </page>
+                        <page name="internal_notes" string="Internal Notes">
+                            <field name="comment" placeholder="Internal notes..." />
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search view for Secondary Members -->
+    <record id="view_partner_secondary_entity_search" model="ir.ui.view">
+        <field name="name">res.partner.secondary.entity.search</field>
+        <field name="model">res.partner</field>
+        <field name="priority" eval="20" />
+        <field name="arch" type="xml">
+            <search string="Search Secondary Members">
+                <field name="name" />
+                <field name="entity_global_code" />
+                <field name="vat" />
+                <filter
+                    name="filter_active"
+                    string="Active"
+                    domain="[('active', '=', True)]"
+                />
+                <group expand="0" string="Group By">
+                    <filter
+                        name="group_by_country"
+                        string="Country"
+                        domain="[]"
+                        context="{'group_by': 'country_id'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action for Primary Entities -->
+    <record id="action_primary_entities" model="ir.actions.act_window">
+        <field name="name">Primary Entities</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_primary_entity', '=', True)]</field>
+        <field name="context">{
+            'default_is_primary_entity': True,
+            'default_company_type': 'company',
+        }</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_partner_primary_entity_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_partner_primary_entity_form')}),
+        ]" />
+        <field name="search_view_id" ref="view_partner_primary_entity_search" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Primary Entity
+            </p>
+            <p>
+                Primary entities are organizations that group secondary members.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action for Secondary Members -->
+    <record id="action_secondary_entities" model="ir.actions.act_window">
+        <field name="name">Secondary Members</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('is_secondary_entity', '=', True)]</field>
+        <field name="context">{
+            'default_is_secondary_entity': True,
+            'default_company_type': 'person',
+        }</field>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_partner_secondary_entity_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_partner_secondary_entity_form')}),
+        ]" />
+        <field name="search_view_id" ref="view_partner_secondary_entity_search" />
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Secondary Member
+            </p>
+            <p>
+                Secondary members can belong to one or more primary entities.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Wizard Form View -->
+    <record id="view_partner_entity_type_wizard_form" model="ir.ui.view">
+        <field name="name">partner.entity.type.wizard.form</field>
+        <field name="model">partner.entity.type.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Mark/Unmark Entity Type">
+                <group>
+                    <field name="action_type" widget="radio" />
+                </group>
+                <footer>
+                    <button
+                        string="Apply"
+                        type="object"
+                        name="action_apply"
+                        class="btn-primary"
+                    />
+                    <button string="Cancel" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action to open wizard -->
+    <record id="action_partner_entity_type_wizard" model="ir.actions.act_window">
+        <field name="name">Mark/Unmark Entity Type</field>
+        <field name="res_model">partner.entity.type.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="base.model_res_partner" />
+        <field name="binding_view_types">list</field>
+    </record>
+</odoo>
