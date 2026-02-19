@@ -43,13 +43,13 @@ Installation
 Configuration
 =============
 
-* Go to :menuselection:`Settings --> Configuration --> File Management`.
+* Go to ``Settings --> Configuration --> File Management``.
 * Set **File Prefix** (company dependent). The generated code format is ``<prefix>-<year>/<4-digit-number>``.
 
 Usage
 =====
 
-* Open :menuselection:`Files --> File Management`.
+* Open ``Files --> File Management``.
 * Create a **File**, set **Subject**, **Stage**, **Category**, and (optionally) **Technician**.
 * Link **Partners** (mark one as *Primary*) and related **Files** (no duplicates, no self link).
 * Use **Tags** for quick filtering and color highlighting.
