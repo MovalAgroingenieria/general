@@ -1,0 +1,951 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_spherag" model="remotecontrol">
+            <field name="name">Spherag Atlas</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://api.spherag.com</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "username": "",
+  "password": "",
+  "system_id": 1401,
+  "api_core_url": "https://apicore.spherag.com"
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>Spherag Atlas API · Odoo Integration</h2>
+
+<p><strong>📹 Videotutorial:</strong> <a href="https://tutoriales.moval.es/recordings/AR6GnsJ39PlNgeiCtoUA" target="_blank">Cómo usar el módulo</a></p>
+
+<hr/>
+
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code></p>
+<p>Auth URL: <code>https://api.spherag.com</code></p>
+<p>Operations URL: <code>https://apicore.spherag.com</code></p>
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+  "username": "user@example.com",
+  "password": "********",
+  "system_id": 1401,
+  "api_core_url": "https://apicore.spherag.com"
+}</pre>
+<ul>
+  <li><em>Get Token</em> → performs <code>POST /Authentication/Login</code> and stores <code>bag["access_token"]</code>.</li>
+  <li>Subsequent requests to apicore must include the header: <code>Authorization: Bearer &lt;access_token&gt;</code>.</li>
+  <li><strong>Important:</strong> Token is NOT persisted. Each execution requires a new login.</li>
+</ul>
+
+<h3>2) Hierarchical Model</h3>
+<pre>
+System (systemId)
+└── Atlas (imei - physical device)
+    └── AtlasElement (atlasElementId - sensor/component)
+        └── ChartType (chartType - metric type)
+</pre>
+
+<h3>3) Required Identifiers</h3>
+<ul>
+  <li><strong>systemId</strong>: Integer (example: 1401) - System identifier</li>
+  <li><strong>imei</strong>: String (example: "865648060417847") - Atlas device identifier</li>
+  <li><strong>atlasElementId</strong>: Integer (example: 4260) - Sensor identifier within Atlas</li>
+  <li><strong>chartType</strong>: Integer (example: 8) - Historical metric type identifier</li>
+</ul>
+
+<h3>4) Discovery Endpoints</h3>
+<h4>List Atlas devices:</h4>
+<pre>GET https://apicore.spherag.com/systems/{systemId}/Atlas</pre>
+<p>Returns list of devices with their <code>imei</code>.</p>
+
+<h4>List Atlas Elements (sensors):</h4>
+<pre>GET https://apicore.spherag.com/systems/{systemId}/Atlas/{imei}/AtlasElements</pre>
+<p>Returns list of sensors with <code>id</code>, <code>name</code>, <code>type</code>.</p>
+
+<h4>List Chart Types (metrics):</h4>
+<pre>GET https://apicore.spherag.com/AtlasElement/Charts/{atlasElementId}</pre>
+<p>Returns available metrics: <code>chartType</code>, <code>name</code>.</p>
+
+<h3>5) Historical Data Endpoint</h3>
+<pre>GET https://apicore.spherag.com/systems/{systemId}/Atlas/{imei}/AtlasElements/{atlasElementId}/monitoring
+?ChartType={chartType}
+&StartDate={timestamp_ms}
+&EndDate={timestamp_ms}</pre>
+<p><strong>Headers:</strong> <code>Authorization: Bearer {access_token}</code></p>
+<p><strong>Parameters:</strong></p>
+<ul>
+  <li><code>ChartType</code>: Metric identifier</li>
+  <li><code>StartDate</code>: Epoch timestamp in milliseconds</li>
+  <li><code>EndDate</code>: Epoch timestamp in milliseconds</li>
+</ul>
+
+<h3>6) Response Formats</h3>
+<p>The API returns data in a structured object with different data types:</p>
+<h4>Response Structure:</h4>
+<pre>{
+  "atlasElementId": 8198,
+  "batteryPercentage": 100,
+  "signalPercentage": 100,
+  "sensorData": {
+    "data": [
+      {
+        "data": [
+          {"value": [59.41, 66.98, 69.14], "dateTS": 1764670674425},
+          {"value": [59.42, 67.02, 69.13], "dateTS": 1764670733890}
+        ],
+        "unitTypeId": 61,
+        "symbol": "%"
+      },
+      {
+        "data": [
+          {"value": [10.65, 11.75, 12.41], "dateTS": 1764670674425},
+          {"value": [10.66, 11.76, 12.42], "dateTS": 1764670733890}
+        ],
+        "unitTypeId": 27,
+        "symbol": "ºC"
+      }
+    ]
+  },
+  "flowRateData": null,
+  "accumulatedFlowData": null,
+  "outputData": null,
+  "digitalInputData": null
+}</pre>
+<p><strong>Data Types:</strong> sensorData, flowRateData, accumulatedFlowData, outputData, digitalInputData</p>
+<p><strong>Structure:</strong> Each data type contains arrays of variables, each with timestamped value arrays</p>
+
+<h3>7) Odoo Configuration</h3>
+<h4>In Device (<code>mdm.measurement.device</code>):</h4>
+<pre>{
+  "system_id": 1401,
+  "imei": "865648060417847",
+  "start_date": "2025-01-01"
+}</pre>
+<ul>
+  <li><code>system_id</code>: Spherag system identifier</li>
+  <li><code>imei</code>: Atlas device identifier</li>
+  <li><code>start_date</code>: Default start date for data retrieval</li>
+</ul>
+
+<h4>In Sensor (<code>mdm.measurement.device.sensor</code>):</h4>
+<pre>{
+  "atlas_element_id": 4260,
+  "chart_type": 8,
+  "start_date": "2025-01-01",
+  "data_type": "sensor_data",
+  "data_array_index": 0,
+  "value_index": 0
+}</pre>
+<ul>
+  <li><code>atlas_element_id</code>: Sensor identifier within the Atlas device</li>
+  <li><code>chart_type</code>: Metric type identifier</li>
+  <li><code>start_date</code>: Overrides device start date if provided</li>
+  <li><code>data_type</code>: Type of data field (sensor_data, flow_rate_data, accumulated_flow_data, output_data, digital_input_data)</li>
+  <li><code>data_array_index</code>: Index of the variable array (0=first variable like humidity, 1=second variable like temperature)</li>
+  <li><code>value_index</code>: Position within the value array (0=10cm depth, 1=20cm depth, etc.)</li>
+</ul>
+
+<h3>8) Operational Flow</h3>
+<ol>
+  <li>Login → obtain access_token (not persisted)</li>
+  <li>List Atlas devices for systemId (optional discovery)</li>
+  <li>List AtlasElements for each imei (optional discovery)</li>
+  <li>Get available chartTypes for each atlasElementId (optional discovery)</li>
+  <li>Request historical data using time windows</li>
+  <li>Persist last dateTS processed</li>
+  <li>Finish execution (token is discarded)</li>
+</ol>
+
+<h3>9) Technical Requirements</h3>
+<ul>
+  <li>Login required for each execution</li>
+  <li>Use only accessToken (refreshToken not used)</li>
+  <li>Timestamps in milliseconds (epoch)</li>
+  <li>Incremental ingestion by dateTS</li>
+  <li>Idempotent operations</li>
+  <li>Support multiple chartTypes per sensor</li>
+  <li>Adaptive parser for response format variations</li>
+</ul>
+]]></field>
+        </record>
+
+        <!-- ACTION: Get Token -->
+        <record id="remotecontrol_spherag_action_get_token" model="remotecontrol.action">
+            <field name="name">Spherag: Get Token</field>
+            <field name="remote_id" ref="remotecontrol_spherag"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Read auth credentials from remote.connection_params JSON
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+username = (cfg.get('username') or '').strip()
+password = (cfg.get('password') or '').strip()
+
+if not username or not password:
+    raise Exception("Missing Spherag credentials: set username/password in connection_params.")
+
+# Login endpoint is /Authentication/Login
+url = (base_url or '').rstrip('/') + '/Authentication/Login'
+
+payload = {
+    'username': username,
+    'password': password
+}
+
+resp = request_retry('POST', url, json=payload, timeout=timeout)
+
+if resp.status_code >= 400:
+    raise Exception("Spherag login failed: %s %s" % (resp.status_code, resp.text))
+
+try:
+    j = resp.json()
+    if not isinstance(j, dict):
+        raise Exception("Invalid JSON response format from login endpoint")
+except Exception as json_err:
+    raise Exception("Failed to parse login response: %s" % str(json_err))
+
+access_token_obj = j.get('accessToken')
+if not access_token_obj or not isinstance(access_token_obj, dict):
+    raise Exception("Login response missing 'accessToken' object")
+
+access_token = access_token_obj.get('token') or ''
+
+if not access_token or not isinstance(access_token, (str, unicode)):
+    raise Exception("Login OK but no valid 'accessToken.token' string in response")
+
+# Store token in bag (not persisted between executions)
+bag['access_token'] = access_token
+bag['token_expiration'] = access_token_obj.get('expiration', '')
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Get Devices Plan -->
+        <record id="remotecontrol_spherag_action_get_devices" model="remotecontrol.action">
+            <field name="name">Spherag: Get Devices (Plan)</field>
+            <field name="remote_id" ref="remotecontrol_spherag"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+today_str = fields.Date.today()
+
+condition = [
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id)
+]
+
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+
+sensors = Sensor.search(condition)
+
+# Optimize: build map of sensor_id -> most recent reading (single query)
+last_readings_map = {}
+if sensors:
+    sensor_ids = [s.id for s in sensors]
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for row in cr.fetchall():
+        last_readings_map[row[0]] = row[1]
+
+# Build plan for each sensor
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+
+# Get configuration with validation
+    system_id = device_cfg.get('system_id')
+    imei = device_cfg.get('imei')
+    atlas_element_id = sensor_cfg.get('atlas_element_id')
+    chart_type = sensor_cfg.get('chart_type')
+    data_type = sensor_cfg.get('data_type', 'sensor_data')  # Default to sensor_data
+    data_array_index = sensor_cfg.get('data_array_index', 0)  # Default to first array
+    value_index = sensor_cfg.get('value_index', 0)  # Default to first position
+    start_cfg = sensor_cfg.get('start_date') or device_cfg.get('start_date')
+
+    # Validate all required fields are present and not None/empty
+    if not system_id or not imei or not atlas_element_id or not chart_type:
+        # Log warning about missing configuration
+        continue
+
+    # Determine initial date
+    last_reading_time = last_readings_map.get(sensor.id)
+    if last_reading_time:
+        try:
+            initial_date = fields.Date.to_string(
+                fields.Datetime.from_string(last_reading_time) + timedelta(days=1)
+            )
+        except Exception:
+            initial_date = str(last_reading_time)[:10]
+    elif start_cfg:
+        initial_date = start_cfg[:10]
+    else:
+        year_str = today_str[:4]
+        initial_date = '%s-01-01' % year_str
+
+    if isinstance(initial_date, unicode):
+        initial_date = initial_date.encode('utf-8')
+
+    plan.append({
+        'sensor_id': sensor.id,
+        'device_id': device.id,
+        'system_id': system_id,
+        'imei': imei,
+        'atlas_element_id': atlas_element_id,
+        'chart_type': chart_type,
+        'data_type': data_type,
+        'data_array_index': data_array_index,
+        'value_index': value_index,
+        'initial_date': initial_date
+    })
+
+bag['sensors_plan'] = plan
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Get Readings -->
+        <record id="remotecontrol_spherag_action_get_readings" model="remotecontrol.action">
+            <field name="name">Spherag: Get Readings</field>
+            <field name="remote_id" ref="remotecontrol_spherag"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import time
+from datetime import datetime
+
+Remote = self.remote_id
+SensorModel = env['mdm.measurement.device.sensor']
+
+plan = bag.get('sensors_plan') or []
+access_token = bag.get('access_token')
+
+if not access_token:
+    raise Exception("Missing Spherag access_token in bag")
+
+# Get API core URL from connection params
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+api_core_url = (cfg.get('api_core_url') or 'https://apicore.spherag.com').rstrip('/')
+headers = {
+    'Authorization': 'Bearer %s' % access_token,
+    'Accept': 'application/json'
+}
+
+final_date = fields.Date.today()
+window_start_suffix = ' 00:00:00'
+window_end_suffix = ' 23:59:59'
+
+total_upserts = 0
+total_errors = 0
+items = []
+
+for idx, sensor_plan in enumerate(plan, 1):
+    sensor_id = sensor_plan['sensor_id']
+    device_id = sensor_plan['device_id']
+    system_id = sensor_plan['system_id']
+    imei = sensor_plan['imei']
+    atlas_element_id = sensor_plan['atlas_element_id']
+    chart_type = sensor_plan['chart_type']
+    data_type = sensor_plan.get('data_type', 'sensor_data')
+    data_array_index = sensor_plan.get('data_array_index', 0)
+    value_index = sensor_plan.get('value_index', 0)
+    initial_date = sensor_plan['initial_date']
+
+    # Convert dates to epoch milliseconds
+    try:
+        start_dt = fields.Datetime.from_string(initial_date + window_start_suffix)
+        end_dt = fields.Datetime.from_string(final_date + window_end_suffix)
+        start_ts_ms = int(time.mktime(start_dt.timetuple()) * 1000)
+        end_ts_ms = int(time.mktime(end_dt.timetuple()) * 1000)
+    except Exception as e:
+        items.append({
+            'sensor_id': sensor_id,
+            'error': 'Date conversion error: %s' % str(e)
+        })
+        continue
+
+    # Build URL - correct endpoint path
+    url = '%s/systems/%s/Atlas/%s/AtlasElements/%s/monitoring?ChartType=%s&StartDate=%s&EndDate=%s' % (
+        api_core_url, system_id, imei, atlas_element_id, chart_type, start_ts_ms, end_ts_ms
+    )
+
+    sensor_record = SensorModel.browse(sensor_id)
+
+    try:
+        resp = request_retry('GET', url, headers=headers, timeout=timeout)
+        code = resp.status_code
+        full_url = getattr(resp, 'url', url)
+
+        if code < 400:
+            payload = resp.json() or {}
+
+            # Validate payload is a dict (the new response structure)
+            if not isinstance(payload, dict):
+                items.append({
+                    'sensor_id': sensor_id,
+                    'device_id': device_id,
+                    'status': code,
+                    'error': 'Invalid response format: expected dict, got %s' % type(payload).__name__,
+                    'url': full_url
+                })
+                continue
+
+            upserts = 0
+            errs = 0
+            readings_summary = []
+            window_start = initial_date + window_start_suffix
+            window_end = final_date + window_end_suffix
+
+            # Map data_type to actual response field
+            data_type_map = {
+                'sensor_data': 'sensorData',
+                'flow_rate_data': 'flowRateData',
+                'accumulated_flow_data': 'accumulatedFlowData',
+                'output_data': 'outputData',
+                'digital_input_data': 'digitalInputData'
+            }
+
+            response_field = data_type_map.get(data_type, 'sensorData')
+            data_container = payload.get(response_field)
+
+            if not data_container or not isinstance(data_container, dict):
+                items.append({
+                    'sensor_id': sensor_id,
+                    'device_id': device_id,
+                    'status': code,
+                    'error': 'No data in field: %s' % response_field,
+                    'url': full_url,
+                    'points_found': 0,
+                    'upserts': 0,
+                    'errors': 0
+                })
+                continue
+
+            # Get the data arrays
+            data_arrays = data_container.get('data') or []
+            if not isinstance(data_arrays, list) or len(data_arrays) == 0:
+                items.append({
+                    'sensor_id': sensor_id,
+                    'device_id': device_id,
+                    'status': code,
+                    'error': 'Empty data arrays in %s' % response_field,
+                    'url': full_url,
+                    'points_found': 0,
+                    'upserts': 0,
+                    'errors': 0
+                })
+                continue
+
+            # Check if data_array_index is valid
+            if data_array_index >= len(data_arrays):
+                items.append({
+                    'sensor_id': sensor_id,
+                    'device_id': device_id,
+                    'status': code,
+                    'error': 'data_array_index %s out of range (max: %s)' % (data_array_index, len(data_arrays) - 1),
+                    'url': full_url,
+                    'points_found': 0,
+                    'upserts': 0,
+                    'errors': 0
+                })
+                continue
+
+            # Get the specific variable array (e.g., humidity vs temperature)
+            variable_array = data_arrays[data_array_index]
+            if not isinstance(variable_array, dict):
+                errs += 1
+                items.append({
+                    'sensor_id': sensor_id,
+                    'device_id': device_id,
+                    'status': code,
+                    'error': 'Invalid variable array at index %s' % data_array_index,
+                    'url': full_url,
+                    'points_found': 0,
+                    'upserts': 0,
+                    'errors': 1
+                })
+                continue
+
+            # Get the timestamped data points
+            time_series_data = variable_array.get('data') or []
+            if not isinstance(time_series_data, list):
+                items.append({
+                    'sensor_id': sensor_id,
+                    'device_id': device_id,
+                    'status': code,
+                    'error': 'No time series data in variable array',
+                    'url': full_url,
+                    'points_found': 0,
+                    'upserts': 0,
+                    'errors': 0
+                })
+                continue
+
+            # Process each timestamped data point
+            for data_point in time_series_data:
+                try:
+                    if not isinstance(data_point, dict):
+                        errs += 1
+                        continue
+
+                    # Extract timestamp
+                    date_ts_ms = data_point.get('dateTS')
+                    if date_ts_ms is None or date_ts_ms == '':
+                        errs += 1
+                        if len(readings_summary) < 5:
+                            readings_summary.append({'error': 'Missing dateTS field'})
+                        continue
+
+                    # Convert from milliseconds to datetime
+                    try:
+                        ts_dt = datetime.fromtimestamp(int(date_ts_ms) / 1000.0)
+                        ts_str = ts_dt.strftime('%Y-%m-%d %H:%M:%S')
+                    except (ValueError, TypeError, OSError) as date_err:
+                        errs += 1
+                        if len(readings_summary) < 5:
+                            readings_summary.append({'error': 'Invalid dateTS: %s' % str(date_err), 'dateTS': date_ts_ms})
+                        continue
+
+                    # Check if within window
+                    if not (window_start <= ts_str <= window_end):
+                        continue
+
+                    # Extract value - can be array or single value
+                    raw_value = data_point.get('value')
+
+                    if raw_value is None or raw_value == '':
+                        errs += 1
+                        if len(readings_summary) < 5:
+                            readings_summary.append({'error': 'Missing value field', 'ts': ts_str})
+                        continue
+
+                    # Handle array values (sensor data with multiple depths/positions)
+                    if isinstance(raw_value, list):
+                        if len(raw_value) == 0:
+                            errs += 1
+                            if len(readings_summary) < 5:
+                                readings_summary.append({'error': 'Empty value array', 'ts': ts_str})
+                            continue
+
+                        # Check if value_index is valid
+                        if value_index >= len(raw_value):
+                            errs += 1
+                            if len(readings_summary) < 5:
+                                readings_summary.append({
+                                    'error': 'value_index %s out of range (max: %s)' % (value_index, len(raw_value) - 1),
+                                    'ts': ts_str
+                                })
+                            continue
+
+                        # Get the specific value from the array
+                        value = raw_value[value_index]
+                        if value is None or value == '':
+                            errs += 1
+                            if len(readings_summary) < 5:
+                                readings_summary.append({'error': 'Null value at index %s' % value_index, 'ts': ts_str})
+                            continue
+                    # Handle single values (flow data, accumulated flow, etc.)
+                    else:
+                        value = raw_value
+
+                    # Convert to float
+                    try:
+                        valf = float(value)
+                    except (ValueError, TypeError) as val_err:
+                        errs += 1
+                        if len(readings_summary) < 5:
+                            readings_summary.append({'error': 'Invalid value format: %s' % str(val_err), 'value': str(value)[:50]})
+                        continue
+
+                    # Upsert reading
+                    Remote.upsert(
+                        'mdm.measurement.device.sensor.reading',
+                        {'sensor_id': sensor_record.id, 'measurement_time': ts_str},
+                        {'value': valf, 'device_id': device_id}
+                    )
+                    upserts += 1
+
+                    if len(readings_summary) < 5:
+                        readings_summary.append({
+                            'ts': ts_str,
+                            'value': valf,
+                            'data_type': data_type,
+                            'array_idx': data_array_index,
+                            'value_idx': value_index
+                        })
+
+                except Exception as e:
+                    errs += 1
+                    if len(readings_summary) < 5:
+                        readings_summary.append({
+                            'error': str(e),
+                            'raw_item': str(data_point)[:200]
+                        })
+
+            total_upserts += upserts
+            total_errors += errs
+
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'system_id': system_id,
+                'imei': imei,
+                'atlas_element_id': atlas_element_id,
+                'chart_type': chart_type,
+                'data_type': data_type,
+                'data_array_index': data_array_index,
+                'value_index': value_index,
+                'status': 200,
+                'url': full_url,
+                'points_found': len(time_series_data),
+                'upserts': upserts,
+                'errors': errs,
+                'readings': readings_summary,
+            })
+        else:
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'status': code,
+                'error': (resp.text or '')[:400],
+                'url': full_url
+            })
+    except Exception as e:
+        items.append({
+            'sensor_id': sensor_id,
+            'device_id': device_id,
+            'status': -1,
+            'error': str(e)
+        })
+
+    # Rate limiting
+    time.sleep(0.5)
+
+# Create audit attachment
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'final_date': final_date,
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'items': items,
+}
+
+b64 = base64.b64encode(json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
+fname = 'spherag_readings_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+
+Remote.message_post(
+    body=u"[Spherag] upserts=%s errors=%s" % (total_upserts, total_errors),
+    attachment_ids=[att.id]
+)
+
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Import Devices and Metrics (Discovery) -->
+        <record id="remotecontrol_spherag_action_import_devices" model="remotecontrol.action">
+            <field name="name">Spherag: Import Devices and Metrics</field>
+            <field name="remote_id" ref="remotecontrol_spherag"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="code"><![CDATA[
+Remote = self.remote_id
+access_token = bag.get('access_token')
+
+if not access_token:
+    raise Exception("Missing Spherag access_token in bag")
+
+# Get API core URL and systemId from connection params
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+api_core_url = (cfg.get('api_core_url') or 'https://apicore.spherag.com').rstrip('/')
+system_id = cfg.get('system_id') or bag.get('system_id')
+
+if not system_id:
+    raise Exception("Missing system_id in connection_params. Please add 'system_id': 1401 to the remotecontrol connection_params JSON field.")
+
+headers = {
+    'Authorization': 'Bearer %s' % access_token,
+    'Accept': 'application/json'
+}
+
+# 1. Get Atlas devices with pagination
+api_calls = []
+atlas_devices = []
+
+# Pagination: fetch all pages
+page = 1
+limit = 100
+has_next_page = True
+
+while has_next_page:
+    url_atlas = '%s/systems/%s/Atlas?Init=%s&Limit=%s' % (api_core_url, system_id, page, limit)
+    resp_atlas = request_retry('GET', url_atlas, headers=headers, timeout=timeout)
+
+    if resp_atlas.status_code >= 400:
+        raise Exception("Error fetching Atlas devices from URL %s: HTTP %s - %s" % (url_atlas, resp_atlas.status_code, resp_atlas.text))
+
+    resp_data = resp_atlas.json() or {}
+
+    # API returns paginated response with 'items' array
+    items = resp_data.get('items') or []
+    atlas_devices.extend(items)
+
+    # Store API call info
+    api_calls.append({
+        'url': url_atlas,
+        'method': 'GET',
+        'status': resp_atlas.status_code,
+        'page': page,
+        'items_in_page': len(items),
+        'total_count': resp_data.get('totalCount', 0),
+        'total_pages': resp_data.get('totalPages', 0)
+    })
+
+    # Check if there are more pages
+    has_next_page = resp_data.get('hasNextPage', False)
+    page += 1
+
+    # Safety limit to avoid infinite loops
+    if page > 50:
+        break
+
+# 2. For each Atlas, get AtlasElements (sensors/connectors)
+devices_list = []
+total_elements = 0
+
+for atlas in atlas_devices:
+    # Validate atlas is a dict
+    if not isinstance(atlas, dict):
+        continue
+
+    imei = atlas.get('imei')
+    # Validate IMEI is not None or empty
+    if not imei or str(imei).strip() == '':
+        continue
+
+    device_entry = {
+        'id': atlas.get('id'),
+        'imei': str(imei).strip(),
+        'name': atlas.get('name') or str(imei),
+        'status': atlas.get('status'),
+        'batteryPercentage': atlas.get('batteryPercentage'),
+        'signalPercentage': atlas.get('signalPercentage'),
+        'elements': [],
+        'elements_url': '',
+        'elements_status': None,
+        'elements_error': None
+    }
+
+    # Get AtlasElements: /systems/{systemId}/Atlas/{imei}/AtlasElements
+    url_elements = '%s/systems/%s/Atlas/%s/AtlasElements' % (api_core_url, system_id, imei)
+    device_entry['elements_url'] = url_elements
+    try:
+        resp_elements = request_retry('GET', url_elements, headers=headers, timeout=timeout)
+        device_entry['elements_status'] = resp_elements.status_code
+        if resp_elements.status_code < 400:
+            elements = resp_elements.json() or []
+
+            for element in elements:
+                if not isinstance(element, dict):
+                    continue
+
+                # API returns 'elementId' not 'id'
+                element_id = element.get('elementId') or element.get('id')
+                if element_id is None:
+                    continue
+
+                # Extract subsystem info if present
+                subsystem = element.get('subsystem') or {}
+
+                element_entry = {
+                    'id': element_id,
+                    'name': element.get('name') or 'Element %s' % element_id,
+                    'elementType': element.get('elementType'),
+                    'subsystem_id': subsystem.get('id'),
+                    'subsystem_name': subsystem.get('name'),
+                    'subsystem_type': subsystem.get('subsystemType'),
+                    'chart_types': []
+                }
+
+                # Get ChartTypes for this element
+                url_charts = '%s/AtlasElement/Charts/%s' % (api_core_url, element_id)
+                try:
+                    resp_charts = request_retry('GET', url_charts, headers=headers, timeout=timeout)
+                    if resp_charts.status_code < 400:
+                        charts = resp_charts.json() or []
+                        for chart in charts:
+                            if isinstance(chart, dict):
+                                chart_id = chart.get('id')
+                                if chart_id is not None:
+                                    element_entry['chart_types'].append({
+                                        'id': chart_id,
+                                        'name': chart.get('name') or 'Chart %s' % chart_id
+                                    })
+                except Exception as chart_err:
+                    element_entry['chart_types_error'] = str(chart_err)
+
+                device_entry['elements'].append(element_entry)
+                total_elements += 1
+        else:
+            device_entry['elements_error'] = 'HTTP %s: %s' % (resp_elements.status_code, (resp_elements.text or '')[:200])
+
+    except Exception as e:
+        device_entry['elements_error'] = str(e)
+
+    devices_list.append(device_entry)
+
+# Create summary
+data = {
+    'system_id': system_id,
+    'api_calls': api_calls,
+    'devices': devices_list,
+    'summary': {
+        'total_devices': len(devices_list),
+        'total_elements': total_elements,
+        'executed_at': fields.Datetime.now()
+    }
+}
+
+json_str = json.dumps(data, ensure_ascii=False, indent=2)
+encoded = base64.b64encode(json_str.encode('utf-8'))
+fname = 'spherag_devices_metrics_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': encoded,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+
+Remote.message_post(
+    body=u'[Spherag] Devices=%s Elements=%s | Total Atlas: %s | API calls: %s' % (
+        len(devices_list), total_elements, len(atlas_devices), len(api_calls)
+    ),
+    attachment_ids=[att.id]
+)
+
+bag['total_devices'] = len(devices_list)
+bag['total_elements'] = total_elements
+bag['attachment_id'] = att.id
+bag['attachment_name'] = fname
+]]></field>
+        </record>
+
+        <!-- PROCEDURE: Import Devices and Metrics -->
+        <record id="remotecontrol_spherag_procedure_import" model="remotecontrol.procedure">
+            <field name="name">Spherag: Import Devices and Metrics</field>
+            <field name="remote_id" ref="remotecontrol_spherag"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_spherag_step_import_10_token" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_spherag_procedure_import"/>
+            <field name="action_id" ref="remotecontrol_spherag_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_spherag_step_import_20_devices" model="remotecontrol.step">
+            <field name="name">Import Devices and Metrics</field>
+            <field name="procedure_id" ref="remotecontrol_spherag_procedure_import"/>
+            <field name="action_id" ref="remotecontrol_spherag_action_import_devices"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <!-- PROCEDURE: Daily Sync -->
+        <record id="remotecontrol_spherag_procedure" model="remotecontrol.procedure">
+            <field name="name">Spherag: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_spherag"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_spherag_step_10_token" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_spherag_procedure"/>
+            <field name="action_id" ref="remotecontrol_spherag_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_spherag_step_20_devices" model="remotecontrol.step">
+            <field name="name">Get devices (plan)</field>
+            <field name="procedure_id" ref="remotecontrol_spherag_procedure"/>
+            <field name="action_id" ref="remotecontrol_spherag_action_get_devices"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_spherag_step_30_readings" model="remotecontrol.step">
+            <field name="name">Get readings</field>
+            <field name="procedure_id" ref="remotecontrol_spherag_procedure"/>
+            <field name="action_id" ref="remotecontrol_spherag_action_get_readings"/>
+            <field name="sequence">30</field>
+        </record>
+
+    </data>
+</odoo>
