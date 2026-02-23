@@ -6,7 +6,7 @@
     "name": "RemoteControl: Intages",
     "summary": "Telecontrol Intages (BigQuery SQL) with default actions and "
                "procedures for Google BigQuery integration",
-    "version": "10.0.1.0.0",
+    "version": "10.0.1.0.1",
     "category": "Tools",
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",

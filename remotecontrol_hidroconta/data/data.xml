@@ -309,6 +309,8 @@ condition = [
     ('device_id.remotecontrol_id', '=', Remote.id),
     ('active', '=', True)
 ]
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
 sensors = Sensor.search(condition)
 sensor_plan = []
 for sensor in sensors:
@@ -500,6 +502,7 @@ result = 'Processed %d sensors, %d readings loaded, %d errors. File saved: %s' %
             <field name="active">True</field>
             <field name="schedule_cron">False</field>
             <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="True"/>
         </record>
 
         <record id="remotecontrol_hidroconta_step_daily_sync_10_login" model="remotecontrol.step">

@@ -181,10 +181,13 @@ Remote = self.remote_id
 Sensor = env['mdm.measurement.device.sensor']
 Reading = env['mdm.measurement.device.sensor.reading']
 today_str = fields.Date.today()
-sensors = Sensor.search([
+condition = [
     ('remotecontrol_params', '!=', False),
-    ('device_id.remotecontrol_id', '=', Remote.id)
-])
+    ('device_id.remotecontrol_id', '=', Remote.id),
+]
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+sensors = Sensor.search(condition)
 sensor_ids = [s.id for s in sensors]
 last_readings_map = {}
 if sensors:
@@ -524,7 +527,9 @@ Remote.message_post(
             <field name="active">True</field>
             <field name="schedule_cron">False</field>
             <field name="readonly">True</field>
-        </record>
+        
+            <field name="procedure_for_readings" eval="True"/>
+</record>
         <record id="remotecontrol_intages_step_20_fetch" model="remotecontrol.step">
             <field name="name">Fetch and Parse Rows</field>
             <field name="procedure_id" ref="remotecontrol_intages_procedure"/>

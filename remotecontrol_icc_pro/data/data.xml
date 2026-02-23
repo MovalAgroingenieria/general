@@ -340,11 +340,14 @@ Reading = env['mdm.measurement.device.sensor.reading']
 today_str = fields.Date.today()
 
 # Get all sensors with remotecontrol_params configured for THIS remote control
-sensors = Sensor.search([
+condition = [
     ('remotecontrol_params', '!=', False),
     ('device_id.remotecontrol_id', '=', Remote.id),
-    ('active', '=', True)
-])
+    ('active', '=', True),
+]
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+sensors = Sensor.search(condition)
 
 # Build map of sensor_id -> most recent reading (single query optimization)
 last_readings_map = {}
@@ -768,6 +771,7 @@ result = 'Retrieved last readings for %d meters' % total_readings
             <field name="active">True</field>
             <field name="schedule_cron">False</field>
             <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="True"/>
         </record>
 
         <record id="remotecontrol_icc_pro_step_daily_sync_10_token" model="remotecontrol.step">

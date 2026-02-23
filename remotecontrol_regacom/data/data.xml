@@ -245,10 +245,13 @@ Sensor = env['mdm.measurement.device.sensor']
 Reading = env['mdm.measurement.device.sensor.reading']
 today_str = fields.Date.today()
 # Get all sensors with remotecontrol_params configured for THIS remote control
-sensors = Sensor.search([
+condition = [
     ('remotecontrol_params', '!=', False),
-    ('device_id.remotecontrol_id', '=', Remote.id)
-])
+    ('device_id.remotecontrol_id', '=', Remote.id),
+]
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+sensors = Sensor.search(condition)
 # Build map of sensor_id -> most recent reading (single query optimization)
 last_readings_map = {}
 if sensors:
@@ -513,6 +516,7 @@ bag['audit_attachment_id'] = att.id
             <field name="remote_id" ref="remotecontrol_regacom"/>
             <field name="active">True</field>
             <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="True"/>
         </record>
 
         <record id="remotecontrol_regacom_step_10_devices" model="remotecontrol.step">

@@ -333,10 +333,13 @@ Reading = env['mdm.measurement.device.sensor.reading']
 today_str = fields.Date.today()
 
 # Get all devices with remotecontrol_params configured for THIS remote control
-devices = Device.search([
+device_domain = [
     ('remotecontrol_params', '!=', False),
-    ('remotecontrol_id', '=', Remote.id)
-])
+    ('remotecontrol_id', '=', Remote.id),
+]
+if selected_device_ids:
+    device_domain.append(('id', 'in', selected_device_ids))
+devices = Device.search(device_domain)
 
 # Build map of sensor_id -> most recent reading (single query optimization)
 all_sensors = Sensor.search([('device_id', 'in', devices.ids)])
@@ -660,6 +663,7 @@ bag['audit_attachment_id'] = att.id
         <field name="remote_id" ref="remotecontrol_scada_abaran_new"/>
         <field name="active" eval="True"/>
         <field name="readonly" eval="True"/>
+        <field name="procedure_for_readings" eval="True"/>
     </record>
 
     <!-- Procedure Step 1: Get devices -->

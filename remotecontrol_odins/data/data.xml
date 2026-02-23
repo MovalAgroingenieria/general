@@ -255,9 +255,8 @@ condition = [
     ('remotecontrol_params','!=',False),
     ('device_id.remotecontrol_id', '=', Remote.id)
 ]
-selected_device_id = bag.get('selected_device_id')
-if selected_device_id:
-    condition.append(('device_id', '=', selected_device_id))
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
 sensors = Sensor.search(condition)
 # Optimize: build map of sensor_id -> most recent reading (single query)
 last_readings_map = {}
@@ -584,7 +583,9 @@ bag['message'] = 'ODINS Get Sensor Readings - completed: %d readings created, %d
             <field name="active">True</field>
             <field name="schedule_cron">False</field>
             <field name="readonly">True</field>
-        </record>
+
+            <field name="procedure_for_readings" eval="True"/>
+</record>
 
         <record id="remotecontrol_odins_step_10_get_readings" model="remotecontrol.step">
             <field name="name">Get Devices</field>

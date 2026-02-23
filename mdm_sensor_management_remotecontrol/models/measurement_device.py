@@ -88,3 +88,41 @@ class MeasurementDevice(models.Model):
         procedure.with_context(
             selected_device_ids=self.ids,
         ).run()
+
+    @api.multi
+    def action_run_readings_procedure_multi(self):
+        """Run readings procedure for multiple selected devices.
+
+        Groups devices by remotecontrol and calls each remotecontrol's
+        readings procedure with the corresponding device ids.
+        Devices without a remotecontrol are skipped silently.
+        """
+        # Group devices by remotecontrol_id
+        remotecontrol_groups = {}
+        for device in self:
+            if not device.remotecontrol_id:
+                # No remotecontrol configured → skip without breaking flow
+                continue
+            rc_id = device.remotecontrol_id.id
+            if rc_id not in remotecontrol_groups:
+                remotecontrol_groups[rc_id] = {
+                    'remotecontrol': device.remotecontrol_id,
+                    'device_ids': [],
+                }
+            remotecontrol_groups[rc_id]['device_ids'].append(device.id)
+
+        for rc_id, group in remotecontrol_groups.items():
+            remotecontrol = group['remotecontrol']
+            device_ids = group['device_ids']
+            # Find the readings procedure for this remotecontrol
+            procedures = self.env['remotecontrol.procedure'].search([
+                ('remote_id', '=', remotecontrol.id),
+                ('procedure_for_readings', '=', True),
+            ])
+            if not procedures or len(procedures) != 1:
+                # No unique readings procedure configured → skip group
+                continue
+            procedures[0].with_context(
+                selected_device_ids=device_ids,
+            ).run()
+        return True

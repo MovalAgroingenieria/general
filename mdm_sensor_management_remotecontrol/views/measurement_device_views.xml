@@ -48,4 +48,20 @@
         </field>
     </record>
 
+    <record id="action_mdm_device_run_readings_multi" model="ir.actions.server">
+        <field name="name">Get readings</field>
+        <field name="model_id" ref="mdm_sensor_management.model_mdm_measurement_device"/>
+        <field name="state">code</field>
+        <field name="code">records.action_run_readings_procedure_multi()</field>
+        <field name="groups_id" eval="[(4, ref('mdm_sensor_management.group_mdm_manager'))]"/>
+    </record>
+
+    <record id="action_mdm_device_run_readings_multi_binding" model="ir.values">
+        <field name="name">Get readings</field>
+        <field name="key">action</field>
+        <field name="key2">client_action_multi</field>
+        <field name="model">mdm.measurement.device</field>
+        <field name="value" eval="'ir.actions.server,' + str(ref('action_mdm_device_run_readings_multi'))"/>
+    </record>
+
 </odoo>

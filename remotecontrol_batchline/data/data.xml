@@ -362,6 +362,8 @@ condition = [
     ('remotecontrol_params','!=',False),
     ('device_id.remotecontrol_id', '=', Remote.id)
 ]
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
 sensors = Sensor.search(condition)
 # Optimize: build map of sensor_id -> most recent reading (single query)
 last_readings_map = {}
@@ -596,6 +598,8 @@ condition = [
     ('remotecontrol_params','!=',False),
     ('device_id.remotecontrol_id', '=', Remote.id)
 ]
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
 sensors = Sensor.search(condition)
 # Optimize: build map of sensor_id -> most recent reading (single query)
 last_readings_map = {}
@@ -843,7 +847,9 @@ bag[u'attachment_name']=fname
             <field name="active">True</field>
             <field name="schedule_cron">False</field>
             <field name="readonly">True</field>
-        </record>
+
+            <field name="procedure_for_readings" eval="True"/>
+</record>
 
         <record id="remotecontrol_batchline_procedure_pressures_import" model="remotecontrol.procedure">
             <field name="name">Batchline: Import pressure devices</field>
