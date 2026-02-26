@@ -382,9 +382,9 @@ class TimesheetCompliance(models.Model):
     def _get_b1_email_sent_message_body(self):
         """Body for chatter when B1 email is sent."""
         self.ensure_one()
-        return _(
-            "Daily compliance email (B1) sent to employee on %(date)s."
-        ) % {"date": fields.Datetime.now().strftime("%d/%m/%Y %H:%M")}
+        return _("Daily compliance email (B1) sent to employee on %(date)s.") % {
+            "date": fields.Datetime.now().strftime("%d/%m/%Y %H:%M")
+        }
 
     def _get_timesheet_entries_count(self):
         self.ensure_one()
@@ -594,9 +594,7 @@ class TimesheetCompliance(models.Model):
             )
             email_to = self._sanitize_mail_header(manager_email)
             email_from = (
-                self.env.company.email
-                or self.env.user.email
-                or "no-reply@example.com"
+                self.env.company.email or self.env.user.email or "no-reply@example.com"
             ).strip()
             email_from = email_from.replace("\n", " ").replace("\r", " ")
 
@@ -746,9 +744,7 @@ class TimesheetCompliance(models.Model):
                 ).strip()
                 email_from = email_from.replace("\n", " ").replace("\r", " ")
 
-                subject = _(
-                    "Timesheet compliance escalation - %(name)s - %(date)s"
-                ) % {
+                subject = _("Timesheet compliance escalation - %(name)s - %(date)s") % {
                     "name": rec.employee_id.name,
                     "date": rec.date,
                 }
@@ -964,9 +960,7 @@ class TimesheetCompliance(models.Model):
             )
 
             email_from = self._sanitize_mail_header(
-                self.env.company.email
-                or self.env.user.email
-                or "no-reply@example.com"
+                self.env.company.email or self.env.user.email or "no-reply@example.com"
             )
             email_to = self._sanitize_mail_header(manager_user.email)
 
