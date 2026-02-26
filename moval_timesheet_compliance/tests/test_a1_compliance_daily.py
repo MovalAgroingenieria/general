@@ -211,7 +211,7 @@ class TestComplianceDailyA1(TransactionCase):
         self.assertEqual(rec.state, "issue")
 
     def test_delta_promotion_to_fixed_when_corrected(self):
-        """When delta becomes <= tolerance after being warn/issue, state becomes fixed."""
+        """When delta <= tolerance after warn/issue, state becomes fixed."""
         self.company.x_delta_tolerance_ok = 0.01
         self.company.x_delta_warn_hours = 0.5
         day = py_date(2026, 1, 18)

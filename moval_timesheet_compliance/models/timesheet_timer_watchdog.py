@@ -54,10 +54,11 @@ class TimesheetTimerWatchdog(models.AbstractModel):
                     incident_type="long_running",
                     timer_started_at=started_at,
                     duration_hours=duration_hours,
-                    note=_("Timer active for %s (limit %s).") % (
-                        f"{duration_hours:.2f}h",
-                        f"{cfg['max_active_hours']:.2f}h",
-                    ),
+                    note=_("Timer active for %(duration)s (limit %(limit)s).")
+                    % {
+                        "duration": f"{duration_hours:.2f}h",
+                        "limit": f"{cfg['max_active_hours']:.2f}h",
+                    },
                     now=now,
                     cfg=cfg,
                 )
@@ -301,7 +302,7 @@ class TimesheetTimerWatchdog(models.AbstractModel):
         now=False,
         cfg=False,
     ):
-        Incident = self.env["timesheet.timer.incident"]
+        Incident = self.env["timesheet.timer.incident"].sudo()
         now = now or fields.Datetime.now()
         cfg = cfg or self._get_watchdog_config()
 
@@ -373,6 +374,9 @@ class TimesheetTimerWatchdog(models.AbstractModel):
                 "notify_count": incident.notify_count + 1,
             }
         )
+        # Flush so that a subsequent search in the same transaction sees the update
+        # (e.g. second cron run must respect cooldown).
+        incident.flush_recordset(["last_notified_at", "notify_count"])
         return True
 
     def _should_notify(self, incident, cooldown_hours, now=False):
@@ -441,15 +445,15 @@ class TimesheetTimerWatchdog(models.AbstractModel):
 
         summary = _("Timer watchdog escalation: recurring incident")
         note = _(
-            "Recurring timer incident for %s.\n\nType: %s\n"
-            "Notifications in last %s days: %s\n\nLast note:\n%s"
-        ) % (
-            employee.name,
-            incident.incident_type,
-            cfg["escalation_window_days"],
-            total_notify,
-            incident.note or "",
-        )
+            "Recurring timer incident for %(emp)s.\n\nType: %(type)s\n"
+            "Notifications in last %(days)s days: %(count)s\n\nLast note:\n%(note)s"
+        ) % {
+            "emp": employee.name,
+            "type": incident.incident_type,
+            "days": cfg["escalation_window_days"],
+            "count": total_notify,
+            "note": incident.note or "",
+        }
 
         self.env["mail.activity"].sudo().create(
             {

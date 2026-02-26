@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 {
     "name": "Timesheet Compliance Daily",
-    "summary": "Daily compliance per employee: attendance vs timesheets, telework and generic allocation quality.",
+    "summary": (
+        "Daily compliance per employee: attendance vs timesheets, "
+        "telework and generic allocation quality."
+    ),
     "version": "16.0.1.0.0",
     "category": "Human Resources",
     "license": "AGPL-3",
@@ -30,8 +33,4 @@
         "views/timesheet_compliance_menus.xml",
         "views/account_analytic_line_actions.xml",
     ],
-    "demo": [],
-    "installable": True,
-    "application": False,
-    "auto_install": False,
 }

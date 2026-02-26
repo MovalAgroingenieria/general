@@ -95,7 +95,7 @@ class TestComplianceE3WeeklyGenericQuality(TimesheetComplianceCase):
             captured["ctx"] = dict(self.env.context)
             return True
 
-        # Patch context_today to be Monday, and patch send_mail to avoid real mail pipeline.
+        # Patch context_today to be Monday, and patch send_mail to avoid real mail.
         with patch.object(
             fields.Date, "context_today", autospec=True, return_value=monday
         ):
@@ -105,7 +105,7 @@ class TestComplianceE3WeeklyGenericQuality(TimesheetComplianceCase):
         self.assertEqual(
             captured["calls"],
             1,
-            "E3 should send exactly one email for the department",
+            "E3 should send one email per department",
         )
 
         ctx = captured["ctx"] or {}
@@ -125,6 +125,4 @@ class TestComplianceE3WeeklyGenericQuality(TimesheetComplianceCase):
         ):
             with patch.object(type(template), "send_mail", new=_fake_send_mail):
                 compliance_model._cron_send_e3_weekly_generic_quality()
-        self.assertEqual(
-            captured["calls"], 0, "E3 should not send on non-Monday"
-        )
+        self.assertEqual(captured["calls"], 0, "E3 should not send on non-Monday")

@@ -24,7 +24,9 @@ class ResCompany(models.Model):
     x_generic_min_hours = fields.Float(
         string="Minimum Hours for Generic Evaluation",
         default=3.0,
-        help="Minimum total timesheet hours required to evaluate generic allocation.",
+        help=(
+            "Minimum total timesheet hours required " "to evaluate generic allocation."
+        ),
     )
 
     # Delta (attendance vs timesheet) thresholds
@@ -32,12 +34,18 @@ class ResCompany(models.Model):
     x_delta_tolerance_ok = fields.Float(
         string="Delta tolerance (OK)",
         default=0.01,
-        help="Difference in hours between attendance and timesheet below which state is OK (e.g. 0.01).",
+        help=(
+            "Difference in hours between attendance and timesheet "
+            "below which state is OK (e.g. 0.01)."
+        ),
     )
     x_delta_warn_hours = fields.Float(
         string="Delta warning threshold (hours)",
         default=0.5,
-        help="If the absolute difference is above tolerance but ≤ this value, state is Warning; above this, Issue.",
+        help=(
+            "If the absolute difference is above tolerance but ≤ this value, "
+            "state is Warning; above this, Issue."
+        ),
     )
 
     # Timer watchdog (F phase)
@@ -51,33 +59,50 @@ class ResCompany(models.Model):
     x_timer_notify_cooldown_hours = fields.Float(
         string="Timer Notify Cooldown (Hours)",
         default=6.0,
-        help="Minimum hours between employee notifications for the same incident/timer.",
+        help=(
+            "Minimum hours between employee notifications "
+            "for the same incident/timer."
+        ),
     )
     x_timer_check_no_attendance = fields.Boolean(
         string="Detect timers without attendance",
         default=True,
-        help="Create an incident if a timer is running while the employee has no active attendance.",
+        help=(
+            "Create an incident if a timer is running while the employee "
+            "has no active attendance."
+        ),
     )
     x_timer_stop_on_checkout = fields.Boolean(
         string="Stop timer on checkout",
         default=False,
-        help="If enabled, attempt to stop/pause the timer automatically on employee checkout.",
+        help=(
+            "If enabled, attempt to stop/pause the timer automatically "
+            "on employee checkout."
+        ),
     )
 
     x_timer_escalation_enabled = fields.Boolean(
         string="Enable Timer Escalation",
         default=False,
-        help="Escalate recurring timer incidents to the department manager (with cooldown).",
+        help=(
+            "Escalate recurring timer incidents to the department manager "
+            "(with cooldown)."
+        ),
     )
     x_timer_escalation_after_count = fields.Integer(
         string="Escalate After Notifications",
         default=3,
-        help="Escalate after this many employee notifications for the same incident type within the window.",
+        help=(
+            "Escalate after this many employee notifications for the same "
+            "incident type within the window."
+        ),
     )
     x_timer_escalation_window_days = fields.Integer(
         string="Escalation Window (Days)",
         default=7,
-        help="Time window (in days) used to count notifications before escalating.",
+        help=(
+            "Time window (in days) used to count notifications " "before escalating."
+        ),
     )
     x_timer_escalation_cooldown_hours = fields.Float(
         string="Escalation Cooldown (Hours)",

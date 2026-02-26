@@ -34,7 +34,7 @@ class TestComplianceDailyA2(TransactionCase):
         cls.department = cls.env["hr.department"].create({"name": "Dept A2"})
         cls.employee.department_id = cls.department.id
 
-        # --- Analytic prerequisites (Odoo 16 may require plan_id on analytic account) ---
+        # --- Analytic prerequisites (Odoo 16: plan_id on analytic account) ---
         analytic_vals = {
             "name": "Timesheet Analytic Account A2",
             "company_id": cls.company.id,

@@ -359,7 +359,7 @@ class TimesheetCompliance(models.Model):
         ).strip()
         email_from = email_from.replace("\n", " ").replace("\r", " ")
 
-        subject = _("Timesheet compliance - %s") % self.date
+        subject = _("Timesheet compliance - %(date)s") % {"date": self.date}
 
         template.with_context(**ctx).send_mail(
             self.id,
@@ -383,8 +383,8 @@ class TimesheetCompliance(models.Model):
         """Body for chatter when B1 email is sent."""
         self.ensure_one()
         return _(
-            "Daily compliance email (B1) sent to employee on %s."
-        ) % fields.Datetime.now().strftime("%d/%m/%Y %H:%M")
+            "Daily compliance email (B1) sent to employee on %(date)s."
+        ) % {"date": fields.Datetime.now().strftime("%d/%m/%Y %H:%M")}
 
     def _get_timesheet_entries_count(self):
         self.ensure_one()
@@ -473,12 +473,12 @@ class TimesheetCompliance(models.Model):
 
     @api.model
     def _cron_send_employee_emails(self):
-        """DEPRECATED: kept for compatibility; use _cron_send_b1_employee_daily_emails."""
+        """DEPRECATED: use _cron_send_b1_employee_daily_emails."""
         return self._cron_send_b1_employee_daily_emails()
 
     @api.model
     def _cron_send_daily_employee_emails(self):
-        """DEPRECATED: kept for compatibility; use _cron_send_b1_employee_daily_emails."""
+        """DEPRECATED: use _cron_send_b1_employee_daily_emails."""
         return self._cron_send_b1_employee_daily_emails()
 
     def _get_project_hours_breakdown(self):
@@ -531,10 +531,10 @@ class TimesheetCompliance(models.Model):
         rows = [
             {
                 "task_name": task.display_name,
-                "hours": totals[task],
+                "hours": hours,
                 "note": notes.get(task, ""),
             }
-            for task in totals
+            for task, hours in totals.items()
         ]
         rows.sort(key=lambda r: r["hours"], reverse=True)
         return rows[:limit]
@@ -561,7 +561,7 @@ class TimesheetCompliance(models.Model):
             by_dept.setdefault(rec.department_id.id, self.browse())
             by_dept[rec.department_id.id] |= rec
 
-        for dept_id, recs in by_dept.items():
+        for _dept_id, recs in by_dept.items():
             dept = recs[0].department_id
             manager_user = dept.manager_id.user_id if dept.manager_id else False
             manager_email = manager_user.email if manager_user else False
@@ -569,7 +569,8 @@ class TimesheetCompliance(models.Model):
                 continue
 
             template = self.env.ref(
-                "moval_timesheet_compliance.mail_template_timesheet_compliance_b2_manager",
+                "moval_timesheet_compliance."
+                "mail_template_timesheet_compliance_b2_manager",
                 raise_if_not_found=False,
             )
             if not template:
@@ -585,12 +586,17 @@ class TimesheetCompliance(models.Model):
                 "email_to_override": self._sanitize_mail_header(manager_email),
             }
             subject = self._sanitize_mail_header(
-                _("Timesheet compliance incidents - %s - %s")
-                % (dept.display_name, fields.Date.to_string(target_date))
+                _("Timesheet compliance incidents - %(dept)s - %(date)s")
+                % {
+                    "dept": dept.display_name,
+                    "date": fields.Date.to_string(target_date),
+                }
             )
             email_to = self._sanitize_mail_header(manager_email)
             email_from = (
-                self.env.company.email or self.env.user.email or "no-reply@example.com"
+                self.env.company.email
+                or self.env.user.email
+                or "no-reply@example.com"
             ).strip()
             email_from = email_from.replace("\n", " ").replace("\r", " ")
 
@@ -633,7 +639,12 @@ class TimesheetCompliance(models.Model):
             domain.append(("user_id", "in", employees.mapped("user_id").ids))
 
         domain_str = quote(json.dumps(domain), safe="")
-        return f"{base_url.rstrip('/')}/web#model=account.analytic.line&view_type=list&domain={domain_str}"
+        base = base_url.rstrip("/")
+        path = (
+            f"{base}/web#model=account.analytic.line&view_type=list"
+            f"&domain={domain_str}"
+        )
+        return path
 
     def _get_b2_rows(self):
         rows = []
@@ -681,7 +692,12 @@ class TimesheetCompliance(models.Model):
             domain.append(("user_id", "=", self.user_id.id))
 
         domain_str = quote(json.dumps(domain), safe="")
-        return f"{base_url.rstrip('/')}/web#model=account.analytic.line&view_type=list&domain={domain_str}"
+        base = base_url.rstrip("/")
+        path = (
+            f"{base}/web#model=account.analytic.line&view_type=list"
+            f"&domain={domain_str}"
+        )
+        return path
 
     @api.model
     def _cron_send_b3_escalate_unresolved(self):
@@ -701,7 +717,8 @@ class TimesheetCompliance(models.Model):
             return True
 
         template = self.env.ref(
-            "moval_timesheet_compliance.mail_template_timesheet_compliance_b3_escalation",
+            "moval_timesheet_compliance."
+            "mail_template_timesheet_compliance_b3_escalation",
             raise_if_not_found=False,
         )
 
@@ -729,10 +746,12 @@ class TimesheetCompliance(models.Model):
                 ).strip()
                 email_from = email_from.replace("\n", " ").replace("\r", " ")
 
-                subject = _("Timesheet compliance escalation - %s - %s") % (
-                    rec.employee_id.name,
-                    rec.date,
-                )
+                subject = _(
+                    "Timesheet compliance escalation - %(name)s - %(date)s"
+                ) % {
+                    "name": rec.employee_id.name,
+                    "date": rec.date,
+                }
                 template.with_context(**ctx).send_mail(
                     rec.id,
                     force_send=True,
@@ -745,9 +764,9 @@ class TimesheetCompliance(models.Model):
 
             rec.message_post(
                 body=_(
-                    "Incident escalated (B3) and notification sent to manager on %s."
+                    "Incident escalated (B3) and notification sent to manager on %(date)s."
                 )
-                % fields.Datetime.now().strftime("%d/%m/%Y %H:%M"),
+                % {"date": fields.Datetime.now().strftime("%d/%m/%Y %H:%M")},
                 message_type="notification",
                 subtype_xmlid="mail.mt_note",
             )
@@ -794,6 +813,25 @@ class TimesheetCompliance(models.Model):
             return {}
         result = action.read()[0]
         result["domain"] = domain
+        return result
+
+    @api.model
+    def action_open_daily_compliance(self):
+        """Open compliance list filtered by yesterday and today (for 'Cumplimiento diario' menu)."""
+        today = fields.Date.context_today(self.env.user)
+        yesterday = today - timedelta(days=1)
+        action = self.env.ref(
+            "moval_timesheet_compliance.action_moval_timesheet_compliance_manager",
+            raise_if_not_found=False,
+        )
+        if not action:
+            return {}
+        result = action.read()[0]
+        result["domain"] = [
+            ("date", ">=", yesterday),
+            ("date", "<=", today),
+        ]
+        result["name"] = _("Daily Compliance")
         return result
 
     def action_open_timesheets(self):
@@ -845,7 +883,8 @@ class TimesheetCompliance(models.Model):
         depts = self.env["hr.department"].search([("manager_id", "!=", False)])
 
         template = self.env.ref(
-            "moval_timesheet_compliance.mail_template_timesheet_compliance_e3_weekly",
+            "moval_timesheet_compliance."
+            "mail_template_timesheet_compliance_e3_weekly",
             raise_if_not_found=False,
         )
         if not template:
@@ -878,7 +917,7 @@ class TimesheetCompliance(models.Model):
                 rows[key]["generic"] += r.generic_hours or 0.0
 
             employee_rows = []
-            for _, v in rows.items():
+            for _key, v in rows.items():
                 pct = (v["generic"] / v["total"]) if v["total"] else 0.0
                 employee_rows.append(
                     {
@@ -913,20 +952,25 @@ class TimesheetCompliance(models.Model):
 
             any_rec = recs[0]
             subject = self._sanitize_mail_header(
-                _("Timesheet generic allocation - %s - %s to %s")
-                % (
-                    dept.display_name,
-                    fields.Date.to_string(last_monday),
-                    fields.Date.to_string(last_sunday),
+                _(
+                    "Timesheet generic allocation - %(dept)s - "
+                    "%(date_from)s to %(date_to)s"
                 )
+                % {
+                    "dept": dept.display_name,
+                    "date_from": fields.Date.to_string(last_monday),
+                    "date_to": fields.Date.to_string(last_sunday),
+                }
             )
 
             email_from = self._sanitize_mail_header(
-                self.env.company.email or self.env.user.email or "no-reply@example.com"
+                self.env.company.email
+                or self.env.user.email
+                or "no-reply@example.com"
             )
             email_to = self._sanitize_mail_header(manager_user.email)
 
-            template.with_context(ctx).send_mail(
+            template.with_context(**ctx).send_mail(
                 any_rec.id,
                 force_send=True,
                 raise_exception=True,
