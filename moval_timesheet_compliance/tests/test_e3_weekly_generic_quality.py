@@ -1,5 +1,6 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+# pylint: disable=invalid-name,protected-access
 
 from datetime import date, timedelta
 from unittest.mock import patch

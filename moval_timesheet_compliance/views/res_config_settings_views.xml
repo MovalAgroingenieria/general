@@ -5,10 +5,10 @@
     <record id="res_config_settings_view_form_timesheet_compliance" model="ir.ui.view">
         <field name="name">res.config.settings.view.form.timesheet.compliance</field>
         <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="inherit_id" ref="hr.res_config_settings_view_form"/>
         <field name="priority" eval="90"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[@id='user_default_rights']" position="after">
+            <xpath expr="//div[@data-key='hr']//div[@name='employee_rights_setting_container']" position="after">
                 <h2>Timesheet Compliance</h2>
 
                 <div class="row mt16 o_settings_container" name="timesheet_compliance_settings">
@@ -201,4 +201,20 @@
             </xpath>
         </field>
     </record>
+
+    <record id="moval_timesheet_compliance_config_settings_action" model="ir.actions.act_window">
+        <field name="name">Timesheet Compliance Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module': 'hr', 'bin_size': False}</field>
+    </record>
+
+    <menuitem id="menu_timesheet_compliance_settings"
+        name="Timesheet Compliance"
+        parent="hr.menu_human_resources_configuration"
+        sequence="15"
+        action="moval_timesheet_compliance_config_settings_action"
+        groups="hr.group_hr_manager"/>
 </odoo>

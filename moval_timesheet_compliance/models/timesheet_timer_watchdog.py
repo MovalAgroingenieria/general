@@ -1,5 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+# pylint: disable=protected-access,translation-not-lazy,too-many-arguments
+# pylint: disable=too-many-positional-arguments,invalid-name
 
 import logging
 from datetime import timedelta
@@ -163,8 +165,8 @@ class TimesheetTimerWatchdog(models.AbstractModel):
         return self._timer_ref_str(incident.timer_ref)
 
     def _auto_resolve_inactive_incidents(self, active_refs, now):
-        Incident = self.env["timesheet.timer.incident"]
-        open_incidents = Incident.search([("is_resolved", "=", False)])
+        incident_model = self.env["timesheet.timer.incident"]
+        open_incidents = incident_model.search([("is_resolved", "=", False)])
 
         to_resolve = open_incidents.filtered(
             lambda i: self._incident_ref_str(i) not in active_refs
@@ -240,7 +242,7 @@ class TimesheetTimerWatchdog(models.AbstractModel):
     def _get_timer_employee(self, timer):
         icp = self.env["ir.config_parameter"].sudo()
         configured_model = icp.get_param("moval_timesheet.timer_model_name") or ""
-        if timer._name == configured_model:
+        if timer._name == configured_model:  # noqa: W0212
             emp_field = (
                 icp.get_param("moval_timesheet.timer_employee_field") or "employee_id"
             )
@@ -302,12 +304,12 @@ class TimesheetTimerWatchdog(models.AbstractModel):
         now=False,
         cfg=False,
     ):
-        Incident = self.env["timesheet.timer.incident"].sudo()
+        incident_model = self.env["timesheet.timer.incident"].sudo()
         now = now or fields.Datetime.now()
         cfg = cfg or self._get_watchdog_config()
 
         timer_ref = self._timer_ref_str(timer)
-        incident = Incident.search(
+        incident = incident_model.search(
             [
                 ("timer_ref", "=", timer_ref),
                 ("incident_type", "=", incident_type),
@@ -337,7 +339,7 @@ class TimesheetTimerWatchdog(models.AbstractModel):
                     "note": note or "",
                 }
             )
-            incident = Incident.create(vals)
+            incident = incident_model.create(vals)
             _logger.info(
                 "Timer watchdog: incident created (%s) for %s", incident_type, timer_ref
             )
@@ -421,8 +423,8 @@ class TimesheetTimerWatchdog(models.AbstractModel):
             return False
 
         window_start = now - timedelta(days=cfg["escalation_window_days"])
-        Incident = self.env["timesheet.timer.incident"]
-        recent = Incident.search(
+        incident_model = self.env["timesheet.timer.incident"]
+        recent = incident_model.search(
             [
                 ("employee_id", "=", employee.id),
                 ("incident_type", "=", incident.incident_type),
@@ -457,7 +459,7 @@ class TimesheetTimerWatchdog(models.AbstractModel):
 
         self.env["mail.activity"].sudo().create(
             {
-                "res_model_id": self.env["ir.model"]._get_id(
+                "res_model_id": self.env["ir.model"]._get_id(  # noqa: W0212
                     "timesheet.timer.incident"
                 ),
                 "res_id": incident.id,

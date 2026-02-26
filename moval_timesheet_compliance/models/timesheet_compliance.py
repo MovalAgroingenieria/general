@@ -1,5 +1,6 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+# pylint: disable=protected-access,translation-not-lazy
 
 import json
 import logging
@@ -440,7 +441,7 @@ class TimesheetCompliance(models.Model):
                 self.env.user.lang or self.env.context.get("lang") or "en_US"
             )
             decimal_point = getattr(lang, "decimal_point", ".") or "."
-        except Exception:
+        except (ValueError, TypeError, AttributeError, KeyError):
             decimal_point = "."
         s = "%.2f" % (float(value or 0))
         return s.replace(".", decimal_point)
@@ -540,7 +541,7 @@ class TimesheetCompliance(models.Model):
         return rows[:limit]
 
     @api.model
-    def _cron_send_b2_manager_daily_emails(self):
+    def _cron_send_b2_manager_daily_emails(self):  # pylint: disable=too-many-locals
         today = fields.Date.context_today(self.env.user)
         target_date = today - timedelta(days=1)
 
@@ -760,7 +761,8 @@ class TimesheetCompliance(models.Model):
 
             rec.message_post(
                 body=_(
-                    "Incident escalated (B3) and notification sent to manager on %(date)s."
+                    "Incident escalated (B3) and notification sent to manager "
+                    "on %(date)s."
                 )
                 % {"date": fields.Datetime.now().strftime("%d/%m/%Y %H:%M")},
                 message_type="notification",
@@ -773,49 +775,32 @@ class TimesheetCompliance(models.Model):
         self.write({"state": "justified"})
 
     @api.model
-    def action_open_analysis_today(self):
-        today = fields.Date.context_today(self)
-        return self._get_analysis_action_with_domain([("date", "=", today)])
-
-    @api.model
-    def action_open_analysis_yesterday(self):
-        today = fields.Date.context_today(self)
-        yesterday = today - timedelta(days=1)
-        return self._get_analysis_action_with_domain([("date", "=", yesterday)])
-
-    @api.model
-    def action_open_analysis_this_week(self):
-        today = fields.Date.context_today(self)
-        start_week = today - timedelta(days=today.weekday())
-        end_week = start_week + timedelta(days=6)
-        return self._get_analysis_action_with_domain(
-            [("date", ">=", start_week), ("date", "<=", end_week)]
-        )
-
-    @api.model
-    def action_open_analysis_this_month(self):
-        today = fields.Date.context_today(self)
-        start_month = today.replace(day=1)
-        return self._get_analysis_action_with_domain(
-            [("date", ">=", start_month), ("date", "<=", today)]
-        )
-
-    def _get_analysis_action_with_domain(self, domain):
-        action = self.env.ref(
-            "moval_timesheet_compliance.action_moval_timesheet_compliance_pivot",
-            raise_if_not_found=False,
-        )
-        if not action:
-            return {}
-        result = action.read()[0]
-        result["domain"] = domain
-        return result
-
-    @api.model
     def action_open_daily_compliance(self):
-        """Open compliance list filtered by yesterday and today (for 'Cumplimiento diario' menu)."""
+        """Open compliance list filtered by yesterday and today
+        (for 'Cumplimiento diario' menu)."""
         today = fields.Date.context_today(self.env.user)
         yesterday = today - timedelta(days=1)
+        return self._get_compliance_list_action(
+            domain=[
+                ("date", ">=", yesterday),
+                ("date", "<=", today),
+            ],
+            name=_("Daily Compliance"),
+        )
+
+    @api.model
+    def action_open_compliance_today(self):
+        """Open compliance list filtered to today only
+        (for 'Registros de cumplimiento' menu)."""
+        today = fields.Date.context_today(self.env.user)
+        return self._get_compliance_list_action(
+            domain=[("date", "=", today)],
+            name=_("Compliance Records"),
+        )
+
+    @api.model
+    def _get_compliance_list_action(self, domain, name):
+        """Return window action for timesheet.compliance with given domain and name."""
         action = self.env.ref(
             "moval_timesheet_compliance.action_moval_timesheet_compliance_manager",
             raise_if_not_found=False,
@@ -823,11 +808,8 @@ class TimesheetCompliance(models.Model):
         if not action:
             return {}
         result = action.read()[0]
-        result["domain"] = [
-            ("date", ">=", yesterday),
-            ("date", "<=", today),
-        ]
-        result["name"] = _("Daily Compliance")
+        result["domain"] = domain
+        result["name"] = name
         return result
 
     def action_open_timesheets(self):
@@ -867,7 +849,7 @@ class TimesheetCompliance(models.Model):
         }
 
     @api.model
-    def _cron_send_e3_weekly_generic_quality(self):
+    def _cron_send_e3_weekly_generic_quality(self):  # pylint: disable=too-many-locals
         today = fields.Date.context_today(self.env.user)
         if fields.Date.to_date(today).weekday() != 0:
             return
