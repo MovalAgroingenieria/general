@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-13 09:37+0000\n"
-"PO-Revision-Date: 2026-01-13 09:37+0000\n"
+"POT-Creation-Date: 2026-02-26 22:22+0000\n"
+"PO-Revision-Date: 2026-02-26 22:22+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -52,7 +52,9 @@ msgid ""
 "                        <t t-set=\"incident_rows\" t-value=\"ctx.get('incident_rows', [])\"></t>\n"
 "                        <t t-if=\"incident_rows\">\n"
 "                            <t t-foreach=\"incident_rows\" t-as=\"row\">\n"
-"                                <tr>\n"
+"                                <t t-set=\"row_state\" t-value=\"row.get('state', '')\"></t>\n"
+"                                <t t-set=\"row_style\" t-value=\"'background-color: #fff3cd' if row_state == 'warn' else ('background-color: #f8d7da' if row_state == 'issue' else '')\"></t>\n"
+"                                <tr t-att-style=\"row_style\">\n"
 "                                    <td>\n"
 "                                        <t t-esc=\"row.get('employee_name', '')\"></t>\n"
 "                                    </td>\n"
@@ -60,25 +62,19 @@ msgid ""
 "                                        <t t-esc=\"row.get('telework', '')\"></t>\n"
 "                                    </td>\n"
 "                                    <td align=\"right\">\n"
-"                                        <t t-esc=\"row.get('attendance_hours', 0)\"></t>\n"
+"                                        <t t-esc=\"row.get('attendance_hours_fmt', row.get('attendance_hours', 0))\"></t>\n"
 "                                    </td>\n"
 "                                    <td align=\"right\">\n"
-"                                        <t t-esc=\"row.get('timesheet_hours', 0)\"></t>\n"
+"                                        <t t-esc=\"row.get('timesheet_hours_fmt', row.get('timesheet_hours', 0))\"></t>\n"
 "                                    </td>\n"
 "                                    <td align=\"right\">\n"
-"                                        <t t-esc=\"row.get('delta_hours', 0)\"></t>\n"
+"                                        <t t-esc=\"row.get('delta_hours_fmt', row.get('delta_hours', 0))\"></t>\n"
 "                                    </td>\n"
 "                                    <td>\n"
 "                                        <t t-esc=\"row.get('state', '')\"></t>\n"
 "                                    </td>\n"
 "                                    <td align=\"right\">\n"
-"                                        <t t-set=\"gp\" t-value=\"row.get('generic_pct', 0)\"></t>\n"
-"                                        <t t-if=\"gp and gp &lt;= 1\">\n"
-"                                            <t t-esc=\"'%.2f' % (gp * 100.0)\"></t>%\n"
-"                                        </t>\n"
-"                                        <t t-else=\"\">\n"
-"                                            <t t-esc=\"gp or 0\"></t>%\n"
-"                                        </t>\n"
+"                                        <t t-esc=\"row.get('generic_pct_fmt', row.get('generic_pct', 0))\"></t>\n"
 "                                    </td>\n"
 "                                    <td>\n"
 "                                        <t t-esc=\"row.get('generic_state', '')\"></t>\n"
@@ -266,11 +262,11 @@ msgid ""
 "                    </li>\n"
 "                    <li>\n"
 "                        <b>Attendance hours:</b>\n"
-"                        <t t-esc=\"object.attendance_hours\"></t>\n"
+"                        <t t-esc=\"ctx.get('attendance_hours_fmt', object.attendance_hours)\"></t>\n"
 "                    </li>\n"
 "                    <li>\n"
 "                        <b>Timesheet hours:</b>\n"
-"                        <t t-esc=\"object.timesheet_hours\"></t>\n"
+"                        <t t-esc=\"ctx.get('timesheet_hours_fmt', object.timesheet_hours)\"></t>\n"
 "                    </li>\n"
 "                    <li>\n"
 "                        <b>Timesheet entries:</b>\n"
@@ -278,7 +274,7 @@ msgid ""
 "                    </li>\n"
 "                    <li>\n"
 "                        <b>Delta:</b>\n"
-"                        <t t-esc=\"object.delta_hours\"></t>\n"
+"                        <t t-esc=\"ctx.get('delta_hours_fmt', object.delta_hours)\"></t>\n"
 "                    </li>\n"
 "                    <li>\n"
 "                        <b>State:</b>\n"
@@ -303,7 +299,7 @@ msgid ""
 "                                        <t t-esc=\"row.get('project_name')\"></t>\n"
 "                                    </td>\n"
 "                                    <td align=\"right\">\n"
-"                                        <t t-esc=\"row.get('hours')\"></t>\n"
+"                                        <t t-esc=\"row.get('hours_fmt', row.get('hours'))\"></t>\n"
 "                                    </td>\n"
 "                                </tr>\n"
 "                            </t>\n"
@@ -334,7 +330,7 @@ msgid ""
 "                                        <t t-esc=\"row.get('task_name')\"></t>\n"
 "                                    </td>\n"
 "                                    <td align=\"right\">\n"
-"                                        <t t-esc=\"row.get('hours')\"></t>\n"
+"                                        <t t-esc=\"row.get('hours_fmt', row.get('hours'))\"></t>\n"
 "                                    </td>\n"
 "                                    <td>\n"
 "                                        <t t-esc=\"row.get('note')\"></t>\n"
@@ -355,16 +351,11 @@ msgid ""
 "                <ul>\n"
 "                    <li>\n"
 "                        <b>Generic hours:</b>\n"
-"                        <t t-esc=\"object.generic_hours\"></t>\n"
+"                        <t t-esc=\"ctx.get('generic_hours_fmt', object.generic_hours)\"></t>\n"
 "                    </li>\n"
 "                    <li>\n"
 "                        <b>Generic %:</b>\n"
-"                        <t t-if=\"g_pct and g_pct &lt;= 1\">\n"
-"                            <t t-esc=\"'%.2f' % (g_pct * 100.0)\"></t>%\n"
-"                        </t>\n"
-"                        <t t-else=\"\">\n"
-"                            <t t-esc=\"g_pct or 0\"></t>%\n"
-"                        </t>\n"
+"                        <t t-esc=\"ctx.get('generic_pct_fmt', g_pct)\"></t>\n"
 "                    </li>\n"
 "                    <li>\n"
 "                        <b>Min hours to evaluate:</b>\n"
@@ -399,6 +390,31 @@ msgstr ""
 #. module: moval_timesheet_compliance
 #: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_needaction
 msgid "Action Needed"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.ui.menu,name:moval_timesheet_compliance.menu_compliance_analysis_period
+msgid "Analysis by period"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.actions.server,name:moval_timesheet_compliance.action_compliance_analysis_this_month
+msgid "Analysis: This month"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.actions.server,name:moval_timesheet_compliance.action_compliance_analysis_this_week
+msgid "Analysis: This week"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.actions.server,name:moval_timesheet_compliance.action_compliance_analysis_today
+msgid "Analysis: Today"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.actions.server,name:moval_timesheet_compliance.action_compliance_analysis_yesterday
+msgid "Analysis: Yesterday"
 msgstr ""
 
 #. module: moval_timesheet_compliance
@@ -455,6 +471,11 @@ msgid "Company"
 msgstr ""
 
 #. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_hr_department_form_timesheet_compliance
+msgid "Company default"
+msgstr ""
+
+#. module: moval_timesheet_compliance
 #: model:ir.actions.act_window,name:moval_timesheet_compliance.action_moval_timesheet_compliance_pivot
 #: model:ir.ui.menu,name:moval_timesheet_compliance.menu_moval_timesheet_compliance_pivot
 msgid "Compliance Analysis"
@@ -467,7 +488,7 @@ msgstr ""
 
 #. module: moval_timesheet_compliance
 #: model:ir.model,name:moval_timesheet_compliance.model_res_config_settings
-msgid "Config Settings"
+msgid "Configuration of Moval TLDV API"
 msgstr ""
 
 #. module: moval_timesheet_compliance
@@ -508,8 +529,25 @@ msgid "Date"
 msgstr ""
 
 #. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Delta (attendance vs timesheets)"
+msgstr ""
+
+#. module: moval_timesheet_compliance
 #: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__delta_hours
 msgid "Delta Hours"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_company__x_delta_tolerance_ok
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_config_settings__x_delta_tolerance_ok
+msgid "Delta tolerance (OK)"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_company__x_delta_warn_hours
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_res_config_settings__x_delta_warn_hours
+msgid "Delta warning threshold (hours)"
 msgstr ""
 
 #. module: moval_timesheet_compliance
@@ -542,6 +580,14 @@ msgid "Detect timers without attendance"
 msgstr ""
 
 #. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_company__x_delta_tolerance_ok
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_config_settings__x_delta_tolerance_ok
+msgid ""
+"Difference in hours between attendance and timesheet below which state is OK"
+" (e.g. 0.01)."
+msgstr ""
+
+#. module: moval_timesheet_compliance
 #: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__display_name
 #: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__display_name
 msgid "Display Name"
@@ -558,6 +604,7 @@ msgid "Email Sent At"
 msgstr ""
 
 #. module: moval_timesheet_compliance
+#: model:ir.model,name:moval_timesheet_compliance.model_hr_employee
 #: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__employee_id
 #: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__employee_id
 #: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
@@ -645,6 +692,16 @@ msgstr ""
 #. module: moval_timesheet_compliance
 #: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
 msgid "Escalation Window (days)"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_hr_employee__x_timesheet_compliance_excluded
+msgid "Excluded from timesheet compliance"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__failed_message_ids
+msgid "Failed Messages"
 msgstr ""
 
 #. module: moval_timesheet_compliance
@@ -773,6 +830,7 @@ msgstr ""
 
 #. module: moval_timesheet_compliance
 #: model:ir.model.fields,help:moval_timesheet_compliance.field_timesheet_compliance__message_has_error
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_timesheet_compliance__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr ""
 
@@ -782,6 +840,50 @@ msgstr ""
 msgid ""
 "If enabled, attempt to stop/pause the timer automatically on employee "
 "checkout."
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_hr_department__x_timer_max_active_hours
+msgid ""
+"If set, overrides the company limit for this department. Use a lower value "
+"for roles with many context switches (e.g. support, many tasks per day); "
+"leave empty to use company default."
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_hr_department__x_timer_notify_cooldown_hours
+msgid ""
+"If set, overrides the company notification cooldown for this department. "
+"Leave empty to use company default."
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_hr_employee__x_timesheet_compliance_excluded
+msgid ""
+"If set, this employee is excluded from daily compliance computation, emails "
+"(B1/B2/B3) and escalation. Use for roles not required to report timesheets."
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_company__x_delta_warn_hours
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_res_config_settings__x_delta_warn_hours
+msgid ""
+"If the absolute difference is above tolerance but ≤ this value, state is "
+"Warning; above this, Issue."
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid ""
+"If the difference (attendance − timesheets) is below this value, state is OK"
+" (e.g. 0.01)."
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid ""
+"If the difference is above tolerance but ≤ this value, state is Warning; "
+"above this, Issue."
 msgstr ""
 
 #. module: moval_timesheet_compliance
@@ -862,8 +964,28 @@ msgid "Maximum allowed running time (in hours) for an active timer."
 msgstr ""
 
 #. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_content
+msgid "Message Content"
+msgstr ""
+
+#. module: moval_timesheet_compliance
 #: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_has_error
 msgid "Message Delivery error"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_search
+msgid "Message Search"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_timesheet_compliance__message_content
+msgid "Message content, to be used only in searches"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,help:moval_timesheet_compliance.field_timesheet_compliance__message_search
+msgid "Message search, to be used only in searches"
 msgstr ""
 
 #. module: moval_timesheet_compliance
@@ -956,6 +1078,11 @@ msgid "OK"
 msgstr ""
 
 #. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "OK tolerance (hours)"
+msgstr ""
+
+#. module: moval_timesheet_compliance
 #: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
 msgid "Pending incidents"
 msgstr ""
@@ -980,6 +1107,11 @@ msgstr ""
 #. module: moval_timesheet_compliance
 #: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_timer_incident__resolved_at
 msgid "Resolved At"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_timesheet_compliance__message_has_sms_error
+msgid "SMS Delivery error"
 msgstr ""
 
 #. module: moval_timesheet_compliance
@@ -1008,6 +1140,16 @@ msgstr ""
 #. module: moval_timesheet_compliance
 #: model:ir.model.constraint,message:moval_timesheet_compliance.constraint_timesheet_compliance_employee_date_uniq
 msgid "There is already a compliance record for this employee and date."
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.ui.menu,name:moval_timesheet_compliance.menu_compliance_analysis_this_month
+msgid "This month"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.ui.menu,name:moval_timesheet_compliance.menu_compliance_analysis_this_week
+msgid "This week"
 msgstr ""
 
 #. module: moval_timesheet_compliance
@@ -1049,6 +1191,21 @@ msgid "Timer Watchdog"
 msgstr ""
 
 #. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_hr_department_form_timesheet_compliance
+msgid "Timer Watchdog (overrides)"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_hr_department__x_timer_max_active_hours
+msgid "Timer max active hours (override)"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.model.fields,field_description:moval_timesheet_compliance.field_hr_department__x_timer_notify_cooldown_hours
+msgid "Timer notify cooldown hours (override)"
+msgstr ""
+
+#. module: moval_timesheet_compliance
 #: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_timer_incident__incident_type__long_running
 msgid "Timer running too long"
 msgstr ""
@@ -1062,6 +1219,7 @@ msgstr ""
 #: model:ir.ui.menu,name:moval_timesheet_compliance.menu_moval_timesheet_compliance_root
 #: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
 #: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_hr_department_form_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_hr_employee_form_timesheet_compliance
 #: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
 msgid "Timesheet Compliance"
 msgstr ""
@@ -1176,6 +1334,11 @@ msgid "Timesheet generic allocation"
 msgstr ""
 
 #. module: moval_timesheet_compliance
+#: model:ir.ui.menu,name:moval_timesheet_compliance.menu_compliance_analysis_today
+msgid "Today"
+msgstr ""
+
+#. module: moval_timesheet_compliance
 #: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
 msgid "Trigger an incident when a timer stays active longer than this limit."
 msgstr ""
@@ -1187,10 +1350,25 @@ msgid "User"
 msgstr ""
 
 #. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_form
+msgid "View attendances"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_form
+msgid "View timesheets"
+msgstr ""
+
+#. module: moval_timesheet_compliance
 #: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_compliance__generic_state__warn
 #: model:ir.model.fields.selection,name:moval_timesheet_compliance.selection__timesheet_compliance__state__warn
 #: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.view_moval_timesheet_compliance_search
 msgid "Warning"
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model_terms:ir.ui.view,arch_db:moval_timesheet_compliance.res_config_settings_view_form_timesheet_compliance
+msgid "Warning threshold (hours)"
 msgstr ""
 
 #. module: moval_timesheet_compliance
@@ -1208,4 +1386,9 @@ msgstr ""
 msgid ""
 "When an employee checks out, stop any running timers and register the "
 "incident."
+msgstr ""
+
+#. module: moval_timesheet_compliance
+#: model:ir.ui.menu,name:moval_timesheet_compliance.menu_compliance_analysis_yesterday
+msgid "Yesterday"
 msgstr ""

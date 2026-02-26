@@ -1,4 +1,4 @@
-# Copyright 2026 Moval
+# 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from datetime import timedelta
@@ -34,7 +34,9 @@ class TestComplianceDailyB1(TransactionCase):
         )
 
     def _create_employee_with_user(self, login, email):
-        user = self.Users.create(
+        user = self.Users.with_context(
+            no_reset_password=True, mail_create_nosubscribe=True
+        ).create(
             {
                 "name": login,
                 "login": login,
@@ -116,3 +118,14 @@ class TestComplianceDailyB1(TransactionCase):
 
             self.Compliance._cron_send_b1_employee_daily_emails()
             self.assertEqual(mocked_send.call_count, 1)
+
+    def test_b1_does_not_send_when_employee_excluded(self):
+        employee = self._create_employee_with_user(
+            "user_b1_excluded", "user_b1_excluded@example.com"
+        )
+        employee.x_timesheet_compliance_excluded = True
+        self._create_compliance(employee, state="warn", telework=False)
+
+        with self._patch_send_mail() as mocked_send:
+            self.Compliance._cron_send_b1_employee_daily_emails()
+            self.assertEqual(mocked_send.call_count, 0)

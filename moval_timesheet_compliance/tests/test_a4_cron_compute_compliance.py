@@ -1,4 +1,4 @@
-# Copyright 2026 Moval
+# 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from datetime import datetime, time, timedelta
@@ -19,6 +19,8 @@ class TestComplianceDailyA4(TransactionCase):
         cls.company.x_generic_min_hours = 1.0
         cls.company.x_generic_warn_pct = 0.20
         cls.company.x_generic_issue_pct = 0.40
+        cls.company.x_delta_tolerance_ok = 0.01
+        cls.company.x_delta_warn_hours = 0.5
 
         cls.department = cls.env["hr.department"].create(
             {
@@ -27,13 +29,17 @@ class TestComplianceDailyA4(TransactionCase):
             }
         )
 
-        cls.user = cls.env["res.users"].create(
-            {
-                "name": "User A4",
-                "login": "user_a4@example.com",
-                "email": "user_a4@example.com",
-                "groups_id": [(6, 0, [cls.env.ref("base.group_user").id])],
-            }
+        cls.user = (
+            cls.env["res.users"]
+            .with_context(no_reset_password=True, mail_create_nosubscribe=True)
+            .create(
+                {
+                    "name": "User A4",
+                    "login": "user_a4@example.com",
+                    "email": "user_a4@example.com",
+                    "groups_id": [(6, 0, [cls.env.ref("base.group_user").id])],
+                }
+            )
         )
         cls.employee = cls.env["hr.employee"].create(
             {
@@ -199,3 +205,24 @@ class TestComplianceDailyA4(TransactionCase):
         rec.invalidate_recordset()
         self.assertEqual(rec.state, "fixed", "Fixed must not be reopened by cron")
         self.assertAlmostEqual(rec.delta_hours, 2.0, places=2)
+
+    def test_a4_excluded_employee_not_in_cron(self):
+        """Cron must not create or update compliance for excluded employees."""
+        fixed_today = fields.Date.from_string("2026-01-13")
+        yesterday = fixed_today - timedelta(days=1)
+
+        self.employee.x_timesheet_compliance_excluded = True
+        self._make_attendance(yesterday, 8)
+        self._make_timesheet(yesterday, 8, self.project_normal)
+
+        with patch("odoo.fields.Date.context_today", return_value=fixed_today):
+            self.Compliance._cron_compute_compliance()
+
+        rec = self.Compliance.search(
+            [("employee_id", "=", self.employee.id), ("date", "=", yesterday)],
+            limit=1,
+        )
+        self.assertFalse(
+            rec,
+            "No compliance record must exist for excluded employee",
+        )

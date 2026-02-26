@@ -1,4 +1,4 @@
-# Copyright 2026 Moval
+# 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from datetime import date as py_date
@@ -30,6 +30,9 @@ class TestComplianceDailyA2(TransactionCase):
                 "user_id": cls.user.id,
             }
         )
+
+        cls.department = cls.env["hr.department"].create({"name": "Dept A2"})
+        cls.employee.department_id = cls.department.id
 
         # --- Analytic prerequisites (Odoo 16 may require plan_id on analytic account) ---
         analytic_vals = {
@@ -132,3 +135,42 @@ class TestComplianceDailyA2(TransactionCase):
         self.assertEqual(rec.generic_hours, 1.0)
         self.assertAlmostEqual(rec.generic_pct, 0.2, places=6)
         self.assertEqual(rec.generic_state, "ok")
+
+    def test_a2_department_override_generic_thresholds(self):
+        """Department-specific generic warn/issue pct override company thresholds."""
+        d = py_date(2026, 1, 14)
+        self.company.x_generic_project_ids = [(6, 0, [self.project_generic.id])]
+        self.company.x_generic_min_hours = 0.0
+        self.company.x_generic_warn_pct = 0.5
+        self.company.x_generic_issue_pct = 0.8
+
+        self.department.x_generic_warn_pct = 0.25
+        self.department.x_generic_issue_pct = 0.50
+
+        self.env["hr.attendance"].create(
+            {
+                "employee_id": self.employee.id,
+                "check_in": "2026-01-14 09:00:00",
+                "check_out": "2026-01-14 17:00:00",
+            }
+        )
+        self._create_timesheet_line(
+            d, 4.0, name="Generic", project=self.project_generic
+        )
+        self._create_timesheet_line(
+            d, 6.0, name="Other", project=self.project_non_generic
+        )
+
+        self.compliance_model.compute_for_dates([d])
+        rec = self.compliance_model.search(
+            [("employee_id", "=", self.employee.id), ("date", "=", d)],
+            limit=1,
+        )
+        self.assertEqual(rec.timesheet_hours, 10.0)
+        self.assertEqual(rec.generic_hours, 4.0)
+        self.assertAlmostEqual(rec.generic_pct, 0.4, places=6)
+        self.assertEqual(
+            rec.generic_state,
+            "warn",
+            "40% generic with dept warn=0.25 issue=0.50 must be warn",
+        )

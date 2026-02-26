@@ -1,4 +1,4 @@
-# Copyright 2026 Moval
+# 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from datetime import timedelta
@@ -7,15 +7,7 @@ from unittest.mock import patch
 from odoo import fields
 from odoo.tests.common import TransactionCase
 
-
-class DummyTimer:
-    _name = "project.task"
-
-    def __init__(self, timer_id, started_at, employee=None):
-        self.id = timer_id
-        self.timer_start = started_at
-        self.employee_id = employee
-        self.user_id = employee.user_id if employee else False
+from .dummy_timer import DummyTimer
 
 
 class TestTimerWatchdogF1(TransactionCase):

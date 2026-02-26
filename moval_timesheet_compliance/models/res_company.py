@@ -1,4 +1,4 @@
-# Copyright 2026 Moval
+# 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from odoo import fields, models
@@ -27,7 +27,19 @@ class ResCompany(models.Model):
         help="Minimum total timesheet hours required to evaluate generic allocation.",
     )
 
+    # Delta (attendance vs timesheet) thresholds
     # -------------------------------------------------------------------------
+    x_delta_tolerance_ok = fields.Float(
+        string="Delta tolerance (OK)",
+        default=0.01,
+        help="Difference in hours between attendance and timesheet below which state is OK (e.g. 0.01).",
+    )
+    x_delta_warn_hours = fields.Float(
+        string="Delta warning threshold (hours)",
+        default=0.5,
+        help="If the absolute difference is above tolerance but ≤ this value, state is Warning; above this, Issue.",
+    )
+
     # Timer watchdog (F phase)
     # -------------------------------------------------------------------------
 

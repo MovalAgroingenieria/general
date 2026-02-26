@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright 2026 Moval
+<!-- 2026 Moval Agroingeniería
      License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
 <odoo>
     <record id="view_hr_department_form_timesheet_compliance" model="ir.ui.view">
@@ -11,6 +11,10 @@
                 <group string="Timesheet Compliance">
                     <field name="x_generic_warn_pct"/>
                     <field name="x_generic_issue_pct"/>
+                </group>
+                <group string="Timer Watchdog (overrides)">
+                    <field name="x_timer_max_active_hours" placeholder="Company default"/>
+                    <field name="x_timer_notify_cooldown_hours" placeholder="Company default"/>
                 </group>
             </xpath>
         </field>

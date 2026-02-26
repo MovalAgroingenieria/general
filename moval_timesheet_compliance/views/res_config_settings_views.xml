@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright 2026 Moval
+<!-- 2026 Moval Agroingeniería
      License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
 <odoo>
     <record id="res_config_settings_view_form_timesheet_compliance" model="ir.ui.view">
@@ -60,6 +60,34 @@
                             </div>
                             <div class="content-group mt8">
                                 <field name="x_generic_issue_pct" class="w-auto"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>Delta (attendance vs timesheets)</h2>
+                <div class="row mt16 o_settings_container" name="timesheet_compliance_delta_settings">
+                    <div class="col-12 col-lg-6 o_setting_box" id="delta_tolerance_ok_setting">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">OK tolerance (hours)</div>
+                            <div class="text-muted">
+                                If the difference (attendance − timesheets) is below this value, state is OK (e.g. 0.01).
+                            </div>
+                            <div class="content-group mt8">
+                                <field name="x_delta_tolerance_ok" class="w-auto"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6 o_setting_box" id="delta_warn_hours_setting">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">Warning threshold (hours)</div>
+                            <div class="text-muted">
+                                If the difference is above tolerance but ≤ this value, state is Warning; above this, Issue.
+                            </div>
+                            <div class="content-group mt8">
+                                <field name="x_delta_warn_hours" class="w-auto"/>
                             </div>
                         </div>
                     </div>

@@ -1,8 +1,7 @@
-# Copyright 2026 Moval
+# 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from datetime import date as py_date
-from datetime import timedelta
 
 from odoo.tests.common import TransactionCase
 
@@ -62,6 +61,8 @@ class TestComplianceDailyA1(TransactionCase):
         cls.company.x_generic_min_hours = 3.0
         cls.company.x_generic_warn_pct = 0.5
         cls.company.x_generic_issue_pct = 0.8
+        cls.company.x_delta_tolerance_ok = 0.01
+        cls.company.x_delta_warn_hours = 0.5
 
         cls.compliance_model = cls.env["timesheet.compliance"]
 
@@ -137,3 +138,113 @@ class TestComplianceDailyA1(TransactionCase):
         self.assertEqual(rec.generic_hours, 4.0)
         self.assertAlmostEqual(rec.generic_pct, 0.8, places=6)
         self.assertEqual(rec.generic_state, "issue")
+
+    def test_compute_skips_excluded_employees(self):
+        self.employee.x_timesheet_compliance_excluded = True
+        day = py_date(2026, 1, 15)
+
+        self.env["hr.attendance"].create(
+            {
+                "employee_id": self.employee.id,
+                "check_in": "2026-01-15 09:00:00",
+                "check_out": "2026-01-15 17:00:00",
+            }
+        )
+        self._create_timesheet_line(day, 8.0, name="Work", project=self.project_generic)
+
+        self.compliance_model.compute_for_dates([day])
+        rec = self.compliance_model.search(
+            [("employee_id", "=", self.employee.id), ("date", "=", day)],
+            limit=1,
+        )
+        self.assertFalse(
+            rec,
+            "No compliance record must be created for excluded employee",
+        )
+
+    def test_delta_state_warn_when_within_warn_threshold(self):
+        """State is warn when |delta| > tolerance_ok but <= warn_hours."""
+        self.company.x_delta_tolerance_ok = 0.01
+        self.company.x_delta_warn_hours = 0.5
+        day = py_date(2026, 1, 16)
+
+        self.env["hr.attendance"].create(
+            {
+                "employee_id": self.employee.id,
+                "check_in": "2026-01-16 09:00:00",
+                "check_out": "2026-01-16 17:00:00",
+            }
+        )
+        self._create_timesheet_line(day, 7.5, name="Work", project=self.project_generic)
+
+        self.compliance_model.compute_for_dates([day])
+        rec = self.compliance_model.search(
+            [("employee_id", "=", self.employee.id), ("date", "=", day)],
+            limit=1,
+        )
+        self.assertTrue(rec)
+        self.assertAlmostEqual(rec.delta_hours, 0.5, places=2)
+        self.assertEqual(rec.state, "warn")
+
+    def test_delta_state_issue_when_above_warn_threshold(self):
+        """State is issue when |delta| > warn_hours."""
+        self.company.x_delta_tolerance_ok = 0.01
+        self.company.x_delta_warn_hours = 0.5
+        day = py_date(2026, 1, 17)
+
+        self.env["hr.attendance"].create(
+            {
+                "employee_id": self.employee.id,
+                "check_in": "2026-01-17 09:00:00",
+                "check_out": "2026-01-17 17:00:00",
+            }
+        )
+        self._create_timesheet_line(day, 6.0, name="Work", project=self.project_generic)
+
+        self.compliance_model.compute_for_dates([day])
+        rec = self.compliance_model.search(
+            [("employee_id", "=", self.employee.id), ("date", "=", day)],
+            limit=1,
+        )
+        self.assertTrue(rec)
+        self.assertAlmostEqual(rec.delta_hours, 2.0, places=2)
+        self.assertEqual(rec.state, "issue")
+
+    def test_delta_promotion_to_fixed_when_corrected(self):
+        """When delta becomes <= tolerance after being warn/issue, state becomes fixed."""
+        self.company.x_delta_tolerance_ok = 0.01
+        self.company.x_delta_warn_hours = 0.5
+        day = py_date(2026, 1, 18)
+
+        self.env["hr.attendance"].create(
+            {
+                "employee_id": self.employee.id,
+                "check_in": "2026-01-18 09:00:00",
+                "check_out": "2026-01-18 17:00:00",
+            }
+        )
+        self._create_timesheet_line(day, 6.0, name="Work", project=self.project_generic)
+
+        self.compliance_model.compute_for_dates([day])
+        rec = self.compliance_model.search(
+            [("employee_id", "=", self.employee.id), ("date", "=", day)],
+            limit=1,
+        )
+        self.assertEqual(rec.state, "issue")
+        self.assertAlmostEqual(rec.delta_hours, 2.0, places=2)
+
+        self._create_timesheet_line(
+            day, 2.0, name="Extra", project=self.project_generic
+        )
+        self.compliance_model.compute_for_dates([day])
+        rec.invalidate_recordset()
+        rec = self.compliance_model.search(
+            [("employee_id", "=", self.employee.id), ("date", "=", day)],
+            limit=1,
+        )
+        self.assertAlmostEqual(rec.delta_hours, 0.0, places=2)
+        self.assertEqual(
+            rec.state,
+            "fixed",
+            "Delta corrected within tolerance must promote to fixed",
+        )

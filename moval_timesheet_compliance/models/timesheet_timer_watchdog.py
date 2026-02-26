@@ -1,82 +1,12 @@
-# Copyright 2026 Moval
+# 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 import logging
 from datetime import timedelta
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 
 _logger = logging.getLogger(__name__)
-
-
-class TimesheetTimerIncident(models.Model):
-    _name = "timesheet.timer.incident"
-    _description = "Timesheet Timer Incident"
-    _order = "create_date desc"
-
-    timer_ref = fields.Reference(
-        selection="_selection_timer_models",
-        required=True,
-        index=True,
-    )
-    employee_id = fields.Many2one("hr.employee", required=True, index=True)
-    user_id = fields.Many2one("res.users", related="employee_id.user_id", store=True)
-    department_id = fields.Many2one(
-        "hr.department",
-        related="employee_id.department_id",
-        store=True,
-        index=True,
-    )
-    company_id = fields.Many2one(
-        "res.company",
-        required=True,
-        default=lambda self: self.env.company,
-        index=True,
-    )
-
-    incident_type = fields.Selection(
-        selection=[
-            ("long_running", "Timer running too long"),
-            ("no_attendance", "Timer running without attendance"),
-            ("checkout_with_timer", "Checkout with active timer"),
-        ],
-        required=True,
-        index=True,
-    )
-
-    timer_started_at = fields.Datetime(readonly=True)
-    duration_hours = fields.Float(readonly=True)
-
-    first_seen_at = fields.Datetime(readonly=True)
-    last_seen_at = fields.Datetime(readonly=True)
-
-    last_notified_at = fields.Datetime(readonly=True)
-    notify_count = fields.Integer(readonly=True, default=0)
-
-    escalated_at = fields.Datetime(readonly=True)
-    escalated_count = fields.Integer(readonly=True, default=0)
-
-    is_resolved = fields.Boolean(default=False, index=True)
-    resolved_at = fields.Datetime(readonly=True)
-
-    note = fields.Text()
-
-    @api.model
-    def _selection_timer_models(self):
-        res = []
-        if "project.task" in self.env:
-            res.append(("project.task", "Task (project.task)"))
-
-        icp = self.env["ir.config_parameter"].sudo()
-        model_name = icp.get_param("moval_timesheet.timer_model_name")
-        if (
-            model_name
-            and model_name in self.env
-            and (model_name, model_name) not in res
-        ):
-            res.append((model_name, model_name))
-
-        return res
 
 
 class TimesheetTimerWatchdog(models.AbstractModel):
@@ -109,6 +39,8 @@ class TimesheetTimerWatchdog(models.AbstractModel):
             if not employee:
                 continue
 
+            cfg = self._get_watchdog_config(employee=employee)
+
             started_at = self._get_timer_started_at(timer)
             if not started_at:
                 continue
@@ -122,9 +54,9 @@ class TimesheetTimerWatchdog(models.AbstractModel):
                     incident_type="long_running",
                     timer_started_at=started_at,
                     duration_hours=duration_hours,
-                    note=(
-                        f"Timer active for {duration_hours:.2f}h "
-                        f"(limit {cfg['max_active_hours']:.2f}h)."
+                    note=_("Timer active for %s (limit %s).") % (
+                        f"{duration_hours:.2f}h",
+                        f"{cfg['max_active_hours']:.2f}h",
                     ),
                     now=now,
                     cfg=cfg,
@@ -139,7 +71,7 @@ class TimesheetTimerWatchdog(models.AbstractModel):
                     incident_type="no_attendance",
                     timer_started_at=started_at,
                     duration_hours=duration_hours,
-                    note="Timer active but no active attendance found.",
+                    note=_("Timer active but no active attendance found."),
                     now=now,
                     cfg=cfg,
                 )
@@ -150,7 +82,7 @@ class TimesheetTimerWatchdog(models.AbstractModel):
     def handle_checkout(self, employee):
         """Checkout hook: create an incident for any running timer."""
         now = fields.Datetime.now()
-        cfg = self._get_watchdog_config()
+        cfg = self._get_watchdog_config(employee=employee)
 
         timers = self._get_active_timers(employee=employee)
         if not timers:
@@ -166,11 +98,11 @@ class TimesheetTimerWatchdog(models.AbstractModel):
             if cfg["stop_on_checkout"]:
                 stopped = self._try_stop_timer(timer)
 
-            note = "Checkout detected with an active timer."
+            note = _("Checkout detected with an active timer.")
             if stopped:
-                note += " Timer was automatically stopped."
+                note += " " + _("Timer was automatically stopped.")
             else:
-                note += " Please stop it and adjust your timesheet if needed."
+                note += " " + _("Please stop it and adjust your timesheet if needed.")
 
             self._handle_incident(
                 timer=timer,
@@ -187,9 +119,10 @@ class TimesheetTimerWatchdog(models.AbstractModel):
         return True
 
     @api.model
-    def _get_watchdog_config(self):
+    def _get_watchdog_config(self, employee=None):
+        """Get watchdog config (company defaults + optional department overrides)."""
         company = self.env.company
-        return {
+        cfg = {
             "max_active_hours": company.x_timer_max_active_hours or 0.0,
             "notify_cooldown_hours": company.x_timer_notify_cooldown_hours or 0.0,
             "check_no_attendance": bool(company.x_timer_check_no_attendance),
@@ -200,8 +133,20 @@ class TimesheetTimerWatchdog(models.AbstractModel):
             "escalation_cooldown_hours": company.x_timer_escalation_cooldown_hours
             or 0.0,
         }
+        if employee and employee.department_id:
+            dept = employee.department_id
+            if (
+                dept.x_timer_max_active_hours is not None
+                and dept.x_timer_max_active_hours > 0
+            ):
+                cfg["max_active_hours"] = dept.x_timer_max_active_hours
+            if (
+                dept.x_timer_notify_cooldown_hours is not None
+                and dept.x_timer_notify_cooldown_hours >= 0
+            ):
+                cfg["notify_cooldown_hours"] = dept.x_timer_notify_cooldown_hours
+        return cfg
 
-    # -------------------------------------------------------------------------
     # Helpers
     # -------------------------------------------------------------------------
 
@@ -228,7 +173,6 @@ class TimesheetTimerWatchdog(models.AbstractModel):
 
         return len(to_resolve)
 
-    # -------------------------------------------------------------------------
     # Timer adapter
     # -------------------------------------------------------------------------
 
@@ -327,7 +271,6 @@ class TimesheetTimerWatchdog(models.AbstractModel):
                 return True
         return False
 
-    # -------------------------------------------------------------------------
     # Attendance
     # -------------------------------------------------------------------------
 
@@ -343,7 +286,6 @@ class TimesheetTimerWatchdog(models.AbstractModel):
             )
         )
 
-    # -------------------------------------------------------------------------
     # Incidents + notifications + escalation
     # -------------------------------------------------------------------------
 
@@ -445,12 +387,13 @@ class TimesheetTimerWatchdog(models.AbstractModel):
             return False
 
         summary_map = {
-            "long_running": "Timer watchdog: timer running too long",
-            "no_attendance": "Timer watchdog: timer running without attendance",
-            "checkout_with_timer": "Timer watchdog: checkout with an active timer",
+            "long_running": _("Timer watchdog: timer running too long"),
+            "no_attendance": _("Timer watchdog: timer running without attendance"),
+            "checkout_with_timer": _("Timer watchdog: checkout with an active timer"),
         }
         summary = summary_map.get(
-            incident.incident_type, "Timer watchdog: please review your running timer"
+            incident.incident_type,
+            _("Timer watchdog: please review your running timer"),
         )
 
         self.env["mail.activity"].sudo().create(
@@ -496,12 +439,16 @@ class TimesheetTimerWatchdog(models.AbstractModel):
         if not manager_user:
             return False
 
-        summary = "Timer watchdog escalation: recurring incident"
-        note = (
-            f"Recurring timer incident for {employee.name}.\n\n"
-            f"Type: {incident.incident_type}\n"
-            f"Notifications in last {cfg['escalation_window_days']} days: {total_notify}\n\n"
-            f"Last note:\n{incident.note or ''}"
+        summary = _("Timer watchdog escalation: recurring incident")
+        note = _(
+            "Recurring timer incident for %s.\n\nType: %s\n"
+            "Notifications in last %s days: %s\n\nLast note:\n%s"
+        ) % (
+            employee.name,
+            incident.incident_type,
+            cfg["escalation_window_days"],
+            total_notify,
+            incident.note or "",
         )
 
         self.env["mail.activity"].sudo().create(

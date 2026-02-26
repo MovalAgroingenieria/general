@@ -1,4 +1,4 @@
-# Copyright 2026 Moval
+# 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from odoo import fields, models
@@ -7,7 +7,6 @@ from odoo import fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
-    # -------------------------------------------------------------------------
     # Generic allocation (E)
     # -------------------------------------------------------------------------
 
@@ -28,7 +27,17 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
     )
 
+    # Delta (attendance vs timesheet)
     # -------------------------------------------------------------------------
+    x_delta_tolerance_ok = fields.Float(
+        related="company_id.x_delta_tolerance_ok",
+        readonly=False,
+    )
+    x_delta_warn_hours = fields.Float(
+        related="company_id.x_delta_warn_hours",
+        readonly=False,
+    )
+
     # Timer watchdog (F)
     # -------------------------------------------------------------------------
 

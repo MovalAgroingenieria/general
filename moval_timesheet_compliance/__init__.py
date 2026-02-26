@@ -1,2 +1,2 @@
-# Copyright 2026 Moval
+# 2026 Moval Agroingeniería
 from . import models

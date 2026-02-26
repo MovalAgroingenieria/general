@@ -1,4 +1,4 @@
-# Copyright 2026 Moval
+# 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from datetime import date, timedelta
@@ -13,13 +13,17 @@ from .common import TimesheetComplianceCase
 @tagged("-at_install")
 class TestComplianceE3WeeklyGenericQuality(TimesheetComplianceCase):
     def _make_user(self, login, email):
-        user = self.env["res.users"].create(
-            {
-                "name": login,
-                "login": login,
-                "email": email,
-                "groups_id": [(6, 0, [self.env.ref("base.group_user").id])],
-            }
+        user = (
+            self.env["res.users"]
+            .with_context(no_reset_password=True, mail_create_nosubscribe=True)
+            .create(
+                {
+                    "name": login,
+                    "login": login,
+                    "email": email,
+                    "groups_id": [(6, 0, [self.env.ref("base.group_user").id])],
+                }
+            )
         )
         return user
 
@@ -34,7 +38,7 @@ class TestComplianceE3WeeklyGenericQuality(TimesheetComplianceCase):
         )
 
     def test_e3_weekly_sends_only_on_monday_and_builds_pivot_url(self):
-        Compliance = self.env["timesheet.compliance"]
+        compliance_model = self.env["timesheet.compliance"]
 
         manager_user = self._make_user("manager_e3", "manager_e3@example.com")
         dept = self.env["hr.department"].create(
@@ -63,7 +67,7 @@ class TestComplianceE3WeeklyGenericQuality(TimesheetComplianceCase):
         # Create compliance records for last week range
         d = last_monday
         while d <= last_sunday:
-            Compliance.create(
+            compliance_model.create(
                 {
                     "employee_id": employee.id,
                     "date": fields.Date.to_string(d),
@@ -85,7 +89,7 @@ class TestComplianceE3WeeklyGenericQuality(TimesheetComplianceCase):
 
         captured = {"calls": 0, "ctx": None}
 
-        def _fake_send_mail(self, res_id, force_send=False, **kwargs):
+        def _fake_send_mail(_self, *_args, **_kwargs):
             captured["calls"] += 1
             # Capture the render context used by with_context(...)
             captured["ctx"] = dict(self.env.context)
@@ -96,10 +100,12 @@ class TestComplianceE3WeeklyGenericQuality(TimesheetComplianceCase):
             fields.Date, "context_today", autospec=True, return_value=monday
         ):
             with patch.object(type(template), "send_mail", new=_fake_send_mail):
-                Compliance._cron_send_e3_weekly_generic_quality()
+                compliance_model._cron_send_e3_weekly_generic_quality()
 
         self.assertEqual(
-            captured["calls"], 1, "E3 should send exactly one email for the department"
+            captured["calls"],
+            1,
+            "E3 should send exactly one email for the department",
         )
 
         ctx = captured["ctx"] or {}
@@ -118,5 +124,7 @@ class TestComplianceE3WeeklyGenericQuality(TimesheetComplianceCase):
             fields.Date, "context_today", autospec=True, return_value=tuesday
         ):
             with patch.object(type(template), "send_mail", new=_fake_send_mail):
-                Compliance._cron_send_e3_weekly_generic_quality()
-        self.assertEqual(captured["calls"], 0, "E3 should not send on non-Monday")
+                compliance_model._cron_send_e3_weekly_generic_quality()
+        self.assertEqual(
+            captured["calls"], 0, "E3 should not send on non-Monday"
+        )

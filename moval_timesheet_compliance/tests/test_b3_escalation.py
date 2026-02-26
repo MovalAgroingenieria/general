@@ -1,4 +1,4 @@
-# Copyright 2026 Moval
+# 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from datetime import timedelta
@@ -6,7 +6,6 @@ from unittest.mock import patch
 
 from odoo import fields
 from odoo.tests import tagged
-from odoo.tools.misc import mute_logger
 
 from .common import TimesheetComplianceCase
 
@@ -30,7 +29,9 @@ class TestComplianceDailyB3Escalation(TimesheetComplianceCase):
         cls.old_date2 = cls.today - timedelta(days=47)
 
         # Manager setup (department manager gets escalation email)
-        cls.manager_user = cls.Users.create(
+        cls.manager_user = cls.Users.with_context(
+            no_reset_password=True, mail_create_nosubscribe=True
+        ).create(
             {
                 "name": "Manager B3",
                 "login": "manager_b3",
@@ -52,7 +53,9 @@ class TestComplianceDailyB3Escalation(TimesheetComplianceCase):
         )
 
         # Employee to escalate
-        cls.user = cls.Users.create(
+        cls.user = cls.Users.with_context(
+            no_reset_password=True, mail_create_nosubscribe=True
+        ).create(
             {
                 "name": "User B3",
                 "login": "user_b3",
@@ -146,4 +149,22 @@ class TestComplianceDailyB3Escalation(TimesheetComplianceCase):
 
         self.assertFalse(rec_fixed.escalated_at)
         self.assertFalse(rec_just.escalated_at)
+        self.assertEqual(mocked_send.call_count, 0)
+
+    def test_b3_does_not_escalate_excluded_employee(self):
+        """B3 cron must not escalate compliances of excluded employees."""
+        self.employee.x_timesheet_compliance_excluded = True
+        rec = self._create_unresolved(state="warn")
+
+        with patch(
+            "odoo.addons.mail.models.mail_template.MailTemplate.send_mail"
+        ) as mocked_send:
+            self.Compliance._cron_send_b3_escalate_unresolved()
+
+        rec.invalidate_recordset()
+        self.assertFalse(
+            rec.escalated_at,
+            "Excluded employee must not be escalated",
+        )
+        self.assertEqual(rec.state, "warn")
         self.assertEqual(mocked_send.call_count, 0)

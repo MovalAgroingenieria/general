@@ -1,11 +1,12 @@
-# Copyright 2026 Moval
+# 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 import json
+import logging
 from datetime import timedelta
 from urllib.parse import quote
-import logging
-from odoo import api, fields, models
+
+from odoo import _, api, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -95,7 +96,6 @@ class TimesheetCompliance(models.Model):
             value = str(value)
         return value.replace("\n", " ").replace("\r", " ").strip()
 
-    # -------------------------------------------------------------------------
     # Cron
     # -------------------------------------------------------------------------
 
@@ -108,17 +108,20 @@ class TimesheetCompliance(models.Model):
         ]
         self.compute_for_dates(dates)
 
-    # -------------------------------------------------------------------------
     # Public API
     # -------------------------------------------------------------------------
 
     def compute_for_dates(self, dates):
-        employees = self.env["hr.employee"].search([("user_id", "!=", False)])
+        employees = self.env["hr.employee"].search(
+            [
+                ("user_id", "!=", False),
+                ("x_timesheet_compliance_excluded", "=", False),
+            ]
+        )
         for employee in employees:
             for day in dates:
                 self._compute_employee_date(employee, day)
 
-    # -------------------------------------------------------------------------
     # Core logic
     # -------------------------------------------------------------------------
 
@@ -140,25 +143,25 @@ class TimesheetCompliance(models.Model):
 
         values = compliance._compute_values(employee, day)
 
-        # Always update numbers
         compliance.write(values)
 
-        # Do not touch justified, ever
         if compliance.state == "justified":
             return
 
-        # Do not reopen fixed automatically
         if compliance.state == "fixed":
             return
 
-        # Normal evaluation
         new_state = compliance._evaluate_state(values)
 
-        # Optional: promote to fixed if it was warn/issue/escalated and now it matches
-        if abs(values.get("delta_hours", 0.0)) <= 0.01 and compliance.state in (
-                "warn",
-                "issue",
-                "escalated",
+        tolerance_ok = (
+            self.env.company.x_delta_tolerance_ok
+            if self.env.company.x_delta_tolerance_ok is not None
+            else 0.01
+        )
+        if abs(values.get("delta_hours", 0.0)) <= tolerance_ok and compliance.state in (
+            "warn",
+            "issue",
+            "escalated",
         ):
             new_state = "fixed"
 
@@ -189,7 +192,6 @@ class TimesheetCompliance(models.Model):
             "generic_state": generic_state,
         }
 
-    # -------------------------------------------------------------------------
     # Evaluation helpers
     # -------------------------------------------------------------------------
 
@@ -201,10 +203,22 @@ class TimesheetCompliance(models.Model):
         if telework and not timesheet_hours:
             return "issue"
 
-        if abs(delta_hours) <= 0.01:
+        company = self.env.company
+        tolerance_ok = (
+            company.x_delta_tolerance_ok
+            if company.x_delta_tolerance_ok is not None
+            else 0.01
+        )
+        warn_hours = (
+            company.x_delta_warn_hours
+            if company.x_delta_warn_hours is not None
+            else 0.5
+        )
+
+        if abs(delta_hours) <= tolerance_ok:
             return "ok"
 
-        if abs(delta_hours) <= 0.5:
+        if abs(delta_hours) <= warn_hours:
             return "warn"
 
         return "issue"
@@ -217,7 +231,7 @@ class TimesheetCompliance(models.Model):
         department = employee.department_id
         warn_pct = department.x_generic_warn_pct or self.env.company.x_generic_warn_pct
         issue_pct = (
-                department.x_generic_issue_pct or self.env.company.x_generic_issue_pct
+            department.x_generic_issue_pct or self.env.company.x_generic_issue_pct
         )
 
         issue_ratio = issue_pct or 0.0
@@ -229,7 +243,6 @@ class TimesheetCompliance(models.Model):
             return "warn"
         return "ok"
 
-    # -------------------------------------------------------------------------
     # Data sources
     # -------------------------------------------------------------------------
 
@@ -294,7 +307,6 @@ class TimesheetCompliance(models.Model):
 
         return False
 
-    # -------------------------------------------------------------------------
     # Cron (emails)
     # -------------------------------------------------------------------------
 
@@ -318,6 +330,8 @@ class TimesheetCompliance(models.Model):
     def _should_send_b1_employee_email(self):
         """B1 rule: send if telework=True or state in warn/issue."""
         self.ensure_one()
+        if self.employee_id.x_timesheet_compliance_excluded:
+            return False
         if self.email_sent_at:
             return False
         if not self.user_id or not self.user_id.email:
@@ -340,18 +354,37 @@ class TimesheetCompliance(models.Model):
         ctx = self._get_b1_email_render_context()
         ctx["timesheet_entries_count"] = self._get_timesheet_entries_count()
 
-        email_from = (self.env.company.email or self.env.user.email or "no-reply@example.com").strip()
+        email_from = (
+            self.env.company.email or self.env.user.email or "no-reply@example.com"
+        ).strip()
         email_from = email_from.replace("\n", " ").replace("\r", " ")
+
+        subject = _("Timesheet compliance - %s") % self.date
 
         template.with_context(**ctx).send_mail(
             self.id,
             force_send=True,
             raise_exception=True,
-            email_values={"email_from": email_from},
+            email_values={
+                "email_from": email_from,
+                "subject": subject,
+            },
         )
 
         self.email_sent_at = fields.Datetime.now()
+        self.message_post(
+            body=self._get_b1_email_sent_message_body(),
+            message_type="notification",
+            subtype_xmlid="mail.mt_note",
+        )
         return True
+
+    def _get_b1_email_sent_message_body(self):
+        """Body for chatter when B1 email is sent."""
+        self.ensure_one()
+        return _(
+            "Daily compliance email (B1) sent to employee on %s."
+        ) % fields.Datetime.now().strftime("%d/%m/%Y %H:%M")
 
     def _get_timesheet_entries_count(self):
         self.ensure_one()
@@ -373,14 +406,44 @@ class TimesheetCompliance(models.Model):
         warn_pct = (dept.x_generic_warn_pct or company.x_generic_warn_pct) or 0.0
         issue_pct = (dept.x_generic_issue_pct or company.x_generic_issue_pct) or 0.0
 
+        project_rows = self._get_project_hours_breakdown()
+        for row in project_rows:
+            row["hours_fmt"] = self._format_hours_for_mail(row.get("hours", 0))
+        task_rows = self._get_top_tasks_breakdown(limit=10)
+        for row in task_rows:
+            row["hours_fmt"] = self._format_hours_for_mail(row.get("hours", 0))
+
+        g_pct = self.generic_pct
+        if g_pct and g_pct <= 1:
+            generic_pct_fmt = self._format_hours_for_mail(g_pct * 100.0) + "%"
+        else:
+            generic_pct_fmt = (self._format_hours_for_mail(g_pct or 0) or "0") + "%"
+
         return {
-            "project_rows": self._get_project_hours_breakdown(),
-            "task_rows": self._get_top_tasks_breakdown(limit=10),
+            "project_rows": project_rows,
+            "task_rows": task_rows,
             "my_timesheets_url": self._get_my_timesheets_action_url(),
             "generic_min_hours": min_hours,
             "generic_warn_pct": warn_pct,
             "generic_issue_pct": issue_pct,
+            "attendance_hours_fmt": self._format_hours_for_mail(self.attendance_hours),
+            "timesheet_hours_fmt": self._format_hours_for_mail(self.timesheet_hours),
+            "delta_hours_fmt": self._format_hours_for_mail(self.delta_hours),
+            "generic_hours_fmt": self._format_hours_for_mail(self.generic_hours),
+            "generic_pct_fmt": generic_pct_fmt,
         }
+
+    def _format_hours_for_mail(self, value):
+        """Format float hours for email (2 decimals, locale-aware decimal separator)."""
+        try:
+            lang = self.env["res.lang"]._lang_get(
+                self.env.user.lang or self.env.context.get("lang") or "en_US"
+            )
+            decimal_point = getattr(lang, "decimal_point", ".") or "."
+        except Exception:
+            decimal_point = "."
+        s = "%.2f" % (float(value or 0))
+        return s.replace(".", decimal_point)
 
     def _get_my_timesheets_action_url(self):
         self.ensure_one()
@@ -397,16 +460,15 @@ class TimesheetCompliance(models.Model):
 
         ctx = {"moval_timesheet_date": fields.Date.to_string(self.date)}
         fragment = (
-                "#action=%s&model=account.analytic.line&view_type=list&context=%s"
-                % (
-                    action.id,
-                    quote(json.dumps(ctx), safe=""),
-                )
+            "#action=%s&model=account.analytic.line&view_type=list&context=%s"
+            % (
+                action.id,
+                quote(json.dumps(ctx), safe=""),
+            )
         )
         return "%s/web%s" % (base_url.rstrip("/"), fragment)
 
-    # -------------------------------------------------------------------------
-    # Backward-compatible wrappers (optional, safe)
+    # Backward-compatible wrappers
     # -------------------------------------------------------------------------
 
     @api.model
@@ -488,6 +550,7 @@ class TimesheetCompliance(models.Model):
                 ("department_id", "!=", False),
                 ("state", "in", ["warn", "issue", "escalated"]),
                 ("b2_manager_sent_at", "=", False),
+                ("employee_id.x_timesheet_compliance_excluded", "=", False),
             ]
         )
         if not incidents:
@@ -522,22 +585,33 @@ class TimesheetCompliance(models.Model):
                 "email_to_override": self._sanitize_mail_header(manager_email),
             }
             subject = self._sanitize_mail_header(
-                f"Timesheet compliance incidents - {dept.display_name} - {fields.Date.to_string(target_date)}"
+                _("Timesheet compliance incidents - %s - %s")
+                % (dept.display_name, fields.Date.to_string(target_date))
             )
             email_to = self._sanitize_mail_header(manager_email)
-            email_from = (self.env.company.email or self.env.user.email or "no-reply@example.com").strip()
+            email_from = (
+                self.env.company.email or self.env.user.email or "no-reply@example.com"
+            ).strip()
             email_from = email_from.replace("\n", " ").replace("\r", " ")
 
             template.with_context(**ctx).send_mail(
                 recs[0].id,
                 force_send=True,
                 raise_exception=True,
-                email_values={"email_from": email_from,
-                              "email_to": email_to,
-                              "subject": subject,
-                              },
+                email_values={
+                    "email_from": email_from,
+                    "email_to": email_to,
+                    "subject": subject,
+                },
             )
             recs.write({"b2_manager_sent_at": fields.Datetime.now()})
+            for rec in recs:
+                rec.message_post(
+                    body=_("Included in manager incident email (B2) on %s.")
+                    % fields.Datetime.now().strftime("%d/%m/%Y %H:%M"),
+                    message_type="notification",
+                    subtype_xmlid="mail.mt_note",
+                )
 
         return True
 
@@ -571,8 +645,21 @@ class TimesheetCompliance(models.Model):
                     "attendance_hours": rec.attendance_hours,
                     "timesheet_hours": rec.timesheet_hours,
                     "delta_hours": rec.delta_hours,
+                    "attendance_hours_fmt": rec._format_hours_for_mail(
+                        rec.attendance_hours
+                    ),
+                    "timesheet_hours_fmt": rec._format_hours_for_mail(
+                        rec.timesheet_hours
+                    ),
+                    "delta_hours_fmt": rec._format_hours_for_mail(rec.delta_hours),
                     "state": rec.state,
                     "generic_pct": rec.generic_pct,
+                    "generic_pct_fmt": rec._format_hours_for_mail(
+                        (rec.generic_pct * 100.0)
+                        if rec.generic_pct and rec.generic_pct <= 1
+                        else (rec.generic_pct or 0)
+                    )
+                    + "%",
                     "generic_state": rec.generic_state,
                     "detail_url": rec._get_b2_employee_day_url(),
                 }
@@ -607,6 +694,7 @@ class TimesheetCompliance(models.Model):
                 ("state", "in", ["warn", "issue"]),
                 ("escalated_at", "=", False),
                 ("department_id", "!=", False),
+                ("employee_id.x_timesheet_compliance_excluded", "=", False),
             ]
         )
         if not to_escalate:
@@ -634,20 +722,115 @@ class TimesheetCompliance(models.Model):
                     "detail_url": rec._get_b2_employee_day_url(),
                 }
 
-                email_from = (self.env.company.email or self.env.user.email or "no-reply@example.com").strip()
+                email_from = (
+                    self.env.company.email
+                    or self.env.user.email
+                    or "no-reply@example.com"
+                ).strip()
                 email_from = email_from.replace("\n", " ").replace("\r", " ")
 
+                subject = _("Timesheet compliance escalation - %s - %s") % (
+                    rec.employee_id.name,
+                    rec.date,
+                )
                 template.with_context(**ctx).send_mail(
                     rec.id,
                     force_send=True,
                     raise_exception=True,
-                    email_values={"email_from": email_from},
+                    email_values={
+                        "email_from": email_from,
+                        "subject": self._sanitize_mail_header(subject),
+                    },
                 )
+
+            rec.message_post(
+                body=_(
+                    "Incident escalated (B3) and notification sent to manager on %s."
+                )
+                % fields.Datetime.now().strftime("%d/%m/%Y %H:%M"),
+                message_type="notification",
+                subtype_xmlid="mail.mt_note",
+            )
 
         return True
 
     def action_mark_justified(self):
         self.write({"state": "justified"})
+
+    @api.model
+    def action_open_analysis_today(self):
+        today = fields.Date.context_today(self)
+        return self._get_analysis_action_with_domain([("date", "=", today)])
+
+    @api.model
+    def action_open_analysis_yesterday(self):
+        today = fields.Date.context_today(self)
+        yesterday = today - timedelta(days=1)
+        return self._get_analysis_action_with_domain([("date", "=", yesterday)])
+
+    @api.model
+    def action_open_analysis_this_week(self):
+        today = fields.Date.context_today(self)
+        start_week = today - timedelta(days=today.weekday())
+        end_week = start_week + timedelta(days=6)
+        return self._get_analysis_action_with_domain(
+            [("date", ">=", start_week), ("date", "<=", end_week)]
+        )
+
+    @api.model
+    def action_open_analysis_this_month(self):
+        today = fields.Date.context_today(self)
+        start_month = today.replace(day=1)
+        return self._get_analysis_action_with_domain(
+            [("date", ">=", start_month), ("date", "<=", today)]
+        )
+
+    def _get_analysis_action_with_domain(self, domain):
+        action = self.env.ref(
+            "moval_timesheet_compliance.action_moval_timesheet_compliance_pivot",
+            raise_if_not_found=False,
+        )
+        if not action:
+            return {}
+        result = action.read()[0]
+        result["domain"] = domain
+        return result
+
+    def action_open_timesheets(self):
+        """Open timesheet lines (account.analytic.line) for this employee and date."""
+        self.ensure_one()
+        aal = self.env["account.analytic.line"]
+        domain = [("date", "=", self.date)]
+        if "employee_id" in aal._fields:
+            domain.append(("employee_id", "=", self.employee_id.id))
+        else:
+            domain.append(("user_id", "=", self.user_id.id))
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Timesheets - %s - %s" % (self.employee_id.name, self.date),
+            "res_model": "account.analytic.line",
+            "view_mode": "tree,form",
+            "domain": domain,
+            "context": {"default_date": self.date},
+        }
+
+    def action_open_attendances(self):
+        """Open attendance records (hr.attendance) for this employee and date."""
+        self.ensure_one()
+        start_dt = fields.Datetime.to_datetime(self.date)
+        end_dt = fields.Datetime.to_datetime(self.date + timedelta(days=1))
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Attendances - %s - %s" % (self.employee_id.name, self.date),
+            "res_model": "hr.attendance",
+            "view_mode": "tree,form",
+            "domain": [
+                ("employee_id", "=", self.employee_id.id),
+                ("check_in", ">=", start_dt),
+                ("check_in", "<", end_dt),
+            ],
+            "context": {"default_employee_id": self.employee_id.id},
+        }
 
     @api.model
     def _cron_send_e3_weekly_generic_quality(self):
@@ -724,12 +907,18 @@ class TimesheetCompliance(models.Model):
                     ),
                 }
             )
-            ctx.update({"email_to_override": self._sanitize_mail_header(manager_user.email)})
+            ctx.update(
+                {"email_to_override": self._sanitize_mail_header(manager_user.email)}
+            )
 
             any_rec = recs[0]
             subject = self._sanitize_mail_header(
-                f"Timesheet generic allocation - {dept.display_name} - "
-                f"{fields.Date.to_string(last_monday)} to {fields.Date.to_string(last_sunday)}"
+                _("Timesheet generic allocation - %s - %s to %s")
+                % (
+                    dept.display_name,
+                    fields.Date.to_string(last_monday),
+                    fields.Date.to_string(last_sunday),
+                )
             )
 
             email_from = self._sanitize_mail_header(
@@ -770,11 +959,11 @@ class TimesheetCompliance(models.Model):
             ("date", "<=", fields.Date.to_string(date_to)),
         ]
         fragment = (
-                "#action=%s&model=timesheet.compliance&view_type=list&context=%s&domain=%s"
-                % (
-                    action.id,
-                    quote(json.dumps(ctx), safe=""),
-                    quote(json.dumps(domain), safe=""),
-                )
+            "#action=%s&model=timesheet.compliance&view_type=list&context=%s&domain=%s"
+            % (
+                action.id,
+                quote(json.dumps(ctx), safe=""),
+                quote(json.dumps(domain), safe=""),
+            )
         )
         return "%s/web%s" % (base_url.rstrip("/"), fragment)

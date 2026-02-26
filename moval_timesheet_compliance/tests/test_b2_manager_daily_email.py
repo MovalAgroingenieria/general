@@ -1,13 +1,13 @@
-# Copyright 2026 Moval
+# 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from datetime import timedelta
 from unittest.mock import patch
 
 from odoo import fields
+from odoo.tests import tagged
 
 from .common import TimesheetComplianceCase
-from odoo.tests import tagged
 
 
 @tagged("-at_install")
@@ -26,7 +26,9 @@ class TestComplianceDailyB2Manager(TimesheetComplianceCase):
 
         cls.target_date = fields.Date.context_today(cls.env.user) - timedelta(days=1)
 
-        cls.manager_user = cls.Users.create(
+        cls.manager_user = cls.Users.with_context(
+            no_reset_password=True, mail_create_nosubscribe=True
+        ).create(
             {
                 "name": "Manager B2",
                 "login": "manager_b2",
@@ -48,7 +50,9 @@ class TestComplianceDailyB2Manager(TimesheetComplianceCase):
             }
         )
 
-        cls.user = cls.Users.create(
+        cls.user = cls.Users.with_context(
+            no_reset_password=True, mail_create_nosubscribe=True
+        ).create(
             {
                 "name": "User B2",
                 "login": "user_b2",
@@ -65,7 +69,9 @@ class TestComplianceDailyB2Manager(TimesheetComplianceCase):
         )
 
         # Second employee in same department (needed to test grouping)
-        cls.user2 = cls.Users.create(
+        cls.user2 = cls.Users.with_context(
+            no_reset_password=True, mail_create_nosubscribe=True
+        ).create(
             {
                 "name": "User B2-2",
                 "login": "user_b2_2",
@@ -103,9 +109,7 @@ class TestComplianceDailyB2Manager(TimesheetComplianceCase):
 
     def test_b2_sends_one_email_per_department_and_marks_sent(self):
         rec1 = self._create_incident(employee=self.employee)
-        rec2 = self._create_incident(
-            employee=self.employee2
-        )  # same dept/date, different employee
+        rec2 = self._create_incident(employee=self.employee2)
 
         with patch(
             "odoo.addons.mail.models.mail_template.MailTemplate.send_mail"
@@ -154,3 +158,20 @@ class TestComplianceDailyB2Manager(TimesheetComplianceCase):
             "If no manager email, it must not mark as sent",
         )
         self.assertEqual(mocked_send.call_count, 0)
+
+    def test_b2_does_not_include_excluded_employees(self):
+        """B2 cron must not include compliances of excluded employees."""
+        self.employee.x_timesheet_compliance_excluded = True
+        self._create_incident(employee=self.employee)
+
+        with patch(
+            "odoo.addons.mail.models.mail_template.MailTemplate.send_mail"
+        ) as mocked_send:
+            mocked_send.return_value = 1
+            self.Compliance._cron_send_b2_manager_daily_emails()
+
+        self.assertEqual(
+            mocked_send.call_count,
+            0,
+            "No email when only incident is for excluded employee",
+        )

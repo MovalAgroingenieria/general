@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright 2026 Moval
+<!-- 2026 Moval Agroingeniería
      License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
 <odoo>
     <data>
@@ -40,6 +40,14 @@
                                     class="btn-primary"
                                     attrs="{'invisible': [('state','not in',('warn','issue'))]}"
                                     groups="moval_timesheet_compliance.group_timesheet_compliance_manager"/>
+                            <button name="action_open_timesheets"
+                                    type="object"
+                                    string="View timesheets"
+                                    class="btn-secondary"/>
+                            <button name="action_open_attendances"
+                                    type="object"
+                                    string="View attendances"
+                                    class="btn-secondary"/>
                         </header>
 
                         <group>
@@ -69,6 +77,7 @@
                             <field name="generic_state" readonly="1"/>
                         </group>
                     </sheet>
+                    <chatter/>
                 </form>
             </field>
         </record>
@@ -152,63 +161,6 @@
             </field>
         </record>
 
-
-        <record id="action_moval_timesheet_compliance_manager" model="ir.actions.act_window">
-            <field name="name">Daily Timesheet Compliance</field>
-            <field name="res_model">timesheet.compliance</field>
-            <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="view_moval_timesheet_compliance_tree"/>
-            <field name="search_view_id" ref="view_moval_timesheet_compliance_search"/>
-            <field name="context">{}</field>
-            <field name="domain">[]</field>
-        </record>
-        <record id="action_moval_timesheet_compliance_pivot" model="ir.actions.act_window">
-            <field name="name">Compliance Analysis</field>
-            <field name="res_model">timesheet.compliance</field>
-            <field name="view_mode">pivot,graph,tree,form</field>
-            <field name="view_id" ref="view_moval_timesheet_compliance_pivot"/>
-            <field name="search_view_id" ref="view_moval_timesheet_compliance_search"/>
-            <field name="context">
-                {
-                "search_default_groupby_dept": 1,
-                "search_default_groupby_date": 0
-                }
-            </field>
-            <field name="domain">[]</field>
-            <field name="groups_id" eval="[(4, ref('moval_timesheet_compliance.group_timesheet_compliance_manager'))]"/>
-        </record>
-        <menuitem
-                id="menu_moval_timesheet_compliance_root"
-                name="Timesheet Compliance"
-                parent="hr.menu_hr_root"
-                sequence="80"
-                groups="moval_timesheet_compliance.group_timesheet_compliance_user,moval_timesheet_compliance.group_timesheet_compliance_manager"
-        />
-        <menuitem
-                id="menu_moval_timesheet_compliance_pivot"
-                name="Compliance Analysis"
-                parent="moval_timesheet_compliance.menu_moval_timesheet_compliance_root"
-                action="moval_timesheet_compliance.action_moval_timesheet_compliance_pivot"
-                sequence="30"
-                groups="moval_timesheet_compliance.group_timesheet_compliance_manager"
-        />
-        <menuitem
-                id="menu_moval_timesheet_compliance"
-                name="Daily Compliance"
-                parent="moval_timesheet_compliance.menu_moval_timesheet_compliance_root"
-                action="moval_timesheet_compliance.action_moval_timesheet_compliance_manager"
-                sequence="20"
-                groups="moval_timesheet_compliance.group_timesheet_compliance_user,moval_timesheet_compliance.group_timesheet_compliance_manager"
-        />
-
-        <menuitem
-                id="menu_moval_timesheet_compliance_manager"
-                name="Compliance Records"
-                parent="moval_timesheet_compliance.menu_moval_timesheet_compliance_root"
-                action="moval_timesheet_compliance.action_moval_timesheet_compliance_manager"
-                groups="moval_timesheet_compliance.group_timesheet_compliance_manager"
-                sequence="30"
-        />
 
     </data>
 </odoo>

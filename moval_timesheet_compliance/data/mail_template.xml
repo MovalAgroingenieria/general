@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright 2026 Moval
+<!-- 2026 Moval Agroingeniería
      License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
 <odoo noupdate="0">
 
@@ -42,11 +42,11 @@
                     </li>
                     <li>
                         <b>Attendance hours:</b>
-                        <t t-esc="object.attendance_hours"/>
+                        <t t-esc="ctx.get('attendance_hours_fmt', object.attendance_hours)"/>
                     </li>
                     <li>
                         <b>Timesheet hours:</b>
-                        <t t-esc="object.timesheet_hours"/>
+                        <t t-esc="ctx.get('timesheet_hours_fmt', object.timesheet_hours)"/>
                     </li>
                     <li>
                         <b>Timesheet entries:</b>
@@ -54,7 +54,7 @@
                     </li>
                     <li>
                         <b>Delta:</b>
-                        <t t-esc="object.delta_hours"/>
+                        <t t-esc="ctx.get('delta_hours_fmt', object.delta_hours)"/>
                     </li>
                     <li>
                         <b>State:</b>
@@ -79,7 +79,7 @@
                                         <t t-esc="row.get('project_name')"/>
                                     </td>
                                     <td align="right">
-                                        <t t-esc="row.get('hours')"/>
+                                        <t t-esc="row.get('hours_fmt', row.get('hours'))"/>
                                     </td>
                                 </tr>
                             </t>
@@ -110,7 +110,7 @@
                                         <t t-esc="row.get('task_name')"/>
                                     </td>
                                     <td align="right">
-                                        <t t-esc="row.get('hours')"/>
+                                        <t t-esc="row.get('hours_fmt', row.get('hours'))"/>
                                     </td>
                                     <td>
                                         <t t-esc="row.get('note')"/>
@@ -131,16 +131,11 @@
                 <ul>
                     <li>
                         <b>Generic hours:</b>
-                        <t t-esc="object.generic_hours"/>
+                        <t t-esc="ctx.get('generic_hours_fmt', object.generic_hours)"/>
                     </li>
                     <li>
                         <b>Generic %:</b>
-                        <t t-if="g_pct and g_pct &lt;= 1">
-                            <t t-esc="'%.2f' % (g_pct * 100.0)"/>%
-                        </t>
-                        <t t-else="">
-                            <t t-esc="g_pct or 0"/>%
-                        </t>
+                        <t t-esc="ctx.get('generic_pct_fmt', g_pct)"/>
                     </li>
                     <li>
                         <b>Min hours to evaluate:</b>
@@ -225,7 +220,9 @@
                         <t t-set="incident_rows" t-value="ctx.get('incident_rows', [])"/>
                         <t t-if="incident_rows">
                             <t t-foreach="incident_rows" t-as="row">
-                                <tr>
+                                <t t-set="row_state" t-value="row.get('state', '')"/>
+                                <t t-set="row_style" t-value="'background-color: #fff3cd' if row_state == 'warn' else ('background-color: #f8d7da' if row_state == 'issue' else '')"/>
+                                <tr t-att-style="row_style">
                                     <td>
                                         <t t-esc="row.get('employee_name', '')"/>
                                     </td>
@@ -233,25 +230,19 @@
                                         <t t-esc="row.get('telework', '')"/>
                                     </td>
                                     <td align="right">
-                                        <t t-esc="row.get('attendance_hours', 0)"/>
+                                        <t t-esc="row.get('attendance_hours_fmt', row.get('attendance_hours', 0))"/>
                                     </td>
                                     <td align="right">
-                                        <t t-esc="row.get('timesheet_hours', 0)"/>
+                                        <t t-esc="row.get('timesheet_hours_fmt', row.get('timesheet_hours', 0))"/>
                                     </td>
                                     <td align="right">
-                                        <t t-esc="row.get('delta_hours', 0)"/>
+                                        <t t-esc="row.get('delta_hours_fmt', row.get('delta_hours', 0))"/>
                                     </td>
                                     <td>
                                         <t t-esc="row.get('state', '')"/>
                                     </td>
                                     <td align="right">
-                                        <t t-set="gp" t-value="row.get('generic_pct', 0)"/>
-                                        <t t-if="gp and gp &lt;= 1">
-                                            <t t-esc="'%.2f' % (gp * 100.0)"/>%
-                                        </t>
-                                        <t t-else="">
-                                            <t t-esc="gp or 0"/>%
-                                        </t>
+                                        <t t-esc="row.get('generic_pct_fmt', row.get('generic_pct', 0))"/>
                                     </td>
                                     <td>
                                         <t t-esc="row.get('generic_state', '')"/>

@@ -1,4 +1,4 @@
-# Copyright 2026 Moval
+# 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from datetime import timedelta
@@ -22,7 +22,6 @@ class TestComplianceDailyB2(TimesheetComplianceCase):
         template = self.env.ref(self.TEMPLATE_XMLID)
 
         user = self.env.ref("base.user_demo")
-        # Ensure email exists for template fields
         user.email = user.email or "user_b2@example.com"
 
         employee = self.env["hr.employee"].create(
@@ -49,9 +48,8 @@ class TestComplianceDailyB2(TimesheetComplianceCase):
             }
         )
 
-        # Render body/subject (Odoo 16 expects a list of ids and returns a dict)
         rendered_map = template.with_context(
-            compliance._get_b1_email_render_context()
+            **compliance._get_b1_email_render_context()
         )._render_template(template.body_html, template.model, [compliance.id])
 
         rendered = rendered_map.get(compliance.id) or ""
@@ -63,12 +61,10 @@ class TestComplianceDailyB2(TimesheetComplianceCase):
         subject = subject_map.get(compliance.id) or ""
         self.assertTrue(subject)
 
-        # Link checks: action id must be present in the URL fragment
         action = self.env.ref(self.ACTION_XMLID)
         self.assertIn(str(action.id), rendered)
-        self.assertIn("my_timesheets_url", template.body_html)  # opcional, muy débil
+        self.assertIn("my_timesheets_url", template.body_html)
 
-        # Minimal stable content checks
         self.assertIn(str(day), rendered)
         self.assertIn("Telework", rendered)
         self.assertIn("Attendance", rendered)

@@ -88,6 +88,37 @@ A SQL-level uniqueness constraint ensures:
 This guarantees consistent daily tracking and prevents duplicates.
 
 
+Configuration (Company and Delta)
+----------------------------------
+
+**Delta (attendance vs timesheets)**
+
+In **Settings → Timesheet Compliance** you can configure:
+
+* **OK tolerance (hours)** – If the absolute difference between attendance and
+  timesheet hours is below this value, the state is **OK** (default: 0.01).
+* **Warning threshold (hours)** – If the difference is above the tolerance but
+  ≤ this value, state is **Warning**; above this, **Issue** (default: 0.5).
+
+These values are global per company and affect the daily computation and state
+evaluation.
+
+
+Excluded employees
+------------------
+
+On **Employees**, a boolean **Excluded from timesheet compliance** is available
+(for employees with a user).
+
+When set:
+
+* No compliance record is created or updated for that employee by the cron.
+* The employee is excluded from B1 (daily email), B2 (manager incident email)
+  and B3 (escalation).
+
+Use this for roles that are not required to report timesheets.
+
+
 Generic Project Configuration
 -----------------------------
 
@@ -158,12 +189,11 @@ Content:
 
 Sending rules:
 
-* Email is sent if:
-
-  * ``telework = True`` **or**
-  * ``state`` is ``warn`` or ``issue``
-
-* Idempotent: sent only once per day per record
+* Email is sent if ``telework = True`` **or** ``state`` is ``warn`` or ``issue``.
+* Idempotent: sent only once per day per record.
+* Employees excluded from compliance do not receive B1.
+* Hours and delta in the email are formatted (e.g. 2 decimals, locale decimal
+  separator). Templates can be translated (e.g. ``i18n/es.po``).
 
 B2. Daily manager email by department
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -181,11 +211,15 @@ Content:
   * Generic percentage and state
   * Link to filtered timesheets for that employee and day
 
+* Rows are **coloured by state** (e.g. warning = amber, issue = red) for
+  quick scanning.
+
 Rules:
 
 * No incidents → no email
 * One email per department/day
 * Idempotent: never sent twice
+* Employees excluded from compliance are not included.
 
 B3. Automatic escalation after 48h
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -205,7 +239,28 @@ Actions:
 * Escalation timestamp is stored
 * Notification is sent to management
 
-Each record is escalated only once.
+Each record is escalated only once. Excluded employees are not escalated.
+
+
+Timer Watchdog (optional, phase F)
+----------------------------------
+
+The module can monitor active timers (e.g. from project tasks) and create
+incidents when:
+
+* A timer runs longer than a configured limit.
+* A timer runs without an active attendance.
+* The employee checks out with a timer still running.
+
+Configuration is at **Settings → Timer Watchdog** (company level). Departments
+can **override** (on the department form, section “Timer Watchdog (overrides)”):
+
+* **Timer max active hours** – Lower value for roles with many context switches
+  (e.g. support); leave empty to use company default.
+* **Timer notify cooldown hours** – Leave empty to use company default.
+
+This allows different thresholds per department (e.g. stricter for support,
+looser for development).
 
 
 Links and UX
@@ -224,7 +279,24 @@ A dedicated action allows users to open their timesheets with filters applied.
 
 This action is used from email links and respects access rights.
 
-Compliance views for managers
+From compliance to detail (timesheets and attendances)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+From the **compliance form view**, two buttons open filtered views for that
+employee and date:
+
+* **View timesheets** – Opens ``account.analytic.line`` (timesheet lines) for
+  the compliance’s employee and date.
+* **View attendances** – Opens ``hr.attendance`` for the same employee and date.
+
+Email and escalation history (chatter)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Each compliance record has a **chatter**. When B1, B2 or B3 sends an email or
+escalates, a note is posted (e.g. “Daily compliance email (B1) sent to employee
+on …”) so you can see when messages were sent without opening MailTracking.
+
+Compliance views and analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Managers have access to a panel for audit and follow-up.
@@ -232,7 +304,8 @@ Managers have access to a panel for audit and follow-up.
 Available views:
 
 * List view for daily monitoring
-* Form view for detailed inspection and manual actions
+* Form view with buttons to open timesheets/attendances and chatter
+* Pivot and graph for analysis
 
 Search and filters:
 
@@ -242,6 +315,10 @@ Search and filters:
 * Telework
 * Compliance state
 * Generic allocation state
+
+**Analysis by period** (menu): quick filters for **Today**, **Yesterday**,
+**This week**, **This month** open the compliance pivot with the date domain
+already applied.
 
 Manual justification and fixing can be applied from the form view.
 
@@ -274,6 +351,15 @@ The module includes automated tests covering:
 * Email notification rules (B1, B2)
 * Escalation logic (B3)
 * Idempotency and state protection
+* Timer watchdog (cron and checkout hook)
+
+
+Module structure
+----------------
+
+* **One class per Python file** (models and tests).
+* **One XML file per model** (or per record type): views, actions, menus,
+  security groups and rules, and data are split into separate files by model.
 
 
 Credits
