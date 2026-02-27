@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Extension of Primary Entity form to add Censuses smart button -->
+    <record id="view_partner_primary_entity_form_census" model="ir.ui.view">
+        <field name="name">res.partner.primary.entity.form.census</field>
+        <field name="model">res.partner</field>
+        <field
+            name="inherit_id"
+            ref="base_general_entity.view_partner_primary_entity_form"
+        />
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button
+                    class="oe_stat_button"
+                    type="object"
+                    name="action_view_censuses"
+                    icon="fa-calendar"
+                    invisible="is_primary_entity == False"
+                >
+                    <field name="census_count" widget="statinfo" string="Censuses" />
+                </button>
+                <button
+                    class="oe_stat_button"
+                    type="object"
+                    name="action_view_primary_census_lines"
+                    icon="fa-list"
+                    invisible="is_primary_entity == False"
+                >
+                    <field
+                        name="primary_census_line_count"
+                        widget="statinfo"
+                        string="Census Lines"
+                    />
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Extension of Secondary Member form to add Census Lines smart button -->
+    <record id="view_partner_secondary_entity_form_census" model="ir.ui.view">
+        <field name="name">res.partner.secondary.entity.form.census</field>
+        <field name="model">res.partner</field>
+        <field
+            name="inherit_id"
+            ref="base_general_entity.view_partner_secondary_entity_form"
+        />
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button
+                        class="oe_stat_button"
+                        type="object"
+                        name="action_view_census_lines"
+                        icon="fa-list"
+                        invisible="is_secondary_entity == False"
+                    >
+                        <field
+                            name="census_line_count"
+                            widget="statinfo"
+                            string="Census Lines"
+                        />
+                    </button>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
