@@ -61,7 +61,8 @@ class ScrapAnnualReportWizard(models.TransientModel):
         return self._build_hierarchy(type_contributions)
 
     def _get_invoices_for_year(self):
-        """Get posted customer invoices for the selected year."""
+        """Get posted customer invoices for the selected year (Spanish
+        customers only)."""
         date_from = f"{self.year}-01-01"
         date_to = f"{self.year}-12-31"
 
@@ -72,6 +73,7 @@ class ScrapAnnualReportWizard(models.TransientModel):
                 ("state", "=", "posted"),
                 ("invoice_date", ">=", date_from),
                 ("invoice_date", "<=", date_to),
+                ("partner_id.country_id.code", "=", "ES"),
             ]
         )
 
