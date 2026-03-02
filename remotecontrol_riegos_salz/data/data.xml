@@ -40,7 +40,7 @@ This makes all irrigation system information available inside Odoo, simplifying 
 <p>The system uses these credentials to connect with the Riegos Salz web service.
 During the process, the password is automatically encrypted internally (<em>MD5 format</em>), ensuring that it is never sent in plain text.</p>
 
-<p>The connection is made through the secure Riegos Salz web service (<code>https://cloudcontrol.riegosalz.com/wm-rest.php</code>), which accepts requests in JSON format.</p>
+<p>The connection is made through the secure Riegos Salz web service (<code>https://cloudcontrol.riegosalz.com/apirest</code>), which accepts requests in JSON format.</p>
 
 <hr>
 
@@ -292,8 +292,8 @@ username = (cfg.get('username') or '').strip()
 password = (cfg.get('password') or '').strip()
 if not username or not password:
     raise Exception("Missing credentials: please configure username/password in connection_params")
-password_md5 = hashlib.md5(password.encode('utf-8')).hexdigest().upper()
-url = base_url + '/wm-rest.php'
+password_md5 = hashlib.md5(password.encode('utf-8')).hexdigest()
+url = base_url + '/apirest'
 headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
 total_upserts = 0
 total_errors = 0
@@ -348,6 +348,19 @@ for sensor_plan in plan:
             total_errors += 1
             continue
         data = resp.json() or {}
+        cod_error = data.get('codError', -1)
+        if cod_error != 0:
+            error_msg = data.get('error', '')
+            if isinstance(error_msg, list):
+                error_msg = '; '.join(error_msg)
+            items.append({
+                'sensor_id': sensor_id,
+                'status': code,
+                'error': 'API codError=%s: %s' % (cod_error, error_msg),
+                'url': url
+            })
+            total_errors += 1
+            continue
         historicos = data.get('historicos', {}) or {}
         readings = historicos.get(str(sensor_id_value)) or []
         upserts = 0

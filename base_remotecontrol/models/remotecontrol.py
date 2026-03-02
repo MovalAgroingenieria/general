@@ -12,6 +12,7 @@ import base64
 import pytz
 import pyodbc
 import logging
+from datetime import timedelta
 _logger = logging.getLogger(__name__)
 
 
@@ -345,6 +346,8 @@ class RemoteControlAction(models.Model):
             'json': json,
             'base64': base64,
             'pytz': pytz,
+            'timedelta': timedelta,
+            'selected_device_ids': bag.get('selected_device_ids') or [],
             'request_retry': lambda method, url, **kwargs: (
                 remote_control.request_with_retries(
                     method, url,
