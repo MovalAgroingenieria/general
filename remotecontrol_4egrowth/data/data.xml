@@ -54,14 +54,15 @@
 <h3>4) Sensor Configuration</h3>
 <p>In each <strong>Sensor</strong> (<code>mdm.measurement.device.sensor</code>) set <em>remotecontrol_params</em>:</p>
 <pre>{
-  "parameter": "humedad",           // query filter name (see list below)
-  "parameter_value": 30,            // depth or selector (e.g., 30 cm)
-  "group": "Humedad suelo",         // payload group
-  "key": "Humedad suelo 30 cm",     // entry under the group with a "data" array
+  "parameter": "humedad",           // optional: query filter name (see list below)
+  "parameter_value": 30,            // optional: depth or selector (e.g., 30 cm)
+  "group": "Humedad suelo",         // REQUIRED: payload group (must match API response exactly)
+  "key": "Humedad suelo 30 cm",     // REQUIRED: entry under the group with a "data" array
   "start_date": "2025-01-01"        // optional; else device.start_date; else Jan 1 of current year
 }</pre>
 <p><strong>Notes</strong></p>
 <ul>
+  <li><code>parameter</code> and <code>parameter_value</code> are <strong>optional</strong>. When omitted, the API is called with only <code>initial_date</code>/<code>final_date</code> and returns all data groups.</li>
   <li><code>parameter_value</code> may be <em>0</em> and is considered valid.</li>
   <li><code>group</code> and <code>key</code> must match exactly what the endpoint returns in <code>all_data</code>.</li>
 </ul>
@@ -81,7 +82,7 @@
   <li><code>humedad</code> (Soil moisture): depth selector. Example values: <code>20</code>, <code>30</code>, <code>40</code>, <code>all</code>, or comma separated (API accepts lists).</li>
   <li><code>temperatura</code> (Soil temperature): depth selector, similar semantics to <em>humedad</em>.</li>
   <li><code>potencial</code> (Matric potential): depth selector, similar semantics.</li>
-  <li><code>clima</code> (Weather): variable selector, e.g. <code>eto</code>, <code>temperatura</code>, or <code>all</code>.</li>
+  <li><code>clima</code> (Weather / generic): variable selector, e.g. <code>eto</code>, <code>temperatura</code>, or <code>all</code>. Also used as the query parameter for reservoir (balsa) devices to retrieve water-height and water-volume data.</li>
 </ul>
 
 <h4>Mapping examples (group/key)</h4>
@@ -116,6 +117,68 @@
       <li><code>parameter_value</code>: <code>eto</code> (or <code>all</code>)</li>
       <li><code>group</code>: <code>Clima</code></li>
       <li><code>key</code>: <code>eto</code> (or the exact variable name returned by the API)</li>
+    </ul>
+  </li>
+  <li>For <strong>Water height</strong> (reservoir / balsa):
+    <ul>
+      <li><code>group</code>: <code>Altura agua</code></li>
+      <li><code>key</code>: <code>Altura agua</code></li>
+      <li><em>No <code>parameter</code> / <code>parameter_value</code> needed</em></li>
+    </ul>
+  </li>
+  <li>For <strong>Water volume</strong> (reservoir / balsa):
+    <ul>
+      <li><code>group</code>: <code>Volumen agua</code></li>
+      <li><code>key</code>: <code>Volumen agua</code></li>
+      <li><em>No <code>parameter</code> / <code>parameter_value</code> needed</em></li>
+    </ul>
+  </li>
+</ul>
+
+<parameter name="newString"><p><strong>Note on reservoir (balsa) devices:</strong> <code>parameter</code> and <code>parameter_value</code> are optional.
+When omitted, the API is called with only <code>initial_date</code> / <code>final_date</code> and returns the full payload.
+The system then extracts the correct data series using <code>group</code> / <code>key</code>.</p>
+
+<hr/>
+
+<h3>Changelog</h3>
+<ul>
+  <li><strong>1.0.7</strong> (2026-03-02)
+    <ul>
+      <li><code>parameter</code> and <code>parameter_value</code> are now <strong>optional</strong> in sensor configuration. When omitted, the API is called without extra filters (only <code>initial_date</code>/<code>final_date</code>), and the system extracts data by <code>group</code>/<code>key</code>.</li>
+      <li>Added support for <strong>reservoir (balsa)</strong> devices: <em>Altura agua</em> (water height) and <em>Volumen agua</em> (water volume).</li>
+      <li>Replaced direct <code>payload[group][key]</code> access with safe <code>.get()</code> calls to prevent <code>KeyError</code>. Missing groups/keys now produce clear audit warnings showing available keys.</li>
+    </ul>
+  </li>
+  <li><strong>1.0.6</strong> (2026-02)
+    <ul>
+      <li>Set <code>procedure_for_readings = True</code> on the default sync procedure.</li>
+    </ul>
+  </li>
+  <li><strong>1.0.5</strong> (2026-02)
+    <ul>
+      <li>Handle null values in <code>reading['value']</code> (defaults to <code>0.0</code>).</li>
+      <li>Improved JSON audit serialization (<code>ensure_ascii</code>, fallback on error).</li>
+    </ul>
+  </li>
+  <li><strong>1.0.4</strong> (2026-01)
+    <ul>
+      <li>Optimized plan builder: single SQL query for last reading per sensor instead of one query per sensor.</li>
+    </ul>
+  </li>
+  <li><strong>1.0.3</strong> (2025-12)
+    <ul>
+      <li>Audit attachment with full execution details.</li>
+    </ul>
+  </li>
+  <li><strong>1.0.2</strong> (2025-11)
+    <ul>
+      <li>Added configurable <code>start_date</code> fallback chain (sensor → device → Jan 1).</li>
+    </ul>
+  </li>
+  <li><strong>1.0.1</strong> (2025-10)
+    <ul>
+      <li>Initial release: JWT login, plan builder, readings fetch with upsert.</li>
     </ul>
   </li>
 </ul>]]>
@@ -201,7 +264,7 @@ for sensor in sensors:
     parameter_value = sensor_cfg.get('parameter_value')
     parameter_group = (sensor_cfg.get('group') or '').strip()
     parameter_key = (sensor_cfg.get('key') or '').strip()
-    if parameter and parameter_value not in (None,'') and parameter_group and parameter_key:
+    if parameter_group and parameter_key:
         try:
             device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
         except Exception:
@@ -224,16 +287,18 @@ for sensor in sensors:
                 else:
                     year_str = today_str[:4]
                     initial_date = '%s-01-01' % year_str
-            plan.append({
+            entry = {
                 'sensor_id': sensor.id,
                 'device_id': device.id,
                 'growth_id': growth_id,
-                'parameter': parameter,
-                'parameter_value': parameter_value,
                 'parameter_group': parameter_group,
                 'parameter_key': parameter_key,
                 'initial_date': initial_date,
-            })
+            }
+            if parameter and parameter_value not in (None, ''):
+                entry['parameter'] = parameter
+                entry['parameter_value'] = parameter_value
+            plan.append(entry)
 bag['sensors_plan'] = plan
             ]]></field>
         </record>
@@ -265,21 +330,31 @@ for sensor_plan in plan:
     sensor_id       = sensor_plan['sensor_id']
     device_id       = sensor_plan['device_id']
     growth_id       = sensor_plan['growth_id']
-    parameter       = sensor_plan['parameter']
-    parameter_value = sensor_plan['parameter_value']
+    parameter       = sensor_plan.get('parameter', '')
+    parameter_value = sensor_plan.get('parameter_value', '')
     parameter_group = sensor_plan['parameter_group']
     parameter_key   = sensor_plan['parameter_key']
     initial_date    = sensor_plan['initial_date']
     sensor_record = SensorModel.browse(sensor_id)
     base = (base_url or '').rstrip('/') + '/api/data_device/%s/all_data/' % growth_id
-    params = {'initial_date': initial_date, 'final_date': final_date, parameter: str(parameter_value)}
+    params = {'initial_date': initial_date, 'final_date': final_date}
+    if parameter and parameter_value not in (None, ''):
+        params[parameter] = str(parameter_value)
     try:
         resp = request_retry('GET', base, headers=headers, timeout=timeout, params=params)
         code = resp.status_code
         full_url = getattr(resp, 'url', base)
         if code < 400:
             payload = resp.json() or {}
-            data_list = payload[parameter_group][parameter_key]['data'] or []
+            group_data = payload.get(parameter_group)
+            if not group_data:
+                items.append({'sensor_id': sensor_id, 'device_id': device_id, 'growth_id': growth_id, 'status': 200, 'url': full_url, 'error': "Group '%s' not found in response. Available groups: %s" % (parameter_group, list(payload.keys()))})
+                continue
+            key_data = group_data.get(parameter_key)
+            if not key_data:
+                items.append({'sensor_id': sensor_id, 'device_id': device_id, 'growth_id': growth_id, 'status': 200, 'url': full_url, 'error': "Key '%s' not found in group '%s'. Available keys: %s" % (parameter_key, parameter_group, list(group_data.keys()))})
+                continue
+            data_list = key_data.get('data') or []
             window_start = initial_date + window_start_suffix
             window_end   = final_date   + window_end_suffix
             upserts = 0
