@@ -19,6 +19,8 @@
         "sales_team",
         "sale",
         "commission_oca",
+        "auth_signup",
+        "hr",
         "hr_expense",
     ],
     "post_init_hook": "post_init_sync_agent_user_group",
