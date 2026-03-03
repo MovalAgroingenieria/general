@@ -4,6 +4,8 @@
 from odoo.exceptions import AccessError
 from odoo.tests.common import TransactionCase, tagged
 
+from ..models.ir_ui_menu import EXTERNAL_AGENT_MENU_BLACKLIST
+
 
 @tagged("post_install", "-at_install")
 class TestAgentExternalPermissions(TransactionCase):
@@ -150,11 +152,59 @@ class TestAgentExternalPermissions(TransactionCase):
         self.assertIn(self.opp_other.id, opp_ids)
         self.assertNotIn(self.opp_internal_assigned.id, opp_ids)
 
+    def test_external_agent_does_not_see_opportunities_without_partner(self):
+        """Opportunities with no contact must not be visible to external agents."""
+        opp_no_partner = self.Lead.create(
+            {
+                "name": "Opp without contact",
+                "type": "opportunity",
+                "partner_id": False,
+                "user_id": self.user_internal.id,
+            }
+        )
+        lead_env = self.Lead.with_user(self.user_external)
+        opp_ids = lead_env.search([("type", "=", "opportunity")]).ids
+        self.assertNotIn(
+            opp_no_partner.id,
+            opp_ids,
+            "External agent must not see opportunities without a contact",
+        )
+
+    def test_external_agent_can_read_external_agent_ids_on_assigned_contact(self):
+        """External agent can read the External Agents field on contacts they see."""
+        partner_env = self.Partner.with_user(self.user_external)
+        data = partner_env.browse(self.partner_allowed.id).read(
+            ["name", "external_agent_ids"]
+        )
+        self.assertEqual(len(data), 1)
+        self.assertIn(self.user_external.id, data[0]["external_agent_ids"])
+
     def test_external_agent_has_no_sales_order_access(self):
         so_env = self.SaleOrder.with_user(self.user_external)
 
         with self.assertRaises(AccessError):
             so_env.browse(self.sale_order_1.id).read(["name"])
+
+    def test_external_agent_does_not_see_restricted_app_menus(self):
+        """External agent must not see blacklisted root menus (e.g. HR, Expenses)."""
+        menu_obj = self.env["ir.ui.menu"]
+        ir_model_data = self.env["ir.model.data"]
+        # pylint: disable=protected-access
+        visible_as_external = menu_obj.with_user(self.user_external)._visible_menu_ids(
+            debug=False
+        )
+
+        for xmlid in EXTERNAL_AGENT_MENU_BLACKLIST:
+            menu_id = ir_model_data._xmlid_to_res_id(  # pylint: disable=protected-access
+                xmlid, raise_if_not_found=False
+            )
+            if not menu_id:
+                continue
+            self.assertNotIn(
+                menu_id,
+                visible_as_external,
+                "External agent must not see menu %s" % xmlid,
+            )
 
     def test_internal_salesperson_rule_is_installed(self):
         rule = self.env.ref(
