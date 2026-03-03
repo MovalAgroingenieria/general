@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Add agent field to opportunity form view -->
     <record id="view_crm_opportunity_form_external_agent" model="ir.ui.view">
         <field name="name">crm.lead.form.external.agent</field>
         <field name="model">crm.lead</field>
@@ -12,7 +11,6 @@
                 <attribute name="domain">[('external_agent_ids', 'in', uid)]</attribute>
                 <attribute name="groups">agent_external_permissions.group_external_agent</attribute>
             </xpath>
-            <!-- Insert after Salesperson (user_id) -->
             <xpath expr="//field[@name='user_id']" position="after">
                 <group string="External Agents" invisible="type == 'lead'">
                     <field name="external_agent_ids"
@@ -26,6 +24,5 @@
 
         </field>
     </record>
-
 
 </odoo>

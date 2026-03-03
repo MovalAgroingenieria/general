@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- =========================================================
-         GROUPS
-         ========================================================= -->
-
     <record id="group_external_agent" model="res.groups">
         <field name="name">External Agent</field>
         <field name="category_id" ref="base.module_category_sales_sales"/>
@@ -17,12 +13,6 @@
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
-    <!-- =========================================================
-         RECORD RULES
-         ========================================================= -->
-
-    <!-- Contacts (External Agents): only contacts where user is assigned as agent
-         + always allow access to the user's own partner record. -->
     <record id="rule_res_partner_external_agent" model="ir.rule">
         <field name="name">External Agent: Assigned Contacts Only</field>
         <field name="model_id" ref="base.model_res_partner"/>
@@ -33,17 +23,12 @@
         <field name="groups" eval="[(4, ref('agent_external_permissions.group_external_agent'))]"/>
     </record>
 
-    <!-- CRM (External Agents): only opportunities whose partner has the agent assigned.
-         NOTE: We explicitly restrict to opportunities to avoid interfering with leads. -->
     <record id="rule_crm_lead_external_agent" model="ir.rule">
         <field name="name">External Agent: Opportunities From Assigned Contacts Only</field>
         <field name="model_id" ref="crm.model_crm_lead"/>
         <field name="global" eval="False"/>
         <field name="domain_force">
             [
-            '|',
-            ('partner_id', '=', False),
-            '&amp;',
             ('type', '=', 'opportunity'),
             ('partner_id.external_agent_ids', 'in', user.id)
             ]
@@ -51,8 +36,6 @@
         <field name="groups" eval="[(4, ref('agent_external_permissions.group_external_agent'))]"/>
     </record>
 
-
-    <!-- CRM (Internal Salespeople): only own opportunities. -->
     <record id="rule_crm_lead_internal_salesperson" model="ir.rule">
         <field name="name">Internal Salesperson: Own Opportunities Only</field>
         <field name="model_id" ref="crm.model_crm_lead"/>
@@ -61,8 +44,6 @@
         <field name="groups" eval="[(4, ref('agent_external_permissions.group_internal_salesperson'))]"/>
     </record>
 
-    <!-- Sales Orders (External Agents): explicit deny (optional safety net).
-         In practice, ACLs should already block sale.order for external agents. -->
     <record id="rule_sale_order_external_agent" model="ir.rule">
         <field name="name">External Agent: No Sales Orders</field>
         <field name="model_id" ref="sale.model_sale_order"/>

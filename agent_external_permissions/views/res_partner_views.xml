@@ -8,7 +8,11 @@
 
             <xpath expr="//sheet//group" position="after">
                 <group string="External Agents Assignment" col="2" groups="base.group_user">
-                    <field name="external_agent_ids" widget="many2many_tags"/>
+                    <field name="external_agent_ids" widget="many2many_tags"
+                           groups="!agent_external_permissions.group_external_agent"/>
+                    <field name="external_agent_ids" widget="many2many_tags"
+                           groups="agent_external_permissions.group_external_agent"
+                           readonly="1"/>
 
                     <button
                             name="%(agent_external_permissions.action_update_agents_wizard)d"

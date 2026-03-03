@@ -19,15 +19,9 @@ class ResPartner(models.Model):
     )
 
     def _propagate_external_agents_to_opportunities(self):
-        """
-        Propagate external_agent_ids to related opportunities.
-
-        Target:
-        - crm.lead records where type='opportunity' and partner_id in self
-
-        Context keys:
-        - skip_external_agent_propagation: disable propagation
-        - force_external_agent_propagation_sudo: propagate using sudo (use sparingly)
+        """Propagate agents to opportunities.
+        Context: skip_external_agent_propagation,
+        force_external_agent_propagation_sudo.
         """
         if self.env.context.get("skip_external_agent_propagation"):
             return
@@ -45,7 +39,6 @@ class ResPartner(models.Model):
         if not leads:
             return
 
-        # Group lead ids by partner_id in one pass (fast and predictable)
         lead_ids_by_partner = defaultdict(list)
         for lead in leads:
             lead_ids_by_partner[lead.partner_id.id].append(lead.id)
@@ -60,13 +53,6 @@ class ResPartner(models.Model):
             )
 
     def write(self, vals):
-        """
-        If external_agent_ids changed, propagate to related opportunities.
-
-        Notes:
-        - Safe for multi-record writes.
-        - Propagation happens AFTER the partner write (so partner has the final values).
-        """
         must_propagate = "external_agent_ids" in vals and not self.env.context.get(
             "skip_external_agent_propagation"
         )

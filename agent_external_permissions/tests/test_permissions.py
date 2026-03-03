@@ -12,7 +12,6 @@ class TestAgentExternalPermissions(TransactionCase):
         super().setUpClass()
         cls.company = cls.env.company
 
-        # Groups
         cls.group_external = cls.env.ref(
             "agent_external_permissions.group_external_agent"
         )
@@ -20,7 +19,6 @@ class TestAgentExternalPermissions(TransactionCase):
             "agent_external_permissions.group_internal_salesperson"
         )
 
-        # Sale groups can vary by build
         cls.group_sale_user = cls.env.ref(
             "sales_team.group_sale_salesman", raise_if_not_found=False
         ) or cls.env.ref("sale.group_sale_salesman", raise_if_not_found=False)
@@ -28,14 +26,12 @@ class TestAgentExternalPermissions(TransactionCase):
             "sales_team.group_sale_salesman_all_leads", raise_if_not_found=False
         ) or cls.env.ref("sale.group_sale_salesman_all_leads", raise_if_not_found=False)
 
-        # Models
         cls.Partner = cls.env["res.partner"]
         cls.Users = cls.env["res.users"]
         cls.Lead = cls.env["crm.lead"]
         cls.SaleOrder = cls.env["sale.order"]
         cls.IrRule = cls.env["ir.rule"]
 
-        # Users
         cls.user_external = cls._create_user(
             name="External Agent User",
             login="ext_agent",
@@ -72,7 +68,6 @@ class TestAgentExternalPermissions(TransactionCase):
             },
         )
 
-        # Partners
         cls.partner_allowed = cls.Partner.create(
             {
                 "name": "Partner Allowed for External",
@@ -81,7 +76,6 @@ class TestAgentExternalPermissions(TransactionCase):
         )
         cls.partner_denied = cls.Partner.create({"name": "Partner Denied for External"})
 
-        # Opportunities
         cls.opp_ext_assigned = cls.Lead.create(
             {
                 "name": "Opp (partner has external agent) / user = external",
@@ -107,7 +101,6 @@ class TestAgentExternalPermissions(TransactionCase):
             }
         )
 
-        # Sale orders
         cls.customer = cls.Partner.create({"name": "Customer"})
         cls.sale_order_1 = cls.SaleOrder.create(
             {
@@ -139,9 +132,6 @@ class TestAgentExternalPermissions(TransactionCase):
         vals.update(extra_vals)
         return cls.env["res.users"].with_context(no_reset_password=True).create(vals)
 
-    # -------------------------
-    # CONTACTS (External Agents)
-    # -------------------------
     def test_external_agent_sees_only_assigned_contacts(self):
         partner_env = self.Partner.with_user(self.user_external)
         partners = partner_env.search([])
@@ -151,45 +141,27 @@ class TestAgentExternalPermissions(TransactionCase):
         self.assertNotIn(self.partner_denied.id, partner_ids)
         self.assertIn(self.user_external.partner_id.id, partner_ids)
 
-    # -------------------------
-    # CRM (External Agents)
-    # -------------------------
     def test_external_agent_sees_only_opportunities_of_assigned_contacts(self):
         lead_env = self.Lead.with_user(self.user_external)
         opps = lead_env.search([("type", "=", "opportunity")])
         opp_ids = set(opps.ids)
 
-        # Both opportunities linked to partner_allowed must be visible
         self.assertIn(self.opp_ext_assigned.id, opp_ids)
         self.assertIn(self.opp_other.id, opp_ids)
-
-        # Opportunity with partner without the agent must not be visible
         self.assertNotIn(self.opp_internal_assigned.id, opp_ids)
 
-    # -------------------------
-    # SALES (External Agents)
-    # -------------------------
     def test_external_agent_has_no_sales_order_access(self):
         so_env = self.SaleOrder.with_user(self.user_external)
 
         with self.assertRaises(AccessError):
             so_env.browse(self.sale_order_1.id).read(["name"])
 
-    # -------------------------
-    # CRM (Internal Salespeople)
-    # -------------------------
     def test_internal_salesperson_rule_is_installed(self):
-        """
-        Validate the internal salesperson crm.lead ir.rule exists, is attached to the
-        internal group, and enforces own opportunities only.
-        """
         rule = self.env.ref(
             "agent_external_permissions.rule_crm_lead_internal_salesperson"
         )
         self.assertTrue(rule)
         self.assertIn(self.group_internal, rule.groups)
-
-        # tolerant compare (ignore whitespace)
         normalized = "".join((rule.domain_force or "").split())
         expected = "".join(
             "[('type','=','opportunity'),('user_id','=',user.id)]".split()
@@ -200,9 +172,6 @@ class TestAgentExternalPermissions(TransactionCase):
         lead_env = self.Lead.with_user(self.user_internal)
         lead_env.browse(self.opp_internal_assigned.id).read(["name"])
 
-    # -------------------------
-    # SALES (Internal Salespeople)
-    # -------------------------
     def test_internal_salesperson_sales_not_restricted_by_this_module(self):
         rules = self.IrRule.search(
             [
@@ -220,9 +189,6 @@ class TestAgentExternalPermissions(TransactionCase):
         if self.group_sale_all and self.group_sale_all in self.user_internal.groups_id:
             self.assertIn(self.sale_order_2.id, order_ids)
 
-    # -------------------------
-    # WIZARD
-    # -------------------------
     def test_update_agents_wizard_updates_existing_opportunities(self):
         self.partner_allowed.write(
             {"external_agent_ids": [(6, 0, [self.user_external.id])]}

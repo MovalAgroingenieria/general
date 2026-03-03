@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Add fields to user form view -->
     <record id="view_users_form_external_agent" model="ir.ui.view">
         <field name="name">res.users.form.external.agent</field>
         <field name="model">res.users</field>
@@ -12,7 +11,6 @@
                     <field name="is_external_agent"/>
                     <field name="is_internal_salesperson"/>
 
-                    <!-- Show assigned contacts only for external agents -->
                     <field name="agent_contacts"
                            widget="many2many_tags"
                            invisible="not is_external_agent"/>

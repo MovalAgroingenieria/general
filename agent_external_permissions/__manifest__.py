@@ -20,6 +20,7 @@
         "sale",
         "commission_oca",
     ],
+    "post_init_hook": "post_init_sync_agents",
     "data": [
         "security/external_agent_security.xml",
         "security/ir.model.access.csv",
