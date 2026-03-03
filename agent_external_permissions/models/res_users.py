@@ -2,10 +2,12 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, fields, models
+from odoo.api import SUPERUSER_ID
 
 MODULE = "agent_external_permissions"
 GROUP_XMLID = "group_agent_user"
-GROUP_SALE_OWN = "sales_team.group_sale_salesman"  # Ventas / Usuario: Solo mostrar documentos propios
+GROUP_SALE_OWN = "sales_team.group_sale_salesman"
+GROUP_SEE_EMPLOYEES = "group_see_employees_menu"
 
 
 class ResUsers(models.Model):
@@ -51,9 +53,15 @@ class ResUsers(models.Model):
                 user.agent_contacts = self.env["res.partner"].browse()
 
     def _sync_agent_user_group(self):
-        """Set group_agent_user (and Ventas/Usuario solo documentos propios) if partner is an agent."""
+        """Set group_agent_user (and Ventas/Usuario solo documentos propios) if partner is an agent.
+        Remove group_see_employees_menu from agents so they don't see the Employees menu.
+        """
         group = self.env.ref(f"{MODULE}.{GROUP_XMLID}", raise_if_not_found=False)
         group_sale = self.env.ref(GROUP_SALE_OWN, raise_if_not_found=False)
+        group_see_employees = self.env.ref(
+            f"{MODULE}.{GROUP_SEE_EMPLOYEES}",
+            raise_if_not_found=False,
+        )
         if not group:
             return
         for user in self:
@@ -65,9 +73,50 @@ class ResUsers(models.Model):
                 if group_sale and group_sale not in user.groups_id:
                     cmd.append((4, group_sale.id))
                     vals["share"] = False
+                if group_see_employees and group_see_employees in user.groups_id:
+                    cmd.append((3, group_see_employees.id))
                 user.sudo().write(vals)
             else:
-                user.sudo().write({"groups_id": [(3, group.id)]})
+                cmd = [(3, group.id)]
+                if group_see_employees and group_see_employees not in user.groups_id:
+                    cmd.append((4, group_see_employees.id))
+                user.sudo().write({"groups_id": cmd})
+
+    def _sync_agent_user_group_after_commit(self, user_ids):
+        """Run _sync_agent_user_group in a new transaction after commit. Used when creating from portal wizard to avoid 'more than one user type' validation."""
+        if not user_ids:
+            return
+        registry = self.env.registry
+        self.env.cr.postcommit.add(
+            lambda: self._sync_agent_user_group_postcommit_impl(registry, user_ids)
+        )
+
+    def _sync_agent_user_group_postcommit_impl(self, registry, user_ids):
+        try:
+            with registry.cursor() as cr:
+                env = api.Environment(cr, SUPERUSER_ID, {})
+                users = env["res.users"].browse(user_ids).exists()
+                group = env.ref(f"{MODULE}.{GROUP_XMLID}", raise_if_not_found=False)
+                group_sale = env.ref(GROUP_SALE_OWN, raise_if_not_found=False)
+                group_see_employees = env.ref(
+                    f"{MODULE}.{GROUP_SEE_EMPLOYEES}",
+                    raise_if_not_found=False,
+                )
+                if not group:
+                    return
+                for user in users:
+                    if not user.partner_id or not user.partner_id.agent:
+                        continue
+                    cmd = [(4, group.id)]
+                    vals = {"groups_id": cmd, "share": False}
+                    if group_sale and group_sale not in user.groups_id:
+                        cmd.append((4, group_sale.id))
+                    if group_see_employees and group_see_employees in user.groups_id:
+                        cmd.append((3, group_see_employees.id))
+                    user.write(vals)
+                cr.commit()
+        except Exception:
+            pass
 
     def write(self, vals):
         res = super().write(vals)
@@ -78,5 +127,10 @@ class ResUsers(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         users = super().create(vals_list)
-        users._sync_agent_user_group()
+        if self.env.context.get("no_reset_password"):
+            agent_ids = [u.id for u in users if u.partner_id and u.partner_id.agent]
+            if agent_ids:
+                self._sync_agent_user_group_after_commit(agent_ids)
+        else:
+            users._sync_agent_user_group()
         return users
