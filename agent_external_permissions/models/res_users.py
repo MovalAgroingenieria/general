@@ -17,19 +17,17 @@ class ResUsers(models.Model):
         help="Check this if the user is an internal salesperson.",
     )
 
-    # Inverse view of partner.external_agent_ids via the same rel table
     agent_contacts = fields.Many2many(
         comodel_name="res.partner",
-        relation="res_users_agent_rel",
+        relation="agent_external_permissions_res_partner_external_agent_rel",
         column1="user_id",
         column2="partner_id",
         string="Assigned Contacts",
         help="Contacts assigned to this external agent.",
-        readonly=True,  # recommended: manage assignment from partner side
+        readonly=True,
     )
 
     def _sync_agent_groups(self):
-        """Ensure group membership matches the boolean flags."""
         group_external = self.env.ref(
             f"{MODULE}.group_external_agent", raise_if_not_found=False
         )
@@ -38,31 +36,25 @@ class ResUsers(models.Model):
         )
 
         if not group_external or not group_internal:
-            # If groups are not loaded yet (e.g., during install), do nothing safely.
             return
 
         for user in self:
-            # If both are ticked, enforce exclusivity: unset the other.
             if user.is_external_agent and user.is_internal_salesperson:
                 user.is_internal_salesperson = False
 
-            # Build m2m commands for groups_id
             cmds = []
             if user.is_external_agent:
                 cmds += [(4, group_external.id), (3, group_internal.id)]
             elif user.is_internal_salesperson:
                 cmds += [(4, group_internal.id), (3, group_external.id)]
             else:
-                # none selected -> remove both
                 cmds += [(3, group_external.id), (3, group_internal.id)]
 
-            # Use sudo to avoid permission issues when admins edit normal users
             user.sudo().write({"groups_id": cmds})
 
     @api.model_create_multi
     def create(self, vals_list):
         users = super().create(vals_list)
-        # Only sync if flags are present in create vals or defaults might apply
         users._sync_agent_groups()  # pylint: disable=protected-access
         return users
 

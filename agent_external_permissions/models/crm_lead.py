@@ -19,14 +19,12 @@ class CrmLead(models.Model):
 
     @api.onchange("partner_id")
     def _onchange_partner_id_set_external_agents(self):
-        """UI helper: prefill agents from the selected contact."""
         for lead in self:
             lead.external_agent_ids = (
                 lead.partner_id.external_agent_ids if lead.partner_id else False
             )
 
     def _check_external_agent_partner_allowed(self, partner):
-        """Block assigning partners not linked to the current external agent."""
         self.ensure_one()
         if not partner:
             return
@@ -44,12 +42,8 @@ class CrmLead(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        """
-        If partner_id is provided and external_agent_ids is NOT explicitly set,
-        initialize external_agent_ids from the partner.
-
-        Context keys:
-        - disable_external_agent_sync: disable sync
+        """Sync external_agent_ids from partner when set.
+        Context: disable_external_agent_sync.
         """
         if self.env.context.get("disable_external_agent_sync"):
             return super().create(vals_list)
@@ -58,14 +52,11 @@ class CrmLead(models.Model):
         new_vals_list = []
 
         for vals in vals_list:
-            vals = dict(vals)  # do not mutate caller dict
+            vals = dict(vals)
             partner = False
 
             if vals.get("partner_id"):
                 partner = partner_obj.browse(vals["partner_id"]).exists()
-
-                # Guardrail: prevent create with forbidden partner (clean error)
-                # Using a "virtual" record for check: create has no record yet.
                 if (
                     self.env.user.has_group(
                         "agent_external_permissions.group_external_agent"
@@ -87,12 +78,8 @@ class CrmLead(models.Model):
         return super().create(new_vals_list)
 
     def write(self, vals):
-        """
-        If partner_id changes and external_agent_ids is NOT explicitly provided,
-        sync external_agent_ids from the new partner.
-
-        Context keys:
-        - disable_external_agent_sync: disable sync
+        """Sync external_agent_ids from partner when partner_id changes.
+        Context: disable_external_agent_sync.
         """
         if self.env.context.get("disable_external_agent_sync"):
             return super().write(vals)
@@ -104,7 +91,6 @@ class CrmLead(models.Model):
                 else False
             )
 
-            # Guardrail first, so the user doesn't lose access mid-write
             for lead in self:
                 # pylint: disable=protected-access
                 lead._check_external_agent_partner_allowed(partner)

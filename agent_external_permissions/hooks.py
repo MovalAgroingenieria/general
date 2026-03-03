@@ -4,18 +4,14 @@
 from odoo import SUPERUSER_ID, api
 
 
-def post_init_sync_agents(cr, _registry):
-    """Post-init hook.
-
-    On install, propagate ``res.partner.external_agent_ids`` to
-    ``crm.lead.external_agent_ids`` for existing opportunities where:
-
-    - type == 'opportunity'
-    - partner_id is set
-    - external_agent_ids is empty
+def post_init_sync_agents(env_or_cr, _registry=None):
+    """On install: sync partner external_agent_ids to crm.lead opportunities.
+    Compatible with (env,) or (cr, registry) call styles.
     """
-    env = api.Environment(cr, SUPERUSER_ID, {"active_test": False})
-
+    if _registry is not None:
+        env = api.Environment(env_or_cr, SUPERUSER_ID, {"active_test": False})
+    else:
+        env = env_or_cr
     partner_obj = env["res.partner"].sudo()
     lead_obj = env["crm.lead"].sudo()
 
