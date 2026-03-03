@@ -1,65 +1,36 @@
-# 2026 Moval Agroingeniería
+# Copyright 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import api, fields, models
+from odoo import models
 
 MODULE = "agent_external_permissions"
+GROUP_XMLID = "group_agent_user"
 
 
 class ResUsers(models.Model):
     _inherit = "res.users"
 
-    is_external_agent = fields.Boolean(
-        help="Check this if the user is an external agent.",
-    )
-
-    is_internal_salesperson = fields.Boolean(
-        help="Check this if the user is an internal salesperson.",
-    )
-
-    agent_contacts = fields.Many2many(
-        comodel_name="res.partner",
-        relation="agent_external_permissions_res_partner_external_agent_rel",
-        column1="user_id",
-        column2="partner_id",
-        string="Assigned Contacts",
-        help="Contacts assigned to this external agent.",
-        readonly=True,
-    )
-
-    def _sync_agent_groups(self):
-        group_external = self.env.ref(
-            f"{MODULE}.group_external_agent", raise_if_not_found=False
-        )
-        group_internal = self.env.ref(
-            f"{MODULE}.group_internal_salesperson", raise_if_not_found=False
-        )
-
-        if not group_external or not group_internal:
+    def _sync_agent_user_group(self):
+        """Set group_agent_user if partner is an agent, remove otherwise."""
+        group = self.env.ref(f"{MODULE}.{GROUP_XMLID}", raise_if_not_found=False)
+        if not group:
             return
-
         for user in self:
-            if user.is_external_agent and user.is_internal_salesperson:
-                user.is_internal_salesperson = False
-
-            cmds = []
-            if user.is_external_agent:
-                cmds += [(4, group_external.id), (3, group_internal.id)]
-            elif user.is_internal_salesperson:
-                cmds += [(4, group_internal.id), (3, group_external.id)]
+            if not user.partner_id:
+                continue
+            if user.partner_id.agent:
+                user.sudo().write({"groups_id": [(4, group.id)]})
             else:
-                cmds += [(3, group_external.id), (3, group_internal.id)]
-
-            user.sudo().write({"groups_id": cmds})
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        users = super().create(vals_list)
-        users._sync_agent_groups()  # pylint: disable=protected-access
-        return users
+                user.sudo().write({"groups_id": [(3, group.id)]})
 
     def write(self, vals):
         res = super().write(vals)
-        if "is_external_agent" in vals or "is_internal_salesperson" in vals:
-            self._sync_agent_groups()
+        if "partner_id" in vals:
+            self._sync_agent_user_group()
         return res
+
+    @classmethod
+    def create(cls, vals_list):
+        users = super().create(vals_list)
+        users._sync_agent_user_group()
+        return users

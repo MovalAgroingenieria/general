@@ -19,15 +19,10 @@
         "sales_team",
         "sale",
         "commission_oca",
+        "hr_expense",
     ],
-    "post_init_hook": "post_init_sync_agents",
+    "post_init_hook": "post_init_sync_agent_user_group",
     "data": [
-        "security/external_agent_security.xml",
-        "security/ir.model.access.csv",
-        "views/res_users_views.xml",
-        "wizards/update_agents_wizard_views.xml",
-        "views/res_partner_views.xml",
-        "views/crm_lead_views.xml",
-        "views/crm_menu_access.xml",
+        "security/agent_security.xml",
     ],
 }

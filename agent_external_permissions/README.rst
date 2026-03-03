@@ -15,62 +15,73 @@ External Agent Permissions
 
 Description
 ===========
-This module extends Odoo's security model to provide **clear and isolated
-access control** for **external agents** and **internal salespeople**, with a
-strong focus on CRM visibility while preserving standard Sales behavior.
+This module restricts data access for **agent users**: internal users whose
+associated contact (``user.partner_id``) is an **agent** in the OCA commission
+sense (``res.partner`` with ``agent=True`` from **commission_oca**).
 
-It is designed for **Odoo 18** and relies exclusively on **record rules,
-groups, and ACLs**, avoiding fragile view inheritance or hard-coded logic.
+It uses **only permissions**: one security group and record rules. No new
+fields are added to contacts, users, or leads. Assignment is done via the
+existing OCA field **Agents** (``agent_ids``) on contacts.
 
 Key Features
 ============
-* **External Agents** — Can only access contacts where they are assigned as external agents; Can only access CRM opportunities linked to those contacts; Have **no access** to Sales Orders; External agents assigned to contacts are automatically propagated to opportunities.
+* **Agent users** — Users whose partner has ``agent=True`` get the group
+  *Agent user*. Record rules then restrict:
 
-* **Internal Salespeople** — Can only access their own CRM opportunities; Are **not restricted** on Sales Orders (standard Odoo behavior applies); Contact visibility is not modified by this module.
+  * **Contacts (res.partner)** — Only the user's own partner and contacts
+    that have this agent in **Agents** (``agent_ids``).
+  * **Opportunities (crm.lead)** — Only opportunities whose contact has this
+    agent in ``agent_ids``.
+  * **Sale orders (sale.order)** — Only orders whose partner has this agent
+    in ``agent_ids``.
+  * **Expenses (hr.expense, hr.expense.sheet)** — Only the user's own
+    expenses (where ``employee_id.user_id`` is the current user).
 
-* **Automatic Agent Management** — Agents assigned to a contact are automatically propagated to new opportunities; A wizard allows bulk synchronization of agents on existing opportunities.
-
-* **Clean UI Integration** — External agent assignment field added to contacts; Agent visibility added to the opportunity form; Synchronization wizard accessible directly from the contact form.
+* **Automatic group** — The group *Agent user* is added/removed when:
+  the contact's ``agent`` flag is changed, or when a user's contact
+  (``partner_id``) is set. On module install, all existing users whose
+  partner is already an agent receive the group.
 
 Usage
 =====
 Installation
 ~~~~~~~~~~~~
-1. Install the module from Odoo Apps
-2. Update the Apps list
-3. Search for **External Agent Permissions**
-4. Click *Install*
+1. Install **commission_oca** (and optionally **hr_expense** if you use
+   expense rules).
+2. Install this module from Apps.
+3. Update the Apps list, search for **External Agent Permissions**, then
+   *Install*.
 
 Configuration
 ~~~~~~~~~~~~~
-1. **User Configuration** — Go to *Settings → Users & Companies → Users*; Edit a user and enable **Is External Agent** or **Is Internal Salesperson**; Required group membership is handled automatically.
+1. **Define agents** — In **Contacts**, mark the partner as **Creditor/Agent**
+   (``agent=True``) and set **Agents** on other contacts where this agent
+   is assigned (OCA commission_oca behaviour).
 
-2. **Contact Configuration** — Open a contact; Assign users in the **External Agents** field; Use the **Update Opportunities Agents** button to propagate changes.
+2. **Create the agent user** — Create an internal user linked to that
+   partner. The module will automatically add the *Agent user* group when
+   the partner has ``agent=True``, so the user will only see contacts,
+   opportunities, sale orders, and (if hr_expense is installed) expenses
+   associated with that agent.
 
-3. **Opportunity Management** — New opportunities inherit agents from the related contact; Existing opportunities can be updated using the wizard; External agents only see opportunities linked to contacts where they are assigned.
+3. **No extra fields** — Use the standard **Agents** field on contacts to
+   assign agents; no wizard or extra assignment UI is required.
 
-Permissions Matrix
-~~~~~~~~~~~~~~~~~~
-+----------------------+----------------------+------------------------------------+----------------------+
-| User Type            | Contacts             | Opportunities                      | Sales Orders         |
-+======================+======================+====================================+======================+
-| External Agent       | Only assigned        | Opportunities whose contact        | No access            |
-|                      | contacts             | has the agent assigned             |                      |
-+----------------------+----------------------+------------------------------------+----------------------+
-| Internal Salesperson | All contacts         | Only their own opportunities       | All sales orders     |
-+----------------------+----------------------+------------------------------------+----------------------+
-| Standard User        | All contacts         | Standard Odoo behavior             | Standard behavior    |
-+----------------------+----------------------+------------------------------------+----------------------+
-
-Workflow Example
-~~~~~~~~~~~~~~~~
-1. Create a contact **ABC Corporation**
-2. Assign **John** as an External Agent on the contact
-3. Create an opportunity linked to **ABC Corporation**
-4. The opportunity automatically inherits John as external agent
-5. John can see the contact and the opportunity
-6. Other external agents cannot see them
-7. Internal salespeople only see opportunities assigned to themselves
+Permissions (agent user only)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++------------------+----------------------------------------------------------+
+| Model            | Rule                                                     |
++==================+==========================================================+
+| res.partner      | Own partner or contacts with this agent in agent_ids     |
++------------------+----------------------------------------------------------+
+| crm.lead         | Opportunities whose partner has this agent in agent_ids  |
++------------------+----------------------------------------------------------+
+| sale.order       | Orders whose partner has this agent in agent_ids         |
++------------------+----------------------------------------------------------+
+| hr.expense       | Own expenses (employee_id.user_id = user)                 |
++------------------+----------------------------------------------------------+
+| hr.expense.sheet | Own expense sheets (same criterion)                      |
++------------------+----------------------------------------------------------+
 
 Compatibility
 =============
@@ -83,12 +94,14 @@ Dependencies
 * crm
 * sales_team
 * sale
+* commission_oca
+* hr_expense (for expense and expense sheet rules)
 
 Credits
 =======
 
 Authors
-~~~~~~~~
+~~~~~~~
 * Moval Agroingeniería S.L.
 
 Contributors

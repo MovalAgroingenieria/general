@@ -1,33 +1,22 @@
-# 2026 Moval Agroingeniería
+# Copyright 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import SUPERUSER_ID, api
+from odoo import api, SUPERUSER_ID
 
 
-def post_init_sync_agents(env_or_cr, _registry=None):
-    """On install: sync partner external_agent_ids to crm.lead opportunities.
-    Compatible with (env,) or (cr, registry) call styles.
-    """
+def post_init_sync_agent_user_group(env_or_cr, _registry=None):
+    """On install: add group_agent_user to all users whose partner is an agent."""
     if _registry is not None:
-        env = api.Environment(env_or_cr, SUPERUSER_ID, {"active_test": False})
+        env = api.Environment(env_or_cr, SUPERUSER_ID, {})
     else:
         env = env_or_cr
-    partner_obj = env["res.partner"].sudo()
-    lead_obj = env["crm.lead"].sudo()
-
-    partners = partner_obj.search([("external_agent_ids", "!=", False)])
-    if not partners:
+    group = env.ref(
+        "agent_external_permissions.group_agent_user",
+        raise_if_not_found=False,
+    )
+    if not group:
         return
-
-    for partner in partners:
-        leads = lead_obj.search(
-            [
-                ("type", "=", "opportunity"),
-                ("partner_id", "=", partner.id),
-                ("external_agent_ids", "=", False),
-            ]
-        )
-        if leads:
-            leads.with_context(skip_external_agent_propagation=True).write(
-                {"external_agent_ids": [(6, 0, partner.external_agent_ids.ids)]}
-            )
+    partners = env["res.partner"].search([("agent", "=", True)])
+    users = partners.mapped("user_ids").filtered(lambda u: u and group not in u.groups_id)
+    if users:
+        users.sudo().write({"groups_id": [(4, group.id)]})
