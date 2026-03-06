@@ -1,0 +1,973 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="remotecontrol_electrosegura" model="remotecontrol">
+            <field name="name">Electrosegura</field>
+            <field name="remotecontrol_type">sql</field>
+            <field name="base_url">odbc://</field>
+            <field name="timeout">300</field>
+            <field name="verify_ssl">False</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="is_electrosegura">True</field>
+            <field name="connection_params"><![CDATA[
+            {
+                "driver": "MariaDB Unicode",
+                "server": "185.14.56.58",
+                "port": "4306",
+                "database": "electrosegura_measurements",
+                "uid": "electrosegura",
+                "pwd": ""
+            }]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>Electrosegura · MariaDB Integration Help</h2>
+<p><strong>Type:</strong> SQL Database Connection (MariaDB/MySQL)</p>
+
+<hr/>
+
+<h3>1) MariaDB Connection</h3>
+<p>Uses <strong>pyodbc</strong> library to connect to MariaDB/MySQL database containing sensor measurement data.</p>
+
+<h4>Standard connection_params (JSON):</h4>
+<pre>{
+  "driver": "MariaDB Unicode",
+  "server": "185.14.56.58",
+  "port": "4306",
+  "database": "electrosegura_measurements",
+  "uid": "electrosegura",
+  "pwd": "your_password_here"
+}</pre>
+
+<h4>Required parameters:</h4>
+<ul>
+  <li><code>driver</code>: ODBC driver name (e.g., "MariaDB Unicode" or "MySQL ODBC 8.0 Driver")</li>
+  <li><code>server</code>: Database server IP or hostname</li>
+  <li><code>port</code>: Database port (default 3306 for MySQL, 4306 in this case)</li>
+  <li><code>database</code>: Database name containing sensor data</li>
+  <li><code>uid</code>: Database username</li>
+  <li><code>pwd</code>: Database password</li>
+</ul>
+
+<h4>⚠️ Security Note</h4>
+<p><strong>IMPORTANT:</strong> Store the password securely in the connection_params. Consider using environment variables or secure vault in production.</p>
+
+<h3>2) Available Procedures</h3>
+
+<h4>A) Database Discovery (Recommended First Step)</h4>
+<p>Analyzes the MariaDB database and generates a comprehensive report of all available sensors:</p>
+<ol>
+  <li><strong>Scans all three tables</strong> - flow_data, reservoir_reading, water_quality</li>
+  <li><strong>Identifies unique sensor names</strong> - Groups sensors by name and type</li>
+  <li><strong>Generates configuration templates</strong> - Creates ready-to-use JSON configs</li>
+  <li><strong>Provides statistics</strong> - Date ranges, record counts, sensor distribution</li>
+  <li><strong>Exports results</strong> - JSON (detailed) and CSV (importable) formats</li>
+</ol>
+
+<p><strong>Output files:</strong></p>
+<ul>
+  <li><strong>JSON file</strong>: Complete discovery report with all details and statistics</li>
+  <li><strong>CSV file</strong>: Easy-to-read table format for device and sensor creation</li>
+</ul>
+
+<p><strong>When to use:</strong> Run this procedure BEFORE creating any devices/sensors to understand your database structure.</p>
+
+<h4>B) Daily Sync (Scheduled)</h4>
+<p>Synchronizes sensor readings from MariaDB to Odoo:</p>
+<ol>
+  <li><strong>Build Device/Sensor Plan</strong> - Loads configured devices/sensors from Odoo with remotecontrol_params</li>
+  <li><strong>Fetch and Parse Rows</strong> - Queries MariaDB tables for new data since last sync</li>
+  <li><strong>Upsert Readings</strong> - Processes data and creates/updates readings in mdm.measurement.device.sensor.reading</li>
+</ol>
+
+<p><strong>When to use:</strong> Run this procedure AFTER creating devices and sensors to synchronize measurement data.</p>
+
+
+<h3>3) MariaDB Table Structure</h3>
+<p>Data is stored across three tables, each containing specific sensor types:</p>
+
+<h4>A) flow_data (caudal - Flow measurements)</h4>
+<pre>
+time       : DATETIME - Reading timestamp
+name       : VARCHAR  - Sensor name/identifier
+flow       : FLOAT    - Flow value (m³/h or L/s)
+</pre>
+
+<h4>B) reservoir_reading (volumen - Volume/Reservoir measurements)</h4>
+<pre>
+time       : DATETIME - Reading timestamp
+name       : VARCHAR  - Sensor name/identifier
+volume     : FLOAT    - Volume/Level value (m³ or meters)
+</pre>
+
+<h4>C) water_quality (calidad - Quality measurements)</h4>
+<pre>
+time        : DATETIME - Reading timestamp
+name        : VARCHAR  - Sensor name/identifier
+conductance : FLOAT    - Conductance value (µS/cm)
+</pre>
+
+<h3>4) Device Configuration</h3>
+<p>Each <strong>mdm.measurement.device</strong> needs <code>remotecontrol_params</code> (JSON) with device identifiers:</p>
+
+<h4>Required fields:</h4>
+<ul>
+  <li><code>device_id</code>: Device identifier (not used for MariaDB matching, but kept for consistency)</li>
+</ul>
+
+<h4>Optional fields:</h4>
+<ul>
+  <li><code>start_date</code>: Initial sync date (default: last reading or current year start)</li>
+</ul>
+
+<h4>Example device configuration:</h4>
+<pre>{
+  "device_id": "PARTIDOR 58",
+  "start_date": "2025-01-01"
+}</pre>
+
+<h3>5) Sensor Configuration</h3>
+<p>Each <strong>mdm.measurement.device.sensor</strong> needs <code>remotecontrol_params</code> (JSON):</p>
+
+<h4>Required fields:</h4>
+<ul>
+  <li><code>table</code>: MariaDB table name to query (e.g. "flow_data", "nivel_partidor72_callosilla")</li>
+  <li><code>value_field</code>: Column containing the numeric value (e.g. "flow", "nivel")</li>
+  <li><code>sensor_id</code>: Exact value of the 'name' column in MariaDB for this sensor</li>
+</ul>
+
+<h4>Optional fields:</h4>
+<ul>
+  <li><code>time_field</code>: Timestamp column name (default: "time")</li>
+  <li><code>start_date</code>: Initial sync date if no readings exist yet (default: Jan 1 of current year)</li>
+</ul>
+
+<h4>Example sensor configurations:</h4>
+
+<h5>Flow sensor:</h5>
+<pre>{
+  "table": "flow_data",
+  "value_field": "flow",
+  "sensor_id": "Lo_Belmonte_Caudal"
+}</pre>
+
+<h5>Reservoir sensor:</h5>
+<pre>{
+  "table": "reservoir_reading",
+  "value_field": "volume",
+  "sensor_id": "Embalse_Callosilla"
+}</pre>
+
+<h5>Any other table (future-proof):</h5>
+<pre>{
+  "table": "nivel_partidor72_callosilla",
+  "value_field": "nivel",
+  "sensor_id": "Callosilla_Nivel",
+  "start_date": "2025-01-01"
+}</pre>
+
+<h3>6) Data Processing Logic</h3>
+
+<h4>Smart Sensor Matching</h4>
+<p>The system intelligently matches MariaDB data to Odoo sensors using:</p>
+<ol>
+  <li><strong>Type matching:</strong> sensor.remotecontrol_params.type determines which table to query</li>
+  <li><strong>Name matching:</strong> MariaDB 'name' column = sensor.remotecontrol_params.sensor_id</li>
+  <li><strong>Date range:</strong> Only fetches data after sensor's last reading or configured start_date</li>
+</ol>
+
+<h4>Multi-table Query Strategy</h4>
+<p>For each sensor type, the system:</p>
+<ul>
+  <li>Queries the appropriate table based on sensor type</li>
+  <li>Filters by sensor name and date range</li>
+  <li>Processes results and upserts into Odoo</li>
+</ul>
+
+<h3>7) Setup Workflow</h3>
+<ol>
+  <li><strong>Configure connection:</strong> Set connection_params with server, database, credentials</li>
+  <li><strong>Test connection:</strong> Verify ODBC driver is installed (MariaDB Unicode or MySQL ODBC)</li>
+  <li><strong>RUN DISCOVERY:</strong> Execute "Database Discovery" procedure to analyze available sensors</li>
+  <li><strong>Review discovery report:</strong> Download JSON and CSV attachments to understand your data structure</li>
+  <li><strong>Create devices:</strong> Create mdm.measurement.device records based on discovery report</li>
+  <li><strong>Create sensors:</strong> Create mdm.measurement.device.sensor records with type and sensor_id from discovery report</li>
+  <li><strong>Test sync:</strong> Run "Daily Sync" procedure manually to verify configuration</li>
+  <li><strong>Schedule:</strong> Enable automatic scheduling if desired</li>
+</ol>
+
+<h4>Discovery Report Structure</h4>
+
+<p><strong>JSON file contains:</strong></p>
+<pre>{
+  "executed_at": "2025-12-18 10:30:00",
+  "connection_info": { ... },
+  "devices_to_create": [
+    {
+      "sequence": 1,
+      "name": "PARTIDOR 58",
+      "suggested_odoo_name": "Partidor 58",
+      "remotecontrol_params": {
+        "device_id": "PARTIDOR 58",
+        "start_date": "2025-01-01"
+      }
+    }
+  ],
+  "sensors_to_create": [
+    {
+      "sequence": 1,
+      "device_sequence": 1,
+      "device_name": "PARTIDOR 58",
+      "suggested_odoo_name": "Caudal Partidor 58",
+      "sensor_type": "caudal",
+      "remotecontrol_params": {
+        "type": "caudal",
+        "sensor_id": "PARTIDOR 58",
+        "start_date": "2025-01-01"
+      }
+    }
+  ],
+  "statistics": {
+    "caudal": {
+      "unique_sensors": 25,
+      "date_range_start": "2025-01-01",
+      "date_range_end": "2025-12-18",
+      "total_readings": 125000
+    }
+  },
+  "summary": {
+    "total_unique_devices": 32,
+    "total_sensors_to_create": 50
+  }
+}</pre>
+
+<p><strong>CSV file contains:</strong> Easy-to-read tables for device and sensor creation with all necessary configuration.</p>
+
+
+<h3>8) Troubleshooting</h3>
+
+<h4>Common Issues:</h4>
+<ul>
+  <li><strong>ODBC driver not found:</strong> Install MariaDB ODBC driver or MySQL ODBC driver on the server</li>
+  <li><strong>Connection refused:</strong> Verify server IP, port, and firewall settings</li>
+  <li><strong>Authentication failed:</strong> Check username and password in connection_params</li>
+  <li><strong>No sensors found:</strong> Verify sensor_id in remotecontrol_params matches 'name' column exactly (case-sensitive)</li>
+  <li><strong>Type mismatch:</strong> Ensure sensor type (caudal/volumen/calidad) matches available data</li>
+  <li><strong>No data:</strong> Check start_date configuration and database table time range</li>
+</ul>
+
+<h4>Debugging:</h4>
+<p>Each procedure run creates audit attachments with detailed execution information and sample data for troubleshooting.</p>
+
+<h4>ODBC Driver Installation:</h4>
+<p><strong>Ubuntu/Debian:</strong></p>
+<pre>
+sudo apt-get update
+sudo apt-get install unixodbc unixodbc-dev
+sudo apt-get install odbc-mariadb
+# or
+sudo apt-get install libmyodbc
+</pre>
+
+<p><strong>Verify driver installation:</strong></p>
+<pre>
+odbcinst -q -d
+</pre>
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_electrosegura_action_build_plan" model="remotecontrol.action">
+            <field name="name">Electrosegura: Build Device/Sensor Plan</field>
+            <field name="remote_id" ref="remotecontrol_electrosegura"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import json
+from datetime import timedelta
+
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+today_str = fields.Date.today()
+
+condition = [
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id),
+]
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+sensors = Sensor.search(condition)
+sensor_ids = [s.id for s in sensors]
+last_readings_map = {}
+
+if sensors:
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for sid, mtime in cr.fetchall():
+        last_readings_map[sid] = mtime
+
+plan = []
+
+for sensor in sensors:
+    device = sensor.device_id
+    try:
+        scfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except:
+        scfg = {}
+
+    try:
+        dcfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except:
+        dcfg = {}
+
+    sensor_name = scfg.get('sensor_id', '').strip()
+    if not sensor_name:
+        continue
+
+    start_cfg = scfg.get('start_date') or dcfg.get('start_date')
+    last_m = last_readings_map.get(sensor.id)
+
+    if last_m:
+        try:
+            initial_date = fields.Date.to_string(
+                fields.Datetime.from_string(last_m)
+            )
+        except:
+            initial_date = str(last_m)[:10]
+    else:
+        if start_cfg:
+            initial_date = start_cfg[:10]
+        else:
+            initial_date = '2025-01-01'
+
+    # Resolve table and columns directly from sensor params (same pattern as alsambo)
+    table = scfg.get('table', '').strip()
+    value_field = scfg.get('value_field', '').strip()
+    time_field = scfg.get('time_field', 'time').strip() or 'time'
+
+    if not table or not value_field:
+        continue  # skip: required params missing
+
+    plan.append({
+        'sensor_id': sensor.id,
+        'device_id': device.id,
+        'sensor_name': sensor_name,
+        'table': table,
+        'value_field': value_field,
+        'time_field': time_field,
+        'initial_date': initial_date,
+    })
+
+bag['electrosegura_plan'] = plan
+bag['electrosegura_plan_count'] = len(plan)
+
+# Create attachment with the plan for debugging
+plan_json = json.dumps(plan, indent=2, ensure_ascii=False, default=str)
+plan_b64 = base64.b64encode(plan_json.encode('utf-8'))
+plan_fname = 'electrosegura_plan_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+
+plan_att = env['ir.attachment'].create({
+    'name': plan_fname,
+    'datas_fname': plan_fname,
+    'datas': plan_b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+
+Remote.message_post(
+    body='[Electrosegura] Plan built: %s sensors to sync' % len(plan),
+    attachment_ids=[plan_att.id]
+)
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_electrosegura_action_fetch_rows" model="remotecontrol.action">
+            <field name="name">Electrosegura: Fetch and Parse Rows</field>
+            <field name="remote_id" ref="remotecontrol_electrosegura"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import pyodbc
+from datetime import datetime
+
+Remote = self.remote_id
+plan = bag.get('electrosegura_plan') or []
+
+rows = []
+errors = []
+
+try:
+    cfg = json.loads(Remote.connection_params or '{}') or {}
+    driver = cfg.get('driver', 'MariaDB Unicode').strip()
+    server = cfg.get('server', '').strip()
+    port = cfg.get('port', '3306')
+    database = cfg.get('database', '').strip()
+    uid = cfg.get('uid', '').strip()
+    pwd = cfg.get('pwd', '').strip()
+
+    if not all([server, database, uid]):
+        raise Exception("Missing required connection parameters")
+
+    connection_string = (
+        "DRIVER={%s};"
+        "SERVER=%s;"
+        "PORT=%s;"
+        "DATABASE=%s;"
+        "UID=%s;"
+        "PWD=%s;"
+    ) % (driver, server, port, database, uid, pwd)
+
+    conn = pyodbc.connect(connection_string)
+    cursor = conn.cursor()
+
+    for item in plan:
+        sensor_id = item['sensor_id']
+        device_id = item['device_id']
+        sensor_name = item['sensor_name']
+        table_name = item['table']
+        value_col = item['value_field']
+        time_col = item['time_field']
+        initial_date = item['initial_date']
+
+        try:
+            query = """
+                SELECT name, %s, %s
+                FROM %s
+                WHERE name = ?
+                AND %s >= ?
+                ORDER BY %s ASC
+            """ % (value_col, time_col, table_name, time_col, time_col)
+
+            cursor.execute(query, (sensor_name, initial_date))
+            results = cursor.fetchall()
+
+            row_count = 0
+            for row in results:
+                row_count += 1
+                name = row[0] if row[0] else ''
+                value = row[1]
+                timestamp = row[2]
+
+                if hasattr(timestamp, 'strftime'):
+                    ts = timestamp.strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    ts = str(timestamp)
+
+                rows.append({
+                    'sensor_id': sensor_id,
+                    'device_id': device_id,
+                    'table': table_name,
+                    'sensor_name': name,
+                    'value': value,
+                    'timestamp': ts,
+                })
+
+            # Log info for debugging
+            if row_count == 0:
+                errors.append({
+                    'sensor_id': sensor_id,
+                    'sensor_name': sensor_name,
+                    'table': table_name,
+                    'warning': 'No data found',
+                    'query': query.replace('?', '%s') % (sensor_name, initial_date),
+                    'initial_date': initial_date
+                })
+
+        except Exception as e:
+            errors.append({
+                'sensor_id': sensor_id,
+                'sensor_name': sensor_name,
+                'table': table_name if 'table_name' in locals() else 'N/A',
+                'error': str(e),
+                'query': query if 'query' in locals() else 'N/A'
+            })
+
+    cursor.close()
+    conn.close()
+
+except Exception as ex:
+    errors.append({'fatal_error': str(ex)})
+
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'total_rows': len(rows),
+    'total_errors': len(errors),
+    'sample_rows': rows[:20],
+    'errors': errors[:10] if errors else [],
+}
+
+audit_json = json.dumps(audit, indent=2, ensure_ascii=False, default=str)
+audit_b64 = base64.b64encode(audit_json.encode('utf-8'))
+fname = 'electrosegura_fetch_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': audit_b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+
+Remote.message_post(
+    body='[Electrosegura] Fetch: %s rows, %s errors' % (len(rows), len(errors)),
+    attachment_ids=[att.id]
+)
+
+bag['electrosegura_rows'] = rows
+bag['electrosegura_fetch_errors'] = errors
+bag['electrosegura_fetch_filename'] = fname
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_electrosegura_action_upsert_rows" model="remotecontrol.action">
+            <field name="name">Electrosegura: Upsert Readings</field>
+            <field name="remote_id" ref="remotecontrol_electrosegura"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import json
+import pytz
+from datetime import datetime
+
+Remote = self.remote_id
+Device = env['mdm.measurement.device']
+Sensor = env['mdm.measurement.device.sensor']
+
+def parse_value(v):
+    """Parse numeric value from various formats."""
+    if v is None:
+        return None
+    if isinstance(v, dict):
+        for k in ('$numberDecimal', '$numberLong', '$numberInt'):
+            if k in v:
+                v = v[k]
+                break
+    if isinstance(v, str):
+        v = v.strip().replace(',', '.')
+        if v.lower() == 'nan':
+            return None
+        try:
+            return float(v)
+        except:
+            return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    return None
+
+rows = bag.get('electrosegura_rows') or []
+
+total_processed = 0
+total_upserts = 0
+total_errors = 0
+details = []
+
+for r in rows:
+    total_processed += 1
+
+    sensor_id = r.get('sensor_id')
+    device_id = r.get('device_id')
+    timestamp = r.get('timestamp')
+    value = parse_value(r.get('value'))
+
+    if not sensor_id or not device_id or not timestamp or value is None:
+        total_errors += 1
+        if len(details) < 20:
+            details.append({
+                'sensor_id': sensor_id,
+                'timestamp': timestamp,
+                'value': value,
+                'status': 'error',
+                'error': 'Missing required fields'
+            })
+        continue
+
+    sensor = Sensor.browse(sensor_id)
+    device = Device.browse(device_id)
+
+    if not sensor.exists() or not device.exists():
+        total_errors += 1
+        if len(details) < 20:
+            details.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'timestamp': timestamp,
+                'status': 'error',
+                'error': 'Sensor or device not found'
+            })
+        continue
+
+    try:
+        try:
+            date_time_read = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
+            date_time_read = pytz.timezone('Europe/Madrid').localize(date_time_read)
+            date_time_read = date_time_read.astimezone(pytz.timezone('UTC'))
+            ts_utc = date_time_read.strftime('%Y-%m-%d %H:%M:%S')
+        except:
+            ts_utc = timestamp
+
+        Remote.upsert(
+            'mdm.measurement.device.sensor.reading',
+            {
+                'sensor_id': sensor_id,
+                'measurement_time': ts_utc,
+            },
+            {
+                'value': value,
+                'device_id': device_id,
+            }
+        )
+        total_upserts += 1
+
+        if len(details) < 20:
+            details.append({
+                'device_id': device_id,
+                'sensor_id': sensor_id,
+                'sensor_name': sensor.name,
+                'timestamp': timestamp,
+                'value': value,
+                'status': 'success'
+            })
+
+    except Exception as e:
+        total_errors += 1
+        if len(details) < 20:
+            details.append({
+                'device_id': device_id,
+                'sensor_id': sensor_id,
+                'timestamp': timestamp,
+                'value': value,
+                'status': 'error',
+                'error': str(e)
+            })
+
+success_rate = '0.0%'
+if total_processed:
+    success_rate = '%.1f%%' % (float(total_upserts) / float(total_processed) * 100.0)
+
+bag['electrosegura_upsert_summary'] = {
+    'executed_at': fields.Datetime.now(),
+    'total_rows_processed': total_processed,
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'success_rate': success_rate,
+}
+
+bag['electrosegura_upsert_details'] = details
+
+Remote.message_post(
+    body='[Electrosegura] Upsert: %s processed, %s upserts, %s errors (success_rate=%s)' %
+         (total_processed, total_upserts, total_errors, success_rate)
+)
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_electrosegura_action_discovery" model="remotecontrol.action">
+            <field name="name">Electrosegura: Database Discovery</field>
+            <field name="remote_id" ref="remotecontrol_electrosegura"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import pyodbc
+from datetime import datetime
+
+Remote = self.remote_id
+
+discovery_result = {
+    'executed_at': fields.Datetime.now(),
+    'connection_info': {},
+    'sensors_by_name': {},
+    'devices_to_create': [],
+    'sensors_to_create': [],
+    'statistics': {},
+    'errors': []
+}
+
+try:
+    cfg = json.loads(Remote.connection_params or '{}') or {}
+    driver = cfg.get('driver', 'MariaDB Unicode').strip()
+    server = cfg.get('server', '').strip()
+    port = cfg.get('port', '3306')
+    database = cfg.get('database', '').strip()
+    uid = cfg.get('uid', '').strip()
+    pwd = cfg.get('pwd', '').strip()
+
+    if not all([server, database, uid]):
+        raise Exception("Missing required connection parameters")
+
+    connection_string = (
+        "DRIVER={%s};"
+        "SERVER=%s;"
+        "PORT=%s;"
+        "DATABASE=%s;"
+        "UID=%s;"
+        "PWD=%s;"
+    ) % (driver, server, port, database, uid, pwd)
+
+    discovery_result['connection_info'] = {
+        'driver': driver,
+        'server': server,
+        'port': port,
+        'database': database,
+        'uid': uid
+    }
+
+    conn = pyodbc.connect(connection_string)
+    cursor = conn.cursor()
+
+    # Query similar to the example provided
+    query = """
+        SELECT
+            name,
+            GROUP_CONCAT(DISTINCT sensor_type ORDER BY sensor_type SEPARATOR ', ') AS sensor_types
+        FROM (
+            SELECT name, 'flow_data|flow' AS sensor_type FROM flow_data WHERE TRIM(name) <> ''
+            UNION
+            SELECT name, 'reservoir_reading|volume' AS sensor_type FROM reservoir_reading WHERE TRIM(name) <> ''
+            UNION
+            SELECT name, 'water_quality|conductance' AS sensor_type FROM water_quality WHERE TRIM(name) <> ''
+        ) t
+        WHERE TRIM(name) <> ''
+        GROUP BY name
+        ORDER BY name
+    """
+
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    device_counter = 1
+    sensor_counter = 1
+    total_sensors = 0
+
+    for row in rows:
+        sensor_name = row[0] if row[0] else ''
+        sensor_types = row[1] if row[1] else ''
+
+        if not sensor_name.strip():
+            continue
+
+        types_list = [t.strip() for t in sensor_types.split(',')]
+        total_sensors += len(types_list)
+
+        # Information for analysis
+        discovery_result['sensors_by_name'][sensor_name] = {
+            'sensor_types': types_list,
+            'sensor_count': len(types_list)
+        }
+
+        # Device to create
+        device_info = {
+            'sequence': device_counter,
+            'name': sensor_name,
+            'suggested_odoo_name': sensor_name.replace('_', ' ').title(),
+            'remotecontrol_params': {
+                'device_id': sensor_name,
+                'start_date': '2026-03-01'
+            }
+        }
+        discovery_result['devices_to_create'].append(device_info)
+
+        # Sensors to create for this device (new format: table + value_field)
+        for stype in types_list:
+            # stype is 'flow_data|flow', 'reservoir_reading|volume', etc.
+            parts = stype.split('|')
+            table_name = parts[0].strip()
+            value_field = parts[1].strip() if len(parts) > 1 else ''
+            sensor_info = {
+                'sequence': sensor_counter,
+                'device_sequence': device_counter,
+                'device_name': sensor_name,
+                'suggested_odoo_name': '%s / %s' % (
+                    sensor_name.replace('_', ' ').title(),
+                    table_name.replace('_', ' ').title()
+                ),
+                'table': table_name,
+                'value_field': value_field,
+                'remotecontrol_params': {
+                    'table': table_name,
+                    'value_field': value_field,
+                    'sensor_id': sensor_name,
+                    'start_date': '2026-03-01'
+                }
+            }
+            discovery_result['sensors_to_create'].append(sensor_info)
+            sensor_counter += 1
+
+        device_counter += 1
+
+    # Gather additional statistics
+    stats_queries = {
+        'flow_data': 'SELECT COUNT(DISTINCT name) as cnt, MIN(time) as min_date, MAX(time) as max_date, COUNT(*) as total_rows FROM flow_data WHERE TRIM(name) <> ""',
+        'reservoir_reading': 'SELECT COUNT(DISTINCT name) as cnt, MIN(time) as min_date, MAX(time) as max_date, COUNT(*) as total_rows FROM reservoir_reading WHERE TRIM(name) <> ""',
+        'water_quality': 'SELECT COUNT(DISTINCT name) as cnt, MIN(time) as min_date, MAX(time) as max_date, COUNT(*) as total_rows FROM water_quality WHERE TRIM(name) <> ""'
+    }
+
+    for table_type, stats_query in stats_queries.items():
+        try:
+            cursor.execute(stats_query)
+            stat_row = cursor.fetchone()
+            if stat_row:
+                discovery_result['statistics'][table_type] = {
+                    'unique_sensors': stat_row[0] or 0,
+                    'date_range_start': str(stat_row[1]) if stat_row[1] else 'N/A',
+                    'date_range_end': str(stat_row[2]) if stat_row[2] else 'N/A',
+                    'total_readings': stat_row[3] or 0
+                }
+        except Exception as e:
+            discovery_result['errors'].append({
+                'table': table_type,
+                'error': str(e)
+            })
+
+    cursor.close()
+    conn.close()
+
+    # Summary
+    discovery_result['summary'] = {
+        'total_unique_devices': len(discovery_result['devices_to_create']),
+        'total_sensors_to_create': len(discovery_result['sensors_to_create']),
+        'sensors_by_table': {
+            'flow_data': sum(1 for s in discovery_result['sensors_to_create'] if s['table'] == 'flow_data'),
+            'reservoir_reading': sum(1 for s in discovery_result['sensors_to_create'] if s['table'] == 'reservoir_reading'),
+            'water_quality': sum(1 for s in discovery_result['sensors_to_create'] if s['table'] == 'water_quality'),
+        }
+    }
+
+except Exception as ex:
+    discovery_result['errors'].append({
+        'fatal_error': str(ex),
+        'traceback': str(ex)
+    })
+
+# Create human-readable JSON
+discovery_json = json.dumps(discovery_result, indent=2, ensure_ascii=False, default=str)
+discovery_b64 = base64.b64encode(discovery_json.encode('utf-8'))
+fname = 'electrosegura_discovery_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': discovery_b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+
+# Also create a CSV for easy import
+csv_lines = []
+csv_lines.append('Device Sequence,Device Name,Device Suggested Name,Device remotecontrol_params')
+for dev in discovery_result.get('devices_to_create', []):
+    csv_lines.append('%s,"%s","%s","%s"' % (
+        dev['sequence'],
+        dev['name'],
+        dev['suggested_odoo_name'],
+        json.dumps(dev['remotecontrol_params'])
+    ))
+
+csv_lines.append('')
+csv_lines.append('Sensor Sequence,Device Sequence,Device Name,Sensor Suggested Name,Table,Value Field,Sensor remotecontrol_params')
+for sens in discovery_result.get('sensors_to_create', []):
+    csv_lines.append('%s,%s,"%s","%s",%s,%s,"%s"' % (
+        sens['sequence'],
+        sens['device_sequence'],
+        sens['device_name'],
+        sens['suggested_odoo_name'],
+        sens['table'],
+        sens['value_field'],
+        json.dumps(sens['remotecontrol_params'])
+    ))
+
+csv_content = '\n'.join(csv_lines)
+csv_b64 = base64.b64encode(csv_content.encode('utf-8'))
+csv_fname = 'electrosegura_discovery_%s.csv' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+
+csv_att = env['ir.attachment'].create({
+    'name': csv_fname,
+    'datas_fname': csv_fname,
+    'datas': csv_b64,
+    'mimetype': 'text/csv',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+
+summary = discovery_result.get('summary', {})
+Remote.message_post(
+    body='[Electrosegura] Discovery completed: %s devices, %s sensors (%s flow_data, %s reservoir_reading, %s water_quality)' % (
+        summary.get('total_unique_devices', 0),
+        summary.get('total_sensors_to_create', 0),
+        summary.get('sensors_by_table', {}).get('flow_data', 0),
+        summary.get('sensors_by_table', {}).get('reservoir_reading', 0),
+        summary.get('sensors_by_table', {}).get('water_quality', 0)
+    ),
+    attachment_ids=[att.id, csv_att.id]
+)
+
+bag['electrosegura_discovery'] = discovery_result
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_electrosegura_procedure_discovery" model="remotecontrol.procedure">
+            <field name="name">Electrosegura: Database Discovery</field>
+            <field name="remote_id" ref="remotecontrol_electrosegura"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_electrosegura_step_discovery" model="remotecontrol.step">
+            <field name="name">Analyze Database and Generate Report</field>
+            <field name="procedure_id" ref="remotecontrol_electrosegura_procedure_discovery"/>
+            <field name="action_id" ref="remotecontrol_electrosegura_action_discovery"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_electrosegura_procedure" model="remotecontrol.procedure">
+            <field name="name">Electrosegura: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_electrosegura"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="True"/>
+        </record>
+
+        <record id="remotecontrol_electrosegura_step_10_plan" model="remotecontrol.step">
+            <field name="name">Build Device/Sensor Plan</field>
+            <field name="procedure_id" ref="remotecontrol_electrosegura_procedure"/>
+            <field name="action_id" ref="remotecontrol_electrosegura_action_build_plan"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_electrosegura_step_20_fetch" model="remotecontrol.step">
+            <field name="name">Fetch and Parse Rows</field>
+            <field name="procedure_id" ref="remotecontrol_electrosegura_procedure"/>
+            <field name="action_id" ref="remotecontrol_electrosegura_action_fetch_rows"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_electrosegura_step_30_upsert" model="remotecontrol.step">
+            <field name="name">Upsert Readings</field>
+            <field name="procedure_id" ref="remotecontrol_electrosegura_procedure"/>
+            <field name="action_id" ref="remotecontrol_electrosegura_action_upsert_rows"/>
+            <field name="sequence">30</field>
+        </record>
+
+    </data>
+</odoo>
