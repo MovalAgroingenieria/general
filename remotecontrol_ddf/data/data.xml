@@ -1,0 +1,616 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_ddf" model="remotecontrol">
+            <field name="name">Digital Data Farm</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://apy.digitaldatafarm.com</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "api_key": ""
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>Digital Data Farm (DDF) · Odoo Integration</h2>
+<p><strong>Official API base URL:</strong> <code>https://apy.digitaldatafarm.com</code></p>
+
+<hr/>
+
+<h3>1) Connection</h3>
+<p>Type: <code>REST</code></p>
+<p>Authentication handled via API key configured in the Remote Control record.</p>
+<p><strong>connection_params</strong> example:</p>
+<pre>{
+  "api_key": "your_api_key_here"
+}</pre>
+<p>Authentication is done via header: <code>Authorization: API-KEY &lt;api_key&gt;</code></p>
+
+<hr/>
+
+<h3>2) Available Procedures</h3>
+
+<h4>A) DDF: Get Plots (One-time setup)</h4>
+<p>Discovers all available plots and their dataloggers/channels:</p>
+<ol>
+  <li>Calls <code>GET /plots/</code> → retrieves all plots</li>
+  <li>For each plot: <code>GET /plots/{plot_id}</code> → gets datalogger IDs and location description</li>
+  <li>For each datalogger: <code>GET /dataloggers/{mp_id}/</code> → gets measurement point details and channels</li>
+  <li>Generates JSON attachment: <code>ddf_plots_YYYYMMDD_HHMMSS.json</code> grouped by location</li>
+</ol>
+<p>Use this JSON file to identify the correct <code>datalogger_id</code> and <code>sensor_id</code> values for your devices/sensors.</p>
+
+<h4>B) DDF: Daily Sync (Scheduled)</h4>
+<p>Synchronizes readings from configured devices/sensors:</p>
+<ol>
+  <li><strong>Get devices (plan)</strong> - Builds execution plan from sensors with remotecontrol_params</li>
+  <li><strong>Get readings</strong> - Downloads readings from DDF API and upserts into Odoo</li>
+</ol>
+
+<hr/>
+
+<h3>3) Device &amp; Sensor Configuration</h3>
+<p>Uses standard Odoo models:</p>
+<ul>
+  <li><strong>Device</strong>: <code>mdm.measurement.device</code></li>
+  <li><strong>Sensor</strong>: <code>mdm.measurement.device.sensor</code></li>
+</ul>
+
+<h4>Device remotecontrol_params (optional):</h4>
+<pre>{
+  "start_date": "2026-01-01"
+}</pre>
+<ul>
+  <li><code>start_date</code>: Default start date if sensor has no readings yet (fallback to current year start)</li>
+</ul>
+
+<h4>Sensor remotecontrol_params (required):</h4>
+<pre>{
+  "datalogger_id": 1108,
+  "sensor_id": 23695
+}</pre>
+<p><strong>Parameters:</strong></p>
+<ul>
+  <li><code>datalogger_id</code>: DDF <code>mp_id</code> (measurement point ID). Get from "DDF: Get Plots" output</li>
+  <li><code>sensor_id</code>: DDF <code>dc_id</code> (device channel ID). Get from "DDF: Get Plots" output</li>
+</ul>
+
+<hr/>
+
+<h3>4) API Endpoints Used</h3>
+<ul>
+  <li><code>GET /plots/</code> → List all plots (with trailing slash)</li>
+  <li><code>GET /plots/{plot_id}</code> → Get plot details + datalogger IDs (no trailing slash)</li>
+  <li><code>GET /dataloggers/{mp_id}/</code> → Get datalogger details + channels (with trailing slash)</li>
+  <li><code>GET /dataloggers/{mp_id}/device_channel/{dc_id}/data?start_date={iso}&amp;end_date={iso}</code> → Get readings</li>
+</ul>
+
+<p><strong>⚠️ Important:</strong> Trailing slashes matter! Server returns 307 redirects without proper slashes.</p>
+
+<hr/>
+
+<h3>5) Date Window for Fetching Data</h3>
+<p>The fetch window is computed per sensor:</p>
+<ol>
+  <li>If sensor has readings: start from last reading date (no +1 day to avoid gaps)</li>
+  <li>If <code>start_date</code> configured: use that date</li>
+  <li>Otherwise: <code>01/01/{current_year}</code></li>
+</ol>
+<p>To date: <code>{today}</code></p>
+<p><strong>API limitation:</strong> Maximum 1-month range per request. Larger ranges are automatically split into 30-day chunks.</p>
+
+<hr/>
+
+<h3>6) Data Conversion</h3>
+<ul>
+  <li><strong>Timestamps</strong>: Unix seconds (UTC) → <code>YYYY-MM-DD HH:MM:SS</code> (stored as UTC in Odoo)</li>
+  <li><strong>Values</strong>: Converted to float</li>
+  <li><strong>Date format</strong>: ISO 8601 with milliseconds: <code>YYYY-MM-DDTHH:MM:SS.sssZ</code></li>
+</ul>
+
+<hr/>
+
+<h3>7) Database Upsert Logic</h3>
+<p>Each reading is upserted into:</p>
+<pre>mdm.measurement.device.sensor.reading</pre>
+
+<p>Unique key:</p>
+<pre>{
+  "sensor_id": SENSOR_ID,
+  "measurement_time": TIMESTAMP
+}</pre>
+
+<p>Stored values:</p>
+<ul>
+  <li><code>value</code></li>
+</ul>
+
+<hr/>
+
+<h3>8) API Response Structures</h3>
+
+<p><strong>GET /plots/</strong></p>
+<pre>{
+  "plots": [
+    {
+      "plot_id": 123,
+      "plot_name": "Lechugas 1",
+      "descr": "Parcela lechugas 1",
+      "loc": [-2.557, 36.0001],
+      "report_name": "DDF3",
+      "crop_name": "Lechuga",
+      "active": true
+    }
+  ]
+}</pre>
+
+<p><strong>GET /plots/{plot_id}</strong></p>
+<pre>{
+  "plot": {
+    "plot_id": 123,
+    "res_id": 45,
+    "loc_descr": "Totana"
+  },
+  "dataloggers": [1234, 5678]
+}</pre>
+
+<p><strong>GET /dataloggers/{mp_id}/</strong></p>
+<pre>{
+  "measurement_point": {
+    "mp_id": 1234,
+    "mp_name": "PM12341",
+    "descr": "Description",
+    "plot_id": 123,
+    "mp_loc": [-2.557, 36.0001],
+    "active": true
+  },
+  "channels": [
+    {
+      "dc_id": 10255,
+      "dev_ch_idtext": "H12341_10CM",
+      "variable": "Agua en el suelo",
+      "unit": "%",
+      "depth": 10.0,
+      "model": "Sonda 6 profundidades"
+    }
+  ]
+}</pre>
+
+<p><strong>GET /dataloggers/{mp_id}/device_channel/{dc_id}/data</strong></p>
+<pre>{
+  "channel_data": [
+    [1762381800, 10.5],
+    [1762380000, 11.2]
+  ]
+}</pre>
+<p>Each entry: <code>[unix_timestamp_seconds, value]</code></p>
+
+<hr/>
+
+<h3>9) Error Handling</h3>
+<ul>
+  <li>Missing <code>datalogger_id</code> or <code>sensor_id</code> → sensor skipped</li>
+  <li>HTTP 307 redirect → caught and logged (check trailing slashes)</li>
+  <li>HTTP 4xx/5xx error → logged and counted in audit JSON</li>
+  <li>Invalid timestamp/value → reading skipped</li>
+</ul>
+
+<hr/>
+
+<h3>10) Execution Sequence</h3>
+<p><strong>Daily Sync procedure:</strong></p>
+<ol>
+  <li><strong>Get devices (plan)</strong> (sequence 10)</li>
+  <li><strong>Get readings</strong> (sequence 20)</li>
+</ol>
+
+<p>An audit JSON file is attached to the remote control record after each sync with statistics.</p>
+]]></field>
+        </record>
+
+    </data>
+    <data noupdate="0">
+
+        <record id="remotecontrol_ddf_action_get_plots" model="remotecontrol.action">
+            <field name="name">DDF: Get Plots</field>
+            <field name="remote_id" ref="remotecontrol_ddf"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+api_key = (cfg.get('api_key') or '').strip()
+if not api_key:
+    raise Exception("Missing DDF api_key in connection_params.")
+if isinstance(api_key, unicode):
+    api_key = api_key.encode('utf-8')
+auth_value = b'API-KEY ' + api_key
+headers = {b'Authorization': auth_value}
+base = (base_url or '').rstrip('/')
+
+url_plots = base + '/plots/'
+resp = request_retry('GET', url_plots, headers=headers, timeout=timeout, allow_redirects=False)
+if resp.status_code >= 300:
+    raise Exception("Error fetching /plots: %s %s" % (resp.status_code, resp.text))
+plots_raw = (resp.json() or {}).get('plots') or []
+
+plots_list = []
+total_dataloggers = 0
+total_channels = 0
+loc_groups = {}
+
+for plot in plots_raw:
+    plot_id = plot.get('plot_id')
+    if not plot_id:
+        continue
+    plot_entry = {
+        'plot_id': plot_id,
+        'plot_name': plot.get('plot_name') or '',
+        'descr': plot.get('descr') or '',
+        'loc': plot.get('loc'),
+        'report_name': plot.get('report_name') or '',
+        'crop_name': plot.get('crop_name') or '',
+        'active': plot.get('active', True),
+        'dataloggers': [],
+    }
+
+    url_plot = '%s/plots/%s' % (base, plot_id)
+    resp2 = request_retry('GET', url_plot, headers=headers, timeout=timeout, allow_redirects=False)
+    if resp2.status_code >= 300:
+        plots_list.append(plot_entry)
+        continue
+    plot_detail_json = resp2.json() or {}
+    dl_ids = plot_detail_json.get('dataloggers') or []
+    plot_detail = plot_detail_json.get('plot') or {}
+    res_id = plot_detail.get('res_id')
+    loc_descr = plot_detail.get('loc_descr') or ''
+    plot_entry['res_id'] = res_id
+    plot_entry['loc_descr'] = loc_descr
+
+    for mp_id in dl_ids:
+        url_dl = '%s/dataloggers/%s/' % (base, mp_id)
+        resp3 = request_retry('GET', url_dl, headers=headers, timeout=timeout, allow_redirects=False)
+        if resp3.status_code >= 300:
+            continue
+        detail = resp3.json() or {}
+        mp = detail.get('measurement_point') or {}
+        channels_raw = detail.get('channels') or []
+        channels = []
+        for ch in channels_raw:
+            channels.append({
+                'dc_id': ch.get('dc_id'),
+                'dev_ch_idtext': ch.get('dev_ch_idtext') or '',
+                'variable': ch.get('variable') or '',
+                'unit': ch.get('unit') or '',
+                'depth': ch.get('depth'),
+                'model': ch.get('model') or '',
+            })
+        total_channels += len(channels)
+        plot_entry['dataloggers'].append({
+            'mp_id': mp_id,
+            'mp_name': mp.get('mp_name') or '',
+            'descr': mp.get('descr') or '',
+            'active': mp.get('active', True),
+            'channels': channels,
+        })
+        total_dataloggers += 1
+
+    plots_list.append(plot_entry)
+    loc_key = loc_descr if loc_descr else '__no_loc__'
+    if loc_key not in loc_groups:
+        loc_groups[loc_key] = []
+    loc_groups[loc_key].append(plot_entry)
+
+loc_groups_list = [
+    {'loc_descr': k if k != '__no_loc__' else None, 'plots': v}
+    for k, v in sorted(loc_groups.items(), key=lambda x: (x[0] == '__no_loc__', x[0]))
+]
+data = {
+    'procedure': 'DDF: Get Plots',
+    'executed_at': fields.Datetime.now(),
+    'summary': {
+        'total_loc_groups': len(loc_groups_list),
+        'total_plots': len(plots_list),
+        'total_dataloggers': total_dataloggers,
+        'total_channels': total_channels,
+    },
+    'loc_groups': loc_groups_list,
+}
+json_str = json.dumps(data, ensure_ascii=False, indent=2)
+encoded = base64.b64encode(json_str.encode('utf-8'))
+timestamp = fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+fname = 'ddf_plots_%s.json' % timestamp
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': encoded,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': remote.id,
+})
+remote.message_post(
+    body='[DDF] LocGroups=%s Plots=%s Dataloggers=%s Channels=%s - JSON generated for import preparation' % (
+        len(loc_groups_list), len(plots_list), total_dataloggers, total_channels),
+    attachment_ids=[att.id]
+)
+bag['total_loc_groups'] = len(loc_groups_list)
+bag['total_plots'] = len(plots_list)
+bag['total_dataloggers'] = total_dataloggers
+bag['total_channels'] = total_channels
+bag['attachment_name'] = fname
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_ddf_action_get_devices" model="remotecontrol.action">
+            <field name="name">DDF: Get Devices (plan)</field>
+            <field name="remote_id" ref="remotecontrol_ddf"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+from datetime import timedelta
+
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+today_str = fields.Date.today()
+
+condition = [
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id),
+]
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+
+sensors = Sensor.search(condition)
+
+last_readings_map = {}
+if sensors:
+    sensor_ids = [s.id for s in sensors]
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for row in cr.fetchall():
+        last_readings_map[row[0]] = row[1]
+
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+
+    sensor_id_param = sensor_cfg.get('sensor_id')
+    datalogger_id = device_cfg.get('datalogger_id')
+
+    if not (sensor_id_param and datalogger_id):
+        continue
+
+    start_cfg = sensor_cfg.get('start_date') or device_cfg.get('start_date')
+
+    last_reading_time = last_readings_map.get(sensor.id)
+    if last_reading_time:
+        try:
+            initial_date = str(last_reading_time)[:10]
+        except Exception:
+            initial_date = today_str
+    elif start_cfg:
+        initial_date = start_cfg[:10]
+    else:
+        year_str = today_str[:4]
+        initial_date = '%s-01-01' % year_str
+
+    plan.append({
+        'sensor_id': sensor.id,
+        'device_id': device.id,
+        'datalogger_id': datalogger_id,
+        'sensor_id_param': sensor_id_param,
+        'initial_date': initial_date,
+    })
+
+bag['sensors_plan'] = plan
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_ddf_action_get_readings" model="remotecontrol.action">
+            <field name="name">DDF: Get Readings</field>
+            <field name="remote_id" ref="remotecontrol_ddf"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+from datetime import datetime, timedelta
+
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+api_key = (cfg.get('api_key') or '').strip()
+if not api_key:
+    raise Exception("Missing DDF api_key in connection_params.")
+headers = {'Authorization': 'API-KEY %s' % api_key}
+base = (base_url or '').rstrip('/')
+
+sensors_plan = bag.get('sensors_plan') or []
+if not sensors_plan:
+    raise Exception("No sensors_plan found in bag. Run Get Devices (plan) first.")
+
+today = fields.Date.today()
+total_upserts = 0
+total_errors = 0
+items = []
+
+for plan_item in sensors_plan:
+    sensor_id = plan_item.get('sensor_id')
+    datalogger_id = plan_item.get('datalogger_id')
+    sensor_id_param = plan_item.get('sensor_id_param')
+    initial_date = plan_item.get('initial_date')
+
+    if not (sensor_id and datalogger_id and sensor_id_param and initial_date):
+        continue
+
+    upserts = 0
+    errs = 0
+    urls_called = []
+
+    try:
+        current_dt = datetime.strptime(initial_date, '%Y-%m-%d')
+    except Exception:
+        continue
+    end_dt = datetime.strptime(today, '%Y-%m-%d')
+
+    while current_dt <= end_dt:
+        chunk_end = min(current_dt + timedelta(days=30), end_dt)
+        start_str = current_dt.strftime('%Y-%m-%d')
+        end_str = chunk_end.strftime('%Y-%m-%d')
+        start_iso = '%sT00:00:00.000Z' % start_str
+        end_iso = '%sT00:00:00.000Z' % end_str
+        url = '%s/dataloggers/%s/device_channel/%s/data?start_date=%s&end_date=%s' % (
+            base, datalogger_id, sensor_id_param, start_iso, end_iso)
+        urls_called.append(url)
+
+        try:
+            resp = request_retry('GET', url, headers=headers, timeout=timeout)
+            if resp.status_code >= 400:
+                errs += 1
+                items.append({
+                    'sensor_id': sensor_id,
+                    'datalogger_id': datalogger_id,
+                    'sensor_id_param': sensor_id_param,
+                    'url': url,
+                    'status': resp.status_code,
+                    'error': (resp.text or '')[:400],
+                })
+            else:
+                channel_data = (resp.json() or {}).get('channel_data') or []
+                for entry in channel_data:
+                    try:
+                        unix_ts = entry[0]
+                        value = float(entry[1])
+                        utc_dt = datetime.fromtimestamp(unix_ts, tz=pytz.UTC)
+                        ts_str = utc_dt.strftime('%Y-%m-%d %H:%M:%S')
+                        remote.upsert(
+                            'mdm.measurement.device.sensor.reading',
+                            {'sensor_id': sensor_id, 'measurement_time': ts_str},
+                            {'value': value},
+                        )
+                        upserts += 1
+                    except Exception:
+                        errs += 1
+        except Exception as e:
+            errs += 1
+            items.append({
+                'sensor_id': sensor_id,
+                'datalogger_id': datalogger_id,
+                'sensor_id_param': sensor_id_param,
+                'url': url,
+                'status': -1,
+                'error': str(e),
+            })
+
+        current_dt = chunk_end + timedelta(days=1)
+
+    total_upserts += upserts
+    total_errors += errs
+    items.append({
+        'sensor_id': sensor_id,
+        'datalogger_id': datalogger_id,
+        'sensor_id_param': sensor_id_param,
+        'upserts': upserts,
+        'errors': errs,
+        'urls': urls_called,
+    })
+
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'items': items,
+}
+b64 = base64.b64encode(json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
+fname = 'ddf_readings_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': remote.id,
+})
+remote.message_post(
+    body=u'[DDF] upserts=%s errors=%s' % (total_upserts, total_errors),
+    attachment_ids=[att.id]
+)
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_ddf_procedure_get_plots" model="remotecontrol.procedure">
+            <field name="name">DDF: Get Plots</field>
+            <field name="remote_id" ref="remotecontrol_ddf"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_ddf_step_get_plots_10" model="remotecontrol.step">
+            <field name="name">Get plots (with dataloggers and channels)</field>
+            <field name="procedure_id" ref="remotecontrol_ddf_procedure_get_plots"/>
+            <field name="action_id" ref="remotecontrol_ddf_action_get_plots"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_ddf_procedure_daily_sync" model="remotecontrol.procedure">
+            <field name="name">DDF: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_ddf"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">True</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="True"/>
+        </record>
+
+        <record id="remotecontrol_ddf_step_daily_10" model="remotecontrol.step">
+            <field name="name">Get devices (plan)</field>
+            <field name="procedure_id" ref="remotecontrol_ddf_procedure_daily_sync"/>
+            <field name="action_id" ref="remotecontrol_ddf_action_get_devices"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_ddf_step_daily_20" model="remotecontrol.step">
+            <field name="name">Get readings</field>
+            <field name="procedure_id" ref="remotecontrol_ddf_procedure_daily_sync"/>
+            <field name="action_id" ref="remotecontrol_ddf_action_get_readings"/>
+            <field name="sequence">20</field>
+        </record>
+
+    </data>
+</odoo>
