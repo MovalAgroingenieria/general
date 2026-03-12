@@ -1,0 +1,670 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* remotecontrol_deepdata
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-12 11:08+0000\n"
+"PO-Revision-Date: 2026-03-12 11:08+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "/rest/getCategorias"
+msgstr "/rest/getCategorias"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "/rest/getIdiomas"
+msgstr "/rest/getIdiomas"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "/rest/getInstalaciones"
+msgstr "/rest/getInstalaciones"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "/rest/getPuntosMedida <em>(loop per installation)</em>"
+msgstr "/rest/getPuntosMedida <em>(bucle por instalación)</em>"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "/rest/getVariables <em>(loop per measure point)</em>"
+msgstr "/rest/getVariables <em>(bucle por punto de medida)</em>"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "1) Connection (Remote Control)"
+msgstr "1) Conexión (Remote control)"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "2) Authentication"
+msgstr "2) Autenticación"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "3) Hierarchical Catalog Model"
+msgstr "3) Modelo Jerárquico del Catálogo"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "4) Catalog Endpoints (Sync Procedure)"
+msgstr "4) Endpoints del Catálogo (Procedimiento de Sincronización)"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "5) Measures Endpoint (Import Procedure)"
+msgstr "5) Endpoint de Medidas (Procedimiento de Importación)"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "6) Error Handling"
+msgstr "6) Gestión de Errores"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "7) Odoo Configuration"
+msgstr "7) Configuración en Odoo"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "8) Operational Flow"
+msgstr "8) Flujo Operativo"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "9) Technical Notes"
+msgstr "9) Notas Técnicas"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>date</code> in getMedidas response is a string in DD-MM-YYYY HH:MM:SS format (converted to YYYY-MM-DD for Odoo)."
+msgstr "<code>date</code> en la respuesta de getMedidas es una cadena en formato DD-MM-YYYY HH:MM:SS (convertido a YYYY-MM-DD para Odoo)."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>idLanguage</code>: Language code for catalog labels (default: <code>es</code>). Use <code>getIdiomas</code> to find available values."
+msgstr "<code>idLanguage</code>: Código de idioma para las etiquetas del catálogo (predeterminado: <code>es</code>). Use <code>getIdiomas</code> para encontrar los valores disponibles."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>installation_id</code>: <strong>Required.</strong> DeepData installation identifier."
+msgstr "<code>installation_id</code>: <strong>Obligatorio.</strong> Identificador de instalación DeepData."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>installation_name</code>: Optional. Display name of the installation."
+msgstr "<code>installation_name</code>: Opcional. Nombre para mostrar de la instalación."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>jsessionid</code> is returned in the JSON response body of <code>/rest/login</code> — <strong>not</strong> in a cookie."
+msgstr "<code>jsessionid</code> se devuelve en el cuerpo de la respuesta JSON de <code>/rest/login</code> — <strong>no</strong> en una cookie."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>jsessionid</code>: session token (~30 min validity)."
+msgstr "<code>jsessionid</code>: token de sesión (validez ~30 min)."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>max_vars_per_call</code>: Maximum number of variables per getMedidas API call (default: <code>5</code>).\n"
+"    The API rejects requests with too many variables (REST0012) and that failed attempt\n"
+"    triggers a 24 h cooldown (REST0013). Pre-splitting avoids hitting the limit."
+msgstr "<code>max_vars_per_call</code>: Número máximo de variables por llamada a getMedidas (predeterminado: <code>5</code>).\n"
+"    La API rechaza peticiones con demasiadas variables (REST0012) y ese intento fallido\n"
+"    activa un bloqueo de 24 h (REST0013). Pre-dividir evita alcanzar el límite."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>measure_point_id</code>: <strong>Required.</strong> DeepData measure point identifier."
+msgstr "<code>measure_point_id</code>: <strong>Obligatorio.</strong> Identificador de punto de medida DeepData."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>measure_point_name</code>: Optional. Display name of the measure point."
+msgstr "<code>measure_point_name</code>: Opcional. Nombre para mostrar del punto de medida."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>name</code>: display name of the authenticated user."
+msgstr "<code>name</code>: nombre para mostrar del usuario autenticado."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>password</code>: DeepData login password."
+msgstr "<code>password</code>: Contraseña de acceso DeepData."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>start_date</code>: Optional. Overrides device start_date if provided."
+msgstr "<code>start_date</code>: Opcional. Sobrescribe el start_date del dispositivo si se proporciona."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>start_date</code>: Optional. Start date for first data retrieval. Defaults to Jan 1st of current year."
+msgstr "<code>start_date</code>: Opcional. Fecha de inicio para la primera recuperación de datos. Por defecto es el 1 de enero del año actual."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>timezone</code>: Default IANA timezone. Can be overridden per installation."
+msgstr "<code>timezone</code>: Zona horaria IANA predeterminada. Se puede sobrescribir por instalación."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>timezone</code>: Optional. IANA timezone for this installation. Defaults to the one in connection_params."
+msgstr "<code>timezone</code>: Opcional. Zona horaria IANA para esta instalación. Por defecto la de connection_params."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>username</code>: DeepData login user."
+msgstr "<code>username</code>: Usuario de acceso DeepData."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>variable_id</code>: <strong>Required.</strong> DeepData variable identifier."
+msgstr "<code>variable_id</code>: <strong>Obligatorio.</strong> Identificador de variable DeepData."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>variable_name</code>: Optional. Display name of the variable."
+msgstr "<code>variable_name</code>: Opcional. Nombre para mostrar de la variable."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>variable_type</code>: Optional. DeepData variable type (Acumulativa, Demandada, etc.)."
+msgstr "<code>variable_type</code>: Opcional. Tipo de variable DeepData (Acumulativa, Demandada, etc.)."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>variable_unit</code>: Optional. Measurement unit (kWh, kVArh, etc.)."
+msgstr "<code>variable_unit</code>: Opcional. Unidad de medida (kWh, kVArh, etc.)."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>{\"idLanguage\":\"es\",\"idInstallation\":1,\"idMeasurePoint\":10}</code>"
+msgstr "<code>{\"idLanguage\":\"es\",\"idInstallation\":1,\"idMeasurePoint\":10}</code>"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>{\"idLanguage\":\"es\",\"idInstallation\":1}</code>"
+msgstr "<code>{\"idLanguage\":\"es\",\"idInstallation\":1}</code>"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<code>{\"idLanguage\":\"es\"}</code>"
+msgstr "<code>{\"idLanguage\":\"es\"}</code>"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<strong>Catalog Sync</strong> (run once / periodically):\n"
+"    Login → getIdiomas → getInstalaciones → getCategorias →\n"
+"    getPuntosMedida (loop per installation) → getVariables (loop per measure point).\n"
+"    Produces a hierarchy JSON attachment for reference."
+msgstr "<strong>Sincronización de Catálogo</strong> (ejecutar una vez / periódicamente):\n"
+"    Login → getIdiomas → getInstalaciones → getCategorias →\n"
+"    getPuntosMedida (bucle por instalación) → getVariables (bucle por punto de medida).\n"
+"    Genera un adjunto JSON con la jerarquía completa para referencia."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<strong>Full (with optional fields):</strong>"
+msgstr "<strong>Completo (con campos opcionales):</strong>"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<strong>Measure Import</strong> (daily / scheduled):\n"
+"    Login → Build plan from Odoo devices → getMedidas (per installation, all variables batched) → Upsert readings.\n"
+"    Handles automatic re-login, variable splitting and structured error recovery."
+msgstr "<strong>Importación de Medidas</strong> (diaria / programada):\n"
+"    Login → Construir plan desde dispositivos Odoo → getMedidas (por instalación, todas las variables agrupadas) → Upsert de lecturas.\n"
+"    Gestiona re-login automático, división de variables y recuperación estructurada de errores."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<strong>Minimum (required):</strong>"
+msgstr "<strong>Mínimo (obligatorio):</strong>"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<strong>Note:</strong> <code>date</code> is a string in DD-MM-YYYY HH:MM:SS format.\n"
+"<code>idInstallation</code>, <code>idMeasurePoint</code> and <code>idVariable</code> are strings (not integers)."
+msgstr "<strong>Nota:</strong> <code>date</code> es una cadena en formato DD-MM-YYYY HH:MM:SS.\n"
+"<code>idInstallation</code>, <code>idMeasurePoint</code> e <code>idVariable</code> son cadenas (no enteros)."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<strong>Note:</strong> Dates are sent in the local timezone of the request, without UTC conversion.\n"
+"<code>timeZone</code> per measure point is optional (defaults to the installation timezone)."
+msgstr "<strong>Nota:</strong> Las fechas se envían en la zona horaria local de la petición, sin conversión UTC.\n"
+"<code>timeZone</code> por punto de medida es opcional (por defecto la zona horaria de la instalación)."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "<strong>connection_params</strong> (JSON):"
+msgstr "<strong>connection_params</strong> (JSON):"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Action"
+msgstr "Acción"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "All POST bodies use <code>Content-Type: text/plain</code> with a JSON string as body."
+msgstr "Todos los cuerpos POST usan <code>Content-Type: text/plain</code> con una cadena JSON como cuerpo."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "All subsequent requests must include the header: <code>Cookie: JSESSIONID=&lt;value&gt;</code>."
+msgstr "Todas las peticiones posteriores deben incluir la cabecera: <code>Cookie: JSESSIONID=&lt;value&gt;</code>."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Audit JSON attachment created after each execution."
+msgstr "Se crea un adjunto JSON de auditoría tras cada ejecución."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Automatic re-login and retry (max 3)"
+msgstr "Re-login automático y reintento (máx 3)"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Body (Content-Type: text/plain)"
+msgstr "Cuerpo (Content-Type: text/plain)"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Code"
+msgstr "Código"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "DeepData Instance\n"
+"├── Idioma (language)\n"
+"├── Categoría (category of variables)\n"
+"└── Instalación (installation / site)\n"
+"    └── Punto de Medida (measure point) ──► mdm.measurement.device\n"
+"        └── Variable (sensor variable)  ──► mdm.measurement.device.sensor\n"
+"            ├── type: Acumulativa / Demandada / Instantanea\n"
+"            └── unit: measurement unit"
+msgstr "DeepData Instance\n"
+"├── Idioma (language)\n"
+"├── Categoría (category of variables)\n"
+"└── Instalación (installation / site)\n"
+"    └── Punto de Medida (measure point) ──► mdm.measurement.device\n"
+"        └── Variable (sensor variable)  ──► mdm.measurement.device.sensor\n"
+"            ├── type: Acumulativa / Demandada / Instantanea\n"
+"            └── unit: measurement unit"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "DeepData REST API v1.0.3 · Odoo Integration"
+msgstr "DeepData REST API v1.0.3 · Integración con Odoo"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Description"
+msgstr "Descripción"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Device (<code>mdm.measurement.device</code>) remotecontrol_params:"
+msgstr "Dispositivo (<code>mdm.measurement.device</code>) remotecontrol_params:"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Each device represents a DeepData <strong>measure point</strong> within an installation."
+msgstr "Cada dispositivo representa un <strong>punto de medida</strong> DeepData dentro de una instalación."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Each sensor represents a DeepData <strong>variable</strong> within the measure point (device)."
+msgstr "Cada sensor representa una <strong>variable</strong> DeepData dentro del punto de medida (dispositivo)."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Endpoint"
+msgstr "Endpoint"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Error consulting measures"
+msgstr "Error al consultar medidas"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "GET"
+msgstr "GET"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Idempotent readings via <code>upsert(sensor_id, measurement_time)</code>."
+msgstr "Lecturas idempotentes mediante <code>upsert(sensor_id, measurement_time)</code>."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "If the session expires, the API returns error code <code>REST0003</code>. The import procedure\n"
+"detects this and performs an automatic re-login (max 3 times)."
+msgstr "Si la sesión expira, la API devuelve el código de error <code>REST0003</code>. El procedimiento de importación\n"
+"lo detecta y realiza un re-login automático (máx 3 veces)."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Incorrect JSON format"
+msgstr "Formato JSON incorrecto"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Log and abort — do <strong>NOT</strong> retry"
+msgstr "Registrar y abortar — <strong>NO</strong> reintentar"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Log and skip"
+msgstr "Registrar y omitir"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Log as info, continue"
+msgstr "Registrar como info, continuar"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Login query parameter is <code>pass</code> (not <code>password</code>)."
+msgstr "El parámetro de consulta del login es <code>pass</code> (no <code>password</code>)."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Measures queried, available in 24h"
+msgstr "Medidas ya consultadas, disponibles en 24h"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Method"
+msgstr "Método"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Missing parameters"
+msgstr "Faltan parámetros"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "No data available"
+msgstr "No hay datos disponibles"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "POST"
+msgstr "POST"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "POST /rest/getMedidas\n"
+"Content-Type: text/plain\n"
+"Cookie: JSESSIONID=&lt;value&gt;\n"
+"\n"
+"{\n"
+"  \"startDate\": \"YYYY-MM-DD HH:mm:SS\",\n"
+"  \"endDate\":   \"YYYY-MM-DD HH:mm:SS\",\n"
+"  \"idLanguage\": \"es\",\n"
+"  \"listInstallation\": [\n"
+"    {\n"
+"      \"idInstallation\": 105,\n"
+"      \"listMeasurePoint\": [\n"
+"        {\n"
+"          \"idMeasurePoint\": 1165,\n"
+"          \"timeZone\": \"Atlantic/Canary\",\n"
+"          \"listVariables\": [1, 2, 3]\n"
+"        }\n"
+"      ]\n"
+"    }\n"
+"  ]\n"
+"}"
+msgstr "POST /rest/getMedidas\n"
+"Content-Type: text/plain\n"
+"Cookie: JSESSIONID=&lt;value&gt;\n"
+"\n"
+"{\n"
+"  \"startDate\": \"YYYY-MM-DD HH:mm:SS\",\n"
+"  \"endDate\":   \"YYYY-MM-DD HH:mm:SS\",\n"
+"  \"idLanguage\": \"es\",\n"
+"  \"listInstallation\": [\n"
+"    {\n"
+"      \"idInstallation\": 105,\n"
+"      \"listMeasurePoint\": [\n"
+"        {\n"
+"          \"idMeasurePoint\": 1165,\n"
+"          \"timeZone\": \"Atlantic/Canary\",\n"
+"          \"listVariables\": [1, 2, 3]\n"
+"        }\n"
+"      ]\n"
+"    }\n"
+"  ]\n"
+"}"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "REST0002"
+msgstr "REST0002"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "REST0003"
+msgstr "REST0003"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "REST0007"
+msgstr "REST0007"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "REST0009"
+msgstr "REST0009"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "REST0011"
+msgstr "REST0011"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "REST0012"
+msgstr "REST0012"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "REST0012 = too many variables → variable set is split in half per measure point, not the date range."
+msgstr "REST0012 = demasiadas variables → el conjunto de variables se divide a la mitad por punto de medida, no el rango de fechas."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "REST0013"
+msgstr "REST0013"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "REST0013 = measures already queried → do <strong>NOT</strong> retry; log and skip."
+msgstr "REST0013 = medidas ya consultadas → <strong>NO</strong> reintentar; registrar y omitir."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Request:"
+msgstr "Petición:"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Response:"
+msgstr "Respuesta:"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Retry once with backoff (5 s)"
+msgstr "Reintentar una vez con espera (5 s)"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Sensor (<code>mdm.measurement.device.sensor</code>) remotecontrol_params:"
+msgstr "Sensor (<code>mdm.measurement.device.sensor</code>) remotecontrol_params:"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Session expired / invalid cookie"
+msgstr "Sesión expirada / cookie inválida"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Session is ephemeral — not persisted between executions (~30 min validity)."
+msgstr "La sesión es efímera — no se persiste entre ejecuciones (validez ~30 min)."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Split variable set in half, retry"
+msgstr "Dividir conjunto de variables a la mitad, reintentar"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Step"
+msgstr "Paso"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "The <em>Login</em> action performs <code>GET /rest/login?user=…&amp;pass=…</code> (note: the parameter is <code>pass</code>, not <code>password</code>)."
+msgstr "La acción <em>Login</em> realiza <code>GET /rest/login?user=…&amp;pass=…</code> (nota: el parámetro es <code>pass</code>, no <code>password</code>)."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "The JSON response body contains:"
+msgstr "El cuerpo de la respuesta JSON contiene:"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "The catalog sync is <strong>idempotent</strong> — it can be run multiple times without duplicating data.\n"
+"It produces a JSON attachment with the full hierarchy for review."
+msgstr "La sincronización del catálogo es <strong>idempotente</strong> — puede ejecutarse múltiples veces sin duplicar datos.\n"
+"Genera un adjunto JSON con la jerarquía completa para revisión."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Too many variables in request"
+msgstr "Demasiadas variables en la petición"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "Type: <code>REST</code>. Base URL: root URL including the application context path, e.g. <code>https://deepdata.example.com/ems-site</code>."
+msgstr "Tipo: <code>REST</code>. URL base: URL raíz incluyendo el contexto de la aplicación, p.ej. <code>https://deepdata.example.com/ems-site</code>."
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "[\n"
+"  {\n"
+"    \"date\": \"01-11-2023 00:00:00\",\n"
+"    \"listValue\": [\n"
+"      {\n"
+"        \"idInstallation\": \"105\",\n"
+"        \"idMeasurePoint\": \"1165\",\n"
+"        \"idVariable\": \"1\",\n"
+"        \"value\": 23.5\n"
+"      }\n"
+"    ]\n"
+"  }\n"
+"]"
+msgstr "[\n"
+"  {\n"
+"    \"date\": \"01-11-2023 00:00:00\",\n"
+"    \"listValue\": [\n"
+"      {\n"
+"        \"idInstallation\": \"105\",\n"
+"        \"idMeasurePoint\": \"1165\",\n"
+"        \"idVariable\": \"1\",\n"
+"        \"value\": 23.5\n"
+"      }\n"
+"    ]\n"
+"  }\n"
+"]"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "{\n"
+"  \"installation_id\": 1,\n"
+"  \"installation_name\": \"Porzuna\",\n"
+"  \"measure_point_id\": 10,\n"
+"  \"measure_point_name\": \"General Porzuna 1\",\n"
+"  \"timezone\": \"Europe/Madrid\",\n"
+"  \"start_date\": \"2025-01-01\"\n"
+"}"
+msgstr "{\n"
+"  \"installation_id\": 1,\n"
+"  \"installation_name\": \"Porzuna\",\n"
+"  \"measure_point_id\": 10,\n"
+"  \"measure_point_name\": \"General Porzuna 1\",\n"
+"  \"timezone\": \"Europe/Madrid\",\n"
+"  \"start_date\": \"2025-01-01\"\n"
+"}"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "{\n"
+"  \"installation_id\": 1,\n"
+"  \"measure_point_id\": 10\n"
+"}"
+msgstr "{\n"
+"  \"installation_id\": 1,\n"
+"  \"measure_point_id\": 10\n"
+"}"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "{\n"
+"  \"username\": \"your_user\",\n"
+"  \"password\": \"your_password\",\n"
+"  \"timezone\": \"Europe/Madrid\",\n"
+"  \"idLanguage\": \"es\",\n"
+"  \"max_vars_per_call\": 5\n"
+"}"
+msgstr "{\n"
+"  \"username\": \"your_user\",\n"
+"  \"password\": \"your_password\",\n"
+"  \"timezone\": \"Europe/Madrid\",\n"
+"  \"idLanguage\": \"es\",\n"
+"  \"max_vars_per_call\": 5\n"
+"}"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "{\n"
+"  \"variable_id\": 100\n"
+"}"
+msgstr "{\n"
+"  \"variable_id\": 100\n"
+"}"
+
+#. module: remotecontrol_deepdata
+#: model:remotecontrol,remotecontrol_help:remotecontrol_deepdata.remotecontrol_deepdata
+msgid "{\n"
+"  \"variable_id\": 100,\n"
+"  \"variable_name\": \"Energia Activa\",\n"
+"  \"variable_type\": \"Acumulativa\",\n"
+"  \"variable_unit\": \"kWh\",\n"
+"  \"start_date\": \"2025-01-01\"\n"
+"}"
+msgstr "{\n"
+"  \"variable_id\": 100,\n"
+"  \"variable_name\": \"Energia Activa\",\n"
+"  \"variable_type\": \"Acumulativa\",\n"
+"  \"variable_unit\": \"kWh\",\n"
+"  \"start_date\": \"2025-01-01\"\n"
+"}"
+

@@ -397,12 +397,18 @@ class RemoteControlAction(models.Model):
                 u"[Action %s] executed successfully." % (action_name,))
         except Exception as e:
             traceback_info = traceback.format_exc()
-            # Create ASCII-safe error message
+            # Create unicode-safe error message (Python 2: traceback is
+            # bytes that may contain non-ASCII from source or exception
+            # messages; decode safely before mixing with unicode _())
             try:
-                error_str = unicode(e).encode('ascii', 'replace') if \
-                    isinstance(e, Exception) else str(e)
+                error_str = unicode(e)
             except Exception:
-                error_str = 'Unicode error in exception message'
+                try:
+                    error_str = str(e).decode('utf-8', 'replace')
+                except Exception:
+                    error_str = u'(undecodable error)'
+            if isinstance(traceback_info, bytes):
+                traceback_info = traceback_info.decode('utf-8', 'replace')
             raise UserError(
                 _("Execution error (%s) in action '%s':\n%s") % (
                     error_str, action_name, traceback_info))

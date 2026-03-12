@@ -1,0 +1,1463 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================ -->
+        <!-- REMOTE CONTROL: DeepData                                     -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_deepdata" model="remotecontrol">
+            <field name="name">DeepData</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://deepdata.example.com</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">2</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "username": "",
+  "password": "",
+  "timezone": "Europe/Madrid",
+  "idLanguage": "es"
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>DeepData REST API v1.0.3 · Odoo Integration</h2>
+
+<hr/>
+
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code>. Base URL: root URL including the application context path, e.g. <code>https://deepdata.example.com/ems-site</code>.</p>
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+  "username": "your_user",
+  "password": "your_password",
+  "timezone": "Europe/Madrid",
+  "idLanguage": "es",
+  "max_vars_per_call": 5
+}</pre>
+<ul>
+  <li><code>username</code>: DeepData login user.</li>
+  <li><code>password</code>: DeepData login password.</li>
+  <li><code>timezone</code>: Default IANA timezone. Can be overridden per installation.</li>
+  <li><code>idLanguage</code>: Language code for catalog labels (default: <code>es</code>). Use <code>getIdiomas</code> to find available values.</li>
+  <li><code>max_vars_per_call</code>: Maximum number of variables per getMedidas API call (default: <code>5</code>).
+    The API rejects requests with too many variables (REST0012) and that failed attempt
+    triggers a 24 h cooldown (REST0013). Pre-splitting avoids hitting the limit.</li>
+</ul>
+
+<h3>2) Authentication</h3>
+<p>The <em>Login</em> action performs <code>GET /rest/login?user=…&amp;pass=…</code> (note: the parameter is <code>pass</code>, not <code>password</code>).</p>
+<p>The JSON response body contains:</p>
+<ul>
+  <li><code>jsessionid</code>: session token (~30 min validity).</li>
+  <li><code>name</code>: display name of the authenticated user.</li>
+</ul>
+<p>All subsequent requests must include the header: <code>Cookie: JSESSIONID=&lt;value&gt;</code>.</p>
+<p>If the session expires, the API returns error code <code>REST0003</code>. The import procedure
+detects this and performs an automatic re-login (max 3 times).</p>
+
+<h3>3) Hierarchical Catalog Model</h3>
+<pre>
+DeepData Instance
+├── Idioma (language)
+├── Categoría (category of variables)
+└── Instalación (installation / site)
+    └── Punto de Medida (measure point) ──► mdm.measurement.device
+        └── Variable (sensor variable)  ──► mdm.measurement.device.sensor
+            ├── type: Acumulativa / Demandada / Instantanea
+            └── unit: measurement unit
+</pre>
+
+<h3>4) Catalog Endpoints (Sync Procedure)</h3>
+<table border="1" cellpadding="4" cellspacing="0">
+  <tr><th>Step</th><th>Method</th><th>Endpoint</th><th>Body (Content-Type: text/plain)</th></tr>
+  <tr><td>1</td><td>GET</td><td>/rest/getIdiomas</td><td>—</td></tr>
+  <tr><td>2</td><td>GET</td><td>/rest/getInstalaciones</td><td>—</td></tr>
+  <tr><td>3</td><td>POST</td><td>/rest/getCategorias</td><td><code>{"idLanguage":"es"}</code></td></tr>
+  <tr><td>4</td><td>POST</td><td>/rest/getPuntosMedida <em>(loop per installation)</em></td><td><code>{"idLanguage":"es","idInstallation":1}</code></td></tr>
+  <tr><td>5</td><td>POST</td><td>/rest/getVariables <em>(loop per measure point)</em></td><td><code>{"idLanguage":"es","idInstallation":1,"idMeasurePoint":10}</code></td></tr>
+</table>
+<p>The catalog sync is <strong>idempotent</strong> — it can be run multiple times without duplicating data.
+It produces a JSON attachment with the full hierarchy for review.</p>
+
+<h3>5) Measures Endpoint (Import Procedure)</h3>
+<h4>Request:</h4>
+<pre>POST /rest/getMedidas
+Content-Type: text/plain
+Cookie: JSESSIONID=&lt;value&gt;
+
+{
+  "startDate": "YYYY-MM-DD HH:mm:SS",
+  "endDate":   "YYYY-MM-DD HH:mm:SS",
+  "idLanguage": "es",
+  "listInstallation": [
+    {
+      "idInstallation": 105,
+      "listMeasurePoint": [
+        {
+          "idMeasurePoint": 1165,
+          "timeZone": "Atlantic/Canary",
+          "listVariables": [1, 2, 3]
+        }
+      ]
+    }
+  ]
+}</pre>
+<p><strong>Note:</strong> Dates are sent in the local timezone of the request, without UTC conversion.
+<code>timeZone</code> per measure point is optional (defaults to the installation timezone).</p>
+<h4>Response:</h4>
+<pre>[
+  {
+    "date": "01-11-2023 00:00:00",
+    "listValue": [
+      {
+        "idInstallation": "105",
+        "idMeasurePoint": "1165",
+        "idVariable": "1",
+        "value": 23.5
+      }
+    ]
+  }
+]</pre>
+<p><strong>Note:</strong> <code>date</code> is a string in DD-MM-YYYY HH:MM:SS format.
+<code>idInstallation</code>, <code>idMeasurePoint</code> and <code>idVariable</code> are strings (not integers).</p>
+
+<h3>6) Error Handling</h3>
+<table border="1" cellpadding="4" cellspacing="0">
+  <tr><th>Code</th><th>Description</th><th>Action</th></tr>
+  <tr><td>REST0003</td><td>Session expired / invalid cookie</td><td>Automatic re-login and retry (max 3)</td></tr>
+  <tr><td>REST0002</td><td>Missing parameters</td><td>Log and skip</td></tr>
+  <tr><td>REST0007</td><td>Incorrect JSON format</td><td>Log and skip</td></tr>
+  <tr><td>REST0009</td><td>Error consulting measures</td><td>Retry once with backoff (5 s)</td></tr>
+  <tr><td>REST0011</td><td>No data available</td><td>Log as info, continue</td></tr>
+  <tr><td>REST0012</td><td>Too many variables in request</td><td>Split variable set in half, retry</td></tr>
+  <tr><td>REST0013</td><td>Measures queried, available in 24h</td><td>Log and abort — do <strong>NOT</strong> retry</td></tr>
+</table>
+
+<h3>7) Odoo Configuration</h3>
+<h4>Device (<code>mdm.measurement.device</code>) remotecontrol_params:</h4>
+<p>Each device represents a DeepData <strong>measure point</strong> within an installation.</p>
+<p><strong>Minimum (required):</strong></p>
+<pre>{
+  "installation_id": 1,
+  "measure_point_id": 10
+}</pre>
+<p><strong>Full (with optional fields):</strong></p>
+<pre>{
+  "installation_id": 1,
+  "installation_name": "Porzuna",
+  "measure_point_id": 10,
+  "measure_point_name": "General Porzuna 1",
+  "timezone": "Europe/Madrid",
+  "start_date": "2025-01-01"
+}</pre>
+<ul>
+  <li><code>installation_id</code>: <strong>Required.</strong> DeepData installation identifier.</li>
+  <li><code>measure_point_id</code>: <strong>Required.</strong> DeepData measure point identifier.</li>
+  <li><code>installation_name</code>: Optional. Display name of the installation.</li>
+  <li><code>measure_point_name</code>: Optional. Display name of the measure point.</li>
+  <li><code>timezone</code>: Optional. IANA timezone for this installation. Defaults to the one in connection_params.</li>
+  <li><code>start_date</code>: Optional. Start date for first data retrieval. Defaults to Jan 1st of current year.</li>
+</ul>
+<h4>Sensor (<code>mdm.measurement.device.sensor</code>) remotecontrol_params:</h4>
+<p>Each sensor represents a DeepData <strong>variable</strong> within the measure point (device).</p>
+<p><strong>Minimum (required):</strong></p>
+<pre>{
+  "variable_id": 100
+}</pre>
+<p><strong>Full (with optional fields):</strong></p>
+<pre>{
+  "variable_id": 100,
+  "variable_name": "Energia Activa",
+  "variable_type": "Acumulativa",
+  "variable_unit": "kWh",
+  "start_date": "2025-01-01"
+}</pre>
+<ul>
+  <li><code>variable_id</code>: <strong>Required.</strong> DeepData variable identifier.</li>
+  <li><code>variable_name</code>: Optional. Display name of the variable.</li>
+  <li><code>variable_type</code>: Optional. DeepData variable type (Acumulativa, Demandada, etc.).</li>
+  <li><code>variable_unit</code>: Optional. Measurement unit (kWh, kVArh, etc.).</li>
+  <li><code>start_date</code>: Optional. Overrides device start_date if provided.</li>
+</ul>
+
+<h3>8) Operational Flow</h3>
+<ol>
+  <li><strong>Catalog Sync</strong> (run once / periodically):
+    Login → getIdiomas → getInstalaciones → getCategorias →
+    getPuntosMedida (loop per installation) → getVariables (loop per measure point).
+    Produces a hierarchy JSON attachment for reference.</li>
+  <li><strong>Measure Import</strong> (daily / scheduled):
+    Login → Build plan from Odoo devices → getMedidas (per installation, all variables batched) → Upsert readings.
+    Handles automatic re-login, variable splitting and structured error recovery.</li>
+</ol>
+
+<h3>9) Technical Notes</h3>
+<ul>
+  <li><code>jsessionid</code> is returned in the JSON response body of <code>/rest/login</code> — <strong>not</strong> in a cookie.</li>
+  <li>Login query parameter is <code>pass</code> (not <code>password</code>).</li>
+  <li>All POST bodies use <code>Content-Type: text/plain</code> with a JSON string as body.</li>
+  <li>Session is ephemeral — not persisted between executions (~30 min validity).</li>
+  <li><code>date</code> in getMedidas response is a string in DD-MM-YYYY HH:MM:SS format (converted to YYYY-MM-DD for Odoo).</li>
+  <li>REST0012 = too many variables → variable set is split in half per measure point, not the date range.</li>
+  <li>REST0013 = measures already queried → do <strong>NOT</strong> retry; log and skip.</li>
+  <li>Idempotent readings via <code>upsert(sensor_id, measurement_time)</code>.</li>
+  <li>Audit JSON attachment created after each execution.</li>
+</ul>
+]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Login (get JSESSIONID)                               -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_deepdata_action_login" model="remotecontrol.action">
+            <field name="name">DeepData: Login</field>
+            <field name="remote_id" ref="remotecontrol_deepdata"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# ── DeepData Login ──────────────────────────────────────────────────────
+# GET /rest/login?user={user}&pass={password}
+# jsessionid is returned in the JSON response body (field "jsessionid").
+# ────────────────────────────────────────────────────────────────────────
+
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+username = (cfg.get('username') or '').strip()
+password = (cfg.get('password') or '').strip()
+id_language = (cfg.get('idLanguage') or 'es').strip()
+
+if not username or not password:
+    raise Exception(
+        "Missing DeepData credentials: set 'username' and 'password' "
+        "in connection_params.")
+
+# Build login URL — param is 'pass', not 'password'
+url = (base_url or '').rstrip('/') + '/rest/login'
+params = {'user': username, 'pass': password}
+
+resp = request_retry('GET', url, params=params, timeout=timeout)
+
+if resp.status_code >= 400:
+    raise Exception(
+        "DeepData login failed: HTTP %s - %s" % (
+            resp.status_code, (resp.text or '')[:500]))
+
+# jsessionid comes from JSON body, not from Set-Cookie header
+try:
+    body = resp.json() if resp.text else {}
+except Exception:
+    raise Exception("DeepData login: invalid JSON response")
+
+if isinstance(body, dict) and (body.get('codigo') or body.get('errorCode')):
+    raise Exception(
+        "DeepData login error: %s - %s" % (
+            body.get('codigo') or body.get('errorCode'),
+            body.get('mensaje') or body.get('errorMessage', '')))
+
+jsessionid = (body.get('jsessionid') or body.get('JSESSIONID') or '').strip()
+
+if not jsessionid:
+    raise Exception(
+        "DeepData login succeeded but no 'jsessionid' in JSON response. "
+        "Response: %s" % str(body)[:300])
+
+# Store session in bag (ephemeral, not persisted)
+bag['jsessionid'] = jsessionid
+bag['idLanguage'] = id_language
+bag['login_name'] = body.get('name', '')
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Sync Catalog                                         -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_deepdata_action_sync_catalog" model="remotecontrol.action">
+            <field name="name">DeepData: Sync Catalog</field>
+            <field name="remote_id" ref="remotecontrol_deepdata"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# ── DeepData Catalog Sync ──────────────────────────────────────────────
+# GET getIdiomas, GET getInstalaciones.
+# POST getCategorias (text/plain, idLanguage).
+# POST getPuntosMed per installation (text/plain, idLanguage + idInstallation).
+# POST getVariables per measure point (text/plain, idLanguage + idInstallation + idMeasurePoint).
+# Produces an audit JSON attachment with the full hierarchy.
+# ────────────────────────────────────────────────────────────────────────
+import time as _time
+
+Remote = self.remote_id
+jsessionid = bag.get('jsessionid')
+id_language = bag.get('idLanguage', 'es')
+
+if not jsessionid:
+    raise Exception("Missing JSESSIONID in bag. Run Login action first.")
+
+api_base = (base_url or '').rstrip('/')
+hdrs_get = {
+    'Cookie': 'JSESSIONID=%s' % jsessionid,
+    'Accept': 'application/json',
+}
+hdrs_post = {
+    'Cookie': 'JSESSIONID=%s' % jsessionid,
+    'Content-Type': 'text/plain',
+    'Accept': 'application/json',
+}
+
+def _get(endpoint, label):
+    url = '%s/rest/%s' % (api_base, endpoint)
+    resp = request_retry('GET', url, headers=hdrs_get, timeout=timeout)
+    if resp.status_code >= 400:
+        raise Exception(
+            "DeepData %s: HTTP %s - %s" % (
+                label, resp.status_code, (resp.text or '')[:500]))
+    # Check if response is HTML (error page)
+    content_type = resp.headers.get('Content-Type', '')
+    if 'text/html' in content_type:
+        raise Exception(
+            "DeepData %s: Server returned HTML error page (session may have expired)" % label)
+    try:
+        body = resp.json()
+    except Exception:
+        raise Exception("DeepData %s: invalid JSON response" % label)
+    if isinstance(body, dict) and (body.get('codigo') or body.get('errorCode')):
+        ec = body.get('codigo') or body.get('errorCode')
+        em = body.get('mensaje') or body.get('errorMessage', '')
+        if ec == 'REST0003':
+            raise Exception(
+                "SESSION_EXPIRED: session expired during %s" % label)
+        raise Exception(
+            "DeepData %s: %s - %s" % (label, ec, em))
+    return body
+
+def _post(endpoint, payload_dict, label):
+    url = '%s/rest/%s' % (api_base, endpoint)
+    resp = request_retry(
+        'POST', url, data=json.dumps(payload_dict),
+        headers=hdrs_post, timeout=timeout)
+    if resp.status_code >= 400:
+        raise Exception(
+            "DeepData %s: HTTP %s - %s" % (
+                label, resp.status_code, (resp.text or '')[:500]))
+    # Check if response is HTML (error page)
+    content_type = resp.headers.get('Content-Type', '')
+    if 'text/html' in content_type:
+        raise Exception(
+            "DeepData %s: Server returned HTML error page (session may have expired)" % label)
+    try:
+        body = resp.json()
+    except Exception:
+        raise Exception("DeepData %s: invalid JSON response" % label)
+    if isinstance(body, dict) and (body.get('codigo') or body.get('errorCode')):
+        ec = body.get('codigo') or body.get('errorCode')
+        em = body.get('mensaje') or body.get('errorMessage', '')
+        if ec == 'REST0003':
+            raise Exception(
+                "SESSION_EXPIRED: session expired during %s" % label)
+        raise Exception(
+            "DeepData %s: %s - %s" % (label, ec, em))
+    return body
+
+def _to_list(raw, key=None):
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, dict):
+        return raw.get(key, []) if key else []
+    return []
+
+# ── 1. getIdiomas ──────────────────────────────────────────────────────
+idiomas = _to_list(_get('getIdiomas', 'getIdiomas'))
+_time.sleep(0.3)
+
+# ── 2. getInstalaciones ────────────────────────────────────────────────
+instalaciones = _to_list(
+    _get('getInstalaciones', 'getInstalaciones'), 'instalaciones')
+_time.sleep(0.3)
+
+# ── 3. getCategorias (POST, text/plain) ────────────────────────────────
+cat_raw = _post('getCategorias', {'idLanguage': id_language}, 'getCategorias')
+categorias = _to_list(cat_raw, 'categorias')
+cat_map = {}
+for cat in categorias:
+    if isinstance(cat, dict):
+        cid = cat.get('idCategory')
+        if cid is not None:
+            cat_map[cid] = {
+                'id': cid,
+                'name': cat.get('nameCategory', ''),
+                'description': cat.get('descriptionCategory', ''),
+            }
+_time.sleep(0.3)
+
+# ── 4+5. getPuntosMed per installation + getVariables per point ────────
+hierarchy = []
+for inst in instalaciones:
+    if not isinstance(inst, dict):
+        continue
+    inst_id = inst.get('idInstallation')
+    if inst_id is None:
+        continue
+    inst_entry = {
+        'id': inst_id,
+        'name': inst.get('nameInstallation', ''),
+        'description': inst.get('descriptionInstallation', ''),
+        'timezone': inst.get('timeZone', ''),
+        'measure_points': [],
+    }
+
+    # POST getPuntosMedida for this installation
+    try:
+        pm_raw = _post(
+            'getPuntosMedida',
+            {'idLanguage': id_language, 'idInstallation': inst_id},
+            'getPuntosMedida[inst=%s]' % inst_id)
+        puntos = _to_list(pm_raw, 'puntosMedida')
+        _time.sleep(0.2)
+        # ── Deduplication ───────────────────────────────────────────
+        # The DeepData getPuntosMedida endpoint returns duplicate
+        # entries for the same idMeasurePoint (observed: 3 unique
+        # points repeated 13× = 39 rows). We skip already-seen IDs
+        # to avoid inflated counts and redundant getVariables calls.
+        # ────────────────────────────────────────────────────────────
+        seen_pm_ids = set()
+        for pm in puntos:
+            if not isinstance(pm, dict):
+                continue
+            pm_id = pm.get('idMeasurePoint')
+            if pm_id is None:
+                continue
+            if pm_id in seen_pm_ids:
+                continue
+            seen_pm_ids.add(pm_id)
+            # ── Category extraction ──────────────────────────────────
+            # The API nests the category inside the measure point as:
+            #   {"category": {"idCategory": 1}}
+            # instead of a flat "idCategory" field at root level.
+            # ─────────────────────────────────────────────────────────
+            pm_cat_raw = pm.get('category')
+            if isinstance(pm_cat_raw, dict):
+                pm_cat_id = pm_cat_raw.get('idCategory')
+            else:
+                pm_cat_id = pm.get('idCategory')
+            pm_entry = {
+                'id': pm_id,
+                'name': pm.get('nameMeasurePoint', ''),
+                'description': pm.get('descriptionMeasurePoint', ''),
+                'category_id': pm_cat_id,
+                'category_name': cat_map.get(
+                    pm_cat_id, {}).get('name', '') if pm_cat_id else '',
+                'variables': [],
+            }
+
+            # POST getVariables for this measure point
+            try:
+                var_raw = _post(
+                    'getVariables',
+                    {
+                        'idLanguage': id_language,
+                        'idInstallation': inst_id,
+                        'idMeasurePoint': pm_id,
+                    },
+                    'getVariables[inst=%s,pm=%s]' % (inst_id, pm_id))
+                variables = _to_list(var_raw, 'variables')
+                _time.sleep(0.2)
+                # Deduplicate variables by idVariable (defensive:
+                # same API pattern as getPuntosMedida).
+                seen_var_ids = set()
+                for var in variables:
+                    if not isinstance(var, dict):
+                        continue
+                    vid = var.get('idVariable')
+                    if vid is None:
+                        continue
+                    if vid in seen_var_ids:
+                        continue
+                    seen_var_ids.add(vid)
+                    pm_entry['variables'].append({
+                        'id': vid,
+                        'name': var.get('nameVariable', ''),
+                        'short_name': var.get('shortNameVariable', ''),
+                        'type': var.get('typeVariable', ''),
+                        'unit': var.get('unitVariable', ''),
+                    })
+            except Exception as ve:
+                pm_entry['variables_error'] = str(ve)
+
+            inst_entry['measure_points'].append(pm_entry)
+    except Exception as pe:
+        inst_entry['measure_points_error'] = str(pe)
+
+    hierarchy.append(inst_entry)
+
+# Summary
+total_inst = len(hierarchy)
+total_pm = sum(len(i['measure_points']) for i in hierarchy)
+total_var = sum(
+    len(mp['variables'])
+    for i in hierarchy
+    for mp in i['measure_points']
+)
+
+# ── Create audit attachment ────────────────────────────────────────────
+catalog = {
+    'executed_at': fields.Datetime.now(),
+    'id_language': id_language,
+    'languages': idiomas,
+    'categories': list(cat_map.values()),
+    'hierarchy': hierarchy,
+    'summary': {
+        'total_installations': total_inst,
+        'total_measure_points': total_pm,
+        'total_variables': total_var,
+        'total_categories': len(cat_map),
+    }
+}
+
+json_str = json.dumps(catalog, ensure_ascii=False, indent=2)
+encoded = base64.b64encode(json_str.encode('utf-8'))
+fname = 'deepdata_catalog_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_'))
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': encoded,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id,
+})
+
+Remote.message_post(
+    body=u'[DeepData] Catalog sync: installations=%s measure_points=%s '
+         u'variables=%s categories=%s lang=%s' % (
+             total_inst, total_pm, total_var, len(cat_map), id_language),
+    attachment_ids=[att.id],
+)
+
+bag['catalog'] = catalog
+bag['hierarchy'] = hierarchy
+bag['catalog_attachment_id'] = att.id
+bag['catalog_attachment_name'] = fname
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Get Devices Plan (for measure import)                -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_deepdata_action_get_devices" model="remotecontrol.action">
+            <field name="name">DeepData: Get Devices (Plan)</field>
+            <field name="remote_id" ref="remotecontrol_deepdata"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# ── DeepData: Build Sensor Plan ────────────────────────────────────────
+# Reads mdm.measurement.device.sensor records linked to this
+# remotecontrol and builds the plan for getMedidas calls.
+#
+# Each device represents a DeepData measure point and stores both
+# installation_id and measure_point_id in its remotecontrol_params.
+# Each sensor stores only variable_id in its remotecontrol_params.
+#
+# Groups sensors by installation for efficient API batching.
+# ────────────────────────────────────────────────────────────────────────
+
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+today_str = fields.Date.today()
+
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+default_tz = cfg.get('timezone', 'Europe/Madrid')
+
+condition = [
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id),
+]
+
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+
+sensors = Sensor.search(condition)
+
+# Build map of sensor_id -> most recent reading (single query)
+last_readings_map = {}
+if sensors:
+    sensor_ids = [s.id for s in sensors]
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for row in cr.fetchall():
+        last_readings_map[row[0]] = row[1]
+
+# Build plan grouped by installation
+# Structure: { installation_id: { info, sensors: [...] } }
+installations_plan = {}
+plan = []
+
+for sensor in sensors:
+    device = sensor.device_id
+
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+
+    installation_id = device_cfg.get('installation_id')
+    measure_point_id = device_cfg.get('measure_point_id')
+    variable_id = sensor_cfg.get('variable_id')
+
+    if not installation_id or not measure_point_id or not variable_id:
+        continue
+
+    # Determine start date
+    start_cfg = sensor_cfg.get('start_date') or device_cfg.get('start_date')
+    last_reading_time = last_readings_map.get(sensor.id)
+
+    if last_reading_time:
+        try:
+            initial_date = fields.Date.to_string(
+                fields.Datetime.from_string(last_reading_time))
+        except Exception:
+            initial_date = str(last_reading_time)[:10]
+    elif start_cfg:
+        initial_date = start_cfg[:10]
+    else:
+        year_str = today_str[:4]
+        initial_date = '%s-01-01' % year_str
+
+    if isinstance(initial_date, unicode):
+        initial_date = initial_date.encode('utf-8')
+
+    inst_tz = device_cfg.get('timezone', default_tz)
+
+    plan.append({
+        'sensor_id': sensor.id,
+        'device_id': device.id,
+        'installation_id': installation_id,
+        'installation_name': device_cfg.get('installation_name', ''),
+        'measure_point_id': measure_point_id,
+        'measure_point_name': device_cfg.get('measure_point_name', ''),
+        'variable_id': variable_id,
+        'variable_name': sensor_cfg.get('variable_name', ''),
+        'variable_type': sensor_cfg.get('variable_type', ''),
+        'variable_unit': sensor_cfg.get('variable_unit', ''),
+        'timezone': inst_tz,
+        'initial_date': initial_date,
+    })
+
+    # Group by installation for batched getMedidas calls
+    inst_key = int(installation_id)
+    if inst_key not in installations_plan:
+        installations_plan[inst_key] = {
+            'installation_id': installation_id,
+            'installation_name': device_cfg.get('installation_name', ''),
+            'timezone': inst_tz,
+            'measure_points': {},
+        }
+    mp_key = int(measure_point_id)
+    if mp_key not in installations_plan[inst_key]['measure_points']:
+        installations_plan[inst_key]['measure_points'][mp_key] = {
+            'measure_point_id': measure_point_id,
+            'measure_point_name': device_cfg.get('measure_point_name', ''),
+            'variables': [],
+        }
+    installations_plan[inst_key]['measure_points'][mp_key][
+        'variables'].append({
+            'variable_id': variable_id,
+            'sensor_id': sensor.id,
+            'device_id': device.id,
+        })
+
+bag['sensors_plan'] = plan
+bag['installations_plan'] = installations_plan
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Get Measures (getMedidas)                            -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_deepdata_action_get_measures" model="remotecontrol.action">
+            <field name="name">DeepData: Get Measures</field>
+            <field name="remote_id" ref="remotecontrol_deepdata"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# ── DeepData: Get Measures (getMedidas) ────────────────────────────────
+# POST /rest/getMedidas — body Content-Type: text/plain (JSON string).
+# Payload: listInstallation > listMeasurePoint (with timeZone) > listVariables (int list).
+#
+# Response format:
+#   [{"date": "DD-MM-YYYY HH:MM:SS",
+#     "listValue": [{"idInstallation": "813", "idMeasurePoint": "23043",
+#                     "idVariable": "1", "value": 23.5}, ...]}, ...]
+#   Note: date is a STRING in DD-MM-YYYY format (not a numeric timestamp).
+#   Note: idInstallation/idMeasurePoint/idVariable are STRINGS (not ints).
+#
+# REST0003 → re-login and retry.
+# REST0012 → too many variables → split variable set in half, retry.
+# REST0013 → already queried, available in 24h → log and ABORT (no retry).
+# REST0011 → no data → log as info, continue.
+# REST0009 → error consulting → retry once with backoff.
+# ────────────────────────────────────────────────────────────────────────
+import time as _time
+from datetime import datetime
+
+Remote = self.remote_id
+plan = bag.get('sensors_plan') or []
+installations_plan = bag.get('installations_plan') or {}
+jsessionid = bag.get('jsessionid')
+
+if not jsessionid:
+    raise Exception("Missing JSESSIONID in bag. Run Login action first.")
+
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+api_base = (base_url or '').rstrip('/')
+id_language = bag.get('idLanguage') or cfg.get('idLanguage', 'es')
+today_str = fields.Date.today()
+end_date_str = today_str + ' 23:59:59'
+
+# Maximum number of variables per API call.  The DeepData API returns
+# REST0012 when too many variables are requested at once, and that
+# first failed call already triggers a 24 h cooldown (REST0013).
+# Pre-splitting avoids hitting the limit entirely.  Default: 5.
+max_vars_per_call = int(cfg.get('max_vars_per_call', 5))
+
+# Build sensor lookup: (installation_id, measure_point_id, variable_id) -> sensor_id, device_id
+sensor_lookup = {}
+for s in plan:
+    key = (int(s['installation_id']), int(s['measure_point_id']),
+           int(s['variable_id']))
+    sensor_lookup[key] = {
+        'sensor_id': s['sensor_id'],
+        'device_id': s['device_id'],
+    }
+
+total_upserts = 0
+total_errors = 0
+total_api_calls = 0
+items = []
+relogin_count = 0
+MAX_RELOGINS = 3
+
+def _do_login():
+    """Re-login: param is 'pass', jsessionid from JSON body."""
+    login_url = api_base + '/rest/login'
+    login_params = {
+        'user': (cfg.get('username') or '').strip(),
+        'pass': (cfg.get('password') or '').strip(),
+    }
+    login_resp = request_retry(
+        'GET', login_url, params=login_params, timeout=timeout)
+    if login_resp.status_code >= 400:
+        raise Exception(
+            "DeepData re-login failed: HTTP %s" % login_resp.status_code)
+    try:
+        login_body = login_resp.json()
+    except Exception:
+        raise Exception("DeepData re-login: invalid JSON response")
+    new_jsessionid = (
+        login_body.get('jsessionid') or
+        login_body.get('JSESSIONID') or '').strip()
+    if not new_jsessionid:
+        raise Exception("DeepData re-login: no jsessionid in response")
+    return new_jsessionid
+
+def _parse_date(date_val):
+    """Convert API date to Odoo datetime string (YYYY-MM-DD HH:MM:SS).
+
+    The DeepData API returns date as a string in DD-MM-YYYY HH:MM:SS
+    format (e.g. '10-03-2026 00:15:00').  We also handle numeric
+    timestamps (sec or ms) as a fallback, and YYYY-MM-DD strings.
+    """
+    s = str(date_val).strip() if date_val is not None else ''
+    if not s:
+        return ''
+
+    # ── Try DD-MM-YYYY HH:MM:SS (actual API format) ────────────────
+    if len(s) >= 10 and s[2] == '-' and s[5] == '-':
+        try:
+            dt = datetime.strptime(s, '%d-%m-%Y %H:%M:%S')
+            return dt.strftime('%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            pass
+
+    # ── Already YYYY-MM-DD HH:MM:SS ────────────────────────────────
+    if len(s) >= 10 and s[4] == '-' and s[7] == '-':
+        return s
+
+    # ── Numeric timestamp (sec or ms) — fallback ──────────────────
+    try:
+        ts_num = int(s)
+        ts_secs = ts_num / 1000.0 if ts_num > 9999999999 else float(ts_num)
+        return datetime.fromtimestamp(ts_secs).strftime('%Y-%m-%d %H:%M:%S')
+    except (ValueError, TypeError, OSError):
+        pass
+
+    return s  # last resort: return as-is
+
+def _call_medidas(payload_dict, session_id):
+    """POST /rest/getMedidas with text/plain body."""
+    url = api_base + '/rest/getMedidas'
+    hdrs = {
+        'Cookie': 'JSESSIONID=%s' % session_id,
+        'Content-Type': 'text/plain',
+        'Accept': 'application/json',
+    }
+    return request_retry(
+        'POST', url, data=json.dumps(payload_dict),
+        headers=hdrs, timeout=timeout)
+
+def _build_payload(inst_data, var_ids, start_date, end_date):
+    """Build getMedidas payload: listInstallation > listMeasurePoint > listVariables."""
+    list_mp = []
+    for mp_id, mp_data in inst_data['measure_points'].items():
+        mp_vars = [
+            int(v['variable_id']) for v in mp_data['variables']
+            if v['variable_id'] in var_ids
+        ]
+        if mp_vars:
+            list_mp.append({
+                'idMeasurePoint': mp_data['measure_point_id'],
+                'timeZone': inst_data.get('timezone', ''),
+                'listVariables': mp_vars,
+            })
+    return {
+        'startDate': start_date,
+        'endDate': end_date,
+        'idLanguage': id_language,
+        'listInstallation': [{
+            'idInstallation': inst_data['installation_id'],
+            'listMeasurePoint': list_mp,
+        }],
+    }
+
+def _all_var_ids(inst_data):
+    ids = set()
+    for mp_data in inst_data['measure_points'].values():
+        for v in mp_data['variables']:
+            ids.add(v['variable_id'])
+    return ids
+
+def _split_vars(var_ids):
+    """Split variable id set in half."""
+    lst = sorted(var_ids)
+    mid = max(1, len(lst) // 2)
+    return set(lst[:mid]), set(lst[mid:])
+
+def _process(inst_id, inst_data, var_ids, start_date, end_date,
+             session_id, depth=0):
+    """Call getMedidas for one installation. Returns (u, e, c, session, log)."""
+    global relogin_count
+    if depth > 8:
+        return (0, 1, 0, session_id,
+                [{'inst': inst_id, 'error': 'Max depth reached'}])
+
+    payload = _build_payload(inst_data, var_ids, start_date, end_date)
+    upserts = 0
+    errors = 0
+    api_calls = 0
+    log = []
+
+    try:
+        resp = _call_medidas(payload, session_id)
+        api_calls += 1
+        try:
+            body = resp.json() if resp.text else {}
+        except Exception:
+            body = {}
+
+        # ── API error codes ────────────────────────────────────
+        # The API returns errors as {"codigo": "RESTxxxx", "mensaje": "..."}
+        # with HTTP 400.  We check both Spanish ("codigo") and the
+        # English names documented in the spec ("errorCode") for safety.
+        if isinstance(body, dict) and (body.get('codigo') or body.get('errorCode')):
+            ec = body.get('codigo') or body.get('errorCode', '')
+            em = body.get('mensaje') or body.get('errorMessage', '') or ''
+
+            if ec == 'REST0003':
+                if relogin_count >= MAX_RELOGINS:
+                    raise Exception("Max re-logins (%s) exceeded" % MAX_RELOGINS)
+                relogin_count += 1
+                session_id = _do_login()
+                bag['jsessionid'] = session_id
+                return _process(inst_id, inst_data, var_ids, start_date,
+                                end_date, session_id, depth)
+
+            elif ec == 'REST0012':
+                # Too many variables → split var set in half
+                if len(var_ids) <= 1:
+                    log.append({'inst': inst_id,
+                                'error': 'REST0012: cannot split (1 variable)',
+                                'start': start_date})
+                    errors += 1
+                    return (upserts, errors, api_calls, session_id, log)
+                half1, half2 = _split_vars(var_ids)
+                for half in [h for h in [half1, half2] if h]:
+                    su, se, sc, session_id, sl = _process(
+                        inst_id, inst_data, half, start_date, end_date,
+                        session_id, depth + 1)
+                    upserts += su
+                    errors += se
+                    api_calls += sc
+                    log.extend(sl)
+                return (upserts, errors, api_calls, session_id, log)
+
+            elif ec == 'REST0013':
+                # Already queried — do NOT retry, log and abort
+                log.append({'inst': inst_id,
+                            'warning': 'REST0013: %s (skip, do not retry)' % em,
+                            'start': start_date, 'end': end_date})
+                return (upserts, errors, api_calls, session_id, log)
+
+            elif ec == 'REST0011':
+                # No data available — not an error
+                log.append({'inst': inst_id,
+                            'info': 'REST0011: no data for requested range',
+                            'start': start_date, 'end': end_date})
+                return (upserts, errors, api_calls, session_id, log)
+
+            elif ec == 'REST0009':
+                # Error consulting → retry once with backoff
+                if depth == 0:
+                    _time.sleep(5.0)
+                    return _process(inst_id, inst_data, var_ids, start_date,
+                                    end_date, session_id, depth + 1)
+                log.append({'inst': inst_id, 'error': 'REST0009: %s' % em,
+                            'start': start_date})
+                errors += 1
+                return (upserts, errors, api_calls, session_id, log)
+
+            else:
+                # REST0002 (missing params), REST0007 (bad JSON), others
+                log.append({'inst': inst_id,
+                            'error': '%s: %s' % (ec, em),
+                            'start': start_date})
+                errors += 1
+                return (upserts, errors, api_calls, session_id, log)
+
+        if resp.status_code >= 400:
+            log.append({'inst': inst_id, 'status': resp.status_code,
+                        'error': (resp.text or '')[:400],
+                        'start': start_date})
+            errors += 1
+            return (upserts, errors, api_calls, session_id, log)
+
+        # ── Process successful response ────────────────────────
+        medidas = body if isinstance(body, list) else body.get('medidas', [])
+        readings_sample = []
+
+        for medida in medidas:
+            if not isinstance(medida, dict):
+                continue
+            date_ts = medida.get('date')
+            list_value = medida.get('listValue') or []
+            if date_ts is None or not isinstance(list_value, list):
+                errors += 1
+                continue
+            date_str = _parse_date(date_ts)
+
+            for entry in list_value:
+                if not isinstance(entry, dict):
+                    errors += 1
+                    continue
+                e_inst = entry.get('idInstallation')
+                e_mp = entry.get('idMeasurePoint')
+                e_var = entry.get('idVariable')
+                e_val = entry.get('value')
+                if e_inst is None or e_mp is None or e_var is None \
+                        or e_val is None:
+                    errors += 1
+                    continue
+
+                lookup_key = (int(e_inst), int(e_mp), int(e_var))
+                sensor_info = sensor_lookup.get(lookup_key)
+                if not sensor_info:
+                    continue  # variable not configured in Odoo
+
+                try:
+                    valf = float(e_val)
+                except (ValueError, TypeError):
+                    errors += 1
+                    continue
+
+                Remote.upsert(
+                    'mdm.measurement.device.sensor.reading',
+                    {'sensor_id': sensor_info['sensor_id'],
+                     'measurement_time': date_str},
+                    {'value': valf,
+                     'device_id': sensor_info['device_id']},
+                )
+                upserts += 1
+                if len(readings_sample) < 5:
+                    readings_sample.append({
+                        'ts': date_str, 'inst': e_inst,
+                        'mp': e_mp, 'var': e_var, 'val': valf,
+                    })
+
+        log.append({
+            'inst': inst_id,
+            'start': start_date, 'end': end_date,
+            'status': resp.status_code,
+            'medidas_count': len(medidas),
+            'upserts': upserts, 'errors': errors,
+            'sample': readings_sample,
+        })
+
+    except Exception as e:
+        err_str = str(e)
+        if 'SESSION_EXPIRED' in err_str or 'REST0003' in err_str:
+            if relogin_count < MAX_RELOGINS:
+                relogin_count += 1
+                session_id = _do_login()
+                bag['jsessionid'] = session_id
+                return _process(inst_id, inst_data, var_ids, start_date,
+                                end_date, session_id, depth)
+        log.append({'inst': inst_id, 'error': err_str, 'start': start_date})
+        errors += 1
+
+    return (upserts, errors, api_calls, session_id, log)
+
+
+# ── Main loop ──────────────────────────────────────────────────────────
+for inst_id, inst_data in installations_plan.items():
+    inst_start = today_str
+    for s in plan:
+        if int(s['installation_id']) == int(inst_id):
+            if s['initial_date'] < inst_start:
+                inst_start = s['initial_date']
+
+    all_vars = sorted(_all_var_ids(inst_data))
+
+    # Pre-split variables into chunks of max_vars_per_call to avoid
+    # REST0012 (too many variables) which triggers the 24h cooldown.
+    chunks = []
+    for i in range(0, len(all_vars), max_vars_per_call):
+        chunks.append(set(all_vars[i:i + max_vars_per_call]))
+    if not chunks:
+        chunks = [set(all_vars)]
+
+    for chunk in chunks:
+        u, e, c, jsessionid, inst_log = _process(
+            inst_id, inst_data, chunk,
+            inst_start + ' 00:00:00', end_date_str, jsessionid)
+
+        total_upserts += u
+        total_errors += e
+        total_api_calls += c
+        items.extend(inst_log)
+        _time.sleep(0.5)
+
+bag['jsessionid'] = jsessionid
+
+# ── Create audit attachment ────────────────────────────────────────────
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'end_date': today_str,
+    'id_language': id_language,
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'total_api_calls': total_api_calls,
+    'relogins': relogin_count,
+    'installations_processed': len(installations_plan),
+    'items': items,
+}
+
+b64 = base64.b64encode(
+    json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
+fname = 'deepdata_measures_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_'))
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id,
+})
+
+Remote.message_post(
+    body=u'[DeepData] Measures: upserts=%s errors=%s api_calls=%s '
+         u'relogins=%s installations=%s lang=%s' % (
+             total_upserts, total_errors, total_api_calls,
+             relogin_count, len(installations_plan), id_language),
+    attachment_ids=[att.id],
+)
+
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Provision Devices (auto-create devices + sensors)     -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_deepdata_action_provision_devices" model="remotecontrol.action">
+            <field name="name">DeepData: Provision Devices</field>
+            <field name="remote_id" ref="remotecontrol_deepdata"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">False</field>
+            <field name="code"><![CDATA[
+# ── DeepData: Provision Devices ────────────────────────────────────────
+# Auto-creates mdm.measurement.device and mdm.measurement.device.sensor
+# records from the catalog hierarchy obtained in the previous step.
+#
+# Hierarchy mapping:
+#   DeepData measure point  →  one mdm device
+#   DeepData variable       →  one mdm sensor (under its device)
+#
+# Each device stores both the installation and measure point identifiers
+# in remotecontrol_params so the import pipeline can reconstruct the
+# getMedidas payload (which groups by installation).
+#
+# Idempotent: existing devices are matched by (installation_id,
+# measure_point_id) in their remotecontrol_params; sensors by
+# (device_id, variable_id).
+#
+# Sensor types and UOMs are auto-created (find-or-create) based on the
+# variable metadata returned by the API (unit + type).
+# ────────────────────────────────────────────────────────────────────────
+
+Remote = self.remote_id
+hierarchy = bag.get('hierarchy') or []
+
+if not hierarchy:
+    raise Exception(
+        "No hierarchy in bag. Run Sync Catalog action first.")
+
+Device = env['mdm.measurement.device']
+Sensor = env['mdm.measurement.device.sensor']
+SensorType = env['mdm.measurement.device.sensor.type']
+SensorUom = env['mdm.measurement.device.sensor.uom']
+
+# Resolve the remotecontrol xmlid for linking devices
+remotecontrol_ref = env.ref('remotecontrol_deepdata.remotecontrol_deepdata')
+
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+default_tz = cfg.get('timezone', 'Europe/Madrid')
+
+# ── UOM cache: find or create by name ──────────────────────────────────
+uom_cache = {}  # unit_name -> record
+
+def _get_uom(unit_name):
+    if not unit_name:
+        unit_name = u'-'
+    if unit_name in uom_cache:
+        return uom_cache[unit_name]
+    uom = SensorUom.search([('name', '=', unit_name)], limit=1)
+    if not uom:
+        uom = SensorUom.create({
+            'name': unit_name,
+            'abbreviation': unit_name,
+            'description': u'Auto-created from DeepData (unit: %s)' % unit_name,
+        })
+    uom_cache[unit_name] = uom
+    return uom
+
+# ── Sensor Type cache: find or create by composite name ───────────────
+# mdm.measurement.device.sensor.type has unique(name), so we build a
+# composite name "Type (Unit)" to allow the same DeepData type with
+# different units (e.g. "Acumulativa (kWh)" vs "Acumulativa (kVArh)").
+type_cache = {}  # full_name -> record
+
+def _get_sensor_type(type_name, uom):
+    if not type_name:
+        type_name = u'General'
+    full_name = u'%s (%s)' % (type_name, uom.name)
+    if full_name in type_cache:
+        return type_cache[full_name]
+    stype = SensorType.search([('name', '=', full_name)], limit=1)
+    if not stype:
+        stype = SensorType.create({
+            'name': full_name,
+            'description': u'Auto-created from DeepData (%s)' % type_name,
+            'uom_id': uom.id,
+        })
+    type_cache[full_name] = stype
+    return stype
+
+# ── Build map of existing devices by (installation_id, measure_point_id)
+# Each device represents one DeepData measure point inside an installation.
+existing_devices = {}  # (installation_id, measure_point_id) -> device record
+all_devices = Device.search([
+    ('remotecontrol_id', '=', remotecontrol_ref.id),
+])
+for dev in all_devices:
+    try:
+        dev_cfg = json.loads(dev.remotecontrol_params or '{}')
+    except Exception:
+        dev_cfg = {}
+    iid = dev_cfg.get('installation_id')
+    mpid = dev_cfg.get('measure_point_id')
+    if iid is not None and mpid is not None:
+        existing_devices[(int(iid), int(mpid))] = dev
+
+# ── Build map of existing sensors by (device_id, variable_id) ─────────
+# Since each device already represents a specific measure point, the
+# sensor only needs the variable_id to be unique within its device.
+existing_sensors = {}  # (device_id, variable_id) -> sensor record
+all_sensors = Sensor.search([
+    ('remotecontrol_id', '=', remotecontrol_ref.id),
+])
+for sen in all_sensors:
+    try:
+        sen_cfg = json.loads(sen.remotecontrol_params or '{}')
+    except Exception:
+        sen_cfg = {}
+    var_id = sen_cfg.get('variable_id')
+    if var_id is not None:
+        existing_sensors[(sen.device_id.id, int(var_id))] = sen
+
+total_devices_created = 0
+total_devices_existing = 0
+total_sensors_created = 0
+total_sensors_existing = 0
+total_uom_created = len(uom_cache)  # updated later
+total_types_created = len(type_cache)  # updated later
+device_details = []
+
+for inst in hierarchy:
+    if not isinstance(inst, dict):
+        continue
+    inst_id = inst.get('id')
+    if inst_id is None:
+        continue
+
+    inst_name = inst.get('name') or ('Installation %s' % inst_id)
+    inst_tz = inst.get('timezone') or default_tz
+
+    # ── One device per measure point ───────────────────────────────
+    for mp in inst.get('measure_points', []):
+        if not isinstance(mp, dict):
+            continue
+        mp_id = mp.get('id')
+        if mp_id is None:
+            continue
+        mp_name = mp.get('name') or ('MP %s' % mp_id)
+
+        dev_key = (int(inst_id), int(mp_id))
+        device = existing_devices.get(dev_key)
+        if device:
+            total_devices_existing += 1
+        else:
+            device = Device.create({
+                'name': mp_name,
+                'description': u'%s · %s' % (inst_name, mp_name),
+                'remotecontrol_id': remotecontrol_ref.id,
+                'remotecontrol_params': json.dumps({
+                    'installation_id': inst_id,
+                    'installation_name': inst_name,
+                    'measure_point_id': mp_id,
+                    'measure_point_name': mp_name,
+                    'timezone': inst_tz,
+                }, ensure_ascii=False),
+            })
+            existing_devices[dev_key] = device
+            total_devices_created += 1
+
+        dev_sensors_created = 0
+        dev_sensors_existing = 0
+
+        # ── One sensor per variable ────────────────────────────────
+        for var in mp.get('variables', []):
+            if not isinstance(var, dict):
+                continue
+            var_id = var.get('id')
+            if var_id is None:
+                continue
+
+            sensor_key = (device.id, int(var_id))
+            if sensor_key in existing_sensors:
+                dev_sensors_existing += 1
+                total_sensors_existing += 1
+                continue
+
+            # ── Resolve UOM and Sensor Type ────────────────────────
+            unit_name = var.get('unit', '')
+            var_type = var.get('type', '')
+            uom = _get_uom(unit_name)
+            stype = _get_sensor_type(var_type, uom)
+
+            var_name = var.get('name') or var.get('short_name') or ('Var %s' % var_id)
+
+            sensor = Sensor.create({
+                'name': var_name,
+                'device_id': device.id,
+                'type_id': stype.id,
+                'remotecontrol_params': json.dumps({
+                    'variable_id': var_id,
+                    'variable_name': var.get('name', ''),
+                    'variable_type': var_type,
+                    'variable_unit': unit_name,
+                }, ensure_ascii=False),
+            })
+            existing_sensors[sensor_key] = sensor
+            dev_sensors_created += 1
+            total_sensors_created += 1
+
+        device_details.append({
+            'installation_id': inst_id,
+            'measure_point_id': mp_id,
+            'device_name': mp_name,
+            'device_id': device.id,
+            'sensors_created': dev_sensors_created,
+            'sensors_existing': dev_sensors_existing,
+        })
+
+total_uom_created = len(uom_cache)
+total_types_created = len(type_cache)
+
+# ── Create audit attachment ────────────────────────────────────────────
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'total_devices_created': total_devices_created,
+    'total_devices_existing': total_devices_existing,
+    'total_sensors_created': total_sensors_created,
+    'total_sensors_existing': total_sensors_existing,
+    'total_uom_in_cache': total_uom_created,
+    'total_sensor_types_in_cache': total_types_created,
+    'devices': device_details,
+}
+
+b64 = base64.b64encode(
+    json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
+fname = 'deepdata_provision_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_'))
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id,
+})
+
+Remote.message_post(
+    body=u'[DeepData] Provision: devices_created=%s devices_existing=%s '
+         u'sensors_created=%s sensors_existing=%s uoms=%s types=%s' % (
+             total_devices_created, total_devices_existing,
+             total_sensors_created, total_sensors_existing,
+             total_uom_created, total_types_created),
+    attachment_ids=[att.id],
+)
+
+bag['provision_audit'] = audit
+bag['provision_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- PROCEDURE: Catalog Sync                                      -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_deepdata_procedure_catalog" model="remotecontrol.procedure">
+            <field name="name">DeepData: Catalog Sync</field>
+            <field name="remote_id" ref="remotecontrol_deepdata"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_deepdata_step_catalog_10_login" model="remotecontrol.step">
+            <field name="name">Login</field>
+            <field name="procedure_id" ref="remotecontrol_deepdata_procedure_catalog"/>
+            <field name="action_id" ref="remotecontrol_deepdata_action_login"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_deepdata_step_catalog_20_sync" model="remotecontrol.step">
+            <field name="name">Sync Catalog</field>
+            <field name="procedure_id" ref="remotecontrol_deepdata_procedure_catalog"/>
+            <field name="action_id" ref="remotecontrol_deepdata_action_sync_catalog"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_deepdata_step_catalog_30_provision" model="remotecontrol.step">
+            <field name="name">Provision Devices</field>
+            <field name="procedure_id" ref="remotecontrol_deepdata_procedure_catalog"/>
+            <field name="action_id" ref="remotecontrol_deepdata_action_provision_devices"/>
+            <field name="sequence">30</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- PROCEDURE: Import Measures                                   -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_deepdata_procedure_measures" model="remotecontrol.procedure">
+            <field name="name">DeepData: Import Measures</field>
+            <field name="remote_id" ref="remotecontrol_deepdata"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+
+            <field name="procedure_for_readings" eval="True"/>
+</record>
+
+        <record id="remotecontrol_deepdata_step_measures_10_login" model="remotecontrol.step">
+            <field name="name">Login</field>
+            <field name="procedure_id" ref="remotecontrol_deepdata_procedure_measures"/>
+            <field name="action_id" ref="remotecontrol_deepdata_action_login"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_deepdata_step_measures_20_plan" model="remotecontrol.step">
+            <field name="name">Get Devices (Plan)</field>
+            <field name="procedure_id" ref="remotecontrol_deepdata_procedure_measures"/>
+            <field name="action_id" ref="remotecontrol_deepdata_action_get_devices"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_deepdata_step_measures_30_import" model="remotecontrol.step">
+            <field name="name">Get Measures</field>
+            <field name="procedure_id" ref="remotecontrol_deepdata_procedure_measures"/>
+            <field name="action_id" ref="remotecontrol_deepdata_action_get_measures"/>
+            <field name="sequence">30</field>
+        </record>
+
+    </data>
+</odoo>
