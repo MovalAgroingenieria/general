@@ -25,4 +25,15 @@
         "demo/demo_data.xml",
     ],
     "application": True,
+    "assets": {
+        "web.assets_backend": [
+            "base_general_entity/static/lib/entity_iconset/entity_iconset.css",
+        ],
+        "web.assets_frontend": [
+            "base_general_entity/static/lib/entity_iconset/entity_iconset.css",
+        ],
+        "web.report_assets_common": [
+            "base_general_entity/static/lib/entity_iconset/entity_iconset.css",
+        ],
+    },
 }
