@@ -1,34 +1,97 @@
-@font-face {
-  font-family: 'moval_iconset';
-  src:  url('fonts/moval_iconset.eot?5h8ey2');
-  src:  url('fonts/moval_iconset.eot?5h8ey2#iefix') format('embedded-opentype'),
-    url('fonts/moval_iconset.ttf?5h8ey2') format('truetype'),
-    url('fonts/moval_iconset.woff?5h8ey2') format('woff'),
-    url('fonts/moval_iconset.svg?5h8ey2#moval_iconset') format('svg');
-  font-weight: normal;
+/* Base icon class */
+[class^="fa-moval-"], [class*=" fa-moval-"] {
+  display: inline-block;
+  font-family: 'moval_iconset' !important;
   font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  --fa-entity-duotone-offset: 1em;
 }
 
-/* Simplified fa-moval class (inspired by the native Base Fontawesome module) */
-[class^="fa-moval-"], [class*=" fa-moval-"] {
-   display: inline-block;
-   font-family: moval_iconset;
-   font-style: normal;
-   font-weight: normal;
-   font-variant: normal;
-   text-rendering: auto;
+/* Define pseudo-elements */
+[class^="fa-moval-"]::before,
+[class^="fa-moval-"]::after,
+[class*=" fa-moval-"]::before,
+[class*=" fa-moval-"]::after {
+  font-family: 'moval_iconset' !important;
+  font-style: normal;
+  font-weight: normal;
 }
 
 /* Render duotone icons */
 [class*="-duotone"]::before {
-   opacity: 1;
+  opacity: 1;
 }
+
 [class*="-duotone"]::after {
-   opacity: 0.4;
-   margin-left: -1em;
+  opacity: 0.4;
+  position: relative;
+  right: var(--fa-entity-duotone-offset);
+}
+
+/* Context overrides */
+.btn  [class*="-duotone"] {
+    --fa-entity-duotone-offset: 1em;
+}
+.oe_stat_button  [class*="-duotone"] {
+    --fa-entity-duotone-offset: 1.25em;
+}
+
+/* Print duotone */
+.duotone-print-white::after {
+  opacity: 1;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.duotone-print-color::after {
+  opacity: 1;
+  /* Overwritten by js */
+  color: rgba(255, 255, 255, 0.4);
 }
 
 /* Icons */
+
+@font-face {
+  font-family: 'moval_iconset';
+  src:  url('fonts/moval_iconset.eot?sy22kg');
+  src:  url('fonts/moval_iconset.eot?sy22kg#iefix') format('embedded-opentype'),
+    url('fonts/moval_iconset.ttf?sy22kg') format('truetype'),
+    url('fonts/moval_iconset.woff?sy22kg') format('woff'),
+    url('fonts/moval_iconset.svg?sy22kg#moval_iconset') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+.fa-moval-well:before {
+  content: "\e9a3";
+}
+.fa-moval-well-duotone::before {
+  content: "\e9a4";
+}
+.fa-moval-well-duotone::after {
+  content: "\e9a5";
+}
+.fa-moval-hydric-estimation-duotone::before {
+  content: "\e9a1";
+}
+.fa-moval-hydric-estimation-duotone::after {
+  content: "\e9a2";
+}
+.fa-moval-hydric-estimation:before {
+  content: "\e9a0";
+}
+.fa-moval-logo-duotone::before {
+  content: "\e99c";
+}
+.fa-moval-logo-duotone::after {
+  content: "\e99d";
+}
+.fa-moval-logo-duotone .path3:before {
+  content: "\e99e";
+}
+.fa-moval-logo:before {
+  content: "\e99f";
+}
 .fa-moval-gis-viewer:before {
   content: "\e900";
 }
@@ -440,11 +503,23 @@
 .fa-moval-user-check-duotone::after {
   content: "\e922";
 }
-.fa-moval-logo:before {
+.fa-moval-logo-2023:before {
   content: "\e98d";
+}
+.fa-moval-logo-duotone-2023 .path1:before {
+  content: "\e998";
+}
+.fa-moval-logo-duotone-2023 .path2:before {
+  content: "\e999";
 }
 .fa-moval-logo-xmas:before {
   content: "\e98e";
+}
+.fa-moval-logo-xmas-duotone::before {
+  content: "\e99a";
+}
+.fa-moval-logo-xmas-duotone::after {
+  content: "\e99b";
 }
 .fa-moval-agf-territory:before {
   content: "\e98f";
@@ -478,4 +553,16 @@
 }
 .fa-moval-sun:before {
   content: "\f185";
+}
+.fa-moval-hammer:before {
+  content: "\e923";
+}
+.fa-moval-sede-electronica:before {
+  content: "\e924";
+}
+.fa-moval-sede-electronica-duotone::before {
+  content: "\e925";
+}
+.fa-moval-sede-electronica-duotone::after {
+  content: "\e926";
 }
