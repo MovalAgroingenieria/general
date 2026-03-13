@@ -21,5 +21,8 @@
         "views/general_entity_member_views.xml",
         "views/menu_views.xml",
     ],
+    "demo": [
+        "demo/demo_data.xml",
+    ],
     "application": True,
 }
