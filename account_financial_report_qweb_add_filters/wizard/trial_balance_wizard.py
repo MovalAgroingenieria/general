@@ -154,12 +154,14 @@ class TrialBalanceReportWizard(models.TransientModel):
             ('date', '>=', start_date),
             ('date', '<=', end_date),
         ]
+        # domain_back: move lines before the period, used to discover
+        # group values (partners, products…) that carry an initial balance.
+        # No reconciliation filter here — a trial balance reports all
+        # entries regardless of their reconciliation status.
         domain_back = [
             ('account_id', '=', account.id),
             ('date', '<=', start_date),
-            ('full_reconcile_id', '=', None),
         ]
-
         if group_by_field:
             # Usar read_group si se especifica un campo de agrupación
             move_lines = self.env['account.move.line'].read_group(
