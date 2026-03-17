@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="partner_vote_view_tree" model="ir.ui.view">
+        <field name="name">partner.vote.tree</field>
+        <field name="model">partner.vote</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="vote_type_id.active == False">
+                <field name="partner_id"/>
+                <field name="vote_type_id"/>
+                <field name="vote_count_display"/>
+                <field name="last_compute_date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="partner_vote_view_form" model="ir.ui.view">
+        <field name="name">partner.vote.form</field>
+        <field name="model">partner.vote</field>
+        <field name="arch" type="xml">
+            <form string="Partner vote" create="false" edit="false" delete="false">
+                <group>
+                    <group>
+                        <field name="partner_id"/>
+                        <field name="vote_type_id"/>
+                        <field name="vote_count_display"/>
+                        <field name="last_compute_date"/>
+                    </group>
+                    <group>
+                        <field name="vote_count_integer" invisible="vote_type_id.vote_value_type != 'integer'"/>
+                        <field name="vote_count_float" invisible="vote_type_id.vote_value_type != 'float'"/>
+                    </group>
+                </group>
+                <field name="formula_detail" nolabel="1" readonly="1"/>
+            </form>
+        </field>
+    </record>
+</odoo>
