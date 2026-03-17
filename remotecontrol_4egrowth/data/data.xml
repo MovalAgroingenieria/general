@@ -143,6 +143,11 @@ The system then extracts the correct data series using <code>group</code> / <cod
 
 <h3>Changelog</h3>
 <ul>
+  <li><strong>1.0.8</strong> (2026-03-17)
+    <ul>
+      <li>Fixed <code>initial_date</code> calculation: removed erroneous <code>+1 day</code> offset from last reading date. The old logic skipped a full day of data and caused <code>initial_date &gt; final_date</code> when syncing twice on the same day. Safe because upsert handles duplicates.</li>
+    </ul>
+  </li>
   <li><strong>1.0.7</strong> (2026-03-02)
     <ul>
       <li><code>parameter</code> and <code>parameter_value</code> are now <strong>optional</strong> in sensor configuration. When omitted, the API is called without extra filters (only <code>initial_date</code>/<code>final_date</code>), and the system extracts data by <code>group</code>/<code>key</code>.</li>
@@ -276,8 +281,7 @@ for sensor in sensors:
             if last_reading_time:
                 try:
                     initial_date = fields.Date.to_string(
-                        fields.Datetime.from_string(last_reading_time) +
-                        timedelta(days=1))
+                        fields.Datetime.from_string(last_reading_time))
                 except Exception:
                     initial_date = str(last_reading_time)[:10]
             else:

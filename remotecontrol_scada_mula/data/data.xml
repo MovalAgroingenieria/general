@@ -459,8 +459,7 @@ for sensor in sensors:
     if last_reading_time:
         try:
             initial_date = fields.Date.to_string(
-                fields.Datetime.from_string(last_reading_time) +
-                timedelta(days=1))
+                fields.Datetime.from_string(last_reading_time))
         except Exception:
             initial_date = str(last_reading_time)[:10]
     else:

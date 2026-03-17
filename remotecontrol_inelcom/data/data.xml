@@ -302,7 +302,7 @@ for sensor in sensors:
     if last_reading_time:
         try:
             last_dt = fields.Datetime.from_string(last_reading_time)
-            initial_date = fields.Date.to_string(last_dt + timedelta(days=1))
+            initial_date = fields.Date.to_string(last_dt)
         except Exception:
             initial_date = str(last_reading_time)[:10]
     elif start_dev:
@@ -353,7 +353,7 @@ for sensor in location_sensors:
     if last_reading_time:
         try:
             last_dt = fields.Datetime.from_string(last_reading_time)
-            initial_date = fields.Date.to_string(last_dt + timedelta(days=1))
+            initial_date = fields.Date.to_string(last_dt)
         except Exception:
             initial_date = str(last_reading_time)[:10]
     elif start_sensor:
