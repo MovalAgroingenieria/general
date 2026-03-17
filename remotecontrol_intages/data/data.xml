@@ -219,7 +219,7 @@ for sensor in sensors:
     if last_m:
         try:
             initial_date = fields.Date.to_string(
-                fields.Datetime.from_string(last_m) + timedelta(days=1)
+                fields.Datetime.from_string(last_m)
             )
         except:
             initial_date = str(last_m)[:10]
@@ -527,7 +527,7 @@ Remote.message_post(
             <field name="active">True</field>
             <field name="schedule_cron">False</field>
             <field name="readonly">True</field>
-        
+
             <field name="procedure_for_readings" eval="True"/>
 </record>
         <record id="remotecontrol_intages_step_20_fetch" model="remotecontrol.step">

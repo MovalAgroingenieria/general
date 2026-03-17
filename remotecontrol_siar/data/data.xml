@@ -156,8 +156,7 @@ for device in (devices or []):
             try:
                 # last_reading_time comes as string from SQL execute
                 start_date = fields.Date.to_string(
-                    fields.Datetime.from_string(last_reading_time) +
-                    timedelta(days=1))
+                    fields.Datetime.from_string(last_reading_time))
             except Exception:
                 start_date = default_initial_date
         sensor_plan['initial_date'] = start_date

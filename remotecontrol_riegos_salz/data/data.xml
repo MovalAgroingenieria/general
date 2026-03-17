@@ -230,9 +230,9 @@ for sensor in sensors:
         last_reading_time = last_readings_map.get(sensor.id)
         if last_reading_time:
             try:
-                next_reading = fields.Datetime.from_string(
-                    last_reading_time) + timedelta(days=1)
-                start_date = next_reading.strftime('%Y-%m-%d %H:%M:%S')
+                last_dt = fields.Datetime.from_string(
+                    last_reading_time)
+                start_date = last_dt.strftime('%Y-%m-%d %H:%M:%S')
             except Exception:
                 start_date = str(last_reading_time)
         else:

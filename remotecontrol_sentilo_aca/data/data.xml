@@ -219,7 +219,7 @@ for sensor in sensors:
     )
 
     if last_reading:
-        dt = fields.Datetime.from_string(last_reading.measurement_time) + timedelta(days=1)
+        dt = fields.Datetime.from_string(last_reading.measurement_time)
         initial_date = dt.strftime('%d/%m/%Y')
     else:
         year_str = today_str[:4]

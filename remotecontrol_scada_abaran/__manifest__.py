@@ -5,7 +5,7 @@
 {
     'name': 'Remote Control - SCADA Abaran',
     'summary': 'Integration with legacy SCADA SQL database (Abaran)',
-    'version': '10.0.1.0.1',
+    'version': '10.0.1.0.2',
     'category': 'Tools',
     'author': 'Moval Agroingenieria',
     'website': 'https://moval.es',
