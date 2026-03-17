@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Root menu -->
+    <menuitem
+        id="menu_general_entity_root"
+        name="Entities"
+        sequence="100"
+        web_icon="base_general_entity,static/description/icon.png"
+        groups="base_general_entity.group_general_entity_user"
+    />
+
+    <!-- Submenu: Management -->
+    <menuitem
+        id="menu_general_entity_management"
+        name="Management"
+        parent="menu_general_entity_root"
+        sequence="10"
+        groups="base_general_entity.group_general_entity_user"
+    />
+
+    <!-- Submenu: Primary Entities -->
+    <menuitem
+        id="menu_primary_entities"
+        name="Primary Entities"
+        parent="menu_general_entity_management"
+        action="action_primary_entities"
+        sequence="10"
+        groups="base_general_entity.group_general_entity_user"
+    />
+
+    <!-- Submenu: Secondary Members -->
+    <menuitem
+        id="menu_secondary_entities"
+        name="Secondary Members"
+        parent="menu_general_entity_management"
+        action="action_secondary_entities"
+        sequence="20"
+        groups="base_general_entity.group_general_entity_user"
+    />
+
+    <!-- Technical submenu -->
+    <menuitem
+        id="menu_general_entity_technical"
+        name="Technical"
+        parent="menu_general_entity_root"
+        sequence="100"
+        groups="base_general_entity.group_general_entity_manager"
+    />
+
+    <!-- Submenu: Relationships (Members) - under Technical -->
+    <menuitem
+        id="menu_entity_members"
+        name="Relationships (Members)"
+        parent="menu_general_entity_technical"
+        action="action_general_entity_member"
+        sequence="10"
+        groups="base_general_entity.group_general_entity_manager"
+    />
+</odoo>

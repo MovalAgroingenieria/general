@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- list view for Members -->
+    <record id="view_general_entity_member_list" model="ir.ui.view">
+        <field name="name">general.entity.member.list</field>
+        <field name="model">general.entity.member</field>
+        <field name="arch" type="xml">
+            <list default_order="primary_partner_id, sequence" editable="bottom">
+                <field name="sequence" widget="handle" />
+                <field
+                    name="primary_partner_id"
+                    column_invisible="context.get('default_primary_partner_id')"
+                    context="{'form_view_ref': 'base_general_entity.view_partner_primary_entity_form'}"
+                    options="{'no_create': True, 'no_quick_create': True}"
+                />
+                <field
+                    name="member_partner_id"
+                    context="{'form_view_ref': 'base_general_entity.view_partner_secondary_entity_form'}"
+                    options="{'no_create': True, 'no_quick_create': True}"
+                />
+                <field name="member_code_in_entity" />
+                <field name="entity_global_code" />
+                <field name="company_id" column_invisible="True" />
+                <field name="active" column_invisible="True" />
+            </list>
+        </field>
+    </record>
+
+    <!-- Form view for Members -->
+    <record id="view_general_entity_member_form" model="ir.ui.view">
+        <field name="name">general.entity.member.form</field>
+        <field name="model">general.entity.member</field>
+        <field name="arch" type="xml">
+            <form string="Entity Member">
+                <sheet>
+                    <group>
+                        <group>
+                            <field
+                                name="primary_partner_id"
+                                options="{'no_create': True, 'no_quick_create': True}"
+                            />
+                            <field
+                                name="member_partner_id"
+                                options="{'no_create': True, 'no_quick_create': True}"
+                            />
+                            <field name="company_id" groups="base.group_multi_company" />
+                        </group>
+                        <group>
+                            <field name="member_code_in_entity" />
+                            <field name="entity_global_code" />
+                            <field name="sequence" />
+                            <field name="active" widget="boolean_toggle" />
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note" placeholder="Additional notes..." />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search view for Members -->
+    <record id="view_general_entity_member_search" model="ir.ui.view">
+        <field name="name">general.entity.member.search</field>
+        <field name="model">general.entity.member</field>
+        <field name="arch" type="xml">
+            <search string="Search Members">
+                <field name="primary_partner_id" />
+                <field name="member_partner_id" />
+                <field name="member_code_in_entity" />
+                <field name="entity_global_code" />
+                <field name="company_id" groups="base.group_multi_company" />
+                <filter
+                    name="filter_active"
+                    string="Active"
+                    domain="[('active', '=', True)]"
+                />
+                <filter
+                    name="filter_inactive"
+                    string="Inactive"
+                    domain="[('active', '=', False)]"
+                />
+                <group expand="0" string="Group By">
+                    <filter
+                        name="group_by_primary"
+                        string="Primary Entity"
+                        domain="[]"
+                        context="{'group_by': 'primary_partner_id'}"
+                    />
+                    <filter
+                        name="group_by_member"
+                        string="Secondary Member"
+                        domain="[]"
+                        context="{'group_by': 'member_partner_id'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action for Members -->
+    <record id="action_general_entity_member" model="ir.actions.act_window">
+        <field name="name">Relationships (Members)</field>
+        <field name="res_model">general.entity.member</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new relationship
+            </p>
+            <p>
+                Here you manage the relationships between primary entities and secondary members.
+            </p>
+        </field>
+    </record>
+</odoo>

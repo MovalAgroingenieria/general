@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- ===== Primary Entities ===== -->
+    <record id="demo_primary_irrigation_north" model="res.partner">
+        <field name="name">Irrigation Community North</field>
+        <field name="is_primary_entity" eval="True" />
+        <field name="company_type">company</field>
+        <field name="entity_global_code">ICN-001</field>
+        <field name="email">info@irrigation-north.example.com</field>
+        <field name="phone">+34 900 100 001</field>
+    </record>
+
+    <record id="demo_primary_coop_central" model="res.partner">
+        <field name="name">Agricultural Cooperative Central</field>
+        <field name="is_primary_entity" eval="True" />
+        <field name="company_type">company</field>
+        <field name="entity_global_code">ACC-002</field>
+        <field name="email">info@agri-coop-central.example.com</field>
+        <field name="phone">+34 900 100 002</field>
+    </record>
+
+    <record id="demo_primary_water_east" model="res.partner">
+        <field name="name">Water Consortium East</field>
+        <field name="is_primary_entity" eval="True" />
+        <field name="company_type">company</field>
+        <field name="entity_global_code">WCE-003</field>
+        <field name="email">info@water-east.example.com</field>
+        <field name="phone">+34 900 100 003</field>
+    </record>
+
+    <!-- ===== Secondary Members ===== -->
+    <record id="demo_secondary_garcia" model="res.partner">
+        <field name="name">María García López</field>
+        <field name="is_secondary_entity" eval="True" />
+        <field name="company_type">person</field>
+        <field name="entity_global_code">SM-101</field>
+        <field name="email">m.garcia@example.com</field>
+        <field name="phone">+34 600 200 001</field>
+    </record>
+
+    <record id="demo_secondary_smith" model="res.partner">
+        <field name="name">John Smith</field>
+        <field name="is_secondary_entity" eval="True" />
+        <field name="company_type">person</field>
+        <field name="entity_global_code">SM-102</field>
+        <field name="email">j.smith@example.com</field>
+        <field name="phone">+34 600 200 002</field>
+    </record>
+
+    <record id="demo_secondary_martinez" model="res.partner">
+        <field name="name">Carlos Martínez Ruiz</field>
+        <field name="is_secondary_entity" eval="True" />
+        <field name="company_type">person</field>
+        <field name="entity_global_code">SM-103</field>
+        <field name="email">c.martinez@example.com</field>
+        <field name="phone">+34 600 200 003</field>
+    </record>
+
+    <record id="demo_secondary_fernandez" model="res.partner">
+        <field name="name">Ana Fernández Díaz</field>
+        <field name="is_secondary_entity" eval="True" />
+        <field name="company_type">person</field>
+        <field name="entity_global_code">SM-104</field>
+        <field name="email">a.fernandez@example.com</field>
+        <field name="phone">+34 600 200 004</field>
+    </record>
+
+    <record id="demo_secondary_lopez" model="res.partner">
+        <field name="name">Pedro López Navarro</field>
+        <field name="is_secondary_entity" eval="True" />
+        <field name="company_type">person</field>
+        <field name="entity_global_code">SM-105</field>
+        <field name="email">p.lopez@example.com</field>
+        <field name="phone">+34 600 200 005</field>
+    </record>
+
+    <!-- ===== Relationships (Members) ===== -->
+    <!-- Irrigation Community North: 3 members -->
+    <record id="demo_member_icn_garcia" model="general.entity.member">
+        <field name="primary_partner_id" ref="demo_primary_irrigation_north" />
+        <field name="member_partner_id" ref="demo_secondary_garcia" />
+        <field name="member_code_in_entity">ICN-M01</field>
+        <field name="sequence" eval="10" />
+        <field name="note">Founding member</field>
+    </record>
+
+    <record id="demo_member_icn_smith" model="general.entity.member">
+        <field name="primary_partner_id" ref="demo_primary_irrigation_north" />
+        <field name="member_partner_id" ref="demo_secondary_smith" />
+        <field name="member_code_in_entity">ICN-M02</field>
+        <field name="sequence" eval="20" />
+    </record>
+
+    <record id="demo_member_icn_martinez" model="general.entity.member">
+        <field name="primary_partner_id" ref="demo_primary_irrigation_north" />
+        <field name="member_partner_id" ref="demo_secondary_martinez" />
+        <field name="member_code_in_entity">ICN-M03</field>
+        <field name="sequence" eval="30" />
+    </record>
+
+    <!-- Agricultural Cooperative Central: 2 members (Garcia & Fernandez) -->
+    <record id="demo_member_acc_garcia" model="general.entity.member">
+        <field name="primary_partner_id" ref="demo_primary_coop_central" />
+        <field name="member_partner_id" ref="demo_secondary_garcia" />
+        <field name="member_code_in_entity">ACC-M01</field>
+        <field name="sequence" eval="10" />
+        <field name="note">Also member of Irrigation Community North</field>
+    </record>
+
+    <record id="demo_member_acc_fernandez" model="general.entity.member">
+        <field name="primary_partner_id" ref="demo_primary_coop_central" />
+        <field name="member_partner_id" ref="demo_secondary_fernandez" />
+        <field name="member_code_in_entity">ACC-M02</field>
+        <field name="sequence" eval="20" />
+    </record>
+
+    <!-- Water Consortium East: 2 members (Martinez & Lopez) -->
+    <record id="demo_member_wce_martinez" model="general.entity.member">
+        <field name="primary_partner_id" ref="demo_primary_water_east" />
+        <field name="member_partner_id" ref="demo_secondary_martinez" />
+        <field name="member_code_in_entity">WCE-M01</field>
+        <field name="sequence" eval="10" />
+    </record>
+
+    <record id="demo_member_wce_lopez" model="general.entity.member">
+        <field name="primary_partner_id" ref="demo_primary_water_east" />
+        <field name="member_partner_id" ref="demo_secondary_lopez" />
+        <field name="member_code_in_entity">WCE-M02</field>
+        <field name="sequence" eval="20" />
+        <field name="note">Recently joined</field>
+    </record>
+</odoo>
