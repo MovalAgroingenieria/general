@@ -20,7 +20,7 @@
             "fontawesome_ext/static/lib/moval_iconset/moval_iconset.css",
         ],
         "web.report_assets_common": [
-            "fontawesome_ext/static/lib/moval_iconset/moval_report_iconset.css",
+            "fontawesome_ext/static/lib/moval_iconset/moval_iconset.css",
         ],
     },
 }

@@ -1,34 +1,66 @@
-@font-face {
-  font-family: 'filemgmt_iconset';
-  src:  url('fonts/filemgmt_iconset.eot?1tomhh');
-  src:  url('fonts/filemgmt_iconset.eot?1tomhh#iefix') format('embedded-opentype'),
-    url('fonts/filemgmt_iconset.ttf?1tomhh') format('truetype'),
-    url('fonts/filemgmt_iconset.woff?1tomhh') format('woff'),
-    url('fonts/filemgmt_iconset.svg?1tomhh#filemgmt_iconset') format('svg');
-  font-weight: normal;
+/* Base icon class */
+[class^="fa-filemgmt-"], [class*=" fa-filemgmt-"] {
+  display: inline-block;
+  font-family: 'filemgmt_iconset' !important;
   font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  --fa-entity-duotone-offset: 1em;
 }
 
-/* Simplified fafilemgmt class (inspired by the native Base Fontawesome module) */
-[class^="fa-filemgmt-"], [class*=" fa-filemgmt-"] {
-   display: inline-block;
-   font-family: filemgmt_iconset;
-   font-style: normal;
-   font-weight: normal;
-   font-variant: normal;
-   text-rendering: auto;
+/* Define pseudo-elements */
+[class^="fa-filemgmt-"]::before,
+[class^="fa-filemgmt-"]::after,
+[class*=" fa-filemgmt-"]::before,
+[class*=" fa-filemgmt-"]::after {
+  font-family: 'filemgmt_iconset' !important;
+  font-style: normal;
+  font-weight: normal;
 }
 
 /* Render duotone icons */
 [class*="-duotone"]::before {
-   opacity: 1;
+  opacity: 1;
 }
+
 [class*="-duotone"]::after {
-   opacity: 0.4;
-   margin-left: -1em;
+  opacity: 0.4;
+  position: relative;
+  right: var(--fa-entity-duotone-offset);
+}
+
+/* Context overrides */
+.btn  [class*="-duotone"] {
+    --fa-entity-duotone-offset: 1em;
+}
+.oe_stat_button  [class*="-duotone"] {
+    --fa-entity-duotone-offset: 1.25em;
+}
+
+/* Print duotone */
+.duotone-print-white::after {
+  opacity: 1;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.duotone-print-color::after {
+  opacity: 1;
+  /* Overwritten by js */
+  color: rgba(255, 255, 255, 0.4);
 }
 
 /* Icons */
+@font-face {
+  font-family: 'filemgmt_iconset';
+  src:  url('fonts/filemgmt_iconset.eot?qd89sk');
+  src:  url('fonts/filemgmt_iconset.eot?qd89sk#iefix') format('embedded-opentype'),
+    url('fonts/filemgmt_iconset.ttf?qd89sk') format('truetype'),
+    url('fonts/filemgmt_iconset.woff?qd89sk') format('woff'),
+    url('fonts/filemgmt_iconset.svg?qd89sk#filemgmt_iconset') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
 .fa-filemgmt-files:before {
   content: "\e900";
 }
