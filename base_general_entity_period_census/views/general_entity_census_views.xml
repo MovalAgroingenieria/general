@@ -53,11 +53,39 @@
             <form string="Period Census">
                 <header>
                     <button
+                        name="%(action_census_generate_lines_wizard)d"
+                        type="action"
+                        string="Generate Lines"
+                        class="btn-secondary"
+                        invisible="state == 'locked'"
+                    />
+                    <button
                         name="action_copy_to_next_period"
                         type="object"
                         string="Copy to Next Period"
                         class="btn-secondary"
                         invisible="state == 'draft' and line_count == 0"
+                    />
+                    <button
+                        name="%(action_census_partial_copy_wizard)d"
+                        type="action"
+                        string="Partial Copy"
+                        class="btn-secondary"
+                        invisible="line_count == 0"
+                    />
+                    <button
+                        name="action_validate_all_lines"
+                        type="object"
+                        string="Validate All"
+                        class="btn-success"
+                        invisible="state != 'draft' or line_count == 0"
+                    />
+                    <button
+                        name="action_unvalidate_all_lines"
+                        type="object"
+                        string="Unvalidate All"
+                        class="btn-secondary"
+                        invisible="state != 'draft' or line_count == 0"
                     />
                     <button
                         name="action_lock"

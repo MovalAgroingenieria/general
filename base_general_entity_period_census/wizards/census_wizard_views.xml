@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- ===== Generate Lines Wizard ===== -->
+    <record id="view_census_generate_lines_wizard_form" model="ir.ui.view">
+        <field name="name">census.generate.lines.wizard.form</field>
+        <field name="model">census.generate.lines.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate Census Lines">
+                <group>
+                    <field name="census_id" invisible="1" />
+                    <field name="primary_partner_id" />
+                    <field name="skip_existing" />
+                </group>
+                <group string="Members to Add">
+                    <field name="member_ids" nolabel="1">
+                        <list>
+                            <field name="member_partner_id" />
+                            <field name="member_code_in_entity" />
+                            <field name="sequence" />
+                        </list>
+                    </field>
+                </group>
+                <footer>
+                    <button
+                        name="action_generate"
+                        type="object"
+                        string="Generate Lines"
+                        class="btn-primary"
+                    />
+                    <button string="Cancel" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_census_generate_lines_wizard" model="ir.actions.act_window">
+        <field name="name">Generate Lines from Members</field>
+        <field name="res_model">census.generate.lines.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ===== Partial Copy Wizard ===== -->
+    <record id="view_census_partial_copy_wizard_form" model="ir.ui.view">
+        <field name="name">census.partial.copy.wizard.form</field>
+        <field name="model">census.partial.copy.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Copy to Next Period (Partial)">
+                <group>
+                    <field name="census_id" invisible="1" />
+                    <field name="next_period_date" />
+                    <field name="copy_additional" />
+                </group>
+                <group string="Lines to Copy">
+                    <field name="line_ids" nolabel="1">
+                        <list>
+                            <field name="member_partner_id" />
+                            <field name="entity_global_code" />
+                            <field name="shares" />
+                            <field name="distributed_qty" />
+                            <field name="state" />
+                        </list>
+                    </field>
+                </group>
+                <footer>
+                    <button
+                        name="action_copy"
+                        type="object"
+                        string="Copy to Next Period"
+                        class="btn-primary"
+                    />
+                    <button string="Cancel" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_census_partial_copy_wizard" model="ir.actions.act_window">
+        <field name="name">Copy to Next Period (Partial)</field>
+        <field name="res_model">census.partial.copy.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -68,6 +68,7 @@ class GeneralEntityCensus(models.Model):
         required=True,
         tracking=True,
     )
+    active = fields.Boolean(default=True)
     line_ids = fields.One2many(
         comodel_name="general.entity.census.line",
         inverse_name="census_id",
@@ -376,3 +377,52 @@ class GeneralEntityCensus(models.Model):
                         "(e.g., 2026-02-01 for February 2026)."
                     )
                 )
+
+    @api.constrains("period_type", "period_start_date", "period_end_date")
+    def _check_custom_period_dates(self):
+        """Validate custom period dates."""
+        for census in self:
+            if census.period_type != "custom":
+                continue
+            if not census.period_start_date or not census.period_end_date:
+                raise ValidationError(
+                    self.env._("Custom periods require both start and end dates.")
+                )
+            if census.period_end_date < census.period_start_date:
+                raise ValidationError(
+                    self.env._(
+                        "The end date (%(end)s) must be equal to or "
+                        "later than the start date (%(start)s).",
+                        end=census.period_end_date,
+                        start=census.period_start_date,
+                    )
+                )
+
+    def action_validate_all_lines(self):
+        """Validate all draft lines in this census."""
+        for census in self:
+            if census.state == "locked":
+                raise UserError(
+                    self.env._(
+                        "Cannot validate lines in a locked census. " "Unlock it first."
+                    )
+                )
+            draft_lines = census.line_ids.filtered(lambda ln: ln.state == "draft")
+            if draft_lines:
+                draft_lines.write({"state": "validated"})
+
+    def action_unvalidate_all_lines(self):
+        """Unvalidate all validated lines in this census."""
+        for census in self:
+            if census.state == "locked":
+                raise UserError(
+                    self.env._(
+                        "Cannot unvalidate lines in a locked census. "
+                        "Unlock it first."
+                    )
+                )
+            validated_lines = census.line_ids.filtered(
+                lambda ln: ln.state == "validated"
+            )
+            if validated_lines:
+                validated_lines.write({"state": "draft"})
