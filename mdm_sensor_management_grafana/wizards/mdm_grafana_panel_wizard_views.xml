@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="mdm_grafana_panel_wizard_view_form" model="ir.ui.view">
+        <field name="name">mdm.grafana.panel.wizard.form</field>
+        <field name="model">mdm.grafana.panel.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Create Grafana Panel">
+                <sheet>
+                    <group string="Sensor Type">
+                        <group>
+                            <field name="sensor_type_id"/>
+                            <field name="uom_id"/>
+                        </group>
+                    </group>
+                    <group string="Panel Type">
+                        <field name="panel_type" widget="radio" nolabel="1"/>
+                    </group>
+                    <group string="Device Selection">
+                        <group>
+                            <field name="all_devices"/>
+                        </group>
+                    </group>
+                    <group string="Device and Sensor Selection">
+                        <group>
+                            <!-- Single device selection -->
+                            <field name="device_id"
+                                   domain="[('sensor_ids.type_id', '=', sensor_type_id)]"
+                                   options="{'no_create': True, 'no_edit': True}"
+                                   attrs="{'invisible': [('all_devices', '=', True)],
+                                           'required': [('all_devices', '=', False)]}"/>
+                            <!-- Multiple devices selection -->
+                            <field name="device_ids"
+                                   widget="many2many_tags"
+                                   domain="[('sensor_ids.type_id', '=', sensor_type_id)]"
+                                   options="{'no_create': True, 'no_edit': True}"
+                                   attrs="{'invisible': [('all_devices', '=', False)],
+                                           'required': [('all_devices', '=', True)]}"/>
+                        </group>
+                        <group>
+                            <!-- Mono-sensor / histogram + single device: pick one sensor -->
+                            <field name="sensor_id"
+                                   domain="[('device_id', '=', device_id),
+                                            ('type_id', '=', sensor_type_id)]"
+                                   options="{'no_create': True, 'no_edit': True}"
+                                   attrs="{'invisible': ['|', ('panel_type', '=', 'multi_sensor'), ('all_devices', '=', True)],
+                                           'required': [('panel_type', 'in', ['mono_sensor', 'histogram']), ('all_devices', '=', False)]}"/>
+                            <!-- Multi-sensor OR multi-device: pick several sensors -->
+                            <field name="sensor_ids"
+                                   widget="many2many_tags"
+                                   domain="[('type_id', '=', sensor_type_id)]"
+                                   options="{'no_create': True, 'no_edit': True}"
+                                   attrs="{'invisible': ['&amp;', ('panel_type', '!=', 'multi_sensor'), ('all_devices', '=', False)],
+                                           'required': ['|', ('panel_type', '=', 'multi_sensor'), ('all_devices', '=', True)]}"/>
+                        </group>
+                    </group>
+                    <group string="Dashboard">
+                        <group>
+                            <field name="dashboard_name"/>
+                            <field name="dashboard_title"/>
+                        </group>
+                        <group>
+                            <field name="dashboard_uid"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_create_and_import"
+                            string="Create and Import"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel"
+                            class="btn-default"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

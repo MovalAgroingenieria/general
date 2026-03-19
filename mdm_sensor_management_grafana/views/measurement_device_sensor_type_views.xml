@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="mdm_sensor_type_view_form_grafana_inherit" model="ir.ui.view">
+        <field name="name">Sensor Type Form (Grafana)</field>
+        <field name="model">mdm.measurement.device.sensor.type</field>
+        <field name="inherit_id" ref="mdm_sensor_management.mdm_sensor_type_view_form"/>
+        <field name="arch" type="xml">
+             <xpath expr="//field[@name='name']" position="before">
+                <field name="grafana_dashboard_ids" invisible="1"/>
+            </xpath>
+            <xpath expr="//div[@name='buttons']" position="inside">
+                <button name="action_view_grafana_panels"
+                        type="object"
+                        class="oe_stat_button oe_read_only"
+                        icon="fa-grafana-logo"
+                        string="Grafana Panels"
+                        attrs="{'invisible': ['|', ('id', '=', False), ('grafana_dashboard_ids', '=', [])]}"/>
+                <button name="action_delete_grafana_panel"
+                        type="object"
+                        class="oe_stat_button oe_read_only"
+                        icon="fa-trash"
+                        string="Delete Panel"
+                        confirm="This will delete the dashboard from both Grafana and Odoo. Are you sure?"
+                        attrs="{'invisible': ['|', ('id', '=', False), ('grafana_dashboard_ids', '=', [])]}"/>
+            </xpath>
+            <xpath expr="//form/sheet" position="before">
+                <header>
+                    <button name="action_open_grafana_panel_wizard"
+                            string="Create Grafana Panel"
+                            type="object"
+                            class="btn-primary"
+                            attrs="{'invisible': ['|', ('id', '=', False), ('grafana_dashboard_ids', '!=', [])]}"/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
