@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_partner_view_form_assembly" model="ir.ui.view">
+        <field name="name">res.partner.form.assembly</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_open_assembly_attendees" type="object" class="oe_stat_button" icon="fa-users" invisible="count_assembly_attendees == 0">
+                    <div class="o_form_field o_stat_info">
+                        <span class="o_stat_value"><field name="count_assembly_attendees"/></span>
+                        <span class="o_stat_text">Attendances</span>
+                    </div>
+                </button>
+                <button name="action_open_assembly_delegations" type="object" class="oe_stat_button" icon="fa-hand-o-right" invisible="count_assembly_delegations == 0">
+                    <div class="o_form_field o_stat_info">
+                        <span class="o_stat_value"><field name="count_assembly_delegations"/></span>
+                        <span class="o_stat_text">Delegations</span>
+                    </div>
+                </button>
+                <button name="action_open_assembly_representations" type="object" class="oe_stat_button" icon="fa-user-o" invisible="count_assembly_representations == 0">
+                    <div class="o_form_field o_stat_info">
+                        <span class="o_stat_value"><field name="count_assembly_representations"/></span>
+                        <span class="o_stat_text">Representations</span>
+                    </div>
+                </button>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Assemblies" name="assemblies">
+                    <group>
+                        <field name="assembly_excluded"/>
+                    </group>
+                    <field name="assembly_attendee_ids" readonly="1">
+                        <list>
+                            <field name="assembly_id"/>
+                            <field name="participant_partner_id"/>
+                            <field name="attendee_state"/>
+                            <field name="date_register"/>
+                        </list>
+                    </field>
+                    <field name="assembly_delegation_ids" readonly="1">
+                        <list>
+                            <field name="assembly_id"/>
+                            <field name="delegate_partner_id"/>
+                            <field name="delegation_state"/>
+                        </list>
+                    </field>
+                    <field name="assembly_representation_ids" readonly="1">
+                        <list>
+                            <field name="assembly_id"/>
+                            <field name="agent_id"/>
+                            <field name="representation_state"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

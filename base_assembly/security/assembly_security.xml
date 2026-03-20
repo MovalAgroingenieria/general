@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="assembly_group_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="base.module_category_administration"/>
+        <field name="comment">View assemblies, manage own attendance and delegations.</field>
+    </record>
+    <record id="assembly_group_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="base.module_category_administration"/>
+        <field name="implied_ids" eval="[(4, ref('assembly_group_user'))]"/>
+        <field name="comment">Full access to assemblies, agenda, votings. Implies User; record rules OR so manager sees all.</field>
+    </record>
+    <record id="assembly_attendee_rule_user" model="ir.rule">
+        <field name="name">Assembly attendee: own only</field>
+        <field name="model_id" ref="model_assembly_attendee"/>
+        <field name="groups" eval="[(4, ref('assembly_group_user'))]"/>
+        <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+    </record>
+    <record id="assembly_delegation_rule_user" model="ir.rule">
+        <field name="name">Assembly delegation: own only</field>
+        <field name="model_id" ref="model_assembly_delegation"/>
+        <field name="groups" eval="[(4, ref('assembly_group_user'))]"/>
+        <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+    </record>
+    <record id="assembly_representation_rule_user" model="ir.rule">
+        <field name="name">Assembly representation: own only</field>
+        <field name="model_id" ref="model_assembly_representation"/>
+        <field name="groups" eval="[(4, ref('assembly_group_user'))]"/>
+        <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+    </record>
+    <record id="assembly_voting_line_rule_user" model="ir.rule">
+        <field name="name">Assembly voting line: own attendee only</field>
+        <field name="model_id" ref="model_assembly_voting_line"/>
+        <field name="groups" eval="[(4, ref('assembly_group_user'))]"/>
+        <field name="domain_force">[('attendee_id.partner_id', '=', user.partner_id.id)]</field>
+    </record>
+</odoo>

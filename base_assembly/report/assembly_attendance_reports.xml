@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 11.1 Attendees list (all) -->
+    <record id="assembly_assembly_action_report_attendance" model="ir.actions.report">
+        <field name="name">Attendees list (all)</field>
+        <field name="model">assembly.assembly</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_assembly.report_assembly_attendance</field>
+        <field name="report_file">base_assembly.report_assembly_attendance</field>
+        <field name="print_report_name">'Attendees - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_assembly_assembly"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- 11.2 Attendees list (present only) -->
+    <record id="assembly_assembly_action_report_attendance_with_signature" model="ir.actions.report">
+        <field name="name">Attendees list (present only)</field>
+        <field name="model">assembly.assembly</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_assembly.report_assembly_attendance_present</field>
+        <field name="report_file">base_assembly.report_assembly_attendance_present</field>
+        <field name="print_report_name">'Attendees present - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_assembly_assembly"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- 11.3 Attendees list with delegated votes -->
+    <record id="assembly_assembly_action_report_attendance_with_delegationvote" model="ir.actions.report">
+        <field name="name">Attendees list (with delegated votes)</field>
+        <field name="model">assembly.assembly</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_assembly.report_assembly_attendance_delegation</field>
+        <field name="report_file">base_assembly.report_assembly_attendance_delegation</field>
+        <field name="print_report_name">'Attendees and delegations - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_assembly_assembly"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- 11.8 Individual call -->
+    <record id="assembly_attendee_action_report_individual_call" model="ir.actions.report">
+        <field name="name">Individual call</field>
+        <field name="model">assembly.attendee</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_assembly.report_assembly_attendee_individual_call</field>
+        <field name="report_file">base_assembly.report_assembly_attendee_individual_call</field>
+        <field name="print_report_name">'Call - %s - %s' % (object.assembly_id.name, object.partner_id.name)</field>
+        <field name="binding_model_id" ref="model_assembly_attendee"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- 11.9 Individual call with votes -->
+    <record id="assembly_attendee_action_report_individual_call_with_votes" model="ir.actions.report">
+        <field name="name">Individual call (with votes)</field>
+        <field name="model">assembly.attendee</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_assembly.report_assembly_attendee_individual_call_votes</field>
+        <field name="report_file">base_assembly.report_assembly_attendee_individual_call_votes</field>
+        <field name="print_report_name">'Call with votes - %s - %s' % (object.assembly_id.name, object.partner_id.name)</field>
+        <field name="binding_model_id" ref="model_assembly_attendee"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Template: listado todos -->
+    <template id="report_assembly_attendance">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="base_assembly.report_assembly_attendance_doc_all"/>
+        </t>
+    </template>
+
+    <!-- Template: listado solo presentes -->
+    <template id="report_assembly_attendance_present">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="base_assembly.report_assembly_attendance_doc_present"/>
+        </t>
+    </template>
+
+    <!-- Template: listado con delegaciones -->
+    <template id="report_assembly_attendance_delegation">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="base_assembly.report_assembly_attendance_doc_delegation"/>
+        </t>
+    </template>
+
+    <!-- Document: listado todos -->
+    <template id="report_assembly_attendance_doc_all">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="attendees" t-value="o.attendee_ids.sorted(key=lambda a: a.partner_id.name)"/>
+                <div class="page">
+                    <div class="text-center mb-4">
+                        <h4><strong t-field="o.name"/></h4>
+                        <div t-if="o.date_first_call">
+                            <span t-field="o.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
+                            <t t-if="o.location"> – <span t-field="o.location"/></t>
+                        </div>
+                    </div>
+                    <div class="row"><div class="col-12"><strong>Attendees list</strong></div></div>
+                    <table class="table table-sm table-bordered mt-2">
+                        <thead>
+                            <tr>
+                                <th>Partner</th>
+                                <th>Represents</th>
+                                <th>TIN</th>
+                                <th>State</th>
+                                <th class="text-end">Total votes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="attendees" t-as="att">
+                                <td><span t-field="att.partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/></td>
+                                <td>
+                                    <t t-if="att.participant_partner_id and att.participant_partner_id != att.partner_id">
+                                        <span t-field="att.participant_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
+                                    </t>
+                                    <t t-else="">–</t>
+                                </td>
+                                <td><span t-field="att.partner_id.vat"/></td>
+                                <td><span t-field="att.attendee_state"/></td>
+                                <td class="text-end">
+                                    <t t-set="total" t-value="sum(att.attendee_vote_ids.mapped('attendee_vote_total'))"/>
+                                    <span t-esc="total"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Document: listado solo presentes -->
+    <template id="report_assembly_attendance_doc_present">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="attendees" t-value="o.attendee_ids.filtered(lambda a: a.attendee_state == 'confirmed').sorted(key=lambda a: a.partner_id.name)"/>
+                <div class="page">
+                    <div class="text-center mb-4">
+                        <h4><strong t-field="o.name"/></h4>
+                        <div t-if="o.date_first_call">
+                            <span t-field="o.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
+                            <t t-if="o.location"> – <span t-field="o.location"/></t>
+                        </div>
+                    </div>
+                    <div class="row"><div class="col-12"><strong>Attendees list (present only)</strong></div></div>
+                    <table class="table table-sm table-bordered mt-2">
+                        <thead>
+                            <tr>
+                                <th>Partner</th>
+                                <th>Represents</th>
+                                <th>TIN</th>
+                                <th class="text-end">Total votes</th>
+                                <th>Signature</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="attendees" t-as="att">
+                                <td><span t-field="att.partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/></td>
+                                <td>
+                                    <t t-if="att.participant_partner_id and att.participant_partner_id != att.partner_id">
+                                        <span t-field="att.participant_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
+                                    </t>
+                                    <t t-else="">–</t>
+                                </td>
+                                <td><span t-field="att.partner_id.vat"/></td>
+                                <td class="text-end">
+                                    <t t-set="total" t-value="sum(att.attendee_vote_ids.mapped('attendee_vote_total'))"/>
+                                    <span t-esc="total"/>
+                                </td>
+                                <td><span t-field="att.attendance_signature"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Document: listado con delegaciones -->
+    <template id="report_assembly_attendance_doc_delegation">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="attendees" t-value="o.attendee_ids.sorted(key=lambda a: a.partner_id.name)"/>
+                <div class="page">
+                    <div class="text-center mb-4">
+                        <h4><strong t-field="o.name"/></h4>
+                        <div t-if="o.date_first_call">
+                            <span t-field="o.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
+                            <t t-if="o.location"> – <span t-field="o.location"/></t>
+                        </div>
+                    </div>
+                    <div class="row"><div class="col-12"><strong>Attendees list (with delegated votes)</strong></div></div>
+                    <table class="table table-sm table-bordered mt-2">
+                        <thead>
+                            <tr>
+                                <th>Partner</th>
+                                <th>Represents</th>
+                                <th>TIN</th>
+                                <th>State</th>
+                                <th class="text-end">Total votes</th>
+                                <th>Delegations received</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="attendees" t-as="att">
+                                <td><span t-field="att.partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/></td>
+                                <td>
+                                    <t t-if="att.participant_partner_id and att.participant_partner_id != att.partner_id">
+                                        <span t-field="att.participant_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
+                                    </t>
+                                    <t t-else="">–</t>
+                                </td>
+                                <td><span t-field="att.partner_id.vat"/></td>
+                                <td><span t-field="att.attendee_state"/></td>
+                                <td class="text-end">
+                                    <t t-set="total" t-value="sum(att.attendee_vote_ids.mapped('attendee_vote_total'))"/>
+                                    <span t-esc="total"/>
+                                </td>
+                                <td>
+                                    <t t-set="delegations_in" t-value="o.delegation_ids.filtered(lambda d: d.delegate_partner_id == att.partner_id and d.delegation_state == 'confirmed')"/>
+                                    <t t-if="delegations_in">
+                                        <t t-foreach="delegations_in" t-as="del_in">
+                                            <span t-field="del_in.partner_id.name"/>
+                                            <t t-if="del_in.vote_type_ids"> (<t t-foreach="del_in.vote_type_ids" t-as="vt"><span t-field="vt.name"/><t t-if="vt != del_in.vote_type_ids[-1]">, </t></t>)</t>
+                                            <t t-if="del_in != delegations_in[-1]">; </t>
+                                        </t>
+                                    </t>
+                                    <t t-else="">–</t>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- 11.8 Individual call (document) -->
+    <template id="report_assembly_attendee_individual_call">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="base_assembly.report_assembly_attendee_call_doc"/>
+        </t>
+    </template>
+
+    <!-- 11.9 Individual call with votes (document) -->
+    <template id="report_assembly_attendee_individual_call_votes">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="base_assembly.report_assembly_attendee_call_doc_votes"/>
+        </t>
+    </template>
+
+    <template id="report_assembly_attendee_call_doc">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="assembly" t-value="o.assembly_id"/>
+                <div class="page">
+                    <div class="mb-4">
+                        <strong>Addressee</strong>
+                        <div t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['address', 'name', 'phone', 'vat'], 'no_marker': True}"/>
+                    </div>
+                    <div class="text-center mb-4">
+                        <h4><strong>Individual call</strong></h4>
+                        <h5><span t-field="assembly.name"/></h5>
+                        <div t-if="assembly.date_first_call">
+                            <span t-field="assembly.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
+                            <t t-if="assembly.location"> – <span t-field="assembly.location"/></t>
+                        </div>
+                    </div>
+                    <t t-set="publication_html" t-value="assembly.get_rendered_publication_text()"/>
+                    <div t-if="publication_html" class="mb-4" t-out="publication_html"/>
+                    <div t-elif="assembly.description" class="mb-4">
+                        <div t-field="assembly.description"/>
+                    </div>
+                    <div class="row">
+                        <div class="col-12"><strong>Agenda</strong></div>
+                    </div>
+                    <ol class="mt-2">
+                        <li t-foreach="assembly.agenda_ids.sorted(key=lambda x: x.sequence)" t-as="item">
+                            <span t-field="item.name"/>
+                            <t t-if="item.requires_vote and item.vote_type_id"> (<span t-field="item.vote_type_id.name"/>)</t>
+                        </li>
+                    </ol>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_assembly_attendee_call_doc_votes">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="assembly" t-value="o.assembly_id"/>
+                <div class="page">
+                    <div class="mb-4">
+                        <strong>Addressee</strong>
+                        <div t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['address', 'name', 'phone', 'vat'], 'no_marker': True}"/>
+                    </div>
+                    <div class="text-center mb-4">
+                        <h4><strong>Individual call (with votes)</strong></h4>
+                        <h5><span t-field="assembly.name"/></h5>
+                        <div t-if="assembly.date_first_call">
+                            <span t-field="assembly.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
+                            <t t-if="assembly.location"> – <span t-field="assembly.location"/></t>
+                        </div>
+                    </div>
+                    <t t-set="publication_html" t-value="assembly.get_rendered_publication_text()"/>
+                    <div t-if="publication_html" class="mb-4" t-out="publication_html"/>
+                    <div t-elif="assembly.description" class="mb-4">
+                        <div t-field="assembly.description"/>
+                    </div>
+                    <div class="row">
+                        <div class="col-12"><strong>Agenda</strong></div>
+                    </div>
+                    <ol class="mt-2">
+                        <li t-foreach="assembly.agenda_ids.sorted(key=lambda x: x.sequence)" t-as="item">
+                            <span t-field="item.name"/>
+                            <t t-if="item.requires_vote and item.vote_type_id"> (<span t-field="item.vote_type_id.name"/>)</t>
+                        </li>
+                    </ol>
+                    <t t-if="o.attendee_vote_ids">
+                        <div class="row mt-4">
+                            <div class="col-12"><strong>Votes by type</strong></div>
+                        </div>
+                        <table class="table table-sm table-bordered mt-2">
+                            <thead>
+                                <tr>
+                                    <th>Vote type</th>
+                                    <th class="text-end">Own</th>
+                                    <th class="text-end">Delegated in</th>
+                                    <th class="text-end">Delegated out</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.attendee_vote_ids" t-as="av">
+                                    <td><span t-field="av.vote_type_id.name"/></td>
+                                    <td class="text-end"><span t-field="av.own_votes"/></td>
+                                    <td class="text-end"><span t-field="av.delegated_in_votes"/></td>
+                                    <td class="text-end"><span t-field="av.delegated_out_votes"/></td>
+                                    <td class="text-end"><span t-field="av.attendee_vote_total"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

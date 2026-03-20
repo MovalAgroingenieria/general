@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="assembly_attendee_vote_view_tree" model="ir.ui.view">
+        <field name="name">assembly.attendee.vote.tree</field>
+        <field name="model">assembly.attendee.vote</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" delete="0">
+                <field name="vote_type_id"/>
+                <field name="own_votes"/>
+                <field name="delegated_out_votes"/>
+                <field name="delegated_in_votes"/>
+                <field name="attendee_vote_total"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="assembly_attendee_view_form" model="ir.ui.view">
+        <field name="name">assembly.attendee.form</field>
+        <field name="model">assembly.attendee</field>
+        <field name="arch" type="xml">
+            <form string="Attendee">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_assembly" type="object" class="oe_stat_button" icon="fa-building-o" title="Assembly">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_text">Assembly</span>
+                            </div>
+                        </button>
+                        <button name="action_open_attendee_votes" type="object" class="oe_stat_button" icon="fa-pie-chart">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_value"><field name="count_attendee_votes"/></span>
+                                <span class="o_stat_text">Votes by type</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="partner_id" string="Partner:"/>
+                        <h1><field name="partner_id" options="{'no_create': True}" style="margin-top:5px;"/></h1>
+                    </div>
+                    <group>
+                        <group string="Attendee data">
+                            <field name="assembly_id"/>
+                            <field name="participant_partner_id" string="Participant (who attends)" help="Who actually attends (default: partner). Set to representative when applicable."/>
+                            <field name="partner_vat" string="TIN"/>
+                            <field name="attendance_type"/>
+                            <field name="attendee_state"/>
+                            <field name="date_register"/>
+                        </group>
+                        <group string="Votes">
+                            <field name="total_votes" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Attendance">
+                        <field name="attendance_notes" placeholder="Notes for this attendance…" nolabel="1" colspan="2"/>
+                        <field name="attendance_signature" string="Signature" options="{'size': [200, 100]}"/>
+                        <field name="attendance_url" readonly="1" placeholder="URL for QR code" colspan="2"/>
+                    </group>
+                    <group string="Votes by type">
+                        <field name="attendee_vote_ids" readonly="1" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="assembly_attendee_view_tree" model="ir.ui.view">
+        <field name="name">assembly.attendee.tree</field>
+        <field name="model">assembly.attendee</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="assembly_id"/>
+                <field name="partner_id"/>
+                <field name="participant_partner_id" string="Represents"/>
+                <field name="partner_vat" string="TIN"/>
+                <field name="attendance_type"/>
+                <field name="attendee_state"/>
+                <field name="date_register"/>
+                <field name="total_votes" sum="Total votes"/>
+                <field name="attendance_notes"/>
+                <field name="attendance_signature" string="Signature"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="assembly_attendee_view_search" model="ir.ui.view">
+        <field name="name">assembly.attendee.search</field>
+        <field name="model">assembly.attendee</field>
+        <field name="arch" type="xml">
+            <search string="Attendees">
+                <field name="partner_id"/>
+                <field name="participant_partner_id"/>
+                <field name="partner_vat" string="TIN"/>
+                <field name="assembly_id"/>
+                <filter string="Registered" name="filter_registered" domain="[('attendee_state','=','registered')]"/>
+                <filter string="Confirmed" name="filter_confirmed" domain="[('attendee_state','=','confirmed')]"/>
+                <filter string="Absent" name="filter_absent" domain="[('attendee_state','=','absent')]"/>
+                <separator/>
+                <filter string="Present" name="filter_present" domain="[('attendance_type','=','present')]"/>
+                <filter string="Remote" name="filter_remote" domain="[('attendance_type','=','remote')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Assembly" name="group_assembly" context="{'group_by': 'assembly_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

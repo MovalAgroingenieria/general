@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 11.6 Voting ballot (per assembly) -->
+    <record id="assembly_assembly_action_report_voting_ballot" model="ir.actions.report">
+        <field name="name">Voting ballot</field>
+        <field name="model">assembly.assembly</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_assembly.report_assembly_voting_ballot</field>
+        <field name="report_file">base_assembly.report_assembly_voting_ballot</field>
+        <field name="print_report_name">'Voting ballot - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_assembly_assembly"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- 11.7 Nominative voting ballot (per attendee) -->
+    <record id="assembly_attendee_action_report_voting_ballot_nominative" model="ir.actions.report">
+        <field name="name">Voting ballot (nominative)</field>
+        <field name="model">assembly.attendee</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_assembly.report_assembly_voting_ballot_nominative</field>
+        <field name="report_file">base_assembly.report_assembly_voting_ballot_nominative</field>
+        <field name="print_report_name">'Ballot - %s - %s' % (object.assembly_id.name, object.partner_id.name)</field>
+        <field name="binding_model_id" ref="model_assembly_attendee"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_assembly_voting_ballot">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="base_assembly.report_assembly_voting_ballot_doc"/>
+        </t>
+    </template>
+
+    <template id="report_assembly_voting_ballot_doc">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <div class="text-center mb-4">
+                        <h4><strong>Voting ballot</strong></h4>
+                        <h5><span t-field="o.name"/></h5>
+                        <div t-if="o.date_first_call">
+                            <span t-field="o.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
+                            <t t-if="o.location"> – <span t-field="o.location"/></t>
+                        </div>
+                    </div>
+                    <t t-set="ballot_intro" t-value="o.get_rendered_ballot_intro_text()"/>
+                    <div t-if="ballot_intro" class="mb-4" t-out="ballot_intro"/>
+                    <p><strong>Attendee / representative:</strong> _________________________________</p>
+                    <p><strong>Total votes:</strong> _________________________________</p>
+                    <hr/>
+                    <div class="row mt-4"><div class="col-12"><strong>Agenda items to vote</strong></div></div>
+                    <t t-set="vote_items" t-value="o.agenda_ids.filtered(lambda a: a.requires_vote).sorted(key=lambda x: x.sequence)"/>
+                    <t t-foreach="vote_items" t-as="item">
+                        <div class="mt-3 p-2 border">
+                            <strong><span t-esc="item.sequence"/>.</strong> <span t-field="item.name"/>
+                            <t t-if="item.vote_type_id"> (<span t-field="item.vote_type_id.name"/>)</t>
+                            <t t-if="item.vote_item_type == 'multiple_options' and item.option_ids">
+                                <div class="row mt-2">
+                                    <t t-foreach="item.option_ids" t-as="opt">
+                                        <span class="col-12 col-md-6 mt-1">☐ <span t-field="opt.name"/></span>
+                                    </t>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="row mt-2">
+                                    <span class="col-3">Yes ☐</span>
+                                    <span class="col-3">No ☐</span>
+                                    <span class="col-3">Abstention ☐</span>
+                                    <span class="col-3">Blank ☐</span>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_assembly_voting_ballot_nominative">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="base_assembly.report_assembly_voting_ballot_nominative_doc"/>
+        </t>
+    </template>
+
+    <template id="report_assembly_voting_ballot_nominative_doc">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="assembly" t-value="o.assembly_id"/>
+                <t t-set="total_votes" t-value="sum(o.attendee_vote_ids.mapped('attendee_vote_total'))"/>
+                <div class="page">
+                    <div class="text-center mb-4">
+                        <h4><strong>Voting ballot (nominative)</strong></h4>
+                        <h5><span t-field="assembly.name"/></h5>
+                        <div t-if="assembly.date_first_call">
+                            <span t-field="assembly.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
+                            <t t-if="assembly.location"> – <span t-field="assembly.location"/></t>
+                        </div>
+                    </div>
+                    <t t-set="ballot_nominative_intro" t-value="assembly.get_rendered_ballot_nominative_intro_text()"/>
+                    <div t-if="ballot_nominative_intro" class="mb-4" t-out="ballot_nominative_intro"/>
+                    <p><strong>Attendee:</strong> <span t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
+                        <t t-if="o.participant_partner_id and o.participant_partner_id != o.partner_id">
+                            <span class="text-muted"> (represents <span t-field="o.participant_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>)</span>
+                        </t>
+                    </p>
+                    <p><strong>Total votes:</strong> <span t-esc="total_votes"/></p>
+                    <hr/>
+                    <div class="row mt-4"><div class="col-12"><strong>Agenda items to vote</strong></div></div>
+                    <t t-set="vote_items" t-value="assembly.agenda_ids.filtered(lambda a: a.requires_vote).sorted(key=lambda x: x.sequence)"/>
+                    <t t-foreach="vote_items" t-as="item">
+                        <div class="mt-3 p-2 border">
+                            <strong><span t-esc="item.sequence"/>.</strong> <span t-field="item.name"/>
+                            <t t-if="item.vote_type_id"> (<span t-field="item.vote_type_id.name"/>)</t>
+                            <t t-if="item.vote_item_type == 'multiple_options' and item.option_ids">
+                                <div class="row mt-2">
+                                    <t t-foreach="item.option_ids" t-as="opt">
+                                        <span class="col-12 col-md-6 mt-1">☐ <span t-field="opt.name"/></span>
+                                    </t>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="row mt-2">
+                                    <span class="col-3">Yes ☐</span>
+                                    <span class="col-3">No ☐</span>
+                                    <span class="col-3">Abstention ☐</span>
+                                    <span class="col-3">Blank ☐</span>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

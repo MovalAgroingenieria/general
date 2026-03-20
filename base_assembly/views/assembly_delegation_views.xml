@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="assembly_delegation_view_tree" model="ir.ui.view">
+        <field name="name">assembly.delegation.tree</field>
+        <field name="model">assembly.delegation</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" default_order="partner_id">
+                <field name="assembly_id"/>
+                <field name="partner_id" string="Delegator"/>
+                <field name="delegate_partner_id" string="Delegate"/>
+                <field name="vote_type_ids" widget="many2many_tags"/>
+                <field name="delegation_state"/>
+                <field name="date_delegation"/>
+            </list>
+        </field>
+    </record>
+    <record id="assembly_delegation_view_form" model="ir.ui.view">
+        <field name="name">assembly.delegation.form</field>
+        <field name="model">assembly.delegation</field>
+        <field name="arch" type="xml">
+            <form string="Delegation">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_assembly" type="object" class="oe_stat_button" icon="fa-building-o" title="Assembly">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_text">Assembly</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="partner_id" string="Delegator:"/>
+                        <h1><field name="partner_id" options="{'no_create': True}" style="margin-top:5px;"/></h1>
+                    </div>
+                    <group>
+                        <group string="Delegation">
+                            <field name="assembly_id"/>
+                            <field name="delegate_partner_id" string="Delegate" options="{'no_create': True}"/>
+                            <field name="vote_type_ids" widget="many2many_tags"/>
+                            <field name="delegation_state"/>
+                            <field name="date_delegation"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="assembly_delegation_view_search" model="ir.ui.view">
+        <field name="name">assembly.delegation.search</field>
+        <field name="model">assembly.delegation</field>
+        <field name="arch" type="xml">
+            <search string="Delegations">
+                <field name="partner_id" string="Delegator"/>
+                <field name="delegate_partner_id" string="Delegate"/>
+                <field name="assembly_id"/>
+                <filter string="Draft" name="filter_draft" domain="[('delegation_state','=','draft')]"/>
+                <filter string="Confirmed" name="filter_confirmed" domain="[('delegation_state','=','confirmed')]"/>
+                <filter string="Revoked" name="filter_revoked" domain="[('delegation_state','=','revoked')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Assembly" name="group_assembly" context="{'group_by': 'assembly_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

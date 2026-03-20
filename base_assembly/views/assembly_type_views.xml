@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="assembly_type_view_tree" model="ir.ui.view">
+        <field name="name">assembly.type.tree</field>
+        <field name="model">assembly.type</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="not active">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="vote_type_ids" widget="many2many_tags"/>
+            </list>
+        </field>
+    </record>
+    <record id="assembly_type_view_form" model="ir.ui.view">
+        <field name="name">assembly.type.form</field>
+        <field name="model">assembly.type</field>
+        <field name="arch" type="xml">
+            <form string="Assembly type">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="vote_type_ids" widget="many2many_tags"/>
+                        </group>
+                        <group>
+                            <field name="default_quorum_type"/>
+                            <field name="default_quorum_value"/>
+                            <field name="default_quorum_second_call_type"/>
+                            <field name="default_quorum_second_call_value"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Default location">
+                        <field name="default_street"/>
+                        <field name="default_city"/>
+                        <field name="default_zip"/>
+                        <field name="default_state_id"/>
+                        <field name="default_country_id"/>
+                    </group>
+                    <group string="Default officers">
+                        <field name="default_president_id"/>
+                        <field name="default_secretary_id"/>
+                    </group>
+                    <group>
+                        <field name="description" placeholder="Description"/>
+                        <field name="partner_domain" widget="domain" options="{'model': 'res.partner'}"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

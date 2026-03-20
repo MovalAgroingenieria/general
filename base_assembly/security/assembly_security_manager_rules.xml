@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Manager full-access rules: loaded without noupdate so they are created on upgrade.
+     Combined with User "own only" rules via OR, so users with Manager see all records. -->
+<odoo>
+    <record id="assembly_attendee_rule_manager" model="ir.rule">
+        <field name="name">Assembly attendee: manager full access</field>
+        <field name="model_id" ref="model_assembly_attendee"/>
+        <field name="groups" eval="[(4, ref('assembly_group_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="assembly_delegation_rule_manager" model="ir.rule">
+        <field name="name">Assembly delegation: manager full access</field>
+        <field name="model_id" ref="model_assembly_delegation"/>
+        <field name="groups" eval="[(4, ref('assembly_group_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="assembly_representation_rule_manager" model="ir.rule">
+        <field name="name">Assembly representation: manager full access</field>
+        <field name="model_id" ref="model_assembly_representation"/>
+        <field name="groups" eval="[(4, ref('assembly_group_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+    <record id="assembly_voting_line_rule_manager" model="ir.rule">
+        <field name="name">Assembly voting line: manager full access</field>
+        <field name="model_id" ref="model_assembly_voting_line"/>
+        <field name="groups" eval="[(4, ref('assembly_group_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+</odoo>

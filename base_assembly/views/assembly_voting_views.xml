@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="assembly_voting_result_view_tree" model="ir.ui.view">
+        <field name="name">assembly.voting.result.tree</field>
+        <field name="model">assembly.voting.result</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" delete="0">
+                <field name="vote_option"/>
+                <field name="total_votes"/>
+                <field name="result_percentage"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="assembly_voting_line_view_tree" model="ir.ui.view">
+        <field name="name">assembly.voting.line.tree</field>
+        <field name="model">assembly.voting.line</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" create="1">
+                <field name="attendee_id"/>
+                <field name="partner_id"/>
+                <field name="vote_option"/>
+                <field name="votes_applied"/>
+                <field name="vote_channel"/>
+                <field name="vote_cast_at"/>
+                <field name="vote_cast_by_user_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="assembly_voting_view_form" model="ir.ui.view">
+        <field name="name">assembly.voting.form</field>
+        <field name="model">assembly.voting</field>
+        <field name="arch" type="xml">
+            <form string="Voting">
+                <header>
+                    <button name="action_close" string="Close voting" type="object" class="btn-primary" invisible="voting_state != 'open'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_cancel" string="Cancel voting" type="object" invisible="voting_state != 'open'" groups="base_assembly.assembly_group_manager"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_assembly" type="object" class="oe_stat_button" icon="fa-building-o" title="Assembly">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_text">Assembly</span>
+                            </div>
+                        </button>
+                        <button name="action_open_agenda_item" type="object" class="oe_stat_button" icon="fa-list-ol" title="Agenda item">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_text">Agenda</span>
+                            </div>
+                        </button>
+                        <button name="action_open_vote_lines" type="object" class="oe_stat_button" icon="fa-check-square-o">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_value"><field name="count_vote_lines"/></span>
+                                <span class="o_stat_text">Votes</span>
+                            </div>
+                        </button>
+                        <button name="action_open_results" type="object" class="oe_stat_button" icon="fa-bar-chart">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_value"><field name="count_results"/></span>
+                                <span class="o_stat_text">Results</span>
+                            </div>
+                        </button>
+                    </div>
+                    <group>
+                        <field name="agenda_id"/>
+                        <field name="vote_type_id"/>
+                        <field name="name"/>
+                        <field name="voting_state"/>
+                        <field name="allow_online_voting"/>
+                        <field name="date_open"/>
+                        <field name="date_close"/>
+                        <field name="total_votes_cast"/>
+                        <field name="total_votes_possible"/>
+                        <field name="participation_percentage"/>
+                    </group>
+                    <notebook>
+                        <page string="Votes cast" name="lines">
+                            <field name="vote_line_ids"/>
+                        </page>
+                        <page string="Results" name="results">
+                            <field name="result_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="assembly_voting_view_tree" model="ir.ui.view">
+        <field name="name">assembly.voting.tree</field>
+        <field name="model">assembly.voting</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="agenda_id"/>
+                <field name="vote_type_id"/>
+                <field name="voting_state"/>
+                <field name="date_open"/>
+                <field name="total_votes_cast"/>
+                <field name="total_votes_possible"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="assembly_voting_view_search" model="ir.ui.view">
+        <field name="name">assembly.voting.search</field>
+        <field name="model">assembly.voting</field>
+        <field name="arch" type="xml">
+            <search string="Votings">
+                <field name="agenda_id"/>
+                <field name="vote_type_id"/>
+                <filter string="Open" name="filter_open" domain="[('voting_state','=','open')]"/>
+                <filter string="Closed" name="filter_closed" domain="[('voting_state','=','closed')]"/>
+                <filter string="Cancelled" name="filter_cancelled" domain="[('voting_state','=','cancelled')]"/>
+            </search>
+        </field>
+    </record>
+</odoo>
