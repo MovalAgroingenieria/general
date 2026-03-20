@@ -4,7 +4,7 @@
 import logging
 
 from jinja2.sandbox import SandboxedEnvironment
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools.safe_eval import safe_eval
 
@@ -88,7 +88,11 @@ class VoteType(models.Model):
                 num = int(num)
             else:
                 num = round(num, self.decimal_precision)
-            detail = f"Formula: {expr}\nResult: {num}"
+            detail = self.env._(
+                "Formula: %(formula)s\nResult: %(result)s",
+                formula=expr,
+                result=num,
+            )
             return num, detail
         except Exception as e:  # pylint: disable=broad-exception-caught
             _logger.warning(
@@ -107,10 +111,10 @@ class VoteType(models.Model):
         self.ensure_one()
         partner = self.env["res.partner"].browse(partner_id)
         if not partner.exists():
-            return {"error": _("Partner not found.")}
+            return {"error": self.env._("Partner not found.")}
         formula = (formula or "").strip()
         if not formula:
-            return {"error": _("Formula is empty.")}
+            return {"error": self.env._("Formula is empty.")}
         try:
             env = SandboxedEnvironment()
             if not formula.startswith("{{"):
@@ -118,13 +122,16 @@ class VoteType(models.Model):
             template = env.from_string(formula)
             result = template.render(partner=partner)
             if result is None or result == "":
-                return {"value": 0, "detail": _("Result: empty")}
+                return {"value": 0, "detail": self.env._("Result: empty")}
             num = float(result)
             if self.vote_value_type == "integer":
                 num = int(num)
             else:
                 num = round(num, self.decimal_precision)
-            return {"value": num, "detail": _("Result: %s") % num}
+            return {
+                "value": num,
+                "detail": self.env._("Result: %(result)s", result=num),
+            }
         except Exception as e:  # pylint: disable=broad-exception-caught
             return {"error": str(e)}
 
@@ -149,8 +156,7 @@ class VoteType(models.Model):
             value, detail = self.evaluate_formula(partner)
             if "Error:" in detail:
                 log_lines.append(
-                    "Partner %s (%s): %s"
-                    % (partner.id, partner.display_name, detail)
+                    "Partner %s (%s): %s" % (partner.id, partner.display_name, detail),
                 )
             vote = partner_vote_model.search(
                 [
@@ -182,9 +188,9 @@ class VoteType(models.Model):
                         "partner_id": partner.id,
                         "vote_type_id": self.id,
                         **vals,
-                    }
+                    },
                 )
-        summary = self.env._("%s partners processed.") % len(partners)
+        summary = self.env._("%(count)s partners processed.", count=len(partners))
         if log_lines:
             summary += "\n\n" + "\n".join(log_lines)
         else:
@@ -193,7 +199,7 @@ class VoteType(models.Model):
             {
                 "last_compute_date": fields.Datetime.now(),
                 "last_compute_log": summary,
-            }
+            },
         )
         return True
 
@@ -205,5 +211,7 @@ class VoteType(models.Model):
                 vote_type.action_recompute_votes()
             except Exception as e:  # pylint: disable=broad-exception-caught
                 _logger.exception(
-                    "base_vote cron: recompute %s failed: %s", vote_type.code, e
+                    "base_vote cron: recompute %s failed: %s",
+                    vote_type.code,
+                    e,
                 )

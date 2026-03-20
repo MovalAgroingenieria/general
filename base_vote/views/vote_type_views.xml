@@ -10,9 +10,6 @@
                             class="btn-primary" groups="base.group_system"/>
                 </header>
                 <sheet>
-                    <div class="oe_button_box" name="button_box">
-                        <field name="active" widget="boolean_button" options="{'terminology': 'archive'}"/>
-                    </div>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <group>
                         <group>
@@ -22,6 +19,7 @@
                             <field name="decimal_precision" invisible="vote_value_type != 'float'"/>
                         </group>
                         <group>
+                            <field name="active" invisible="1"/>
                             <field name="last_compute_date" readonly="1"/>
                             <field name="partner_vote_count" invisible="1"/>
                         </group>
