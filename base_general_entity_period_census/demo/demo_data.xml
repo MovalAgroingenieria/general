@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--
+        Demo data for period censuses.
+        Depends on demo data from base_general_entity:
+        - demo_primary_irrigation_north (ICN-001) with 3 members
+        - demo_primary_coop_central (ACC-002) with 2 members
+    -->
+
+    <!-- ===== Demo product for distribution ===== -->
+    <record id="demo_product_water" model="product.product">
+        <field name="name">Water Allocation (m³)</field>
+        <field name="type">service</field>
+        <field name="uom_id" ref="uom.product_uom_cubic_meter" />
+        <field name="uom_po_id" ref="uom.product_uom_cubic_meter" />
+    </record>
+
+    <!-- ===== Census: Irrigation North - January 2026 ===== -->
+    <record id="demo_census_icn_202601" model="general.entity.census">
+        <field
+            name="primary_partner_id"
+            ref="base_general_entity.demo_primary_irrigation_north"
+        />
+        <field name="period_date">2026-01-01</field>
+        <field name="period_type">monthly</field>
+        <field name="distribution_product_id" ref="demo_product_water" />
+        <field name="distribution_amount_day" eval="0.5" />
+        <field name="state">locked</field>
+    </record>
+
+    <!-- Lines for ICN January 2026 -->
+    <record id="demo_line_icn_202601_garcia" model="general.entity.census.line">
+        <field name="census_id" ref="demo_census_icn_202601" />
+        <field
+            name="member_partner_id"
+            ref="base_general_entity.demo_secondary_garcia"
+        />
+        <field name="shares" eval="10.0" />
+        <field name="state">validated</field>
+    </record>
+
+    <record id="demo_line_icn_202601_smith" model="general.entity.census.line">
+        <field name="census_id" ref="demo_census_icn_202601" />
+        <field
+            name="member_partner_id"
+            ref="base_general_entity.demo_secondary_smith"
+        />
+        <field name="shares" eval="5.0" />
+        <field name="state">validated</field>
+    </record>
+
+    <record id="demo_line_icn_202601_martinez" model="general.entity.census.line">
+        <field name="census_id" ref="demo_census_icn_202601" />
+        <field
+            name="member_partner_id"
+            ref="base_general_entity.demo_secondary_martinez"
+        />
+        <field name="shares" eval="8.0" />
+        <field name="state">validated</field>
+    </record>
+
+    <!-- Additional movements for García in January -->
+    <record id="demo_additional_icn_202601_garcia_01" model="general.entity.census.additional">
+        <field name="census_line_id" ref="demo_line_icn_202601_garcia" />
+        <field name="qty" eval="2.5" />
+        <field name="note">Extra allocation for drought compensation</field>
+    </record>
+
+    <record id="demo_additional_icn_202601_garcia_02" model="general.entity.census.additional">
+        <field name="census_line_id" ref="demo_line_icn_202601_garcia" />
+        <field name="qty" eval="-0.5" />
+        <field name="note">Correction: overestimation in previous period</field>
+    </record>
+
+    <!-- ===== Census: Irrigation North - February 2026 (draft) ===== -->
+    <record id="demo_census_icn_202602" model="general.entity.census">
+        <field
+            name="primary_partner_id"
+            ref="base_general_entity.demo_primary_irrigation_north"
+        />
+        <field name="period_date">2026-02-01</field>
+        <field name="period_type">monthly</field>
+        <field name="distribution_product_id" ref="demo_product_water" />
+        <field name="distribution_amount_day" eval="0.6" />
+        <field name="state">draft</field>
+    </record>
+
+    <!-- Lines for ICN February 2026 (linked to January) -->
+    <record id="demo_line_icn_202602_garcia" model="general.entity.census.line">
+        <field name="census_id" ref="demo_census_icn_202602" />
+        <field
+            name="member_partner_id"
+            ref="base_general_entity.demo_secondary_garcia"
+        />
+        <field name="shares" eval="12.0" />
+        <field name="previous_line_id" ref="demo_line_icn_202601_garcia" />
+        <field name="state">draft</field>
+        <field name="note">Shares increased from 10 to 12</field>
+    </record>
+
+    <record id="demo_line_icn_202602_smith" model="general.entity.census.line">
+        <field name="census_id" ref="demo_census_icn_202602" />
+        <field
+            name="member_partner_id"
+            ref="base_general_entity.demo_secondary_smith"
+        />
+        <field name="shares" eval="5.0" />
+        <field name="previous_line_id" ref="demo_line_icn_202601_smith" />
+        <field name="state">validated</field>
+    </record>
+
+    <record id="demo_line_icn_202602_martinez" model="general.entity.census.line">
+        <field name="census_id" ref="demo_census_icn_202602" />
+        <field
+            name="member_partner_id"
+            ref="base_general_entity.demo_secondary_martinez"
+        />
+        <field name="shares" eval="8.0" />
+        <field name="previous_line_id" ref="demo_line_icn_202601_martinez" />
+        <field name="state">draft</field>
+    </record>
+
+    <!-- Additional movement for Martínez in February -->
+    <record id="demo_additional_icn_202602_martinez" model="general.entity.census.additional">
+        <field name="census_line_id" ref="demo_line_icn_202602_martinez" />
+        <field name="qty" eval="1.0" />
+        <field name="note">Temporary extra water for new crop</field>
+    </record>
+
+    <!-- ===== Census: Coop Central - January 2026 (locked) ===== -->
+    <record id="demo_census_acc_202601" model="general.entity.census">
+        <field
+            name="primary_partner_id"
+            ref="base_general_entity.demo_primary_coop_central"
+        />
+        <field name="period_date">2026-01-01</field>
+        <field name="period_type">monthly</field>
+        <field name="state">locked</field>
+    </record>
+
+    <record id="demo_line_acc_202601_garcia" model="general.entity.census.line">
+        <field name="census_id" ref="demo_census_acc_202601" />
+        <field
+            name="member_partner_id"
+            ref="base_general_entity.demo_secondary_garcia"
+        />
+        <field name="shares" eval="20.0" />
+        <field name="state">validated</field>
+    </record>
+
+    <record id="demo_line_acc_202601_fernandez" model="general.entity.census.line">
+        <field name="census_id" ref="demo_census_acc_202601" />
+        <field
+            name="member_partner_id"
+            ref="base_general_entity.demo_secondary_fernandez"
+        />
+        <field name="shares" eval="15.0" />
+        <field name="state">validated</field>
+    </record>
+</odoo>

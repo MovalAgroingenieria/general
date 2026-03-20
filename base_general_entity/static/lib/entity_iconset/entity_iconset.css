@@ -1,0 +1,76 @@
+/* Base icon class */
+[class^="fa-entity-"], [class*=" fa-entity-"] {
+  display: inline-block;
+  font-family: 'entity_iconset' !important;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  --fa-entity-duotone-offset: 1em;
+}
+
+/* Important: define pseudo-elements explicitly */
+[class^="fa-entity-"]::before,
+[class^="fa-entity-"]::after,
+[class*=" fa-entity-"]::before,
+[class*=" fa-entity-"]::after {
+  font-family: 'entity_iconset' !important;
+  font-style: normal;
+  font-weight: normal;
+}
+
+/* Duotone icons */
+[class*="-duotone"]::before {
+  opacity: 1;
+}
+
+[class*="-duotone"]::after {
+  opacity: 0.4;
+  position: relative;
+  right: var(--fa-entity-duotone-offset);
+}
+
+/* Context overrides */
+.btn [class*="-duotone"] {
+--fa-entity-duotone-offset: 1em;
+}
+.oe_stat_button [class*="-duotone"] {
+--fa-entity-duotone-offset: 1.25em;
+}
+.o_main_navbar [class*="-duotone"],
+.o_control_panel_main .btn-light [class*="-duotone"] {
+    --fa-entity-duotone-offset: 1em;
+}
+
+/* Print duotone */
+.duotone-print-white::after {
+  opacity: 1;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.duotone-print-color::after {
+  opacity: 1;
+  /* Overwritten by js */
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Icons */
+@font-face {
+  font-family: 'entity_iconset';
+  src:  url('fonts/entity_iconset.eot?ayeb6d');
+  src:  url('fonts/entity_iconset.eot?ayeb6d#iefix') format('embedded-opentype'),
+    url('fonts/entity_iconset.ttf?ayeb6d') format('truetype'),
+    url('fonts/entity_iconset.woff?ayeb6d') format('woff'),
+    url('fonts/entity_iconset.svg?ayeb6d#entity_iconset') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+.fa-entity-logo:before {
+  content: "\e900";
+}
+.fa-entity-logo-duotone::before {
+  content: "\e901";
+}
+.fa-entity-logo-duotone::after {
+  content: "\e902";
+}

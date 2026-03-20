@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Module category -->
+    <record id="module_category_general_entity" model="ir.module.category">
+        <field name="name">General Entity</field>
+        <field name="sequence" eval="100" />
+    </record>
+
+    <!-- User: read-only access to entity data -->
+    <record id="group_general_entity_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="module_category_general_entity" />
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]" />
+    </record>
+
+    <!-- Manager: full CRUD, inherits User -->
+    <record id="group_general_entity_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="module_category_general_entity" />
+        <field name="implied_ids" eval="[(4, ref('group_general_entity_user'))]" />
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]" />
+    </record>
+</odoo>
