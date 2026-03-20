@@ -1,6 +1,8 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
+import logging
+
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools.safe_eval import safe_eval
@@ -11,6 +13,8 @@ try:
 except ImportError:
     Template = None
     TemplateError = Exception
+
+_logger = logging.getLogger(__name__)
 
 
 class AssemblyAssembly(models.Model):
@@ -56,10 +60,14 @@ class AssemblyAssembly(models.Model):
         ondelete="set null",
     )
     description = fields.Html(string="Convocation text")
-    # Publishable / template texts (Jinja2: assembly_day, assembly_month, assembly_year, assembly)
+    # Publishable / template texts
+    # (Jinja2: assembly_day, assembly_month, assembly_year, assembly)
     publication_text = fields.Html(
         string="Publication text",
-        help="Rendered in reports; use {{ assembly_day }}, {{ assembly_month }}, {{ assembly_year }}, {{ assembly }}.",
+        help=(
+            "Rendered in reports; use {{ assembly_day }}, "
+            "{{ assembly_month }}, {{ assembly_year }}, {{ assembly }}."
+        ),
     )
     final_paragraph = fields.Html(
         string="Final paragraph",
@@ -123,7 +131,10 @@ class AssemblyAssembly(models.Model):
     allow_online_voting = fields.Boolean(
         string="Allow online voting",
         default=False,
-        help="If set, attendees can cast votes via the portal when the assembly is in session.",
+        help=(
+            "If set, attendees can cast votes via the portal "
+            "when the assembly is in session."
+        ),
     )
     partner_domain = fields.Text(string="Partner domain", default="[]")
     agenda_ids = fields.One2many(
@@ -397,18 +408,23 @@ class AssemblyAssembly(models.Model):
         self.attendee_ids.recompute_votes()
 
     def _render_html_template(self, template_str, **extra):
-        """Render HTML template with Jinja2. Variables: assembly, assembly_day, assembly_month, assembly_year."""
+        """Render HTML template with Jinja2.
+
+        Variables: assembly, assembly_day, assembly_month, assembly_year.
+        """
         if not template_str or not Template:
             return template_str or ""
         lang = self.env.context.get("lang") or "en_US"
         try:
-            from babel.dates import format_date
+            from babel.dates import format_date  # pylint: disable=import-outside-toplevel
         except ImportError:
             format_date = None
         dt = self.date_first_call or self.date_end or fields.Datetime.now()
         if hasattr(dt, "date"):
             dt = dt.date()
-        assembly_day = format_date(dt, "d", locale=lang) if format_date else str(dt.day)
+        assembly_day = (
+            format_date(dt, "d", locale=lang) if format_date else str(dt.day)
+        )
         assembly_month = (
             format_date(dt, "LLLL", locale=lang) if format_date else str(dt.month)
         )
@@ -424,7 +440,8 @@ class AssemblyAssembly(models.Model):
                 assembly_year=assembly_year,
                 **extra,
             )
-        except TemplateError:
+        except TemplateError as e:
+            _logger.warning("Template error: %s", e)
             return template_str or ""
 
     def get_rendered_publication_text(self):

@@ -38,7 +38,7 @@ class AssemblyDelegation(models.Model):
         "delegation_id",
         "vote_type_id",
         string="Vote types",
-        domain="[('id', 'in', assembly_id.vote_type_ids.ids)]",
+        domain="[('active', '=', True)]",
         help="Leave empty to delegate all vote types.",
     )
     date_delegation = fields.Datetime(default=fields.Datetime.now)

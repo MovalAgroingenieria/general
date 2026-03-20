@@ -33,7 +33,10 @@ class AssemblyAttendee(models.Model):
         string="Participant",
         ondelete="set null",
         index=True,
-        help="Who actually attends (default: partner). Set to representative when applicable.",
+        help=(
+            "Who actually attends (default: partner). "
+            "Set to representative when applicable."
+        ),
     )
     attendance_type = fields.Selection(
         [("present", "Present"), ("remote", "Remote")],

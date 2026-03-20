@@ -28,13 +28,16 @@ class AssemblyAgenda(models.Model):
         ],
         string="Vote kind",
         default="yes_no",
-        help="Yes/No for standard vote; Multiple options to show a list of choices on the ballot.",
+        help=(
+            "Yes/No for standard vote; "
+            "Multiple options to show a list of choices on the ballot."
+        ),
     )
     vote_type_id = fields.Many2one(
         "vote.type",
         string="Vote type",
         ondelete="restrict",
-        domain="[('id', 'in', assembly_id.vote_type_ids.ids)]",
+        domain="[('active', '=', True)]",
     )
     voting_ids = fields.One2many(
         "assembly.voting",
