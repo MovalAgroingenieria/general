@@ -10,7 +10,9 @@ class CreditControlLine(models.Model):
 
     invoice_date = fields.Date(
         string="Invoice date",
-        compute="_compute_invoice_date")
+        compute="_compute_invoice_date",
+        store=True,
+    )
 
     tracking_ref = fields.Char(
         string="Tracking Reference")
@@ -62,6 +64,7 @@ class CreditControlLine(models.Model):
     )
 
     @api.multi
+    @api.depends('invoice_id', 'invoice_id.date')
     def _compute_invoice_date(self):
         for record in self:
             if record.invoice_id:
