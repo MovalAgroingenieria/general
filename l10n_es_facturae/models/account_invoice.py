@@ -10,6 +10,7 @@ from cryptography.x509.name import _NAMEOID_TO_NAME
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.hazmat.backends import default_backend
+from decimal import Decimal, ROUND_HALF_UP
 
 import pytz
 import random
@@ -526,4 +527,238 @@ class AccountInvoice(models.Model):
                   "full error have been written in the server logs. Here "
                   "is the error, which may give you an idea on the cause "
                   "of the problem : %s") % str(e))
+        return True
+
+    # Helper methods for amounts calculations
+# -*- coding: utf-8 -*-
+
+from decimal import Decimal, ROUND_HALF_UP
+
+from odoo import api, models, _
+from odoo.exceptions import Warning as UserError
+
+
+class AccountInvoice(models.Model):
+    _inherit = 'account.invoice'
+
+    @api.model
+    def _facturae_decimal(self, value):
+        if value is None:
+            value = 0.0
+        return Decimal(str(value))
+
+    @api.model
+    def _facturae_q2(self, value):
+        return self._facturae_decimal(value).quantize(
+            Decimal('0.01'),
+            rounding=ROUND_HALF_UP
+        )
+
+    @api.model
+    def _facturae_amount_to_str(self, value, decimals=2):
+        value = self._facturae_decimal(value)
+        pattern = '%%.%sf' % decimals
+        return pattern % value
+
+    @api.multi
+    def get_facturae_line_amounts(self, line):
+        self.ensure_one()
+
+        if not line:
+            raise UserError(_('Facturae error: invoice line is empty or undefined.'))
+
+        qty = self._facturae_decimal(line.quantity or 0.0)
+        unit_price = self._facturae_decimal(line.price_unit or 0.0)
+
+        raw_total_cost = qty * unit_price
+        total_cost = self._facturae_q2(raw_total_cost)
+
+        gross_amount = self._facturae_q2(line.price_subtotal or 0.0)
+
+        discount_amount = Decimal('0.00')
+        surcharge_amount = Decimal('0.00')
+
+        if gross_amount < total_cost:
+            discount_amount = self._facturae_q2(total_cost - gross_amount)
+        elif gross_amount > total_cost:
+            surcharge_amount = self._facturae_q2(gross_amount - total_cost)
+
+        normalized_gross = self._facturae_q2(
+            total_cost + surcharge_amount - discount_amount
+        )
+
+        return {
+            'quantity': qty,
+            'unit_price': unit_price,
+            'raw_total_cost': raw_total_cost,
+            'total_cost': total_cost,
+            'discount_amount': discount_amount,
+            'surcharge_amount': surcharge_amount,
+            'gross_amount': normalized_gross,
+            'taxable_base': normalized_gross,
+            'has_discount': discount_amount != Decimal('0.00'),
+            'has_surcharge': surcharge_amount != Decimal('0.00'),
+        }
+
+    @api.multi
+    def get_facturae_invoice_amounts(self):
+        """
+        Aggregate invoice totals from normalized Facturae line amounts.
+
+        Rule mapping:
+        - TotalGrossAmount = sum(line total_cost)
+        - TotalGeneralDiscounts = sum(line discounts)
+        - TotalGeneralSurcharges = sum(line surcharges)
+        - TotalGrossAmountBeforeTaxes = TotalGrossAmount - discounts + surcharges
+        - TotalTaxOutputs = sum positive taxes
+        - TotalTaxesWithheld = sum withheld taxes (positive value)
+        - InvoiceTotal = gross_before_taxes + tax_outputs - taxes_withheld
+        """
+        self.ensure_one()
+
+        total_gross_amount = Decimal('0.00')
+        total_general_discounts = Decimal('0.00')
+        total_general_surcharges = Decimal('0.00')
+        total_gross_amount_before_taxes = Decimal('0.00')
+        total_tax_outputs = Decimal('0.00')
+        total_taxes_withheld = Decimal('0.00')
+
+        # 1) Aggregate normalized line amounts
+        for line in self.invoice_line_ids:
+            vals = self.get_facturae_line_amounts(line)
+
+            total_gross_amount += vals['total_cost']
+            total_general_discounts += vals['discount_amount']
+            total_general_surcharges += vals['surcharge_amount']
+            total_gross_amount_before_taxes += vals['gross_amount']
+
+        total_gross_amount = self._facturae_q2(total_gross_amount)
+        total_general_discounts = self._facturae_q2(total_general_discounts)
+        total_general_surcharges = self._facturae_q2(total_general_surcharges)
+        total_gross_amount_before_taxes = self._facturae_q2(
+            total_gross_amount_before_taxes
+        )
+
+        # 2) Aggregate taxes from normalized taxable bases
+        for line in self.invoice_line_ids:
+            vals = self.get_facturae_line_amounts(line)
+            taxable_base = vals['taxable_base']
+
+            for tax in line.invoice_line_tax_ids:
+                tax_rate = self._facturae_decimal(tax.amount or 0.0)
+                tax_amount = self._facturae_q2(taxable_base * tax_rate / Decimal('100.00'))
+
+                if tax_rate >= Decimal('0.00'):
+                    total_tax_outputs += tax_amount
+                else:
+                    # stored as positive withheld total
+                    total_taxes_withheld += abs(tax_amount)
+
+        total_tax_outputs = self._facturae_q2(total_tax_outputs)
+        total_taxes_withheld = self._facturae_q2(total_taxes_withheld)
+
+        invoice_total = self._facturae_q2(
+            total_gross_amount_before_taxes +
+            total_tax_outputs -
+            total_taxes_withheld
+        )
+
+        return {
+            'total_gross_amount': total_gross_amount,
+            'total_general_discounts': total_general_discounts,
+            'total_general_surcharges': total_general_surcharges,
+            'total_gross_amount_before_taxes': total_gross_amount_before_taxes,
+            'total_tax_outputs': total_tax_outputs,
+            'total_taxes_withheld': total_taxes_withheld,
+            'invoice_total': invoice_total,
+            'total_outstanding_amount': invoice_total,
+            'total_executable_amount': invoice_total,
+        }
+
+    @api.multi
+    def check_facturae_line_amounts(self):
+        self.ensure_one()
+        errors = []
+
+        for line in self.invoice_line_ids:
+            vals = self.get_facturae_line_amounts(line)
+            expected = self._facturae_q2(
+                vals['total_cost'] +
+                vals['surcharge_amount'] -
+                vals['discount_amount']
+            )
+            if expected != vals['gross_amount']:
+                errors.append(_(
+                    u"- Line '%s': GrossAmount (%s) != TotalCost (%s) + "
+                    u"Surcharges (%s) - Discounts (%s)"
+                ) % (
+                    line.name or line.id,
+                    self._facturae_amount_to_str(vals['gross_amount']),
+                    self._facturae_amount_to_str(vals['total_cost']),
+                    self._facturae_amount_to_str(vals['surcharge_amount']),
+                    self._facturae_amount_to_str(vals['discount_amount']),
+                ))
+
+        if errors:
+            raise UserError(
+                _('Facturae line validation error:\n\n%s') % '\n'.join(errors)
+            )
+
+        return True
+
+    @api.multi
+    def check_facturae_invoice_amounts(self):
+        self.ensure_one()
+
+        vals = self.get_facturae_invoice_amounts()
+        errors = []
+
+        expected_before_taxes = self._facturae_q2(
+            vals['total_gross_amount'] -
+            vals['total_general_discounts'] +
+            vals['total_general_surcharges']
+        )
+        if expected_before_taxes != vals['total_gross_amount_before_taxes']:
+            errors.append(_(
+                u"- TotalGrossAmountBeforeTaxes (%s) != "
+                u"TotalGrossAmount (%s) - TotalGeneralDiscounts (%s) + "
+                u"TotalGeneralSurcharges (%s)"
+            ) % (
+                self._facturae_amount_to_str(
+                    vals['total_gross_amount_before_taxes']),
+                self._facturae_amount_to_str(vals['total_gross_amount']),
+                self._facturae_amount_to_str(vals['total_general_discounts']),
+                self._facturae_amount_to_str(vals['total_general_surcharges']),
+            ))
+
+        expected_invoice_total = self._facturae_q2(
+            vals['total_gross_amount_before_taxes'] +
+            vals['total_tax_outputs'] -
+            vals['total_taxes_withheld']
+        )
+        if expected_invoice_total != vals['invoice_total']:
+            errors.append(_(
+                u"- InvoiceTotal (%s) != TotalGrossAmountBeforeTaxes (%s) + "
+                u"TotalTaxOutputs (%s) - TotalTaxesWithheld (%s)"
+            ) % (
+                self._facturae_amount_to_str(vals['invoice_total']),
+                self._facturae_amount_to_str(vals['total_gross_amount_before_taxes']),
+                self._facturae_amount_to_str(vals['total_tax_outputs']),
+                self._facturae_amount_to_str(vals['total_taxes_withheld']),
+            ))
+
+        if (
+            vals['total_gross_amount_before_taxes'] > Decimal('0.00') and
+            vals['total_taxes_withheld'] < Decimal('0.00')
+        ):
+            errors.append(_(
+                u"- TotalTaxesWithheld must be greater than or equal to zero "
+                u"when TotalGrossAmountBeforeTaxes is positive."
+            ))
+
+        if errors:
+            raise UserError(
+                _('Facturae invoice validation error:\n\n%s') % '\n'.join(errors)
+            )
+
         return True

@@ -138,6 +138,8 @@ class CreateFacturae(models.TransientModel):
         invoice = self.env['account.invoice'].browse(invoice_ids[0])
 
         self._validate_partner_data(invoice)
+        invoice.check_facturae_line_amounts()
+        invoice.check_facturae_invoice_amounts()
 
         invoice_file, file_name = invoice.ensure_one().get_facturae(
             self.firmar_facturae)
