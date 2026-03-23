@@ -33,12 +33,13 @@ class CreditControlLine(models.Model):
         ('refused', 'Refused'),
         ('deceased', 'Deceased'),
         ('not_retired', 'Not retired'),
-        ('no_one_takes_responsibility','No one takes responsibility')],
+        ('no_one_takes_responsibility', 'No one takes responsibility')],
         string="Return reason")
 
     description_html = fields.Html(
         string="Description",
-        translate=True,)
+        translate=True,
+    )
 
     notes = fields.Html(
         string="Notes")

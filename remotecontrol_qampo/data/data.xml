@@ -1,0 +1,1130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================ -->
+        <!-- REMOTE CONTROL: Qampo                                       -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_qampo" model="remotecontrol">
+            <field name="name">Qampo</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://api.qampo.es/apiv2/api</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">2</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "apikey": "",
+  "timezone": "Europe/Madrid"
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>Qampo REST API v2 · Odoo Integration</h2>
+
+<hr/>
+
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code>. Base URL: <code>https://api.qampo.es/apiv2/api</code>.</p>
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+  "apikey": "your_api_key_here",
+  "timezone": "Europe/Madrid"
+}</pre>
+<ul>
+  <li><code>apikey</code>: <strong>Required.</strong> Qampo API key. Must be sent in the <code>apikey</code> HTTP header for every request.</li>
+  <li><code>timezone</code>: Default IANA timezone for timestamp conversion (default: <code>Europe/Madrid</code>).</li>
+</ul>
+
+<h3>2) Authentication</h3>
+<p>Qampo uses <strong>API key authentication</strong>. The key is sent in every request via the
+<code>apikey</code> HTTP header. No login/session step is needed.</p>
+
+<h3>3) API Endpoints</h3>
+<table border="1" cellpadding="4" cellspacing="0">
+  <tr><th>Method</th><th>Endpoint</th><th>Parameters</th><th>Description</th></tr>
+  <tr>
+    <td>GET</td><td>/health</td><td>—</td>
+    <td>Health check. Returns <code>{"code": 200, "status": "OK"}</code>.</td>
+  </tr>
+  <tr>
+    <td>GET</td><td>/devices</td><td>—</td>
+    <td>List all devices (stations) with their sensors and published variables.</td>
+  </tr>
+  <tr>
+    <td>GET</td><td>/getValues</td>
+    <td><code>nodeid</code>, <code>ts_start</code>, <code>ts_end</code>, [<code>variableLabel</code>]</td>
+    <td>Get sensor readings. Timestamps are in <strong>milliseconds</strong> (epoch).
+    Returns all published variables for the device regardless of variableLabel filter.</td>
+  </tr>
+  <tr>
+    <td>GET</td><td>/crops</td><td>—</td>
+    <td>List configured crops.</td>
+  </tr>
+</table>
+
+<h3>4) Device Response Structure</h3>
+<pre>[
+  {
+    "id": "10419201",
+    "owner": "user@example.com",
+    "coordinates": {"latitude": 39.94, "longitude": -0.05},
+    "gmt": 3600,
+    "state": {
+      "lastConnection": "23/03/26 13:29",
+      "intTemp": "12.12",
+      "battery": "4120.94",
+      "rssi": "20"
+    },
+    "sensors": [
+      {"input": "1", "sensor": "soil_hum_", "label": "soil_hum_1",
+       "name": "Humedad Suelo", "type": "analog", "realm": "soil"},
+      ...
+    ],
+    "publishedVariables": [
+      {"label": "soil_hum_1", "nameEs": "Hum. 45 cm",
+       "nameEn": "Hum. 45 cm", "periodo": "rt",
+       "primarySensor": "soil_hum_", "type": "soil"},
+      ...
+    ],
+    "timeConfiguration": {"measureTime": "15", "sendTime": "60"},
+    "tags": []
+  }
+]</pre>
+
+<h3>5) getValues Response Structure</h3>
+<pre>{
+  "soil_hum_1": [
+    {"value": "31.09", "timestamp": 1774051200000},
+    {"value": "30.77", "timestamp": 1774052100000},
+    ...
+  ],
+  "soil_hum_2": [...],
+  "soil_hum_3": [...]
+}</pre>
+<p><strong>Note:</strong> <code>value</code> is a string (must be cast to float). <code>timestamp</code>
+is in <strong>milliseconds</strong> since epoch (UTC). The response returns all published
+variables for the device regardless of the <code>variableLabel</code> query parameter.</p>
+
+<h3>6) Odoo Configuration</h3>
+<h4>Device (<code>mdm.measurement.device</code>) remotecontrol_params:</h4>
+<p>Each device represents a Qampo <strong>station</strong> (node).</p>
+<p><strong>Minimum (required):</strong></p>
+<pre>{
+  "node_id": "10419201"
+}</pre>
+<p><strong>With optional fields:</strong></p>
+<pre>{
+  "node_id": "10419201",
+  "start_date": "2026-01-01"
+}</pre>
+<ul>
+  <li><code>node_id</code>: <strong>Required.</strong> Qampo device ID (string).</li>
+  <li><code>start_date</code>: Optional. Start date for first data retrieval (YYYY-MM-DD). Defaults to Jan 1st of current year.</li>
+</ul>
+<p>GPS coordinates are stored in the device <code>location</code> field. Other metadata (owner, etc.) goes into <code>description</code>.</p>
+<h4>Sensor (<code>mdm.measurement.device.sensor</code>) remotecontrol_params:</h4>
+<p>Each sensor represents a Qampo <strong>published variable</strong> within a device.</p>
+<p><strong>Minimum (required):</strong></p>
+<pre>{
+  "variable_label": "soil_hum_1"
+}</pre>
+<p><strong>With optional fields:</strong></p>
+<pre>{
+  "variable_label": "soil_hum_1",
+  "start_date": "2026-01-01"
+}</pre>
+<ul>
+  <li><code>variable_label</code>: <strong>Required.</strong> Label of the published variable (used as key in getValues response).</li>
+  <li><code>start_date</code>: Optional. Overrides device start_date if provided.</li>
+</ul>
+<p>Other metadata (variable type, primary sensor, etc.) is stored in the sensor <code>description</code> field.</p>
+
+<h3>7) Operational Flow</h3>
+<ol>
+  <li><strong>Catalog Sync</strong> (run once / periodically):
+    Health check → Fetch devices → Auto-create mdm.measurement.device and
+    mdm.measurement.device.sensor records. Idempotent.
+    Produces a JSON attachment with the full device catalog.</li>
+  <li><strong>Readings Import</strong> (daily / scheduled):
+    Build plan from Odoo devices → getValues per device → Upsert readings.
+    Handles date ranges and structured error recovery.</li>
+</ol>
+
+<h3>8) Technical Notes</h3>
+<ul>
+  <li>Authentication is via <code>apikey</code> header on every request. No session management.</li>
+  <li>Timestamps in the API are in <strong>milliseconds</strong> (epoch UTC).</li>
+  <li>Values in getValues response are <strong>strings</strong> (e.g. <code>"31.09"</code>).</li>
+  <li>getValues returns ALL published variables regardless of <code>variableLabel</code> parameter.</li>
+  <li>Idempotent readings via <code>upsert(sensor_id, measurement_time)</code>.</li>
+  <li>Audit JSON attachment created after each execution.</li>
+</ul>
+]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Health Check                                         -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_qampo_action_health" model="remotecontrol.action">
+            <field name="name">Qampo: Health Check</field>
+            <field name="remote_id" ref="remotecontrol_qampo"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">2</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# ── Qampo Health Check ─────────────────────────────────────────────────
+# GET /health — verifies the API is reachable and the apikey is valid.
+# Also validates the apikey by calling /devices (health doesn't need auth).
+# ────────────────────────────────────────────────────────────────────────
+
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+apikey = (cfg.get('apikey') or '').strip()
+if not apikey:
+    raise Exception(
+        "Missing Qampo API key: set 'apikey' in connection_params.")
+
+api_base = (base_url or '').rstrip('/')
+hdrs = {
+    'apikey': apikey,
+    'Accept': 'application/json',
+}
+
+# 1. Health check (does not require authentication)
+url_health = '%s/health' % api_base
+resp = request_retry('GET', url_health, headers=hdrs, timeout=timeout)
+
+if resp.status_code >= 400:
+    raise Exception(
+        "Qampo health check failed: HTTP %s - %s" % (
+            resp.status_code, (resp.text or '')[:500]))
+
+try:
+    body = resp.json() if resp.text else {}
+except Exception:
+    raise Exception("Qampo health check: invalid JSON response")
+
+if body.get('code') != 200:
+    raise Exception(
+        "Qampo health check error: %s" % str(body)[:500])
+
+# 2. Quick auth validation by calling /devices
+url_devices = '%s/devices' % api_base
+resp2 = request_retry('GET', url_devices, headers=hdrs, timeout=timeout)
+
+if resp2.status_code >= 400:
+    raise Exception(
+        "Qampo API key validation failed: HTTP %s - %s" % (
+            resp2.status_code, (resp2.text or '')[:500]))
+
+try:
+    devices = resp2.json() if resp2.text else []
+except Exception:
+    raise Exception("Qampo devices: invalid JSON response")
+
+if isinstance(devices, dict) and devices.get('code'):
+    raise Exception(
+        "Qampo API key error: %s - %s" % (
+            devices.get('code'), devices.get('msg', '')))
+
+bag['apikey'] = apikey
+bag['device_count'] = len(devices) if isinstance(devices, list) else 0
+bag['timezone'] = cfg.get('timezone', 'Europe/Madrid')
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Sync Catalog (fetch devices from API)                -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_qampo_action_sync_catalog" model="remotecontrol.action">
+            <field name="name">Qampo: Sync Catalog</field>
+            <field name="remote_id" ref="remotecontrol_qampo"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">2</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# ── Qampo Catalog Sync ─────────────────────────────────────────────────
+# GET /devices — fetches all stations with sensors and published variables.
+# Produces an audit JSON attachment with the full catalog.
+# ────────────────────────────────────────────────────────────────────────
+
+Remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+apikey = bag.get('apikey') or (cfg.get('apikey') or '').strip()
+if not apikey:
+    raise Exception("Missing Qampo API key in bag or connection_params.")
+
+api_base = (base_url or '').rstrip('/')
+hdrs = {
+    'apikey': apikey,
+    'Accept': 'application/json',
+}
+
+url = '%s/devices' % api_base
+resp = request_retry('GET', url, headers=hdrs, timeout=timeout)
+
+if resp.status_code >= 400:
+    raise Exception(
+        "Qampo /devices failed: HTTP %s - %s" % (
+            resp.status_code, (resp.text or '')[:500]))
+
+try:
+    devices_raw = resp.json() if resp.text else []
+except Exception:
+    raise Exception("Qampo /devices: invalid JSON response")
+
+if isinstance(devices_raw, dict) and devices_raw.get('code'):
+    raise Exception(
+        "Qampo /devices error: %s - %s" % (
+            devices_raw.get('code'), devices_raw.get('msg', '')))
+
+if not isinstance(devices_raw, list):
+    raise Exception(
+        "Qampo /devices: expected a list, got %s" % type(devices_raw).__name__)
+
+# Parse and normalize the catalog
+catalog = []
+total_sensors = 0
+total_published = 0
+
+for dev in devices_raw:
+    if not isinstance(dev, dict):
+        continue
+
+    node_id = dev.get('id', '')
+    coords = dev.get('coordinates') or {}
+    state = dev.get('state') or {}
+
+    # Filter connected sensors only (skip "Not Connected")
+    connected_sensors = []
+    for s in (dev.get('sensors') or []):
+        if isinstance(s, dict) and s.get('sensor') != 'Not Connected':
+            connected_sensors.append(s)
+            total_sensors += 1
+
+    # Published variables (the ones that actually have data)
+    published_vars = []
+    for pv in (dev.get('publishedVariables') or []):
+        if isinstance(pv, dict):
+            published_vars.append(pv)
+            total_published += 1
+
+    time_cfg = dev.get('timeConfiguration') or {}
+
+    catalog.append({
+        'node_id': node_id,
+        'owner': dev.get('owner', ''),
+        'latitude': coords.get('latitude'),
+        'longitude': coords.get('longitude'),
+        'gmt_offset': dev.get('gmt'),
+        'last_connection': state.get('lastConnection', ''),
+        'battery': state.get('battery', ''),
+        'rssi': state.get('rssi', ''),
+        'internal_temp': state.get('intTemp', ''),
+        'measure_interval_min': time_cfg.get('measureTime', ''),
+        'send_interval_min': time_cfg.get('sendTime', ''),
+        'connected_sensors': connected_sensors,
+        'published_variables': published_vars,
+        'tags': dev.get('tags', []),
+    })
+
+# ── Create audit attachment ────────────────────────────────────────────
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'total_devices': len(catalog),
+    'total_connected_sensors': total_sensors,
+    'total_published_variables': total_published,
+    'devices': catalog,
+}
+
+json_str = json.dumps(audit, ensure_ascii=False, indent=2)
+encoded = base64.b64encode(json_str.encode('utf-8'))
+fname = 'qampo_catalog_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_'))
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': encoded,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id,
+})
+
+Remote.message_post(
+    body=u'[Qampo] Catalog sync: devices=%s connected_sensors=%s '
+         u'published_variables=%s' % (
+             len(catalog), total_sensors, total_published),
+    attachment_ids=[att.id],
+)
+
+bag['catalog'] = catalog
+bag['catalog_attachment_id'] = att.id
+bag['catalog_attachment_name'] = fname
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Provision Devices (auto-create devices + sensors)    -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_qampo_action_provision_devices" model="remotecontrol.action">
+            <field name="name">Qampo: Provision Devices</field>
+            <field name="remote_id" ref="remotecontrol_qampo"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">False</field>
+            <field name="code"><![CDATA[
+# ── Qampo: Provision Devices ───────────────────────────────────────────
+# Auto-creates mdm.measurement.device and mdm.measurement.device.sensor
+# records from the catalog fetched in the previous step.
+#
+# Mapping:
+#   Qampo device (station)      →  one mdm.measurement.device
+#   Qampo published variable    →  one mdm.measurement.device.sensor
+#
+# Each device stores the node_id in remotecontrol_params.
+# Each sensor stores the variable_label in remotecontrol_params.
+#
+# Idempotent: existing devices are matched by node_id;
+# sensors by (device_id, variable_label).
+#
+# Sensor types and UOMs are auto-created based on the variable metadata.
+# ────────────────────────────────────────────────────────────────────────
+
+Remote = self.remote_id
+catalog = bag.get('catalog') or []
+
+if not catalog:
+    raise Exception(
+        "No catalog in bag. Run Sync Catalog action first.")
+
+Device = env['mdm.measurement.device']
+Sensor = env['mdm.measurement.device.sensor']
+SensorType = env['mdm.measurement.device.sensor.type']
+SensorUom = env['mdm.measurement.device.sensor.uom']
+
+remotecontrol_ref = env.ref('remotecontrol_qampo.remotecontrol_qampo')
+
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+default_tz = cfg.get('timezone', 'Europe/Madrid')
+
+# ── UOM cache: find or create by name ──────────────────────────────────
+uom_cache = {}
+
+def _get_uom(unit_name):
+    if not unit_name:
+        unit_name = u'-'
+    if unit_name in uom_cache:
+        return uom_cache[unit_name]
+    uom = SensorUom.search([('name', '=', unit_name)], limit=1)
+    if not uom:
+        uom = SensorUom.create({
+            'name': unit_name,
+            'abbreviation': unit_name,
+            'description': u'Auto-created from Qampo (unit: %s)' % unit_name,
+        })
+    uom_cache[unit_name] = uom
+    return uom
+
+# ── Sensor Type cache: find or create by composite name ───────────────
+type_cache = {}
+
+def _get_sensor_type(type_name, uom):
+    if not type_name:
+        type_name = u'General'
+    full_name = u'%s (%s)' % (type_name, uom.name)
+    if full_name in type_cache:
+        return type_cache[full_name]
+    stype = SensorType.search([('name', '=', full_name)], limit=1)
+    if not stype:
+        stype = SensorType.create({
+            'name': full_name,
+            'description': u'Auto-created from Qampo (%s)' % type_name,
+            'uom_id': uom.id,
+        })
+    type_cache[full_name] = stype
+    return stype
+
+# ── Build map of existing devices by node_id ──────────────────────────
+existing_devices = {}
+all_devices = Device.search([
+    ('remotecontrol_id', '=', remotecontrol_ref.id),
+])
+for dev in all_devices:
+    try:
+        dev_cfg = json.loads(dev.remotecontrol_params or '{}')
+    except Exception:
+        dev_cfg = {}
+    nid = dev_cfg.get('node_id')
+    if nid:
+        existing_devices[str(nid)] = dev
+
+# ── Build map of existing sensors by (device_id, variable_label) ──────
+existing_sensors = {}
+all_sensors = Sensor.search([
+    ('remotecontrol_id', '=', remotecontrol_ref.id),
+])
+for sen in all_sensors:
+    try:
+        sen_cfg = json.loads(sen.remotecontrol_params or '{}')
+    except Exception:
+        sen_cfg = {}
+    vlabel = sen_cfg.get('variable_label')
+    if vlabel:
+        existing_sensors[(sen.device_id.id, str(vlabel))] = sen
+
+total_devices_created = 0
+total_devices_existing = 0
+total_sensors_created = 0
+total_sensors_existing = 0
+device_details = []
+
+for dev_data in catalog:
+    node_id = str(dev_data.get('node_id', ''))
+    if not node_id:
+        continue
+
+    lat = dev_data.get('latitude')
+    lon = dev_data.get('longitude')
+    dev_name = u'Qampo %s' % node_id
+
+    # Build location string from coordinates
+    location_str = ''
+    if lat is not None and lon is not None:
+        location_str = u'%s, %s' % (lat, lon)
+
+    # remotecontrol_params: only what is needed to connect
+    dev_params = {
+        'node_id': node_id,
+    }
+
+    # Build description with extra metadata
+    desc_parts = [u'Qampo station %s' % node_id]
+    owner = dev_data.get('owner', '')
+    if owner:
+        desc_parts.append(u'Owner: %s' % owner)
+    if location_str:
+        desc_parts.append(u'Coordinates: %s' % location_str)
+
+    device = existing_devices.get(node_id)
+    if device:
+        total_devices_existing += 1
+    else:
+        create_vals = {
+            'name': dev_name,
+            'description': u'\n'.join(desc_parts),
+            'remotecontrol_id': remotecontrol_ref.id,
+            'remotecontrol_params': json.dumps(
+                dev_params, ensure_ascii=False),
+        }
+        if location_str:
+            create_vals['location'] = location_str
+        device = Device.create(create_vals)
+        existing_devices[node_id] = device
+        total_devices_created += 1
+
+    dev_sensors_created = 0
+    dev_sensors_existing = 0
+
+    # ── One sensor per published variable ──────────────────────────
+    for pv in dev_data.get('published_variables', []):
+        if not isinstance(pv, dict):
+            continue
+        var_label = pv.get('label', '')
+        if not var_label:
+            continue
+
+        sensor_key = (device.id, str(var_label))
+        if sensor_key in existing_sensors:
+            dev_sensors_existing += 1
+            total_sensors_existing += 1
+            continue
+
+        # Determine UOM and sensor type from variable metadata
+        var_type = pv.get('type', '')
+        var_name = pv.get('nameEs') or pv.get('nameEn') or var_label
+
+        # Use the variable type as UOM hint; Qampo doesn't explicitly
+        # provide units, so we use the type (soil, weather, etc.)
+        uom = _get_uom(var_type or u'-')
+        stype = _get_sensor_type(var_type, uom)
+
+        # Build sensor description with extra metadata
+        sensor_desc_parts = []
+        if var_type:
+            sensor_desc_parts.append(u'Type: %s' % var_type)
+        primary = pv.get('primarySensor', '')
+        if primary:
+            sensor_desc_parts.append(u'Primary sensor: %s' % primary)
+
+        sensor_create_vals = {
+            'name': var_name,
+            'device_id': device.id,
+            'type_id': stype.id,
+            'remotecontrol_params': json.dumps({
+                'variable_label': var_label,
+            }, ensure_ascii=False),
+        }
+        if sensor_desc_parts:
+            sensor_create_vals['description'] = u'\n'.join(sensor_desc_parts)
+
+        sensor = Sensor.create(sensor_create_vals)
+        existing_sensors[sensor_key] = sensor
+        dev_sensors_created += 1
+        total_sensors_created += 1
+
+    device_details.append({
+        'node_id': node_id,
+        'device_name': dev_name,
+        'device_id': device.id,
+        'sensors_created': dev_sensors_created,
+        'sensors_existing': dev_sensors_existing,
+    })
+
+# ── Create audit attachment ────────────────────────────────────────────
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'total_devices_created': total_devices_created,
+    'total_devices_existing': total_devices_existing,
+    'total_sensors_created': total_sensors_created,
+    'total_sensors_existing': total_sensors_existing,
+    'total_uom_in_cache': len(uom_cache),
+    'total_sensor_types_in_cache': len(type_cache),
+    'devices': device_details,
+}
+
+b64 = base64.b64encode(
+    json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
+fname = 'qampo_provision_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_'))
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id,
+})
+
+Remote.message_post(
+    body=u'[Qampo] Provision: devices_created=%s devices_existing=%s '
+         u'sensors_created=%s sensors_existing=%s uoms=%s types=%s' % (
+             total_devices_created, total_devices_existing,
+             total_sensors_created, total_sensors_existing,
+             len(uom_cache), len(type_cache)),
+    attachment_ids=[att.id],
+)
+
+bag['provision_audit'] = audit
+bag['provision_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Get Devices Plan (for readings import)               -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_qampo_action_get_devices" model="remotecontrol.action">
+            <field name="name">Qampo: Get Devices (Plan)</field>
+            <field name="remote_id" ref="remotecontrol_qampo"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# ── Qampo: Build Sensor Plan ───────────────────────────────────────────
+# Reads mdm.measurement.device.sensor records linked to this
+# remotecontrol and builds the plan for getValues calls.
+#
+# Each device stores node_id in its remotecontrol_params.
+# Each sensor stores variable_label in its remotecontrol_params.
+#
+# Groups sensors by device (node) for efficient API calls
+# (getValues returns all variables per device in one call).
+# ────────────────────────────────────────────────────────────────────────
+
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+today_str = fields.Date.today()
+
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+default_tz = cfg.get('timezone', 'Europe/Madrid')
+apikey = bag.get('apikey') or (cfg.get('apikey') or '').strip()
+bag['apikey'] = apikey
+
+condition = [
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id),
+]
+
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+
+sensors = Sensor.search(condition)
+
+# Build map of sensor_id -> most recent reading (single query)
+last_readings_map = {}
+if sensors:
+    sensor_ids = [s.id for s in sensors]
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for row in cr.fetchall():
+        last_readings_map[row[0]] = row[1]
+
+# Build plan grouped by device (node)
+# Structure: { node_id: { info, sensors: [...] } }
+devices_plan = {}
+plan = []
+
+for sensor in sensors:
+    device = sensor.device_id
+
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+
+    node_id = device_cfg.get('node_id')
+    variable_label = sensor_cfg.get('variable_label')
+
+    if not node_id or not variable_label:
+        continue
+
+    # Determine start date
+    start_cfg = sensor_cfg.get('start_date') or device_cfg.get('start_date')
+    last_reading_time = last_readings_map.get(sensor.id)
+
+    if last_reading_time:
+        try:
+            initial_date = fields.Date.to_string(
+                fields.Datetime.from_string(last_reading_time))
+        except Exception:
+            initial_date = str(last_reading_time)[:10]
+    elif start_cfg:
+        initial_date = start_cfg[:10]
+    else:
+        year_str = today_str[:4]
+        initial_date = '%s-01-01' % year_str
+
+    if isinstance(initial_date, unicode):
+        initial_date = initial_date.encode('utf-8')
+
+    dev_tz = device_cfg.get('timezone', default_tz)
+
+    plan.append({
+        'sensor_id': sensor.id,
+        'device_id': device.id,
+        'node_id': node_id,
+        'variable_label': variable_label,
+        'timezone': dev_tz,
+        'initial_date': initial_date,
+    })
+
+    # Group by device for batched getValues calls
+    node_key = str(node_id)
+    if node_key not in devices_plan:
+        devices_plan[node_key] = {
+            'node_id': node_id,
+            'timezone': dev_tz,
+            'device_id': device.id,
+            'sensors': [],
+        }
+    devices_plan[node_key]['sensors'].append({
+        'variable_label': variable_label,
+        'sensor_id': sensor.id,
+        'device_id': device.id,
+    })
+
+bag['sensors_plan'] = plan
+bag['devices_plan'] = devices_plan
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Get Readings (getValues)                             -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_qampo_action_get_readings" model="remotecontrol.action">
+            <field name="name">Qampo: Get Readings</field>
+            <field name="remote_id" ref="remotecontrol_qampo"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# ── Qampo: Get Readings (getValues) ────────────────────────────────────
+# GET /getValues?nodeid={id}&ts_start={ms}&ts_end={ms}
+#
+# Response: { "var_label": [{"value": "31.09", "timestamp": 1774051200000}, ...], ... }
+#
+# Notes:
+# - Timestamps are in MILLISECONDS (epoch UTC).
+# - Values are STRINGS (cast to float).
+# - Returns ALL published variables per device in a single call.
+# ────────────────────────────────────────────────────────────────────────
+import time as _time
+import calendar
+from datetime import datetime, timedelta
+
+Remote = self.remote_id
+plan = bag.get('sensors_plan') or []
+devices_plan = bag.get('devices_plan') or {}
+
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+apikey = bag.get('apikey') or (cfg.get('apikey') or '').strip()
+if not apikey:
+    raise Exception("Missing Qampo API key in bag or connection_params.")
+
+api_base = (base_url or '').rstrip('/')
+default_tz = cfg.get('timezone', 'Europe/Madrid')
+today_str = fields.Date.today()
+
+hdrs = {
+    'apikey': apikey,
+    'Accept': 'application/json',
+}
+
+# Build sensor lookup: (node_id, variable_label) -> sensor_id, device_id
+sensor_lookup = {}
+for s in plan:
+    key = (str(s['node_id']), str(s['variable_label']))
+    sensor_lookup[key] = {
+        'sensor_id': s['sensor_id'],
+        'device_id': s['device_id'],
+    }
+
+total_upserts = 0
+total_errors = 0
+total_api_calls = 0
+items = []
+
+# ── Date range helpers ─────────────────────────────────────────────────
+# The Qampo API uses millisecond timestamps. We need to convert
+# YYYY-MM-DD date strings to epoch milliseconds and process data in
+# chunks (max 7 days per call to avoid timeouts with large date ranges).
+
+MAX_DAYS_PER_CALL = 7
+
+def _date_to_ms(date_str):
+    """Convert YYYY-MM-DD to epoch milliseconds (UTC midnight)."""
+    dt = datetime.strptime(date_str[:10], '%Y-%m-%d')
+    return int(calendar.timegm(dt.timetuple())) * 1000
+
+def _ms_to_datetime_str(ts_ms):
+    """Convert epoch milliseconds to Odoo datetime string."""
+    ts_secs = ts_ms / 1000.0
+    dt = datetime.utcfromtimestamp(ts_secs)
+    return dt.strftime('%Y-%m-%d %H:%M:%S')
+
+def _process_device(node_id, device_data, start_date, end_date):
+    """Fetch readings for one device, chunking date ranges."""
+    upserts = 0
+    errors = 0
+    api_calls = 0
+    log = []
+    readings_sample = []
+
+    start_dt = datetime.strptime(start_date[:10], '%Y-%m-%d')
+    end_dt = datetime.strptime(end_date[:10], '%Y-%m-%d')
+
+    # Chunk into MAX_DAYS_PER_CALL segments
+    chunk_start = start_dt
+    while chunk_start <= end_dt:
+        chunk_end = min(chunk_start + timedelta(days=MAX_DAYS_PER_CALL),
+                        end_dt)
+
+        ts_start = int(calendar.timegm(chunk_start.timetuple())) * 1000
+        ts_end = int(calendar.timegm(
+            chunk_end.replace(hour=23, minute=59, second=59).timetuple()
+        )) * 1000
+
+        url = '%s/getValues?nodeid=%s&ts_start=%s&ts_end=%s' % (
+            api_base, node_id, ts_start, ts_end)
+
+        try:
+            resp = request_retry('GET', url, headers=hdrs, timeout=timeout)
+            api_calls += 1
+
+            if resp.status_code >= 400:
+                try:
+                    err_body = resp.json()
+                    err_msg = err_body.get('msg', resp.text or '')
+                except Exception:
+                    err_msg = (resp.text or '')[:400]
+                log.append({
+                    'node_id': node_id,
+                    'status': resp.status_code,
+                    'error': err_msg,
+                    'chunk_start': chunk_start.strftime('%Y-%m-%d'),
+                    'chunk_end': chunk_end.strftime('%Y-%m-%d'),
+                })
+                errors += 1
+                chunk_start = chunk_end + timedelta(days=1)
+                continue
+
+            try:
+                body = resp.json() if resp.text else {}
+            except Exception:
+                log.append({
+                    'node_id': node_id,
+                    'error': 'Invalid JSON response',
+                    'chunk_start': chunk_start.strftime('%Y-%m-%d'),
+                })
+                errors += 1
+                chunk_start = chunk_end + timedelta(days=1)
+                continue
+
+            # Check for API error response
+            if isinstance(body, dict) and body.get('code'):
+                if body.get('code') != 200:
+                    log.append({
+                        'node_id': node_id,
+                        'error': '%s: %s' % (
+                            body.get('code'), body.get('msg', '')),
+                        'chunk_start': chunk_start.strftime('%Y-%m-%d'),
+                    })
+                    errors += 1
+                    chunk_start = chunk_end + timedelta(days=1)
+                    continue
+
+            # Process readings per variable label
+            if isinstance(body, dict):
+                for var_label, readings in body.items():
+                    if not isinstance(readings, list):
+                        continue
+
+                    lookup_key = (str(node_id), str(var_label))
+                    sensor_info = sensor_lookup.get(lookup_key)
+                    if not sensor_info:
+                        continue  # variable not configured in Odoo
+
+                    for reading in readings:
+                        if not isinstance(reading, dict):
+                            errors += 1
+                            continue
+
+                        ts_val = reading.get('timestamp')
+                        val_str = reading.get('value')
+
+                        if ts_val is None or val_str is None:
+                            errors += 1
+                            continue
+
+                        try:
+                            valf = float(val_str)
+                        except (ValueError, TypeError):
+                            errors += 1
+                            continue
+
+                        date_str = _ms_to_datetime_str(int(ts_val))
+
+                        Remote.upsert(
+                            'mdm.measurement.device.sensor.reading',
+                            {'sensor_id': sensor_info['sensor_id'],
+                             'measurement_time': date_str},
+                            {'value': valf,
+                             'device_id': sensor_info['device_id']},
+                        )
+                        upserts += 1
+
+                        if len(readings_sample) < 5:
+                            readings_sample.append({
+                                'ts': date_str,
+                                'node': node_id,
+                                'var': var_label,
+                                'val': valf,
+                            })
+
+        except Exception as e:
+            log.append({
+                'node_id': node_id,
+                'error': str(e),
+                'chunk_start': chunk_start.strftime('%Y-%m-%d'),
+            })
+            errors += 1
+
+        chunk_start = chunk_end + timedelta(days=1)
+        _time.sleep(0.3)
+
+    log.append({
+        'node_id': node_id,
+        'start': start_date,
+        'end': end_date,
+        'upserts': upserts,
+        'errors': errors,
+        'api_calls': api_calls,
+        'sample': readings_sample[:5],
+    })
+
+    return upserts, errors, api_calls, log
+
+
+# ── Main loop ──────────────────────────────────────────────────────────
+for node_key, device_data in devices_plan.items():
+    node_id = device_data['node_id']
+
+    # Determine earliest start date from all sensors of this device
+    device_start = today_str
+    for s in plan:
+        if str(s['node_id']) == str(node_id):
+            if s['initial_date'] < device_start:
+                device_start = s['initial_date']
+
+    u, e, c, dev_log = _process_device(
+        node_id, device_data, device_start, today_str)
+
+    total_upserts += u
+    total_errors += e
+    total_api_calls += c
+    items.extend(dev_log)
+    _time.sleep(0.5)
+
+# ── Create audit attachment ────────────────────────────────────────────
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'end_date': today_str,
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'total_api_calls': total_api_calls,
+    'devices_processed': len(devices_plan),
+    'items': items,
+}
+
+b64 = base64.b64encode(
+    json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
+fname = 'qampo_readings_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_'))
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id,
+})
+
+Remote.message_post(
+    body=u'[Qampo] Readings: upserts=%s errors=%s api_calls=%s '
+         u'devices=%s' % (
+             total_upserts, total_errors, total_api_calls,
+             len(devices_plan)),
+    attachment_ids=[att.id],
+)
+
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- PROCEDURE: Catalog Sync                                      -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_qampo_procedure_catalog" model="remotecontrol.procedure">
+            <field name="name">Qampo: Catalog Sync</field>
+            <field name="remote_id" ref="remotecontrol_qampo"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_qampo_step_catalog_10_health" model="remotecontrol.step">
+            <field name="name">Health Check</field>
+            <field name="procedure_id" ref="remotecontrol_qampo_procedure_catalog"/>
+            <field name="action_id" ref="remotecontrol_qampo_action_health"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_qampo_step_catalog_20_sync" model="remotecontrol.step">
+            <field name="name">Sync Catalog</field>
+            <field name="procedure_id" ref="remotecontrol_qampo_procedure_catalog"/>
+            <field name="action_id" ref="remotecontrol_qampo_action_sync_catalog"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_qampo_step_catalog_30_provision" model="remotecontrol.step">
+            <field name="name">Provision Devices</field>
+            <field name="procedure_id" ref="remotecontrol_qampo_procedure_catalog"/>
+            <field name="action_id" ref="remotecontrol_qampo_action_provision_devices"/>
+            <field name="sequence">30</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- PROCEDURE: Import Readings                                   -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_qampo_procedure_readings" model="remotecontrol.procedure">
+            <field name="name">Qampo: Import Readings</field>
+            <field name="remote_id" ref="remotecontrol_qampo"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="True"/>
+        </record>
+
+        <record id="remotecontrol_qampo_step_readings_10_health" model="remotecontrol.step">
+            <field name="name">Health Check</field>
+            <field name="procedure_id" ref="remotecontrol_qampo_procedure_readings"/>
+            <field name="action_id" ref="remotecontrol_qampo_action_health"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_qampo_step_readings_20_plan" model="remotecontrol.step">
+            <field name="name">Get Devices (Plan)</field>
+            <field name="procedure_id" ref="remotecontrol_qampo_procedure_readings"/>
+            <field name="action_id" ref="remotecontrol_qampo_action_get_devices"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_qampo_step_readings_30_import" model="remotecontrol.step">
+            <field name="name">Get Readings</field>
+            <field name="procedure_id" ref="remotecontrol_qampo_procedure_readings"/>
+            <field name="action_id" ref="remotecontrol_qampo_action_get_readings"/>
+            <field name="sequence">30</field>
+        </record>
+
+    </data>
+</odoo>
