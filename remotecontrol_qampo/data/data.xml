@@ -798,13 +798,13 @@ bag['devices_plan'] = devices_plan
 # Response: { "var_label": [{"value": "31.09", "timestamp": 1774051200000}, ...], ... }
 #
 # Notes:
-# - Timestamps are in MILLISECONDS (epoch UTC).
+# - Timestamps are in MILLISECONDS (epoch, local time, NOT true UTC).
 # - Values are STRINGS (cast to float).
 # - Returns ALL published variables per device in a single call.
 # ────────────────────────────────────────────────────────────────────────
 import time as _time
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime
 
 Remote = self.remote_id
 plan = bag.get('sensors_plan') or []
@@ -843,34 +843,27 @@ total_errors = 0
 total_api_calls = 0
 items = []
 
-# ── Date range helpers ─────────────────────────────────────────────────
-# The Qampo API uses millisecond timestamps. We need to convert
-# YYYY-MM-DD date strings to epoch milliseconds and process data in
-# chunks (max 7 days per call to avoid timeouts with large date ranges).
-
 MAX_DAYS_PER_CALL = 7
 
-def _date_to_ms(date_str):
-    """Convert YYYY-MM-DD to epoch milliseconds (UTC midnight)."""
-    dt = datetime.strptime(date_str[:10], '%Y-%m-%d')
-    return int(calendar.timegm(dt.timetuple())) * 1000
-
-def _ms_to_datetime_str(ts_ms):
-    """Convert epoch milliseconds to Odoo datetime string."""
-    ts_secs = ts_ms / 1000.0
-    dt = datetime.utcfromtimestamp(ts_secs)
-    return dt.strftime('%Y-%m-%d %H:%M:%S')
-
-def _process_device(node_id, device_data, start_date, end_date):
-    """Fetch readings for one device, chunking date ranges."""
-    upserts = 0
-    errors = 0
-    api_calls = 0
-    log = []
+# ── Main loop ──────────────────────────────────────────────────────────
+for node_key, device_data in devices_plan.items():
+    node_id = device_data['node_id']
+    device_tz = device_data.get('timezone', default_tz)
+    dev_upserts = 0
+    dev_errors = 0
+    dev_api_calls = 0
+    dev_log = []
     readings_sample = []
 
-    start_dt = datetime.strptime(start_date[:10], '%Y-%m-%d')
-    end_dt = datetime.strptime(end_date[:10], '%Y-%m-%d')
+    # Determine earliest start date from all sensors of this device
+    device_start = today_str
+    for s in plan:
+        if str(s['node_id']) == str(node_id):
+            if s['initial_date'] < device_start:
+                device_start = s['initial_date']
+
+    start_dt = datetime.strptime(device_start[:10], '%Y-%m-%d')
+    end_dt = datetime.strptime(today_str[:10], '%Y-%m-%d')
 
     # Chunk into MAX_DAYS_PER_CALL segments
     chunk_start = start_dt
@@ -888,7 +881,7 @@ def _process_device(node_id, device_data, start_date, end_date):
 
         try:
             resp = request_retry('GET', url, headers=hdrs, timeout=timeout)
-            api_calls += 1
+            dev_api_calls += 1
 
             if resp.status_code >= 400:
                 try:
@@ -896,39 +889,39 @@ def _process_device(node_id, device_data, start_date, end_date):
                     err_msg = err_body.get('msg', resp.text or '')
                 except Exception:
                     err_msg = (resp.text or '')[:400]
-                log.append({
+                dev_log.append({
                     'node_id': node_id,
                     'status': resp.status_code,
                     'error': err_msg,
                     'chunk_start': chunk_start.strftime('%Y-%m-%d'),
                     'chunk_end': chunk_end.strftime('%Y-%m-%d'),
                 })
-                errors += 1
+                dev_errors += 1
                 chunk_start = chunk_end + timedelta(days=1)
                 continue
 
             try:
                 body = resp.json() if resp.text else {}
             except Exception:
-                log.append({
+                dev_log.append({
                     'node_id': node_id,
                     'error': 'Invalid JSON response',
                     'chunk_start': chunk_start.strftime('%Y-%m-%d'),
                 })
-                errors += 1
+                dev_errors += 1
                 chunk_start = chunk_end + timedelta(days=1)
                 continue
 
             # Check for API error response
             if isinstance(body, dict) and body.get('code'):
                 if body.get('code') != 200:
-                    log.append({
+                    dev_log.append({
                         'node_id': node_id,
                         'error': '%s: %s' % (
                             body.get('code'), body.get('msg', '')),
                         'chunk_start': chunk_start.strftime('%Y-%m-%d'),
                     })
-                    errors += 1
+                    dev_errors += 1
                     chunk_start = chunk_end + timedelta(days=1)
                     continue
 
@@ -941,27 +934,40 @@ def _process_device(node_id, device_data, start_date, end_date):
                     lookup_key = (str(node_id), str(var_label))
                     sensor_info = sensor_lookup.get(lookup_key)
                     if not sensor_info:
-                        continue  # variable not configured in Odoo
+                        continue
 
                     for reading in readings:
                         if not isinstance(reading, dict):
-                            errors += 1
+                            dev_errors += 1
                             continue
 
                         ts_val = reading.get('timestamp')
                         val_str = reading.get('value')
 
                         if ts_val is None or val_str is None:
-                            errors += 1
+                            dev_errors += 1
                             continue
 
                         try:
                             valf = float(val_str)
                         except (ValueError, TypeError):
-                            errors += 1
+                            dev_errors += 1
                             continue
 
-                        date_str = _ms_to_datetime_str(int(ts_val))
+                        # Qampo epoch ms represent local time, not UTC.
+                        # Localise to device tz, then convert to UTC.
+                        ts_secs = int(ts_val) / 1000.0
+                        naive_dt = datetime.utcfromtimestamp(ts_secs)
+                        try:
+                            local_tz = pytz.timezone(device_tz)
+                            local_dt = local_tz.localize(
+                                naive_dt, is_dst=None)
+                            utc_dt = local_dt.astimezone(pytz.utc)
+                            date_str = utc_dt.strftime(
+                                '%Y-%m-%d %H:%M:%S')
+                        except Exception:
+                            date_str = naive_dt.strftime(
+                                '%Y-%m-%d %H:%M:%S')
 
                         Remote.upsert(
                             'mdm.measurement.device.sensor.reading',
@@ -970,7 +976,7 @@ def _process_device(node_id, device_data, start_date, end_date):
                             {'value': valf,
                              'device_id': sensor_info['device_id']},
                         )
-                        upserts += 1
+                        dev_upserts += 1
 
                         if len(readings_sample) < 5:
                             readings_sample.append({
@@ -981,49 +987,28 @@ def _process_device(node_id, device_data, start_date, end_date):
                             })
 
         except Exception as e:
-            log.append({
+            dev_log.append({
                 'node_id': node_id,
                 'error': str(e),
                 'chunk_start': chunk_start.strftime('%Y-%m-%d'),
             })
-            errors += 1
-
+            dev_errors += 1
         chunk_start = chunk_end + timedelta(days=1)
         _time.sleep(0.3)
-
-    log.append({
+    dev_log.append({
         'node_id': node_id,
-        'start': start_date,
-        'end': end_date,
-        'upserts': upserts,
-        'errors': errors,
-        'api_calls': api_calls,
+        'start': device_start,
+        'end': today_str,
+        'upserts': dev_upserts,
+        'errors': dev_errors,
+        'api_calls': dev_api_calls,
         'sample': readings_sample[:5],
     })
-
-    return upserts, errors, api_calls, log
-
-
-# ── Main loop ──────────────────────────────────────────────────────────
-for node_key, device_data in devices_plan.items():
-    node_id = device_data['node_id']
-
-    # Determine earliest start date from all sensors of this device
-    device_start = today_str
-    for s in plan:
-        if str(s['node_id']) == str(node_id):
-            if s['initial_date'] < device_start:
-                device_start = s['initial_date']
-
-    u, e, c, dev_log = _process_device(
-        node_id, device_data, device_start, today_str)
-
-    total_upserts += u
-    total_errors += e
-    total_api_calls += c
+    total_upserts += dev_upserts
+    total_errors += dev_errors
+    total_api_calls += dev_api_calls
     items.extend(dev_log)
     _time.sleep(0.5)
-
 # ── Create audit attachment ────────────────────────────────────────────
 audit = {
     'executed_at': fields.Datetime.now(),
@@ -1034,12 +1019,10 @@ audit = {
     'devices_processed': len(devices_plan),
     'items': items,
 }
-
 b64 = base64.b64encode(
     json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
 fname = 'qampo_readings_%s.json' % (
     fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_'))
-
 att = env['ir.attachment'].create({
     'name': fname,
     'datas_fname': fname,
@@ -1048,7 +1031,6 @@ att = env['ir.attachment'].create({
     'res_model': 'remotecontrol',
     'res_id': Remote.id,
 })
-
 Remote.message_post(
     body=u'[Qampo] Readings: upserts=%s errors=%s api_calls=%s '
          u'devices=%s' % (
@@ -1056,7 +1038,6 @@ Remote.message_post(
              len(devices_plan)),
     attachment_ids=[att.id],
 )
-
 bag['upserts'] = total_upserts
 bag['errors'] = total_errors
 bag['audit_attachment_id'] = att.id
