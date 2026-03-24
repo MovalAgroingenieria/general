@@ -14,6 +14,7 @@
         'hr_timesheet',
         'analytic',
         'hr_timesheet_sheet',
+        'sh_task_time',
     ],
     "data": [
         'views/project_task_time.xml',

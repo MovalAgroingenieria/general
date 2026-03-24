@@ -21,11 +21,11 @@ class AccountAnalyticLine(models.Model):
         string="Edited",
         default=False,
         readonly=True)
-    
+
     tasktime_modificated = fields.Boolean(
         string="Modified",
         default=False)
-    
+
     original_time_line = fields.Float(
         string="Initial Quantity", default=0.0)
 
@@ -90,3 +90,73 @@ class AccountAnalyticLine(models.Model):
                 record.original_time_line = vals['amount']
             resp = super(AccountAnalyticLine, record).write(vals)
         return resp
+
+
+class ProjectTask(models.Model):
+    _inherit = 'project.task'
+
+    def action_task_start(self):
+        """Override to open the end-task wizard for the running task
+        instead of raising an error, so the user can enter the
+        description before the new task starts automatically."""
+        if self.task_running:
+            raise exceptions.UserError(
+                _("This task has been already started by another user!"))
+        current_user_id = self.env.user.id
+        running_task = self.env['project.task'].sudo().search(
+            [('task_running', '=', True),
+             ('id', '!=', self.id),
+             ('starter_user_id', '=', current_user_id)], limit=1)
+        if not self.env.company.sh_multiple_task and running_task:
+            # Open the end-task wizard for the running task, passing
+            # the id of the task to start after completion.
+            running_task.sudo().end_time = datetime.now()
+            tot_sec = (running_task.end_time -
+                       running_task.start_time).total_seconds()
+            tot_hours = round((tot_sec / 3600.0), 2)
+            running_task.sudo().total_time = tot_hours
+
+            ctx = {
+                'active_model': 'project.task',
+                'active_id': running_task.id,
+                'task_to_start_id': self.id,
+            }
+            if self.env.company.sh_is_default_description:
+                ctx['default_name'] = (str(self.env.user.name) +
+                                       ' - ' + str(running_task.name))
+            return {
+                'name': _("End running task: %s", running_task.name),
+                'type': 'ir.actions.act_window',
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'task.time.account.line',
+                'context': ctx,
+                'target': 'new',
+            }
+
+        return super().action_task_start()
+
+    def action_task_end(self):
+        """Override to prevent a user from stopping another user's
+        running task."""
+        if (self.task_running and self.starter_user_id
+                and self.starter_user_id != self.env.user):
+            raise exceptions.UserError(
+                _("You cannot stop this task because it was started "
+                  "by %s.", self.starter_user_id.name))
+        return super().action_task_end()
+
+
+class TaskTimeAccountLine(models.Model):
+    _inherit = 'task.time.account.line'
+
+    def end_task(self):
+        """Override: after ending the task, if a new task was queued
+        to start (via task_to_start_id in context), start it."""
+        task_to_start_id = self.env.context.get('task_to_start_id', False)
+        result = super().end_task()
+        if task_to_start_id:
+            task_to_start = self.env['project.task'].browse(task_to_start_id)
+            if task_to_start.exists() and not task_to_start.task_running:
+                task_to_start.action_task_start()
+        return result
