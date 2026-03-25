@@ -56,4 +56,23 @@
         sequence="10"
         groups="base_general_entity.group_general_entity_manager"
     />
+
+    <!-- Configuration submenu -->
+    <menuitem
+        id="menu_general_entity_configuration"
+        name="Configuration"
+        parent="menu_general_entity_root"
+        sequence="90"
+        groups="base_general_entity.group_general_entity_manager"
+    />
+
+    <!-- Submenu: Member Types - under Configuration -->
+    <menuitem
+        id="menu_entity_member_types"
+        name="Member Types"
+        parent="menu_general_entity_configuration"
+        action="action_general_entity_member_type"
+        sequence="10"
+        groups="base_general_entity.group_general_entity_manager"
+    />
 </odoo>

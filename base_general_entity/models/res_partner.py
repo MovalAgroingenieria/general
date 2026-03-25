@@ -21,8 +21,11 @@ class ResPartner(models.Model):
         copy=False,
         help="Global shared code (applies to primary and secondary entities)",
     )
-
-    # Relations as primary entity
+    member_type_id = fields.Many2one(
+        comodel_name="general.entity.member.type",
+        index=True,
+        help="Classification type for secondary members",
+    )
     member_ids = fields.One2many(
         comodel_name="general.entity.member",
         inverse_name="primary_partner_id",
@@ -30,8 +33,6 @@ class ResPartner(models.Model):
     member_count = fields.Integer(
         compute="_compute_member_count",
     )
-
-    # Relations as secondary member
     primary_entity_ids = fields.One2many(
         comodel_name="general.entity.member",
         inverse_name="member_partner_id",

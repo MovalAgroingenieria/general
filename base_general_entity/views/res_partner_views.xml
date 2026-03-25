@@ -107,6 +107,7 @@
                 <field name="company_type" column_invisible="True" />
                 <field name="name" />
                 <field name="entity_global_code" />
+                <field name="member_type_id" optional="show" />
                 <field name="phone" />
                 <field name="email" />
                 <field name="vat" />
@@ -133,6 +134,7 @@
                             <field name="is_secondary_entity" invisible="1" />
                             <field name="company_type" invisible="1" />
                             <field name="entity_global_code" />
+                            <field name="member_type_id" />
                             <field name="email" widget="email" />
                             <field name="phone" widget="phone" />
                         </group>
@@ -183,6 +185,7 @@
             <search string="Search Secondary Members">
                 <field name="name" />
                 <field name="entity_global_code" />
+                <field name="member_type_id" />
                 <field name="vat" />
                 <filter
                     name="filter_active"
@@ -190,6 +193,12 @@
                     domain="[('active', '=', True)]"
                 />
                 <group expand="0" string="Group By">
+                    <filter
+                        name="group_by_member_type"
+                        string="Member Type"
+                        domain="[]"
+                        context="{'group_by': 'member_type_id'}"
+                    />
                     <filter
                         name="group_by_country"
                         string="Country"

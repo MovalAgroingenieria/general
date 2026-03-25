@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-13 10:42+0000\n"
-"PO-Revision-Date: 2026-03-13 10:42+0000\n"
+"POT-Creation-Date: 2026-03-25 10:57+0000\n"
+"PO-Revision-Date: 2026-03-25 10:57+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -22,8 +22,7 @@ msgid ""
 "A contact cannot be both a primary entity and a secondary member "
 "simultaneously."
 msgstr ""
-"Un contacte no pot ser entitat primària i membre secundari "
-"simultàniament."
+"Un contacte no pot ser entitat primària i membre secundari simultàniament."
 
 #. module: base_general_entity
 #: model:ir.model.fields,field_description:base_general_entity.field_partner_entity_type_wizard__action_type
@@ -32,7 +31,9 @@ msgstr "Tipus d'acció"
 
 #. module: base_general_entity
 #: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member__active
+#: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member_type__active
 #: model_terms:ir.ui.view,arch_db:base_general_entity.view_general_entity_member_search
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_general_entity_member_type_search
 #: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_primary_entity_search
 #: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_secondary_entity_search
 msgid "Active"
@@ -53,6 +54,11 @@ msgstr "Ja existeix un altre membre amb el codi %(code)s en aquesta entitat"
 #: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_entity_type_wizard_form
 msgid "Apply"
 msgstr "Aplicar"
+
+#. module: base_general_entity
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_general_entity_member_type_search
+msgid "Archived"
+msgstr "Arxivat"
 
 #. module: base_general_entity
 #: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_secondary_entity_form
@@ -77,9 +83,25 @@ msgid "Check if this contact is a secondary member"
 msgstr "Marcar si aquest contacte és un membre secundari"
 
 #. module: base_general_entity
+#: model:ir.model.fields,help:base_general_entity.field_res_partner__member_type_id
+#: model:ir.model.fields,help:base_general_entity.field_res_users__member_type_id
+msgid "Classification type for secondary members"
+msgstr "Tipus de classificació per a membres secundaris"
+
+#. module: base_general_entity
+#: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member_type__code
+msgid "Code"
+msgstr "Codi"
+
+#. module: base_general_entity
 #: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member__company_id
 msgid "Company"
 msgstr "Companyia"
+
+#. module: base_general_entity
+#: model:ir.ui.menu,name:base_general_entity.menu_general_entity_configuration
+msgid "Configuration"
+msgstr "Configuració"
 
 #. module: base_general_entity
 #: model:ir.model,name:base_general_entity.model_res_partner
@@ -91,6 +113,11 @@ msgstr "Contacte"
 #: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_secondary_entity_search
 msgid "Country"
 msgstr "País"
+
+#. module: base_general_entity
+#: model_terms:ir.actions.act_window,help:base_general_entity.action_general_entity_member_type
+msgid "Create a new Member Type"
+msgstr "Crear un nou tipus de membre"
 
 #. module: base_general_entity
 #: model_terms:ir.actions.act_window,help:base_general_entity.action_primary_entities
@@ -109,18 +136,21 @@ msgstr "Crear una nova relació"
 
 #. module: base_general_entity
 #: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member__create_uid
+#: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member_type__create_uid
 #: model:ir.model.fields,field_description:base_general_entity.field_partner_entity_type_wizard__create_uid
 msgid "Created by"
 msgstr "Creat per"
 
 #. module: base_general_entity
 #: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member__create_date
+#: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member_type__create_date
 #: model:ir.model.fields,field_description:base_general_entity.field_partner_entity_type_wizard__create_date
 msgid "Created on"
 msgstr "Creat el"
 
 #. module: base_general_entity
 #: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member__display_name
+#: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member_type__display_name
 #: model:ir.model.fields,field_description:base_general_entity.field_partner_entity_type_wizard__display_name
 msgid "Display Name"
 msgstr "Nom mostrat"
@@ -146,6 +176,11 @@ msgstr "Codi global d'entitat"
 #: model_terms:ir.ui.view,arch_db:base_general_entity.view_general_entity_member_form
 msgid "Entity Member"
 msgstr "Membre d'entitat"
+
+#. module: base_general_entity
+#: model:ir.model,name:base_general_entity.model_general_entity_member_type
+msgid "Entity Member Type"
+msgstr "Tipus de membre d'entitat"
 
 #. module: base_general_entity
 #: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_primary_entity_form
@@ -182,11 +217,11 @@ msgid ""
 "Here you manage the relationships between primary entities and secondary "
 "members."
 msgstr ""
-"Aquí gestioneu les relacions entre entitats primàries i membres "
-"secundaris."
+"Aquí gestioneu les relacions entre entitats primàries i membres secundaris."
 
 #. module: base_general_entity
 #: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member__id
+#: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member_type__id
 #: model:ir.model.fields,field_description:base_general_entity.field_partner_entity_type_wizard__id
 msgid "ID"
 msgstr "ID"
@@ -222,12 +257,14 @@ msgstr "És membre secundari"
 
 #. module: base_general_entity
 #: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member__write_uid
+#: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member_type__write_uid
 #: model:ir.model.fields,field_description:base_general_entity.field_partner_entity_type_wizard__write_uid
 msgid "Last Updated by"
 msgstr "Darrera actualització per"
 
 #. module: base_general_entity
 #: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member__write_date
+#: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member_type__write_date
 #: model:ir.model.fields,field_description:base_general_entity.field_partner_entity_type_wizard__write_date
 msgid "Last Updated on"
 msgstr "Darrera actualització el"
@@ -291,9 +328,32 @@ msgid "Member Partner"
 msgstr "Contacte membre"
 
 #. module: base_general_entity
+#: model:ir.model.fields,field_description:base_general_entity.field_res_partner__member_type_id
+#: model:ir.model.fields,field_description:base_general_entity.field_res_users__member_type_id
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_general_entity_member_type_form
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_secondary_entity_search
+msgid "Member Type"
+msgstr "Tipus de membre"
+
+#. module: base_general_entity
+#: model:ir.actions.act_window,name:base_general_entity.action_general_entity_member_type
+#: model:ir.ui.menu,name:base_general_entity.menu_entity_member_types
+msgid "Member Types"
+msgstr "Tipus de membre"
+
+#. module: base_general_entity
 #: model:ir.model.fields,help:base_general_entity.field_general_entity_member__member_code_in_entity
 msgid "Member code within this specific entity"
 msgstr "Codi del membre dins d'aquesta entitat específica"
+
+#. module: base_general_entity
+#: model_terms:ir.actions.act_window,help:base_general_entity.action_general_entity_member_type
+msgid ""
+"Member types allow you to classify secondary members\n"
+"                into categories for filtering and reporting."
+msgstr ""
+"Els tipus de membre permeten classificar membres secundaris\n"
+"                en categories per a filtratge i informes."
 
 #. module: base_general_entity
 #: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_primary_entity_form
@@ -301,9 +361,25 @@ msgid "Members"
 msgstr "Membres"
 
 #. module: base_general_entity
+#: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member_type__name
+msgid "Name"
+msgstr "Nom"
+
+#. module: base_general_entity
 #: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member__note
+#: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member_type__note
 msgid "Note"
 msgstr "Nota"
+
+#. module: base_general_entity
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_general_entity_member_type_form
+msgid "Notes"
+msgstr "Notes"
+
+#. module: base_general_entity
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_general_entity_member_type_form
+msgid "Notes..."
+msgstr "Notes..."
 
 #. module: base_general_entity
 #: model:ir.actions.act_window,name:base_general_entity.action_primary_entities
@@ -327,13 +403,19 @@ msgstr "Contacte primari"
 #. module: base_general_entity
 #: model_terms:ir.actions.act_window,help:base_general_entity.action_primary_entities
 msgid "Primary entities are organizations that group secondary members."
-msgstr "Les entitats primàries són organitzacions que agrupen membres secundaris."
+msgstr ""
+"Les entitats primàries són organitzacions que agrupen membres secundaris."
 
 #. module: base_general_entity
 #: model:ir.actions.act_window,name:base_general_entity.action_general_entity_member
 #: model:ir.ui.menu,name:base_general_entity.menu_entity_members
 msgid "Relationships (Members)"
 msgstr "Relacions (Membres)"
+
+#. module: base_general_entity
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_general_entity_member_type_search
+msgid "Search Member Types"
+msgstr "Cercar tipus de membre"
 
 #. module: base_general_entity
 #: model_terms:ir.ui.view,arch_db:base_general_entity.view_general_entity_member_search
@@ -365,10 +447,12 @@ msgstr "Membres secundaris"
 #. module: base_general_entity
 #: model_terms:ir.actions.act_window,help:base_general_entity.action_secondary_entities
 msgid "Secondary members can belong to one or more primary entities."
-msgstr "Els membres secundaris poden pertànyer a una o més entitats primàries."
+msgstr ""
+"Els membres secundaris poden pertànyer a una o més entitats primàries."
 
 #. module: base_general_entity
 #: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member__sequence
+#: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member_type__sequence
 msgid "Sequence"
 msgstr "Seqüència"
 
@@ -384,8 +468,8 @@ msgid ""
 "The following contacts are already primary entities and cannot be marked as "
 "secondary members: %(names)s"
 msgstr ""
-"Els següents contactes ja són entitats primàries i no es poden marcar "
-"com a membres secundaris: %(names)s"
+"Els següents contactes ja són entitats primàries i no es poden marcar com a "
+"membres secundaris: %(names)s"
 
 #. module: base_general_entity
 #. odoo-python
@@ -394,13 +478,20 @@ msgid ""
 "The following contacts are already secondary members and cannot be marked as"
 " primary entities: %(names)s"
 msgstr ""
-"Els següents contactes ja són membres secundaris i no es poden marcar com"
-" a entitats primàries: %(names)s"
+"Els següents contactes ja són membres secundaris i no es poden marcar com a "
+"entitats primàries: %(names)s"
+
+#. module: base_general_entity
+#: model:ir.model.constraint,message:base_general_entity.constraint_general_entity_member_type_unique_code
+msgid "The member type code must be unique."
+msgstr "El codi del tipus de membre ha de ser únic."
 
 #. module: base_general_entity
 #: model:ir.model.constraint,message:base_general_entity.constraint_general_entity_member_unique_primary_member_company
 msgid "This member is already related to this primary entity in this company."
-msgstr "Aquest membre ja està relacionat amb aquesta entitat primària en aquesta companyia."
+msgstr ""
+"Aquest membre ja està relacionat amb aquesta entitat primària en aquesta "
+"companyia."
 
 #. module: base_general_entity
 #: model:ir.model.fields,help:base_general_entity.field_general_entity_member__active

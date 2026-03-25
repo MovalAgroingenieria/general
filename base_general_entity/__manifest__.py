@@ -17,6 +17,7 @@
         "security/ir.model.access.csv",
         "security/ir_rule.xml",
         "wizards/partner_entity_type_wizard_views.xml",
+        "views/general_entity_member_type_views.xml",
         "views/res_partner_views.xml",
         "views/general_entity_member_views.xml",
         "views/menu_views.xml",
