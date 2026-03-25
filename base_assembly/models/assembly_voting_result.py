@@ -8,6 +8,14 @@ class AssemblyVotingResult(models.Model):
     _name = "assembly.voting.result"
     _description = "Voting result by option"
 
+    _sql_constraints = [
+        (
+            "voting_result_option_uniq",
+            "UNIQUE(voting_id, vote_option)",
+            "Each vote option may appear only once per voting.",
+        ),
+    ]
+
     voting_id = fields.Many2one(
         "assembly.voting",
         string="Voting",

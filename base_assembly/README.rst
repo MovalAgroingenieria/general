@@ -1,51 +1,33 @@
 .. Copyright 2026 Moval Agroingeniería
 .. License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-================
+==============
 Base Assembly
-================
+==============
 
-Assembly management: agenda, attendance, delegations and voting.
+Base module for assembly management: assembly types, scheduling, agenda,
+attendees, vote delegation, quorum, and voting (uses *base_vote*).
 
-Features
-========
+**Dependencies:** ``base``, ``base_vote``, ``web``.
 
-* Assembly types and assemblies with state workflow (draft, announced, open, in session, closed, cancelled)
-* Agenda items with optional vote types and votings
-* Attendees (present/remote) with vote totals from base_vote and delegations
-* Delegations (delegator → delegate) per vote type with convocable-partner checks
-* Quorum (percentage or fixed, 1st/2nd call)
-* Voting lines (yes/no/abstention/blank) and result aggregation
+**Security:** *Assembly User* is read-oriented with scoped record rules; *Assembly Manager* has model ACL for CRUD. Manager does **not** imply User (see ``security/assembly_security.xml``)—assign both only if you need user rules on a manager login.
 
-Usage
-=====
+Installation
+============
 
-#. Create an assembly type and define vote types and default quorum.
-#. Create an assembly, set dates and agenda.
-#. Use "Generate attendees" to create attendee records from the partner domain.
-#. Open registration; partners confirm attendance or delegate votes.
-#. Start session; run votings from agenda items and close the assembly.
+Install from Apps after *base_vote* is installed.
 
 Credits
 =======
 
 Authors
-~~~~~~~~
-* Moval Agroingeniería S.L.
+~~~~~~~
 
-Contributors
-~~~~~~~~~~~~
-* Alberto Hernández <ahernandez@moval.es>
-* Miguel Mora <mmora@moval.es>
-* Salvador Sánchez <ssanchez@moval.es>
-* Juanu Sandoval <jsandoval@moval.es>
-* Jorge Vera <jvera@moval.es>
-* César Andrés <candres@moval.es>
+* Moval Agroingeniería
 
 Maintainers
 ~~~~~~~~~~~
-This module is maintained by Moval Agroingeniería.
 
-.. image:: https://services.moval.es/static/images/logo_moval_small.png
-   :alt: Moval Agroingeniería
-   :target: http://moval.es
+This module is part of the `Moval/moval_addons <https://github.com/Moval/moval_addons/tree/18.0/base_general_entity_period_census>`_ project on GitHub.
+
+You are welcome to contribute.

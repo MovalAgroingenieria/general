@@ -1,7 +1,9 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+# pylint: disable=invalid-name
 
-"""Portal tests for base_assembly: list, detail, confirm, delegations, voting, documents.
+"""Portal tests for base_assembly: list, detail, confirm, delegations,
+voting, documents.
 
 Matrix: authenticated / no permission, token (session) valid / invalid,
 allowed state / not allowed. See doc/PORTAL_TEST_MATRIX.md.
@@ -10,9 +12,9 @@ allowed state / not allowed. See doc/PORTAL_TEST_MATRIX.md.
 from .http_common import AssemblyHttpCase
 
 
-def _logout_and_clear_session(test_case):
+def _logout_and_clear_session(test_case):  # pylint: disable=import-outside-toplevel
     test_case.session.logout(keep_db=True)
-    from odoo.http import root
+    from odoo.http import root  # pylint: disable=import-outside-toplevel
 
     root.session_store.save(test_case.session)
     test_case.opener.cookies.pop("session_id", None)
@@ -31,11 +33,13 @@ class PortalListTests(AssemblyHttpCase):
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open("/my/assemblies", allow_redirects=False)
         self._skip_if_route_404(res, "Portal list /my/assemblies")
+        # pylint: disable=protected-access
         self.assertEqual(res.status_code, 200)
         self.assertIn(self.assembly.name.encode(), res.content)
 
     def test_L2_authenticated_no_permission_sees_empty_or_only_own(self):
-        """L2: Autenticado sin permiso (no convocado en ninguna) → 200, sin asambleas ajenas."""
+        """L2: Autenticado sin permiso (no convocado en ninguna) →
+        200, sin asambleas ajenas."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         other = self.env["res.partner"].create({"name": "Other", "is_company": False})
@@ -44,7 +48,7 @@ class PortalListTests(AssemblyHttpCase):
         self.assembly.action_announce()
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open("/my/assemblies", allow_redirects=False)
-        self._skip_if_route_404(res, "Portal list")
+        self._skip_if_route_404(res, "Portal list")  # pylint: disable=protected-access
         self.assertEqual(res.status_code, 200)
         self.assertNotIn(self.assembly.name.encode(), res.content)
 
@@ -52,7 +56,7 @@ class PortalListTests(AssemblyHttpCase):
         """L3: Invalid token/session → 302 to login."""
         _logout_and_clear_session(self)
         res = self.url_open("/my/assemblies", allow_redirects=False)
-        self._skip_if_route_404(res, "Portal list")
+        self._skip_if_route_404(res, "Portal list")  # pylint: disable=protected-access
         self.assertEqual(res.status_code, 302)
         self.assertTrue("login" in res.headers.get("Location", "").lower())
 
@@ -69,7 +73,9 @@ class PortalDetailTests(AssemblyHttpCase):
         self.assembly.action_generate_attendees()
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open("/my/assembly/%s" % self.assembly.id, allow_redirects=False)
-        self._skip_if_route_404(res, "Portal detail")
+        self._skip_if_route_404(
+            res, "Portal detail"
+        )  # pylint: disable=protected-access
         self.assertEqual(res.status_code, 200)
 
     def test_D2_authenticated_no_permission_detail_403_or_404(self):
@@ -82,7 +88,9 @@ class PortalDetailTests(AssemblyHttpCase):
         self.assembly.action_announce()
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open("/my/assembly/%s" % self.assembly.id, allow_redirects=False)
-        self._skip_if_route_404(res, "Portal detail")
+        self._skip_if_route_404(
+            res, "Portal detail"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (403, 404))
 
     def test_D3_token_invalid_redirects_to_login(self):
@@ -91,7 +99,9 @@ class PortalDetailTests(AssemblyHttpCase):
             self.skipTest("Portal group not available")
         _logout_and_clear_session(self)
         res = self.url_open("/my/assembly/%s" % self.assembly.id, allow_redirects=False)
-        self._skip_if_route_404(res, "Portal detail")
+        self._skip_if_route_404(
+            res, "Portal detail"
+        )  # pylint: disable=protected-access
         self.assertEqual(res.status_code, 302)
 
     def test_D4_nonexistent_id_404(self):
@@ -100,7 +110,9 @@ class PortalDetailTests(AssemblyHttpCase):
             self.skipTest("Portal group not available")
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open("/my/assembly/999999", allow_redirects=False)
-        self._skip_if_route_404(res, "Portal detail")
+        self._skip_if_route_404(
+            res, "Portal detail"
+        )  # pylint: disable=protected-access
         self.assertEqual(res.status_code, 404)
 
 
@@ -121,7 +133,9 @@ class PortalConfirmTests(AssemblyHttpCase):
             data={},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal confirm")
+        self._skip_if_route_404(
+            res, "Portal confirm"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (200, 302))
 
     def test_C2_state_not_allowed_draft_403(self):
@@ -136,7 +150,9 @@ class PortalConfirmTests(AssemblyHttpCase):
             data={},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal confirm")
+        self._skip_if_route_404(
+            res, "Portal confirm"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (400, 403))
 
     def test_C3_state_not_allowed_closed_403(self):
@@ -156,7 +172,9 @@ class PortalConfirmTests(AssemblyHttpCase):
             data={},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal confirm")
+        self._skip_if_route_404(
+            res, "Portal confirm"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (400, 403))
 
     def test_C4_authenticated_no_permission_403_or_404(self):
@@ -174,7 +192,9 @@ class PortalConfirmTests(AssemblyHttpCase):
             data={},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal confirm")
+        self._skip_if_route_404(
+            res, "Portal confirm"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (403, 404))
 
     def test_C5_token_invalid_redirects_to_login(self):
@@ -185,7 +205,9 @@ class PortalConfirmTests(AssemblyHttpCase):
             data={},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal confirm")
+        self._skip_if_route_404(
+            res, "Portal confirm"
+        )  # pylint: disable=protected-access
         self.assertEqual(res.status_code, 302)
 
 
@@ -212,7 +234,9 @@ class PortalDelegationTests(AssemblyHttpCase):
             data={"delegate_partner_id": other.id},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal delegation create")
+        self._skip_if_route_404(
+            res, "Portal delegation create"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (200, 302))
 
     def test_DG2_state_not_allowed_create_delegation_403(self):
@@ -233,7 +257,9 @@ class PortalDelegationTests(AssemblyHttpCase):
             data={"delegate_partner_id": other.id},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal delegation create")
+        self._skip_if_route_404(
+            res, "Portal delegation create"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (400, 403))
 
     def test_DG3_authenticated_no_permission_create_403_or_404(self):
@@ -251,7 +277,9 @@ class PortalDelegationTests(AssemblyHttpCase):
             data={"delegate_partner_id": other.id},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal delegation create")
+        self._skip_if_route_404(
+            res, "Portal delegation create"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (403, 404))
 
     def test_DG4_token_invalid_redirects_to_login(self):
@@ -262,7 +290,9 @@ class PortalDelegationTests(AssemblyHttpCase):
             data={},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal delegation create")
+        self._skip_if_route_404(
+            res, "Portal delegation create"
+        )  # pylint: disable=protected-access
         self.assertEqual(res.status_code, 302)
 
     def test_DC1_confirm_own_delegation_200(self):
@@ -279,7 +309,7 @@ class PortalDelegationTests(AssemblyHttpCase):
         self.assembly.action_generate_attendees()
         self.assembly.action_announce()
         self.assembly.action_open_registration()
-        delegation = self.env["assembly.delegation"].create(
+        delegation = self.env["assembly.delegation"].create(  # noqa: F841
             {
                 "assembly_id": self.assembly.id,
                 "partner_id": self.portal_partner.id,
@@ -296,6 +326,7 @@ class PortalDelegationTests(AssemblyHttpCase):
             allow_redirects=False,
         )
         self._skip_if_route_404(res, "Portal delegation confirm")
+        # pylint: disable=protected-access
         self.assertIn(res.status_code, (200, 302))
 
     def test_DC2_confirm_other_delegation_403_or_404(self):
@@ -312,7 +343,7 @@ class PortalDelegationTests(AssemblyHttpCase):
         self.assembly.action_generate_attendees()
         self.assembly.action_announce()
         self.assembly.action_open_registration()
-        delegation = self.env["assembly.delegation"].create(
+        delegation = self.env["assembly.delegation"].create(  # noqa: F841
             {
                 "assembly_id": self.assembly.id,
                 "partner_id": p_a.id,
@@ -329,6 +360,7 @@ class PortalDelegationTests(AssemblyHttpCase):
             allow_redirects=False,
         )
         self._skip_if_route_404(res, "Portal delegation confirm")
+        # pylint: disable=protected-access
         self.assertIn(res.status_code, (403, 404))
 
     def test_DR1_revoke_own_delegation_200(self):
@@ -345,7 +377,7 @@ class PortalDelegationTests(AssemblyHttpCase):
         self.assembly.action_generate_attendees()
         self.assembly.action_announce()
         self.assembly.action_open_registration()
-        delegation = self.env["assembly.delegation"].create(
+        delegation = self.env["assembly.delegation"].create(  # noqa: F841
             {
                 "assembly_id": self.assembly.id,
                 "partner_id": self.portal_partner.id,
@@ -362,7 +394,9 @@ class PortalDelegationTests(AssemblyHttpCase):
             data={},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal delegation revoke")
+        self._skip_if_route_404(
+            res, "Portal delegation revoke"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (200, 302))
 
     def test_DR2_revoke_other_delegation_403_or_404(self):
@@ -379,7 +413,7 @@ class PortalDelegationTests(AssemblyHttpCase):
         self.assembly.action_generate_attendees()
         self.assembly.action_announce()
         self.assembly.action_open_registration()
-        delegation = self.env["assembly.delegation"].create(
+        delegation = self.env["assembly.delegation"].create(  # noqa: F841
             {
                 "assembly_id": self.assembly.id,
                 "partner_id": p_a.id,
@@ -396,7 +430,9 @@ class PortalDelegationTests(AssemblyHttpCase):
             data={},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal delegation revoke")
+        self._skip_if_route_404(
+            res, "Portal delegation revoke"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (403, 404))
 
     def test_DR3_token_invalid_revoke_302(self):
@@ -407,7 +443,9 @@ class PortalDelegationTests(AssemblyHttpCase):
             data={},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal delegation revoke")
+        self._skip_if_route_404(
+            res, "Portal delegation revoke"
+        )  # pylint: disable=protected-access
         self.assertEqual(res.status_code, 302)
 
 
@@ -431,7 +469,9 @@ class PortalVotingTests(AssemblyHttpCase):
             "/my/assembly/%s/voting" % self.assembly.id,
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal voting center")
+        self._skip_if_route_404(
+            res, "Portal voting center"
+        )  # pylint: disable=protected-access
         self.assertEqual(res.status_code, 200)
 
     def test_V2_attendee_not_confirmed_voting_403_or_no_form(self):
@@ -450,7 +490,9 @@ class PortalVotingTests(AssemblyHttpCase):
             "/my/assembly/%s/voting" % self.assembly.id,
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal voting center")
+        self._skip_if_route_404(
+            res, "Portal voting center"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (200, 403))
 
     def test_V3_state_not_allowed_open_without_in_session_403(self):
@@ -467,7 +509,9 @@ class PortalVotingTests(AssemblyHttpCase):
             "/my/assembly/%s/voting" % self.assembly.id,
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal voting center")
+        self._skip_if_route_404(
+            res, "Portal voting center"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (200, 403))
 
     def test_V4_authenticated_no_permission_voting_403_or_404(self):
@@ -486,14 +530,18 @@ class PortalVotingTests(AssemblyHttpCase):
             "/my/assembly/%s/voting" % self.assembly.id,
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal voting center")
+        self._skip_if_route_404(
+            res, "Portal voting center"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (403, 404))
 
     def test_V5_token_invalid_redirects_to_login(self):
         """V5: Invalid token → 302."""
         _logout_and_clear_session(self)
         res = self.url_open("/my/assembly/1/voting", allow_redirects=False)
-        self._skip_if_route_404(res, "Portal voting center")
+        self._skip_if_route_404(
+            res, "Portal voting center"
+        )  # pylint: disable=protected-access
         self.assertEqual(res.status_code, 302)
 
     def test_V6_cast_voting_closed_403_or_400(self):
@@ -505,7 +553,9 @@ class PortalVotingTests(AssemblyHttpCase):
         self.assembly.partner_domain = "[('id', '=', %s)]" % self.portal_partner.id
         self.assembly.action_generate_attendees()
         att = self.assembly.attendee_ids[0]
-        self._give_partner_votes(att.partner_id, vote_type, 1)
+        self._give_partner_votes(
+            att.partner_id, vote_type, 1
+        )  # pylint: disable=protected-access
         att.action_confirm()
         self.assembly.action_announce()
         self.assembly.action_open_registration()
@@ -521,7 +571,9 @@ class PortalVotingTests(AssemblyHttpCase):
             data={"vote_option": "yes"},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal vote cast")
+        self._skip_if_route_404(
+            res, "Portal vote cast"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (400, 403))
 
     def test_V7_cast_invalid_vote_option_400(self):
@@ -533,7 +585,9 @@ class PortalVotingTests(AssemblyHttpCase):
         self.assembly.partner_domain = "[('id', '=', %s)]" % self.portal_partner.id
         self.assembly.action_generate_attendees()
         att = self.assembly.attendee_ids[0]
-        self._give_partner_votes(att.partner_id, vote_type, 1)
+        self._give_partner_votes(
+            att.partner_id, vote_type, 1
+        )  # pylint: disable=protected-access
         att.action_confirm()
         self.assembly.action_announce()
         self.assembly.action_open_registration()
@@ -548,11 +602,14 @@ class PortalVotingTests(AssemblyHttpCase):
             data={"vote_option": "invalid_option"},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal vote cast")
+        self._skip_if_route_404(
+            res, "Portal vote cast"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (400, 422))
 
     def test_V8_cast_attendee_id_in_body_ignored(self):
-        """V8: POST cast con attendee_id ajeno en body → se ignora, voto para usuario."""
+        """V8: POST cast con attendee_id ajeno en body →
+        se ignora, voto para usuario."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         other = self.env["res.partner"].create({"name": "Other", "is_company": False})
@@ -562,9 +619,10 @@ class PortalVotingTests(AssemblyHttpCase):
             other.id,
         )
         self.assembly.action_generate_attendees()
-        vote_type = self.assembly.assembly_type_id.vote_type_ids[0]
+        vote_type = self.assembly.assembly_type_id.vote_type_ids[0]  # noqa: F841
         for att in self.assembly.attendee_ids:
             self._give_partner_votes(att.partner_id, vote_type, 1)
+            # pylint: disable=protected-access
             att.action_confirm()
         self.assembly.action_announce()
         self.assembly.action_open_registration()
@@ -582,10 +640,12 @@ class PortalVotingTests(AssemblyHttpCase):
             data={"vote_option": "yes", "attendee_id": other_attendee.id},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal vote cast")
+        self._skip_if_route_404(
+            res, "Portal vote cast"
+        )  # pylint: disable=protected-access
         if res.status_code in (200, 302):
             self.env.invalidate_all()
-            line = self.env["assembly.voting.line"].search(
+            line = self.env["assembly.voting.line"].search(  # noqa: F841
                 [
                     ("voting_id", "=", voting.id),
                     ("attendee_id.partner_id", "=", self.portal_partner.id),
@@ -613,7 +673,9 @@ class PortalDocumentTests(AssemblyHttpCase):
             "/my/assembly/%s/document/convocatoria" % self.assembly.id,
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal document")
+        self._skip_if_route_404(
+            res, "Portal document"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (200, 302))
         if res.status_code == 200 and res.headers.get("Content-Type"):
             self.assertIn("pdf", res.headers.get("Content-Type", "").lower())
@@ -630,14 +692,18 @@ class PortalDocumentTests(AssemblyHttpCase):
             "/my/assembly/%s/document/tipo_invalido_xyz" % self.assembly.id,
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal document")
+        self._skip_if_route_404(
+            res, "Portal document"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (400, 404))
 
     def test_DOC3_authenticated_no_permission_403_or_404(self):
         """DOC3: Asamblea ajena → 403/404."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
-        other = self.env["res.partner"].create({"name": "Other", "is_company": False})
+        other = self.env["res.partner"].create(
+            {"name": "Other", "is_company": False}
+        )  # noqa: F841
         self.assembly.partner_domain = "[('id', '=', %s)]" % other.id
         self.assembly.action_generate_attendees()
         self.assembly.action_announce()
@@ -646,7 +712,9 @@ class PortalDocumentTests(AssemblyHttpCase):
             "/my/assembly/%s/document/convocatoria" % self.assembly.id,
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal document")
+        self._skip_if_route_404(
+            res, "Portal document"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (403, 404))
 
     def test_DOC4_token_invalid_redirects_to_login(self):
@@ -656,5 +724,7 @@ class PortalDocumentTests(AssemblyHttpCase):
             "/my/assembly/1/document/convocatoria",
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal document")
+        self._skip_if_route_404(
+            res, "Portal document"
+        )  # pylint: disable=protected-access
         self.assertEqual(res.status_code, 302)

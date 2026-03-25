@@ -8,8 +8,12 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="requires_vote"/>
-                <field name="vote_item_type"/>
-                <field name="vote_type_id"/>
+                <field
+                    name="vote_type_id"
+                    domain="[('id', 'in', assembly_id.vote_type_ids)]"
+                    required="requires_vote"
+                    options="{'no_create': True, 'no_open': True}"
+                />
                 <field name="agenda_state"/>
                 <button name="action_start_voting" string="Start voting" type="object" icon="fa-check" invisible="agenda_state not in ('pending','in_progress') or not requires_vote" groups="base_assembly.assembly_group_manager"/>
                 <button name="action_skip" string="Skip" type="object" icon="fa-forward" invisible="agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
@@ -24,7 +28,6 @@
                 <field name="name"/>
                 <field name="assembly_id"/>
                 <filter string="Requires vote" name="filter_requires_vote" domain="[('requires_vote','=',True)]"/>
-                <filter string="Multiple options" name="filter_multiple_options" domain="[('vote_item_type','=','multiple_options')]"/>
                 <filter string="Pending" name="filter_pending" domain="[('agenda_state','=','pending')]"/>
                 <filter string="Voted" name="filter_voted" domain="[('agenda_state','=','voted')]"/>
             </search>
@@ -67,18 +70,14 @@
                     <group string="Voting">
                         <group>
                             <field name="requires_vote"/>
-                            <field name="vote_item_type"/>
-                            <field name="vote_type_id"/>
+                <field
+                    name="vote_type_id"
+                    domain="[('id', 'in', assembly_id.vote_type_ids)]"
+                    required="requires_vote"
+                    options="{'no_create': True, 'no_open': True}"
+                />
                             <field name="agenda_state"/>
                         </group>
-                    </group>
-                    <group string="Options (for multiple choice)" invisible="vote_item_type != 'multiple_options'">
-                        <field name="option_ids" nolabel="1" colspan="2">
-                            <list editable="bottom">
-                                <field name="sequence" widget="handle"/>
-                                <field name="name"/>
-                            </list>
-                        </field>
                     </group>
                 </sheet>
             </form>
@@ -98,9 +97,6 @@
                     <button name="action_cancel" string="Cancel" type="object" invisible="assembly_state == 'cancelled'" groups="base_assembly.assembly_group_manager"/>
                     <button name="action_reopen" string="Reopen" type="object" invisible="assembly_state != 'cancelled'" groups="base_assembly.assembly_group_manager"/>
                     <button name="action_generate_attendees" string="Generate attendees" type="object" invisible="assembly_state not in ('draft','announced','open')" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_recompute_attendee_votes" string="Recompute votes" type="object" invisible="assembly_state not in ('open','in_session')" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_preview_publication_text" string="Preview publication text" type="object" invisible="assembly_state != 'draft' and assembly_state != 'announced'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_preview_final_paragraph" string="Preview final paragraph" type="object" invisible="assembly_state != 'draft' and assembly_state != 'announced'" groups="base_assembly.assembly_group_manager"/>
                 </header>
                 <sheet>
                     <!-- Smart buttons at top -->
@@ -115,12 +111,6 @@
                             <div class="o_form_field o_stat_info">
                                 <span class="o_stat_value"><field name="count_delegations"/></span>
                                 <span class="o_stat_text">Delegations</span>
-                            </div>
-                        </button>
-                        <button name="action_open_representations" type="object" class="oe_stat_button" icon="fa-user-o" invisible="assembly_state == 'draft'">
-                            <div class="o_form_field o_stat_info">
-                                <span class="o_stat_value"><field name="count_representations"/></span>
-                                <span class="o_stat_text">Represent.</span>
                             </div>
                         </button>
                         <button name="action_open_attendees" type="object" class="oe_stat_button" icon="fa-users" invisible="assembly_state == 'draft'">
@@ -146,10 +136,6 @@
                                 <i class="fa fa-hand-o-right fa-2x d-block text-primary" title="Delegations"/>
                                 <span class="o_stat_info"><field name="count_delegations"/></span> Delegations
                             </button>
-                            <button name="action_open_representations" type="object" class="btn btn-link px-2 o_smart_button" invisible="assembly_state == 'draft'">
-                                <i class="fa fa-user-o fa-2x d-block text-primary" title="Representations"/>
-                                <span class="o_stat_info"><field name="count_representations"/></span> Representations
-                            </button>
                             <button name="action_open_attendees" type="object" class="btn btn-link px-2 o_smart_button" invisible="assembly_state == 'draft'">
                                 <i class="fa fa-users fa-2x d-block text-primary" title="Attendees"/>
                                 <span class="o_stat_info"><field name="total_present_attendees"/></span> Attendees
@@ -166,7 +152,6 @@
                             <field name="date_end"/>
                             <field name="location"/>
                             <field name="is_second_call"/>
-                            <field name="allow_online_voting"/>
                             <field name="president_id"/>
                             <field name="secretary_id"/>
                         </group>
@@ -191,10 +176,13 @@
                                     <field name="sequence" widget="handle"/>
                                     <field name="name"/>
                                     <field name="requires_vote"/>
-                                    <field name="vote_item_type"/>
-                                    <field name="vote_type_id"/>
+                                    <field
+                                        name="vote_type_id"
+                                        domain="[('id', 'in', parent.vote_type_ids)]"
+                                        required="requires_vote"
+                                        options="{'no_create': True, 'no_open': True}"
+                                    />
                                     <field name="agenda_state"/>
-                                    <field name="option_ids" column_invisible="1"/>
                                     <button name="action_start_voting" string="Start voting" type="object" icon="fa-check" invisible="agenda_state not in ('pending','in_progress') or not requires_vote" groups="base_assembly.assembly_group_manager"/>
                                     <button name="action_skip" string="Skip" type="object" icon="fa-forward" invisible="agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
                                 </list>
@@ -204,10 +192,10 @@
                             <field name="attendee_ids">
                                 <list>
                                     <field name="partner_id"/>
-                                    <field name="participant_partner_id" string="Represents"/>
+                                    <field name="participant_partner_id"/>
                                     <field name="partner_vat" string="TIN"/>
                                     <field name="attendance_type"/>
-                                    <field name="attendee_state"/>
+                                    <field name="attendee_state" readonly="1"/>
                                     <field name="date_register"/>
                                     <field name="total_votes" sum="Total"/>
                                     <field name="attendance_notes"/>
@@ -217,7 +205,7 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Delegations" name="delegations">
+                        <page string="Delegations" name="delegations" groups="base_assembly.assembly_group_manager">
                             <field name="delegation_ids">
                                 <list editable="bottom">
                                     <field name="partner_id" string="Delegator"/>
@@ -227,74 +215,6 @@
                                     <field name="date_delegation"/>
                                 </list>
                             </field>
-                        </page>
-                        <page string="Representations" name="representations">
-                            <field name="representation_ids">
-                                <list editable="bottom">
-                                    <field name="partner_id"/>
-                                    <field name="agent_id"/>
-                                    <field name="representation_state"/>
-                                    <field name="date_representation"/>
-                                </list>
-                            </field>
-                        </page>
-                        <page string="Public notes" name="public_notes">
-                            <label for="public_notes" string="Notes visible in lists and reports"/>
-                            <field name="public_notes" nolabel="1" placeholder="Public notes for this assembly…"/>
-                        </page>
-                        <page string="Internal notes" name="internal_notes" groups="base_assembly.assembly_group_manager">
-                            <label for="internal_notes" string="Private notes (not published)"/>
-                            <field name="internal_notes" nolabel="1" placeholder="Internal notes…"/>
-                        </page>
-                        <page string="Publication text" name="publication_text" groups="base_assembly.assembly_group_manager">
-                            <label for="publication_text" class="oe_edit_only" string="Text for individual call / publication (Jinja2)"/>
-                            <field name="publication_text" class="oe_edit_only" nolabel="1" placeholder="e.g. {{ assembly_day }}, {{ assembly_month }}, {{ assembly_year }}"/>
-                            <div class="oe_edit_only text-muted mt-2">
-                                <span>Use Jinja2: {{ object.attribute }}. Available: assembly, assembly_day, assembly_month, assembly_year.</span>
-                            </div>
-                        </page>
-                        <page string="Final paragraph" name="final_paragraph" groups="base_assembly.assembly_group_manager">
-                            <label for="final_paragraph" class="oe_edit_only" string="Final paragraph (Jinja2)"/>
-                            <field name="final_paragraph" class="oe_edit_only" nolabel="1"/>
-                            <div class="oe_edit_only text-muted mt-2">
-                                <span>Same Jinja2 variables as publication text.</span>
-                            </div>
-                        </page>
-                        <page string="Delegation document" name="delegation_doc" groups="base_assembly.assembly_group_manager">
-                            <label for="delegation_document_text" class="oe_edit_only" string="Main text"/>
-                            <field name="delegation_document_text" class="oe_edit_only" nolabel="1"/>
-                            <div class="oe_edit_only text-muted mt-2">
-                                <span>Jinja2: {{ object.attribute }}. Object: assembly.</span>
-                            </div>
-                            <label for="delegation_footer_text" class="oe_edit_only mt-4" string="Footer text"/>
-                            <field name="delegation_footer_text" class="oe_edit_only" nolabel="1"/>
-                            <div class="oe_edit_only text-muted mt-2">
-                                <span>Jinja2. Object: assembly.</span>
-                            </div>
-                        </page>
-                        <page string="Representation document" name="representation_doc" groups="base_assembly.assembly_group_manager">
-                            <label for="representation_document_text" class="oe_edit_only" string="Main text"/>
-                            <field name="representation_document_text" class="oe_edit_only" nolabel="1"/>
-                            <div class="oe_edit_only text-muted mt-2">
-                                <span>Jinja2: {{ object.attribute }}. Object: assembly.</span>
-                            </div>
-                            <label for="representation_footer_text" class="oe_edit_only mt-4" string="Footer text"/>
-                            <field name="representation_footer_text" class="oe_edit_only" nolabel="1"/>
-                            <div class="oe_edit_only text-muted mt-2">
-                                <span>Jinja2. Object: assembly.</span>
-                            </div>
-                        </page>
-                        <page string="Voting ballot texts" name="ballot_texts" groups="base_assembly.assembly_group_manager">
-                            <label for="ballot_intro_text" class="oe_edit_only" string="Ballot intro (generic)"/>
-                            <field name="ballot_intro_text" class="oe_edit_only" nolabel="1"/>
-                            <div class="oe_edit_only text-muted mt-2">
-                                <span>Shown on voting ballot. Use {{ partner }} for nominative.</span>
-                            </div>
-                            <label for="ballot_nominative_intro_text" class="oe_edit_only mt-4" string="Ballot intro (nominative)"/>
-                            <field name="ballot_nominative_intro_text" class="oe_edit_only" nolabel="1"/>
-                            <div class="oe_edit_only text-muted mt-2">
-                                <span>Variables: {{ partner }}, {{ attendee }}.</span>
-                            </div>
                         </page>
                         <page string="Configuration" name="config">
                             <field name="vote_type_ids" widget="many2many_tags"/>

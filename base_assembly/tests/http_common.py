@@ -1,7 +1,16 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+# pylint: disable=invalid-name,import-outside-toplevel,consider-using-from-import,protected-access
 
-"""Common base and helpers for HTTP controller tests (Odoo 18 HttpCase)."""
+"""Base ``HttpCase`` para pruebas HTTP del módulo.
+
+Incluye asamblea de ejemplo, asistentes y usuarios (manager / assembly user). El
+contrato **obligatorio** de ``GET /assembly/attendance`` se valida con códigos
+concretos (sin usar :meth:`_skip_if_route_404`).
+
+:meth:`_skip_if_route_404` queda para rutas opcionales o dependientes del entorno
+(portal, display público, voto HTTP), no para el deep-link de managers.
+"""
 
 import unittest
 
@@ -11,20 +20,19 @@ from .common import AssemblyTestMixin
 
 
 class AssemblyHttpCase(AssemblyTestMixin, HttpCase):
-    """Base for HTTP controller tests: setup users, assemblies, and route helpers."""
+    """Setup común: servidor HTTP, logins, ``assembly`` + ``attendee``."""
 
     @classmethod
     def setUpClass(cls):
-        # Skip entire class when HTTP server is not running (e.g. --stop-after-init)
         try:
-            import odoo.service.server as server
+            from odoo.service import server  # pylint: disable=import-outside-toplevel
 
             if not getattr(getattr(server, "server", None), "httpd", None):
                 raise unittest.SkipTest(
                     "HTTP server not running (e.g. --stop-after-init)"
                 )
-        except (AttributeError, TypeError):
-            raise unittest.SkipTest("HTTP server not running")
+        except (AttributeError, TypeError) as exc:
+            raise unittest.SkipTest("HTTP server not running") from exc
         super().setUpClass()
         cls.group_user = cls.env.ref("base_assembly.assembly_group_user")
         cls.group_manager = cls.env.ref("base_assembly.assembly_group_manager")
@@ -77,6 +85,6 @@ class AssemblyHttpCase(AssemblyTestMixin, HttpCase):
             cls.user_portal = None
 
     def _skip_if_route_404(self, response, route_description):
-        """Skip the test if the route is not implemented (404)."""
+        """Si la respuesta es 404, salta el test (rutas no siempre desplegadas)."""
         if response.status_code == 404:
             self.skipTest("Route not implemented: %s" % route_description)

@@ -18,12 +18,6 @@
                         <span class="o_stat_text">Delegations</span>
                     </div>
                 </button>
-                <button name="action_open_assembly_representations" type="object" class="oe_stat_button" icon="fa-user-o" invisible="count_assembly_representations == 0">
-                    <div class="o_form_field o_stat_info">
-                        <span class="o_stat_value"><field name="count_assembly_representations"/></span>
-                        <span class="o_stat_text">Representations</span>
-                    </div>
-                </button>
             </xpath>
             <xpath expr="//notebook" position="inside">
                 <page string="Assemblies" name="assemblies">
@@ -43,13 +37,6 @@
                             <field name="assembly_id"/>
                             <field name="delegate_partner_id"/>
                             <field name="delegation_state"/>
-                        </list>
-                    </field>
-                    <field name="assembly_representation_ids" readonly="1">
-                        <list>
-                            <field name="assembly_id"/>
-                            <field name="agent_id"/>
-                            <field name="representation_state"/>
                         </list>
                     </field>
                 </page>

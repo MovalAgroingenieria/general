@@ -2,11 +2,12 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 class AssemblyVoting(models.Model):
     _name = "assembly.voting"
+    _inherit = ["assembly.mixin.open.assembly"]
     _description = "Assembly voting"
     _order = "agenda_id, date_open desc"
 
@@ -29,7 +30,7 @@ class AssemblyVoting(models.Model):
         required=True,
         ondelete="restrict",
     )
-    name = fields.Char(string="Description")
+    name = fields.Char(string="Description", default="/")
     voting_state = fields.Selection(
         [("open", "Open"), ("closed", "Closed"), ("cancelled", "Cancelled")],
         string="State",
@@ -38,11 +39,6 @@ class AssemblyVoting(models.Model):
     )
     date_open = fields.Datetime(string="Opened at")
     date_close = fields.Datetime(string="Closed at")
-    allow_online_voting = fields.Boolean(
-        string="Allow online voting",
-        related="assembly_id.allow_online_voting",
-        readonly=True,
-    )
     vote_line_ids = fields.One2many(
         "assembly.voting.line",
         "voting_id",
@@ -80,81 +76,103 @@ class AssemblyVoting(models.Model):
             rec.count_vote_lines = len(rec.vote_line_ids)
             rec.count_results = len(rec.result_ids)
 
-    def action_open_assembly(self):
-        self.ensure_one()
-        return {
-            "type": "ir.actions.act_window",
-            "name": self.env._("Assembly"),
-            "res_model": "assembly.assembly",
-            "view_mode": "form",
-            "res_id": self.assembly_id.id,
-            "target": "current",
-        }
-
     def action_open_agenda_item(self):
-        self.ensure_one()
-        return {
-            "type": "ir.actions.act_window",
-            "name": self.env._("Agenda item"),
-            "res_model": "assembly.agenda",
-            "view_mode": "form",
-            "res_id": self.agenda_id.id,
-            "target": "current",
-        }
+        return self._action_window(
+            "assembly.agenda",
+            self.env._("Agenda item"),
+            "form",
+            res_id=self.agenda_id.id,
+        )
 
     def action_open_vote_lines(self):
-        self.ensure_one()
-        return {
-            "type": "ir.actions.act_window",
-            "name": self.env._("Votes cast"),
-            "res_model": "assembly.voting.line",
-            "view_mode": "list,form",
-            "domain": [("voting_id", "=", self.id)],
-            "context": {"default_voting_id": self.id},
-        }
+        return self._action_window(
+            "assembly.voting.line",
+            self.env._("Votes cast"),
+            "list,form",
+            domain=[("voting_id", "=", self.id)],
+            context={"default_voting_id": self.id},
+        )
 
     def action_open_results(self):
-        self.ensure_one()
-        return {
-            "type": "ir.actions.act_window",
-            "name": self.env._("Results"),
-            "res_model": "assembly.voting.result",
-            "view_mode": "list,form",
-            "domain": [("voting_id", "=", self.id)],
-            "context": {"default_voting_id": self.id},
-        }
+        return self._action_window(
+            "assembly.voting.result",
+            self.env._("Results"),
+            "list,form",
+            domain=[("voting_id", "=", self.id)],
+            context={"default_voting_id": self.id},
+        )
+
+    @api.constrains("name")
+    def _check_name_non_empty(self):
+        for rec in self:
+            if not (rec.name or "").strip():
+                raise ValidationError(self.env._("Voting description cannot be empty."))
+
+    @api.constrains("vote_type_id", "agenda_id")
+    def _check_vote_type_consistent_with_agenda(self):
+        for rec in self:
+            if not rec.agenda_id or not rec.vote_type_id:
+                continue
+            assembly = rec.agenda_id.assembly_id
+            if not assembly:
+                continue
+            avt = assembly.vote_type_ids
+            if rec.vote_type_id not in avt:
+                raise ValidationError(
+                    self.env._(
+                        "The voting vote type must be one of the assembly's vote types."
+                    )
+                )
+            if (
+                rec.agenda_id.requires_vote
+                and rec.agenda_id.vote_type_id
+                and rec.vote_type_id != rec.agenda_id.vote_type_id
+            ):
+                raise ValidationError(
+                    self.env._(
+                        "The voting vote type must match the agenda item's vote type."
+                    )
+                )
+
+    @api.model
+    def _apply_default_name_to_voting_create_vals(self, vals_list):
+        for vals in vals_list:
+            if vals.get("name"):
+                continue
+            if vals.get("agenda_id"):
+                agenda = self.env["assembly.agenda"].browse(vals["agenda_id"])
+                if agenda.exists():
+                    vals["name"] = agenda.name or "/"
+            if not vals.get("name"):
+                vals["name"] = "/"
 
     @api.model_create_multi
     def create(self, vals_list):
-        for vals in vals_list:
-            if not vals.get("name") and vals.get("agenda_id"):
-                agenda = self.env["assembly.agenda"].browse(vals["agenda_id"])
-                if agenda.exists():
-                    vals["name"] = agenda.name
+        self._apply_default_name_to_voting_create_vals(vals_list)
         return super().create(vals_list)
 
     @api.depends(
         "vote_line_ids", "vote_line_ids.votes_applied", "agenda_id", "vote_type_id"
     )
     def _compute_totals(self):
+        Attendee = self.env["assembly.attendee"]
+        AttendeeVote = self.env["assembly.attendee.vote"]
         for voting in self:
             total_cast = sum(voting.vote_line_ids.mapped("votes_applied"))
             possible = 0.0
             if voting.agenda_id and voting.vote_type_id:
-                attendees = self.env["assembly.attendee"].search(
-                    [
-                        ("assembly_id", "=", voting.assembly_id.id),
-                        ("attendee_state", "=", "confirmed"),
-                    ]
+                attendees = Attendee._search_attendees_for_assembly(
+                    voting.assembly_id.id,
+                    attendee_state="confirmed",
                 )
-                for att in attendees:
-                    avs = att.attendee_vote_ids
-                    av = next(
-                        (x for x in avs if x.vote_type_id == voting.vote_type_id),
-                        None,
+                if attendees:
+                    lines = AttendeeVote.search(
+                        [
+                            ("attendee_id", "in", attendees.ids),
+                            ("vote_type_id", "=", voting.vote_type_id.id),
+                        ]
                     )
-                    if av:
-                        possible += av.attendee_vote_total
+                    possible = sum(lines.mapped("attendee_vote_total"))
             voting.total_votes_cast = total_cast
             voting.total_votes_possible = possible
             voting.participation_percentage = (
@@ -165,25 +183,29 @@ class AssemblyVoting(models.Model):
         for rec in self:
             if rec.voting_state != "open":
                 raise UserError(self.env._("Only open votings can be closed."))
-            rec.voting_state = "closed"
-            rec.date_close = fields.Datetime.now()
-            rec._create_results()  # pylint: disable=protected-access
-            rec.agenda_id.agenda_state = "voted"
+            rec.write(
+                {
+                    "voting_state": "closed",
+                    "date_close": fields.Datetime.now(),
+                }
+            )
+            rec._persist_closed_voting_results()  # pylint: disable=protected-access
+            rec.agenda_id.write({"agenda_state": "voted"})
 
     def action_cancel(self):
         for rec in self:
             if rec.voting_state != "open":
                 raise UserError(self.env._("Only open votings can be cancelled."))
-            rec.voting_state = "cancelled"
+            rec.write({"voting_state": "cancelled"})
 
-    def _create_results(self):
+    def _persist_closed_voting_results(self):
         self.ensure_one()
         result_model = self.env["assembly.voting.result"]
         possible = self.total_votes_possible
         cast = self.total_votes_cast
         for option in ["yes", "no", "abstention", "blank"]:
             lines_for_option = self.vote_line_ids.filtered(
-                lambda line, opt=option: line.vote_option == opt
+                lambda line, opt=option, option=option: line.vote_option == opt
             )
             total = sum(lines_for_option.mapped("votes_applied"))
             pct = (total / possible * 100.0) if possible else 0.0

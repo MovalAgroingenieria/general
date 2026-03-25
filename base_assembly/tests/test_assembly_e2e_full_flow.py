@@ -1,6 +1,6 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
-
+# pylint: disable=protected-access
 """End-to-end test: full assembly flow from configuration to close and documents.
 
 Covers: config → assembly creation → generate attendees → confirm → delegations
@@ -15,9 +15,13 @@ from .common import AssemblyTestMixin
 
 
 class TestAssemblyE2EFullFlow(AssemblyTestMixin, TransactionCase):
-    """E2E: complete flow with concrete data (5 partners, 3 agenda items, delegations)."""
+    """E2E: complete flow with concrete data (5 partners, 3 agenda items,
+    delegations)."""
 
-    def test_e2e_full_flow_in_person_with_delegation_and_documents(self):
+    def test_e2e_full_flow_in_person_with_delegation_and_documents(
+        # pylint: disable=too-many-locals,too-many-statements
+        self,
+    ):
         """
         Base scenario: in-person, with delegation David→Bruno.
         Steps 1–15 from E2E_TEST_DESIGN; final state checks and report generation.
@@ -25,7 +29,8 @@ class TestAssemblyE2EFullFlow(AssemblyTestMixin, TransactionCase):
         env = self.env
         # --- 1. Configuration ---
         vote_type = self._create_vote_type(env, name="Cooperative vote", code="VCOOP")
-        assembly_type = self._create_assembly_type(
+        # pylint: disable=protected-access
+        assembly_type = self._create_assembly_type(  # pylint: disable=protected-access
             env, name="Ordinary General Meeting", vote_type=vote_type
         )
         assembly_type.write(
@@ -33,9 +38,12 @@ class TestAssemblyE2EFullFlow(AssemblyTestMixin, TransactionCase):
         )
         # 5 partners: Ana(1), Bruno(2), Carla(1), David(3), Elena(1)
         partners = self._create_partners(env, count=5, prefix="Partner")
+        # pylint: disable=protected-access
         votes_per_partner = [1, 2, 1, 3, 1]
         for partner, votes in zip(partners, votes_per_partner):
-            self._give_partner_votes(partner, vote_type, votes)
+            self._give_partner_votes(
+                partner, vote_type, votes
+            )  # pylint: disable=protected-access
 
         # --- 2. Assembly creation ---
         partner_domain = "[('id', 'in', %s)]" % partners.ids
@@ -87,19 +95,21 @@ class TestAssemblyE2EFullFlow(AssemblyTestMixin, TransactionCase):
         assembly.action_generate_attendees()
         self.assertEqual(len(assembly.attendee_ids), 5)
 
-        attendees = assembly.attendee_ids.sorted(key=lambda a: a.partner_id.name)
-        ana, bruno, carla, david, elena = attendees
+        attendees = assembly.attendee_ids.sorted(
+            key=lambda a: a.partner_id.name
+        )  # noqa: F841
+        ana, bruno, carla, david, _ = attendees
 
         # --- 7. Confirmation: Ana, Bruno, Carla ---
         ana.action_confirm()
         bruno.action_confirm()
         carla.action_confirm()
-        self.assertEqual(assembly.count_present_attendees(), 3)
+        self.assertEqual(assembly._count_present_attendees(), 3)
         assembly.invalidate_recordset()
         self.assertTrue(assembly.quorum_reached)
 
         # --- 8. Delegation David → Bruno; confirm delegation ---
-        delegation = env["assembly.delegation"].create(
+        delegation = env["assembly.delegation"].create(  # noqa: F841
             {
                 "assembly_id": assembly.id,
                 "partner_id": david.partner_id.id,
@@ -108,9 +118,9 @@ class TestAssemblyE2EFullFlow(AssemblyTestMixin, TransactionCase):
             }
         )
         delegation.write({"delegation_state": "confirmed"})
-        assembly.attendee_ids.recompute_votes()
+        assembly.attendee_ids.recompute_attendee_vote_lines()
         assembly.invalidate_recordset()
-        self.assertEqual(assembly.count_present_attendees(), 4)
+        self.assertEqual(assembly._count_present_attendees(), 4)
         self.assertTrue(assembly.quorum_reached)
 
         # --- 9. Quorum ---
@@ -169,7 +179,7 @@ class TestAssemblyE2EFullFlow(AssemblyTestMixin, TransactionCase):
 
         # --- 13. Voting 2 (item 3) ---
         agenda3.action_start_voting()
-        voting2 = env["assembly.voting"].search(
+        voting2 = env["assembly.voting"].search(  # noqa: F841
             [("agenda_id", "=", agenda3.id)], limit=1
         )
         env["assembly.voting.line"].create(
@@ -205,31 +215,35 @@ class TestAssemblyE2EFullFlow(AssemblyTestMixin, TransactionCase):
 
         # --- 15. Expected results ---
         self.assertEqual(len(assembly.attendee_ids), 5)
-        self.assertEqual(assembly.count_present_attendees(), 4)
+        self.assertEqual(assembly._count_present_attendees(), 4)
         self.assertEqual(len(assembly.delegation_ids), 1)
         self.assertEqual(assembly.delegation_ids.delegation_state, "confirmed")
 
         result_yes_1 = voting1.result_ids.filtered(lambda r: r.vote_option == "yes")
         self.assertEqual(len(result_yes_1), 1)
         self.assertAlmostEqual(result_yes_1.total_votes, 6.0, places=2)
-        result_no_1 = voting1.result_ids.filtered(lambda r: r.vote_option == "no")
+        result_no_1 = voting1.result_ids.filtered(
+            lambda r: r.vote_option == "no"
+        )  # noqa: F841
         self.assertAlmostEqual(result_no_1.total_votes, 1.0, places=2)
 
-        total_result_votes = sum(voting1.result_ids.mapped("total_votes"))
+        total_result_votes = sum(voting1.result_ids.mapped("total_votes"))  # noqa: F841
         self.assertAlmostEqual(
             total_result_votes, voting1.total_votes_possible, places=2
         )
 
         # --- 16. Report generation (at least one without exception) ---
-        report = env.ref("base_assembly.action_report_assembly_attendance")
+        report = env.ref("base_assembly.assembly_assembly_action_report_attendance")
         pdf, _ = report._render_qweb_pdf(report.id, assembly.ids, data={})
+        # pylint: disable=protected-access
         self.assertIsInstance(pdf, bytes)
         self.assertGreater(len(pdf), 0)
 
         # Individual call for one attendee
         report_call = env.ref(
-            "base_assembly.action_report_assembly_attendee_individual_call"
+            "base_assembly.assembly_attendee_action_report_individual_call"
         )
         pdf_call, _ = report_call._render_qweb_pdf(report_call.id, ana.ids, data={})
+        # pylint: disable=protected-access
         self.assertIsInstance(pdf_call, bytes)
         self.assertGreater(len(pdf_call), 0)

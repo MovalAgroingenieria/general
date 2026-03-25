@@ -1,12 +1,13 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+# pylint: disable=invalid-name
 
 """Security tests: ACLs and record rules for base_assembly.
 
 Validates that:
 - Users without assembly group cannot access assembly models.
-- assembly_group_user can only read/write own attendee, delegation, representation, voting.line.
-- assembly_group_user cannot perform manager actions (close assembly, announce, etc.).
+- assembly_group_user: read-only on attendee and delegation (own rows via rules);
+  may create own voting.line; cannot write assembly/agenda/voting/result or manager actions.
 - assembly_group_manager has full access.
 """
 
@@ -18,7 +19,9 @@ from odoo.tests import TransactionCase
 from .common import AssemblyTestMixin
 
 
-class TestAssemblySecurityACL(AssemblyTestMixin, TransactionCase):
+class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
+    AssemblyTestMixin, TransactionCase
+):
     """ACL and record rule security tests."""
 
     @classmethod
@@ -56,83 +59,100 @@ class TestAssemblySecurityACL(AssemblyTestMixin, TransactionCase):
         except Exception as e:
             if "calendar_default_privacy" in str(e) or "not null" in str(e).lower():
                 raise unittest.SkipTest(
-                    "res.users.settings requires calendar_default_privacy (e.g. calendar module)"
+                    "res.users.settings requires calendar_default_privacy "
+                    "(e.g. calendar module)"
                 ) from e
             raise
 
     # --- SEC-ACL-01: Sin grupo assembly no puede leer ---
 
     def test_user_without_assembly_group_cannot_read_assembly(self):
-        assembly, _ = self._create_assembly_with_agenda()
-        env = self.env.with_user(self.user_no_assembly)
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        env = self.env(user=self.user_no_assembly)
         with self.assertRaises(AccessError):
             env["assembly.assembly"].browse(assembly.id).read(["name"])
 
     def test_user_without_assembly_group_cannot_search_assembly(self):
-        self._create_assembly_with_agenda()
-        env = self.env.with_user(self.user_no_assembly)
+        self._create_assembly_with_agenda()  # pylint: disable=protected-access
+        env = self.env(user=self.user_no_assembly)
         with self.assertRaises(AccessError):
             env["assembly.assembly"].search([])
 
     def test_user_without_assembly_group_cannot_read_attendee(self):
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         attendee = assembly.attendee_ids[0]
-        env = self.env.with_user(self.user_no_assembly)
+        env = self.env(user=self.user_no_assembly)
         with self.assertRaises(AccessError):
             env["assembly.attendee"].browse(attendee.id).read(["partner_id"])
 
     # --- SEC-ACL-02 / SEC-ACT-01: User no puede escribir assembly ni cerrar ---
 
     def test_assembly_user_cannot_write_assembly(self):
-        assembly, _ = self._create_assembly_with_agenda()
-        env = self.env.with_user(self.user_assembly_user)
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.assembly"].browse(assembly.id).write({"name": "Hacked"})
 
     def test_assembly_user_cannot_close_assembly(self):
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         assembly.action_announce()
         assembly.action_open_registration()
         assembly.action_start_session()
         agenda.action_skip()
-        env = self.env.with_user(self.user_assembly_user)
+        env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.assembly"].browse(assembly.id).action_close()
 
     def test_assembly_user_cannot_announce_assembly(self):
-        assembly, _ = self._create_assembly_with_agenda()
-        env = self.env.with_user(self.user_assembly_user)
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.assembly"].browse(assembly.id).action_announce()
 
     def test_assembly_user_cannot_open_registration(self):
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_announce()
-        env = self.env.with_user(self.user_assembly_user)
+        env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.assembly"].browse(assembly.id).action_open_registration()
 
     def test_assembly_user_cannot_start_session(self):
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_announce()
         assembly.action_open_registration()
-        env = self.env.with_user(self.user_assembly_user)
+        env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.assembly"].browse(assembly.id).action_start_session()
 
     def test_assembly_user_cannot_generate_attendees(self):
-        assembly, _ = self._create_assembly_with_agenda()
-        env = self.env.with_user(self.user_assembly_user)
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.assembly"].browse(assembly.id).action_generate_attendees()
 
     # --- SEC-ACL-03: User no puede crear/editar tipo, agenda, voting, result ---
 
     def test_assembly_user_cannot_create_assembly_type(self):
-        env = self.env.with_user(self.user_assembly_user)
-        vote_type = self._create_vote_type(env)
+        vote_type = self._create_vote_type(self.env)  # pylint: disable=protected-access
+        env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.type"].create(
                 {
@@ -143,21 +163,27 @@ class TestAssemblySecurityACL(AssemblyTestMixin, TransactionCase):
             )
 
     def test_assembly_user_cannot_write_assembly_type(self):
-        atype = self._create_assembly_type(self.env)
-        env = self.env.with_user(self.user_assembly_user)
+        atype = self._create_assembly_type(  # noqa: F841
+            self.env
+        )  # pylint: disable=protected-access
+        env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.type"].browse(atype.id).write({"name": "Hacked"})
 
     def test_assembly_user_cannot_create_agenda(self):
-        assembly, _ = self._create_assembly_with_agenda()
-        env = self.env.with_user(self.user_assembly_user)
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.agenda"].create(
                 {"assembly_id": assembly.id, "name": "Point 2", "requires_vote": False}
             )
 
     def test_assembly_user_cannot_write_voting(self):
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -166,18 +192,22 @@ class TestAssemblySecurityACL(AssemblyTestMixin, TransactionCase):
         voting = self.env["assembly.voting"].search(
             [("agenda_id", "=", agenda.id)], limit=1
         )
-        env = self.env.with_user(self.user_assembly_user)
+        env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.voting"].browse(voting.id).write(
                 {"voting_state": "cancelled"}
             )
 
     def test_assembly_user_cannot_close_voting(self):
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att = assembly.attendee_ids[0]
-        self._give_partner_votes(att.partner_id, vote_type, 1)
+        self._give_partner_votes(
+            att.partner_id, vote_type, 1
+        )  # pylint: disable=protected-access
         att.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -194,31 +224,51 @@ class TestAssemblySecurityACL(AssemblyTestMixin, TransactionCase):
                 "votes_applied": 1.0,
             }
         )
-        env = self.env.with_user(self.user_assembly_user)
+        env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.voting"].browse(voting.id).action_close()
 
     # --- SEC-ACL-04: User no puede unlink attendee, delegation, voting.line ---
 
+    def test_assembly_user_cannot_create_attendee(self):
+        """Convocados are created by managers (generate attendees), not assembly users."""
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        env = self.env(user=self.user_assembly_user)
+        with self.assertRaises(AccessError):
+            env["assembly.attendee"].create(
+                {
+                    "assembly_id": assembly.id,
+                    "partner_id": self.user_assembly_user.partner_id.id,
+                }
+            )
+
     def test_assembly_user_cannot_unlink_attendee(self):
         partner = self.user_assembly_user.partner_id
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', '=', %s)]" % partner.id
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', '=', %s)]" % partner.id
+            )
         )
         assembly.action_generate_attendees()
         attendee_own = assembly.attendee_ids.filtered(lambda a: a.partner_id == partner)
         self.assertTrue(attendee_own)
-        env = self.env.with_user(self.user_assembly_user)
+        env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.attendee"].browse(attendee_own.id).unlink()
 
     def test_assembly_user_cannot_unlink_voting_line(self):
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att = assembly.attendee_ids[0]
         self.user_assembly_user.partner_id = att.partner_id
-        self._give_partner_votes(att.partner_id, vote_type, 1)
+        self._give_partner_votes(
+            att.partner_id, vote_type, 1
+        )  # pylint: disable=protected-access
         att.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -235,68 +285,85 @@ class TestAssemblySecurityACL(AssemblyTestMixin, TransactionCase):
                 "votes_applied": 1.0,
             }
         )
-        env = self.env.with_user(self.user_assembly_user)
+        env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.voting.line"].browse(line.id).unlink()
 
     # --- SEC-ACL-05: Manager puede todo (smoke) ---
 
     def test_assembly_manager_can_read_and_write_assembly(self):
-        assembly, _ = self._create_assembly_with_agenda()
-        env = self.env.with_user(self.user_assembly_manager)
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        env = self.env(user=self.user_assembly_manager)
         a = env["assembly.assembly"].browse(assembly.id)
         a.read(["name", "assembly_state"])
         a.write({"name": "Renamed by manager"})
         self.assertEqual(a.name, "Renamed by manager")
 
     def test_assembly_manager_can_close_assembly(self):
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         assembly.action_announce()
         assembly.action_open_registration()
         assembly.action_start_session()
         agenda.action_skip()
-        env = self.env.with_user(self.user_assembly_manager)
+        env = self.env(user=self.user_assembly_manager)
         env["assembly.assembly"].browse(assembly.id).action_close()
         self.assertEqual(assembly.assembly_state, "closed")
 
-    # --- SEC-RR-01..04: Record rules: User solo ve propios attendee, delegation, representation, voting.line ---
+    # --- SEC-RR-01..04: Record rules: User solo ve propios attendee, delegation, rep
+    # resentation, voting.line ---
 
     def test_assembly_user_sees_only_own_attendees(self):
-        partners = self._create_partners(self.env, 3)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        partners = self._create_partners(
+            self.env, 3
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.action_generate_attendees()
         self.user_assembly_user.partner_id = partners[0]
-        env = self.env.with_user(self.user_assembly_user)
+        env = self.env(user=self.user_assembly_user)
         attendees = env["assembly.attendee"].search([("assembly_id", "=", assembly.id)])
         self.assertEqual(len(attendees), 1)
         self.assertEqual(attendees.partner_id, partners[0])
 
     def test_assembly_user_cannot_read_other_partner_attendee(self):
-        partners = self._create_partners(self.env, 2)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        partners = self._create_partners(
+            self.env, 2
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.action_generate_attendees()
         attendee_other = assembly.attendee_ids.filtered(
             lambda a: a.partner_id == partners[1]
         )
         self.user_assembly_user.partner_id = partners[0]
-        env = self.env.with_user(self.user_assembly_user)
-        found = env["assembly.attendee"].browse(attendee_other.id).exists()
+        env = self.env(user=self.user_assembly_user)
+        found = env["assembly.attendee"].search([("id", "=", attendee_other.id)])
         self.assertFalse(found)
 
     def test_assembly_user_sees_only_own_delegations(self):
-        partners = self._create_partners(self.env, 3)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        partners = self._create_partners(
+            self.env, 3
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.action_generate_attendees()
         assembly.action_announce()
         assembly.action_open_registration()
-        delegation_own = self.env["assembly.delegation"].create(
+        delegation_own = self.env["assembly.delegation"].create(  # noqa: F841
             {
                 "assembly_id": assembly.id,
                 "partner_id": partners[0].id,
@@ -313,7 +380,7 @@ class TestAssemblySecurityACL(AssemblyTestMixin, TransactionCase):
             }
         )
         self.user_assembly_user.partner_id = partners[0]
-        env = self.env.with_user(self.user_assembly_user)
+        env = self.env(user=self.user_assembly_user)
         delegations = env["assembly.delegation"].search(
             [("assembly_id", "=", assembly.id)]
         )
@@ -321,9 +388,13 @@ class TestAssemblySecurityACL(AssemblyTestMixin, TransactionCase):
         self.assertEqual(delegations[0].id, delegation_own.id)
 
     def test_assembly_user_cannot_write_other_partner_delegation(self):
-        partners = self._create_partners(self.env, 2)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        partners = self._create_partners(
+            self.env, 2
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.action_generate_attendees()
         assembly.action_announce()
@@ -337,21 +408,28 @@ class TestAssemblySecurityACL(AssemblyTestMixin, TransactionCase):
             }
         )
         self.user_assembly_user.partner_id = partners[0]
-        env = self.env.with_user(self.user_assembly_user)
-        browse = env["assembly.delegation"].browse(delegation_other.id)
-        self.assertFalse(browse.exists())
+        env = self.env(user=self.user_assembly_user)
+        self.assertFalse(
+            env["assembly.delegation"].search([("id", "=", delegation_other.id)])
+        )
         with self.assertRaises(AccessError):
             env["assembly.delegation"].browse(delegation_other.id).write(
                 {"delegation_state": "confirmed"}
             )
 
     def test_assembly_user_sees_only_own_voting_lines(self):
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att1, att2 = assembly.attendee_ids[0], assembly.attendee_ids[1]
-        self._give_partner_votes(att1.partner_id, vote_type, 1)
-        self._give_partner_votes(att2.partner_id, vote_type, 1)
+        self._give_partner_votes(
+            att1.partner_id, vote_type, 1
+        )  # pylint: disable=protected-access
+        self._give_partner_votes(
+            att2.partner_id, vote_type, 1
+        )  # pylint: disable=protected-access
         att1.action_confirm()
         att2.action_confirm()
         assembly.action_announce()
@@ -378,22 +456,28 @@ class TestAssemblySecurityACL(AssemblyTestMixin, TransactionCase):
             }
         )
         self.user_assembly_user.partner_id = att1.partner_id
-        env = self.env.with_user(self.user_assembly_user)
+        env = self.env(user=self.user_assembly_user)
         lines = env["assembly.voting.line"].search([("voting_id", "=", voting.id)])
         self.assertEqual(len(lines), 1)
         self.assertEqual(lines.attendee_id.partner_id, att1.partner_id)
 
-    # --- SEC-RR-05: Crear voting.line con attendee ajeno: no visible para User (record rule) ---
+    # --- SEC-RR-05: Crear voting.line con attendee ajeno: no visible para User
+    # (record rule) ---
 
     def test_assembly_user_create_voting_line_for_other_attendee_not_visible(self):
-        """User creates voting.line with other's attendee_id: record rule hides it from him."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        """User creates voting.line with other's attendee_id:
+        record rule hides it from him."""
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att_own = assembly.attendee_ids[0]
         att_other = assembly.attendee_ids[1]
         self._give_partner_votes(att_own.partner_id, vote_type, 1)
+        # pylint: disable=protected-access
         self._give_partner_votes(att_other.partner_id, vote_type, 1)
+        # pylint: disable=protected-access
         att_own.action_confirm()
         att_other.action_confirm()
         assembly.action_announce()
@@ -404,52 +488,53 @@ class TestAssemblySecurityACL(AssemblyTestMixin, TransactionCase):
             [("agenda_id", "=", agenda.id)], limit=1
         )
         self.user_assembly_user.partner_id = att_own.partner_id
-        env = self.env.with_user(self.user_assembly_user)
+        env = self.env(user=self.user_assembly_user)
         line_vals = {
             "voting_id": voting.id,
             "attendee_id": att_other.id,
             "vote_option": "yes",
             "votes_applied": 1.0,
         }
-        line = env["assembly.voting.line"].create(line_vals)
-        self.assertTrue(line.id)
-        search_as_user = env["assembly.voting.line"].search(
-            [("voting_id", "=", voting.id), ("attendee_id", "=", att_other.id)]
-        )
-        self.assertEqual(len(search_as_user), 0)
-        browse_as_user = env["assembly.voting.line"].browse(line.id).exists()
-        self.assertFalse(browse_as_user)
+        with self.assertRaises(AccessError):
+            env["assembly.voting.line"].create(line_vals)
 
     # --- SEC-ACT-05: User no puede confirmar attendee ajeno (solo ve el propio) ---
 
     def test_assembly_user_cannot_confirm_other_attendee(self):
-        partners = self._create_partners(self.env, 2)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        partners = self._create_partners(
+            self.env, 2
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.action_generate_attendees()
         assembly.action_announce()
         assembly.action_open_registration()
-        attendee_other = assembly.attendee_ids.filtered(
+        attendee_other = assembly.attendee_ids.filtered(  # noqa: F841
             lambda a: a.partner_id == partners[1]
         )
         self.user_assembly_user.partner_id = partners[0]
-        env = self.env.with_user(self.user_assembly_user)
+        env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.attendee"].browse(attendee_other.id).action_confirm()
 
     # --- SEC-DATA-01/02: Read/write registro ajeno ---
 
     def test_assembly_user_read_attendee_by_id_other_partner_returns_empty(self):
-        partners = self._create_partners(self.env, 2)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        partners = self._create_partners(
+            self.env, 2
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.action_generate_attendees()
-        attendee_b = assembly.attendee_ids.filtered(
+        attendee_b = assembly.attendee_ids.filtered(  # noqa: F841
             lambda a: a.partner_id == partners[1]
         )
         self.user_assembly_user.partner_id = partners[0]
-        env = self.env.with_user(self.user_assembly_user)
-        rec = env["assembly.attendee"].browse(attendee_b.id)
-        self.assertFalse(rec.exists())
+        env = self.env(user=self.user_assembly_user)
+        self.assertFalse(env["assembly.attendee"].search([("id", "=", attendee_b.id)]))

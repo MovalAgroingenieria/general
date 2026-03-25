@@ -5,15 +5,17 @@
         <field name="res_model">assembly.assembly</field>
         <field name="view_mode">list,form</field>
         <field name="context">{'search_default_active': 1}</field>
+        <field name="groups_id" eval="[(4, ref('base_assembly.assembly_group_user'))]"/>
     </record>
     <record id="assembly_type_action" model="ir.actions.act_window">
         <field name="name">Assembly types</field>
         <field name="res_model">assembly.type</field>
         <field name="view_mode">list,form</field>
+        <field name="groups_id" eval="[(4, ref('base_assembly.assembly_group_manager'))]"/>
     </record>
 
-    <menuitem id="assembly_menu_root" name="Assemblies" sequence="60"/>
+    <menuitem id="assembly_menu_root" name="Assemblies" sequence="60" groups="base_assembly.assembly_group_user"/>
     <menuitem id="assembly_assembly_menu" name="Assemblies" parent="base_assembly.assembly_menu_root" action="base_assembly.assembly_assembly_action" sequence="10"/>
-    <menuitem id="assembly_menu_config" name="Configuration" parent="base_assembly.assembly_menu_root" sequence="20"/>
+    <menuitem id="assembly_menu_config" name="Configuration" parent="base_assembly.assembly_menu_root" sequence="20" groups="base_assembly.assembly_group_manager"/>
     <menuitem id="assembly_type_menu" name="Assembly types" parent="base_assembly.assembly_menu_config" action="base_assembly.assembly_type_action" sequence="10"/>
 </odoo>

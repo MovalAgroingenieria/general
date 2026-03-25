@@ -19,6 +19,10 @@
         <field name="model">assembly.attendee</field>
         <field name="arch" type="xml">
             <form string="Attendee">
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary" invisible="attendee_state != 'registered'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_mark_absent" string="Mark absent" type="object" invisible="attendee_state == 'absent'" groups="base_assembly.assembly_group_manager"/>
+                </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_assembly" type="object" class="oe_stat_button" icon="fa-building-o" title="Assembly">
@@ -34,16 +38,16 @@
                         </button>
                     </div>
                     <div class="oe_title">
-                        <label for="partner_id" string="Partner:"/>
+                        <label for="partner_id" string="Member:"/>
                         <h1><field name="partner_id" options="{'no_create': True}" style="margin-top:5px;"/></h1>
                     </div>
                     <group>
                         <group string="Attendee data">
                             <field name="assembly_id"/>
-                            <field name="participant_partner_id" string="Participant (who attends)" help="Who actually attends (default: partner). Set to representative when applicable."/>
+                            <field name="participant_partner_id"/>
                             <field name="partner_vat" string="TIN"/>
                             <field name="attendance_type"/>
-                            <field name="attendee_state"/>
+                            <field name="attendee_state" readonly="1"/>
                             <field name="date_register"/>
                         </group>
                         <group string="Votes">
@@ -70,10 +74,10 @@
             <list>
                 <field name="assembly_id"/>
                 <field name="partner_id"/>
-                <field name="participant_partner_id" string="Represents"/>
+                <field name="participant_partner_id"/>
                 <field name="partner_vat" string="TIN"/>
                 <field name="attendance_type"/>
-                <field name="attendee_state"/>
+                <field name="attendee_state" readonly="1"/>
                 <field name="date_register"/>
                 <field name="total_votes" sum="Total votes"/>
                 <field name="attendance_notes"/>
@@ -95,7 +99,7 @@
                 <filter string="Confirmed" name="filter_confirmed" domain="[('attendee_state','=','confirmed')]"/>
                 <filter string="Absent" name="filter_absent" domain="[('attendee_state','=','absent')]"/>
                 <separator/>
-                <filter string="Present" name="filter_present" domain="[('attendance_type','=','present')]"/>
+                <filter string="On-site" name="filter_present" domain="[('attendance_type','=','present')]"/>
                 <filter string="Remote" name="filter_remote" domain="[('attendance_type','=','remote')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Assembly" name="group_assembly" context="{'group_by': 'assembly_id'}"/>

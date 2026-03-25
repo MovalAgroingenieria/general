@@ -7,6 +7,7 @@ from odoo.exceptions import ValidationError
 
 class AssemblyAgenda(models.Model):
     _name = "assembly.agenda"
+    _inherit = ["assembly.mixin.open.assembly"]
     _description = "Assembly agenda item"
     _order = "assembly_id, sequence, id"
 
@@ -21,34 +22,21 @@ class AssemblyAgenda(models.Model):
     name = fields.Char(string="Title", required=True)
     description = fields.Html()
     requires_vote = fields.Boolean(default=True)
-    vote_item_type = fields.Selection(
-        [
-            ("yes_no", "Yes / No / Abstention / Blank"),
-            ("multiple_options", "Multiple options"),
-        ],
-        string="Vote kind",
-        default="yes_no",
-        help=(
-            "Yes/No for standard vote; "
-            "Multiple options to show a list of choices on the ballot."
-        ),
-    )
     vote_type_id = fields.Many2one(
         "vote.type",
         string="Vote type",
         ondelete="restrict",
         domain="[('active', '=', True)]",
+        help=(
+            "Required when 'Requires vote' is enabled. "
+            "Must be selected from the assembly's vote types. "
+            "Cannot be changed once voting has started."
+        ),
     )
     voting_ids = fields.One2many(
         "assembly.voting",
         "agenda_id",
         string="Votings",
-    )
-    option_ids = fields.One2many(
-        "assembly.agenda.option",
-        "agenda_id",
-        string="Options",
-        copy=True,
     )
     agenda_state = fields.Selection(
         [
@@ -66,41 +54,112 @@ class AssemblyAgenda(models.Model):
         compute="_compute_count_votings",
     )
 
+    _sql_constraints = [
+        (
+            "assembly_agenda_assembly_sequence_uniq",
+            "UNIQUE(assembly_id, sequence)",
+            "Sequence must be unique per assembly.",
+        ),
+    ]
+
     @api.depends("voting_ids")
     def _compute_count_votings(self):
-        for rec in self:
-            rec.count_votings = len(rec.voting_ids)
+        for line in self:
+            line.count_votings = len(line.voting_ids)
 
-    @api.constrains("vote_type_id", "voting_ids")
-    def _check_vote_type_no_votings(self):
-        for rec in self:
-            if rec.requires_vote and not rec.vote_type_id and rec.voting_ids:
+    @api.constrains("requires_vote", "vote_type_id")
+    def _check_vote_type_required_when_requires_vote(self):
+        for line in self:
+            if line.requires_vote and not line.vote_type_id:
                 raise ValidationError(
-                    self.env._("Vote type is required when the item requires a vote.")
+                    self.env._(
+                        "A vote type must be specified when the agenda item "
+                        "requires a vote. Please select a vote type or "
+                        "uncheck 'Requires vote'."
+                    )
                 )
 
     @api.constrains("vote_type_id", "assembly_id")
     def _check_vote_type_in_assembly(self):
-        for rec in self:
-            if rec.vote_type_id and rec.assembly_id and rec.assembly_id.vote_type_ids:
-                if rec.vote_type_id not in rec.assembly_id.vote_type_ids:
+        for line in self:
+            if not line.vote_type_id or not line.assembly_id:
+                continue
+            assembly_vote_types = line.assembly_id.vote_type_ids
+            if not assembly_vote_types:
+                raise ValidationError(
+                    self.env._(
+                        "Vote type '%(vote_type)s' cannot be used because the assembly "
+                        "has no vote types configured.",
+                        vote_type=line.vote_type_id.name,
+                    )
+                )
+            if line.vote_type_id not in assembly_vote_types:
+                raise ValidationError(
+                    self.env._(
+                        "Vote type '%(vote_type)s' must be one of "
+                        "the assembly's vote types. "
+                        "Available types: %(available)s",
+                        vote_type=line.vote_type_id.name,
+                        available=", ".join(assembly_vote_types.mapped("name")),
+                    )
+                )
+
+    def _assert_agenda_vote_type_constraints_after_write(self):
+        self._check_vote_type_required_when_requires_vote()
+        self._check_vote_type_in_assembly()
+
+    def _validate_agenda_write_vals(self, vals):
+        if "vote_type_id" in vals:
+            for line in self:
+                if not line.voting_ids:
+                    continue
+                new_id = vals["vote_type_id"]
+                current_id = line.vote_type_id.id if line.vote_type_id else False
+                if new_id != current_id:
                     raise ValidationError(
                         self.env._(
-                            "Vote type must be one of the assembly's vote types."
+                            "The vote type cannot be changed because the agenda item "
+                            "already has votings. Once voting has started, "
+                            "the vote type becomes immutable."
+                        )
+                    )
+        if "requires_vote" in vals and vals["requires_vote"]:
+            for line in self:
+                vote_type_id = vals.get(
+                    "vote_type_id",
+                    line.vote_type_id.id if line.vote_type_id else False,
+                )
+                if not vote_type_id:
+                    raise ValidationError(
+                        self.env._(
+                            "A vote type must be specified when the agenda item "
+                            "requires a vote. Please select a vote type before "
+                            "enabling 'Requires vote'."
+                        )
+                    )
+        if "vote_type_id" in vals and not vals["vote_type_id"]:
+            for line in self:
+                will_require_vote = vals.get("requires_vote", line.requires_vote)
+                if will_require_vote:
+                    raise ValidationError(
+                        self.env._(
+                            "The vote type cannot be cleared while 'Requires vote' "
+                            "is enabled. Please either select a vote type or "
+                            "disable 'Requires vote' first."
                         )
                     )
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        agendas = super().create(vals_list)
+        agendas._assert_agenda_vote_type_constraints_after_write()
+        return agendas
+
     def write(self, vals):
-        if "vote_type_id" in vals:
-            for rec in self:
-                if rec.voting_ids:
-                    raise ValidationError(
-                        self.env._(
-                            "Cannot change vote type when the agenda item "
-                            "already has votings."
-                        )
-                    )
-        return super().write(vals)
+        self._validate_agenda_write_vals(vals)
+        res = super().write(vals)
+        self._assert_agenda_vote_type_constraints_after_write()
+        return res
 
     def action_start_voting(self):
         self.ensure_one()
@@ -117,30 +176,17 @@ class AssemblyAgenda(models.Model):
                 "date_open": fields.Datetime.now(),
             }
         )
-        self.agenda_state = "in_progress"
+        self.write({"agenda_state": "in_progress"})
 
     def action_skip(self):
         self.ensure_one()
-        self.agenda_state = "skipped"
-
-    def action_open_assembly(self):
-        self.ensure_one()
-        return {
-            "type": "ir.actions.act_window",
-            "name": self.env._("Assembly"),
-            "res_model": "assembly.assembly",
-            "view_mode": "form",
-            "res_id": self.assembly_id.id,
-            "target": "current",
-        }
+        self.write({"agenda_state": "skipped"})
 
     def action_open_votings(self):
-        self.ensure_one()
-        return {
-            "type": "ir.actions.act_window",
-            "name": self.env._("Votings"),
-            "res_model": "assembly.voting",
-            "view_mode": "list,form",
-            "domain": [("agenda_id", "=", self.id)],
-            "context": {"default_agenda_id": self.id},
-        }
+        return self._action_window(
+            "assembly.voting",
+            self.env._("Votings"),
+            "list,form",
+            domain=[("agenda_id", "=", self.id)],
+            context={"default_agenda_id": self.id},
+        )

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- 11.4 Delegation of vote template (one per delegation) -->
+    <!-- 11.4 Delegation of vote template (from assembly; generic template) -->
     <record id="assembly_assembly_action_report_delegationvote" model="ir.actions.report">
         <field name="name">Delegation of vote (template)</field>
-        <field name="model">assembly.delegation</field>
+        <field name="model">assembly.assembly</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">base_assembly.report_assembly_delegation</field>
         <field name="report_file">base_assembly.report_assembly_delegation</field>
-        <field name="print_report_name">'Delegation - %s - %s' % (object.assembly_id.name, object.partner_id.name)</field>
-        <field name="binding_model_id" ref="model_assembly_delegation"/>
+        <field name="print_report_name">'Delegation template - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_assembly_assembly"/>
         <field name="binding_type">report</field>
     </record>
 
@@ -21,49 +21,51 @@
     <template id="report_assembly_delegation_doc">
         <t t-call="web.html_container">
             <t t-call="web.external_layout">
-                <t t-set="assembly" t-value="o.assembly_id"/>
                 <div class="page">
                     <div class="text-center mb-4">
                         <h4><strong>Delegation of vote</strong></h4>
-                        <h5><span t-field="assembly.name"/></h5>
-                        <div t-if="assembly.date_first_call">
-                            <span t-field="assembly.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
-                            <t t-if="assembly.location"> – <span t-field="assembly.location"/></t>
+                        <h5><span t-field="o.name"/></h5>
+                        <div t-if="o.date_first_call">
+                            <span t-field="o.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
+                            <t t-if="o.location"> – <span t-field="o.location"/></t>
                         </div>
                     </div>
-                    <t t-set="delegation_intro" t-value="assembly.get_rendered_delegation_document_text()"/>
+                    <t t-set="delegation_intro" t-value="o.get_rendered_delegation_document_text()"/>
                     <div t-if="delegation_intro" class="mb-4" t-out="delegation_intro"/>
                     <table class="table table-sm table-bordered">
                         <tr>
                             <th style="width: 30%;">Delegator</th>
-                            <td><span t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'vat'], 'no_marker': True}"/></td>
+                            <td><em>Name / TIN</em></td>
                         </tr>
                         <tr>
                             <th>Delegate</th>
-                            <td><span t-field="o.delegate_partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'vat'], 'no_marker': True}"/></td>
+                            <td><em>Name / TIN</em></td>
                         </tr>
                         <tr>
                             <th>Vote types delegated</th>
                             <td>
                                 <t t-if="o.vote_type_ids">
-                                    <t t-foreach="o.vote_type_ids" t-as="vt"><span t-field="vt.name"/><t t-if="vt != o.vote_type_ids[-1]">, </t></t>
+                                    <em>
+                                        <t t-foreach="o.vote_type_ids" t-as="vt">
+                                            <span t-field="vt.name"/>
+                                            <t t-if="vt != o.vote_type_ids[-1]">, </t>
+                                        </t>
+                                    </em>
                                 </t>
-                                <t t-else="">All vote types of the assembly</t>
+                                <t t-else=""><em>All vote types of the assembly</em></t>
                             </td>
                         </tr>
-                        <tr>
-                            <th>State</th>
-                            <td><span t-field="o.delegation_state"/></td>
-                        </tr>
-                        <tr t-if="o.date_delegation">
-                            <th>Date</th>
-                            <td><span t-field="o.date_delegation" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/></td>
-                        </tr>
                     </table>
-                    <t t-set="delegation_footer" t-value="assembly.get_rendered_delegation_footer_text()"/>
+                    <t t-set="delegation_footer" t-value="o.get_rendered_delegation_footer_text()"/>
                     <div t-if="delegation_footer" class="mt-4" t-out="delegation_footer"/>
                     <p t-else="" class="mt-4 text-muted">
                         This document certifies the delegation of vote for the above assembly. The delegator authorizes the delegate to cast votes on their behalf for the indicated vote type(s).
+                    </p>
+                    <p class="mt-4">
+                        <strong>Signature (delegator):</strong> _____________________________
+                    </p>
+                    <p>
+                        <strong>Date:</strong> _____________________________
                     </p>
                 </div>
             </t>

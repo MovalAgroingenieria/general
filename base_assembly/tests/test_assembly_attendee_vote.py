@@ -10,11 +10,15 @@ class TestAssemblyAttendeeVote(AssemblyTestMixin, TransactionCase):
     """Tests for assembly.attendee.vote: compute total, uniqueness."""
 
     def test_attendee_vote_total_is_own_minus_out_plus_in(self):
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         att = assembly.attendee_ids[0]
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
-        self._give_partner_votes(att.partner_id, vote_type, 10)
+        self._give_partner_votes(
+            att.partner_id, vote_type, 10
+        )  # pylint: disable=protected-access
         att.action_confirm()
         av = self.env["assembly.attendee.vote"].search(
             [
@@ -29,13 +33,17 @@ class TestAssemblyAttendeeVote(AssemblyTestMixin, TransactionCase):
         self.assertEqual(av.attendee_vote_total, 10.0)
 
     def test_attendee_vote_total_with_delegation_out(self):
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         delegator = assembly.attendee_ids[0]
         delegate = assembly.attendee_ids[1]
         self._give_partner_votes(delegator.partner_id, vote_type, 5)
+        # pylint: disable=protected-access
         self._give_partner_votes(delegate.partner_id, vote_type, 2)
+        # pylint: disable=protected-access
         delegator.action_confirm()
         delegate.action_confirm()
         self.env["assembly.delegation"].create(
@@ -47,8 +55,8 @@ class TestAssemblyAttendeeVote(AssemblyTestMixin, TransactionCase):
                 "delegation_state": "confirmed",
             }
         )
-        delegator.recompute_votes()
-        delegate.recompute_votes()
+        delegator.recompute_attendee_vote_lines()
+        delegate.recompute_attendee_vote_lines()
         av_delegator = self.env["assembly.attendee.vote"].search(
             [
                 ("attendee_id", "=", delegator.id),
@@ -71,7 +79,9 @@ class TestAssemblyAttendeeVote(AssemblyTestMixin, TransactionCase):
         self.assertEqual(av_delegate.attendee_vote_total, 2.0 + 5.0)
 
     def test_unique_attendee_vote_type_prevents_duplicate(self):
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         att = assembly.attendee_ids[0]
         vote_type = assembly.assembly_type_id.vote_type_ids[0]

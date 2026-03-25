@@ -11,12 +11,14 @@ class TestAssemblyDelegation(AssemblyTestMixin, TransactionCase):
     """Tests for assembly.delegation: constraints, confirm, recompute."""
 
     def test_create_delegation_different_partners_succeeds(self):
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         delegator = assembly.attendee_ids[0].partner_id
         delegate = assembly.attendee_ids[1].partner_id
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
-        delegation = self.env["assembly.delegation"].create(
+        delegation = self.env["assembly.delegation"].create(  # noqa: F841
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.id,
@@ -27,7 +29,9 @@ class TestAssemblyDelegation(AssemblyTestMixin, TransactionCase):
         self.assertEqual(delegation.delegation_state, "draft")
 
     def test_delegator_equals_delegate_raises(self):
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         partner = assembly.attendee_ids[0].partner_id
         with self.assertRaises(ValidationError) as ctx:
@@ -42,11 +46,19 @@ class TestAssemblyDelegation(AssemblyTestMixin, TransactionCase):
         self.assertIn("different", str(ctx.exception))
 
     def test_delegate_outside_partner_domain_raises(self):
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         delegator = assembly.attendee_ids[0].partner_id
         outside_partner = self.env["res.partner"].create(
             {"name": "Outside", "is_company": False}
+        )
+        self.env["assembly.attendee"].create(
+            {
+                "assembly_id": assembly.id,
+                "partner_id": outside_partner.id,
+            }
         )
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         with self.assertRaises(ValidationError) as ctx:
@@ -61,16 +73,20 @@ class TestAssemblyDelegation(AssemblyTestMixin, TransactionCase):
         self.assertIn("convocable", str(ctx.exception).lower())
 
     def test_confirm_delegation_updates_attendee_votes(self):
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         delegator = assembly.attendee_ids[0]
         delegate = assembly.attendee_ids[1]
         self._give_partner_votes(delegator.partner_id, vote_type, 4)
+        # pylint: disable=protected-access
         self._give_partner_votes(delegate.partner_id, vote_type, 1)
+        # pylint: disable=protected-access
         delegator.action_confirm()
         delegate.action_confirm()
-        delegation = self.env["assembly.delegation"].create(
+        delegation = self.env["assembly.delegation"].create(  # noqa: F841
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.partner_id.id,
@@ -80,8 +96,8 @@ class TestAssemblyDelegation(AssemblyTestMixin, TransactionCase):
             }
         )
         delegation.delegation_state = "confirmed"
-        delegator.recompute_votes()
-        delegate.recompute_votes()
+        delegator.recompute_attendee_vote_lines()
+        delegate.recompute_attendee_vote_lines()
         av_delegate = self.env["assembly.attendee.vote"].search(
             [
                 ("attendee_id", "=", delegate.id),
@@ -93,12 +109,16 @@ class TestAssemblyDelegation(AssemblyTestMixin, TransactionCase):
         self.assertEqual(av_delegate.attendee_vote_total, 1.0 + 4.0)
 
     def test_two_confirmed_delegations_same_type_raises(self):
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         delegator = assembly.attendee_ids[0].partner_id
         delegate1 = assembly.attendee_ids[1].partner_id
         delegate2 = assembly.attendee_ids[2].partner_id
+        assembly.attendee_ids[1].action_confirm()
+        assembly.attendee_ids[2].action_confirm()
         self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
@@ -118,4 +138,4 @@ class TestAssemblyDelegation(AssemblyTestMixin, TransactionCase):
                     "delegation_state": "confirmed",
                 }
             )
-        self.assertIn("already have a confirmed delegation", str(ctx.exception))
+        self.assertIn("same vote type", str(ctx.exception).lower())

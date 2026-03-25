@@ -1,5 +1,6 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+# pylint: disable=too-many-lines,invalid-name
 
 """Tests for quorum, delegations, attendee.vote, votings and results.
 
@@ -18,9 +19,13 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_Q1_quorum_without_attendees_confirmed(self):
         """Q1: No confirmed attendees → total_present=0, quorum_reached=False."""
-        partners = self._create_partners(self.env, 4)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        partners = self._create_partners(
+            self.env, 4
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.action_generate_attendees()
         assembly.action_announce()
@@ -33,14 +38,19 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_Q2_quorum_with_present_attendees(self):
         """Q2: With present attendees → total_present and percentage correct."""
-        partners = self._create_partners(self.env, 4)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        partners = self._create_partners(
+            self.env, 4
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         for att in assembly.attendee_ids[:2]:
             self._give_partner_votes(att.partner_id, vote_type, 1)
+            # pylint: disable=protected-access
             att.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -50,15 +60,20 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_Q3_quorum_percentage_reached(self):
         """Q3: Quorum by percentage reached."""
-        partners = self._create_partners(self.env, 4)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        partners = self._create_partners(
+            self.env, 4
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.quorum_value = 50.0
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         for att in assembly.attendee_ids[:2]:
             self._give_partner_votes(att.partner_id, vote_type, 1)
+            # pylint: disable=protected-access
             att.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -67,9 +82,13 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_Q4_quorum_fixed_number_reached(self):
         """Q4: Quorum by fixed number."""
-        partners = self._create_partners(self.env, 4)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        partners = self._create_partners(
+            self.env, 4
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.quorum_type = "fixed"
         assembly.quorum_value = 2.0
@@ -77,6 +96,7 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         for att in assembly.attendee_ids[:2]:
             self._give_partner_votes(att.partner_id, vote_type, 1)
+            # pylint: disable=protected-access
             att.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -85,9 +105,13 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_Q5_quorum_second_call_any(self):
         """Q5: Second call type 'any' → one present is enough."""
-        partners = self._create_partners(self.env, 4)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        partners = self._create_partners(
+            self.env, 4
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.is_second_call = True
         assembly.quorum_second_call_type = "any"
@@ -95,6 +119,7 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         self._give_partner_votes(assembly.attendee_ids[0].partner_id, vote_type, 1)
+        # pylint: disable=protected-access
         assembly.attendee_ids[0].action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -103,17 +128,24 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
         self.assertTrue(assembly.quorum_reached)
 
     def test_Q6_quorum_with_active_delegation_delegate_confirmed(self):
-        """Q6: Active delegation with delegate confirmed → delegator counts as present."""
-        partners = self._create_partners(self.env, 4)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        """Q6: Active delegation with delegate confirmed → delegator
+        counts as present."""
+        partners = self._create_partners(
+            self.env, 4
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         delegator = assembly.attendee_ids[0]
         delegate = assembly.attendee_ids[1]
         self._give_partner_votes(delegator.partner_id, vote_type, 1)
+        # pylint: disable=protected-access
         self._give_partner_votes(delegate.partner_id, vote_type, 1)
+        # pylint: disable=protected-access
         delegate.action_confirm()
         self.env["assembly.delegation"].create(
             {
@@ -124,26 +156,32 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
                 "delegation_state": "confirmed",
             }
         )
-        delegator.recompute_votes()
-        delegate.recompute_votes()
+        delegator.recompute_attendee_vote_lines()
+        delegate.recompute_attendee_vote_lines()
         assembly.invalidate_recordset()
-        present = assembly.count_present_attendees()
+        present = assembly._count_present_attendees()
         self.assertEqual(
             present, 2, "Delegator (represented by confirmed delegate) + delegate"
         )
 
     def test_Q7_delegation_invalid_for_present_delegate_not_confirmed(self):
         """Q7: Delegate not confirmed → delegator does not count as present."""
-        partners = self._create_partners(self.env, 4)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        partners = self._create_partners(
+            self.env, 4
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         delegator = assembly.attendee_ids[0]
         delegate = assembly.attendee_ids[1]
         self._give_partner_votes(delegator.partner_id, vote_type, 1)
+        # pylint: disable=protected-access
         self._give_partner_votes(delegate.partner_id, vote_type, 1)
+        # pylint: disable=protected-access
         delegator.action_confirm()
         self.env["assembly.delegation"].create(
             {
@@ -151,24 +189,31 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
+                "delegation_state": "draft",
             }
         )
-        delegator.recompute_votes()
-        delegate.recompute_votes()
+        delegator.recompute_attendee_vote_lines()
+        delegate.recompute_attendee_vote_lines()
         assembly.invalidate_recordset()
-        present = assembly.count_present_attendees()
+        present = assembly._count_present_attendees()
         self.assertEqual(
             present,
             1,
-            "Only delegator is confirmed; delegate not confirmed so delegator not represented",
+            (
+                "Only delegator is confirmed; delegate not confirmed so "
+                "delegator not represented"
+            ),
         )
 
     def test_Q8_quorum_state_change_confirm_attendee(self):
         """Q8: Confirming attendee increases total_present."""
-        partners = self._create_partners(self.env, 4)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        partners = self._create_partners(
+            self.env, 4
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
@@ -177,24 +222,31 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
         assembly.invalidate_recordset()
         self.assertEqual(assembly.total_present_attendees, 0)
         self._give_partner_votes(assembly.attendee_ids[0].partner_id, vote_type, 1)
+        # pylint: disable=protected-access
         assembly.attendee_ids[0].action_confirm()
         assembly.invalidate_recordset()
         self.assertEqual(assembly.total_present_attendees, 1)
         self._give_partner_votes(assembly.attendee_ids[1].partner_id, vote_type, 1)
+        # pylint: disable=protected-access
         assembly.attendee_ids[1].action_confirm()
         assembly.invalidate_recordset()
         self.assertEqual(assembly.total_present_attendees, 2)
 
     def test_Q9_quorum_state_change_mark_absent(self):
         """Q9: Marcar ausente disminuye total_present."""
-        partners = self._create_partners(self.env, 4)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids
+        partners = self._create_partners(
+            self.env, 4
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
         )
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         for att in assembly.attendee_ids[:2]:
             self._give_partner_votes(att.partner_id, vote_type, 1)
+            # pylint: disable=protected-access
             att.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -207,6 +259,7 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
     def test_Q10_quorum_invalid_partner_domain_no_crash(self):
         """Q10: Invalid partner_domain → no crash."""
         assembly, _ = self._create_assembly_with_agenda(partner_domain="[('invalid")
+        # pylint: disable=protected-access
         assembly.action_generate_attendees()
         assembly.invalidate_recordset()
         self.assertEqual(assembly.total_present_attendees, 0)
@@ -214,8 +267,10 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_Q11_quorum_empty_domain(self):
         """Q11: partner_domain that returns no partner → total_possible=0."""
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', '=', 0)]"
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', '=', 0)]"
+            )
         )
         assembly.action_generate_attendees()
         assembly.invalidate_recordset()
@@ -228,13 +283,17 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_D1_delegation_total_empty_vote_types(self):
         """D1: Total delegation (empty vote_type_ids) → delegate receives all types."""
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         delegator = assembly.attendee_ids[0]
         delegate = assembly.attendee_ids[1]
         self._give_partner_votes(delegator.partner_id, vote_type, 5)
+        # pylint: disable=protected-access
         self._give_partner_votes(delegate.partner_id, vote_type, 2)
+        # pylint: disable=protected-access
         delegator.action_confirm()
         delegate.action_confirm()
         self.env["assembly.delegation"].create(
@@ -246,8 +305,8 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "delegation_state": "confirmed",
             }
         )
-        delegator.recompute_votes()
-        delegate.recompute_votes()
+        delegator.recompute_attendee_vote_lines()
+        delegate.recompute_attendee_vote_lines()
         av_delegate = self.env["assembly.attendee.vote"].search(
             [
                 ("attendee_id", "=", delegate.id),
@@ -260,8 +319,12 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_D2_delegation_partial_by_type(self):
         """D2: Partial delegation by type → only delegated type affects out/in."""
-        vt1 = self._create_vote_type(self.env, "VT1")
-        vt2 = self._create_vote_type(self.env, "VT2")
+        vt1 = self._create_vote_type(
+            self.env, "VT1"
+        )  # pylint: disable=protected-access
+        vt2 = self._create_vote_type(
+            self.env, "VT2"
+        )  # pylint: disable=protected-access
         assembly_type = self.env["assembly.type"].create(
             {
                 "name": "Two types",
@@ -272,17 +335,29 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "partner_domain": "[]",
             }
         )
-        partners = self._create_partners(self.env, 3)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids,
-            assembly_type=assembly_type,
+        partners = self._create_partners(
+            self.env, 3
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids,
+                assembly_type=assembly_type,
+            )
         )
         assembly.action_generate_attendees()
         a, b = assembly.attendee_ids[0], assembly.attendee_ids[1]
-        self._give_partner_votes(a.partner_id, vt1, 4)
-        self._give_partner_votes(a.partner_id, vt2, 3)
-        self._give_partner_votes(b.partner_id, vt1, 1)
-        self._give_partner_votes(b.partner_id, vt2, 1)
+        self._give_partner_votes(
+            a.partner_id, vt1, 4
+        )  # pylint: disable=protected-access
+        self._give_partner_votes(
+            a.partner_id, vt2, 3
+        )  # pylint: disable=protected-access
+        self._give_partner_votes(
+            b.partner_id, vt1, 1
+        )  # pylint: disable=protected-access
+        self._give_partner_votes(
+            b.partner_id, vt2, 1
+        )  # pylint: disable=protected-access
         a.action_confirm()
         b.action_confirm()
         self.env["assembly.delegation"].create(
@@ -294,8 +369,8 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "delegation_state": "confirmed",
             }
         )
-        a.recompute_votes()
-        b.recompute_votes()
+        a.recompute_attendee_vote_lines()
+        b.recompute_attendee_vote_lines()
         av_a_vt1 = self.env["assembly.attendee.vote"].search(
             [("attendee_id", "=", a.id), ("vote_type_id", "=", vt1.id)], limit=1
         )
@@ -314,12 +389,16 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_D3_delegator_present_confirmed_delegation(self):
         """D3: Delegator present, delegation confirmed → out/in correct."""
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         delegator, delegate = assembly.attendee_ids[0], assembly.attendee_ids[1]
         self._give_partner_votes(delegator.partner_id, vote_type, 4)
+        # pylint: disable=protected-access
         self._give_partner_votes(delegate.partner_id, vote_type, 1)
+        # pylint: disable=protected-access
         delegator.action_confirm()
         delegate.action_confirm()
         self.env["assembly.delegation"].create(
@@ -331,8 +410,8 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "delegation_state": "confirmed",
             }
         )
-        delegator.recompute_votes()
-        delegate.recompute_votes()
+        delegator.recompute_attendee_vote_lines()
+        delegate.recompute_attendee_vote_lines()
         av_del = self.env["assembly.attendee.vote"].search(
             [("attendee_id", "=", delegator.id), ("vote_type_id", "=", vote_type.id)],
             limit=1,
@@ -346,25 +425,30 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_D4_delegate_not_confirmed_then_confirm(self):
         """D4: Delegate not confirmed → on confirm, delegated_in applied."""
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         delegator, delegate = assembly.attendee_ids[0], assembly.attendee_ids[1]
         self._give_partner_votes(delegator.partner_id, vote_type, 3)
+        # pylint: disable=protected-access
         self._give_partner_votes(delegate.partner_id, vote_type, 1)
+        # pylint: disable=protected-access
         delegator.action_confirm()
-        self.env["assembly.delegation"].create(
+        delegation = self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
+                "delegation_state": "draft",
             }
         )
-        delegator.recompute_votes()
-        delegate.recompute_votes()
+        delegator.recompute_attendee_vote_lines()
+        delegate.recompute_attendee_vote_lines()
         delegate.action_confirm()
+        delegation.write({"delegation_state": "confirmed"})
         av = self.env["assembly.attendee.vote"].search(
             [("attendee_id", "=", delegate.id), ("vote_type_id", "=", vote_type.id)],
             limit=1,
@@ -374,7 +458,9 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_D5_duplicate_confirmed_delegation_same_type_raises(self):
         """D5: Two confirmed delegations same type → ValidationError."""
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         p1, p2, p3 = (
@@ -382,6 +468,8 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
             assembly.attendee_ids[1].partner_id,
             assembly.attendee_ids[2].partner_id,
         )
+        assembly.attendee_ids[1].action_confirm()
+        assembly.attendee_ids[2].action_confirm()
         self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
@@ -401,19 +489,23 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                     "delegation_state": "confirmed",
                 }
             )
-        self.assertIn("already have a confirmed delegation", str(ctx.exception))
+        self.assertIn("same vote type", str(ctx.exception).lower())
 
     def test_D6_revoked_delegation_reverts_votes(self):
         """D6: Revoke delegation → recompute restores own and removes in."""
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         delegator, delegate = assembly.attendee_ids[0], assembly.attendee_ids[1]
         self._give_partner_votes(delegator.partner_id, vote_type, 4)
+        # pylint: disable=protected-access
         self._give_partner_votes(delegate.partner_id, vote_type, 1)
+        # pylint: disable=protected-access
         delegator.action_confirm()
         delegate.action_confirm()
-        d = self.env["assembly.delegation"].create(
+        d = self.env["assembly.delegation"].create(  # noqa: F841
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.partner_id.id,
@@ -422,17 +514,17 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "delegation_state": "confirmed",
             }
         )
-        delegator.recompute_votes()
-        delegate.recompute_votes()
+        delegator.recompute_attendee_vote_lines()
+        delegate.recompute_attendee_vote_lines()
         av_dec = self.env["assembly.attendee.vote"].search(
             [("attendee_id", "=", delegate.id), ("vote_type_id", "=", vote_type.id)],
             limit=1,
         )
         self.assertEqual(av_dec.attendee_vote_total, 5.0)
         d.delegation_state = "revoked"
-        delegator.recompute_votes()
-        delegate.recompute_votes()
-        av_del = self.env["assembly.attendee.vote"].search(
+        delegator.recompute_attendee_vote_lines()
+        delegate.recompute_attendee_vote_lines()
+        av_del = self.env["assembly.attendee.vote"].search(  # noqa: F841
             [("attendee_id", "=", delegator.id), ("vote_type_id", "=", vote_type.id)],
             limit=1,
         )
@@ -441,13 +533,19 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
         self.assertEqual(av_dec.attendee_vote_total, 1.0)
 
     def test_D7_circular_delegation_same_type(self):
-        """D7: Circular A→B, B→A same type: model does not forbid; totals consistent."""
-        assembly, _ = self._create_assembly_with_agenda()
+        """D7: Circular A→B, B→A on same vote type: second confirmed delegation is rejected."""
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         a, b = assembly.attendee_ids[0], assembly.attendee_ids[1]
-        self._give_partner_votes(a.partner_id, vote_type, 2)
-        self._give_partner_votes(b.partner_id, vote_type, 3)
+        self._give_partner_votes(
+            a.partner_id, vote_type, 2
+        )  # pylint: disable=protected-access
+        self._give_partner_votes(
+            b.partner_id, vote_type, 3
+        )  # pylint: disable=protected-access
         a.action_confirm()
         b.action_confirm()
         self.env["assembly.delegation"].create(
@@ -459,33 +557,32 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "delegation_state": "confirmed",
             }
         )
-        self.env["assembly.delegation"].create(
-            {
-                "assembly_id": assembly.id,
-                "partner_id": b.partner_id.id,
-                "delegate_partner_id": a.partner_id.id,
-                "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
-            }
-        )
-        a.recompute_votes()
-        b.recompute_votes()
-        av_a = self.env["assembly.attendee.vote"].search(
-            [("attendee_id", "=", a.id), ("vote_type_id", "=", vote_type.id)], limit=1
-        )
-        av_b = self.env["assembly.attendee.vote"].search(
-            [("attendee_id", "=", b.id), ("vote_type_id", "=", vote_type.id)], limit=1
-        )
-        self.assertEqual(av_a.attendee_vote_total + av_b.attendee_vote_total, 5.0)
+        with self.assertRaises(ValidationError):
+            self.env["assembly.delegation"].create(
+                {
+                    "assembly_id": assembly.id,
+                    "partner_id": b.partner_id.id,
+                    "delegate_partner_id": a.partner_id.id,
+                    "vote_type_ids": [(6, 0, vote_type.ids)],
+                    "delegation_state": "confirmed",
+                }
+            )
 
     def test_D8_changes_after_confirmation_recompute(self):
-        """D8: Confirm delegation after having confirmed attendees → recompute updates."""
-        assembly, _ = self._create_assembly_with_agenda()
+        """D8: Confirm delegation after having confirmed attendees →
+        recompute updates."""
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         a, b = assembly.attendee_ids[0], assembly.attendee_ids[1]
-        self._give_partner_votes(a.partner_id, vote_type, 2)
-        self._give_partner_votes(b.partner_id, vote_type, 1)
+        self._give_partner_votes(
+            a.partner_id, vote_type, 2
+        )  # pylint: disable=protected-access
+        self._give_partner_votes(
+            b.partner_id, vote_type, 1
+        )  # pylint: disable=protected-access
         a.action_confirm()
         b.action_confirm()
         self.env["assembly.delegation"].create(
@@ -497,16 +594,18 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "delegation_state": "confirmed",
             }
         )
-        a.recompute_votes()
-        b.recompute_votes()
-        av_b = self.env["assembly.attendee.vote"].search(
+        a.recompute_attendee_vote_lines()
+        b.recompute_attendee_vote_lines()
+        av_b = self.env["assembly.attendee.vote"].search(  # noqa: F841
             [("attendee_id", "=", b.id), ("vote_type_id", "=", vote_type.id)], limit=1
         )
         self.assertEqual(av_b.attendee_vote_total, 3.0)
 
     def test_D9_delegator_equals_delegate_raises(self):
         """D9: Delegator = delegate → ValidationError."""
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         p = assembly.attendee_ids[0].partner_id
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
@@ -523,10 +622,18 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_D10_delegate_outside_domain_raises(self):
         """D10: Delegate outside partner_domain → ValidationError."""
-        assembly, _ = self._create_assembly_with_agenda()
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         outside = self.env["res.partner"].create(
             {"name": "Outside", "is_company": False}
+        )
+        self.env["assembly.attendee"].create(
+            {
+                "assembly_id": assembly.id,
+                "partner_id": outside.id,
+            }
         )
         delegator = assembly.attendee_ids[0].partner_id
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
@@ -543,9 +650,9 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_D11_two_delegations_same_delegator_different_types(self):
         """D11: Two delegations same delegator for different types → allowed."""
-        vt1 = self._create_vote_type(self.env, "V1")
-        vt2 = self._create_vote_type(self.env, "V2")
-        at = self.env["assembly.type"].create(
+        vt1 = self._create_vote_type(self.env, "V1")  # pylint: disable=protected-access
+        vt2 = self._create_vote_type(self.env, "V2")  # pylint: disable=protected-access
+        at = self.env["assembly.type"].create(  # noqa: F841
             {
                 "name": "Two",
                 "code": "TWO",
@@ -555,10 +662,14 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "partner_domain": "[]",
             }
         )
-        partners = self._create_partners(self.env, 3)
-        assembly, _ = self._create_assembly_with_agenda(
-            partner_domain="[('id', 'in', %s)]" % partners.ids,
-            assembly_type=at,
+        partners = self._create_partners(  # noqa: F841
+            self.env, 3
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids,
+                assembly_type=at,
+            )
         )
         assembly.action_generate_attendees()
         a, b, c = (
@@ -567,8 +678,12 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
             assembly.attendee_ids[2],
         )
         for att, v1, v2 in [(a, 2, 3), (b, 1, 1), (c, 1, 1)]:
-            self._give_partner_votes(att.partner_id, vt1, v1)
-            self._give_partner_votes(att.partner_id, vt2, v2)
+            self._give_partner_votes(
+                att.partner_id, vt1, v1
+            )  # pylint: disable=protected-access
+            self._give_partner_votes(
+                att.partner_id, vt2, v2
+            )  # pylint: disable=protected-access
             att.action_confirm()
         self.env["assembly.delegation"].create(
             {
@@ -588,13 +703,13 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "delegation_state": "confirmed",
             }
         )
-        a.recompute_votes()
-        b.recompute_votes()
-        c.recompute_votes()
-        av_b_vt1 = self.env["assembly.attendee.vote"].search(
+        a.recompute_attendee_vote_lines()
+        b.recompute_attendee_vote_lines()
+        c.recompute_attendee_vote_lines()
+        av_b_vt1 = self.env["assembly.attendee.vote"].search(  # noqa: F841
             [("attendee_id", "=", b.id), ("vote_type_id", "=", vt1.id)], limit=1
         )
-        av_c_vt2 = self.env["assembly.attendee.vote"].search(
+        av_c_vt2 = self.env["assembly.attendee.vote"].search(  # noqa: F841
             [("attendee_id", "=", c.id), ("vote_type_id", "=", vt2.id)], limit=1
         )
         self.assertEqual(av_b_vt1.delegated_in_votes, 2.0)
@@ -606,12 +721,18 @@ class TestVotingScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_V1_voting_open_totals_possible(self):
         """V1: Open voting → total_votes_possible from confirmed attendees."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att1, att2 = assembly.attendee_ids[0], assembly.attendee_ids[1]
-        self._give_partner_votes(att1.partner_id, vote_type, 3)
-        self._give_partner_votes(att2.partner_id, vote_type, 2)
+        self._give_partner_votes(
+            att1.partner_id, vote_type, 3
+        )  # pylint: disable=protected-access
+        self._give_partner_votes(
+            att2.partner_id, vote_type, 2
+        )  # pylint: disable=protected-access
         att1.action_confirm()
         att2.action_confirm()
         assembly.action_announce()
@@ -627,11 +748,15 @@ class TestVotingScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_V2_voting_close_creates_results(self):
         """V2: Cierre crea result_ids y agenda voted."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att = assembly.attendee_ids[0]
-        self._give_partner_votes(att.partner_id, vote_type, 2)
+        self._give_partner_votes(
+            att.partner_id, vote_type, 2
+        )  # pylint: disable=protected-access
         att.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -655,12 +780,18 @@ class TestVotingScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_V3_only_confirmed_in_possible(self):
         """V3: Solo confirmados cuentan en total_votes_possible."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att1, att2 = assembly.attendee_ids[0], assembly.attendee_ids[1]
-        self._give_partner_votes(att1.partner_id, vote_type, 2)
-        self._give_partner_votes(att2.partner_id, vote_type, 3)
+        self._give_partner_votes(
+            att1.partner_id, vote_type, 2
+        )  # pylint: disable=protected-access
+        self._give_partner_votes(
+            att2.partner_id, vote_type, 3
+        )  # pylint: disable=protected-access
         att1.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -673,11 +804,15 @@ class TestVotingScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_V4_attendee_zero_votes_cannot_have_line(self):
         """V4: Attendee with 0 votes cannot have a line."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att = assembly.attendee_ids[0]
-        self._give_partner_votes(att.partner_id, vote_type, 0)
+        self._give_partner_votes(
+            att.partner_id, vote_type, 0
+        )  # pylint: disable=protected-access
         att.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -698,11 +833,15 @@ class TestVotingScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_V5_votes_applied_must_match_attendee_total(self):
         """V5: votes_applied debe igualar attendee_vote_total."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att = assembly.attendee_ids[0]
-        self._give_partner_votes(att.partner_id, vote_type, 4)
+        self._give_partner_votes(
+            att.partner_id, vote_type, 4
+        )  # pylint: disable=protected-access
         att.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -724,12 +863,18 @@ class TestVotingScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_V6_not_cast_in_results(self):
         """V6: No emitidos = possible - cast en resultados."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att1, att2 = assembly.attendee_ids[0], assembly.attendee_ids[1]
-        self._give_partner_votes(att1.partner_id, vote_type, 3)
-        self._give_partner_votes(att2.partner_id, vote_type, 2)
+        self._give_partner_votes(
+            att1.partner_id, vote_type, 3
+        )  # pylint: disable=protected-access
+        self._give_partner_votes(
+            att2.partner_id, vote_type, 2
+        )  # pylint: disable=protected-access
         att1.action_confirm()
         att2.action_confirm()
         assembly.action_announce()
@@ -753,11 +898,15 @@ class TestVotingScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_V7_duplicate_vote_same_attendee_raises(self):
         """V7: Double vote same attendee → UNIQUE/ValidationError."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att = assembly.attendee_ids[0]
-        self._give_partner_votes(att.partner_id, vote_type, 1)
+        self._give_partner_votes(
+            att.partner_id, vote_type, 1
+        )  # pylint: disable=protected-access
         att.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -787,11 +936,15 @@ class TestVotingScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_V8_create_line_when_voting_closed_raises(self):
         """V8: Create line when voting closed → ValidationError."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att = assembly.attendee_ids[0]
-        self._give_partner_votes(att.partner_id, vote_type, 1)
+        self._give_partner_votes(
+            att.partner_id, vote_type, 1
+        )  # pylint: disable=protected-access
         att.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -814,7 +967,9 @@ class TestVotingScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_V9_close_already_closed_raises(self):
         """V9: Close voting already closed → UserError."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_announce()
         assembly.action_open_registration()
         assembly.action_start_session()
@@ -829,12 +984,18 @@ class TestVotingScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_V10_participation_totals(self):
         """V10: total_votes_cast y participation correctos."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att1, att2 = assembly.attendee_ids[0], assembly.attendee_ids[1]
-        self._give_partner_votes(att1.partner_id, vote_type, 5)
-        self._give_partner_votes(att2.partner_id, vote_type, 3)
+        self._give_partner_votes(
+            att1.partner_id, vote_type, 5
+        )  # pylint: disable=protected-access
+        self._give_partner_votes(
+            att2.partner_id, vote_type, 3
+        )  # pylint: disable=protected-access
         att1.action_confirm()
         att2.action_confirm()
         assembly.action_announce()
@@ -871,7 +1032,9 @@ class TestResultScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_R1_aggregation_by_option(self):
         """R1: Correct aggregation by option."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att1, att2, att3 = (
@@ -879,9 +1042,15 @@ class TestResultScenarios(AssemblyTestMixin, TransactionCase):
             assembly.attendee_ids[1],
             assembly.attendee_ids[2],
         )
-        self._give_partner_votes(att1.partner_id, vote_type, 3)
-        self._give_partner_votes(att2.partner_id, vote_type, 2)
-        self._give_partner_votes(att3.partner_id, vote_type, 1)
+        self._give_partner_votes(
+            att1.partner_id, vote_type, 3
+        )  # pylint: disable=protected-access
+        self._give_partner_votes(
+            att2.partner_id, vote_type, 2
+        )  # pylint: disable=protected-access
+        self._give_partner_votes(
+            att3.partner_id, vote_type, 1
+        )  # pylint: disable=protected-access
         for att in (att1, att2, att3):
             att.action_confirm()
         assembly.action_announce()
@@ -916,18 +1085,24 @@ class TestResultScenarios(AssemblyTestMixin, TransactionCase):
             }
         )
         voting.action_close()
-        yes_r = voting.result_ids.filtered(lambda r: r.vote_option == "yes")
-        no_r = voting.result_ids.filtered(lambda r: r.vote_option == "no")
+        yes_r = voting.result_ids.filtered(
+            lambda r: r.vote_option == "yes"
+        )  # noqa: F841
+        no_r = voting.result_ids.filtered(lambda r: r.vote_option == "no")  # noqa: F841
         self.assertEqual(yes_r.total_votes, 5.0)
         self.assertEqual(no_r.total_votes, 1.0)
 
     def test_R2_sum_results_equals_possible(self):
         """R2: Suma total_votes de result_ids = total posible."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att = assembly.attendee_ids[0]
-        self._give_partner_votes(att.partner_id, vote_type, 4)
+        self._give_partner_votes(
+            att.partner_id, vote_type, 4
+        )  # pylint: disable=protected-access
         att.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -945,18 +1120,24 @@ class TestResultScenarios(AssemblyTestMixin, TransactionCase):
             }
         )
         voting.action_close()
-        total_result = sum(voting.result_ids.mapped("total_votes"))
+        total_result = sum(voting.result_ids.mapped("total_votes"))  # noqa: F841
         self.assertEqual(total_result, 4.0)
         self.assertEqual(voting.total_votes_possible, 4.0)
 
     def test_R3_result_percentages_coherent(self):
         """R3: Percentages sum to ~100%."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att1, att2 = assembly.attendee_ids[0], assembly.attendee_ids[1]
-        self._give_partner_votes(att1.partner_id, vote_type, 2)
-        self._give_partner_votes(att2.partner_id, vote_type, 3)
+        self._give_partner_votes(
+            att1.partner_id, vote_type, 2
+        )  # pylint: disable=protected-access
+        self._give_partner_votes(
+            att2.partner_id, vote_type, 3
+        )  # pylint: disable=protected-access
         att1.action_confirm()
         att2.action_confirm()
         assembly.action_announce()
@@ -983,17 +1164,23 @@ class TestResultScenarios(AssemblyTestMixin, TransactionCase):
             }
         )
         voting.action_close()
-        total_pct = sum(voting.result_ids.mapped("result_percentage"))
+        total_pct = sum(voting.result_ids.mapped("result_percentage"))  # noqa: F841
         self.assertAlmostEqual(total_pct, 100.0, places=1)
 
     def test_R4_not_cast_equals_possible_minus_cast(self):
         """R4: not_cast = possible - cast."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att1, att2 = assembly.attendee_ids[0], assembly.attendee_ids[1]
-        self._give_partner_votes(att1.partner_id, vote_type, 2)
-        self._give_partner_votes(att2.partner_id, vote_type, 3)
+        self._give_partner_votes(
+            att1.partner_id, vote_type, 2
+        )  # pylint: disable=protected-access
+        self._give_partner_votes(
+            att2.partner_id, vote_type, 3
+        )  # pylint: disable=protected-access
         att1.action_confirm()
         att2.action_confirm()
         assembly.action_announce()
@@ -1021,11 +1208,15 @@ class TestResultScenarios(AssemblyTestMixin, TransactionCase):
 
     def test_R5_all_options_present(self):
         """R5: result_ids contiene yes, no, abstention, blank, not_cast."""
-        assembly, agenda = self._create_assembly_with_agenda()
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
         assembly.action_generate_attendees()
-        vote_type = assembly.assembly_type_id.vote_type_ids[0]
+        vote_type = assembly.assembly_type_id.vote_type_ids[0]  # noqa: F841
         att = assembly.attendee_ids[0]
-        self._give_partner_votes(att.partner_id, vote_type, 1)
+        self._give_partner_votes(
+            att.partner_id, vote_type, 1
+        )  # pylint: disable=protected-access
         att.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -1043,7 +1234,7 @@ class TestResultScenarios(AssemblyTestMixin, TransactionCase):
             }
         )
         voting.action_close()
-        options = set(voting.result_ids.mapped("vote_option"))
+        options = set(voting.result_ids.mapped("vote_option"))  # noqa: F841
         self.assertEqual(
             options,
             {"yes", "no", "abstention", "blank", "not_cast"},

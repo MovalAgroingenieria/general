@@ -1,7 +1,9 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+# pylint: disable=import-outside-toplevel
 
-"""HTTP tests: Portal routes /my/assemblies, /my/assembly/<id>, confirm, delegation, document.
+"""HTTP tests: Portal routes /my/assemblies, /my/assembly/<id>, confirm,
+delegation, document.
 
 When controllers are not implemented, tests are skipped (404).
 """
@@ -22,18 +24,19 @@ class TestHttpPortalList(AssemblyHttpCase):
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open("/my/assemblies", allow_redirects=False)
         self._skip_if_route_404(res, "Portal list /my/assemblies")
+        # pylint: disable=protected-access
         self.assertEqual(res.status_code, 200)
         self.assertIn(self.assembly.name.encode(), res.content)
 
     def test_ptl_02_list_without_session_302_login(self):
         """PTL-02: GET /my/assemblies without session redirects to login."""
         self.session.logout(keep_db=True)
-        from odoo.http import root
+        from odoo.http import root  # pylint: disable=import-outside-toplevel
 
         root.session_store.save(self.session)
         self.opener.cookies.pop("session_id", None)
         res = self.url_open("/my/assemblies", allow_redirects=False)
-        self._skip_if_route_404(res, "Portal list")
+        self._skip_if_route_404(res, "Portal list")  # pylint: disable=protected-access
         self.assertEqual(res.status_code, 302)
         self.assertTrue("login" in res.headers.get("Location", "").lower())
 
@@ -47,13 +50,14 @@ class TestHttpPortalList(AssemblyHttpCase):
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open("/my/assembly/%s" % self.assembly.id, allow_redirects=False)
         self._skip_if_route_404(res, "Portal detail /my/assembly/<id>")
+        # pylint: disable=protected-access
         self.assertEqual(res.status_code, 200)
 
     def test_ptl_04_detail_other_assembly_404_or_403(self):
         """PTL-04: Portal user cannot access other partner's assembly (IDOR)."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
-        other_partners = self.env["res.partner"].create(
+        other_partners = self.env["res.partner"].create(  # noqa: F841
             [
                 {"name": "Other A", "is_company": False},
                 {"name": "Other B", "is_company": False},
@@ -64,7 +68,9 @@ class TestHttpPortalList(AssemblyHttpCase):
         self.assembly.action_announce()
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open("/my/assembly/%s" % self.assembly.id, allow_redirects=False)
-        self._skip_if_route_404(res, "Portal detail")
+        self._skip_if_route_404(
+            res, "Portal detail"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (403, 404))
 
     def test_ptl_05_detail_nonexistent_id_404(self):
@@ -73,7 +79,9 @@ class TestHttpPortalList(AssemblyHttpCase):
             self.skipTest("Portal group not available")
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open("/my/assembly/999999", allow_redirects=False)
-        self._skip_if_route_404(res, "Portal detail")
+        self._skip_if_route_404(
+            res, "Portal detail"
+        )  # pylint: disable=protected-access
         self.assertEqual(res.status_code, 404)
 
 
@@ -94,7 +102,9 @@ class TestHttpPortalConfirm(AssemblyHttpCase):
             data={},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal confirm")
+        self._skip_if_route_404(
+            res, "Portal confirm"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (200, 302))
 
     def test_ptl_07_confirm_assembly_draft_403(self):
@@ -109,7 +119,9 @@ class TestHttpPortalConfirm(AssemblyHttpCase):
             data={},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal confirm")
+        self._skip_if_route_404(
+            res, "Portal confirm"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (400, 403))
 
     def test_ptl_08_confirm_other_assembly_403_or_404(self):
@@ -127,7 +139,9 @@ class TestHttpPortalConfirm(AssemblyHttpCase):
             data={},
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal confirm")
+        self._skip_if_route_404(
+            res, "Portal confirm"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (403, 404))
 
 
@@ -146,7 +160,9 @@ class TestHttpPortalDocument(AssemblyHttpCase):
             "/my/assembly/%s/document/convocatoria" % self.assembly.id,
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal document")
+        self._skip_if_route_404(
+            res, "Portal document"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (200, 302))
         if res.status_code == 200 and res.headers.get("Content-Type"):
             self.assertIn("pdf", res.headers.get("Content-Type", "").lower())
@@ -163,14 +179,18 @@ class TestHttpPortalDocument(AssemblyHttpCase):
             "/my/assembly/%s/document/tipo_invalido_xyz" % self.assembly.id,
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal document")
+        self._skip_if_route_404(
+            res, "Portal document"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (400, 404))
 
     def test_doc_03_document_other_assembly_403_or_404(self):
         """DOC-03: GET document for other's assembly returns 403/404."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
-        other = self.env["res.partner"].create({"name": "Other", "is_company": False})
+        other = self.env["res.partner"].create(
+            {"name": "Other", "is_company": False}
+        )  # noqa: F841
         self.assembly.partner_domain = "[('id', '=', %s)]" % other.id
         self.assembly.action_generate_attendees()
         self.assembly.action_announce()
@@ -179,13 +199,15 @@ class TestHttpPortalDocument(AssemblyHttpCase):
             "/my/assembly/%s/document/convocatoria" % self.assembly.id,
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal document")
+        self._skip_if_route_404(
+            res, "Portal document"
+        )  # pylint: disable=protected-access
         self.assertIn(res.status_code, (403, 404))
 
     def test_doc_04_document_without_session_302(self):
         """DOC-04: GET document without session redirects to login."""
         self.session.logout(keep_db=True)
-        from odoo.http import root
+        from odoo.http import root  # pylint: disable=import-outside-toplevel
 
         root.session_store.save(self.session)
         self.opener.cookies.pop("session_id", None)
@@ -193,5 +215,7 @@ class TestHttpPortalDocument(AssemblyHttpCase):
             "/my/assembly/1/document/convocatoria",
             allow_redirects=False,
         )
-        self._skip_if_route_404(res, "Portal document")
+        self._skip_if_route_404(
+            res, "Portal document"
+        )  # pylint: disable=protected-access
         self.assertEqual(res.status_code, 302)

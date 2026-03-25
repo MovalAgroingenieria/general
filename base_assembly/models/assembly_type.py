@@ -39,7 +39,6 @@ class AssemblyType(models.Model):
         default="[]",
         help="Default domain for convocable partners.",
     )
-    # Default location (generic from WUA)
     default_street = fields.Char(string="Default street")
     default_city = fields.Char(string="Default city")
     default_zip = fields.Char(string="Default zip")

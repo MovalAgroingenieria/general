@@ -3,6 +3,9 @@
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.tools.float_utils import float_compare
+
+_VOTES_APPLIED_FLOAT_DIGITS = 6
 
 
 class AssemblyVotingLine(models.Model):
@@ -73,8 +76,8 @@ class AssemblyVotingLine(models.Model):
         ),
     ]
 
-    @api.model_create_multi
-    def create(self, vals_list):
+    @api.model
+    def _apply_audit_defaults_to_voting_line_create_vals(self, vals_list):
         now = fields.Datetime.now()
         for vals in vals_list:
             if "vote_cast_at" not in vals:
@@ -85,6 +88,64 @@ class AssemblyVotingLine(models.Model):
                 and self.env.user.id
             ):
                 vals["vote_cast_by_user_id"] = self.env.uid
+
+    @api.model
+    def _set_votes_applied_snapshot_on_create_vals(self, vals):
+        """Freeze ``votes_applied`` from ``assembly.attendee.vote`` at create time only."""
+        voting = self.env["assembly.voting"].browse(vals["voting_id"])
+        attendee = self.env["assembly.attendee"].browse(vals["attendee_id"])
+        vote_type = voting.vote_type_id
+        av = attendee.attendee_vote_ids.filtered(
+            lambda v, vt=vote_type: v.vote_type_id == vt
+        )[:1]
+        if not av or av.attendee_vote_total <= 0:
+            raise ValidationError(
+                self.env._(
+                    "This attendee has no votes for this vote type (delegated out)."
+                )
+            )
+        total = av.attendee_vote_total
+        if "votes_applied" in vals:
+            if (
+                float_compare(
+                    vals["votes_applied"],
+                    total,
+                    precision_digits=_VOTES_APPLIED_FLOAT_DIGITS,
+                )
+                != 0
+            ):
+                raise ValidationError(
+                    self.env._(
+                        "Votes applied must match the attendee's vote total for "
+                        "this type."
+                    )
+                )
+        vals["votes_applied"] = total
+
+    def write(self, vals):
+        if "votes_applied" in vals:
+            for line in self:
+                if (
+                    float_compare(
+                        vals["votes_applied"],
+                        line.votes_applied,
+                        precision_digits=_VOTES_APPLIED_FLOAT_DIGITS,
+                    )
+                    != 0
+                ):
+                    raise ValidationError(
+                        self.env._(
+                            "Votes applied is frozen at cast time and cannot be "
+                            "changed."
+                        )
+                    )
+        return super().write(vals)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        self._apply_audit_defaults_to_voting_line_create_vals(vals_list)
+        for vals in vals_list:
+            self._set_votes_applied_snapshot_on_create_vals(vals)
         return super().create(vals_list)
 
     @api.constrains("votes_applied")
@@ -103,6 +164,18 @@ class AssemblyVotingLine(models.Model):
                     )
                 )
 
+    @api.constrains("attendee_id", "voting_id")
+    def _check_attendee_same_assembly_as_voting(self):
+        for line in self:
+            if not line.attendee_id or not line.voting_id:
+                continue
+            if line.attendee_id.assembly_id != line.voting_id.assembly_id:
+                raise ValidationError(
+                    self.env._(
+                        "The attendee must belong to the same assembly as this voting."
+                    )
+                )
+
     @api.onchange("attendee_id")
     def _onchange_attendee_id(self):
         if self.attendee_id and self.voting_id and self.voting_id.vote_type_id:
@@ -114,24 +187,3 @@ class AssemblyVotingLine(models.Model):
                 self.votes_applied = av.attendee_vote_total
             else:
                 self.votes_applied = 0.0
-
-    @api.constrains("attendee_id", "voting_id", "votes_applied")
-    def _check_can_vote(self):
-        for line in self:
-            vote_type = line.voting_id.vote_type_id
-            av = line.attendee_id.attendee_vote_ids.filtered(
-                lambda v, vt=vote_type: v.vote_type_id == vt
-            )
-            if not av or av.attendee_vote_total <= 0:
-                raise ValidationError(
-                    self.env._(
-                        "This attendee has no votes for this vote type (delegated out)."
-                    )
-                )
-            if line.votes_applied != av.attendee_vote_total:
-                raise ValidationError(
-                    self.env._(
-                        "Votes applied must match the attendee's vote total for "
-                        "this type."
-                    )
-                )
