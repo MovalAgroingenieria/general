@@ -831,6 +831,225 @@ bag[u'attachment_name']=fname
             ]]></field>
         </record>
 
+        <record id="remotecontrol_batchline_action_provision_pressure_devices" model="remotecontrol.action">
+            <field name="name">Batchline: Provision pressure devices</field>
+            <field name="remote_id" ref="remotecontrol_batchline"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="code"><![CDATA[
+# ── Batchline: Provision pressure devices ──────────────────────────────
+# Calls GET /api/presiones to retrieve all configured pressure sensors
+# from the Batchline API and then sets remotecontrol_id and
+# remotecontrol_params on matching Odoo mdm.measurement.device records.
+#
+# Matching strategy (in order):
+#   1. Exact match:   device.name == Alias  (case-insensitive)
+#   2. Numeric match: trailing digits of device.name == trailing digits
+#                     of Alias  (e.g. "SP-0036" matches "ARQ-0036")
+#
+# Device remotecontrol_params written:
+#   {"hidrante": "ARQ-0036", "electronica": 0, "canal": 1}
+#
+# Sensor remotecontrol_params written (all sensors under matched device):
+#   {"sensor_type": "H_PRESSURE"}
+#
+# Idempotent: running multiple times only overwrites remotecontrol_params
+# and remotecontrol_id — it never creates or deletes records.
+# ────────────────────────────────────────────────────────────────────────
+import re as _re
+
+Remote = self.remote_id
+token = bag.get('token')
+if not token:
+    raise Exception(u"Missing Batchline token in bag. Run 'Get Token' first.")
+
+api_base = (base_url or '').rstrip('/') + '/api'
+headers = {
+    u'Authorization': u'Bearer %s' % token,
+    u'Accept': u'application/json',
+}
+
+# ── 1. Fetch pressure device list ──────────────────────────────────────
+resp = request_retry(u'GET', api_base + u'/presiones',
+                     headers=headers, timeout=timeout)
+if resp.status_code >= 400:
+    raise Exception(
+        u"Error fetching /api/presiones: %s %s" % (
+            resp.status_code, resp.text))
+pressures = resp.json() or []
+if not isinstance(pressures, list):
+    raise Exception(
+        u"/api/presiones did not return a list: %r" % pressures)
+
+# ── 2. Build lookup of existing Odoo devices ───────────────────────────
+Device = env['mdm.measurement.device']
+Sensor = env['mdm.measurement.device.sensor']
+
+all_devices = Device.search([])
+# Map 1: exact lower name -> device record
+device_by_name = {}
+# Map 2: trailing digits -> device record (e.g. "0036" -> device)
+device_by_digits = {}
+for dev in all_devices:
+    key = (dev.name or '').strip().lower()
+    if key:
+        device_by_name[key] = dev
+    digits = (_re.search(r'\d+$', key) or None)
+    if digits:
+        device_by_digits[digits.group()] = dev
+
+def _find_device(code):
+    """Return matching device or None. Tries exact then numeric suffix.
+    Receives the Hidrante code (e.g. 'ARQ-0036'), NOT the human Alias.
+    """
+    # 1) Exact (case-insensitive)
+    exact = device_by_name.get(code.strip().lower())
+    if exact:
+        return exact, u'exact'
+    # 2) Numeric suffix match  e.g. "ARQ-0036" -> "0036" == "SP-0036" -> "0036"
+    digits = _re.search(r'\d+$', code.strip())
+    if digits:
+        numeric = device_by_digits.get(digits.group())
+        if numeric:
+            return numeric, u'numeric_suffix'
+    return None, None
+
+# ── 3. Resolve remotecontrol record ────────────────────────────────────
+remotecontrol_rec = env.ref(
+    'remotecontrol_batchline.remotecontrol_batchline',
+    raise_if_not_found=True)
+
+# ── 4. Iterate API pressures and update matching devices ───────────────
+matched = 0
+unmatched = 0
+sensors_updated = 0
+unmatched_aliases = []
+details = []
+
+for p in pressures:
+    if not isinstance(p, dict):
+        continue
+    hidrante = (p.get(u'Hidrante') or u'').strip()
+    electronica = p.get(u'Electronica')
+    canal = p.get(u'Canal')
+    alias = (p.get(u'Alias') or u'').strip()
+    unidad = (p.get(u'Unidad') or u'').strip()
+
+    if not hidrante or electronica is None or canal is None:
+        details.append({u'alias': alias, u'status': u'skipped_missing_key_fields'})
+        continue
+
+    # Match by Hidrante code (e.g. "ARQ-0036"), NOT by Alias
+    device, match_type = _find_device(hidrante)
+    if not device:
+        unmatched += 1
+        unmatched_aliases.append(alias)
+        details.append({
+            u'hidrante': hidrante,
+            u'electronica': electronica,
+            u'canal': canal,
+            u'alias': alias,
+            u'status': u'no_match',
+        })
+        continue
+
+    # ── Actualizar device: nombre = código hidrante, remotecontrol params ─
+    device_params = {
+        u'hidrante': hidrante,
+        u'electronica': int(electronica),
+        u'canal': int(canal),
+    }
+    device.write({
+        u'name': hidrante,
+        u'remotecontrol_id': remotecontrol_rec.id,
+        u'remotecontrol_params': json.dumps(device_params, ensure_ascii=False),
+    })
+    matched += 1
+
+    # ── Set sensor remotecontrol fields for all child sensors ─────────
+    sensor_params_str = json.dumps(
+        {u'sensor_type': u'H_PRESSURE'}, ensure_ascii=False)
+    child_sensors = Sensor.search([('device_id', '=', device.id)])
+    child_sensors.write({
+        u'remotecontrol_id': remotecontrol_rec.id,
+        u'remotecontrol_params': sensor_params_str,
+    })
+    sensors_updated += len(child_sensors)
+
+    details.append({
+        u'hidrante': hidrante,
+        u'electronica': int(electronica),
+        u'canal': int(canal),
+        u'alias': alias,
+        u'unidad': unidad,
+        u'device_id': device.id,
+        u'device_name': hidrante,
+        u'match_type': match_type,
+        u'sensors_updated': len(child_sensors),
+        u'status': u'ok',
+    })
+
+# ── 5. Create audit attachment ─────────────────────────────────────────
+audit = {
+    u'executed_at': fields.Datetime.now(),
+    u'total_api_pressures': len(pressures),
+    u'matched': matched,
+    u'unmatched': unmatched,
+    u'sensors_updated': sensors_updated,
+    u'unmatched_aliases': unmatched_aliases,
+    u'details': details,
+}
+b64 = base64.b64encode(
+    json.dumps(audit, ensure_ascii=False, indent=2).encode(u'utf-8'))
+fname = u'batchline_provision_pressure_%s.json' % (
+    fields.Datetime.now()
+    .replace(u':', u'').replace(u'-', u'').replace(u' ', u'_'))
+att = env[u'ir.attachment'].create({
+    u'name': fname,
+    u'datas_fname': fname,
+    u'datas': b64,
+    u'mimetype': u'application/json',
+    u'res_model': u'remotecontrol',
+    u'res_id': Remote.id,
+})
+Remote.message_post(
+    body=u'[Batchline] Provision pressure devices: '
+         u'matched=%s unmatched=%s sensors_updated=%s' % (
+             matched, unmatched, sensors_updated),
+    attachment_ids=[att.id],
+)
+bag[u'provision_matched'] = matched
+bag[u'provision_unmatched'] = unmatched
+bag[u'provision_sensors_updated'] = sensors_updated
+bag[u'provision_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_batchline_procedure_provision_pressures" model="remotecontrol.procedure">
+            <field name="name">Batchline: Provision pressure devices</field>
+            <field name="remote_id" ref="remotecontrol_batchline"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_batchline_step_10_token_provision_pressures" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_batchline_procedure_provision_pressures"/>
+            <field name="action_id" ref="remotecontrol_batchline_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_batchline_step_20_provision_pressure_devices" model="remotecontrol.step">
+            <field name="name">Provision pressure devices</field>
+            <field name="procedure_id" ref="remotecontrol_batchline_procedure_provision_pressures"/>
+            <field name="action_id" ref="remotecontrol_batchline_action_provision_pressure_devices"/>
+            <field name="sequence">20</field>
+        </record>
+
         <record id="remotecontrol_batchline_procedure_get_elements" model="remotecontrol.procedure">
             <field name="name">Batchline: Import elements</field>
             <field name="remote_id" ref="remotecontrol_batchline"/>

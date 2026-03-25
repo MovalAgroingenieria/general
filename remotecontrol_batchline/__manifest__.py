@@ -6,7 +6,7 @@
     "name": "RemoteControl: Batchline",
     "summary": "Remotecontrol Batchline (REST) with default actions and "
                "procedures",
-    "version": "10.0.1.0.5",
+    "version": "10.0.1.0.6",
     "category": "Tools",
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",
