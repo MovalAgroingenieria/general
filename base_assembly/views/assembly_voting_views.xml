@@ -17,8 +17,13 @@
         <field name="model">assembly.voting.line</field>
         <field name="arch" type="xml">
             <list editable="bottom" create="1">
-                <field name="attendee_id"/>
-                <field name="partner_id"/>
+                <field name="assembly_id" column_invisible="1"/>
+                <field
+                    name="attendee_id"
+                    domain="[('assembly_id', '=', assembly_id), ('attendee_state', '!=', 'absent')]"
+                    options="{'no_create': True}"
+                />
+                <field name="partner_id" optional="show"/>
                 <field name="vote_option"/>
                 <field name="votes_applied"/>
                 <field name="vote_channel"/>
@@ -34,6 +39,7 @@
         <field name="arch" type="xml">
             <form string="Voting">
                 <header>
+                    <button name="action_refresh_roll_call" string="Refresh roll call" type="object" class="btn-secondary" invisible="voting_state != 'open'"/>
                     <button name="action_close" string="Close voting" type="object" class="btn-primary" invisible="voting_state != 'open'" groups="base_assembly.assembly_group_manager"/>
                     <button name="action_cancel" string="Cancel voting" type="object" invisible="voting_state != 'open'" groups="base_assembly.assembly_group_manager"/>
                 </header>
@@ -63,8 +69,10 @@
                         </button>
                     </div>
                     <group>
+                        <field name="assembly_id" readonly="1"/>
                         <field name="agenda_id"/>
                         <field name="vote_type_id"/>
+                        <field name="allow_online_voting" readonly="1"/>
                         <field name="name"/>
                         <field name="voting_state"/>
                         <field name="date_open"/>
@@ -74,8 +82,25 @@
                         <field name="participation_percentage"/>
                     </group>
                     <notebook>
-                        <page string="Votes cast" name="lines">
-                            <field name="vote_line_ids"/>
+                        <page string="Roll call" name="lines">
+                            <field name="vote_line_ids">
+                                <list
+                                    string="Roll call"
+                                    editable="top"
+                                    create="0"
+                                    delete="1"
+                                    default_order="partner_id"
+                                >
+                                    <field name="assembly_id" column_invisible="1"/>
+                                    <field name="attendee_id" readonly="1" force_save="1"/>
+                                    <field name="partner_id" optional="hide"/>
+                                    <field name="vote_option"/>
+                                    <field name="votes_applied" readonly="1"/>
+                                    <field name="vote_channel" optional="hide"/>
+                                    <field name="vote_cast_at" optional="show" readonly="1"/>
+                                    <field name="vote_cast_by_user_id" optional="hide" readonly="1"/>
+                                </list>
+                            </field>
                         </page>
                         <page string="Results" name="results">
                             <field name="result_ids"/>
@@ -91,6 +116,7 @@
         <field name="model">assembly.voting</field>
         <field name="arch" type="xml">
             <list>
+                <field name="assembly_id" optional="show"/>
                 <field name="agenda_id"/>
                 <field name="vote_type_id"/>
                 <field name="voting_state"/>
@@ -106,6 +132,7 @@
         <field name="model">assembly.voting</field>
         <field name="arch" type="xml">
             <search string="Votings">
+                <field name="assembly_id"/>
                 <field name="agenda_id"/>
                 <field name="vote_type_id"/>
                 <filter string="Open" name="filter_open" domain="[('voting_state','=','open')]"/>

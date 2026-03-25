@@ -183,6 +183,43 @@ class TestAssemblyCreateInheritance(AssemblyTestMixin, TransactionCase):
         self.assertEqual(assembly.quorum_second_call_value, 20.0)
         self.assertEqual(assembly.partner_domain, domain)
 
+    def test_create_inherits_when_vals_include_model_defaults_like_web_form(self):
+        """Form sends model defaults; they must be replaced by assembly type values (AF §2.2)."""
+        vote_type = self._create_vote_type(self.env, name="VT-WEB", code="VTWEB")
+        partners = self._create_partners(self.env, 2)
+        domain = "[('id', 'in', %s)]" % partners.ids
+        assembly_type = self.env["assembly.type"].create(
+            {
+                "name": "Tipo web",
+                "code": "WEB",
+                "vote_type_ids": [(6, 0, vote_type.ids)],
+                "default_quorum_type": "fixed",
+                "default_quorum_value": 12.0,
+                "default_quorum_second_call_type": "percentage",
+                "default_quorum_second_call_value": 8.0,
+                "partner_domain": domain,
+            }
+        )
+        Assembly = self.env["assembly.assembly"]
+        assembly = Assembly.create(
+            {
+                "name": "Asamblea desde formulario simulado",
+                "assembly_type_id": assembly_type.id,
+                "quorum_type": "percentage",
+                "quorum_value": 50.0,
+                "quorum_second_call_type": "any",
+                "quorum_second_call_value": 0.0,
+                "partner_domain": "[]",
+                "vote_type_ids": [(6, 0, [])],
+            }
+        )
+        self.assertEqual(assembly.vote_type_ids, vote_type)
+        self.assertEqual(assembly.quorum_type, "fixed")
+        self.assertEqual(assembly.quorum_value, 12.0)
+        self.assertEqual(assembly.quorum_second_call_type, "percentage")
+        self.assertEqual(assembly.quorum_second_call_value, 8.0)
+        self.assertEqual(assembly.partner_domain, domain)
+
     def test_create_respects_explicit_values(self):
         """create() respects explicit values even if assembly_type has defaults."""
         vote_type1 = self._create_vote_type(

@@ -96,6 +96,10 @@ class TestBaseAssemblyPackagingSanity(AssemblyTestMixin, TransactionCase):
             "Expected ir.actions.report rows bound to assembly.assembly",
         )
 
+    def test_representation_report_action_xmlid_exists(self):
+        """AF §11.5: representation template report is declared."""
+        self.env.ref("base_assembly.assembly_assembly_action_report_representation")
+
     def test_minimal_core_record_creation(self):
         """End-to-end: create type + assembly + agenda path used across the suite."""
         assembly, _agenda = (

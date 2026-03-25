@@ -196,15 +196,9 @@ class TestAgendaValidationEdgeCases(AssemblyTestMixin, TransactionCase):
         # pylint: disable=protected-access
         assembly.vote_type_ids = [(4, other_vote_type.id)]
 
-        # Start first voting
+        # One open voting per agenda item; immutability applies once any voting exists
         agenda.action_start_voting()
-        voting1 = agenda.voting_ids[0]  # noqa: F841
-
-        # Start second voting (same agenda can have multiple votings)
-        agenda.action_start_voting()
-        voting2 = agenda.voting_ids.filtered(lambda v: v.id != voting1.id)  # noqa: F841
-
-        self.assertEqual(len(agenda.voting_ids), 2, "Should have 2 votings")
+        self.assertEqual(len(agenda.voting_ids), 1)
 
         # Cannot change vote_type_id (votings exist)
         with self.assertRaises(ValidationError) as ctx:

@@ -474,6 +474,16 @@ msgid "Assembly"
 msgstr "Asamblea"
 
 #. module: base_assembly
+#: model:res.groups,name:base_assembly.assembly_group_manager
+msgid "Assembly Manager"
+msgstr "Gestor de asambleas"
+
+#. module: base_assembly
+#: model:res.groups,name:base_assembly.assembly_group_user
+msgid "Assembly User"
+msgstr "Usuario de asambleas"
+
+#. module: base_assembly
 #: model:ir.model,name:base_assembly.model_assembly_agenda
 msgid "Assembly agenda item"
 msgstr "Punto del orden del día de la asamblea"
@@ -672,6 +682,16 @@ msgstr "Cerrar"
 msgid "Close or cancel all open votings before closing the assembly."
 msgstr ""
 "Cierre o cancele todas las votaciones abiertas antes de cerrar la asamblea."
+
+#. module: base_assembly
+#: code:addons/base_assembly/models/assembly_agenda.py:0
+#, python-format
+msgid ""
+"This agenda item already has an open voting. Close or cancel it before "
+"starting a new one."
+msgstr ""
+"Este punto del orden del día ya tiene una votación abierta. Ciérrela o "
+"cancélela antes de iniciar otra."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form
@@ -1170,11 +1190,6 @@ msgstr "Lugar"
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Main text"
 msgstr "Texto principal"
-
-#. module: base_assembly
-#: model:res.groups,name:base_assembly.assembly_group_manager
-msgid "Manager"
-msgstr "Gestor"
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_agenda__vote_item_type__multiple_options
@@ -1918,11 +1933,6 @@ msgstr "URL para código QR"
 #: model:ir.model.fields,help:base_assembly.field_assembly_attendee__attendance_url
 msgid "URL to open this attendee form (e.g. for QR code)."
 msgstr "URL para abrir este formulario de asistente (p. ej. para código QR)."
-
-#. module: base_assembly
-#: model:res.groups,name:base_assembly.assembly_group_user
-msgid "User"
-msgstr "Usuario"
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_voting_line__vote_cast_by_user_id

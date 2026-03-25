@@ -1,9 +1,10 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-"""Paquete de regresión: los 9 puntos obligatorios de QA frente a la especificación funcional.
+"""Regression pack: nine mandatory QA checks against the functional specification.
 
-Cada test es autónomo, determinista y con fixtures mínimas. HTTP asistencia: ``test_http_attendance``.
+Each test is self-contained, deterministic, and uses minimal fixtures. HTTP
+attendance: ``test_http_attendance``.
 """
 
 from odoo.exceptions import ValidationError
@@ -14,10 +15,10 @@ from .http_common import AssemblyHttpCase
 
 
 class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
-    """QA 1–8 (modelos y lógica de negocio)."""
+    """QA 1–8 (models and business logic)."""
 
     def test_qa_01_quorum_counts_people_not_vote_weights(self):
-        """Quorum: personas distintas; pesos ``partner.vote`` no influyen al conteo."""
+        """Quorum: distinct people; ``partner.vote`` weights do not affect the count."""
         assembly, _partners = self._assembly_four_partners()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att0, att1 = assembly.attendee_ids[0], assembly.attendee_ids[1]
@@ -37,7 +38,7 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
         return assembly, partners
 
     def test_qa_02_non_attendee_delegator_transfers_via_partner_vote_only(self):
-        """Delegador sin fila de asistente: votos vía ``partner.vote`` al delegado; sin filas del delegador."""
+        """Delegator without attendee row: votes flow via ``partner.vote`` to delegate; no delegator rows."""
         env = self.env
         p_del = env["res.partner"].create(
             {"name": "PackExtDel", "is_company": False, "assembly_excluded": True}
@@ -102,7 +103,7 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
         return assembly, vt1, vt2
 
     def test_qa_03_partial_delegation_only_selected_vote_types_transfer(self):
-        """Delegación parcial: solo los tipos enlazados transfieren in/out."""
+        """Partial delegation: only linked vote types transfer in/out."""
         env = self.env
         assembly, vt1, vt2 = self._assembly_two_vote_types_pack()
         a, b = assembly.attendee_ids[0], assembly.attendee_ids[1]
@@ -133,7 +134,7 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
         self.assertEqual(lb2.own_votes, 2.0)
 
     def test_qa_04_full_delegation_empty_m2m_all_assembly_vote_types_transfer(self):
-        """Delegación total: M2M vacío equivale a todos los tipos de la asamblea."""
+        """Full delegation: empty M2M means all assembly vote types."""
         env = self.env
         assembly, vt1, vt2 = self._assembly_two_vote_types_pack()
         a, b = assembly.attendee_ids[0], assembly.attendee_ids[1]
@@ -164,7 +165,7 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
             self.assertEqual(lb.delegated_in_votes, in_b)
 
     def test_qa_05_delegate_must_be_confirmed_for_vote_effect(self):
-        """Sin delegado confirmado no hay efecto de voto pese a delegación confirmada."""
+        """Without a confirmed delegate there is no vote effect even if delegation is confirmed."""
         assembly, _p = self._assembly_four_partners()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         delegator = assembly.attendee_ids[0]
@@ -202,7 +203,7 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
         self.assertEqual(line_b.delegated_in_votes, 0.0)
 
     def test_qa_06_no_chained_delegation_same_vote_type(self):
-        """No hay cadena: B recibe tipo T de A → B no puede delegar T a C."""
+        """No chaining: B receives type T from A → B cannot delegate T to C."""
         env = self.env
         vt1 = self._create_vote_type(env, name="Pack Chain VT1")
         vt2 = self._create_vote_type(env, name="Pack Chain VT2")
@@ -242,7 +243,7 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
             )
 
     def test_qa_07_attendee_vote_rows_unique_across_recomputes(self):
-        """Tras varios recomputos: exactamente una fila por (asistente, tipo) en extremos."""
+        """After several recomputes: exactly one row per (attendee, type) at the leaves."""
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]
@@ -273,7 +274,7 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
         )
 
     def test_qa_08_state_transition_helpers_enforce_spec(self):
-        """Grafo de estados: asamblea (p. ej. closed→cancelled) y asistente (sin confirmed→registered)."""
+        """State graph: assembly (e.g. closed→cancelled) and attendee (no confirmed→registered)."""
         Asm = self.env["assembly.assembly"]
         self.assertTrue(
             Asm._assembly_is_allowed_state_transition("closed", "cancelled")
@@ -293,10 +294,10 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
 
 
 class TestFunctionalSpecCompliancePackHttp(AssemblyHttpCase):
-    """QA 9: contrato HTTP del controlador de asistencia (requiere servidor HTTP)."""
+    """QA 9: HTTP contract for the attendance controller (requires HTTP server)."""
 
     def test_qa_09_manager_valid_deep_link_redirects(self):
-        """Manager en asamblea abierta: 302 hacia formulario de asistente."""
+        """Manager with assembly open: 302 to attendee form."""
         self.assembly.action_announce()
         self.assembly.action_open_registration()
         self.authenticate(self.user_manager.login, "assembly_manager_http")
@@ -312,7 +313,7 @@ class TestFunctionalSpecCompliancePackHttp(AssemblyHttpCase):
         )
 
     def test_qa_09b_missing_query_params_plain_text_400(self):
-        """Parámetros faltantes: 400 y cuerpo descriptivo (spec)."""
+        """Missing query params: 400 and descriptive body (spec)."""
         self.authenticate("admin", "admin")
         res = self.url_open("/assembly/attendance", allow_redirects=False)
         self.assertEqual(res.status_code, 400)

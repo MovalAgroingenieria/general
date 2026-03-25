@@ -4,12 +4,12 @@
 
 """HTTP tests: GET /assembly/attendance (auth=user, assembly manager, open/in_session).
 
-Contrato funcional explícito (obligatorio):
-- acceso válido → ``test_att_01_manager_valid_params_redirects_to_form``,
+Explicit functional contract (mandatory):
+- valid access → ``test_att_01_manager_valid_params_redirects_to_form``,
   ``test_att_12_assembly_in_session_accepts``;
-- no manager → ``test_att_06_non_manager_forbidden``;
-- estado de asamblea no permitido → p. ej. ``test_att_08_assembly_draft_returns_403``;
-- participante sin fila de asistente → ``test_att_05_participant_not_attendee_returns_404``.
+- non-manager → ``test_att_06_non_manager_forbidden``;
+- disallowed assembly state → e.g. ``test_att_08_assembly_draft_returns_403``;
+- participant without attendee row → ``test_att_05_participant_not_attendee_returns_404``.
 """
 
 from odoo.addons.base_assembly.controllers.attendance import AttendanceController
@@ -39,15 +39,15 @@ def _werkzeug_rule_endpoint_module(endpoint):
 
 
 class TestHttpAttendance(AssemblyHttpCase):
-    """Regresión del endpoint; el contrato mínimo está referenciado en el docstring del módulo."""
+    """Endpoint regression; minimum contract is referenced in the module docstring."""
 
     def test_att_base_controller_single_manager_route_only(self):
-        """BASE: solo ``open_attendance`` en ``/assembly/attendance`` con auth user."""
+        """BASE: only ``open_attendance`` on ``/assembly/attendance`` with auth user."""
         rows = list(_http_routed_methods(AttendanceController))
         self.assertEqual(
             len(rows),
             1,
-            "base_assembly debe exponer un único @route HTTP en este controlador",
+            "base_assembly must expose a single HTTP @route on this controller",
         )
         name, path, auth = rows[0]
         self.assertEqual(name, "open_attendance")
@@ -55,14 +55,14 @@ class TestHttpAttendance(AssemblyHttpCase):
         self.assertEqual(auth, "user")
 
     def test_att_no_public_token_checkin_on_controller(self):
-        """No debe existir endpoint público por token en el controlador de asistencia."""
+        """No public token check-in endpoint on the attendance controller."""
         self.assertFalse(
             hasattr(AttendanceController, "checkin_by_token"),
-            "checkin_by_token (check-in público) no pertenece al módulo BASE",
+            "checkin_by_token (public check-in) does not belong in BASE",
         )
 
     def test_att_routing_map_base_assembly_has_no_assembly_c_prefix(self):
-        """``base_assembly`` no debe registrar ``/assembly/c/...`` (check-in público)."""
+        """``base_assembly`` must not register ``/assembly/c/...`` (public check-in)."""
         routing_map = self.env["ir.http"].routing_map()
         bad = []
         for rule in routing_map.iter_rules():
@@ -73,11 +73,11 @@ class TestHttpAttendance(AssemblyHttpCase):
                 bad.append(rule.rule)
         self.assertFalse(
             bad,
-            "base_assembly no debe exponer rutas /assembly/c/*: %s" % bad,
+            "base_assembly must not expose /assembly/c/* routes: %s" % bad,
         )
 
     def test_att_01_manager_valid_params_redirects_to_form(self):
-        """FS: acceso válido — manager, asamblea ``open``, ``assembly_id`` + ``participant_id`` → 302/303."""
+        """FS: valid access — manager, assembly ``open``, ``assembly_id`` + ``participant_id`` → 302/303."""
         self.assembly.action_announce()
         self.assembly.action_open_registration()
         self.authenticate(self.user_manager.login, "assembly_manager_http")
@@ -139,7 +139,7 @@ class TestHttpAttendance(AssemblyHttpCase):
         self.assertEqual(res.status_code, 404)
 
     def test_att_05_participant_not_attendee_returns_404(self):
-        """FS: asistente inexistente — ``participant_id`` sin fila en la asamblea → 404."""
+        """FS: no attendee row — ``participant_id`` not in this assembly → 404."""
         self.assembly.action_announce()
         self.assembly.action_open_registration()
         other_partner = self.env["res.partner"].create(  # noqa: F841
@@ -154,7 +154,7 @@ class TestHttpAttendance(AssemblyHttpCase):
         self.assertEqual(res.status_code, 404)
 
     def test_att_06_non_manager_forbidden(self):
-        """FS: no manager — usuario sin ``assembly_group_manager`` → 403 (sin redirect)."""
+        """FS: non-manager — user without ``assembly_group_manager`` → 403 (no redirect)."""
         self.assembly.action_announce()
         self.assembly.action_open_registration()
         self.authenticate(self.user_assembly_user.login, "assembly_user_http")
@@ -185,7 +185,7 @@ class TestHttpAttendance(AssemblyHttpCase):
         self.assertIn(res.status_code, (302, 303, 403, 404, 500))
 
     def test_att_08_assembly_draft_returns_403(self):
-        """FS: estado inválido — asamblea en borrador (no ``open`` / ``in_session``) → 403."""
+        """FS: invalid state — assembly in draft (not ``open`` / ``in_session``) → 403."""
         self.authenticate(self.user_manager.login, "assembly_manager_http")
         url = "/assembly/attendance?assembly_id=%s&participant_id=%s" % (
             self.assembly.id,

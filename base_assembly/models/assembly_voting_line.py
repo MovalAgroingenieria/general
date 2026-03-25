@@ -11,6 +11,7 @@ _VOTES_APPLIED_FLOAT_DIGITS = 6
 class AssemblyVotingLine(models.Model):
     _name = "assembly.voting.line"
     _description = "Voting line (cast vote)"
+    _order = "partner_id, attendee_id, id"
 
     voting_id = fields.Many2one(
         "assembly.voting",
@@ -18,6 +19,13 @@ class AssemblyVotingLine(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
+    )
+    assembly_id = fields.Many2one(
+        "assembly.assembly",
+        string="Assembly",
+        related="voting_id.assembly_id",
+        store=True,
+        readonly=True,
     )
     attendee_id = fields.Many2one(
         "assembly.attendee",
@@ -34,12 +42,14 @@ class AssemblyVotingLine(models.Model):
     )
     vote_option = fields.Selection(
         [
+            ("unset", "Not recorded"),
             ("yes", "Yes"),
             ("no", "No"),
             ("abstention", "Abstention"),
             ("blank", "Blank"),
         ],
         string="Vote",
+        default="unset",
         required=True,
     )
     votes_applied = fields.Float(
@@ -80,6 +90,11 @@ class AssemblyVotingLine(models.Model):
     def _apply_audit_defaults_to_voting_line_create_vals(self, vals_list):
         now = fields.Datetime.now()
         for vals in vals_list:
+            opt = vals.get("vote_option", "unset")
+            if opt == "unset":
+                vals.setdefault("vote_cast_at", False)
+                vals.setdefault("vote_cast_by_user_id", False)
+                continue
             if "vote_cast_at" not in vals:
                 vals["vote_cast_at"] = now
             if (
@@ -139,7 +154,20 @@ class AssemblyVotingLine(models.Model):
                             "changed."
                         )
                     )
-        return super().write(vals)
+        res = super().write(vals)
+        to_stamp = self.filtered(
+            lambda line: line.vote_option
+            and line.vote_option != "unset"
+            and not line.vote_cast_at
+        )
+        if to_stamp:
+            to_stamp.sudo().write(
+                {
+                    "vote_cast_at": fields.Datetime.now(),
+                    "vote_cast_by_user_id": self.env.uid,
+                }
+            )
+        return res
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -173,6 +201,16 @@ class AssemblyVotingLine(models.Model):
                 raise ValidationError(
                     self.env._(
                         "The attendee must belong to the same assembly as this voting."
+                    )
+                )
+
+    @api.constrains("attendee_id")
+    def _check_attendee_not_absent_for_vote_line(self):
+        for line in self:
+            if line.attendee_id and line.attendee_id.attendee_state == "absent":
+                raise ValidationError(
+                    self.env._(
+                        "You cannot record a vote for an attendee marked absent."
                     )
                 )
 

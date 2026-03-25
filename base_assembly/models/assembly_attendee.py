@@ -34,6 +34,13 @@ class AssemblyAttendee(models.Model):
     _inherit = ["assembly.mixin.open.assembly"]
     _description = "Assembly attendee"
     _order = "assembly_id, partner_id"
+    _rec_name = "name"
+    _rec_names_search = [
+        "name",
+        "partner_id.name",
+        "partner_id.vat",
+        "participant_partner_id.name",
+    ]
 
     assembly_id = fields.Many2one(
         "assembly.assembly",
@@ -64,6 +71,13 @@ class AssemblyAttendee(models.Model):
             "rights remain with Member."
         ),
     )
+    name = fields.Char(
+        string="Display name",
+        compute="_compute_name",
+        store=True,
+        index=True,
+        readonly=True,
+    )
     attendance_type = fields.Selection(
         [("present", "On-site"), ("remote", "Remote")],
         string="Attendance mode",
@@ -82,6 +96,13 @@ class AssemblyAttendee(models.Model):
         "assembly.attendee.vote",
         "attendee_id",
         string="Votes by type",
+        help=(
+            "Stored snapshot per assembly vote type (own / delegated in-out). "
+            "It is rebuilt when you generate attendees, change the assembly vote types, "
+            "confirm or mark absent, when delegations change, or via “Recompute votes” "
+            "on the assembly. Contact “Votes per contact” (partner.vote) is the source "
+            "for own amounts; until a rebuild runs, lines here can be missing or stale."
+        ),
     )
     attendee_state = fields.Selection(
         [
@@ -132,6 +153,26 @@ class AssemblyAttendee(models.Model):
     def _compute_count_attendee_votes(self):
         for attendee in self:
             attendee.count_attendee_votes = len(attendee.attendee_vote_ids)
+
+    @api.depends(
+        "partner_id",
+        "partner_id.name",
+        "participant_partner_id",
+        "participant_partner_id.name",
+    )
+    def _compute_name(self):
+        for rec in self:
+            if not rec.partner_id:
+                rec.name = ""
+                continue
+            member = rec.partner_id.display_name
+            if (
+                rec.participant_partner_id
+                and rec.participant_partner_id != rec.partner_id
+            ):
+                rec.name = f"{member} / {rec.participant_partner_id.display_name}"
+            else:
+                rec.name = member
 
     @api.depends("assembly_id")
     def _compute_attendance_url(self):
@@ -646,10 +687,12 @@ class AssemblyAttendee(models.Model):
 
         * :meth:`action_confirm`, :meth:`action_mark_absent`
         * ``assembly.delegation`` ``create`` / ``write`` (post-persist hook)
+        * :meth:`~assembly.assembly.action_generate_attendees` (all attendees on that assembly)
+        * ``assembly.assembly.write`` when ``vote_type_ids`` is updated
 
-        Changing ``assembly.vote_type_ids`` or other assembly fields does **not**
-        trigger a recompute; call this method explicitly if stored lines must be
-        refreshed after such edits.
+        Changing other assembly fields does **not** trigger a recompute. If
+        ``partner.vote`` rows change after the last rebuild, use “Recompute votes”
+        on the assembly (or call this method).
 
         **Computation:** each attendee snapshot is rebuilt from ``partner.vote``,
         assembly vote types, and effective delegations — not from previous values

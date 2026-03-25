@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="assembly_assembly_action_report_representation" model="ir.actions.report">
+        <field name="name">Representation (template)</field>
+        <field name="model">assembly.assembly</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_assembly.report_assembly_representation</field>
+        <field name="report_file">base_assembly.report_assembly_representation</field>
+        <field name="print_report_name">'Representation - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_assembly_assembly"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_assembly_representation">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="base_assembly.report_assembly_representation_doc"/>
+        </t>
+    </template>
+
+    <template id="report_assembly_representation_doc">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <div class="text-center mb-4">
+                        <h4><strong>Representation (power of attorney)</strong></h4>
+                        <h5><span t-field="o.name"/></h5>
+                        <div t-if="o.date_first_call">
+                            <span t-field="o.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
+                            <t t-if="o.location"> – <span t-field="o.location"/></t>
+                        </div>
+                    </div>
+                    <p class="text-muted">
+                        Template for legal representation at this assembly. Complete representative
+                        and represented party details as required by your bylaws.
+                    </p>
+                    <table class="table table-sm table-bordered mt-3">
+                        <tr>
+                            <th style="width: 35%;">Represented party</th>
+                            <td><em>Name / ID</em></td>
+                        </tr>
+                        <tr>
+                            <th>Representative (agent)</th>
+                            <td><em>Name / ID</em></td>
+                        </tr>
+                        <tr>
+                            <th>Scope / powers</th>
+                            <td><em>As defined in the power of attorney</em></td>
+                        </tr>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

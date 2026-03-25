@@ -359,7 +359,7 @@ class AssemblyDelegation(models.Model):
         by_assembly = defaultdict(set)
         for assembly_id, partner_id in pairs:
             by_assembly[assembly_id].add(partner_id)
-        Attendee = self.env["assembly.attendee"]
+        Attendee = self.env["assembly.attendee"].sudo()
         found = set()
         for assembly_id, partner_ids in by_assembly.items():
             recs = Attendee._search_attendees_for_assembly(
@@ -376,7 +376,7 @@ class AssemblyDelegation(models.Model):
             return
         if not self.env["assembly.assembly"].browse(assembly_id).exists():
             return
-        Attendee = self.env["assembly.attendee"]
+        Attendee = self.env["assembly.attendee"].sudo()
         if not Attendee._search_for_assembly_partner(
             assembly_id,
             delegate_partner_id,

@@ -1,6 +1,8 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
+import math
+
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.osv import expression
@@ -170,6 +172,14 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         help="When set, quorum rules use the second-call type/value instead of the "
         "first-call ones.",
     )
+    allow_online_voting = fields.Boolean(
+        string="Allow online voting",
+        default=False,
+        help=(
+            "When enabled, eligible portal users may cast votes through the website "
+            "for open votings of this assembly (subject to portal routes)."
+        ),
+    )
     partner_domain = fields.Text(
         string="Partner domain",
         default="[]",
@@ -220,12 +230,18 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         string="Delegations count",
         compute="_compute_counts",
     )
+    voting_sessions_count = fields.Integer(
+        string="Voting sessions",
+        compute="_compute_counts",
+        help="Number of assembly.voting records linked to this assembly's agenda.",
+    )
 
-    @api.depends("agenda_ids", "delegation_ids")
+    @api.depends("agenda_ids", "delegation_ids", "agenda_ids.voting_ids")
     def _compute_counts(self):
         for assembly in self:
             assembly.count_agenda_items = len(assembly.agenda_ids)
             assembly.count_delegations = len(assembly.delegation_ids)
+            assembly.voting_sessions_count = len(assembly.agenda_ids.mapped("voting_ids"))
 
     @api.depends(
         "partner_domain",
@@ -291,40 +307,151 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         return _eval_partner_domain_text(self.partner_domain)
 
     @api.model
+    def _assembly_create_field_default(self, field_name):
+        """Default value for ``field_name`` on a new assembly (for create inherit checks)."""
+        field = self._fields[field_name]
+        default = field.default
+        if default is None:
+            return None
+        if callable(default):
+            return default(self)
+        return default
+
+    @api.model
+    def _create_vals_matches_assembly_field_default(self, field_name, vals):
+        """Whether ``vals[field_name]`` is absent or still the model field default.
+
+        Web create often sends all columns with model defaults; then
+        :meth:`_apply_assembly_type_to_create_vals` must still copy the type (AF §2.2).
+        """
+        if field_name not in vals:
+            return True
+        field = self._fields[field_name]
+        val = vals[field_name]
+        default = self._assembly_create_field_default(field_name)
+        if field.type == "float":
+            if default is None:
+                return val is None or val is False
+            try:
+                return math.isclose(
+                    float(val if val is not False and val is not None else 0.0),
+                    float(default),
+                    rel_tol=0.0,
+                    abs_tol=1e-9,
+                )
+            except (TypeError, ValueError):
+                return False
+        if field.type == "integer":
+            if default is None:
+                return val is None or val is False
+            try:
+                return int(val) == int(default)
+            except (TypeError, ValueError):
+                return False
+        if field.type == "boolean":
+            return bool(val) == bool(default)
+        if field.type in ("char", "text"):
+            def_norm = "" if default in (None, False) else str(default)
+            val_norm = "" if val in (None, False) else str(val)
+            return val_norm == def_norm
+        if field.type == "selection":
+            return val == default
+        if field.type == "many2one":
+            def_id = default.id if default else False
+            vid = val if isinstance(val, int) else (val[0] if val else False)
+            return vid == def_id or (not vid and not def_id)
+        return False
+
+    @api.model
+    def _create_vals_vote_type_ids_unspecified_or_empty(self, vals):
+        if "vote_type_ids" not in vals:
+            return True
+        v = vals["vote_type_ids"]
+        if not v:
+            return True
+        if isinstance(v, (list, tuple)) and len(v) == 1:
+            cmd = v[0]
+            if (
+                isinstance(cmd, (list, tuple))
+                and len(cmd) >= 3
+                and cmd[0] == 6
+                and not cmd[2]
+            ):
+                return True
+        return False
+
+    @api.model
+    def _create_vals_partner_domain_unspecified_or_model_default(self, vals):
+        if "partner_domain" not in vals:
+            return True
+        raw = vals.get("partner_domain")
+        if raw in (None, False):
+            return True
+        val_s = str(raw).strip()
+        def_raw = self._assembly_create_field_default("partner_domain")
+        def_s = "[]" if def_raw in (None, False) else str(def_raw).strip()
+        return val_s == def_s
+
+    @api.model
+    def _create_vals_char_address_unset(self, vals, field_name):
+        if field_name not in vals:
+            return True
+        val = vals.get(field_name)
+        if val in (None, False):
+            return True
+        return not str(val).strip()
+
+    @api.model
+    def _create_vals_many2one_unset(self, vals, field_name):
+        if field_name not in vals:
+            return True
+        return not vals.get(field_name)
+
+    @api.model
     def _apply_assembly_type_to_create_vals(self, vals, atype):
+        """Copy template fields from ``assembly.type`` into create ``vals`` (AF §2.2).
+
+        Fills gaps when keys are missing **or** still equal model defaults / empty,
+        so browser creates (with ``default_*`` sent for every column) inherit quórum,
+        ``vote_type_ids`` and ``partner_domain`` like :meth:`_onchange_assembly_type_id`.
+        """
         if not atype.exists():
             return
-        if "vote_type_ids" not in vals:
+        if self._create_vals_vote_type_ids_unspecified_or_empty(vals):
             vals["vote_type_ids"] = [(6, 0, atype.vote_type_ids.ids)]
-        if "quorum_type" not in vals:
+        if self._create_vals_matches_assembly_field_default("quorum_type", vals):
             vals["quorum_type"] = atype.default_quorum_type
-        if "quorum_value" not in vals:
+        if self._create_vals_matches_assembly_field_default("quorum_value", vals):
             vals["quorum_value"] = atype.default_quorum_value
-        if "quorum_second_call_type" not in vals:
+        if self._create_vals_matches_assembly_field_default(
+            "quorum_second_call_type", vals
+        ):
             vals["quorum_second_call_type"] = atype.default_quorum_second_call_type
-        if "quorum_second_call_value" not in vals:
+        if self._create_vals_matches_assembly_field_default(
+            "quorum_second_call_value", vals
+        ):
             vals["quorum_second_call_value"] = atype.default_quorum_second_call_value
-        if "partner_domain" not in vals:
+        if self._create_vals_partner_domain_unspecified_or_model_default(vals):
             vals["partner_domain"] = atype.partner_domain or "[]"
-        if "street" not in vals:
+        if self._create_vals_char_address_unset(vals, "street"):
             vals["street"] = atype.default_street
-        if "city" not in vals:
+        if self._create_vals_char_address_unset(vals, "city"):
             vals["city"] = atype.default_city
-        if "zip" not in vals:
+        if self._create_vals_char_address_unset(vals, "zip"):
             vals["zip"] = atype.default_zip
-        if "state_id" not in vals:
+        if self._create_vals_many2one_unset(vals, "state_id"):
             vals["state_id"] = (
                 atype.default_state_id.id if atype.default_state_id else False
             )
-        if "country_id" not in vals:
+        if self._create_vals_many2one_unset(vals, "country_id"):
             vals["country_id"] = (
                 atype.default_country_id.id if atype.default_country_id else False
             )
-        if "president_id" not in vals:
+        if self._create_vals_many2one_unset(vals, "president_id"):
             vals["president_id"] = (
                 atype.default_president_id.id if atype.default_president_id else False
             )
-        if "secretary_id" not in vals:
+        if self._create_vals_many2one_unset(vals, "secretary_id"):
             vals["secretary_id"] = (
                 atype.default_secretary_id.id if atype.default_secretary_id else False
             )
@@ -474,7 +601,12 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     def write(self, vals):
         vals = dict(vals)
         self._validate_assembly_state_write_and_apply_transition_side_effects(vals)
-        return super().write(vals)
+        res = super().write(vals)
+        if "vote_type_ids" in vals:
+            attendees = self.mapped("attendee_ids")
+            if attendees:
+                self.env["assembly.attendee"].recompute_votes(attendees)
+        return res
 
     def _get_active_quorum_rule(self):
         self.ensure_one()
@@ -655,6 +787,16 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                     for partner in to_create
                 ]
             )
+        if self.attendee_ids:
+            self.env["assembly.attendee"].recompute_votes(self.attendee_ids)
+
+    def action_recompute_attendee_votes(self):
+        """AF §6: Recompute stored vote lines for all attendees from base_vote and delegations."""
+        self.ensure_one()
+        if not self.attendee_ids:
+            return True
+        self.env["assembly.attendee"].recompute_votes(self.attendee_ids)
+        return True
 
     def get_rendered_publication_text(self):
         return ""
@@ -673,6 +815,16 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     def action_open_agenda_items(self):
         return self._action_open_related("assembly.agenda", self.env._("Agenda items"))
+
+    def action_open_votings(self):
+        """Open all votings for this assembly (list + form)."""
+        self.ensure_one()
+        return self._action_window(
+            "assembly.voting",
+            self.env._("Votings"),
+            "list,form",
+            domain=[("assembly_id", "=", self.id)],
+        )
 
     def action_open_delegations(self):
         return self._action_open_related(

@@ -10,7 +10,6 @@
                 <field name="requires_vote"/>
                 <field
                     name="vote_type_id"
-                    domain="[('id', 'in', assembly_id.vote_type_ids)]"
                     required="requires_vote"
                     options="{'no_create': True, 'no_open': True}"
                 />
@@ -72,7 +71,6 @@
                             <field name="requires_vote"/>
                 <field
                     name="vote_type_id"
-                    domain="[('id', 'in', assembly_id.vote_type_ids)]"
                     required="requires_vote"
                     options="{'no_create': True, 'no_open': True}"
                 />
@@ -97,14 +95,20 @@
                     <button name="action_cancel" string="Cancel" type="object" invisible="assembly_state == 'cancelled'" groups="base_assembly.assembly_group_manager"/>
                     <button name="action_reopen" string="Reopen" type="object" invisible="assembly_state != 'cancelled'" groups="base_assembly.assembly_group_manager"/>
                     <button name="action_generate_attendees" string="Generate attendees" type="object" invisible="assembly_state not in ('draft','announced','open')" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_recompute_attendee_votes" string="Recompute votes" type="object" invisible="not attendee_ids" groups="base_assembly.assembly_group_manager"/>
                 </header>
                 <sheet>
-                    <!-- Smart buttons at top -->
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_agenda_items" type="object" class="oe_stat_button" icon="fa-list-ol">
                             <div class="o_form_field o_stat_info">
                                 <span class="o_stat_value"><field name="count_agenda_items"/></span>
                                 <span class="o_stat_text">Agenda</span>
+                            </div>
+                        </button>
+                        <button name="action_open_votings" type="object" class="oe_stat_button" icon="fa-check-square-o">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_value"><field name="voting_sessions_count"/></span>
+                                <span class="o_stat_text">Votings</span>
                             </div>
                         </button>
                         <button name="action_open_delegations" type="object" class="oe_stat_button" icon="fa-hand-o-right" invisible="assembly_state == 'draft'">
@@ -125,12 +129,15 @@
                         <field name="code" readonly="1"/>
                     </div>
                     <field name="assembly_state" widget="statusbar" statusbar_visible="draft,announced,open,in_session,closed,cancelled"/>
-                    <!-- Smart buttons bar (top, below statusbar) -->
                     <div class="row mt-3 mb-2">
                         <div class="col-12">
                             <button name="action_open_agenda_items" type="object" class="btn btn-link px-2 o_smart_button">
                                 <i class="fa fa-list-ol fa-2x d-block text-primary" title="Agenda"/>
                                 <span class="o_stat_info"><field name="count_agenda_items"/></span> Agenda
+                            </button>
+                            <button name="action_open_votings" type="object" class="btn btn-link px-2 o_smart_button">
+                                <i class="fa fa-check-square-o fa-2x d-block text-primary" title="Votings"/>
+                                <span class="o_stat_info"><field name="voting_sessions_count"/></span> Votings
                             </button>
                             <button name="action_open_delegations" type="object" class="btn btn-link px-2 o_smart_button" invisible="assembly_state == 'draft'">
                                 <i class="fa fa-hand-o-right fa-2x d-block text-primary" title="Delegations"/>
@@ -178,7 +185,6 @@
                                     <field name="requires_vote"/>
                                     <field
                                         name="vote_type_id"
-                                        domain="[('id', 'in', parent.vote_type_ids)]"
                                         required="requires_vote"
                                         options="{'no_create': True, 'no_open': True}"
                                     />
@@ -200,7 +206,7 @@
                                     <field name="total_votes" sum="Total"/>
                                     <field name="attendance_notes"/>
                                     <field name="attendance_signature" column_invisible="1"/>
-                                    <button name="action_confirm" string="Confirm" type="object" icon="fa-check" invisible="attendee_state != 'registered'" groups="base_assembly.assembly_group_manager"/>
+                                    <button name="action_confirm" string="Confirm" type="object" icon="fa-check" invisible="attendee_state == 'confirmed'" groups="base_assembly.assembly_group_manager"/>
                                     <button name="action_mark_absent" string="Absent" type="object" icon="fa-times" invisible="attendee_state == 'absent'" groups="base_assembly.assembly_group_manager"/>
                                 </list>
                             </field>
@@ -217,6 +223,7 @@
                             </field>
                         </page>
                         <page string="Configuration" name="config">
+                            <field name="allow_online_voting"/>
                             <field name="vote_type_ids" widget="many2many_tags"/>
                             <group>
                                 <group>

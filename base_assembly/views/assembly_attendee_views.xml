@@ -20,7 +20,7 @@
         <field name="arch" type="xml">
             <form string="Attendee">
                 <header>
-                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary" invisible="attendee_state != 'registered'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary" invisible="attendee_state == 'confirmed'" groups="base_assembly.assembly_group_manager"/>
                     <button name="action_mark_absent" string="Mark absent" type="object" invisible="attendee_state == 'absent'" groups="base_assembly.assembly_group_manager"/>
                 </header>
                 <sheet>
@@ -56,7 +56,12 @@
                     </group>
                     <group string="Attendance">
                         <field name="attendance_notes" placeholder="Notes for this attendance…" nolabel="1" colspan="2"/>
-                        <field name="attendance_signature" string="Signature" options="{'size': [200, 100]}"/>
+                        <field
+                            name="attendance_signature"
+                            string="Signature"
+                            widget="signature"
+                            options="{'size': [200, 100], 'full_name': 'partner_id'}"
+                        />
                         <field name="attendance_url" readonly="1" placeholder="URL for QR code" colspan="2"/>
                     </group>
                     <group string="Votes by type">
@@ -81,7 +86,7 @@
                 <field name="date_register"/>
                 <field name="total_votes" sum="Total votes"/>
                 <field name="attendance_notes"/>
-                <field name="attendance_signature" string="Signature"/>
+                <field name="attendance_signature" string="Signature" widget="signature" optional="hide"/>
             </list>
         </field>
     </record>

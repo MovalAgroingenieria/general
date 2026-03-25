@@ -59,9 +59,15 @@ class TestVoteRecomputationRegression(AssemblyTestMixin, TransactionCase):
         """Protects: ``action_confirm`` runs vote recompute and persists one row per assembly vote type."""
         assembly, vote_type, att, _other = self._minimal_two_attendees()
         self._give_partner_votes(att.partner_id, vote_type, 6)
-        self.assertFalse(
-            self._stored_vote_line(att, vote_type),
-            "No stored vote line before first recompute",
+        line_before = self._stored_vote_line(att, vote_type)
+        self.assertTrue(
+            line_before,
+            "Generate attendees must persist vote snapshot rows (from recompute at end)",
+        )
+        self.assertEqual(
+            line_before.own_votes,
+            0.0,
+            "Partner votes after generate: refresh only on confirm/recompute/generate",
         )
         att.action_confirm()
         line = self._stored_vote_line(att, vote_type)
@@ -205,19 +211,20 @@ class TestVoteRecomputationRegression(AssemblyTestMixin, TransactionCase):
         assembly, vote_type, delegator, delegate = self._minimal_two_attendees()
         self._give_partner_votes(delegator.partner_id, vote_type, 5)
         self._give_partner_votes(delegate.partner_id, vote_type, 1)
-        self.env["assembly.delegation"].create(
+        del_rec = self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
+                "delegation_state": "draft",
             }
         )
         delegator.action_confirm()
         d_line = self._stored_vote_line(delegator, vote_type)
         self.assertEqual(d_line.delegated_out_votes, 0.0)
         delegate.action_confirm()
+        del_rec.write({"delegation_state": "confirmed"})
         delegator.recompute_attendee_vote_lines()
         delegate.recompute_attendee_vote_lines()
         d_line = self._stored_vote_line(delegator, vote_type)

@@ -24,6 +24,11 @@ class AssemblyVoting(models.Model):
         store=True,
         readonly=True,
     )
+    allow_online_voting = fields.Boolean(
+        related="assembly_id.allow_online_voting",
+        string="Allow online voting",
+        readonly=True,
+    )
     vote_type_id = fields.Many2one(
         "vote.type",
         string="Vote type",
@@ -93,6 +98,56 @@ class AssemblyVoting(models.Model):
             context={"default_voting_id": self.id},
         )
 
+    def _iter_roll_call_attendee_records(self):
+        """Confirmed attendees with positive vote weight for this voting's type."""
+        self.ensure_one()
+        if not self.assembly_id or not self.vote_type_id:
+            return self.env["assembly.attendee"].browse()
+        AttendeeVote = self.env["assembly.attendee.vote"]
+        av_lines = AttendeeVote.search(
+            [
+                ("vote_type_id", "=", self.vote_type_id.id),
+                ("attendee_vote_total", ">", 0.0),
+                ("attendee_id.assembly_id", "=", self.assembly_id.id),
+                ("attendee_id.attendee_state", "=", "confirmed"),
+            ]
+        )
+        return av_lines.mapped("attendee_id").sorted(
+            lambda a: (a.partner_id.id or 0, a.id)
+        )
+
+    def _ensure_roll_call_lines(self):
+        """Create missing ``unset`` lines for eligible attendees (idempotent)."""
+        self.ensure_one()
+        if self.voting_state != "open":
+            return 0
+        Line = self.env["assembly.voting.line"]
+        created = 0
+        for att in self._iter_roll_call_attendee_records():
+            if Line.search(
+                [("voting_id", "=", self.id), ("attendee_id", "=", att.id)], limit=1
+            ):
+                continue
+            Line.create(
+                {
+                    "voting_id": self.id,
+                    "attendee_id": att.id,
+                    "vote_option": "unset",
+                }
+            )
+            created += 1
+        return created
+
+    def action_refresh_roll_call(self):
+        """Load or update the roll-call grid (adds new rows only; keeps recorded votes)."""
+        self.ensure_one()
+        if self.voting_state != "open":
+            raise UserError(
+                self.env._("You can only refresh the roll call while voting is open.")
+            )
+        self._ensure_roll_call_lines()
+        return {"type": "ir.actions.client", "tag": "reload"}
+
     def action_open_results(self):
         return self._action_window(
             "assembly.voting.result",
@@ -158,7 +213,10 @@ class AssemblyVoting(models.Model):
         Attendee = self.env["assembly.attendee"]
         AttendeeVote = self.env["assembly.attendee.vote"]
         for voting in self:
-            total_cast = sum(voting.vote_line_ids.mapped("votes_applied"))
+            lines_counted = voting.vote_line_ids.filtered(
+                lambda line: line.vote_option != "unset"
+            )
+            total_cast = sum(lines_counted.mapped("votes_applied"))
             possible = 0.0
             if voting.agenda_id and voting.vote_type_id:
                 attendees = Attendee._search_attendees_for_assembly(
@@ -179,6 +237,21 @@ class AssemblyVoting(models.Model):
                 (total_cast / possible * 100.0) if possible else 0.0
             )
 
+    def _cancel_other_open_votings_same_agenda(self):
+        """Drop duplicate open sessions for the same agenda (legacy UX / double clicks)."""
+        self.ensure_one()
+        if not self.agenda_id:
+            return
+        others = self.env["assembly.voting"].search(
+            [
+                ("agenda_id", "=", self.agenda_id.id),
+                ("id", "!=", self.id),
+                ("voting_state", "=", "open"),
+            ]
+        )
+        if others:
+            others.write({"voting_state": "cancelled"})
+
     def action_close(self):
         for rec in self:
             if rec.voting_state != "open":
@@ -191,6 +264,7 @@ class AssemblyVoting(models.Model):
             )
             rec._persist_closed_voting_results()  # pylint: disable=protected-access
             rec.agenda_id.write({"agenda_state": "voted"})
+            rec._cancel_other_open_votings_same_agenda()
 
     def action_cancel(self):
         for rec in self:

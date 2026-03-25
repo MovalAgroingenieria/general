@@ -43,7 +43,22 @@ class TestAssemblyAssembly(  # pylint: disable=too-many-public-methods
         self.assertEqual(assembly.quorum_type, "percentage")
         self.assertEqual(assembly.quorum_value, 25.0)
 
-        # --- Estados: anunciar (feliz y borde) ---
+    def test_action_recompute_attendee_votes_recomputes_stored_lines(self):
+        """AF §6: Assembly action rebuilds attendee vote snapshots from base_vote."""
+        assembly, _ = self._create_assembly_with_agenda()
+        assembly.action_generate_attendees()
+        vote_type = assembly.assembly_type_id.vote_type_ids[0]
+        for att in assembly.attendee_ids:
+            self._give_partner_votes(att.partner_id, vote_type, 2.0)
+            att.action_confirm()
+        line = assembly.attendee_ids[0].attendee_vote_ids.filtered(
+            lambda v: v.vote_type_id == vote_type
+        )
+        self.assertTrue(line)
+        line.sudo().write({"own_votes": 0.0})
+        assembly.action_recompute_attendee_votes()
+        line.invalidate_recordset()
+        self.assertEqual(line.own_votes, 2.0)
 
     def test_announce_with_agenda_changes_state_to_announced(self):
         assembly, _agenda = (
@@ -240,7 +255,7 @@ class TestAssemblyAssembly(  # pylint: disable=too-many-public-methods
         self.assertEqual(assembly.total_present_attendees, 0)
         self.assertFalse(assembly.quorum_reached)
 
-        # --- Cerrar asamblea (feliz y borde) ---
+        # --- Close assembly (happy path and edge) ---
 
     def test_close_assembly_requires_no_open_votings_and_all_agenda_done(self):
         assembly, agenda = (
@@ -297,7 +312,7 @@ class TestAssemblyAssembly(  # pylint: disable=too-many-public-methods
         voting.invalidate_recordset()
         self.assertEqual(voting.voting_state, "cancelled")
 
-        # --- Reabrir (feliz y borde) ---
+        # --- Reopen (happy path and edge) ---
 
     def test_reopen_removes_attendees_votings_and_resets_agenda(self):
         assembly, agenda = (

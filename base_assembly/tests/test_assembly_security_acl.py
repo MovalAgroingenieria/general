@@ -6,8 +6,10 @@
 
 Validates that:
 - Users without assembly group cannot access assembly models.
-- assembly_group_user: read-only on attendee and delegation (own rows via rules);
-  may create own voting.line; cannot write assembly/agenda/voting/result or manager actions.
+- assembly_group_user: read + write own ``assembly.attendee`` (AF §8); create own
+  ``assembly.delegation`` (draft); record rules scope rows; may create own
+  ``assembly.voting.line``; cannot write assembly/agenda/voting/result or run
+  manager-only actions.
 - assembly_group_manager has full access.
 """
 
@@ -64,7 +66,7 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
                 ) from e
             raise
 
-    # --- SEC-ACL-01: Sin grupo assembly no puede leer ---
+    # --- SEC-ACL-01: user without assembly group cannot read ---
 
     def test_user_without_assembly_group_cannot_read_assembly(self):
         assembly, _ = (
@@ -90,7 +92,7 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         with self.assertRaises(AccessError):
             env["assembly.attendee"].browse(attendee.id).read(["partner_id"])
 
-    # --- SEC-ACL-02 / SEC-ACT-01: User no puede escribir assembly ni cerrar ---
+    # --- SEC-ACL-02 / SEC-ACT-01: assembly user cannot write assembly or close ---
 
     def test_assembly_user_cannot_write_assembly(self):
         assembly, _ = (
@@ -148,7 +150,7 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         with self.assertRaises(AccessError):
             env["assembly.assembly"].browse(assembly.id).action_generate_attendees()
 
-    # --- SEC-ACL-03: User no puede crear/editar tipo, agenda, voting, result ---
+    # --- SEC-ACL-03: assembly user cannot create/edit type, agenda, voting, result ---
 
     def test_assembly_user_cannot_create_assembly_type(self):
         vote_type = self._create_vote_type(self.env)  # pylint: disable=protected-access
@@ -228,10 +230,10 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         with self.assertRaises(AccessError):
             env["assembly.voting"].browse(voting.id).action_close()
 
-    # --- SEC-ACL-04: User no puede unlink attendee, delegation, voting.line ---
+    # --- SEC-ACL-04: assembly user cannot unlink attendee, delegation, voting.line ---
 
     def test_assembly_user_cannot_create_attendee(self):
-        """Convocados are created by managers (generate attendees), not assembly users."""
+        """Attendees are created by managers (generate attendees), not assembly users."""
         assembly, _ = (
             self._create_assembly_with_agenda()
         )  # pylint: disable=protected-access
@@ -289,7 +291,7 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         with self.assertRaises(AccessError):
             env["assembly.voting.line"].browse(line.id).unlink()
 
-    # --- SEC-ACL-05: Manager puede todo (smoke) ---
+    # --- SEC-ACL-05: manager full access (smoke) ---
 
     def test_assembly_manager_can_read_and_write_assembly(self):
         assembly, _ = (
@@ -314,8 +316,8 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         env["assembly.assembly"].browse(assembly.id).action_close()
         self.assertEqual(assembly.assembly_state, "closed")
 
-    # --- SEC-RR-01..04: Record rules: User solo ve propios attendee, delegation, rep
-    # resentation, voting.line ---
+    # --- SEC-RR-01..04: record rules: user sees only own attendee, delegation,
+    # representation, voting.line ---
 
     def test_assembly_user_sees_only_own_attendees(self):
         partners = self._create_partners(
@@ -461,7 +463,7 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         self.assertEqual(len(lines), 1)
         self.assertEqual(lines.attendee_id.partner_id, att1.partner_id)
 
-    # --- SEC-RR-05: Crear voting.line con attendee ajeno: no visible para User
+    # --- SEC-RR-05: create voting.line for another attendee: hidden from user
     # (record rule) ---
 
     def test_assembly_user_create_voting_line_for_other_attendee_not_visible(self):
@@ -498,7 +500,7 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         with self.assertRaises(AccessError):
             env["assembly.voting.line"].create(line_vals)
 
-    # --- SEC-ACT-05: User no puede confirmar attendee ajeno (solo ve el propio) ---
+    # --- SEC-ACT-05: user cannot confirm another partner's attendee (sees only own) ---
 
     def test_assembly_user_cannot_confirm_other_attendee(self):
         partners = self._create_partners(
@@ -520,7 +522,42 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         with self.assertRaises(AccessError):
             env["assembly.attendee"].browse(attendee_other.id).action_confirm()
 
-    # --- SEC-DATA-01/02: Read/write registro ajeno ---
+    def test_assembly_user_can_confirm_own_attendance(self):
+        """AF §8: assembly_group_user may write own attendee; confirm uses controlled write."""
+        partner = self.user_assembly_user.partner_id
+        assembly, _ = self._create_assembly_with_agenda(
+            partner_domain="[('id', '=', %s)]" % partner.id
+        )
+        assembly.action_generate_attendees()
+        att = assembly.attendee_ids.filtered(lambda a: a.partner_id == partner)
+        self.assertTrue(att)
+        vote_type = assembly.assembly_type_id.vote_type_ids[0]
+        self._give_partner_votes(partner, vote_type, 1.0)
+        env = self.env(user=self.user_assembly_user)
+        env["assembly.attendee"].browse(att.id).action_confirm()
+        self.assertEqual(att.sudo().attendee_state, "confirmed")
+
+    def test_assembly_user_can_create_own_draft_delegation(self):
+        """AF §8: assembly_group_user may create own delegation (draft)."""
+        partners = self._create_partners(self.env, 2)
+        self.user_assembly_user.partner_id = partners[0]
+        assembly, _ = self._create_assembly_with_agenda(
+            partner_domain="[('id', 'in', %s)]" % partners.ids
+        )
+        assembly.action_generate_attendees()
+        env = self.env(user=self.user_assembly_user)
+        rec = env["assembly.delegation"].create(
+            {
+                "assembly_id": assembly.id,
+                "partner_id": partners[0].id,
+                "delegate_partner_id": partners[1].id,
+                "delegation_state": "draft",
+            }
+        )
+        self.assertTrue(rec.id)
+        self.assertEqual(rec.delegation_state, "draft")
+
+    # --- SEC-DATA-01/02: read/write other partner's record ---
 
     def test_assembly_user_read_attendee_by_id_other_partner_returns_empty(self):
         partners = self._create_partners(

@@ -1,7 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-"""GET ``/assembly/attendance`` — managers only; asamblea ``open`` / ``in_session``; localización por ids."""
+"""GET ``/assembly/attendance`` — managers only; assembly ``open`` / ``in_session``; locate by ids."""
 
 from odoo import http
 from odoo.http import request

@@ -1,6 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
+from odoo import fields
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import TransactionCase
 
@@ -242,6 +243,64 @@ class TestAssemblyVoting(AssemblyTestMixin, TransactionCase):
             voting.action_close()
         self.assertIn("Only open votings", str(ctx.exception))
 
+    def test_action_close_cancels_sibling_open_votings_same_agenda(self):
+        """Closing one voting cancels other open sessions on the same agenda item."""
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        assembly.action_announce()
+        assembly.action_open_registration()
+        assembly.action_start_session()
+        agenda.action_start_voting()
+        v_main = self.env["assembly.voting"].search(
+            [("agenda_id", "=", agenda.id)], limit=1
+        )
+        v_dup = self.env["assembly.voting"].create(
+            {
+                "agenda_id": agenda.id,
+                "vote_type_id": agenda.vote_type_id.id,
+                "name": agenda.name,
+                "voting_state": "open",
+                "date_open": fields.Datetime.now(),
+            }
+        )
+        self.assertEqual(v_dup.voting_state, "open")
+        v_main.action_close()
+        self.assertEqual(v_main.voting_state, "closed")
+        self.assertEqual(v_dup.voting_state, "cancelled")
+        self.assertEqual(agenda.agenda_state, "voted")
+
+    def test_refresh_roll_call_creates_unset_lines_and_zero_cast_total(self):
+        """Roll call adds one row per eligible attendee; unset does not count as cast."""
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        assembly.action_generate_attendees()
+        vote_type = assembly.assembly_type_id.vote_type_ids[0]
+        att1 = assembly.attendee_ids[0]
+        att2 = assembly.attendee_ids[1]
+        self._give_partner_votes(att1.partner_id, vote_type, 3)
+        self._give_partner_votes(att2.partner_id, vote_type, 2)
+        att1.action_confirm()
+        att2.action_confirm()
+        assembly.action_announce()
+        assembly.action_open_registration()
+        assembly.action_start_session()
+        agenda.action_start_voting()
+        voting = self.env["assembly.voting"].search(
+            [("agenda_id", "=", agenda.id)], limit=1
+        )
+        self.assertFalse(voting.vote_line_ids)
+        added = voting._ensure_roll_call_lines()
+        self.assertEqual(added, 2)
+        self.assertEqual(len(voting.vote_line_ids), 2)
+        self.assertTrue(
+            all(line.vote_option == "unset" for line in voting.vote_line_ids)
+        )
+        voting.invalidate_recordset()
+        self.assertEqual(voting.total_votes_cast, 0.0)
+        self.assertEqual(voting._ensure_roll_call_lines(), 0)
+
     def test_new_voting_line_has_channel_and_cast_at_defaults(self):
         assembly, agenda = (
             self._create_assembly_with_agenda()
@@ -270,3 +329,21 @@ class TestAssemblyVoting(AssemblyTestMixin, TransactionCase):
         )
         self.assertEqual(line.vote_channel, "in_person")
         self.assertTrue(line.vote_cast_at)
+
+    def test_cancel_open_voting_leaves_agenda_in_progress(self):
+        """AF §5 / §6: cancelling an open voting keeps the agenda item in_progress."""
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        assembly.action_announce()
+        assembly.action_open_registration()
+        assembly.action_start_session()
+        agenda.action_start_voting()
+        voting = self.env["assembly.voting"].search(
+            [("agenda_id", "=", agenda.id)], limit=1
+        )
+        self.assertEqual(voting.voting_state, "open")
+        self.assertEqual(agenda.agenda_state, "in_progress")
+        voting.action_cancel()
+        self.assertEqual(voting.voting_state, "cancelled")
+        self.assertEqual(agenda.agenda_state, "in_progress")

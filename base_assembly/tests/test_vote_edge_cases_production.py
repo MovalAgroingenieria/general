@@ -12,6 +12,7 @@ Tests complex edge cases that could lead to vote inconsistencies:
 - Attendee state transitions during delegation changes
 """
 
+from odoo.exceptions import ValidationError
 from odoo.tests import TransactionCase
 
 from .common import AssemblyTestMixin
@@ -214,7 +215,7 @@ class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
         self.assertFalse(av_del_t2, "vote_type2 records should be removed")
 
     def test_vote_consistency_delegator_and_delegate_both_delegating(self):
-        """Test vote consistency when delegator and delegate both have delegations."""
+        """Same-type inbound delegation blocks a further outbound on that type (no chain)."""
         assembly, _ = (
             self._create_assembly_with_agenda()
         )  # pylint: disable=protected-access
@@ -235,20 +236,14 @@ class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
                 lambda a: a.partner_id == partners[0]
             )[0]
 
-        # Give votes
         self._give_partner_votes(delegator.partner_id, vote_type, 10)
-        # pylint: disable=protected-access
         self._give_partner_votes(delegate.partner_id, vote_type, 8)
-        # pylint: disable=protected-access
         self._give_partner_votes(final_delegate.partner_id, vote_type, 5)
-        # pylint: disable=protected-access
-        # Confirm all
         delegator.action_confirm()
         delegate.action_confirm()
         final_delegate.action_confirm()
 
-        # Delegator delegates to delegate
-        delegation1 = self.env["assembly.delegation"].create(  # noqa: F841
+        self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.partner_id.id,
@@ -257,56 +252,28 @@ class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
                 "delegation_state": "confirmed",
             }
         )
-
-        # Delegate delegates to final_delegate
-        delegation2 = self.env["assembly.delegation"].create(  # noqa: F841
-            {
-                "assembly_id": assembly.id,
-                "partner_id": delegate.partner_id.id,
-                "delegate_partner_id": final_delegate.partner_id.id,
-                "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
-            }
-        )
-
-        # Recompute all
         assembly.attendee_ids.recompute_attendee_vote_lines()
 
-        # Verify: delegations are NOT chainable
-        # Delegator loses votes to delegate
         av_del = delegator.attendee_vote_ids.filtered(
             lambda v: v.vote_type_id == vote_type
         )
         self.assertEqual(av_del.delegated_out_votes, 10.0)
-
-        # Delegate receives delegator's votes, but also delegates out
         av_dec = delegate.attendee_vote_ids.filtered(
             lambda v: v.vote_type_id == vote_type
         )
-        # Delegate receives 10 from delegator
         self.assertEqual(av_dec.delegated_in_votes, 10.0)
-        # Delegate delegates out their own 8 votes (NOT the received 10)
-        self.assertEqual(av_dec.delegated_out_votes, 8.0)
-        # Total = own (8) + in (10) - out (8) = 10
-        self.assertEqual(av_dec.attendee_vote_total, 10.0)
+        self.assertEqual(av_dec.delegated_out_votes, 0.0)
 
-        # Final delegate receives delegate's own votes (8), NOT delegator's (10)
-        av_final = final_delegate.attendee_vote_ids.filtered(
-            lambda v: v.vote_type_id == vote_type
-        )
-        self.assertEqual(av_final.delegated_in_votes, 8.0)
-        self.assertEqual(av_final.attendee_vote_total, 13.0)  # own (5) + in (8)
-
-        # Verify vote conservation
-        total_own = (
-            av_del.own_votes + av_dec.own_votes + av_final.own_votes
-        )  # noqa: F841
-        total_total = (  # noqa: F841
-            av_del.attendee_vote_total
-            + av_dec.attendee_vote_total
-            + av_final.attendee_vote_total
-        )
-        self.assertEqual(total_own, total_total)
+        with self.assertRaises(ValidationError):
+            self.env["assembly.delegation"].create(
+                {
+                    "assembly_id": assembly.id,
+                    "partner_id": delegate.partner_id.id,
+                    "delegate_partner_id": final_delegate.partner_id.id,
+                    "vote_type_ids": [(6, 0, vote_type.ids)],
+                    "delegation_state": "confirmed",
+                }
+            )
 
     def test_vote_consistency_empty_vote_types_in_assembly(self):
         """Test vote consistency when assembly has no vote types."""

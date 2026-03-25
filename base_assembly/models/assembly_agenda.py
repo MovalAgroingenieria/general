@@ -18,6 +18,11 @@ class AssemblyAgenda(models.Model):
         ondelete="cascade",
         index=True,
     )
+    assembly_allowed_vote_type_ids = fields.Many2many(
+        "vote.type",
+        related="assembly_id.vote_type_ids",
+        string="Assembly vote types",
+    )
     sequence = fields.Integer(default=10)
     name = fields.Char(string="Title", required=True)
     description = fields.Html()
@@ -26,7 +31,9 @@ class AssemblyAgenda(models.Model):
         "vote.type",
         string="Vote type",
         ondelete="restrict",
-        domain="[('active', '=', True)]",
+        domain=(
+            "[('active', '=', True), ('id', 'in', assembly_allowed_vote_type_ids)]"
+        ),
         help=(
             "Required when 'Requires vote' is enabled. "
             "Must be selected from the assembly's vote types. "
@@ -167,6 +174,14 @@ class AssemblyAgenda(models.Model):
             raise ValidationError(self.env._("This item is not open for voting."))
         if self.requires_vote and not self.vote_type_id:
             raise ValidationError(self.env._("Set a vote type for this agenda item."))
+        open_votings = self.voting_ids.filtered(lambda v: v.voting_state == "open")
+        if open_votings:
+            raise ValidationError(
+                self.env._(
+                    "This agenda item already has an open voting. "
+                    "Close or cancel it before starting a new one."
+                )
+            )
         self.env["assembly.voting"].create(
             {
                 "agenda_id": self.id,

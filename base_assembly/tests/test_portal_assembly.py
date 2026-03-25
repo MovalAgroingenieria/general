@@ -608,8 +608,8 @@ class PortalVotingTests(AssemblyHttpCase):
         self.assertIn(res.status_code, (400, 422))
 
     def test_V8_cast_attendee_id_in_body_ignored(self):
-        """V8: POST cast con attendee_id ajeno en body →
-        se ignora, voto para usuario."""
+        """V8: POST cast with another partner's attendee_id in body is ignored;
+        vote applies to the logged-in user."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         other = self.env["res.partner"].create({"name": "Other", "is_company": False})

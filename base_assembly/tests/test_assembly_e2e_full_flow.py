@@ -100,11 +100,12 @@ class TestAssemblyE2EFullFlow(AssemblyTestMixin, TransactionCase):
         )  # noqa: F841
         ana, bruno, carla, david, _ = attendees
 
-        # --- 7. Confirmation: Ana, Bruno, Carla ---
+        # --- 7. Confirmation: Ana, Bruno, Carla, David (delegator must be confirmed) ---
         ana.action_confirm()
         bruno.action_confirm()
         carla.action_confirm()
-        self.assertEqual(assembly._count_present_attendees(), 3)
+        david.action_confirm()
+        self.assertEqual(assembly._count_present_attendees(), 4)
         assembly.invalidate_recordset()
         self.assertTrue(assembly.quorum_reached)
 

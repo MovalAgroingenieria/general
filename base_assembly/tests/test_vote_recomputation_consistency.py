@@ -685,8 +685,8 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
         self.assertEqual(len(line_g), 1)
         self.assertEqual(line_g.delegated_in_votes, 0.0)
 
-    def test_assembly_vote_type_write_does_not_auto_recompute_vote_lines(self):
-        """Cambiar ``vote_type_ids`` en la asamblea no invoca ``recompute_votes`` solo."""
+    def test_assembly_vote_type_write_auto_recomputes_attendee_vote_lines(self):
+        """``assembly.write`` con ``vote_type_ids`` dispara ``recompute_votes`` en asistentes."""
         Attendee = self.env["assembly.attendee"]
         Av = self.env["assembly.attendee.vote"].sudo()
         assembly, _ = self._create_assembly_with_agenda()
@@ -704,11 +704,9 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
         assembly.write({"vote_type_ids": [(6, 0, [vt1.id])]})
         self.assertEqual(
             Av.search_count([("attendee_id", "=", att.id)]),
-            2,
-            "Sin recompute_votes, filas obsoletas permanecen hasta recomputo explícito",
+            1,
+            "Quitar un tipo en la asamblea debe limpiar filas obsoletas al guardar",
         )
-        Attendee.recompute_votes(assembly.attendee_ids)
-        self.assertEqual(Av.search_count([("attendee_id", "=", att.id)]), 1)
         self.assertFalse(
             Av.search(
                 [

@@ -63,6 +63,18 @@ class TestAssemblyAgenda(AssemblyTestMixin, TransactionCase):
             agenda.action_start_voting()
         self.assertIn("not open for voting", str(ctx.exception).lower())
 
+    def test_action_start_voting_while_already_open_raises(self):
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        assembly.action_announce()
+        assembly.action_open_registration()
+        assembly.action_start_session()
+        agenda.action_start_voting()
+        with self.assertRaises(ValidationError) as ctx:
+            agenda.action_start_voting()
+        self.assertIn("open voting", str(ctx.exception).lower())
+
     def test_action_skip_sets_agenda_state_skipped(self):
         _, agenda = (
             self._create_assembly_with_agenda()

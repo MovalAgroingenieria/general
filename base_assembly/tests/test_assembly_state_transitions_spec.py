@@ -1,7 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-"""Especificación de ``assembly_state``: transiciones válidas, acciones y prerequisitos."""
+"""``assembly_state`` spec: valid transitions, actions, and prerequisites."""
 
 from odoo.addons.base_assembly.models.assembly_assembly import (
     _ASSEMBLY_ALLOWED_STATE_TRANSITIONS,
@@ -14,10 +14,10 @@ from .common import AssemblyTestMixin
 
 
 class TestAssemblyStateTransitionsSpec(AssemblyTestMixin, TransactionCase):
-    """Cobertura funcional del grafo de estados y validaciones por acción."""
+    """Functional coverage of the state graph and per-action checks."""
 
     def test_all_structural_edges_in_allow_list(self):
-        """(1) El conjunto documentado coincide con la especificación."""
+        """(1) Documented edge set matches the specification."""
         sequential = {
             ("draft", "announced"),
             ("announced", "open"),
@@ -40,7 +40,7 @@ class TestAssemblyStateTransitionsSpec(AssemblyTestMixin, TransactionCase):
         self.assertIn(("cancelled", "draft"), _ASSEMBLY_ALLOWED_STATE_TRANSITIONS)
 
     def test_valid_linear_path_via_actions(self):
-        """(1) Secuencia feliz draft → … → closed por acciones."""
+        """(1) Happy path draft → … → closed via actions."""
         assembly, agenda = self._create_assembly_with_agenda()
         self.assertEqual(assembly.assembly_state, "draft")
         assembly.action_announce()
@@ -54,13 +54,13 @@ class TestAssemblyStateTransitionsSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(assembly.assembly_state, "closed")
 
     def test_invalid_skip_step_blocked(self):
-        """(2) Saltos no permitidos."""
+        """(2) Disallowed skip transitions."""
         assembly, _ = self._create_assembly_with_agenda()
         with self.assertRaises(UserError):
             assembly.write({"assembly_state": "open"})
 
     def test_cancel_from_closed_then_reopen_draft(self):
-        """(3)(4) Cerrada → cancelada → borrador."""
+        """(3)(4) Closed → cancelled → draft."""
         assembly, agenda = self._create_assembly_with_agenda()
         assembly.action_announce()
         assembly.action_open_registration()
@@ -73,7 +73,7 @@ class TestAssemblyStateTransitionsSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(assembly.assembly_state, "draft")
 
     def test_action_announce_requires_agenda(self):
-        """(5) Prerequisito: anunciar sin puntos de agenda."""
+        """(5) Prerequisite: announce fails without agenda items."""
         env = self.env
         vote_type = self._create_vote_type(env, name="ST agenda req")
         atype = self._create_assembly_type(env, name="ST type", vote_type=vote_type)
@@ -96,7 +96,7 @@ class TestAssemblyStateTransitionsSpec(AssemblyTestMixin, TransactionCase):
         self.assertIn("agenda", str(ex.exception).lower())
 
     def test_action_cancel_reachable_from_draft_announced_and_open(self):
-        """cancelled alcanzable desde draft, announced y open vía ``action_cancel``."""
+        """``cancelled`` reachable from draft, announced, and open via ``action_cancel``."""
         for label, setup in (
             ("draft", lambda a, ag: None),
             ("announced", lambda a, ag: a.action_announce()),
@@ -116,7 +116,7 @@ class TestAssemblyStateTransitionsSpec(AssemblyTestMixin, TransactionCase):
                 )
 
     def test_action_reopen_clears_attendees_votings_resets_agendas(self):
-        """cancelled → draft: sin asistentes ni votaciones; puntos de agenda en pending."""
+        """cancelled → draft: no attendees or votings; agenda items reset to pending."""
         assembly, agenda = self._create_assembly_with_agenda()
         assembly.action_announce()
         assembly.action_open_registration()

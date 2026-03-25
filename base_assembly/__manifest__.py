@@ -4,7 +4,7 @@
 {
     "name": "Base Assembly",
     "summary": "Core models for assemblies: agenda, attendees, delegations, voting",
-    "version": "18.0.1.1.0",
+    "version": "18.0.1.9.1",
     "category": "Administration",
     "author": "Moval Agroingeniería",
     "website": "https://www.moval.es",
@@ -12,6 +12,7 @@
     "depends": ["base", "base_vote", "web"],
     "data": [
         "security/assembly_security.xml",
+        "security/assembly_group_system.xml",
         "security/ir.model.access.csv",
         "data/assembly_sequence_data.xml",
         "views/assembly_type_views.xml",
@@ -23,6 +24,7 @@
         "views/menu_views.xml",
         "report/assembly_attendance_reports.xml",
         "report/assembly_delegation_report.xml",
+        "report/assembly_representation_report.xml",
         "report/assembly_voting_ballot_reports.xml",
     ],
 }

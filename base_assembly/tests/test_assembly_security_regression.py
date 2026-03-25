@@ -72,8 +72,8 @@ class TestAssemblySecurityRegression(AssemblyTestMixin, TransactionCase):
         with self.assertRaises(AccessError):
             self._env_user()["assembly.assembly"].browse(assembly.id).unlink()
 
-    def test_restricted_cannot_write_own_attendee(self):
-        """ACL: read-only on own attendee row (not only “other partner” record rules)."""
+    def test_restricted_can_write_notes_on_own_attendee(self):
+        """ACL: assembly user may write safe fields on own attendee (AF §8)."""
         partner = self.user_assembly_user.partner_id
         assembly, _ = (
             self._create_assembly_with_agenda(  # pylint: disable=protected-access
@@ -83,13 +83,13 @@ class TestAssemblySecurityRegression(AssemblyTestMixin, TransactionCase):
         assembly.action_generate_attendees()
         attendee = assembly.attendee_ids.filtered(lambda a: a.partner_id == partner)
         self.assertTrue(attendee)
-        with self.assertRaises(AccessError):
-            self._env_user()["assembly.attendee"].browse(attendee.id).write(
-                {"attendance_notes": "should fail"}
-            )
+        self._env_user()["assembly.attendee"].browse(attendee.id).write(
+            {"attendance_notes": "allowed"}
+        )
+        self.assertEqual(attendee.sudo().attendance_notes, "allowed")
 
-    def test_restricted_cannot_create_delegation(self):
-        """ACL: no ``perm_create`` on ``assembly.delegation`` for Assembly User."""
+    def test_restricted_cannot_create_delegation_as_other_delegator(self):
+        """ACL: cannot create a delegation where delegator is another partner."""
         partners = self._create_partners(
             self.env, 2
         )  # pylint: disable=protected-access
@@ -105,9 +105,10 @@ class TestAssemblySecurityRegression(AssemblyTestMixin, TransactionCase):
             self._env_user()["assembly.delegation"].create(
                 {
                     "assembly_id": assembly.id,
-                    "partner_id": partners[0].id,
-                    "delegate_partner_id": partners[1].id,
+                    "partner_id": partners[1].id,
+                    "delegate_partner_id": partners[0].id,
                     "vote_type_ids": [(6, 0, vt.ids)],
+                    "delegation_state": "draft",
                 }
             )
 

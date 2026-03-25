@@ -2,14 +2,14 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 # pylint: disable=invalid-name,import-outside-toplevel,consider-using-from-import,protected-access
 
-"""Base ``HttpCase`` para pruebas HTTP del módulo.
+"""Base ``HttpCase`` for HTTP tests in this module.
 
-Incluye asamblea de ejemplo, asistentes y usuarios (manager / assembly user). El
-contrato **obligatorio** de ``GET /assembly/attendance`` se valida con códigos
-concretos (sin usar :meth:`_skip_if_route_404`).
+Provides a sample assembly, attendees, and users (manager / assembly user). The
+mandatory contract for ``GET /assembly/attendance`` is asserted with concrete
+status codes (without :meth:`_skip_if_route_404`).
 
-:meth:`_skip_if_route_404` queda para rutas opcionales o dependientes del entorno
-(portal, display público, voto HTTP), no para el deep-link de managers.
+:meth:`_skip_if_route_404` is for optional or environment-dependent routes
+(portal, public display, HTTP voting), not for the manager deep link.
 """
 
 import unittest
@@ -20,7 +20,7 @@ from .common import AssemblyTestMixin
 
 
 class AssemblyHttpCase(AssemblyTestMixin, HttpCase):
-    """Setup común: servidor HTTP, logins, ``assembly`` + ``attendee``."""
+    """Shared setup: HTTP server, logins, ``assembly`` + ``attendee``."""
 
     @classmethod
     def setUpClass(cls):
@@ -85,6 +85,6 @@ class AssemblyHttpCase(AssemblyTestMixin, HttpCase):
             cls.user_portal = None
 
     def _skip_if_route_404(self, response, route_description):
-        """Si la respuesta es 404, salta el test (rutas no siempre desplegadas)."""
+        """Skip the test if the response is 404 (routes not always deployed)."""
         if response.status_code == 404:
             self.skipTest("Route not implemented: %s" % route_description)
