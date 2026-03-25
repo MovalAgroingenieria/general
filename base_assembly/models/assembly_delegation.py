@@ -943,6 +943,11 @@ class AssemblyDelegation(models.Model):
         self.check_access("create")
         for vals in vals_list:
             self._delegation_validate_create_vals(vals)
+        asm_ids = {v.get("assembly_id") for v in vals_list if v.get("assembly_id")}
+        if asm_ids:
+            self.env["assembly.assembly"].browse(
+                list(asm_ids)
+            ).exists()._assembly_ensure_not_closed_for_related_changes()
         delegations = super().create(vals_list)
         delegations._recompute_votes_after_delegation_persist({}, post_create=True)
         return delegations
@@ -950,6 +955,7 @@ class AssemblyDelegation(models.Model):
     def write(self, vals):
         vals = dict(vals)
         if self:
+            self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
             self.check_access("write")
             self.check_field_access_rights("write", list(vals))
         prev_state_by_id = (
@@ -962,3 +968,7 @@ class AssemblyDelegation(models.Model):
         res = super().write(vals)
         self._recompute_votes_after_delegation_persist(vals, prev_state_by_id)
         return res
+
+    def unlink(self):
+        self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
+        return super().unlink()

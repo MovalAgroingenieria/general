@@ -4,6 +4,8 @@
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
+from .assembly_assembly import CTX_ASSEMBLY_INTERNAL_TRANSITION
+
 
 class AssemblyVoting(models.Model):
     _name = "assembly.voting"
@@ -121,14 +123,14 @@ class AssemblyVoting(models.Model):
         self.ensure_one()
         if self.voting_state != "open":
             return 0
-        Line = self.env["assembly.voting.line"]
+        vote_line_model = self.env["assembly.voting.line"]
         created = 0
         for att in self._iter_roll_call_attendee_records():
-            if Line.search(
+            if vote_line_model.search(
                 [("voting_id", "=", self.id), ("attendee_id", "=", att.id)], limit=1
             ):
                 continue
-            Line.create(
+            vote_line_model.create(
                 {
                     "voting_id": self.id,
                     "attendee_id": att.id,
@@ -204,7 +206,22 @@ class AssemblyVoting(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         self._apply_default_name_to_voting_create_vals(vals_list)
+        agenda_ids = {v.get("agenda_id") for v in vals_list if v.get("agenda_id")}
+        if agenda_ids:
+            agendas = self.env["assembly.agenda"].browse(list(agenda_ids)).exists()
+            agendas.mapped(
+                "assembly_id"
+            )._assembly_ensure_not_closed_for_related_changes()
         return super().create(vals_list)
+
+    def write(self, vals):
+        if not self.env.context.get(CTX_ASSEMBLY_INTERNAL_TRANSITION):
+            self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
+        return super().write(vals)
+
+    def unlink(self):
+        self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
+        return super().unlink()
 
     @api.depends(
         "vote_line_ids", "vote_line_ids.votes_applied", "agenda_id", "vote_type_id"

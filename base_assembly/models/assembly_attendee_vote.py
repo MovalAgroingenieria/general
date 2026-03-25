@@ -113,3 +113,24 @@ class AssemblyAttendeeVote(models.Model):
             rec.attendee_vote_total = (
                 rec.own_votes + rec.delegated_in_votes - rec.delegated_out_votes
             )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        att_ids = {v.get("attendee_id") for v in vals_list if v.get("attendee_id")}
+        if att_ids:
+            self.env["assembly.attendee"].browse(list(att_ids)).exists().mapped(
+                "assembly_id"
+            )._assembly_ensure_not_closed_for_related_changes()
+        return super().create(vals_list)
+
+    def write(self, vals):
+        self.mapped(
+            "attendee_id.assembly_id"
+        )._assembly_ensure_not_closed_for_related_changes()
+        return super().write(vals)
+
+    def unlink(self):
+        self.mapped(
+            "attendee_id.assembly_id"
+        )._assembly_ensure_not_closed_for_related_changes()
+        return super().unlink()

@@ -33,6 +33,10 @@ _ASSEMBLY_ALLOWED_STATE_TRANSITIONS = frozenset(
 
 _ASSEMBLY_STATES_ALLOW_GENERATE_ATTENDEES = frozenset(("draft", "announced", "open"))
 
+# Set on ``assembly.assembly`` writes that cascade to related models while the
+# assembly row still reads ``closed`` (e.g. cancel → close open votings).
+CTX_ASSEMBLY_INTERNAL_TRANSITION = "assembly_internal_transition"
+
 
 def _eval_partner_domain_text(partner_domain_text):
     try:
@@ -235,13 +239,74 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         compute="_compute_counts",
         help="Number of assembly.voting records linked to this assembly's agenda.",
     )
+    kanban_open_votings_count = fields.Integer(
+        string="Open votings (Kanban)",
+        compute="_compute_kanban_vote_digest",
+    )
+    kanban_closed_votings_count = fields.Integer(
+        string="Closed votings (Kanban)",
+        compute="_compute_kanban_vote_digest",
+    )
+    kanban_avg_participation = fields.Float(
+        string="Avg. participation (closed)",
+        compute="_compute_kanban_vote_digest",
+        digits=(16, 2),
+    )
+    kanban_results_summary = fields.Char(
+        string="Results summary",
+        compute="_compute_kanban_vote_digest",
+    )
 
     @api.depends("agenda_ids", "delegation_ids", "agenda_ids.voting_ids")
     def _compute_counts(self):
         for assembly in self:
             assembly.count_agenda_items = len(assembly.agenda_ids)
             assembly.count_delegations = len(assembly.delegation_ids)
-            assembly.voting_sessions_count = len(assembly.agenda_ids.mapped("voting_ids"))
+            assembly.voting_sessions_count = len(
+                assembly.agenda_ids.mapped("voting_ids")
+            )
+
+    @api.depends(
+        "agenda_ids.voting_ids",
+        "agenda_ids.voting_ids.voting_state",
+        "agenda_ids.voting_ids.participation_percentage",
+        "agenda_ids.voting_ids.date_close",
+        "agenda_ids.voting_ids.result_ids",
+        "agenda_ids.voting_ids.result_ids.vote_option",
+        "agenda_ids.voting_ids.result_ids.total_votes",
+        "agenda_ids.voting_ids.result_ids.result_percentage",
+    )
+    def _compute_kanban_vote_digest(self):
+        for asm in self:
+            votings = asm.agenda_ids.mapped("voting_ids")
+            asm.kanban_open_votings_count = len(
+                votings.filtered(lambda v: v.voting_state == "open")
+            )
+            closed_v = votings.filtered(lambda v: v.voting_state == "closed")
+            asm.kanban_closed_votings_count = len(closed_v)
+            if closed_v:
+                asm.kanban_avg_participation = sum(
+                    closed_v.mapped("participation_percentage")
+                ) / len(closed_v)
+            else:
+                asm.kanban_avg_participation = 0.0
+            summary = ""
+            voting_result = self.env["assembly.voting.result"]
+            opt_labels = dict(
+                voting_result._fields["vote_option"]._description_selection(self.env)
+            )
+            for voting in closed_v.sorted("date_close", reverse=True):
+                scored = voting.result_ids.filtered(
+                    lambda r: r.vote_option
+                    in ("yes", "no", "abstention", "blank", "not_cast")
+                )
+                if not scored:
+                    continue
+                best = max(scored, key=lambda r: r.total_votes or 0.0)
+                label = opt_labels.get(best.vote_option, best.vote_option)
+                summary = "%s: %.1f%%" % (label, best.result_percentage or 0.0)
+                break
+            asm.kanban_results_summary = summary
 
     @api.depends(
         "partner_domain",
@@ -412,7 +477,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         """Copy template fields from ``assembly.type`` into create ``vals`` (AF §2.2).
 
         Fills gaps when keys are missing **or** still equal model defaults / empty,
-        so browser creates (with ``default_*`` sent for every column) inherit quórum,
+        so browser creates (with ``default_*`` sent for every column) inherit quorum,
         ``vote_type_ids`` and ``partner_domain`` like :meth:`_onchange_assembly_type_id`.
         """
         if not atype.exists():
@@ -568,7 +633,9 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         if old_state == new_state:
             return
         if new_state == "cancelled" and old_state != "cancelled":
-            self._search_open_votings().write({"voting_state": "cancelled"})
+            self._search_open_votings().with_context(
+                **{CTX_ASSEMBLY_INTERNAL_TRANSITION: True}
+            ).write({"voting_state": "cancelled"})
         if (old_state, new_state) == ("cancelled", "draft"):
             self.attendee_ids.unlink()
             self._search_all_votings().unlink()
@@ -598,9 +665,44 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         """Used by public lifecycle actions; same as :meth:`_transition_assembly_state_via_write`."""
         return self._transition_assembly_state_via_write(new_state, extra_vals)
 
+    def _assembly_closed_write_allowed_vals(self, vals):
+        """When ``assembly_state`` is ``closed``, only transition to ``cancelled`` is allowed."""
+        if not vals:
+            return True
+        if (
+            set(vals.keys()) == {"assembly_state"}
+            and vals.get("assembly_state") == "cancelled"
+        ):
+            return True
+        return False
+
+    def _assembly_ensure_not_closed_for_related_changes(self):
+        """Raise if any assembly in ``self`` is closed (child models call this).
+
+        Skipped during :data:`CTX_ASSEMBLY_INTERNAL_TRANSITION` (e.g. cancel cascades).
+        """
+        if self.env.context.get(CTX_ASSEMBLY_INTERNAL_TRANSITION):
+            return
+        bad = self.filtered(lambda a: a.assembly_state == "closed")
+        if bad:
+            raise UserError(
+                self.env._(
+                    "This assembly is closed. You cannot change related records. "
+                    "Use Cancel on the assembly if you need to void it."
+                )
+            )
+
     def write(self, vals):
         vals = dict(vals)
         self._validate_assembly_state_write_and_apply_transition_side_effects(vals)
+        locked = self.filtered(lambda r: r.assembly_state == "closed")
+        if locked and not locked._assembly_closed_write_allowed_vals(vals):
+            raise UserError(
+                self.env._(
+                    "This assembly is closed and cannot be edited. "
+                    "Use Cancel if you need to void it (then you may reopen from cancelled)."
+                )
+            )
         res = super().write(vals)
         if "vote_type_ids" in vals:
             attendees = self.mapped("attendee_ids")
@@ -814,7 +916,14 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         return ""
 
     def action_open_agenda_items(self):
-        return self._action_open_related("assembly.agenda", self.env._("Agenda items"))
+        self.ensure_one()
+        return self._action_window(
+            "assembly.agenda",
+            self.env._("Agenda items"),
+            "list,kanban,graph,pivot,form",
+            domain=[("assembly_id", "=", self.id)],
+            context={"default_assembly_id": self.id},
+        )
 
     def action_open_votings(self):
         """Open all votings for this assembly (list + form)."""
@@ -822,7 +931,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         return self._action_window(
             "assembly.voting",
             self.env._("Votings"),
-            "list,form",
+            "list,kanban,graph,pivot,form",
             domain=[("assembly_id", "=", self.id)],
         )
 

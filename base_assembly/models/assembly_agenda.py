@@ -158,15 +158,25 @@ class AssemblyAgenda(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        asm_ids = {v.get("assembly_id") for v in vals_list if v.get("assembly_id")}
+        if asm_ids:
+            self.env["assembly.assembly"].browse(
+                list(asm_ids)
+            ).exists()._assembly_ensure_not_closed_for_related_changes()
         agendas = super().create(vals_list)
         agendas._assert_agenda_vote_type_constraints_after_write()
         return agendas
 
     def write(self, vals):
+        self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
         self._validate_agenda_write_vals(vals)
         res = super().write(vals)
         self._assert_agenda_vote_type_constraints_after_write()
         return res
+
+    def unlink(self):
+        self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
+        return super().unlink()
 
     def action_start_voting(self):
         self.ensure_one()
@@ -201,7 +211,7 @@ class AssemblyAgenda(models.Model):
         return self._action_window(
             "assembly.voting",
             self.env._("Votings"),
-            "list,form",
+            "list,kanban,graph,pivot,form",
             domain=[("agenda_id", "=", self.id)],
             context={"default_agenda_id": self.id},
         )

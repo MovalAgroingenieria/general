@@ -38,6 +38,7 @@ from . import (
     # State machines + spec transitions
     test_state_machine_assembly,
     test_assembly_state_transitions_spec,
+    test_assembly_closed_immutability,
     test_state_machine_attendee,
     test_attendee_state_transitions_spec,
     test_state_machine_delegation,

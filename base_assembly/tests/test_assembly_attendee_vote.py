@@ -85,15 +85,23 @@ class TestAssemblyAttendeeVote(AssemblyTestMixin, TransactionCase):
         assembly.action_generate_attendees()
         att = assembly.attendee_ids[0]
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
-        self.env["assembly.attendee.vote"].create(
-            {
-                "attendee_id": att.id,
-                "vote_type_id": vote_type.id,
-                "own_votes": 1.0,
-            }
-        )
+        Av = self.env["assembly.attendee.vote"]
+        if not Av.search(
+            [
+                ("attendee_id", "=", att.id),
+                ("vote_type_id", "=", vote_type.id),
+            ],
+            limit=1,
+        ):
+            Av.create(
+                {
+                    "attendee_id": att.id,
+                    "vote_type_id": vote_type.id,
+                    "own_votes": 1.0,
+                }
+            )
         with self.assertRaises(Exception):
-            self.env["assembly.attendee.vote"].create(
+            Av.create(
                 {
                     "attendee_id": att.id,
                     "vote_type_id": vote_type.id,

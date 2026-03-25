@@ -84,6 +84,11 @@ class AssemblyHttpCase(AssemblyTestMixin, HttpCase):
             cls.portal_partner = None
             cls.user_portal = None
 
+    def setUp(self):
+        super().setUp()
+        # Odoo 18 HttpCase no longer creates ``session`` until :meth:`authenticate`.
+        self.authenticate(None, None)
+
     def _skip_if_route_404(self, response, route_description):
         """Skip the test if the response is 404 (routes not always deployed)."""
         if response.status_code == 404:

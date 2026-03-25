@@ -138,6 +138,7 @@ class AssemblyVotingLine(models.Model):
         vals["votes_applied"] = total
 
     def write(self, vals):
+        self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
         if "votes_applied" in vals:
             for line in self:
                 if (
@@ -171,6 +172,11 @@ class AssemblyVotingLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        vids = {v.get("voting_id") for v in vals_list if v.get("voting_id")}
+        if vids:
+            self.env["assembly.voting"].browse(list(vids)).exists().mapped(
+                "assembly_id"
+            )._assembly_ensure_not_closed_for_related_changes()
         self._apply_audit_defaults_to_voting_line_create_vals(vals_list)
         for vals in vals_list:
             self._set_votes_applied_snapshot_on_create_vals(vals)

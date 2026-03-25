@@ -13,6 +13,8 @@ from .http_common import AssemblyHttpCase
 
 
 def _logout_and_clear_session(test_case):  # pylint: disable=import-outside-toplevel
+    if not getattr(test_case, "session", None):
+        test_case.authenticate(None, None)
     test_case.session.logout(keep_db=True)
     from odoo.http import root  # pylint: disable=import-outside-toplevel
 
@@ -377,6 +379,11 @@ class PortalDelegationTests(AssemblyHttpCase):
         self.assembly.action_generate_attendees()
         self.assembly.action_announce()
         self.assembly.action_open_registration()
+        delegate_att = self.assembly.attendee_ids.filtered(
+            lambda a: a.partner_id == other
+        )
+        self.assertTrue(delegate_att)
+        delegate_att.action_confirm()
         delegation = self.env["assembly.delegation"].create(  # noqa: F841
             {
                 "assembly_id": self.assembly.id,
@@ -413,6 +420,11 @@ class PortalDelegationTests(AssemblyHttpCase):
         self.assembly.action_generate_attendees()
         self.assembly.action_announce()
         self.assembly.action_open_registration()
+        delegate_att = self.assembly.attendee_ids.filtered(
+            lambda a: a.partner_id == p_b
+        )
+        self.assertTrue(delegate_att)
+        delegate_att.action_confirm()
         delegation = self.env["assembly.delegation"].create(  # noqa: F841
             {
                 "assembly_id": self.assembly.id,

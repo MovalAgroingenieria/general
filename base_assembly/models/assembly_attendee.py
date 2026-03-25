@@ -289,6 +289,11 @@ class AssemblyAttendee(models.Model):
             return self.browse()
         vals_list = [dict(vals) for vals in vals_list]
         self._validate_attendee_create_initial_states(vals_list)
+        asm_ids = {v.get("assembly_id") for v in vals_list if v.get("assembly_id")}
+        if asm_ids:
+            self.env["assembly.assembly"].browse(
+                list(asm_ids)
+            ).exists()._assembly_ensure_not_closed_for_related_changes()
         return super().create(vals_list)
 
     def _raise_disallowed_attendee_state_transition(self, old_state, new_state):
@@ -410,6 +415,7 @@ class AssemblyAttendee(models.Model):
           :meth:`_transition_attendee_registration_state` sets — use
           ``action_confirm`` / ``action_mark_absent`` in normal UI and integrations.
         """
+        self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
         vals = self._validate_and_sanitize_attendee_write_vals(vals)
         if self.ids:
             if self._write_would_change_assembly_or_partner(vals):
@@ -432,6 +438,10 @@ class AssemblyAttendee(models.Model):
                         )
                     )
         return super().write(vals)
+
+    def unlink(self):
+        self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
+        return super().unlink()
 
     @api.onchange("partner_id")
     def _onchange_partner_id(self):

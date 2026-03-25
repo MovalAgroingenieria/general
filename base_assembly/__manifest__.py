@@ -4,7 +4,7 @@
 {
     "name": "Base Assembly",
     "summary": "Core models for assemblies: agenda, attendees, delegations, voting",
-    "version": "18.0.1.9.1",
+    "version": "18.0.1.9.3",
     "category": "Administration",
     "author": "Moval Agroingeniería",
     "website": "https://www.moval.es",
