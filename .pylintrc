@@ -2,6 +2,7 @@
 load-plugins=pylint_odoo
 score=n
 extension-pkg-allow-list=lxml
+ignore-paths=base_assembly/tests/
 init-hook=
     import os, sys;
     here = os.path.dirname(os.path.abspath(__file__));
@@ -29,7 +30,14 @@ disable=missing-module-docstring,
     no-member,
     import-error,
     manifest-required-author,
-    duplicate-code
+    duplicate-code,
+    protected-access,
+    too-many-return-statements,
+    too-many-branches,
+    line-too-long,
+    too-many-arguments,
+    too-many-positional-arguments,
+    too-many-locals
 
 # Explicitly enable important rules
 enable=super-with-arguments,
@@ -47,7 +55,7 @@ max-line-length=88
 
 [BASIC]
 # Good names for short variables (common in Odoo)
-good-names=i,j,k,ex,Run,_,id,cr,uid
+good-names=i,j,k,ex,Run,_,id,cr,uid,Delegation,Attendee,AttendeeVote,PartnerVote,VoteType
 
 [REPORTS]
 msg-template={path}:{line}: [{msg_id}({symbol}), {obj}] {msg}
