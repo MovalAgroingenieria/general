@@ -165,16 +165,20 @@
         <t t-set="company" t-value="invoice.company_id"/>
         <t t-set="company_partner" t-value="company.partner_id"/>
         <t t-set="invoice_partner" t-value="invoice.partner_id"/>
+        <t t-set="facturae_rate_date" t-value="(invoice.move_id.date if invoice.move_id and invoice.move_id.date else None) or invoice.date_invoice"/>
         <t
             t-set="euro"
-            t-value="invoice.currency_id.search([('name', '=', 'EUR')]).ensure_one().with_context(company_id=company.id, date=invoice.move_id.date).get_current_rate()"
+            t-value="invoice.currency_id.search([('name', '=', 'EUR')]).ensure_one().with_context(company_id=company.id, date=facturae_rate_date).get_current_rate()"
         />
         <t
             t-set="currency"
-            t-value="invoice.currency_id.with_context(company_id=company.id, date=invoice.move_id.date).get_current_rate()"
+            t-value="invoice.currency_id.with_context(company_id=company.id, date=facturae_rate_date).get_current_rate()"
         />
         <t t-set="currency_rate" t-value="currency.rate if currency else 1.0"/>
         <t t-set="euro_rate" t-value="euro.rate if euro else 1.0"/>
+        <t t-set="facturae_is_eur" t-value="(invoice.currency_id.name or '').strip().upper() == 'EUR'"/>
+        <!-- EUR: FACe RCF06001 / Orden HAP/1650 anexo II regla 6a — line amounts must use 2 decimals -->
+        <t t-set="facturae_use_two_decimals" t-value="invoice.round_decimal or facturae_is_eur"/>
         <t t-set="facturae_invoice_vals" t-value="invoice.get_facturae_invoice_amounts()"/>
 
         <t t-call="l10n_es_facturae.facturae_header">
@@ -301,9 +305,9 @@
                         <PlaceOfIssue t-if="False"/>
                         <InvoicingPeriod t-if="False"/>
                         <InvoiceCurrencyCode t-esc="invoice.currency_id.name"/>
-                        <ExchangeRateDetails t-if="invoice.currency_id.name != 'EUR'">
+                        <ExchangeRateDetails t-if="not facturae_is_eur">
                             <!-- Modify by moval on 04.08.2025 -->
-                            <t t-if="invoice.round_decimal">
+                            <t t-if="facturae_use_two_decimals">
                                 <ExchangeRate t-esc="'%.2f' % (euro_rate / currency_rate)"/>
                             </t>
                             <t t-else="">
@@ -487,7 +491,7 @@
                         <Quantity t-esc="line.quantity"/>
                         <UnitOfMeasure t-if="False"/>
 
-                        <t t-if="invoice.round_decimal">
+                        <t t-if="facturae_use_two_decimals">
                             <UnitPriceWithoutTax
                                 t-esc="invoice._facturae_amount_to_str(facturae_vals['unit_price'], 2)"
                             />
@@ -499,7 +503,7 @@
                         </t>
 
                         <TotalCost>
-                            <t t-if="invoice.round_decimal">
+                            <t t-if="facturae_use_two_decimals">
                                 <t t-esc="invoice._facturae_amount_to_str(facturae_vals['total_cost'], 2)"/>
                             </t>
                             <t t-else="">
@@ -510,13 +514,13 @@
                         <DiscountsAndRebates t-if="facturae_vals['has_discount']">
                             <Discount>
                                 <DiscountReason t-esc="'Descuento'"/>
-                                <t t-if="invoice.round_decimal">
+                                <t t-if="facturae_use_two_decimals">
                                     <DiscountRate t-esc="'%.2f' % (line.discount or 0.0)"/>
                                 </t>
                                 <t t-else="">
                                     <DiscountRate t-esc="'%.8f' % (line.discount or 0.0)"/>
                                 </t>
-                                <t t-if="invoice.round_decimal">
+                                <t t-if="facturae_use_two_decimals">
                                     <DiscountAmount
                                         t-esc="invoice._facturae_amount_to_str(facturae_vals['discount_amount'], 2)"
                                     />
@@ -532,7 +536,7 @@
                         <Charges t-if="facturae_vals['has_surcharge']">
                             <Charge>
                                 <ChargeReason t-esc="'Recargo'"/>
-                                <t t-if="invoice.round_decimal">
+                                <t t-if="facturae_use_two_decimals">
                                     <ChargeAmount
                                         t-esc="invoice._facturae_amount_to_str(facturae_vals['surcharge_amount'], 2)"
                                     />
@@ -545,7 +549,7 @@
                             </Charge>
                         </Charges>
 
-                        <t t-if="invoice.round_decimal">
+                        <t t-if="facturae_use_two_decimals">
                             <GrossAmount
                                 t-esc="invoice._facturae_amount_to_str(facturae_vals['gross_amount'], 2)"
                             />
@@ -561,7 +565,7 @@
                                 <Tax t-if="line_tax.amount &lt; 0">
                                     <TaxTypeCode t-esc="line_tax.facturae_code"/>
 
-                                    <t t-if="invoice.round_decimal">
+                                    <t t-if="facturae_use_two_decimals">
                                         <TaxRate t-esc="'%.2f' % (-line_tax.amount)"/>
                                     </t>
                                     <t t-else="">
@@ -569,7 +573,7 @@
                                     </t>
 
                                     <TaxableBase>
-                                        <t t-if="invoice.round_decimal">
+                                        <t t-if="facturae_use_two_decimals">
                                             <TotalAmount
                                                 t-esc="invoice._facturae_amount_to_str(facturae_vals['taxable_base'], 2)"
                                             />
@@ -585,7 +589,7 @@
                                     </TaxableBase>
 
                                     <TaxAmount>
-                                        <t t-if="invoice.round_decimal">
+                                        <t t-if="facturae_use_two_decimals">
                                             <TotalAmount
                                                 t-esc="'%.2f' % (float(facturae_vals['taxable_base']) * (-line_tax.amount) / 100)"
                                             />
@@ -608,7 +612,7 @@
                                 <Tax t-if="line_tax.amount &gt;= 0">
                                     <TaxTypeCode t-esc="line_tax.facturae_code"/>
 
-                                    <t t-if="invoice.round_decimal">
+                                    <t t-if="facturae_use_two_decimals">
                                         <TaxRate t-esc="'%.2f' % (line_tax.amount)"/>
                                     </t>
                                     <t t-else="">
@@ -616,7 +620,7 @@
                                     </t>
 
                                     <TaxableBase>
-                                        <t t-if="invoice.round_decimal">
+                                        <t t-if="facturae_use_two_decimals">
                                             <TotalAmount
                                                 t-esc="invoice._facturae_amount_to_str(facturae_vals['taxable_base'], 2)"
                                             />
@@ -632,7 +636,7 @@
                                     </TaxableBase>
 
                                     <TaxAmount>
-                                        <t t-if="invoice.round_decimal">
+                                        <t t-if="facturae_use_two_decimals">
                                             <TotalAmount
                                                 t-esc="'%.2f' % (float(facturae_vals['taxable_base']) * (line_tax.amount) / 100)"
                                             />

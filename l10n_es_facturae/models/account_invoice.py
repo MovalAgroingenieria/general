@@ -94,7 +94,11 @@ class AccountInvoice(models.Model):
 
     round_decimal = fields.Boolean(
         string="Round Decimal",
-        help="Round decimals to two digits on all amounts in the invoice",
+        help="Use two decimal places in Factura-e line amounts (unit price, gross "
+             "amount, line taxes). For invoices in EUR this is always applied "
+             "(FACe / Spanish public-sector rules, e.g. RCF06001 / HAP/1650). "
+             "For other currencies, leave disabled to emit up to eight decimals "
+             "where the schema allows it.",
         required=False
     )
 
@@ -106,7 +110,8 @@ class AccountInvoice(models.Model):
 
     @api.depends('integration_ids')
     def _compute_integrations_count(self):
-        self.integration_count = len(self.integration_ids)
+        for invoice in self:
+            invoice.integration_count = len(invoice.integration_ids)
 
     integration_count = fields.Integer(
         compute="_compute_integrations_count",
@@ -114,13 +119,15 @@ class AccountInvoice(models.Model):
 
     @api.depends('integration_ids', 'partner_id')
     def _compute_can_integrate(self):
-        for method in self.partner_id.invoice_integration_method_ids:
-            if not self.env['account.invoice.integration'].search(
-                    [('invoice_id', '=', self.id),
-                     ('method_id', '=', method.id)]):
-                self.can_integrate = True
-                return
-        self.can_integrate = False
+        for invoice in self:
+            can_integrate = False
+            for method in invoice.partner_id.invoice_integration_method_ids:
+                if not self.env['account.invoice.integration'].search(
+                        [('invoice_id', '=', invoice.id),
+                         ('method_id', '=', method.id)]):
+                    can_integrate = True
+                    break
+            invoice.can_integrate = can_integrate
 
     can_integrate = fields.Boolean(compute="_compute_can_integrate")
 
@@ -171,7 +178,7 @@ class AccountInvoice(models.Model):
             return fields.Datetime.from_string(currency_rate.name
                                                ).strftime('%Y-%m-%d')
         currency_date = fields.Datetime.from_string(currency_rate.name)
-        euro_date = fields.Datetime.from_string(currency_rate.name)
+        euro_date = fields.Datetime.from_string(euro_rate.name)
         if currency_date < euro_date:
             return currency_date.strftime('%Y-%m-%d')
         return euro_date.strftime('%Y-%m-%d')
