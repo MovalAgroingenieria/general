@@ -176,7 +176,7 @@
         />
         <t t-set="currency_rate" t-value="currency.rate if currency else 1.0"/>
         <t t-set="euro_rate" t-value="euro.rate if euro else 1.0"/>
-        <t t-set="facturae_is_eur" t-value="(invoice.currency_id.name or '').strip().upper() == 'EUR'"/>
+        <t t-set="facturae_is_eur" t-value="invoice._facturae_is_eur_currency()"/>
         <!-- EUR: FACe RCF06001 / Orden HAP/1650 anexo II regla 6a — line amounts must use 2 decimals -->
         <t t-set="facturae_use_two_decimals" t-value="invoice.round_decimal or facturae_is_eur"/>
         <t t-set="facturae_invoice_vals" t-value="invoice.get_facturae_invoice_amounts()"/>
@@ -488,7 +488,12 @@
                         <DeliveryNotesReferences t-if="False"/>
 
                         <ItemDescription t-length="2500" t-esc="line.name"/>
-                        <Quantity t-esc="line.quantity"/>
+                        <t t-if="facturae_use_two_decimals">
+                            <Quantity t-esc="'%.2f' % float(line.quantity)"/>
+                        </t>
+                        <t t-else="">
+                            <Quantity t-esc="line.quantity"/>
+                        </t>
                         <UnitOfMeasure t-if="False"/>
 
                         <t t-if="facturae_use_two_decimals">

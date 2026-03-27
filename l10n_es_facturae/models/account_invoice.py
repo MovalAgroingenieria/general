@@ -183,6 +183,18 @@ class AccountInvoice(models.Model):
             return currency_date.strftime('%Y-%m-%d')
         return euro_date.strftime('%Y-%m-%d')
 
+    @api.multi
+    def _facturae_is_eur_currency(self):
+        """True if invoice currency is EUR (FACe two-decimal line amounts)."""
+        self.ensure_one()
+        cur = self.currency_id
+        if not cur:
+            return False
+        eur = self.env.ref('base.EUR', raise_if_not_found=False)
+        if eur and cur.id == eur.id:
+            return True
+        return (cur.name or '').strip().upper() == 'EUR'
+
     def get_refund_reason_string(self):
         return dict(
             self.fields_get(
