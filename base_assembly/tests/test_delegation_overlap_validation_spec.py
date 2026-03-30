@@ -10,7 +10,7 @@ from .common import AssemblyTestMixin
 
 
 class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
-    """Reglas 1–4: solape en tipos expandidos; solo confirmadas compiten."""
+    """Rules 1–4: overlap on expanded types; only confirmed delegations compete."""
 
     def _assembly_three_attendees_two_vote_types(self):
         env = self.env
@@ -89,7 +89,7 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
             )
 
     def test_disjoint_partial_delegations_allowed(self):
-        """(4) A→B solo vt1 y A→C solo vt2: ambas confirmadas permitidas."""
+        """(4) A→B vt1 only and A→C vt2 only: both confirmed allowed."""
         Delegation = self.env["assembly.delegation"]
         assembly, vt1, vt2 = self._assembly_three_attendees_two_vote_types()
         a, b, c = (
@@ -150,7 +150,7 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
             d_draft.write({"delegation_state": "confirmed"})
 
     def test_draft_sibling_does_not_block_confirmed_same_vote_types(self):
-        """(4) Borrador no cuenta: segunda confirmada misma cobertura permitida."""
+        """(4) Draft ignored: second confirmed with same coverage allowed."""
         Delegation = self.env["assembly.delegation"]
         assembly, vt1, _vt2 = self._assembly_three_attendees_two_vote_types()
         a, b, c = (
@@ -180,7 +180,7 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
         self.assertTrue(d2)
 
     def test_revoked_sibling_does_not_block_confirmed_same_vote_types(self):
-        """(4) Revocada no cuenta: nueva confirmada misma cobertura permitida."""
+        """(4) Revoked ignored: new confirmed with same coverage allowed."""
         Delegation = self.env["assembly.delegation"]
         assembly, vt1, _vt2 = self._assembly_three_attendees_two_vote_types()
         a, b, c = (

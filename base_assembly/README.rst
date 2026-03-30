@@ -8,7 +8,7 @@
 Base Assembly
 ==============
 
-**Base Assembly** is the core Odoo module for **corporate assemblies** (junta general, asamblea): it defines assembly records, agenda items, attendees, vote delegations, representations, quorum settings, and **roll-call / manual voting** flows on top of *base_vote*.
+**Base Assembly** is the core Odoo module for **corporate assemblies** (e.g. general meetings of members or shareholders): it defines assembly records, agenda items, attendees, vote delegations, representations, quorum settings, and **roll-call / manual voting** flows on top of *base_vote*.
 
 It targets **AF-style** workflows (convocation, attendance, ballots, delegation documents) with QWeb reports and optional mail templates.
 

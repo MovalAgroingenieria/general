@@ -447,7 +447,7 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
         )
 
     def test_recompute_votes_twice_same_snapshot(self):
-        """Dos llamadas seguidas a ``recompute_votes`` → mismo estado persistido."""
+        """Two consecutive ``recompute_votes`` calls → same persisted snapshot."""
         Attendee = self.env["assembly.attendee"]
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
@@ -464,7 +464,7 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
         self.assertEqual(first, second)
 
     def test_recompute_votes_after_unlink_all_lines_restores_snapshot(self):
-        """Borrar todas las filas ``assembly.attendee.vote`` y recomputar → mismo snapshot."""
+        """Delete all ``assembly.attendee.vote`` rows and recompute → same snapshot."""
         Attendee = self.env["assembly.attendee"]
         Av = self.env["assembly.attendee.vote"]
         assembly, _ = self._create_assembly_with_agenda()
@@ -736,7 +736,7 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
         self.assertEqual(
             Av.search_count([("attendee_id", "=", att.id)]),
             1,
-            "Quitar un tipo en la asamblea debe limpiar filas obsoletas al guardar",
+            "Removing a vote type from the assembly must drop obsolete rows on save",
         )
         self.assertFalse(
             Av.search(

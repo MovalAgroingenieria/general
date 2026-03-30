@@ -143,6 +143,12 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     )
     street = fields.Char()
     city = fields.Char()
+    city_id = fields.Many2one(
+        "res.city",
+        string="City",
+        ondelete="set null",
+        domain="[('country_id', '=?', country_id), ('state_id', '=?', state_id)]",
+    )
     zip = fields.Char(string="ZIP")
     state_id = fields.Many2one(
         "res.country.state", string="State/Province", ondelete="restrict"
@@ -501,6 +507,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             self.quorum_second_call_value = t.default_quorum_second_call_value
             self.partner_domain = t.partner_domain or "[]"
             self.street = t.default_street
+            self.city_id = False
             self.city = t.default_city
             self.zip = t.default_zip
             self.state_id = t.default_state_id
@@ -513,6 +520,32 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             self.attendance_partner_vat_format_strict = (
                 t.default_attendance_partner_vat_format_strict
             )
+
+    @api.onchange("country_id")
+    def _onchange_assembly_country_id(self):
+        if self.state_id and self.country_id and self.state_id.country_id != self.country_id:
+            self.state_id = False
+        if self.city_id and self.country_id and self.city_id.country_id != self.country_id:
+            self.city_id = False
+
+    @api.onchange("state_id")
+    def _onchange_assembly_state_id(self):
+        if self.state_id:
+            self.country_id = self.state_id.country_id
+
+    @api.onchange("city_id")
+    def _onchange_assembly_city_id(self):
+        if self.city_id:
+            self.city = self.city_id.name
+            if self.city_id.zipcode:
+                self.zip = self.city_id.zipcode
+            self.state_id = self.city_id.state_id
+            self.country_id = self.city_id.country_id
+
+    @api.onchange("city")
+    def _onchange_assembly_city_char(self):
+        if self.city_id and (self.city or "").strip() != (self.city_id.name or "").strip():
+            self.city_id = False
 
     def _get_partner_domain(self):
         self.ensure_one()
@@ -649,6 +682,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             vals["street"] = atype.default_street
         if self._create_vals_char_address_unset(vals, "city"):
             vals["city"] = atype.default_city
+            vals["city_id"] = False
         if self._create_vals_char_address_unset(vals, "zip"):
             vals["zip"] = atype.default_zip
         if self._create_vals_many2one_unset(vals, "state_id"):
@@ -713,6 +747,23 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                         state=initial_state,
                     )
                 )
+            self._assembly_apply_city_id_to_vals(vals)
+
+    @api.model
+    def _assembly_apply_city_id_to_vals(self, vals):
+        cid = vals.get("city_id")
+        if not cid:
+            return
+        city = self.env["res.city"].browse(cid)
+        if not city.exists():
+            return
+        vals.setdefault("city", city.name)
+        if city.zipcode:
+            vals.setdefault("zip", city.zipcode)
+        if city.state_id:
+            vals.setdefault("state_id", city.state_id.id)
+        if city.country_id:
+            vals.setdefault("country_id", city.country_id.id)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -867,6 +918,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     def write(self, vals):
         vals = dict(vals)
+        self._assembly_apply_city_id_to_vals(vals)
         self._validate_assembly_state_write_and_apply_transition_side_effects(vals)
         locked = self.filtered(lambda r: r.assembly_state == "closed")
         if locked and not locked._assembly_closed_write_allowed_vals(vals):

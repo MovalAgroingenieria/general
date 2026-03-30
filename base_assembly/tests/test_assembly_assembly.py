@@ -20,7 +20,7 @@ class TestAssemblyAssembly(  # pylint: disable=too-many-public-methods
             self.env
         )  # pylint: disable=protected-access
         assembly = self.env["assembly.assembly"].create(
-            {"name": "Asamblea test", "assembly_type_id": assembly_type.id}
+            {"name": "Test assembly", "assembly_type_id": assembly_type.id}
         )
         self.assertTrue(assembly.code)
         self.assertNotEqual(assembly.code, "New")
@@ -38,7 +38,7 @@ class TestAssemblyAssembly(  # pylint: disable=too-many-public-methods
             }
         )
         assembly = self.env["assembly.assembly"].create(
-            {"name": "Asamblea", "assembly_type_id": assembly_type.id}
+            {"name": "Assembly", "assembly_type_id": assembly_type.id}
         )
         self.assertEqual(assembly.quorum_type, "percentage")
         self.assertEqual(assembly.quorum_value, 25.0)

@@ -9,7 +9,15 @@
     "author": "Moval Agroingeniería",
     "website": "https://www.moval.es",
     "license": "AGPL-3",
-    "depends": ["base", "base_vat", "mail", "link_tracker", "base_vote", "web"],
+    "depends": [
+        "base",
+        "base_address_extended",
+        "base_vat",
+        "mail",
+        "link_tracker",
+        "base_vote",
+        "web",
+    ],
     "data": [
         "security/assembly_security.xml",
         "security/assembly_group_system.xml",

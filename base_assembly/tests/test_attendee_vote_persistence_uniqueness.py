@@ -12,7 +12,7 @@ class TestAttendeeVotePersistenceUniqueness(AssemblyTestMixin, TransactionCase):
     """Guarantees: one row per pair; stable totals; duplicates rejected."""
 
     def test_repeated_recompute_single_row_and_stable_totals(self):
-        """(1)(2)(3) Varios recomputos: una fila y totales correctos."""
+        """(1)(2)(3) Many recomputes: single row and stable totals."""
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]
@@ -154,7 +154,7 @@ class TestAttendeeVotePersistenceUniqueness(AssemblyTestMixin, TransactionCase):
         self.assertEqual(line_after.own_votes, 7.0)
 
     def test_collapse_duplicate_vote_lines_singleton_noop(self):
-        """API de colapso: un solo registro se devuelve intacto."""
+        """Collapse API: single record returned unchanged."""
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]

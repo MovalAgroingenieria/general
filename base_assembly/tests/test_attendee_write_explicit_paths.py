@@ -30,7 +30,7 @@ class TestAttendeeWriteExplicitPaths(AssemblyTestMixin, TransactionCase):
         self.assertEqual(att.attendee_state, "confirmed")
 
     def test_internal_context_still_validates_state_graph(self):
-        """Contexto interno no desactiva el grafo de estados."""
+        """Internal context does not bypass the state transition graph."""
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         att = assembly.attendee_ids[0]
@@ -56,7 +56,7 @@ class TestAttendeeWriteExplicitPaths(AssemblyTestMixin, TransactionCase):
         )
 
     def test_repeated_safe_writes_do_not_duplicate_vote_rows(self):
-        """Notas u otros campos seguros: mismas filas ``attendee.vote`` tras varios ``write``."""
+        """Safe fields (e.g. notes): same ``attendee.vote`` row count after repeated ``write``."""
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]

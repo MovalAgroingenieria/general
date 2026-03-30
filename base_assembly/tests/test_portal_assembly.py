@@ -23,10 +23,10 @@ def _logout_and_clear_session(test_case):  # pylint: disable=import-outside-topl
 
 
 class PortalListTests(AssemblyHttpCase):
-    """Listado GET /my/assemblies: L1–L4."""
+    """GET /my/assemblies list: L1–L4."""
 
     def test_L1_authenticated_correct_sees_only_own_assemblies(self):
-        """L1: Autenticado correcto, token correcto → 200, solo asambleas propias."""
+        """L1: Valid session → 200; response lists only assemblies the user may access."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         self.assembly.action_announce()
@@ -40,8 +40,7 @@ class PortalListTests(AssemblyHttpCase):
         self.assertIn(self.assembly.name.encode(), res.content)
 
     def test_L2_authenticated_no_permission_sees_empty_or_only_own(self):
-        """L2: Autenticado sin permiso (no convocado en ninguna) →
-        200, sin asambleas ajenas."""
+        """L2: Logged in but not invited to any assembly → 200; no other assemblies leaked."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         other = self.env["res.partner"].create({"name": "Other", "is_company": False})
@@ -64,10 +63,10 @@ class PortalListTests(AssemblyHttpCase):
 
 
 class PortalDetailTests(AssemblyHttpCase):
-    """Detalle GET /my/assembly/<id>: D1–D4."""
+    """GET /my/assembly/<id> detail: D1–D4."""
 
     def test_D1_authenticated_correct_detail_200(self):
-        """D1: Autenticado correcto, token correcto → 200 detalle."""
+        """D1: Valid session for invited user → 200 detail page."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         self.assembly.action_announce()
@@ -81,7 +80,7 @@ class PortalDetailTests(AssemblyHttpCase):
         self.assertEqual(res.status_code, 200)
 
     def test_D2_authenticated_no_permission_detail_403_or_404(self):
-        """D2: Autenticado sin permiso (asamblea ajena) → 403/404, no exponer datos."""
+        """D2: Logged in but not invited to this assembly → 403/404; no data leak."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         other = self.env["res.partner"].create({"name": "Other", "is_company": False})
@@ -107,7 +106,7 @@ class PortalDetailTests(AssemblyHttpCase):
         self.assertEqual(res.status_code, 302)
 
     def test_D4_nonexistent_id_404(self):
-        """D4: id inexistente → 404."""
+        """D4: Non-existent assembly id → 404."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         self.authenticate(self.user_portal.login, "portal_assembly_http")
@@ -122,7 +121,7 @@ class PortalConfirmTests(AssemblyHttpCase):
     """Confirmation POST /my/assembly/<id>/confirm: C1–C6."""
 
     def test_C1_state_allowed_confirm_200(self):
-        """C1: Estado permitido (open/in_session) → 200/302, attendee confirmado."""
+        """C1: Allowed assembly state (open/in_session) → 200/302; attendee confirmed."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         self.assembly.partner_domain = "[('id', '=', %s)]" % self.portal_partner.id
@@ -141,7 +140,7 @@ class PortalConfirmTests(AssemblyHttpCase):
         self.assertIn(res.status_code, (200, 302))
 
     def test_C2_state_not_allowed_draft_403(self):
-        """C2: Estado no permitido (draft) → 403 o 400."""
+        """C2: Disallowed state (draft) → 403 or 400."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         self.assembly.partner_domain = "[('id', '=', %s)]" % self.portal_partner.id
@@ -158,7 +157,7 @@ class PortalConfirmTests(AssemblyHttpCase):
         self.assertIn(res.status_code, (400, 403))
 
     def test_C3_state_not_allowed_closed_403(self):
-        """C3: Estado no permitido (closed) → 403 o 400."""
+        """C3: Disallowed state (closed) → 403 or 400."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         self.assembly.partner_domain = "[('id', '=', %s)]" % self.portal_partner.id
@@ -180,7 +179,7 @@ class PortalConfirmTests(AssemblyHttpCase):
         self.assertIn(res.status_code, (400, 403))
 
     def test_C4_authenticated_no_permission_403_or_404(self):
-        """C4: Autenticado sin permiso (no convocado) → 403/404."""
+        """C4: Logged in but not invited → 403/404."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         other = self.env["res.partner"].create({"name": "Other", "is_company": False})
@@ -214,7 +213,7 @@ class PortalConfirmTests(AssemblyHttpCase):
 
 
 class PortalDelegationTests(AssemblyHttpCase):
-    """Delegaciones: crear, confirmar, revocar. DG1–DG4, DC1–DC2, DR1–DR3."""
+    """Delegations: create, confirm, revoke. DG1–DG4, DC1–DC2, DR1–DR3."""
 
     def test_DG1_state_allowed_create_delegation_200(self):
         """DG1: Allowed state → POST create delegation 200/302."""
@@ -242,7 +241,7 @@ class PortalDelegationTests(AssemblyHttpCase):
         self.assertIn(res.status_code, (200, 302))
 
     def test_DG2_state_not_allowed_create_delegation_403(self):
-        """DG2: Estado no permitido (draft) → 403 o 400."""
+        """DG2: Disallowed state (draft) → 403 or 400."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         other = self.env["res.partner"].create(
@@ -671,10 +670,10 @@ class PortalVotingTests(AssemblyHttpCase):
 
 
 class PortalDocumentTests(AssemblyHttpCase):
-    """Descarga documentos GET /my/assembly/<id>/document/<doc_type>: DOC1–DOC4."""
+    """GET /my/assembly/<id>/document/<doc_type> download: DOC1–DOC4."""
 
     def test_DOC1_authenticated_correct_whitelist_type_200(self):
-        """DOC1: Autenticado correcto, tipo en lista blanca → 200, PDF."""
+        """DOC1: Valid session, allowed doc_type → 200, PDF."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         self.assembly.partner_domain = "[('id', '=', %s)]" % self.portal_partner.id
@@ -682,7 +681,7 @@ class PortalDocumentTests(AssemblyHttpCase):
         self.assembly.action_announce()
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open(
-            "/my/assembly/%s/document/convocatoria" % self.assembly.id,
+            "/my/assembly/%s/document/publication" % self.assembly.id,
             allow_redirects=False,
         )
         self._skip_if_route_404(
@@ -693,7 +692,7 @@ class PortalDocumentTests(AssemblyHttpCase):
             self.assertIn("pdf", res.headers.get("Content-Type", "").lower())
 
     def test_DOC2_invalid_doc_type_400_or_404(self):
-        """DOC2: doc_type no permitido → 400 o 404."""
+        """DOC2: Disallowed doc_type → 400 or 404."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         self.assembly.partner_domain = "[('id', '=', %s)]" % self.portal_partner.id
@@ -701,7 +700,7 @@ class PortalDocumentTests(AssemblyHttpCase):
         self.assembly.action_announce()
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open(
-            "/my/assembly/%s/document/tipo_invalido_xyz" % self.assembly.id,
+            "/my/assembly/%s/document/invalid_doc_type_xyz" % self.assembly.id,
             allow_redirects=False,
         )
         self._skip_if_route_404(
@@ -710,7 +709,7 @@ class PortalDocumentTests(AssemblyHttpCase):
         self.assertIn(res.status_code, (400, 404))
 
     def test_DOC3_authenticated_no_permission_403_or_404(self):
-        """DOC3: Asamblea ajena → 403/404."""
+        """DOC3: Other user's assembly → 403/404."""
         if not self.user_portal:
             self.skipTest("Portal group not available")
         other = self.env["res.partner"].create(
@@ -721,7 +720,7 @@ class PortalDocumentTests(AssemblyHttpCase):
         self.assembly.action_announce()
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open(
-            "/my/assembly/%s/document/convocatoria" % self.assembly.id,
+            "/my/assembly/%s/document/publication" % self.assembly.id,
             allow_redirects=False,
         )
         self._skip_if_route_404(
@@ -733,7 +732,7 @@ class PortalDocumentTests(AssemblyHttpCase):
         """DOC4: Invalid token → 302."""
         _logout_and_clear_session(self)
         res = self.url_open(
-            "/my/assembly/1/document/convocatoria",
+            "/my/assembly/1/document/publication",
             allow_redirects=False,
         )
         self._skip_if_route_404(

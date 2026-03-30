@@ -105,7 +105,7 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
         self.assertEqual(line_def.delegated_in_votes, 10.0)
 
     def test_negative_revoked_delegation_does_not_transfer(self):
-        """(5) Revocada: deja de contar como inbound efectivo."""
+        """(5) Revoked: no longer counts as effective inbound."""
         assembly, vote_type, p_del, p_def, _p_other = (
             self._setup_assembly_with_excluded_delegator()
         )
@@ -135,7 +135,7 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
         self.assertEqual(line_def.delegated_in_votes, 0.0)
 
     def test_negative_draft_delegation_does_not_transfer(self):
-        """(5) Borrador: no hay transferencia efectiva."""
+        """(5) Draft: no effective transfer."""
         assembly, vote_type, p_del, p_def, _p_other = (
             self._setup_assembly_with_excluded_delegator()
         )
@@ -159,7 +159,7 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
         self.assertEqual(line_def.delegated_in_votes, 0.0)
 
     def test_registered_delegator_contributes_delegated_in(self):
-        """Delegador solo en estado registrado aporta ``partner.vote`` al delegado confirmado."""
+        """Delegator left in registered state still contributes ``partner.vote`` to confirmed delegate."""
         env = self.env
         p_del = env["res.partner"].create(
             {"name": "RegDelegator", "is_company": False, "assembly_excluded": False}
@@ -367,7 +367,7 @@ class TestNonAttendeeDelegatorMandatoryQA(TestVoteRecomputeNonAttendeeDelegator)
         )
         self.assertFalse(
             self._vote_lines_for_partner_on_assembly(self.env, assembly, p_del),
-            "Delegador externo: ninguna fila assembly.attendee.vote",
+            "External delegator: no assembly.attendee.vote row",
         )
         pv = self.env["partner.vote"].search(
             [

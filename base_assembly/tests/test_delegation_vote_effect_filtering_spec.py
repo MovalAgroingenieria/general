@@ -23,7 +23,7 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
         )
 
     def test_spec_confirmed_delegation_and_delegate_confirmed_has_effect(self):
-        """(1) Confirmada + delegado confirmado → out/in persistidos."""
+        """(1) Confirmed delegation + confirmed delegate → out/in persisted."""
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]
@@ -47,7 +47,7 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(self._line(delegate, vt).attendee_vote_total, 8.0)
 
     def test_spec_confirmed_row_but_delegate_not_confirmed_no_vote_effect(self):
-        """(2)(3) Estado BD incoherente: confirmada sin delegado confirmado → sin efecto.
+        """(2)(3) Inconsistent DB row: confirmed delegation without confirmed delegate → no effect.
 
         The ORM blocks normal confirmation; SQL simulates a bad import.
         """
@@ -108,7 +108,7 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(self._line(b, vt).attendee_vote_total, 1.0)
 
     def test_spec_delegated_in_not_redelegated_chain_blocked(self):
-        """(4) No se puede encadenar: quien recibe no delega los mismos tipos."""
+        """(4) Chaining blocked: delegate cannot re-delegate the same vote types."""
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]
@@ -165,7 +165,7 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
         self.assertFalse(Delegation._apply_vote_effect_partner_filters(d1))
 
     def test_spec_partial_vote_type_ids_only_affect_listed_types(self):
-        """Non-empty ``vote_type_ids`` ⇒ efecto solo en esos tipos (resto sin out/in)."""
+        """Non-empty ``vote_type_ids`` ⇒ effect only on those types (others unchanged)."""
         env = self.env
         vt1 = self._create_vote_type(env, name="SpecPart A")
         vt2 = self._create_vote_type(env, name="SpecPart B")

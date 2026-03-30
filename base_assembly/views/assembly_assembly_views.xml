@@ -286,10 +286,11 @@
                     </group>
                     <group string="Address (for documents)" readonly="assembly_state == 'closed'">
                         <field name="street"/>
-                        <field name="city"/>
-                        <field name="zip"/>
-                        <field name="state_id"/>
                         <field name="country_id"/>
+                        <field name="state_id" domain="[('country_id', '=', country_id)]"/>
+                        <field name="zip"/>
+                        <field name="city_id" options="{'no_open': True, 'no_create': True}"/>
+                        <field name="city"/>
                     </group>
                     <notebook>
                         <page string="Agenda" name="agenda">

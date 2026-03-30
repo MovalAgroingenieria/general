@@ -779,7 +779,7 @@ class TestVotingScenarios(AssemblyTestMixin, TransactionCase):
         self.assertEqual(len(voting.result_ids), 5)
 
     def test_V3_only_confirmed_in_possible(self):
-        """V3: Solo confirmados cuentan en total_votes_possible."""
+        """V3: Only confirmed attendees count in total_votes_possible."""
         assembly, agenda = (
             self._create_assembly_with_agenda()
         )  # pylint: disable=protected-access
@@ -832,7 +832,7 @@ class TestVotingScenarios(AssemblyTestMixin, TransactionCase):
             )
 
     def test_V5_votes_applied_must_match_attendee_total(self):
-        """V5: votes_applied debe igualar attendee_vote_total."""
+        """V5: votes_applied must equal attendee_vote_total."""
         assembly, agenda = (
             self._create_assembly_with_agenda()
         )  # pylint: disable=protected-access

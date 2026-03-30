@@ -30,7 +30,7 @@ class TestAssemblyAgenda(AssemblyTestMixin, TransactionCase):
     def test_action_start_voting_without_vote_type_raises(self):
         assembly, agenda = (
             self._create_assembly_with_agenda(  # pylint: disable=protected-access
-                agenda_title="Sin tipo", requires_vote=True
+                agenda_title="No vote type", requires_vote=True
             )
         )
         assembly.action_announce()

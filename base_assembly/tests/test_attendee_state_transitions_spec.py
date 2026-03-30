@@ -20,7 +20,7 @@ _ALLOWED_ATTENDEE_EDGES = frozenset(
 
 
 class TestAttendeeStateTransitionsSpec(AssemblyTestMixin, TransactionCase):
-    """Reglas: registered / confirmed / absent; recomputo al confirmar y al ausentar."""
+    """Rules: registered / confirmed / absent; recompute on confirm and on mark absent."""
 
     def test_model_helper_matches_documented_graph(self):
         Att = self.env["assembly.attendee"]
@@ -37,7 +37,7 @@ class TestAttendeeStateTransitionsSpec(AssemblyTestMixin, TransactionCase):
         )
 
     def test_registered_to_confirmed_and_vote_rows(self):
-        """(1)(4) Confirmar genera/actualiza filas ``assembly.attendee.vote``."""
+        """(1)(4) Confirm creates/updates ``assembly.attendee.vote`` rows."""
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]

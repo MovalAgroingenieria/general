@@ -137,7 +137,7 @@ class TestOnlineVotingOutOfWindow(AssemblyTestMixin, TransactionCase):
 
 
 class TestOnlineVotingEligibility(AssemblyTestMixin, TransactionCase):
-    """Identidad no elegible: 0 votos, votes_applied incorrecto."""
+    """Ineligible identity: zero votes; votes_applied must match totals."""
 
     def test_zero_votes_attendee_cannot_cast(self):
         """Attendee with attendee_vote_total 0 cannot have a voting line."""

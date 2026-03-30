@@ -157,7 +157,7 @@ class TestHttpPortalDocument(AssemblyHttpCase):
         self.assembly.action_announce()
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open(
-            "/my/assembly/%s/document/convocatoria" % self.assembly.id,
+            "/my/assembly/%s/document/publication" % self.assembly.id,
             allow_redirects=False,
         )
         self._skip_if_route_404(
@@ -176,7 +176,7 @@ class TestHttpPortalDocument(AssemblyHttpCase):
         self.assembly.action_announce()
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open(
-            "/my/assembly/%s/document/tipo_invalido_xyz" % self.assembly.id,
+            "/my/assembly/%s/document/invalid_doc_type_xyz" % self.assembly.id,
             allow_redirects=False,
         )
         self._skip_if_route_404(
@@ -196,7 +196,7 @@ class TestHttpPortalDocument(AssemblyHttpCase):
         self.assembly.action_announce()
         self.authenticate(self.user_portal.login, "portal_assembly_http")
         res = self.url_open(
-            "/my/assembly/%s/document/convocatoria" % self.assembly.id,
+            "/my/assembly/%s/document/publication" % self.assembly.id,
             allow_redirects=False,
         )
         self._skip_if_route_404(
@@ -212,7 +212,7 @@ class TestHttpPortalDocument(AssemblyHttpCase):
         root.session_store.save(self.session)
         self.opener.cookies.pop("session_id", None)
         res = self.url_open(
-            "/my/assembly/1/document/convocatoria",
+            "/my/assembly/1/document/publication",
             allow_redirects=False,
         )
         self._skip_if_route_404(

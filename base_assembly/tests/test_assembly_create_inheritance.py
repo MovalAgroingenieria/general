@@ -190,7 +190,7 @@ class TestAssemblyCreateInheritance(AssemblyTestMixin, TransactionCase):
         domain = "[('id', 'in', %s)]" % partners.ids
         assembly_type = self.env["assembly.type"].create(
             {
-                "name": "Tipo web",
+                "name": "Web type",
                 "code": "WEB",
                 "vote_type_ids": [(6, 0, vote_type.ids)],
                 "default_quorum_type": "fixed",
@@ -203,7 +203,7 @@ class TestAssemblyCreateInheritance(AssemblyTestMixin, TransactionCase):
         Assembly = self.env["assembly.assembly"]
         assembly = Assembly.create(
             {
-                "name": "Asamblea desde formulario simulado",
+                "name": "Assembly from simulated form",
                 "assembly_type_id": assembly_type.id,
                 "quorum_type": "percentage",
                 "quorum_value": 50.0,
