@@ -460,6 +460,35 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                     present_partner_ids, possible, quorum_percentage=pct
                 )
 
+    def _assembly_date_coherence_issue_messages(self):
+        self.ensure_one()
+        msgs = []
+        if self.date_first_call and self.date_second_call:
+            if self.date_second_call <= self.date_first_call:
+                msgs.append(
+                    self.env._("Second call must be strictly after the first call.")
+                )
+        if self.date_announcement and self.date_first_call:
+            first_day = fields.Date.to_date(self.date_first_call)
+            if self.date_announcement > first_day:
+                msgs.append(
+                    self.env._(
+                        "Announcement date cannot be after the calendar day of "
+                        "the first call."
+                    )
+                )
+        if self.date_first_call and self.date_start:
+            if self.date_start < self.date_first_call:
+                msgs.append(
+                    self.env._("Session start cannot be before the first call.")
+                )
+        if self.date_start and self.date_end:
+            if self.date_end < self.date_start:
+                msgs.append(
+                    self.env._("Session end cannot be before session start.")
+                )
+        return msgs
+
     @api.constrains(
         "date_announcement",
         "date_first_call",
@@ -469,30 +498,29 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     )
     def _check_assembly_date_coherence(self):
         for rec in self:
-            if rec.date_first_call and rec.date_second_call:
-                if rec.date_second_call <= rec.date_first_call:
-                    raise ValidationError(
-                        self.env._("Second call must be strictly after the first call.")
-                    )
-            if rec.date_announcement and rec.date_first_call:
-                first_day = fields.Date.to_date(rec.date_first_call)
-                if rec.date_announcement > first_day:
-                    raise ValidationError(
-                        self.env._(
-                            "Announcement date cannot be after the calendar day of "
-                            "the first call."
-                        )
-                    )
-            if rec.date_first_call and rec.date_start:
-                if rec.date_start < rec.date_first_call:
-                    raise ValidationError(
-                        self.env._("Session start cannot be before the first call.")
-                    )
-            if rec.date_start and rec.date_end:
-                if rec.date_end < rec.date_start:
-                    raise ValidationError(
-                        self.env._("Session end cannot be before session start.")
-                    )
+            msgs = rec._assembly_date_coherence_issue_messages()
+            if msgs:
+                raise ValidationError("\n".join(msgs))
+
+    @api.onchange(
+        "date_announcement",
+        "date_first_call",
+        "date_second_call",
+        "date_start",
+        "date_end",
+    )
+    def _onchange_assembly_date_coherence_warn(self):
+        if not self:
+            return
+        msgs = self._assembly_date_coherence_issue_messages()
+        if not msgs:
+            return
+        return {
+            "warning": {
+                "title": self.env._("Invalid dates"),
+                "message": "\n".join(msgs),
+            }
+        }
 
     @api.onchange("assembly_type_id")
     def _onchange_assembly_type_id(self):
