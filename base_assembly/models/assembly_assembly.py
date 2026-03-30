@@ -1178,6 +1178,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         self.ensure_one()
         if self.assembly_state not in _ASSEMBLY_STATES_ALLOW_GENERATE_ATTENDEES:
             raise UserError(self.env._("Cannot generate attendees in current state."))
+        self.check_access("write")
         domain = expression.AND(
             [self._get_partner_domain(), [("assembly_excluded", "=", False)]]
         )
@@ -1185,7 +1186,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         existing = self.attendee_ids.mapped("partner_id")
         to_create = partners - existing
         if to_create:
-            self.env["assembly.attendee"].create(
+            self.env["assembly.attendee"].sudo().create(
                 [
                     {"assembly_id": self.id, "partner_id": partner.id}
                     for partner in to_create
