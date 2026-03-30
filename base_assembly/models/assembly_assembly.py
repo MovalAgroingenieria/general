@@ -507,11 +507,19 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             self.quorum_second_call_value = t.default_quorum_second_call_value
             self.partner_domain = t.partner_domain or "[]"
             self.street = t.default_street
-            self.city_id = False
-            self.city = t.default_city
-            self.zip = t.default_zip
-            self.state_id = t.default_state_id
-            self.country_id = t.default_country_id
+            if t.default_city_id:
+                self.city_id = t.default_city_id
+                self.city = t.default_city_id.name
+                if t.default_city_id.zipcode:
+                    self.zip = t.default_city_id.zipcode
+                self.state_id = t.default_city_id.state_id
+                self.country_id = t.default_city_id.country_id
+            else:
+                self.city_id = False
+                self.city = t.default_city
+                self.zip = t.default_zip
+                self.state_id = t.default_state_id
+                self.country_id = t.default_country_id
             self.president_id = t.default_president_id
             self.secretary_id = t.default_secretary_id
             self.attendance_require_partner_vat_confirm = (
@@ -523,9 +531,17 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     @api.onchange("country_id")
     def _onchange_assembly_country_id(self):
-        if self.state_id and self.country_id and self.state_id.country_id != self.country_id:
+        if (
+            self.state_id
+            and self.country_id
+            and self.state_id.country_id != self.country_id
+        ):
             self.state_id = False
-        if self.city_id and self.country_id and self.city_id.country_id != self.country_id:
+        if (
+            self.city_id
+            and self.country_id
+            and self.city_id.country_id != self.country_id
+        ):
             self.city_id = False
 
     @api.onchange("state_id")
@@ -544,7 +560,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     @api.onchange("city")
     def _onchange_assembly_city_char(self):
-        if self.city_id and (self.city or "").strip() != (self.city_id.name or "").strip():
+        if (
+            self.city_id
+            and (self.city or "").strip() != (self.city_id.name or "").strip()
+        ):
             self.city_id = False
 
     def _get_partner_domain(self):
@@ -680,7 +699,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             vals["partner_domain"] = atype.partner_domain or "[]"
         if self._create_vals_char_address_unset(vals, "street"):
             vals["street"] = atype.default_street
-        if self._create_vals_char_address_unset(vals, "city"):
+        if self._create_vals_many2one_unset(vals, "city_id") and atype.default_city_id:
+            vals["city_id"] = atype.default_city_id.id
+            self._assembly_apply_city_id_to_vals(vals)
+        elif self._create_vals_char_address_unset(vals, "city"):
             vals["city"] = atype.default_city
             vals["city_id"] = False
         if self._create_vals_char_address_unset(vals, "zip"):

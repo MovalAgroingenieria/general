@@ -35,10 +35,11 @@
                     </group>
                     <group string="Default location">
                         <field name="default_street"/>
-                        <field name="default_city"/>
-                        <field name="default_zip"/>
-                        <field name="default_state_id"/>
                         <field name="default_country_id"/>
+                        <field name="default_state_id" domain="[('country_id', '=', default_country_id)]"/>
+                        <field name="default_zip"/>
+                        <field name="default_city_id" options="{'no_open': True, 'no_create': True}"/>
+                        <field name="default_city"/>
                     </group>
                     <group string="Default officers">
                         <field name="default_president_id"/>

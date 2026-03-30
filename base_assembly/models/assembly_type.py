@@ -1,7 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class AssemblyType(models.Model):
@@ -48,6 +48,12 @@ class AssemblyType(models.Model):
     )
     default_street = fields.Char(string="Default street")
     default_city = fields.Char(string="Default city")
+    default_city_id = fields.Many2one(
+        "res.city",
+        string="City",
+        ondelete="set null",
+        domain="[('country_id', '=?', default_country_id), ('state_id', '=?', default_state_id)]",
+    )
     default_zip = fields.Char(string="Default zip")
     default_state_id = fields.Many2one(
         "res.country.state",
@@ -96,6 +102,71 @@ class AssemblyType(models.Model):
         ),
     )
     active = fields.Boolean(default=True)
+
+    @api.model
+    def _assembly_type_apply_default_city_id_to_vals(self, vals):
+        cid = vals.get("default_city_id")
+        if not cid:
+            return
+        city = self.env["res.city"].browse(cid)
+        if not city.exists():
+            return
+        vals.setdefault("default_city", city.name)
+        if city.zipcode:
+            vals.setdefault("default_zip", city.zipcode)
+        if city.state_id:
+            vals.setdefault("default_state_id", city.state_id.id)
+        if city.country_id:
+            vals.setdefault("default_country_id", city.country_id.id)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            self._assembly_type_apply_default_city_id_to_vals(vals)
+        return super().create(vals_list)
+
+    def write(self, vals):
+        vals = dict(vals)
+        self._assembly_type_apply_default_city_id_to_vals(vals)
+        return super().write(vals)
+
+    @api.onchange("default_country_id")
+    def _onchange_assembly_type_default_country_id(self):
+        if (
+            self.default_state_id
+            and self.default_country_id
+            and self.default_state_id.country_id != self.default_country_id
+        ):
+            self.default_state_id = False
+        if (
+            self.default_city_id
+            and self.default_country_id
+            and self.default_city_id.country_id != self.default_country_id
+        ):
+            self.default_city_id = False
+
+    @api.onchange("default_state_id")
+    def _onchange_assembly_type_default_state_id(self):
+        if self.default_state_id:
+            self.default_country_id = self.default_state_id.country_id
+
+    @api.onchange("default_city_id")
+    def _onchange_assembly_type_default_city_id(self):
+        if self.default_city_id:
+            self.default_city = self.default_city_id.name
+            if self.default_city_id.zipcode:
+                self.default_zip = self.default_city_id.zipcode
+            self.default_state_id = self.default_city_id.state_id
+            self.default_country_id = self.default_city_id.country_id
+
+    @api.onchange("default_city")
+    def _onchange_assembly_type_default_city_char(self):
+        if (
+            self.default_city_id
+            and (self.default_city or "").strip()
+            != (self.default_city_id.name or "").strip()
+        ):
+            self.default_city_id = False
 
     _sql_constraints = [
         (
