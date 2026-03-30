@@ -4,7 +4,6 @@
 import calendar
 
 from dateutil.relativedelta import relativedelta
-
 from odoo import Command, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
@@ -12,7 +11,7 @@ from odoo.exceptions import UserError, ValidationError
 class GeneralEntityCensus(models.Model):
     _name = "general.entity.census"
     _description = "General Entity Period Census"
-    _order = "period_date desc, id desc"
+    _order = "period_date asc, id desc"
     _inherit = ["mail.thread", "mail.activity.mixin"]
 
     name = fields.Char(compute="_compute_name", store=True)
@@ -404,7 +403,7 @@ class GeneralEntityCensus(models.Model):
             if census.state == "locked":
                 raise UserError(
                     self.env._(
-                        "Cannot validate lines in a locked census. " "Unlock it first."
+                        "Cannot validate lines in a locked census. Unlock it first."
                     )
                 )
             draft_lines = census.line_ids.filtered(lambda ln: ln.state == "draft")

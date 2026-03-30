@@ -8,7 +8,7 @@ from odoo.exceptions import UserError
 class GeneralEntityCensusLine(models.Model):
     _name = "general.entity.census.line"
     _description = "Period Census Line"
-    _order = "period_date desc, member_partner_id"
+    _order = "period_date, primary_partner_id, entity_global_code asc"
 
     _sql_constraints = [
         (
@@ -53,7 +53,7 @@ class GeneralEntityCensusLine(models.Model):
         index=True,
         domain=[("is_secondary_entity", "=", True)],
     )
-    entity_global_code = fields.Char(
+    entity_global_code = fields.Integer(
         related="member_partner_id.entity_global_code",
         readonly=True,
         store=True,
