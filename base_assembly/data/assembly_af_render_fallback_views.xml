@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="assembly_af_publication_qweb" name="AF: publication (QWeb fallback)">
+        <div class="o_assembly_publication">
+            <h2 t-out="object.name"/>
+            <p t-if="object.date_first_call">
+                <span t-field="object.date_first_call"/>
+                <t t-if="object.location"> — <span t-field="object.location"/></t>
+            </p>
+            <div t-if="object.description" t-field="object.description"/>
+        </div>
+    </template>
+    <template id="assembly_af_delegation_document_qweb" name="AF: delegation document (QWeb fallback)">
+        <div class="o_assembly_delegation_intro">
+            <p>Vote delegation form for the assembly <strong t-out="object.name"/>.</p>
+            <p>Identify the delegator and the delegate below and specify the vote types delegated.</p>
+        </div>
+    </template>
+    <template id="assembly_af_delegation_footer_qweb" name="AF: delegation footer (QWeb fallback)">
+        <div class="o_assembly_delegation_footer">
+            <p>The delegator certifies the accuracy of the information above and authorizes the delegate to cast votes on their behalf for the indicated vote type(s).</p>
+        </div>
+    </template>
+    <template id="assembly_af_ballot_intro_qweb" name="AF: ballot intro (QWeb fallback)">
+        <div class="o_assembly_ballot_intro">
+            <p>Voting ballot for <strong t-out="object.name"/>.</p>
+            <p>Mark your choice clearly for each agenda item.</p>
+        </div>
+    </template>
+    <template id="assembly_af_ballot_nominative_intro_qweb" name="AF: nominative ballot intro (QWeb fallback)">
+        <div class="o_assembly_ballot_nominative_intro">
+            <p>Personalized voting ballot for the assembly <strong t-out="object.name"/>.</p>
+        </div>
+    </template>
+</odoo>

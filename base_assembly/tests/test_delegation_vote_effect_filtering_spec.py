@@ -1,7 +1,11 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
+<<<<<<< HEAD
+"""Single filter for delegations that affect votes (confirmed + delegate confirmed)."""
+=======
 """Filtro único de delegaciones con efecto en votos (confirmada + delegado confirmado)."""
+>>>>>>> origin/18.0
 
 from odoo.exceptions import ValidationError
 from odoo.tests import TransactionCase
@@ -10,7 +14,11 @@ from .common import AssemblyTestMixin
 
 
 class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
+<<<<<<< HEAD
+    """Spec: only confirmed delegation + confirmed delegate attendee changes vote lines."""
+=======
     """Especificación: solo confirmada + delegado asistente confirmado altera líneas de voto."""
+>>>>>>> origin/18.0
 
     @staticmethod
     def _line(attendee, vote_type):
@@ -49,7 +57,11 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
     def test_spec_confirmed_row_but_delegate_not_confirmed_no_vote_effect(self):
         """(2)(3) Estado BD incoherente: confirmada sin delegado confirmado → sin efecto.
 
+<<<<<<< HEAD
+        The ORM blocks normal confirmation; SQL simulates a bad import.
+=======
         El ORM impide confirmar normalmente; SQL simula importación errónea.
+>>>>>>> origin/18.0
         """
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
@@ -78,7 +90,11 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(self._line(delegate, vt).delegated_in_votes, 0.0)
 
     def test_spec_draft_and_revoked_no_vote_effect(self):
+<<<<<<< HEAD
+        """(3) Draft or revoked do not change persisted totals."""
+=======
         """(3) Borrador o revocada no alteran totales persistidos."""
+>>>>>>> origin/18.0
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]
@@ -142,7 +158,11 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
             )
 
     def test_spec_filter_helper_excludes_non_effective(self):
+<<<<<<< HEAD
+        """Partner layer: draft / unconfirmed delegate → empty ``_get_effective_delegations(delegations=)``."""
+=======
         """Capa partner: borrador / delegado no confirmado → ``_get_effective_delegations(delegations=)`` vacío."""
+>>>>>>> origin/18.0
         Delegation = self.env["assembly.delegation"]
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
@@ -200,7 +220,11 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(self._line(delegate, vt2).delegated_in_votes, 0.0)
 
     def test_spec_empty_vote_type_ids_covers_all_assembly_vote_types(self):
+<<<<<<< HEAD
+        """Empty ``vote_type_ids`` ⇒ full delegation over all assembly vote types."""
+=======
         """``vote_type_ids`` vacío ⇒ delegación total sobre todos los tipos de la asamblea."""
+>>>>>>> origin/18.0
         env = self.env
         vt1 = self._create_vote_type(env, name="SpecAll A")
         vt2 = self._create_vote_type(env, name="SpecAll B")
@@ -235,7 +259,11 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(self._line(delegate, vt2).delegated_in_votes, 2.0)
 
     def test_spec_delegation_covers_vote_type_matches_expansion(self):
+<<<<<<< HEAD
+        """Single per-type coverage API aligned with ``_get_effective_delegations``."""
+=======
         """API única de cobertura por tipo alineada con ``_get_effective_delegations``."""
+>>>>>>> origin/18.0
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]

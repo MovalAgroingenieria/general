@@ -100,6 +100,43 @@ class TestBaseAssemblyPackagingSanity(AssemblyTestMixin, TransactionCase):
         """AF §11.5: representation template report is declared."""
         self.env.ref("base_assembly.assembly_assembly_action_report_representation")
 
+<<<<<<< HEAD
+    def test_af_v2_call_register_and_window_actions_exist(self):
+        """AF v2: call-register report alias and navigation actions load."""
+        self.env.ref("base_assembly.assembly_assembly_action_report_call_register")
+        act_rep = self.env.ref("base_assembly.assembly_representation_action")
+        act_called = self.env.ref(
+            "base_assembly.assembly_attendee_action_called_members"
+        )
+        act_opt = self.env.ref("base_assembly.assembly_agenda_option_action")
+        self.assertEqual(act_rep.res_model, "assembly.representation")
+        self.assertEqual(act_called.res_model, "assembly.attendee")
+        self.assertEqual(act_opt.res_model, "assembly.agenda.option")
+
+    def test_af_v2_form_views_chatter_and_agenda_fields(self):
+        """Single check: assembly/agenda chatter + agenda vote/manual/summary fields + rep views."""
+        agenda_arch = self.env.ref("base_assembly.assembly_agenda_view_form").arch_db
+        for needle in (
+            'name="agenda_vote_mode"',
+            'name="option_ids"',
+            'name="manual_yes"',
+            'name="manual_no"',
+            'name="manual_abstain"',
+            'name="manual_count_blank"',
+            'name="manual_total_expected"',
+            'name="final_summary"',
+            "<chatter",
+        ):
+            self.assertIn(needle, agenda_arch)
+        self.assertIn(
+            "<chatter",
+            self.env.ref("base_assembly.assembly_assembly_view_form").arch_db,
+        )
+        self.env.ref("base_assembly.assembly_representation_view_tree")
+        self.env.ref("base_assembly.assembly_representation_view_form")
+
+=======
+>>>>>>> origin/18.0
     def test_minimal_core_record_creation(self):
         """End-to-end: create type + assembly + agenda path used across the suite."""
         assembly, _agenda = (

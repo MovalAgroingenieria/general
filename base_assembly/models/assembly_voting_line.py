@@ -19,6 +19,10 @@ class AssemblyVotingLine(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
+<<<<<<< HEAD
+        check_company=True,
+=======
+>>>>>>> origin/18.0
     )
     assembly_id = fields.Many2one(
         "assembly.assembly",
@@ -27,12 +31,27 @@ class AssemblyVotingLine(models.Model):
         store=True,
         readonly=True,
     )
+<<<<<<< HEAD
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        related="assembly_id.company_id",
+        store=True,
+        readonly=True,
+        index=True,
+    )
+=======
+>>>>>>> origin/18.0
     attendee_id = fields.Many2one(
         "assembly.attendee",
         string="Attendee",
         required=True,
         ondelete="cascade",
         index=True,
+<<<<<<< HEAD
+        check_company=True,
+=======
+>>>>>>> origin/18.0
     )
     partner_id = fields.Many2one(
         "res.partner",

@@ -117,6 +117,34 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(len(present), 2)
         self.assertIn(delegator.partner_id.id, present)
 
+<<<<<<< HEAD
+    def test_spec_absent_delegator_not_counted_when_delegate_represents(self):
+        """Absent registrant as delegator must not add quorum presence (matches inbound votes)."""
+        assembly, _partners = self._assembly_four_partners()
+        vote_type = assembly.assembly_type_id.vote_type_ids[0]
+        delegator = assembly.attendee_ids[0]
+        delegate = assembly.attendee_ids[1]
+        self._give_partner_votes(delegator.partner_id, vote_type, 1)
+        self._give_partner_votes(delegate.partner_id, vote_type, 1)
+        delegate.action_confirm()
+        delegator.action_mark_absent()
+        self.env["assembly.delegation"].create(
+            {
+                "assembly_id": assembly.id,
+                "partner_id": delegator.partner_id.id,
+                "delegate_partner_id": delegate.partner_id.id,
+                "vote_type_ids": [(6, 0, vote_type.ids)],
+                "delegation_state": "confirmed",
+            }
+        )
+        assembly.invalidate_recordset()
+        present = assembly._get_present_partner_ids()
+        self.assertEqual(len(present), 1)
+        self.assertIn(delegate.partner_id.id, present)
+        self.assertNotIn(delegator.partner_id.id, present)
+
+=======
+>>>>>>> origin/18.0
     def test_spec_partner_vote_weights_do_not_affect_present_count(self):
         """(QA5) Many vs few partner.votes: same number of confirmed people → same present."""
         assembly, _partners = self._assembly_four_partners()
@@ -201,7 +229,11 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
     def test_spec_assembly_excluded_delegator_counts_for_quorum_when_delegation_confirmed(
         self,
     ):
+<<<<<<< HEAD
+        """Delegator without attendee row but inside convocation domain: counts as present."""
+=======
         """Delegador sin fila de asistente pero en dominio convocable: cuenta como presente."""
+>>>>>>> origin/18.0
         env = self.env
         p_del = env["res.partner"].create(
             {"name": "QSpec ExclDel", "is_company": False, "assembly_excluded": True}
@@ -236,7 +268,11 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         self.assertIn(p_def.id, present)
 
     def test_spec_negative_excluded_delegator_draft_delegation_not_quorum_present(self):
+<<<<<<< HEAD
+        """Until delegation is confirmed, the external delegator is not counted as present."""
+=======
         """Sin confirmar delegación, el delegador externo no entra en el cómputo de presentes."""
+>>>>>>> origin/18.0
         env = self.env
         p_del = env["res.partner"].create(
             {"name": "QSpec ExclDraft", "is_company": False, "assembly_excluded": True}
@@ -266,7 +302,11 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         self.assertNotIn(p_del.id, assembly._get_present_partner_ids())
 
     def test_regression_two_excluded_delegators_distinct_people_in_quorum(self):
+<<<<<<< HEAD
+        """Regression: two external delegators + confirmed delegate → three distinct people present."""
+=======
         """Regresión: dos delegadores externos + delegado confirmado → tres personas presentes."""
+>>>>>>> origin/18.0
         env = self.env
         p_a = env["res.partner"].create(
             {"name": "QSpec ExA", "is_company": False, "assembly_excluded": True}
@@ -309,7 +349,11 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         return assembly, partners
 
     def test_spec_three_confirmed_yields_three_distinct_partner_ids(self):
+<<<<<<< HEAD
+        """Three convoked partners confirmed → three distinct people present."""
+=======
         """Tres socios convocados y confirmados → tres personas presentes distintas."""
+>>>>>>> origin/18.0
         assembly, _partners = self._assembly_three_partners_domain()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         for att in assembly.attendee_ids:
@@ -322,7 +366,11 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(assembly.total_present_attendees, 3)
 
     def test_spec_delegator_outside_convocation_not_counted_via_delegation(self):
+<<<<<<< HEAD
+        """Delegator outside convocation domain is not present even if a delegation exists."""
+=======
         """Delegador fuera del dominio de convocatoria no entra en presentes aunque exista delegación."""
+>>>>>>> origin/18.0
         env = self.env
         p_in = env["res.partner"].create(
             {"name": "QSpec InDom", "is_company": False, "assembly_excluded": False}
@@ -353,7 +401,11 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(assembly.total_present_attendees, 1)
 
     def test_spec_vote_line_recompute_does_not_change_quorum(self):
+<<<<<<< HEAD
+        """Recomputing ``assembly.attendee.vote`` does not change present count or percentage."""
+=======
         """Recomputar ``assembly.attendee.vote`` no altera conteo de presentes ni porcentaje."""
+>>>>>>> origin/18.0
         assembly, _partners = self._assembly_three_partners_domain()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         a_att, b_att, _c = assembly.attendee_ids.sorted("id")
@@ -382,7 +434,11 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(assembly.quorum_percentage, pct_before)
 
     def test_spec_cancelled_assembly_stored_present_is_zero(self):
+<<<<<<< HEAD
+        """Cancelled assembly: stored present count and percentage are zero."""
+=======
         """Asamblea cancelada: presentes almacenados y porcentaje a cero."""
+>>>>>>> origin/18.0
         assembly, _agenda = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
@@ -402,7 +458,11 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(len(assembly._get_present_partner_ids()), 0)
 
     def test_spec_quorum_percentage_matches_people_ratio(self):
+<<<<<<< HEAD
+        """``quorum_percentage`` = present / possible × 100 (people only)."""
+=======
         """``quorum_percentage`` = presentes / posibles × 100 (solo personas)."""
+>>>>>>> origin/18.0
         assembly, _partners = self._assembly_three_partners_domain()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att0, att1, _att2 = assembly.attendee_ids.sorted("id")
@@ -420,7 +480,11 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
     # --- Hardening: ``assembly.assembly._get_present_partner_ids`` (single source) ---
 
     def test_hardening_present_partner_ids_no_double_count(self):
+<<<<<<< HEAD
+        """Two distinct people; ``len(ids) == len(set(ids))`` matches stored count."""
+=======
         """Dos personas distintas; ``len(ids) == len(set(ids))`` y coincide con almacenado."""
+>>>>>>> origin/18.0
         assembly, _partners = self._assembly_four_partners()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         delegator = assembly.attendee_ids[0]
@@ -445,7 +509,11 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(len(ids), assembly.total_present_attendees)
 
     def test_hardening_non_attendee_delegator_in_present_partner_ids(self):
+<<<<<<< HEAD
+        """Convocable delegator without attendee row appears in the present-partner frozenset."""
+=======
         """Delegador convocable sin fila de asistente entra en el frozenset de presentes."""
+>>>>>>> origin/18.0
         env = self.env
         p_del = env["res.partner"].create(
             {"name": "QHard ExDel", "is_company": False, "assembly_excluded": True}
@@ -479,7 +547,11 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(len(present), 2)
 
     def test_hardening_partial_delegation_single_delegator_id(self):
+<<<<<<< HEAD
+        """Partial delegation (single vote_type): delegator counted once in the set."""
+=======
         """Delegación parcial (un solo vote_type): delegador cuenta una vez en el conjunto."""
+>>>>>>> origin/18.0
         env = self.env
         vt1 = self._create_vote_type(env, name="QHard VT1")
         vt2 = self._create_vote_type(env, name="QHard VT2")
@@ -513,7 +585,11 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         self.assertIn(delegator.partner_id.id, ids)
 
     def test_hardening_vote_weights_do_not_change_present_partner_ids(self):
+<<<<<<< HEAD
+        """Changing magnitudes on ``partner.vote`` does not change ``_get_present_partner_ids``."""
+=======
         """Cambiar magnitudes en ``partner.vote`` no altera ``_get_present_partner_ids``."""
+>>>>>>> origin/18.0
         assembly, _partners = self._assembly_four_partners()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         att0, att1 = assembly.attendee_ids[0], assembly.attendee_ids[1]
@@ -529,6 +605,34 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(before, after)
         self.assertEqual(len(after), 2)
 
+<<<<<<< HEAD
+    def test_hardening_possible_equals_convocable_set_size(self):
+        """``search_count`` on the convocation domain matches ``len`` of the quorum set."""
+        assembly, _partners = self._assembly_three_partners_domain()
+        convocable = assembly._present_quorum_convocable_partner_ids()
+        self.assertEqual(
+            assembly._get_possible_attendees_count(),
+            len(convocable),
+        )
+
+    def test_hardening_get_present_partner_ids_accepts_precomputed_convocable(self):
+        """Passing ``convocable_partner_ids`` does not change the present-partner set."""
+        assembly, _partners = self._assembly_three_partners_domain()
+        vote_type = assembly.assembly_type_id.vote_type_ids[0]
+        att0, att1, _att2 = assembly.attendee_ids.sorted("id")
+        self._give_partner_votes(att0.partner_id, vote_type, 1)
+        self._give_partner_votes(att1.partner_id, vote_type, 1)
+        att0.action_confirm()
+        att1.action_confirm()
+        assembly.invalidate_recordset()
+        convocable = assembly._present_quorum_convocable_partner_ids()
+        self.assertEqual(
+            assembly._get_present_partner_ids(convocable_partner_ids=convocable),
+            assembly._get_present_partner_ids(),
+        )
+
+=======
+>>>>>>> origin/18.0
     def test_contract_quorum_helpers_single_source(self):
         """``total_present_attendees``, ``_count_present_attendees`` y ``_get_quorum_present_people_count`` alineados con ``_get_present_partner_ids``; quorum alcanzado coherente."""
         assembly, _partners = self._assembly_three_partners_domain()

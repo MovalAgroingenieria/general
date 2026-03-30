@@ -4,24 +4,47 @@
 {
     "name": "Base Assembly",
     "summary": "Core models for assemblies: agenda, attendees, delegations, voting",
+<<<<<<< HEAD
+    "version": "18.0.1.0.0",
+=======
     "version": "18.0.1.9.3",
+>>>>>>> origin/18.0
     "category": "Administration",
     "author": "Moval Agroingeniería",
     "website": "https://www.moval.es",
     "license": "AGPL-3",
+<<<<<<< HEAD
+    "depends": ["base", "base_vat", "mail", "link_tracker", "base_vote", "web"],
+=======
     "depends": ["base", "base_vote", "web"],
+>>>>>>> origin/18.0
     "data": [
         "security/assembly_security.xml",
         "security/assembly_group_system.xml",
         "security/ir.model.access.csv",
         "data/assembly_sequence_data.xml",
+<<<<<<< HEAD
+        "data/assembly_mail_templates.xml",
+        "data/assembly_af_render_fallback_views.xml",
+=======
+>>>>>>> origin/18.0
         "views/assembly_type_views.xml",
         "views/assembly_assembly_views.xml",
         "views/assembly_attendee_views.xml",
         "views/assembly_delegation_views.xml",
+<<<<<<< HEAD
+        "views/assembly_representation_views.xml",
+        "views/assembly_agenda_option_views.xml",
+        "views/assembly_document_preview_wizard_views.xml",
         "views/assembly_voting_views.xml",
         "views/res_partner_views.xml",
         "views/menu_views.xml",
+        "report/assembly_report_snippets.xml",
+=======
+        "views/assembly_voting_views.xml",
+        "views/res_partner_views.xml",
+        "views/menu_views.xml",
+>>>>>>> origin/18.0
         "report/assembly_attendance_reports.xml",
         "report/assembly_delegation_report.xml",
         "report/assembly_representation_report.xml",

@@ -22,6 +22,18 @@ class AssemblyVotingResult(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
+<<<<<<< HEAD
+        check_company=True,
+    )
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        related="voting_id.assembly_id.company_id",
+        store=True,
+        readonly=True,
+        index=True,
+=======
+>>>>>>> origin/18.0
     )
     vote_option = fields.Selection(
         [

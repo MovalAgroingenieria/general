@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Shared AF v2.0 report fragments (no new report actions). Context: ``asm`` = assembly.assembly. -->
+    <template id="report_assembly_publication_html_block">
+        <t t-set="pub_html" t-value="asm.get_rendered_publication_text()"/>
+        <div t-if="pub_html" class="mb-3 o_assembly_report_publication" t-out="pub_html"/>
+        <div t-elif="asm.description" class="mb-3 o_assembly_report_publication_fallback">
+            <div t-field="asm.description"/>
+        </div>
+    </template>
+
+    <template id="report_assembly_representation_table_block">
+        <t t-set="rep_lines_snip" t-value="asm.representation_ids.filtered(lambda r: r.active)"/>
+        <div class="row mt-4" t-if="rep_lines_snip">
+            <div class="col-12"><strong>Representations (registered)</strong></div>
+        </div>
+        <table class="table table-sm table-bordered mt-2" t-if="rep_lines_snip">
+            <thead>
+                <tr>
+                    <th>Represented member</th>
+                    <th>Agent</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr t-foreach="rep_lines_snip.sorted(key=lambda r: r.owner_partner_id.name)" t-as="rep">
+                    <td><span t-field="rep.owner_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/></td>
+                    <td><span t-field="rep.agent_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/></td>
+                </tr>
+            </tbody>
+        </table>
+    </template>
+
+    <template id="report_assembly_agenda_af_list_block">
+        <div class="row"><div class="col-12"><strong>Agenda</strong></div></div>
+        <ol class="mt-2">
+            <li t-foreach="assembly.agenda_ids.sorted(key=lambda x: x.sequence)" t-as="item">
+                <span t-field="item.name"/>
+                <span class="text-muted small"> — <span t-field="item.agenda_vote_mode"/></span>
+                <t t-if="item.requires_vote and item.vote_type_id"> (<span t-field="item.vote_type_id.name"/>)</t>
+                <div t-if="item.description" class="mt-1 ps-3 small border-start">
+                    <span t-field="item.description"/>
+                </div>
+                <t t-if="item.agenda_vote_mode == 'manual_yes_no'">
+                    <div class="small ms-3 mt-1 o_assembly_report_manual_yn">
+                        Manual counts — Yes: <span t-field="item.manual_yes"/>,
+                        No: <span t-field="item.manual_no"/>,
+                        Abstention: <span t-field="item.manual_abstain"/>,
+                        Blank: <span t-field="item.manual_count_blank"/>
+                        <t t-if="item.manual_total_expected">
+                            (expected total: <span t-field="item.manual_total_expected"/>)
+                        </t>
+                    </div>
+                </t>
+                <t t-if="item.agenda_vote_mode == 'manual_multi' and item.option_ids">
+                    <ul class="small ms-3 mt-1 mb-0 o_assembly_report_ballot_options">
+                        <li t-foreach="item.option_ids.sorted(key=lambda x: x.sequence)" t-as="opt">
+                            <span t-field="opt.name"/>
+                        </li>
+                    </ul>
+                </t>
+                <div t-if="item.final_summary" class="mt-1 ms-3 small border-start ps-2 o_assembly_report_final_summary" t-out="item.final_summary"/>
+            </li>
+        </ol>
+    </template>
+</odoo>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="assembly_agenda_option_view_tree" model="ir.ui.view">
+        <field name="name">assembly.agenda.option.tree</field>
+        <field name="model">assembly.agenda.option</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="agenda_id"/>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="manual_vote_count"/>
+            </list>
+        </field>
+    </record>
+    <record id="assembly_agenda_option_view_form" model="ir.ui.view">
+        <field name="name">assembly.agenda.option.form</field>
+        <field name="model">assembly.agenda.option</field>
+        <field name="arch" type="xml">
+            <form string="Agenda option">
+                <sheet>
+                    <group>
+                        <field name="agenda_id" options="{'no_create': True}"/>
+                        <field name="sequence"/>
+                        <field name="name"/>
+                        <field name="manual_vote_count"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="assembly_agenda_option_view_search" model="ir.ui.view">
+        <field name="name">assembly.agenda.option.search</field>
+        <field name="model">assembly.agenda.option</field>
+        <field name="arch" type="xml">
+            <search string="Agenda options">
+                <field name="name"/>
+                <field name="agenda_id"/>
+            </search>
+        </field>
+    </record>
+</odoo>

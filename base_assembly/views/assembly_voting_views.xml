@@ -159,6 +159,39 @@
                 <field name="count_results"/>
                 <templates>
                     <t t-name="kanban-box">
+<<<<<<< HEAD
+                        <div class="oe_kanban_card oe_kanban_global_click o_kanban_card rounded-3 shadow-sm border overflow-hidden">
+                            <div class="d-flex justify-content-between align-items-start gap-2 px-3 py-2 border-bottom bg-100">
+                                <div class="min-w-0 flex-grow-1">
+                                    <div class="fw-bold text-truncate"><field name="name"/></div>
+                                    <div class="text-muted small text-truncate">
+                                        <i class="fa fa-sitemap me-1"/><field name="assembly_id"/>
+                                    </div>
+                                    <div class="text-muted small text-truncate">
+                                        <i class="fa fa-list-alt me-1"/><field name="agenda_id"/>
+                                    </div>
+                                </div>
+                                <field name="voting_state" widget="badge"/>
+                            </div>
+                            <div class="px-3 py-2 small">
+                                <div class="mb-2 text-truncate">
+                                    <span class="text-muted"><i class="fa fa-tag me-1"/></span><field name="vote_type_id"/>
+                                </div>
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between text-muted mb-1">
+                                        <span><i class="fa fa-bar-chart me-1"/>Participation</span>
+                                        <span><field name="total_votes_cast"/> / <field name="total_votes_possible"/> · <field name="participation_percentage"/>%</span>
+                                    </div>
+                                    <div class="progress rounded-pill" style="height: 7px;">
+                                        <div class="progress-bar bg-info" role="progressbar" t-attf-style="width: {{ Math.min(100, Math.max(0, record.participation_percentage.raw_value || 0)) }}%;"></div>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <span class="badge text-bg-light border">
+                                        <i class="fa fa-database me-1"/><field name="count_results"/> <span class="text-muted">results</span>
+                                    </span>
+                                </div>
+=======
                         <div class="oe_kanban_card oe_kanban_global_click">
                             <div class="o_kanban_record_top mb-1">
                                 <strong class="o_kanban_record_title"><field name="name"/></strong>
@@ -170,6 +203,7 @@
                                 <div>Cast / possible: <field name="total_votes_cast"/> / <field name="total_votes_possible"/></div>
                                 <div>Participation: <field name="participation_percentage"/>%</div>
                                 <div>Result rows: <field name="count_results"/></div>
+>>>>>>> origin/18.0
                             </div>
                         </div>
                     </t>

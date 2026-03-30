@@ -1,5 +1,10 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
+<<<<<<< HEAD
+# Large delegation + vote-recompute surface kept in one module for cohesion.
+# pylint: disable=too-many-lines
+=======
+>>>>>>> origin/18.0
 
 from collections import defaultdict, deque
 
@@ -29,6 +34,18 @@ class AssemblyDelegation(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
+<<<<<<< HEAD
+        check_company=True,
+    )
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        related="assembly_id.company_id",
+        store=True,
+        readonly=True,
+        index=True,
+=======
+>>>>>>> origin/18.0
     )
     partner_id = fields.Many2one(
         "res.partner",
@@ -195,12 +212,21 @@ class AssemblyDelegation(models.Model):
         inbound = self._get_effective_delegations(delegations=inbound)
         if not inbound:
             return delegations_out
+<<<<<<< HEAD
+        inbound_eff = tuple(inc._get_effective_vote_types() for inc in inbound)
+        return delegations_out.filtered(
+            lambda d, ie=inbound_eff: not any(
+                d._get_effective_vote_types() & t for t in ie
+            )
+        )
+=======
 
         def keep(d):
             types_d = d._get_effective_vote_types()
             return not any(types_d & inc._get_effective_vote_types() for inc in inbound)
 
         return delegations_out.filtered(keep)
+>>>>>>> origin/18.0
 
     @api.model
     def _exclude_inbound_vote_chain_overlap(
@@ -219,12 +245,21 @@ class AssemblyDelegation(models.Model):
         outbound = self._get_effective_delegations(delegations=outbound)
         if not outbound:
             return delegations_in
+<<<<<<< HEAD
+        outbound_eff = tuple(ob._get_effective_vote_types() for ob in outbound)
+        return delegations_in.filtered(
+            lambda d, oe=outbound_eff: not any(
+                d._get_effective_vote_types() & t for t in oe
+            )
+        )
+=======
 
         def keep(d):
             types_d = d._get_effective_vote_types()
             return not any(types_d & ob._get_effective_vote_types() for ob in outbound)
 
         return delegations_in.filtered(keep)
+>>>>>>> origin/18.0
 
     @api.model
     def _search_confirmed_delegations_for_member_edge(
@@ -263,16 +298,25 @@ class AssemblyDelegation(models.Model):
             assembly_id,
             partner_ids=list(delegator_partner_ids),
         )
+<<<<<<< HEAD
+        absent_delegator_pids = set(
+            lines.filtered_domain([("attendee_state", "=", "absent")])
+=======
         has_attendee_line = set(lines.mapped("partner_id").ids)
         confirmed_delegator_ids = set(
             lines.filtered_domain([("attendee_state", "=", "confirmed")])
+>>>>>>> origin/18.0
             .mapped("partner_id")
             .ids
         )
         keep_delegator_pids = {
+<<<<<<< HEAD
+            pid for pid in delegator_partner_ids if pid not in absent_delegator_pids
+=======
             pid
             for pid in delegator_partner_ids
             if pid not in has_attendee_line or pid in confirmed_delegator_ids
+>>>>>>> origin/18.0
         }
         return delegations.filtered(
             lambda d, kp=keep_delegator_pids: d.partner_id.id in kp
@@ -296,9 +340,16 @@ class AssemblyDelegation(models.Model):
         **Two call shapes:**
 
         1. ``delegations=<recordset>`` — apply only the partner layer (confirmed row +
+<<<<<<< HEAD
+           confirmed delegate attendee). Used for quorum *presence* (delegators
+           without their own attendee row), vote recompute batching, and internal
+           chain helpers. Unrelated to ``assembly.representation`` (legal/agent
+           representation). Does not apply chain exclusion.
+=======
            confirmed delegate attendee). Used for quorum representation, vote
            recompute batching, and internal chain helpers. Does not apply chain
            exclusion.
+>>>>>>> origin/18.0
 
         2. ``assembly_id``, ``member_partner_id``, ``role`` — delegations on that
            member edge (delegator or delegate), then optionally partner layer,
@@ -885,8 +936,17 @@ class AssemblyDelegation(models.Model):
         if did:
             by_assembly[aid].add(did)
 
+<<<<<<< HEAD
+    def _delegation_collect_vote_recompute_attendees(  # pylint: disable=too-many-nested-blocks
+        self,
+        vals=None,
+        prev_state_by_id=None,
+        post_create=False,
+        prev_endpoint_partners_by_id=None,
+=======
     def _delegation_collect_vote_recompute_attendees(
         self, vals=None, prev_state_by_id=None, post_create=False
+>>>>>>> origin/18.0
     ):
         vals = dict(vals or {})
         Attendee = self.env["assembly.attendee"]
@@ -897,9 +957,25 @@ class AssemblyDelegation(models.Model):
                     by_assembly, delegation
                 )
         else:
+<<<<<<< HEAD
+            prev_eps = prev_endpoint_partners_by_id or {}
             state_changed = prev_state_by_id is not None
             vote_types_changed = "vote_type_ids" in vals
             for rec in self:
+                aid = rec.assembly_id.id
+                snap = prev_eps.get(rec.id)
+                if aid and snap is not None:
+                    op, od = snap
+                    np, nd = rec.partner_id.id, rec.delegate_partner_id.id
+                    if (op, od) != (np, nd):
+                        for pid in (op, od, np, nd):
+                            if pid:
+                                by_assembly[aid].add(pid)
+=======
+            state_changed = prev_state_by_id is not None
+            vote_types_changed = "vote_type_ids" in vals
+            for rec in self:
+>>>>>>> origin/18.0
                 if state_changed:
                     new_state = vals.get("delegation_state", rec.delegation_state)
                     old_state = prev_state_by_id[rec.id]
@@ -922,11 +998,41 @@ class AssemblyDelegation(models.Model):
             )
         return attendees
 
+<<<<<<< HEAD
+    def _delegation_collect_unlink_vote_recompute_attendees(self):
+        """Both endpoints per row must refresh snapshots after the row is removed."""
+        Attendee = self.env["assembly.attendee"]
+        by_assembly = defaultdict(set)
+        for rec in self:
+            self._delegation_recompute_add_endpoint_partners(by_assembly, rec)
+        attendees = Attendee.browse()
+        for aid, partner_ids in by_assembly.items():
+            if not partner_ids:
+                continue
+            attendees |= Attendee._search_attendees_for_assembly(
+                aid, partner_ids=list(partner_ids)
+            )
+        return attendees
+
+    def _recompute_votes_after_delegation_persist(
+        self,
+        vals,
+        prev_state_by_id=None,
+        post_create=False,
+        prev_endpoint_partners_by_id=None,
+    ):
+        attendees = self._delegation_collect_vote_recompute_attendees(
+            vals,
+            prev_state_by_id,
+            post_create=post_create,
+            prev_endpoint_partners_by_id=prev_endpoint_partners_by_id,
+=======
     def _recompute_votes_after_delegation_persist(
         self, vals, prev_state_by_id=None, post_create=False
     ):
         attendees = self._delegation_collect_vote_recompute_attendees(
             vals, prev_state_by_id, post_create=post_create
+>>>>>>> origin/18.0
         )
         self.env["assembly.attendee"].recompute_votes(attendees)
 
@@ -941,13 +1047,21 @@ class AssemblyDelegation(models.Model):
         if not vals_list:
             return self.browse()
         self.check_access("create")
+<<<<<<< HEAD
+=======
         for vals in vals_list:
             self._delegation_validate_create_vals(vals)
+>>>>>>> origin/18.0
         asm_ids = {v.get("assembly_id") for v in vals_list if v.get("assembly_id")}
         if asm_ids:
             self.env["assembly.assembly"].browse(
                 list(asm_ids)
             ).exists()._assembly_ensure_not_closed_for_related_changes()
+<<<<<<< HEAD
+        for vals in vals_list:
+            self._delegation_validate_create_vals(vals)
+=======
+>>>>>>> origin/18.0
         delegations = super().create(vals_list)
         delegations._recompute_votes_after_delegation_persist({}, post_create=True)
         return delegations
@@ -963,12 +1077,36 @@ class AssemblyDelegation(models.Model):
             if "delegation_state" in vals
             else None
         )
+<<<<<<< HEAD
+        prev_endpoint_partners_by_id = None
+        if self and ("partner_id" in vals or "delegate_partner_id" in vals):
+            prev_endpoint_partners_by_id = {
+                d.id: (d.partner_id.id, d.delegate_partner_id.id) for d in self
+            }
+        for rec in self:
+            rec._delegation_validate_before_write(vals)
+        res = super().write(vals)
+        self._recompute_votes_after_delegation_persist(
+            vals,
+            prev_state_by_id,
+            prev_endpoint_partners_by_id=prev_endpoint_partners_by_id,
+        )
+=======
         for rec in self:
             rec._delegation_validate_before_write(vals)
         res = super().write(vals)
         self._recompute_votes_after_delegation_persist(vals, prev_state_by_id)
+>>>>>>> origin/18.0
         return res
 
     def unlink(self):
         self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
+<<<<<<< HEAD
+        attendees = self._delegation_collect_unlink_vote_recompute_attendees()
+        res = super().unlink()
+        if attendees:
+            self.env["assembly.attendee"].recompute_votes(attendees)
+        return res
+=======
         return super().unlink()
+>>>>>>> origin/18.0

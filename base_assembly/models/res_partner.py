@@ -18,6 +18,19 @@ class ResPartner(models.Model):
         "partner_id",
         string="Delegations (as delegator)",
     )
+<<<<<<< HEAD
+    assembly_representation_owner_ids = fields.One2many(
+        "assembly.representation",
+        "owner_partner_id",
+        string="Representations (as represented member)",
+    )
+    assembly_representation_agent_ids = fields.One2many(
+        "assembly.representation",
+        "agent_partner_id",
+        string="Representations (as agent)",
+    )
+=======
+>>>>>>> origin/18.0
     count_assembly_attendees = fields.Integer(
         string="Attendances count",
         compute="_compute_assembly_counts",
@@ -32,10 +45,14 @@ class ResPartner(models.Model):
         help="If set, this partner is excluded from generated attendee lists.",
     )
 
+<<<<<<< HEAD
+    @api.depends("assembly_attendee_ids", "assembly_delegation_ids")
+=======
     @api.depends(
         "assembly_attendee_ids",
         "assembly_delegation_ids",
     )
+>>>>>>> origin/18.0
     def _compute_assembly_counts(self):
         for partner in self:
             partner.count_assembly_attendees = len(partner.assembly_attendee_ids)

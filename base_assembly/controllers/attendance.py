@@ -23,7 +23,11 @@ def _attendance_error(status_code, message):
 
 
 def _parse_assembly_and_participant_ids(assembly_id, participant_id):
+<<<<<<< HEAD
+    """Return ``(assembly_id, participant_id)`` as positive ints, or ``None`` if invalid."""
+=======
     """``(assembly_id, participant_id)`` como enteros positivos, o ``None``."""
+>>>>>>> origin/18.0
     if assembly_id is None or participant_id is None:
         return None
     str_a, str_p = str(assembly_id).strip(), str(participant_id).strip()
@@ -48,6 +52,10 @@ class AttendanceController(http.Controller):
         csrf=False,
     )
     def open_attendance(self, assembly_id=None, participant_id=None):
+<<<<<<< HEAD
+        """Deep link for managers: ``participant_id`` is ``assembly.attendee.partner_id`` (member key)."""
+=======
+>>>>>>> origin/18.0
         env = request.env
         parsed = _parse_assembly_and_participant_ids(assembly_id, participant_id)
         if parsed is None:

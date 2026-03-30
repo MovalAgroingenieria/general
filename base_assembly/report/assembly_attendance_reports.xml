@@ -94,6 +94,11 @@
                             <t t-if="o.location"> – <span t-field="o.location"/></t>
                         </div>
                     </div>
+<<<<<<< HEAD
+                    <t t-set="asm" t-value="o"/>
+                    <t t-call="base_assembly.report_assembly_publication_html_block"/>
+=======
+>>>>>>> origin/18.0
                     <div class="row"><div class="col-12"><strong>Attendees list</strong></div></div>
                     <table class="table table-sm table-bordered mt-2">
                         <thead>
@@ -123,6 +128,27 @@
                             </tr>
                         </tbody>
                     </table>
+<<<<<<< HEAD
+                    <t t-set="rep_lines" t-value="o.representation_ids.filtered(lambda r: r.active)"/>
+                    <div class="row mt-4" t-if="rep_lines">
+                        <div class="col-12"><strong>Representations (registered)</strong></div>
+                    </div>
+                    <table class="table table-sm table-bordered mt-2" t-if="rep_lines">
+                        <thead>
+                            <tr>
+                                <th>Represented member</th>
+                                <th>Agent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="rep_lines.sorted(key=lambda r: r.owner_partner_id.name)" t-as="rep">
+                                <td><span t-field="rep.owner_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/></td>
+                                <td><span t-field="rep.agent_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+=======
+>>>>>>> origin/18.0
                 </div>
             </t>
         </t>
@@ -141,6 +167,11 @@
                             <t t-if="o.location"> – <span t-field="o.location"/></t>
                         </div>
                     </div>
+<<<<<<< HEAD
+                    <t t-set="asm" t-value="o"/>
+                    <t t-call="base_assembly.report_assembly_publication_html_block"/>
+=======
+>>>>>>> origin/18.0
                     <div class="row"><div class="col-12"><strong>Attendees list (present only)</strong></div></div>
                     <table class="table table-sm table-bordered mt-2">
                         <thead>
@@ -170,6 +201,27 @@
                             </tr>
                         </tbody>
                     </table>
+<<<<<<< HEAD
+                    <t t-set="rep_lines_present" t-value="o.representation_ids.filtered(lambda r: r.active)"/>
+                    <div class="row mt-4" t-if="rep_lines_present">
+                        <div class="col-12"><strong>Representations (registered)</strong></div>
+                    </div>
+                    <table class="table table-sm table-bordered mt-2" t-if="rep_lines_present">
+                        <thead>
+                            <tr>
+                                <th>Represented member</th>
+                                <th>Agent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="rep_lines_present.sorted(key=lambda r: r.owner_partner_id.name)" t-as="rep">
+                                <td><span t-field="rep.owner_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/></td>
+                                <td><span t-field="rep.agent_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+=======
+>>>>>>> origin/18.0
                 </div>
             </t>
         </t>
@@ -188,6 +240,11 @@
                             <t t-if="o.location"> – <span t-field="o.location"/></t>
                         </div>
                     </div>
+<<<<<<< HEAD
+                    <t t-set="asm" t-value="o"/>
+                    <t t-call="base_assembly.report_assembly_publication_html_block"/>
+=======
+>>>>>>> origin/18.0
                     <div class="row"><div class="col-12"><strong>Attendees list (with delegated votes)</strong></div></div>
                     <table class="table table-sm table-bordered mt-2">
                         <thead>
@@ -229,11 +286,47 @@
                             </tr>
                         </tbody>
                     </table>
+<<<<<<< HEAD
+                    <t t-set="rep_lines_del" t-value="o.representation_ids.filtered(lambda r: r.active)"/>
+                    <div class="row mt-4" t-if="rep_lines_del">
+                        <div class="col-12"><strong>Representations (registered)</strong></div>
+                    </div>
+                    <table class="table table-sm table-bordered mt-2" t-if="rep_lines_del">
+                        <thead>
+                            <tr>
+                                <th>Represented member</th>
+                                <th>Agent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="rep_lines_del.sorted(key=lambda r: r.owner_partner_id.name)" t-as="rep">
+                                <td><span t-field="rep.owner_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/></td>
+                                <td><span t-field="rep.agent_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+=======
+>>>>>>> origin/18.0
                 </div>
             </t>
         </t>
     </template>
 
+<<<<<<< HEAD
+    <!-- 11.8a Call register: same layout as present-only (signatures); AF v2 parity label -->
+    <record id="assembly_assembly_action_report_call_register" model="ir.actions.report">
+        <field name="name">Call register (present)</field>
+        <field name="model">assembly.assembly</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_assembly.report_assembly_attendance_present</field>
+        <field name="report_file">base_assembly.report_assembly_attendance_present</field>
+        <field name="print_report_name">'Call register - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_assembly_assembly"/>
+        <field name="binding_type">report</field>
+    </record>
+
+=======
+>>>>>>> origin/18.0
     <!-- 11.8 Individual call (document) -->
     <template id="report_assembly_attendee_individual_call">
         <t t-foreach="docs" t-as="o">
@@ -265,6 +358,13 @@
                             <t t-if="assembly.location"> – <span t-field="assembly.location"/></t>
                         </div>
                     </div>
+<<<<<<< HEAD
+                    <t t-set="asm" t-value="assembly"/>
+                    <t t-call="base_assembly.report_assembly_publication_html_block"/>
+                    <t t-call="base_assembly.report_assembly_agenda_af_list_block"/>
+                    <t t-set="asm" t-value="assembly"/>
+                    <t t-call="base_assembly.report_assembly_representation_table_block"/>
+=======
                     <t t-set="publication_html" t-value="assembly.get_rendered_publication_text()"/>
                     <div t-if="publication_html" class="mb-4" t-out="publication_html"/>
                     <div t-elif="assembly.description" class="mb-4">
@@ -279,6 +379,7 @@
                             <t t-if="item.requires_vote and item.vote_type_id"> (<span t-field="item.vote_type_id.name"/>)</t>
                         </li>
                     </ol>
+>>>>>>> origin/18.0
                 </div>
             </t>
         </t>
@@ -301,6 +402,13 @@
                             <t t-if="assembly.location"> – <span t-field="assembly.location"/></t>
                         </div>
                     </div>
+<<<<<<< HEAD
+                    <t t-set="asm" t-value="assembly"/>
+                    <t t-call="base_assembly.report_assembly_publication_html_block"/>
+                    <t t-call="base_assembly.report_assembly_agenda_af_list_block"/>
+                    <t t-set="asm" t-value="assembly"/>
+                    <t t-call="base_assembly.report_assembly_representation_table_block"/>
+=======
                     <t t-set="publication_html" t-value="assembly.get_rendered_publication_text()"/>
                     <div t-if="publication_html" class="mb-4" t-out="publication_html"/>
                     <div t-elif="assembly.description" class="mb-4">
@@ -315,6 +423,7 @@
                             <t t-if="item.requires_vote and item.vote_type_id"> (<span t-field="item.vote_type_id.name"/>)</t>
                         </li>
                     </ol>
+>>>>>>> origin/18.0
                     <t t-if="o.attendee_vote_ids">
                         <div class="row mt-4">
                             <div class="col-12"><strong>Votes by type</strong></div>

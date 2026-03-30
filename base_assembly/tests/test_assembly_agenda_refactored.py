@@ -30,7 +30,11 @@ class TestAssemblyAgendaRefactored(AssemblyTestMixin, TransactionCase):
             )
         msg = str(ctx.exception).lower()
         self.assertIn("vote type", msg)
+<<<<<<< HEAD
+        self.assertTrue("require" in msg or "requires" in msg, msg)
+=======
         self.assertIn("requires", msg)
+>>>>>>> origin/18.0
 
     def test_vote_type_required_when_requires_vote_true_on_write(self):
         """vote_type_id is functionally required when requires_vote=True on write."""
@@ -42,12 +46,19 @@ class TestAssemblyAgendaRefactored(AssemblyTestMixin, TransactionCase):
         agenda = assembly.agenda_ids[0]
         agenda.write({"vote_type_id": False})
 
+<<<<<<< HEAD
+        with self.assertRaises(ValidationError) as ctx:
+            agenda.write({"requires_vote": True})
+        msg = str(ctx.exception).lower()
+        self.assertIn("weighted", msg)
+=======
         # Try to set requires_vote=True without vote_type_id
         with self.assertRaises(ValidationError) as ctx:
             agenda.write({"requires_vote": True})
         msg = str(ctx.exception).lower()
         self.assertIn("vote type", msg)
         self.assertIn("requires", msg)
+>>>>>>> origin/18.0
 
     def test_vote_type_not_required_when_requires_vote_false(self):
         """vote_type_id is optional when requires_vote=False."""
@@ -58,11 +69,21 @@ class TestAssemblyAgendaRefactored(AssemblyTestMixin, TransactionCase):
         )
         agenda = assembly.agenda_ids[0]
 
+<<<<<<< HEAD
+=======
         # Can set vote_type_id to False when requires_vote=False
+>>>>>>> origin/18.0
         agenda.write({"vote_type_id": False})
         self.assertFalse(agenda.vote_type_id)
         self.assertFalse(agenda.requires_vote)
 
+<<<<<<< HEAD
+        vote_type = assembly.assembly_type_id.vote_type_ids[0]
+        with self.assertRaises(ValidationError):
+            agenda.write({"vote_type_id": vote_type.id})
+
+=======
+>>>>>>> origin/18.0
         # Can create agenda with requires_vote=False and no vote_type_id
         agenda2 = self.env["assembly.agenda"].create(
             {
@@ -128,7 +149,13 @@ class TestAssemblyAgendaRefactored(AssemblyTestMixin, TransactionCase):
             # pylint: disable=protected-access
             assembly.vote_type_ids = [(4, other_vote_type.id)]
 
+<<<<<<< HEAD
+        assembly.action_announce()
+        assembly.action_open_registration()
+        assembly.action_start_session()
+=======
         # Start voting (creates voting_ids)
+>>>>>>> origin/18.0
         agenda.action_start_voting()
         self.assertTrue(agenda.voting_ids)
 
@@ -208,7 +235,11 @@ class TestAssemblyAgendaRefactored(AssemblyTestMixin, TransactionCase):
         self.assertTrue(agenda.requires_vote)
 
     def test_toggle_requires_vote_with_vote_type_succeeds(self):
+<<<<<<< HEAD
+        """Weighted mode with vote_type_id from no-vote mode."""
+=======
         """Setting requires_vote=True with vote_type_id succeeds."""
+>>>>>>> origin/18.0
         assembly, _ = (
             self._create_assembly_with_agenda(  # pylint: disable=protected-access
                 agenda_title="Test", requires_vote=False
@@ -217,16 +248,24 @@ class TestAssemblyAgendaRefactored(AssemblyTestMixin, TransactionCase):
         agenda = assembly.agenda_ids[0]
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
 
+<<<<<<< HEAD
+        agenda.write({"agenda_vote_mode": "weighted", "vote_type_id": vote_type.id})
+=======
         # Set vote_type_id first
         agenda.write({"vote_type_id": vote_type.id})
 
         # Then set requires_vote=True (should succeed)
         agenda.write({"requires_vote": True})
+>>>>>>> origin/18.0
         self.assertTrue(agenda.requires_vote)
         self.assertEqual(agenda.vote_type_id, vote_type)
 
     def test_set_requires_vote_and_vote_type_together_succeeds(self):
+<<<<<<< HEAD
+        """Setting weighted mode and vote_type_id together succeeds."""
+=======
         """Setting requires_vote=True and vote_type_id together succeeds."""
+>>>>>>> origin/18.0
         assembly, _ = (
             self._create_assembly_with_agenda(  # pylint: disable=protected-access
                 agenda_title="Test", requires_vote=False
@@ -235,8 +274,12 @@ class TestAssemblyAgendaRefactored(AssemblyTestMixin, TransactionCase):
         agenda = assembly.agenda_ids[0]
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
 
+<<<<<<< HEAD
+        agenda.write({"agenda_vote_mode": "weighted", "vote_type_id": vote_type.id})
+=======
         # Set both together
         agenda.write({"requires_vote": True, "vote_type_id": vote_type.id})
+>>>>>>> origin/18.0
         self.assertTrue(agenda.requires_vote)
         self.assertEqual(agenda.vote_type_id, vote_type)
 
@@ -288,7 +331,11 @@ class TestAssemblyAgendaRefactored(AssemblyTestMixin, TransactionCase):
             )
         msg = str(ctx.exception).lower()
         self.assertIn("vote type", msg)
+<<<<<<< HEAD
+        self.assertTrue("require" in msg or "requires" in msg, msg)
+=======
         self.assertIn("requires", msg)
+>>>>>>> origin/18.0
 
     def test_cannot_clear_vote_type_when_requires_vote_true(self):
         """Cannot clear vote_type_id when requires_vote=True."""
@@ -305,9 +352,13 @@ class TestAssemblyAgendaRefactored(AssemblyTestMixin, TransactionCase):
         self.assertIn("cannot be cleared", str(ctx.exception).lower())
         self.assertIn("requires vote", str(ctx.exception).lower())
 
+<<<<<<< HEAD
+        agenda.write({"agenda_vote_mode": "no_vote"})
+=======
         # Valid: disable requires_vote first, then clear vote_type_id
         agenda.write({"requires_vote": False})
         agenda.write({"vote_type_id": False})
+>>>>>>> origin/18.0
         self.assertFalse(agenda.requires_vote)
         self.assertFalse(agenda.vote_type_id)
 
@@ -364,7 +415,13 @@ class TestAssemblyAgendaRefactored(AssemblyTestMixin, TransactionCase):
         # pylint: disable=protected-access
         assembly.vote_type_ids = [(4, other_vote_type.id)]
 
+<<<<<<< HEAD
+        assembly.action_announce()
+        assembly.action_open_registration()
+        assembly.action_start_session()
+=======
         # Start voting
+>>>>>>> origin/18.0
         agenda.action_start_voting()
         self.assertTrue(agenda.voting_ids)
 
@@ -387,7 +444,11 @@ class TestAssemblyAgendaRefactored(AssemblyTestMixin, TransactionCase):
         )
 
     def test_requires_vote_toggle_with_vote_type_validation(self):
+<<<<<<< HEAD
+        """Vote mode and vote_type_id stay coherent (AF v2)."""
+=======
         """Toggle requires_vote validates vote_type_id correctly."""
+>>>>>>> origin/18.0
         assembly, _ = (
             self._create_assembly_with_agenda(  # pylint: disable=protected-access
                 agenda_title="Test", requires_vote=False
@@ -396,6 +457,15 @@ class TestAssemblyAgendaRefactored(AssemblyTestMixin, TransactionCase):
         agenda = assembly.agenda_ids[0]
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
 
+<<<<<<< HEAD
+        with self.assertRaises(ValidationError):
+            agenda.write({"vote_type_id": vote_type.id})
+
+        agenda.write({"agenda_vote_mode": "weighted", "vote_type_id": vote_type.id})
+        self.assertTrue(agenda.requires_vote)
+        self.assertEqual(agenda.vote_type_id, vote_type)
+
+=======
         # Set vote_type_id first
         agenda.write({"vote_type_id": vote_type.id})
 
@@ -405,10 +475,20 @@ class TestAssemblyAgendaRefactored(AssemblyTestMixin, TransactionCase):
         self.assertEqual(agenda.vote_type_id, vote_type)
 
         # Clear vote_type_id while requires_vote=True (should fail)
+>>>>>>> origin/18.0
         with self.assertRaises(ValidationError) as ctx:
             agenda.write({"vote_type_id": False})
         self.assertIn("cannot be cleared", str(ctx.exception).lower())
 
+<<<<<<< HEAD
+        agenda.write({"agenda_vote_mode": "no_vote"})
+        self.assertFalse(agenda.requires_vote)
+        self.assertFalse(agenda.vote_type_id)
+
+        with self.assertRaises(ValidationError) as ctx:
+            agenda.write({"requires_vote": True})
+        self.assertIn("weighted", str(ctx.exception).lower())
+=======
         # Disable requires_vote (should succeed)
         agenda.write({"requires_vote": False})
         self.assertFalse(agenda.requires_vote)
@@ -423,3 +503,4 @@ class TestAssemblyAgendaRefactored(AssemblyTestMixin, TransactionCase):
         msg = str(ctx.exception).lower()
         self.assertIn("vote type", msg)
         self.assertIn("requires", msg)
+>>>>>>> origin/18.0

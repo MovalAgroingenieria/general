@@ -7,6 +7,25 @@
             <list editable="bottom">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
+<<<<<<< HEAD
+                <field name="agenda_vote_mode"/>
+                <field name="requires_vote" column_invisible="0" invisible="agenda_vote_mode != 'weighted'" optional="show"/>
+                <field
+                    name="vote_type_id"
+                    required="agenda_vote_mode == 'weighted'"
+                    column_invisible="0"
+                    invisible="agenda_vote_mode != 'weighted'"
+                    options="{'no_create': True, 'no_open': True}"
+                />
+                <field name="manual_yes" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                <field name="manual_no" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                <field name="manual_abstain" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                <field name="manual_count_blank" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                <field name="manual_total_expected" column_invisible="0" optional="hide" invisible="agenda_vote_mode not in ('manual_yes_no','manual_multi')"/>
+                <field name="agenda_state"/>
+                <button name="action_start_voting" string="Start voting" type="object" icon="fa-check" invisible="agenda_state not in ('pending','in_progress') or agenda_vote_mode != 'weighted'" groups="base_assembly.assembly_group_manager"/>
+                <button name="action_finalize_manual" string="Finalize manual" type="object" icon="fa-check-circle" invisible="agenda_vote_mode not in ('manual_yes_no','manual_multi') or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
+=======
                 <field name="requires_vote"/>
                 <field
                     name="vote_type_id"
@@ -15,6 +34,7 @@
                 />
                 <field name="agenda_state"/>
                 <button name="action_start_voting" string="Start voting" type="object" icon="fa-check" invisible="agenda_state not in ('pending','in_progress') or not requires_vote" groups="base_assembly.assembly_group_manager"/>
+>>>>>>> origin/18.0
                 <button name="action_skip" string="Skip" type="object" icon="fa-forward" invisible="agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
             </list>
         </field>
@@ -26,9 +46,20 @@
             <search string="Agenda items">
                 <field name="name"/>
                 <field name="assembly_id"/>
+<<<<<<< HEAD
+                <filter string="No vote" name="filter_vote_mode_no_vote" domain="[('agenda_vote_mode','=','no_vote')]"/>
+                <filter string="Weighted vote (roll-call)" name="filter_vote_mode_weighted" domain="[('agenda_vote_mode','=','weighted')]"/>
                 <filter string="Requires vote" name="filter_requires_vote" domain="[('requires_vote','=',True)]"/>
                 <filter string="Pending" name="filter_pending" domain="[('agenda_state','=','pending')]"/>
                 <filter string="Voted" name="filter_voted" domain="[('agenda_state','=','voted')]"/>
+                <separator/>
+                <filter string="Manual yes / no" name="filter_manual_yes_no" domain="[('agenda_vote_mode','=','manual_yes_no')]"/>
+                <filter string="Manual multi-option" name="filter_manual_multi" domain="[('agenda_vote_mode','=','manual_multi')]"/>
+=======
+                <filter string="Requires vote" name="filter_requires_vote" domain="[('requires_vote','=',True)]"/>
+                <filter string="Pending" name="filter_pending" domain="[('agenda_state','=','pending')]"/>
+                <filter string="Voted" name="filter_voted" domain="[('agenda_state','=','voted')]"/>
+>>>>>>> origin/18.0
             </search>
         </field>
     </record>
@@ -37,6 +68,14 @@
         <field name="model">assembly.agenda</field>
         <field name="arch" type="xml">
             <form string="Agenda item">
+<<<<<<< HEAD
+                <header>
+                    <button name="action_start_voting" string="Start voting" type="object" invisible="agenda_vote_mode != 'weighted' or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_finalize_manual" string="Finalize manual" type="object" invisible="agenda_vote_mode not in ('manual_yes_no','manual_multi') or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_skip" string="Skip" type="object" invisible="agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
+                </header>
+=======
+>>>>>>> origin/18.0
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_assembly" type="object" class="oe_stat_button" icon="fa-building-o" title="Assembly">
@@ -68,6 +107,44 @@
                     </div>
                     <group string="Voting">
                         <group>
+<<<<<<< HEAD
+                            <field name="agenda_vote_mode"/>
+                            <field name="requires_vote" readonly="agenda_vote_mode != 'weighted'"/>
+                            <field
+                                name="vote_type_id"
+                                invisible="agenda_vote_mode != 'weighted'"
+                                required="agenda_vote_mode == 'weighted'"
+                                options="{'no_create': True, 'no_open': True}"
+                            />
+                            <field name="agenda_state"/>
+                        </group>
+                    </group>
+                    <group string="Manual yes / no / abstention / blank" invisible="agenda_vote_mode != 'manual_yes_no'">
+                        <group>
+                            <field name="manual_yes"/>
+                            <field name="manual_no"/>
+                            <field name="manual_abstain"/>
+                            <field name="manual_count_blank"/>
+                        </group>
+                    </group>
+                    <group string="Manual voting parameters" invisible="agenda_vote_mode not in ('manual_yes_no','manual_multi')">
+                        <field name="manual_total_expected"/>
+                    </group>
+                    <group string="Ballot options" invisible="agenda_vote_mode != 'manual_multi'">
+                        <field name="option_ids" nolabel="1" colspan="2">
+                            <list editable="bottom">
+                                <field name="sequence" widget="handle"/>
+                                <field name="name"/>
+                                <field name="manual_vote_count"/>
+                            </list>
+                        </field>
+                    </group>
+                    <group string="Final summary">
+                        <field name="final_summary" nolabel="1" colspan="2" placeholder="HTML summary when the point is closed…"/>
+                    </group>
+                </sheet>
+                <chatter/>
+=======
                             <field name="requires_vote"/>
                 <field
                     name="vote_type_id"
@@ -78,6 +155,7 @@
                         </group>
                     </group>
                 </sheet>
+>>>>>>> origin/18.0
             </form>
         </field>
     </record>
@@ -91,11 +169,31 @@
                 <field name="name"/>
                 <field name="sequence"/>
                 <field name="assembly_id"/>
+<<<<<<< HEAD
+                <field name="agenda_vote_mode"/>
+=======
+>>>>>>> origin/18.0
                 <field name="requires_vote"/>
                 <field name="count_votings"/>
                 <field name="agenda_state"/>
                 <templates>
                     <t t-name="kanban-box">
+<<<<<<< HEAD
+                        <div class="oe_kanban_card oe_kanban_global_click o_kanban_card rounded-3 shadow-sm border overflow-hidden">
+                            <div class="d-flex align-items-center justify-content-between gap-2 px-3 py-2 border-bottom bg-100">
+                                <span class="badge rounded-pill text-bg-secondary"><i class="fa fa-list-ol me-1"/><field name="sequence"/></span>
+                                <field name="agenda_state" widget="badge"/>
+                            </div>
+                            <div class="px-3 py-2">
+                                <div class="fw-bold text-truncate mb-1"><field name="name"/></div>
+                                <div class="text-muted small text-truncate mb-2"><i class="fa fa-sitemap me-1"/><field name="assembly_id"/></div>
+                                <div class="d-flex flex-wrap align-items-center gap-2 small">
+                                    <span class="badge text-bg-light border">
+                                        <i class="fa fa-check-square-o me-1"/><field name="count_votings"/> <span class="text-muted">votings</span>
+                                    </span>
+                                    <span class="badge text-bg-light border"><i class="fa fa-sliders me-1"/><field name="agenda_vote_mode"/></span>
+                                </div>
+=======
                         <div class="oe_kanban_card oe_kanban_global_click">
                             <div class="o_kanban_record_top mb-1">
                                 <strong class="o_kanban_record_title"><field name="name"/></strong>
@@ -105,6 +203,7 @@
                                 <div>Item <field name="sequence"/> · <field name="agenda_state"/></div>
                                 <div>Votings: <field name="count_votings"/></div>
                                 <div t-if="record.requires_vote.raw_value" class="text-info">Requires vote</div>
+>>>>>>> origin/18.0
                             </div>
                         </div>
                     </t>
@@ -146,6 +245,12 @@
                     <button name="action_reopen" string="Reopen" type="object" invisible="assembly_state != 'cancelled'" groups="base_assembly.assembly_group_manager"/>
                     <button name="action_generate_attendees" string="Generate attendees" type="object" invisible="assembly_state not in ('draft','announced','open')" groups="base_assembly.assembly_group_manager"/>
                     <button name="action_recompute_attendee_votes" string="Recompute votes" type="object" invisible="not attendee_ids or assembly_state == 'closed'" groups="base_assembly.assembly_group_manager"/>
+<<<<<<< HEAD
+                    <button name="action_open_document_preview_wizard" string="Preview documents" type="object" invisible="assembly_state == 'closed'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_mail_compose_publication" string="Email convocation" type="object" invisible="assembly_state == 'closed'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_mail_compose_delegation" string="Email delegation" type="object" invisible="assembly_state == 'closed'" groups="base_assembly.assembly_group_manager"/>
+=======
+>>>>>>> origin/18.0
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -167,6 +272,15 @@
                                 <span class="o_stat_text">Delegations</span>
                             </div>
                         </button>
+<<<<<<< HEAD
+                        <button name="action_open_representations" type="object" class="oe_stat_button" icon="fa-user" invisible="assembly_state == 'draft'">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_value"><field name="count_representations"/></span>
+                                <span class="o_stat_text">Representations</span>
+                            </div>
+                        </button>
+=======
+>>>>>>> origin/18.0
                         <button name="action_open_attendees" type="object" class="oe_stat_button" icon="fa-users" invisible="assembly_state == 'draft'">
                             <div class="o_form_field o_stat_info">
                                 <span class="o_stat_value"><field name="total_present_attendees"/></span>
@@ -193,6 +307,13 @@
                                 <i class="fa fa-hand-o-right fa-2x d-block text-primary" title="Delegations"/>
                                 <span class="o_stat_info"><field name="count_delegations"/></span> Delegations
                             </button>
+<<<<<<< HEAD
+                            <button name="action_open_representations" type="object" class="btn btn-link px-2 o_smart_button" invisible="assembly_state == 'draft'">
+                                <i class="fa fa-user fa-2x d-block text-primary" title="Representations"/>
+                                <span class="o_stat_info"><field name="count_representations"/></span> Representations
+                            </button>
+=======
+>>>>>>> origin/18.0
                             <button name="action_open_attendees" type="object" class="btn btn-link px-2 o_smart_button" invisible="assembly_state == 'draft'">
                                 <i class="fa fa-users fa-2x d-block text-primary" title="Attendees"/>
                                 <span class="o_stat_info"><field name="total_present_attendees"/></span> Attendees
@@ -201,7 +322,12 @@
                     </div>
                     <group readonly="assembly_state == 'closed'">
                         <group>
+<<<<<<< HEAD
+                            <field name="company_id" groups="base.group_multi_company" readonly="assembly_state == 'closed'"/>
+                            <field name="assembly_type_id" domain="[('company_id', '=', company_id)]"/>
+=======
                             <field name="assembly_type_id"/>
+>>>>>>> origin/18.0
                             <field name="date_announcement"/>
                             <field name="date_first_call"/>
                             <field name="date_second_call"/>
@@ -232,6 +358,25 @@
                                 <list>
                                     <field name="sequence" widget="handle"/>
                                     <field name="name"/>
+<<<<<<< HEAD
+                                    <field name="agenda_vote_mode"/>
+                                    <field name="requires_vote" column_invisible="0" invisible="agenda_vote_mode != 'weighted'" optional="hide"/>
+                                    <field
+                                        name="vote_type_id"
+                                        required="agenda_vote_mode == 'weighted'"
+                                        column_invisible="0"
+                                        invisible="agenda_vote_mode != 'weighted'"
+                                        options="{'no_create': True, 'no_open': True}"
+                                    />
+                                    <field name="manual_yes" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                                    <field name="manual_no" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                                    <field name="manual_abstain" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                                    <field name="manual_count_blank" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                                    <field name="manual_total_expected" column_invisible="0" optional="hide" invisible="agenda_vote_mode not in ('manual_yes_no','manual_multi')"/>
+                                    <field name="agenda_state"/>
+                                    <button name="action_start_voting" string="Start voting" type="object" icon="fa-check" invisible="agenda_state not in ('pending','in_progress') or agenda_vote_mode != 'weighted'" groups="base_assembly.assembly_group_manager"/>
+                                    <button name="action_finalize_manual" string="Finalize manual" type="object" icon="fa-check-circle" invisible="agenda_vote_mode not in ('manual_yes_no','manual_multi') or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
+=======
                                     <field name="requires_vote"/>
                                     <field
                                         name="vote_type_id"
@@ -240,6 +385,7 @@
                                     />
                                     <field name="agenda_state"/>
                                     <button name="action_start_voting" string="Start voting" type="object" icon="fa-check" invisible="agenda_state not in ('pending','in_progress') or not requires_vote" groups="base_assembly.assembly_group_manager"/>
+>>>>>>> origin/18.0
                                     <button name="action_skip" string="Skip" type="object" icon="fa-forward" invisible="agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
                                 </list>
                             </field>
@@ -262,7 +408,15 @@
                             </field>
                         </page>
                         <page string="Delegations" name="delegations" groups="base_assembly.assembly_group_manager">
+<<<<<<< HEAD
+                            <field
+                                name="delegation_ids"
+                                readonly="assembly_state == 'closed'"
+                                context="{'search_default_filter_open': 1}"
+                            >
+=======
                             <field name="delegation_ids" readonly="assembly_state == 'closed'">
+>>>>>>> origin/18.0
                                 <list editable="bottom">
                                     <field name="partner_id" string="Delegator"/>
                                     <field name="delegate_partner_id" string="Delegate"/>
@@ -272,26 +426,86 @@
                                 </list>
                             </field>
                         </page>
+<<<<<<< HEAD
+                        <page string="Representations" name="representations" groups="base_assembly.assembly_group_manager">
+                            <field
+                                name="representation_ids"
+                                readonly="assembly_state == 'closed'"
+                                context="{'default_assembly_id': id}"
+                            >
+                                <list editable="bottom">
+                                    <field name="owner_partner_id"/>
+                                    <field name="agent_partner_id"/>
+                                    <field name="active"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Configuration" name="config">
+                            <group readonly="assembly_state == 'closed'">
+                                <group string="Quorum &amp; online voting">
+                                    <field name="allow_online_voting"/>
+                                    <field name="attendance_require_partner_vat_confirm"/>
+                                    <field name="attendance_partner_vat_format_strict"
+                                           invisible="not attendance_require_partner_vat_confirm"/>
+=======
                         <page string="Configuration" name="config">
                             <group readonly="assembly_state == 'closed'">
                             <field name="allow_online_voting"/>
                             <field name="vote_type_ids" widget="many2many_tags"/>
                             <group>
                                 <group>
+>>>>>>> origin/18.0
                                     <field name="quorum_type"/>
                                     <field name="quorum_value"/>
                                     <field name="quorum_second_call_type"/>
                                     <field name="quorum_second_call_value"/>
                                 </group>
+<<<<<<< HEAD
+                                <group string="Vote types">
+                                    <field
+                                        name="vote_type_ids"
+                                        widget="many2many_tags"
+                                    />
+                                </group>
+                            </group>
+                            <group readonly="assembly_state == 'closed'">
+                                <field
+                                    name="partner_domain"
+                                    string="Partner domain (convocable partners)"
+                                    widget="domain"
+                                    colspan="2"
+                                    options="{'model': 'res.partner'}"
+                                />
+                            </group>
+                            <group readonly="assembly_state == 'closed'">
+                                <field
+                                    name="description"
+                                    string="Convocation / description"
+                                    placeholder="Convocation text"
+                                    colspan="2"
+                                />
+                            </group>
+                            <group string="Document templates (optional overrides)" readonly="assembly_state == 'closed'" groups="base_assembly.assembly_group_manager">
+                                <field name="publication_mail_template_id" options="{'no_create': True}"/>
+                                <field name="delegation_document_mail_template_id" options="{'no_create': True}"/>
+                                <field name="delegation_footer_mail_template_id" options="{'no_create': True}"/>
+                                <field name="ballot_intro_mail_template_id" options="{'no_create': True}"/>
+                                <field name="ballot_nominative_intro_mail_template_id" options="{'no_create': True}"/>
+=======
                             </group>
                             <label for="partner_domain" string="Partner domain (convocable partners)"/>
                             <field name="partner_domain" widget="domain" nolabel="1" options="{'model': 'res.partner'}"/>
                             <label for="description" string="Convocation / description"/>
                             <field name="description" nolabel="1" placeholder="Convocation text"/>
+>>>>>>> origin/18.0
                             </group>
                         </page>
                     </notebook>
                 </sheet>
+<<<<<<< HEAD
+                <chatter/>
+=======
+>>>>>>> origin/18.0
             </form>
         </field>
     </record>
@@ -303,6 +517,10 @@
             <list decoration-muted="assembly_state == 'cancelled'" default_order="date_first_call desc">
                 <field name="name"/>
                 <field name="code"/>
+<<<<<<< HEAD
+                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+=======
+>>>>>>> origin/18.0
                 <field name="assembly_type_id"/>
                 <field name="assembly_state"/>
                 <field name="date_first_call"/>
@@ -324,6 +542,10 @@
             <search string="Assemblies">
                 <field name="name"/>
                 <field name="code"/>
+<<<<<<< HEAD
+                <field name="company_id" groups="base.group_multi_company"/>
+=======
+>>>>>>> origin/18.0
                 <field name="assembly_type_id"/>
                 <field name="location"/>
                 <field name="president_id"/>
@@ -337,6 +559,10 @@
                 <separator/>
                 <filter string="Active" name="filter_active" domain="[('active','=',True)]"/>
                 <group expand="0" string="Group By">
+<<<<<<< HEAD
+                    <filter string="Company" name="group_company" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+=======
+>>>>>>> origin/18.0
                     <filter string="Assembly type" name="group_type" context="{'group_by':'assembly_type_id'}"/>
                     <filter string="President" name="group_president" context="{'group_by':'president_id'}"/>
                     <filter string="Secretary" name="group_secretary" context="{'group_by':'secretary_id'}"/>
@@ -356,6 +582,10 @@
                 <field name="assembly_state"/>
                 <field name="assembly_type_id"/>
                 <field name="quorum_percentage"/>
+<<<<<<< HEAD
+                <field name="quorum_reached"/>
+=======
+>>>>>>> origin/18.0
                 <field name="total_present_attendees"/>
                 <field name="total_possible_attendees"/>
                 <field name="kanban_open_votings_count"/>
@@ -364,6 +594,47 @@
                 <field name="kanban_results_summary"/>
                 <templates>
                     <t t-name="kanban-box">
+<<<<<<< HEAD
+                        <div class="oe_kanban_card oe_kanban_global_click o_kanban_card rounded-3 shadow-sm border overflow-hidden">
+                            <div class="d-flex justify-content-between align-items-start gap-2 px-3 py-2 border-bottom bg-100">
+                                <div class="min-w-0 flex-grow-1">
+                                    <div class="fw-bold text-truncate"><field name="name"/></div>
+                                    <div class="text-muted small font-monospace text-truncate"><field name="code"/></div>
+                                </div>
+                                <field name="assembly_state" widget="badge"/>
+                            </div>
+                            <div class="px-3 py-2 small">
+                                <div t-if="record.assembly_type_id.raw_value" class="text-muted text-truncate mb-2">
+                                    <i class="fa fa-tag me-1"/><field name="assembly_type_id"/>
+                                </div>
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between text-muted mb-1">
+                                        <span><i class="fa fa-users me-1"/>Quorum</span>
+                                        <span><field name="total_present_attendees"/> / <field name="total_possible_attendees"/> · <field name="quorum_percentage"/>%</span>
+                                    </div>
+                                    <div class="progress rounded-pill" style="height: 7px;">
+                                        <div role="progressbar" t-att-class="'progress-bar ' + (record.quorum_reached.raw_value ? 'bg-success' : 'bg-warning')" t-attf-style="width: {{ Math.min(100, Math.round(100 * (record.total_present_attendees.raw_value || 0) / (record.total_possible_attendees.raw_value || 1))) }}%;"></div>
+                                    </div>
+                                    <div class="mt-1">
+                                        <span t-if="record.quorum_reached.raw_value" class="text-success"><i class="fa fa-check-circle me-1"/>Quorum reached</span>
+                                        <span t-else="" class="text-warning"><i class="fa fa-exclamation-circle me-1"/>Quorum pending</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                    <span class="badge rounded-pill text-bg-primary">
+                                        <i class="fa fa-folder-open-o me-1"/><field name="kanban_open_votings_count"/> open
+                                    </span>
+                                    <span class="badge rounded-pill text-bg-secondary">
+                                        <i class="fa fa-check me-1"/><field name="kanban_closed_votings_count"/> closed
+                                    </span>
+                                </div>
+                                <div t-if="record.kanban_closed_votings_count.raw_value" class="text-muted mb-1">
+                                    <i class="fa fa-pie-chart me-1"/>Avg. participation (closed): <strong><field name="kanban_avg_participation"/>%</strong>
+                                </div>
+                                <div t-if="record.kanban_results_summary.raw_value" class="fw-bold border-top pt-2 mt-1 text-truncate">
+                                    <field name="kanban_results_summary"/>
+                                </div>
+=======
                         <div class="oe_kanban_card oe_kanban_global_click">
                             <div class="o_kanban_record_top mb-1">
                                 <strong class="o_kanban_record_title"><field name="name"/></strong>
@@ -376,6 +647,7 @@
                                 <div>Votings: open <field name="kanban_open_votings_count"/> · closed <field name="kanban_closed_votings_count"/></div>
                                 <div t-if="record.kanban_closed_votings_count.raw_value">Avg. participation (closed): <field name="kanban_avg_participation"/>%</div>
                                 <div t-if="record.kanban_results_summary.raw_value" class="fw-bold"><field name="kanban_results_summary"/></div>
+>>>>>>> origin/18.0
                             </div>
                         </div>
                     </t>

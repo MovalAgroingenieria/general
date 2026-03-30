@@ -1,11 +1,27 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
+<<<<<<< HEAD
+from odoo.addons.base_assembly.models.assembly_delegation import (
+    _DELEGATION_ALLOWED_STATE_TRANSITIONS,
+)
+from odoo.exceptions import UserError, ValidationError
+=======
 from odoo.exceptions import ValidationError
+>>>>>>> origin/18.0
 from odoo.tests import TransactionCase
 
 from .common import AssemblyTestMixin
 
+<<<<<<< HEAD
+_ALLOWED_DELEGATION_EDGES = frozenset(
+    (old, new)
+    for old, targets in _DELEGATION_ALLOWED_STATE_TRANSITIONS.items()
+    for new in targets
+)
+
+=======
+>>>>>>> origin/18.0
 
 class TestAssemblyDelegation(AssemblyTestMixin, TransactionCase):
     """Tests for assembly.delegation: constraints, confirm, recompute."""
@@ -108,6 +124,56 @@ class TestAssemblyDelegation(AssemblyTestMixin, TransactionCase):
         self.assertEqual(av_delegate.delegated_in_votes, 4.0)
         self.assertEqual(av_delegate.attendee_vote_total, 1.0 + 4.0)
 
+<<<<<<< HEAD
+    def test_unlink_confirmed_delegation_recomputes_attendee_vote_lines(self):
+        """Removing a delegation must clear stale delegated_in/out on stored snapshots."""
+        assembly, _ = self._create_assembly_with_agenda()
+        assembly.action_generate_attendees()
+        vote_type = assembly.assembly_type_id.vote_type_ids[0]
+        delegator = assembly.attendee_ids[0]
+        delegate = assembly.attendee_ids[1]
+        self._give_partner_votes(delegator.partner_id, vote_type, 6)
+        self._give_partner_votes(delegate.partner_id, vote_type, 2)
+        delegator.action_confirm()
+        delegate.action_confirm()
+        delegation = self.env["assembly.delegation"].create(
+            {
+                "assembly_id": assembly.id,
+                "partner_id": delegator.partner_id.id,
+                "delegate_partner_id": delegate.partner_id.id,
+                "vote_type_ids": [(6, 0, vote_type.ids)],
+                "delegation_state": "confirmed",
+            }
+        )
+        av_del = self.env["assembly.attendee.vote"].search(
+            [
+                ("attendee_id", "=", delegate.id),
+                ("vote_type_id", "=", vote_type.id),
+            ],
+            limit=1,
+        )
+        self.assertEqual(av_del.delegated_in_votes, 6.0)
+        delegation.unlink()
+        av_del = self.env["assembly.attendee.vote"].search(
+            [
+                ("attendee_id", "=", delegate.id),
+                ("vote_type_id", "=", vote_type.id),
+            ],
+            limit=1,
+        )
+        self.assertEqual(av_del.delegated_in_votes, 0.0)
+        self.assertEqual(av_del.attendee_vote_total, 2.0)
+        av_out = self.env["assembly.attendee.vote"].search(
+            [
+                ("attendee_id", "=", delegator.id),
+                ("vote_type_id", "=", vote_type.id),
+            ],
+            limit=1,
+        )
+        self.assertEqual(av_out.delegated_out_votes, 0.0)
+
+=======
+>>>>>>> origin/18.0
     def test_two_confirmed_delegations_same_type_raises(self):
         assembly, _ = (
             self._create_assembly_with_agenda()
@@ -139,3 +205,109 @@ class TestAssemblyDelegation(AssemblyTestMixin, TransactionCase):
                 }
             )
         self.assertIn("same vote type", str(ctx.exception).lower())
+<<<<<<< HEAD
+
+    def test_write_changes_delegator_partner_recomputes_delegate_delegated_in(self):
+        """Changing ``partner_id`` on a confirmed delegation must refresh stored snapshots."""
+        env = self.env
+        p_del_a = env["res.partner"].create(
+            {"name": "DelA", "is_company": False, "assembly_excluded": True}
+        )
+        p_del_b = env["res.partner"].create(
+            {"name": "DelB", "is_company": False, "assembly_excluded": True}
+        )
+        p_def = env["res.partner"].create(
+            {"name": "Delegate", "is_company": False, "assembly_excluded": False}
+        )
+        domain = "[('id', 'in', %s)]" % ([p_del_a.id, p_del_b.id, p_def.id],)
+        assembly, _ = self._create_assembly_with_agenda(partner_domain=domain)
+        assembly.action_generate_attendees()
+        vote_type = assembly.assembly_type_id.vote_type_ids[0]
+        self._give_partner_votes(p_del_a, vote_type, 10)
+        self._give_partner_votes(p_del_b, vote_type, 3)
+        self._give_partner_votes(p_def, vote_type, 2)
+        delegate_att = assembly.attendee_ids.filtered(lambda a: a.partner_id == p_def)
+        delegate_att.action_confirm()
+        del_rec = env["assembly.delegation"].create(
+            {
+                "assembly_id": assembly.id,
+                "partner_id": p_del_a.id,
+                "delegate_partner_id": p_def.id,
+                "vote_type_ids": [(6, 0, vote_type.ids)],
+                "delegation_state": "confirmed",
+            }
+        )
+        av = env["assembly.attendee.vote"].search(
+            [
+                ("attendee_id", "=", delegate_att.id),
+                ("vote_type_id", "=", vote_type.id),
+            ],
+            limit=1,
+        )
+        self.assertEqual(av.delegated_in_votes, 10.0)
+        del_rec.write({"partner_id": p_del_b.id})
+        av = env["assembly.attendee.vote"].search(
+            [
+                ("attendee_id", "=", delegate_att.id),
+                ("vote_type_id", "=", vote_type.id),
+            ],
+            limit=1,
+        )
+        self.assertEqual(av.delegated_in_votes, 3.0)
+
+
+class TestDelegationStateMachine(AssemblyTestMixin, TransactionCase):
+    """Protects delegation status transitions before business rules on confirm."""
+
+    def _graph_shell(self):
+        return self.env["assembly.delegation"].new({})
+
+    def test_same_state_is_noop(self):
+        shell = self._graph_shell()
+        shell._validate_delegation_state_transition("draft", "draft")
+
+    def test_all_documented_edges_allowed(self):
+        shell = self._graph_shell()
+        for old, new in sorted(_ALLOWED_DELEGATION_EDGES):
+            with self.subTest(old=old, new=new):
+                shell._validate_delegation_state_transition(old, new)
+
+    def test_disallowed_edges_raise(self):
+        shell = self._graph_shell()
+        with self.assertRaises(UserError):
+            shell._validate_delegation_state_transition("confirmed", "draft")
+        with self.assertRaises(UserError):
+            shell._validate_delegation_state_transition("revoked", "draft")
+
+    def test_invalid_state_token_raises(self):
+        shell = self._graph_shell()
+        with self.assertRaises(UserError):
+            shell._validate_delegation_state_transition("draft", "not_a_state")
+
+    def test_write_enforces_graph(self):
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        assembly.action_generate_attendees()
+        vote_type = assembly.assembly_type_id.vote_type_ids[0]
+        delegator = assembly.attendee_ids[0]
+        delegate = assembly.attendee_ids[1]
+        self._give_partner_votes(delegator.partner_id, vote_type, 1)
+        self._give_partner_votes(delegate.partner_id, vote_type, 1)
+        delegator.action_confirm()
+        delegate.action_confirm()
+        delegation = self.env["assembly.delegation"].create(
+            {
+                "assembly_id": assembly.id,
+                "partner_id": delegator.partner_id.id,
+                "delegate_partner_id": delegate.partner_id.id,
+                "vote_type_ids": [(6, 0, vote_type.ids)],
+                "delegation_state": "draft",
+            }
+        )
+        delegation.write({"delegation_state": "confirmed"})
+        self.assertEqual(delegation.delegation_state, "confirmed")
+        with self.assertRaises(UserError):
+            delegation.write({"delegation_state": "draft"})
+=======
+>>>>>>> origin/18.0

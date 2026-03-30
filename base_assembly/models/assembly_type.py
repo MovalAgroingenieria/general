@@ -9,6 +9,16 @@ class AssemblyType(models.Model):
     _description = "Assembly type"
     _order = "name"
 
+<<<<<<< HEAD
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        required=True,
+        default=lambda self: self.env.company,
+        index=True,
+    )
+=======
+>>>>>>> origin/18.0
     name = fields.Char(required=True, translate=True)
     code = fields.Char(required=True, index=True)
     description = fields.Text(translate=True)
@@ -62,8 +72,45 @@ class AssemblyType(models.Model):
         string="Default secretary",
         ondelete="set null",
     )
+<<<<<<< HEAD
+    default_attendance_require_partner_vat_confirm = fields.Boolean(
+        string="Default: require TIN to confirm attendance",
+        default=False,
+        help=(
+            "When creating an assembly from this type, copy this to the assembly. "
+            "If enabled, confirming an attendee is blocked when the member has no TIN "
+            "or uses the exempt placeholder."
+        ),
+    )
+    default_attendance_partner_vat_format_strict = fields.Boolean(
+        string="Default: strict TIN format for attendance confirmation",
+        default=False,
+        help=(
+            "When creating an assembly from this type, copy this to the assembly. "
+            "If enabled together with the requirement above, the TIN must pass a "
+            "light normalized format check (alphanumeric, length)."
+        ),
+    )
+    require_vat = fields.Boolean(
+        string="Require VAT to confirm attendance",
+        default=False,
+        help=(
+            "If enabled, confirming an assembly attendee is blocked when the member "
+            "has no tax identification number (VAT/TIN) or only the exempt placeholder."
+        ),
+    )
+    active = fields.Boolean(default=True)
+
+    _sql_constraints = [
+        (
+            "assembly_type_code_company_uniq",
+            "UNIQUE(company_id, code)",
+            "The code must be unique per company.",
+        ),
+=======
     active = fields.Boolean(default=True)
 
     _sql_constraints = [
         ("code_uniq", "UNIQUE(code)", "The code must be unique."),
+>>>>>>> origin/18.0
     ]

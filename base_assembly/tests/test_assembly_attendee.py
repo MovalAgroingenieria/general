@@ -1,6 +1,10 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
+<<<<<<< HEAD
+from odoo.exceptions import UserError
+=======
+>>>>>>> origin/18.0
 from odoo.tests import TransactionCase
 
 from .common import AssemblyTestMixin
@@ -52,6 +56,68 @@ class TestAssemblyAttendee(AssemblyTestMixin, TransactionCase):
         att.action_mark_absent()
         self.assertEqual(att.attendee_state, "absent")
 
+<<<<<<< HEAD
+    def test_mark_absent_blocked_when_open_voting_has_recorded_vote(self):
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        assembly.action_generate_attendees()
+        vote_type = assembly.assembly_type_id.vote_type_ids[0]
+        att = assembly.attendee_ids[0]
+        self._give_partner_votes(
+            att.partner_id, vote_type, 3
+        )  # pylint: disable=protected-access
+        att.action_confirm()
+        assembly.action_announce()
+        assembly.action_open_registration()
+        assembly.action_start_session()
+        agenda.action_start_voting()
+        voting = self.env["assembly.voting"].search(
+            [("agenda_id", "=", agenda.id)], limit=1
+        )
+        self.env["assembly.voting.line"].create(
+            {
+                "voting_id": voting.id,
+                "attendee_id": att.id,
+                "vote_option": "yes",
+                "votes_applied": 3.0,
+            }
+        )
+        with self.assertRaises(UserError):
+            att.action_mark_absent()
+
+    def test_mark_absent_allowed_after_voting_closed_with_recorded_vote(self):
+        assembly, agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        assembly.action_generate_attendees()
+        vote_type = assembly.assembly_type_id.vote_type_ids[0]
+        att = assembly.attendee_ids[0]
+        self._give_partner_votes(
+            att.partner_id, vote_type, 3
+        )  # pylint: disable=protected-access
+        att.action_confirm()
+        assembly.action_announce()
+        assembly.action_open_registration()
+        assembly.action_start_session()
+        agenda.action_start_voting()
+        voting = self.env["assembly.voting"].search(
+            [("agenda_id", "=", agenda.id)], limit=1
+        )
+        self.env["assembly.voting.line"].create(
+            {
+                "voting_id": voting.id,
+                "attendee_id": att.id,
+                "vote_option": "yes",
+                "votes_applied": 3.0,
+            }
+        )
+        voting.action_close()
+        att.action_mark_absent()
+        self.assertEqual(att.attendee_state, "absent")
+
+=======
+>>>>>>> origin/18.0
     def test_recompute_votes_creates_attendee_vote_for_assembly_types(self):
         assembly, _ = (
             self._create_assembly_with_agenda()

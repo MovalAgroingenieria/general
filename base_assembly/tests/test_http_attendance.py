@@ -10,8 +10,18 @@ Explicit functional contract (mandatory):
 - non-manager → ``test_att_06_non_manager_forbidden``;
 - disallowed assembly state → e.g. ``test_att_08_assembly_draft_returns_403``;
 - participant without attendee row → ``test_att_05_participant_not_attendee_returns_404``.
+<<<<<<< HEAD
+- tracked short URL → ``test_att_tracked_short_link_redirects_to_attendance_url``,
+  ``test_att_tracked_short_link_resolves_same_as_direct_attendance_url``
+  (``link_tracker`` ``/r/<code>`` → attendance target → manager form; no ``website`` in manifest).
 """
 
+from urllib.parse import parse_qs, urlparse
+
+=======
+"""
+
+>>>>>>> origin/18.0
 from odoo.addons.base_assembly.controllers.attendance import AttendanceController
 
 from .http_common import AssemblyHttpCase
@@ -76,6 +86,70 @@ class TestHttpAttendance(AssemblyHttpCase):
             "base_assembly must not expose /assembly/c/* routes: %s" % bad,
         )
 
+<<<<<<< HEAD
+    def test_att_tracked_short_link_redirects_to_attendance_url(self):
+        """AF v2 / link_tracker: ``/r/<code>`` resolves to the stored attendance URL (301).
+
+        Uses the same registry as ``base_assembly`` + ``link_tracker`` (no ``website`` addon
+        required for this route — it is registered by ``link_tracker``).
+        """
+        att = self.attendee
+        self.assertTrue(
+            att.attendance_link_tracker_id,
+            "attendee should have a link.tracker after generate attendees",
+        )
+        code = att.attendance_link_tracker_id.code
+        self.assertTrue(code)
+        res = self.url_open("/r/%s" % code, allow_redirects=False)
+        self.assertIn(
+            res.status_code,
+            (301, 302),
+            "link_tracker redirect expected; got %s" % res.status_code,
+        )
+        loc = res.headers.get("Location", "")
+        self.assertTrue(loc, "Redirect Location must be set")
+        parsed = urlparse(loc)
+        self.assertIn("/assembly/attendance", parsed.path)
+        qs = parse_qs(parsed.query)
+        self.assertEqual(
+            (qs.get("assembly_id") or [None])[0],
+            str(self.assembly.id),
+        )
+        self.assertEqual(
+            (qs.get("participant_id") or [None])[0],
+            str(att.partner_id.id),
+        )
+
+    def test_att_tracked_short_link_resolves_same_as_direct_attendance_url(self):
+        """End-to-end: ``/r/<code>`` Location, when opened by a manager, matches direct deep link."""
+        self.assembly.action_announce()
+        self.assembly.action_open_registration()
+        att = self.attendee
+        code = att.attendance_link_tracker_id.code
+        self.assertTrue(code)
+        res_short = self.url_open("/r/%s" % code, allow_redirects=False)
+        self.assertIn(res_short.status_code, (301, 302))
+        loc = res_short.headers.get("Location", "")
+        self.assertTrue(loc, "link_tracker must return a redirect target")
+        self.authenticate(self.user_manager.login, "assembly_manager_http")
+        res_tracked = self.url_open(loc, allow_redirects=False)
+        self.assertIn(
+            res_tracked.status_code,
+            (302, 303),
+            "Resolved attendance URL must redirect manager to backend form",
+        )
+        loc_tracked = res_tracked.headers.get("Location", "")
+        direct = "/assembly/attendance?assembly_id=%s&participant_id=%s" % (
+            self.assembly.id,
+            att.partner_id.id,
+        )
+        res_direct = self.url_open(direct, allow_redirects=False)
+        self.assertIn(res_direct.status_code, (302, 303))
+        loc_direct = res_direct.headers.get("Location", "")
+        self.assertURLEqual(loc_tracked, loc_direct)
+
+=======
+>>>>>>> origin/18.0
     def test_att_01_manager_valid_params_redirects_to_form(self):
         """FS: valid access — manager, assembly ``open``, ``assembly_id`` + ``participant_id`` → 302/303."""
         self.assembly.action_announce()

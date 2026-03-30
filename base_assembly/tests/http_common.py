@@ -40,11 +40,20 @@ class AssemblyHttpCase(AssemblyTestMixin, HttpCase):
         cls.group_portal = cls.env.ref("base.group_portal", raise_if_not_found=False)
 
         try:
+<<<<<<< HEAD
+            cid = cls.env.company.id
+=======
+>>>>>>> origin/18.0
             cls.user_manager = cls.env["res.users"].create(
                 {
                     "name": "Assembly Manager HTTP",
                     "login": "assembly_manager_http",
                     "password": "assembly_manager_http",
+<<<<<<< HEAD
+                    "company_id": cid,
+                    "company_ids": [(6, 0, [cid])],
+=======
+>>>>>>> origin/18.0
                     "groups_id": [(6, 0, [cls.base_user.id, cls.group_manager.id])],
                 }
             )
@@ -53,6 +62,11 @@ class AssemblyHttpCase(AssemblyTestMixin, HttpCase):
                     "name": "Assembly User HTTP",
                     "login": "assembly_user_http",
                     "password": "assembly_user_http",
+<<<<<<< HEAD
+                    "company_id": cid,
+                    "company_ids": [(6, 0, [cid])],
+=======
+>>>>>>> origin/18.0
                     "groups_id": [(6, 0, [cls.base_user.id, cls.group_user.id])],
                 }
             )
@@ -76,6 +90,11 @@ class AssemblyHttpCase(AssemblyTestMixin, HttpCase):
                     "name": "Portal User",
                     "login": "portal_assembly_http",
                     "password": "portal_assembly_http",
+<<<<<<< HEAD
+                    "company_id": cls.env.company.id,
+                    "company_ids": [(6, 0, [cls.env.company.id])],
+=======
+>>>>>>> origin/18.0
                     "groups_id": [(6, 0, [cls.group_portal.id])],
                     "partner_id": cls.portal_partner.id,
                 }
