@@ -265,11 +265,7 @@ class PortalDelegationTests(AssemblyHttpCase):
         self.assertIn(res.status_code, (400, 403))
 
     def test_DG3_authenticated_no_permission_create_403_or_404(self):
-<<<<<<< HEAD
         """DG3: No permission on assembly → 403/404."""
-=======
-        """DG3: Sin permiso en asamblea → 403/404."""
->>>>>>> origin/18.0
         if not self.user_portal:
             self.skipTest("Portal group not available")
         other = self.env["res.partner"].create({"name": "Other", "is_company": False})
@@ -531,11 +527,7 @@ class PortalVotingTests(AssemblyHttpCase):
         self.assertIn(res.status_code, (200, 403))
 
     def test_V4_authenticated_no_permission_voting_403_or_404(self):
-<<<<<<< HEAD
         """V4: No permission on assembly → 403/404."""
-=======
-        """V4: Sin permiso en asamblea → 403/404."""
->>>>>>> origin/18.0
         if not self.user_portal:
             self.skipTest("Portal group not available")
         other = self.env["res.partner"].create({"name": "Other", "is_company": False})

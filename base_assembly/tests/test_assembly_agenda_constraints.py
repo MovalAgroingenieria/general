@@ -26,24 +26,16 @@ class TestAssemblyAgendaConstraints(AssemblyTestMixin, TransactionCase):
             agenda.write({"vote_type_id": False})
         msg = str(ctx.exception).lower()
         self.assertIn("vote type", msg)
-<<<<<<< HEAD
         self.assertTrue("require" in msg or "requires" in msg, msg)
 
     def test_vote_type_not_required_when_requires_vote_false(self):
         """No-vote mode has no vote type; vote type only after switching to weighted."""
-=======
-        self.assertIn("requires", msg)
-
-    def test_vote_type_not_required_when_requires_vote_false(self):
-        """vote_type_id is optional when requires_vote=False."""
->>>>>>> origin/18.0
         assembly, _ = (
             self._create_assembly_with_agenda(  # pylint: disable=protected-access
                 agenda_title="Test agenda", requires_vote=False
             )
         )
         agenda = assembly.agenda_ids[0]
-<<<<<<< HEAD
         self.assertEqual(agenda.agenda_vote_mode, "no_vote")
         agenda.write({"vote_type_id": False})
         self.assertFalse(agenda.vote_type_id)
@@ -55,16 +47,6 @@ class TestAssemblyAgendaConstraints(AssemblyTestMixin, TransactionCase):
         agenda.write({"agenda_vote_mode": "weighted", "vote_type_id": vote_type.id})
         self.assertEqual(agenda.vote_type_id, vote_type)
         self.assertEqual(agenda.agenda_vote_mode, "weighted")
-=======
-        # Can set vote_type_id to False when requires_vote=False
-        agenda.write({"vote_type_id": False})
-        self.assertFalse(agenda.vote_type_id)
-
-        # Can also set a vote_type_id even if requires_vote=False
-        vote_type = assembly.assembly_type_id.vote_type_ids[0]
-        agenda.write({"vote_type_id": vote_type.id})
-        self.assertEqual(agenda.vote_type_id, vote_type)
->>>>>>> origin/18.0
 
     def test_vote_type_must_be_in_assembly_vote_type_ids(self):
         """vote_type_id must belong to assembly_id.vote_type_ids."""
@@ -168,11 +150,7 @@ class TestAssemblyAgendaConstraints(AssemblyTestMixin, TransactionCase):
             )
         msg = str(ctx.exception).lower()
         self.assertIn("vote type", msg)
-<<<<<<< HEAD
         self.assertTrue("require" in msg or "requires" in msg, msg)
-=======
-        self.assertIn("requires", msg)
->>>>>>> origin/18.0
 
     def test_vote_type_not_required_on_create_when_requires_vote_false(self):
         """vote_type_id is optional when creating agenda with requires_vote=False."""
@@ -194,11 +172,7 @@ class TestAssemblyAgendaConstraints(AssemblyTestMixin, TransactionCase):
         self.assertFalse(agenda.requires_vote)
 
     def test_toggle_requires_vote_without_vote_type_raises(self):
-<<<<<<< HEAD
         """requires_vote=True outside weighted mode is rejected."""
-=======
-        """Setting requires_vote=True without vote_type_id raises error."""
->>>>>>> origin/18.0
         assembly, _ = (
             self._create_assembly_with_agenda(  # pylint: disable=protected-access
                 agenda_title="Test", requires_vote=False
@@ -207,7 +181,6 @@ class TestAssemblyAgendaConstraints(AssemblyTestMixin, TransactionCase):
         agenda = assembly.agenda_ids[0]
         agenda.write({"vote_type_id": False})
 
-<<<<<<< HEAD
         with self.assertRaises(ValidationError) as ctx:
             agenda.write({"requires_vote": True})
         msg = str(ctx.exception).lower()
@@ -227,17 +200,6 @@ class TestAssemblyAgendaConstraints(AssemblyTestMixin, TransactionCase):
 
     def test_toggle_requires_vote_with_vote_type_succeeds(self):
         """Switching from no-vote to weighted with vote type succeeds."""
-=======
-        # Try to set requires_vote=True without vote_type_id
-        with self.assertRaises(ValidationError) as ctx:
-            agenda.write({"requires_vote": True})
-        msg = str(ctx.exception).lower()
-        self.assertIn("vote type", msg)
-        self.assertIn("requires", msg)
-
-    def test_toggle_requires_vote_with_vote_type_succeeds(self):
-        """Setting requires_vote=True with vote_type_id succeeds."""
->>>>>>> origin/18.0
         assembly, _ = (
             self._create_assembly_with_agenda(  # pylint: disable=protected-access
                 agenda_title="Test", requires_vote=False
@@ -245,13 +207,6 @@ class TestAssemblyAgendaConstraints(AssemblyTestMixin, TransactionCase):
         )
         agenda = assembly.agenda_ids[0]
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
-<<<<<<< HEAD
         agenda.write({"agenda_vote_mode": "weighted", "vote_type_id": vote_type.id})
-=======
-        agenda.write({"vote_type_id": vote_type.id})
-
-        # Set requires_vote=True (vote_type_id is set)
-        agenda.write({"requires_vote": True})
->>>>>>> origin/18.0
         self.assertTrue(agenda.requires_vote)
         self.assertEqual(agenda.vote_type_id, vote_type)

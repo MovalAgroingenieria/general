@@ -1,6 +1,5 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
-<<<<<<< HEAD
 # pylint: disable=too-many-lines
 
 import math
@@ -11,14 +10,6 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import is_html_empty
 from odoo.tools.misc import clean_context
-=======
-
-import math
-
-from odoo import api, fields, models
-from odoo.exceptions import UserError
-from odoo.osv import expression
->>>>>>> origin/18.0
 from odoo.tools.safe_eval import safe_eval
 
 _DOMAIN_OPERATORS = frozenset(("&", "|", "!"))
@@ -78,7 +69,6 @@ def _quorum_present_percentage(present, possible):
     return present / possible * 100.0
 
 
-<<<<<<< HEAD
 # QWeb xml_ids (ir.ui.view) used when mail.template bodies render empty (e.g. after
 # Html sanitization stripped t-* directives on some DBs).
 _AF_QWEB_FALLBACK_XMLIDS = {
@@ -90,8 +80,6 @@ _AF_QWEB_FALLBACK_XMLIDS = {
 }
 
 
-=======
->>>>>>> origin/18.0
 class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     """Assembly lifecycle, quorum (stored), convocation.
 
@@ -99,7 +87,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     assembly come only from :meth:`_get_present_partner_ids` (confirmed attendees plus
     represented delegators in the convocation domain). Stored
     ``total_present_attendees``, ``quorum_percentage``, and ``quorum_reached`` in
-<<<<<<< HEAD
     :meth:`_compute_quorum` are derived solely from that set and from the convocation
     pool size (same domain as :meth:`_get_possible_attendees_count`, one search per
     recompute when not cancelled) — never from vote weights or stored vote lines.
@@ -107,14 +94,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     _name = "assembly.assembly"
     _inherit = ["mail.thread", "assembly.mixin.window_action"]
-=======
-    :meth:`_compute_quorum` are derived solely from that set and from
-    ``_get_possible_attendees_count`` — never from vote weights or stored vote lines.
-    """
-
-    _name = "assembly.assembly"
-    _inherit = ["assembly.mixin.window_action"]
->>>>>>> origin/18.0
     _description = "Assembly"
     _order = "date_first_call desc, id desc"
 
@@ -124,7 +103,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             "UNIQUE(code)",
             "The assembly reference code must be unique.",
         ),
-<<<<<<< HEAD
         (
             "assembly_name_company_uniq",
             "UNIQUE(company_id, name)",
@@ -139,10 +117,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         default=lambda self: self.env.company,
         index=True,
     )
-=======
-    ]
-
->>>>>>> origin/18.0
     name = fields.Char(required=True)
     code = fields.Char(
         string="Reference",
@@ -156,10 +130,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         "assembly.type",
         string="Assembly type",
         ondelete="restrict",
-<<<<<<< HEAD
         check_company=True,
-=======
->>>>>>> origin/18.0
     )
     date_announcement = fields.Date(string="Announcement date")
     date_first_call = fields.Datetime(string="First call", index=True)
@@ -188,7 +159,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         ondelete="set null",
     )
     description = fields.Html(string="Convocation text")
-<<<<<<< HEAD
     publication_mail_template_id = fields.Many2one(
         "mail.template",
         string="Publication template",
@@ -222,8 +192,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         domain="[('model', '=', 'assembly.assembly')]",
         help="Optional override for the nominative ballot introduction.",
     )
-=======
->>>>>>> origin/18.0
     assembly_state = fields.Selection(
         [
             ("draft", "Draft"),
@@ -278,7 +246,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             "for open votings of this assembly (subject to portal routes)."
         ),
     )
-<<<<<<< HEAD
     attendance_require_partner_vat_confirm = fields.Boolean(
         string="Require TIN to confirm attendance",
         default=False,
@@ -295,8 +262,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             "normalized format check (alphanumeric characters, minimum length)."
         ),
     )
-=======
->>>>>>> origin/18.0
     partner_domain = fields.Text(
         string="Partner domain",
         default="[]",
@@ -320,14 +285,11 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         "assembly_id",
         string="Delegations",
     )
-<<<<<<< HEAD
     representation_ids = fields.One2many(
         "assembly.representation",
         "assembly_id",
         string="Representations",
     )
-=======
->>>>>>> origin/18.0
     total_possible_attendees = fields.Integer(
         string="Possible attendees",
         compute="_compute_quorum",
@@ -355,13 +317,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         string="Delegations count",
         compute="_compute_counts",
     )
-<<<<<<< HEAD
     count_representations = fields.Integer(
         string="Representations count",
         compute="_compute_counts",
     )
-=======
->>>>>>> origin/18.0
     voting_sessions_count = fields.Integer(
         string="Voting sessions",
         compute="_compute_counts",
@@ -385,24 +344,17 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         compute="_compute_kanban_vote_digest",
     )
 
-<<<<<<< HEAD
     @api.depends(
         "agenda_ids",
         "delegation_ids",
         "representation_ids",
         "agenda_ids.voting_ids",
     )
-=======
-    @api.depends("agenda_ids", "delegation_ids", "agenda_ids.voting_ids")
->>>>>>> origin/18.0
     def _compute_counts(self):
         for assembly in self:
             assembly.count_agenda_items = len(assembly.agenda_ids)
             assembly.count_delegations = len(assembly.delegation_ids)
-<<<<<<< HEAD
             assembly.count_representations = len(assembly.representation_ids)
-=======
->>>>>>> origin/18.0
             assembly.voting_sessions_count = len(
                 assembly.agenda_ids.mapped("voting_ids")
             )
@@ -436,16 +388,12 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             opt_labels = dict(
                 voting_result._fields["vote_option"]._description_selection(self.env)
             )
-<<<<<<< HEAD
             # ``date_close`` can be False; sorting by field name mixes bool with datetime.
             epoch_close = fields.Datetime.from_string("1970-01-01 00:00:00")
             for voting in closed_v.sorted(
                 key=lambda v, ep=epoch_close: v.date_close or ep,
                 reverse=True,
             ):
-=======
-            for voting in closed_v.sorted("date_close", reverse=True):
->>>>>>> origin/18.0
                 scored = voting.result_ids.filtered(
                     lambda r: r.vote_option
                     in ("yes", "no", "abstention", "blank", "not_cast")
@@ -484,7 +432,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         # ``assembly.attendee.vote``, vote types, or any vote totals (@api.depends
         # above must stay free of those models).
         for assembly in self:
-<<<<<<< HEAD
             if assembly.assembly_state == "cancelled":
                 possible = assembly._get_possible_attendees_count()
                 present_partner_ids = frozenset()
@@ -494,10 +441,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                 present_partner_ids = assembly._get_present_partner_ids(
                     convocable_partner_ids=convocable
                 )
-=======
-            possible = assembly._get_possible_attendees_count()
-            present_partner_ids = assembly._get_present_partner_ids()
->>>>>>> origin/18.0
             present = len(present_partner_ids)
             assembly.total_possible_attendees = possible
             assembly.total_present_attendees = present
@@ -511,7 +454,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                     present_partner_ids, possible, quorum_percentage=pct
                 )
 
-<<<<<<< HEAD
     @api.constrains(
         "date_announcement",
         "date_first_call",
@@ -546,17 +488,12 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                         self.env._("Session end cannot be before session start.")
                     )
 
-=======
->>>>>>> origin/18.0
     @api.onchange("assembly_type_id")
     def _onchange_assembly_type_id(self):
         if self.assembly_type_id:
             t = self.assembly_type_id
-<<<<<<< HEAD
             if t.company_id:
                 self.company_id = t.company_id
-=======
->>>>>>> origin/18.0
             self.vote_type_ids = t.vote_type_ids
             self.quorum_type = t.default_quorum_type
             self.quorum_value = t.default_quorum_value
@@ -570,15 +507,12 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             self.country_id = t.default_country_id
             self.president_id = t.default_president_id
             self.secretary_id = t.default_secretary_id
-<<<<<<< HEAD
             self.attendance_require_partner_vat_confirm = (
                 t.default_attendance_require_partner_vat_confirm
             )
             self.attendance_partner_vat_format_strict = (
                 t.default_attendance_partner_vat_format_strict
             )
-=======
->>>>>>> origin/18.0
 
     def _get_partner_domain(self):
         self.ensure_one()
@@ -686,11 +620,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         return not vals.get(field_name)
 
     @api.model
-<<<<<<< HEAD
     def _apply_assembly_type_to_create_vals(self, vals, atype):  # noqa: C901
-=======
-    def _apply_assembly_type_to_create_vals(self, vals, atype):
->>>>>>> origin/18.0
         """Copy template fields from ``assembly.type`` into create ``vals`` (AF §2.2).
 
         Fills gaps when keys are missing **or** still equal model defaults / empty,
@@ -737,7 +667,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             vals["secretary_id"] = (
                 atype.default_secretary_id.id if atype.default_secretary_id else False
             )
-<<<<<<< HEAD
         if self._create_vals_matches_assembly_field_default(
             "attendance_require_partner_vat_confirm", vals
         ):
@@ -764,8 +693,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         if not default_c:
             return False
         return vals.get("company_id") in (default_c.id, default_c)
-=======
->>>>>>> origin/18.0
 
     @api.model
     def _prepare_and_validate_assembly_create_vals_list(self, vals_list):
@@ -984,7 +911,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     def _present_quorum_represented_delegator_partner_ids(
         self, confirmed_partner_ids, convocable_partner_ids
     ):
-<<<<<<< HEAD
         """Delegators counted via **vote delegation** (not ``assembly.representation``).
 
         Excludes partners who already have a confirmed attendee row, and delegators
@@ -992,20 +918,12 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         ignore absent delegators). Each remaining id is ``delegation.partner_id``
         for a confirmed delegation that passes quorum partner rules (delegate is a
         confirmed attendee here). Partial ``vote_type_ids`` still counts one person.
-=======
-        """Delegators counted only via representation (excludes already-confirmed attendees).
-
-        Each id is ``delegation.partner_id`` for a confirmed delegation that passes
-        quorum partner rules (delegate is confirmed attendee here). Partial
-        ``vote_type_ids`` still counts — presence is per person, not per vote unit.
->>>>>>> origin/18.0
         """
         self.ensure_one()
         confirmed = frozenset(confirmed_partner_ids)
         convocable = frozenset(convocable_partner_ids)
         extra = set()
         Delegation = self.env["assembly.delegation"]
-<<<<<<< HEAD
         delegations_eff = Delegation._get_effective_delegations(
             delegations=self.delegation_ids
         )
@@ -1029,22 +947,11 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                 or pid in confirmed
                 or pid in absent_delegator_pids
             ):
-=======
-        for delegation in Delegation._get_effective_delegations(
-            delegations=self.delegation_ids
-        ):
-            pid = delegation.partner_id.id
-            if not pid or pid not in convocable or pid in confirmed:
->>>>>>> origin/18.0
                 continue
             extra.add(pid)
         return frozenset(extra)
 
-<<<<<<< HEAD
     def _get_present_partner_ids(self, convocable_partner_ids=None):
-=======
-    def _get_present_partner_ids(self):
->>>>>>> origin/18.0
         """Distinct ``res.partner`` ids counted for quorum presence (people only).
 
         **Single entry point** for “who is present” for quorum: every stored quorum
@@ -1054,44 +961,29 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         **A — Confirmed attendees:** ``partner_id`` of rows with
         ``attendee_state == confirmed``.
 
-<<<<<<< HEAD
         **B — Represented delegators:** partners in the convocation domain who are
         *not* in A, are *not* ``absent`` on an attendee row, and appear as
         ``delegation.partner_id`` on at least one confirmed, quorum-effective
         delegation (delegate is a confirmed attendee); partial ``vote_type_ids`` still
         counts one person.
-=======
-        **B — Represented delegators (no attendee row required):** partners in the
-        convocation domain who are *not* in A and appear as ``delegation.partner_id``
-        on at least one confirmed, quorum-effective delegation (delegate is a
-        confirmed attendee); partial ``vote_type_ids`` on the delegation still counts
-        one person.
->>>>>>> origin/18.0
 
         Returns ``frozenset(A | B)`` (set union ⇒ each partner at most once).
         Cancelled assemblies → empty frozenset.
 
         Does not read ``partner.vote`` nor ``assembly.attendee.vote`` totals.
-<<<<<<< HEAD
 
         :param convocable_partner_ids: optional ``frozenset`` of convocable partner ids
             (same pool as :meth:`_present_quorum_convocable_partner_ids`). When passed
             from :meth:`_compute_quorum`, avoids a second ``res.partner`` search.
-=======
->>>>>>> origin/18.0
         """
         self.ensure_one()
         if self.assembly_state == "cancelled":
             return frozenset()
         confirmed = self._present_quorum_confirmed_attendee_partner_ids()
-<<<<<<< HEAD
         if convocable_partner_ids is not None:
             convocable = convocable_partner_ids
         else:
             convocable = self._present_quorum_convocable_partner_ids()
-=======
-        convocable = self._present_quorum_convocable_partner_ids()
->>>>>>> origin/18.0
         represented = self._present_quorum_represented_delegator_partner_ids(
             confirmed, convocable
         )
@@ -1198,10 +1090,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                 ]
             )
         if self.attendee_ids:
-<<<<<<< HEAD
             self.attendee_ids._sync_attendance_link_trackers()
-=======
->>>>>>> origin/18.0
             self.env["assembly.attendee"].recompute_votes(self.attendee_ids)
 
     def action_recompute_attendee_votes(self):
@@ -1212,7 +1101,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         self.env["assembly.attendee"].recompute_votes(self.attendee_ids)
         return True
 
-<<<<<<< HEAD
     def _get_manual_yes_no_possible_vote_units(self):
         """Vote units held by confirmed attendees for this assembly's configured vote types.
 
@@ -1484,22 +1372,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             }
         )
         return wiz.action_refresh_preview()
-=======
-    def get_rendered_publication_text(self):
-        return ""
-
-    def get_rendered_delegation_document_text(self):
-        return ""
-
-    def get_rendered_delegation_footer_text(self):
-        return ""
-
-    def get_rendered_ballot_intro_text(self):
-        return ""
-
-    def get_rendered_ballot_nominative_intro_text(self):
-        return ""
->>>>>>> origin/18.0
 
     def action_open_agenda_items(self):
         self.ensure_one()
@@ -1526,13 +1398,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             "assembly.delegation", self.env._("Delegations")
         )
 
-<<<<<<< HEAD
     def action_open_representations(self):
         return self._action_open_related(
             "assembly.representation", self.env._("Representations")
         )
 
-=======
->>>>>>> origin/18.0
     def action_open_attendees(self):
         return self._action_open_related("assembly.attendee", self.env._("Attendees"))

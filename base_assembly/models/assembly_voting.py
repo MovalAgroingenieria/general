@@ -19,10 +19,7 @@ class AssemblyVoting(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
-<<<<<<< HEAD
         check_company=True,
-=======
->>>>>>> origin/18.0
     )
     assembly_id = fields.Many2one(
         "assembly.assembly",
@@ -30,7 +27,6 @@ class AssemblyVoting(models.Model):
         store=True,
         readonly=True,
     )
-<<<<<<< HEAD
     company_id = fields.Many2one(
         "res.company",
         string="Company",
@@ -39,8 +35,6 @@ class AssemblyVoting(models.Model):
         readonly=True,
         index=True,
     )
-=======
->>>>>>> origin/18.0
     allow_online_voting = fields.Boolean(
         related="assembly_id.allow_online_voting",
         string="Allow online voting",
@@ -180,7 +174,6 @@ class AssemblyVoting(models.Model):
             if not (rec.name or "").strip():
                 raise ValidationError(self.env._("Voting description cannot be empty."))
 
-<<<<<<< HEAD
     @api.constrains("agenda_id")
     def _check_agenda_is_weighted_mode(self):
         for rec in self:
@@ -192,8 +185,6 @@ class AssemblyVoting(models.Model):
                     )
                 )
 
-=======
->>>>>>> origin/18.0
     @api.constrains("vote_type_id", "agenda_id")
     def _check_vote_type_consistent_with_agenda(self):
         for rec in self:

@@ -1,27 +1,20 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-<<<<<<< HEAD
 from odoo.addons.base_assembly.models.assembly_delegation import (
     _DELEGATION_ALLOWED_STATE_TRANSITIONS,
 )
 from odoo.exceptions import UserError, ValidationError
-=======
-from odoo.exceptions import ValidationError
->>>>>>> origin/18.0
 from odoo.tests import TransactionCase
 
 from .common import AssemblyTestMixin
 
-<<<<<<< HEAD
 _ALLOWED_DELEGATION_EDGES = frozenset(
     (old, new)
     for old, targets in _DELEGATION_ALLOWED_STATE_TRANSITIONS.items()
     for new in targets
 )
 
-=======
->>>>>>> origin/18.0
 
 class TestAssemblyDelegation(AssemblyTestMixin, TransactionCase):
     """Tests for assembly.delegation: constraints, confirm, recompute."""
@@ -124,7 +117,6 @@ class TestAssemblyDelegation(AssemblyTestMixin, TransactionCase):
         self.assertEqual(av_delegate.delegated_in_votes, 4.0)
         self.assertEqual(av_delegate.attendee_vote_total, 1.0 + 4.0)
 
-<<<<<<< HEAD
     def test_unlink_confirmed_delegation_recomputes_attendee_vote_lines(self):
         """Removing a delegation must clear stale delegated_in/out on stored snapshots."""
         assembly, _ = self._create_assembly_with_agenda()
@@ -172,8 +164,6 @@ class TestAssemblyDelegation(AssemblyTestMixin, TransactionCase):
         )
         self.assertEqual(av_out.delegated_out_votes, 0.0)
 
-=======
->>>>>>> origin/18.0
     def test_two_confirmed_delegations_same_type_raises(self):
         assembly, _ = (
             self._create_assembly_with_agenda()
@@ -205,7 +195,6 @@ class TestAssemblyDelegation(AssemblyTestMixin, TransactionCase):
                 }
             )
         self.assertIn("same vote type", str(ctx.exception).lower())
-<<<<<<< HEAD
 
     def test_write_changes_delegator_partner_recomputes_delegate_delegated_in(self):
         """Changing ``partner_id`` on a confirmed delegation must refresh stored snapshots."""
@@ -309,5 +298,3 @@ class TestDelegationStateMachine(AssemblyTestMixin, TransactionCase):
         self.assertEqual(delegation.delegation_state, "confirmed")
         with self.assertRaises(UserError):
             delegation.write({"delegation_state": "draft"})
-=======
->>>>>>> origin/18.0

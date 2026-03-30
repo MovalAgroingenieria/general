@@ -43,16 +43,11 @@
                         </div>
                     </div>
                     <t t-set="ballot_intro" t-value="o.get_rendered_ballot_intro_text()"/>
-<<<<<<< HEAD
                     <div t-if="ballot_intro" class="mb-4 o_assembly_ballot_intro" t-out="ballot_intro"/>
-=======
-                    <div t-if="ballot_intro" class="mb-4" t-out="ballot_intro"/>
->>>>>>> origin/18.0
                     <p><strong>Attendee / representative:</strong> _________________________________</p>
                     <p><strong>Total votes:</strong> _________________________________</p>
                     <hr/>
                     <div class="row mt-4"><div class="col-12"><strong>Agenda items to vote</strong></div></div>
-<<<<<<< HEAD
                     <t t-set="vote_items" t-value="o.agenda_ids.filtered(lambda a: a.agenda_state != 'skipped' and (a.requires_vote or a.agenda_vote_mode in ('manual_yes_no', 'manual_multi'))).sorted(key=lambda x: x.sequence)"/>
                     <t t-foreach="vote_items" t-as="item">
                         <div class="mt-3 p-2 border o_assembly_ballot_item">
@@ -86,19 +81,6 @@
                                 </div>
                             </t>
                             <div t-if="item.final_summary" class="mt-2 small border-start ps-2 o_assembly_ballot_final_summary" t-out="item.final_summary"/>
-=======
-                    <t t-set="vote_items" t-value="o.agenda_ids.filtered(lambda a: a.requires_vote).sorted(key=lambda x: x.sequence)"/>
-                    <t t-foreach="vote_items" t-as="item">
-                        <div class="mt-3 p-2 border">
-                            <strong><span t-esc="item.sequence"/>.</strong> <span t-field="item.name"/>
-                            <t t-if="item.vote_type_id"> (<span t-field="item.vote_type_id.name"/>)</t>
-                            <div class="row mt-2">
-                                <span class="col-3">Yes ☐</span>
-                                <span class="col-3">No ☐</span>
-                                <span class="col-3">Abstention ☐</span>
-                                <span class="col-3">Blank ☐</span>
-                            </div>
->>>>>>> origin/18.0
                         </div>
                     </t>
                 </div>
@@ -127,11 +109,7 @@
                         </div>
                     </div>
                     <t t-set="ballot_nominative_intro" t-value="assembly.get_rendered_ballot_nominative_intro_text()"/>
-<<<<<<< HEAD
                     <div t-if="ballot_nominative_intro" class="mb-4 o_assembly_ballot_nom_intro" t-out="ballot_nominative_intro"/>
-=======
-                    <div t-if="ballot_nominative_intro" class="mb-4" t-out="ballot_nominative_intro"/>
->>>>>>> origin/18.0
                     <p><strong>Attendee:</strong> <span t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
                         <t t-if="o.participant_partner_id and o.participant_partner_id != o.partner_id">
                             <span class="text-muted"> (represents <span t-field="o.participant_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>)</span>
@@ -140,7 +118,6 @@
                     <p><strong>Total votes:</strong> <span t-esc="total_votes"/></p>
                     <hr/>
                     <div class="row mt-4"><div class="col-12"><strong>Agenda items to vote</strong></div></div>
-<<<<<<< HEAD
                     <t t-set="vote_items" t-value="assembly.agenda_ids.filtered(lambda a: a.agenda_state != 'skipped' and (a.requires_vote or a.agenda_vote_mode in ('manual_yes_no', 'manual_multi'))).sorted(key=lambda x: x.sequence)"/>
                     <t t-foreach="vote_items" t-as="item">
                         <div class="mt-3 p-2 border o_assembly_ballot_item">
@@ -174,19 +151,6 @@
                                 </div>
                             </t>
                             <div t-if="item.final_summary" class="mt-2 small border-start ps-2 o_assembly_ballot_final_summary" t-out="item.final_summary"/>
-=======
-                    <t t-set="vote_items" t-value="assembly.agenda_ids.filtered(lambda a: a.requires_vote).sorted(key=lambda x: x.sequence)"/>
-                    <t t-foreach="vote_items" t-as="item">
-                        <div class="mt-3 p-2 border">
-                            <strong><span t-esc="item.sequence"/>.</strong> <span t-field="item.name"/>
-                            <t t-if="item.vote_type_id"> (<span t-field="item.vote_type_id.name"/>)</t>
-                            <div class="row mt-2">
-                                <span class="col-3">Yes ☐</span>
-                                <span class="col-3">No ☐</span>
-                                <span class="col-3">Abstention ☐</span>
-                                <span class="col-3">Blank ☐</span>
-                            </div>
->>>>>>> origin/18.0
                         </div>
                     </t>
                 </div>

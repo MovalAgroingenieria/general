@@ -8,13 +8,8 @@ Validates that:
 - Users without assembly group cannot access assembly models.
 - assembly_group_user: read + write own ``assembly.attendee`` (AF §8); create own
   ``assembly.delegation`` (draft); record rules scope rows; may create own
-<<<<<<< HEAD
   ``assembly.voting.line``; representation rows only when owner/agent matches
   partner; cannot write assembly/agenda/voting/result or run manager-only actions.
-=======
-  ``assembly.voting.line``; cannot write assembly/agenda/voting/result or run
-  manager-only actions.
->>>>>>> origin/18.0
 - assembly_group_manager has full access.
 """
 
@@ -39,20 +34,14 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         cls.base_user = cls.env.ref("base.group_user")
 
         try:
-<<<<<<< HEAD
             cid = cls.env.company.id
-=======
->>>>>>> origin/18.0
             cls.user_no_assembly = cls.env["res.users"].create(
                 {
                     "name": "User No Assembly",
                     "login": "user_no_assembly_sec",
                     "password": "user_no_assembly_sec",
-<<<<<<< HEAD
                     "company_id": cid,
                     "company_ids": [(6, 0, [cid])],
-=======
->>>>>>> origin/18.0
                     "groups_id": [(6, 0, [cls.base_user.id])],
                 }
             )
@@ -61,11 +50,8 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
                     "name": "Assembly User",
                     "login": "assembly_user_sec",
                     "password": "assembly_user_sec",
-<<<<<<< HEAD
                     "company_id": cid,
                     "company_ids": [(6, 0, [cid])],
-=======
->>>>>>> origin/18.0
                     "groups_id": [(6, 0, [cls.base_user.id, cls.group_user.id])],
                 }
             )
@@ -74,11 +60,8 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
                     "name": "Assembly Manager",
                     "login": "assembly_manager_sec",
                     "password": "assembly_manager_sec",
-<<<<<<< HEAD
                     "company_id": cid,
                     "company_ids": [(6, 0, [cid])],
-=======
->>>>>>> origin/18.0
                     "groups_id": [(6, 0, [cls.base_user.id, cls.group_manager.id])],
                 }
             )
@@ -443,7 +426,6 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
                 {"delegation_state": "confirmed"}
             )
 
-<<<<<<< HEAD
     def test_assembly_user_sees_representations_as_owner_or_agent_only(self):
         partners = self._create_partners(
             self.env, 4, prefix="RepSec"
@@ -500,8 +482,6 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
             env["assembly.representation"].search([("id", "=", row.id)], limit=1)
         )
 
-=======
->>>>>>> origin/18.0
     def test_assembly_user_sees_only_own_voting_lines(self):
         assembly, agenda = (
             self._create_assembly_with_agenda()
@@ -658,7 +638,6 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         self.user_assembly_user.partner_id = partners[0]
         env = self.env(user=self.user_assembly_user)
         self.assertFalse(env["assembly.attendee"].search([("id", "=", attendee_b.id)]))
-<<<<<<< HEAD
 
 
 class TestAssemblySecurityRegression(AssemblyTestMixin, TransactionCase):
@@ -833,5 +812,3 @@ class TestAssemblySecurityRegression(AssemblyTestMixin, TransactionCase):
         )
         rep.unlink()
         env_m["assembly.assembly"].browse(asm.id).unlink()
-=======
->>>>>>> origin/18.0

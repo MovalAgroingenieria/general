@@ -134,11 +134,8 @@ class AssemblyTestMixin:
             "name": agenda_title,
             "requires_vote": requires_vote,
         }
-<<<<<<< HEAD
         if not requires_vote:
             agenda_vals["agenda_vote_mode"] = "no_vote"
-=======
->>>>>>> origin/18.0
         if requires_vote and assembly_type.vote_type_ids:
             agenda_vals["vote_type_id"] = assembly_type.vote_type_ids[0].id
         agenda = env["assembly.agenda"].create(agenda_vals)

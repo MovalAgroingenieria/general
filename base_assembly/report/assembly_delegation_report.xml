@@ -31,11 +31,7 @@
                         </div>
                     </div>
                     <t t-set="delegation_intro" t-value="o.get_rendered_delegation_document_text()"/>
-<<<<<<< HEAD
                     <div t-if="delegation_intro" class="mb-4 o_assembly_delegation_intro" t-out="delegation_intro"/>
-=======
-                    <div t-if="delegation_intro" class="mb-4" t-out="delegation_intro"/>
->>>>>>> origin/18.0
                     <table class="table table-sm table-bordered">
                         <tr>
                             <th style="width: 30%;">Delegator</th>
@@ -61,19 +57,12 @@
                         </tr>
                     </table>
                     <t t-set="delegation_footer" t-value="o.get_rendered_delegation_footer_text()"/>
-<<<<<<< HEAD
                     <div t-if="delegation_footer" class="mt-4 o_assembly_delegation_footer" t-out="delegation_footer"/>
                     <p t-if="not delegation_footer" class="mt-4 text-muted o_assembly_delegation_footer_fallback">
                         This document certifies the delegation of vote for the above assembly. The delegator authorizes the delegate to cast votes on their behalf for the indicated vote type(s).
                     </p>
                     <t t-set="asm" t-value="o"/>
                     <t t-call="base_assembly.report_assembly_representation_table_block"/>
-=======
-                    <div t-if="delegation_footer" class="mt-4" t-out="delegation_footer"/>
-                    <p t-else="" class="mt-4 text-muted">
-                        This document certifies the delegation of vote for the above assembly. The delegator authorizes the delegate to cast votes on their behalf for the indicated vote type(s).
-                    </p>
->>>>>>> origin/18.0
                     <p class="mt-4">
                         <strong>Signature (delegator):</strong> _____________________________
                     </p>

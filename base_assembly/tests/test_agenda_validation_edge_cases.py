@@ -153,10 +153,6 @@ class TestAgendaValidationEdgeCases(AssemblyTestMixin, TransactionCase):
             }
         )
 
-<<<<<<< HEAD
-=======
-        # Create agenda without vote
->>>>>>> origin/18.0
         agenda = self.env["assembly.agenda"].create(
             {
                 "assembly_id": assembly.id,
@@ -165,7 +161,6 @@ class TestAgendaValidationEdgeCases(AssemblyTestMixin, TransactionCase):
                 "vote_type_id": False,
             }
         )
-<<<<<<< HEAD
         self.assertEqual(agenda.agenda_vote_mode, "no_vote")
 
         with self.assertRaises(ValidationError):
@@ -180,27 +175,6 @@ class TestAgendaValidationEdgeCases(AssemblyTestMixin, TransactionCase):
 
         agenda.write({"agenda_vote_mode": "no_vote"})
         self.assertFalse(agenda.requires_vote)
-=======
-
-        # Set vote_type1
-        agenda.write({"vote_type_id": vote_type1.id})
-
-        # Enable requires_vote (should succeed)
-        agenda.write({"requires_vote": True})
-        self.assertTrue(agenda.requires_vote)
-        self.assertEqual(agenda.vote_type_id, vote_type1)
-
-        # Change to vote_type2 (should succeed, no votings)
-        agenda.write({"vote_type_id": vote_type2.id})
-        self.assertEqual(agenda.vote_type_id, vote_type2)
-
-        # Disable requires_vote (should succeed)
-        agenda.write({"requires_vote": False})
-        self.assertFalse(agenda.requires_vote)
-
-        # Can clear vote_type_id now
-        agenda.write({"vote_type_id": False})
->>>>>>> origin/18.0
         self.assertFalse(agenda.vote_type_id)
 
     def test_agenda_vote_type_immutability_with_multiple_votings(self):
@@ -292,7 +266,6 @@ class TestAgendaValidationEdgeCases(AssemblyTestMixin, TransactionCase):
         # pylint: disable=protected-access
         assembly.vote_type_ids = [(4, other_vote_type.id)]
 
-<<<<<<< HEAD
         agenda.write({"agenda_vote_mode": "no_vote"})
         self.assertFalse(agenda.vote_type_id)
         agenda.write({"agenda_vote_mode": "weighted", "vote_type_id": vote_type.id})
@@ -305,22 +278,6 @@ class TestAgendaValidationEdgeCases(AssemblyTestMixin, TransactionCase):
         msg = str(ctx.exception).lower()
         self.assertIn("vote type", msg)
         self.assertTrue("require" in msg or "requires" in msg, msg)
-=======
-        # Try to change both requires_vote and vote_type_id together
-        # Case 1: Set requires_vote=True and vote_type_id together (should succeed)
-        agenda.write({"requires_vote": False, "vote_type_id": False})
-        agenda.write({"requires_vote": True, "vote_type_id": vote_type.id})
-        self.assertTrue(agenda.requires_vote)
-        self.assertEqual(agenda.vote_type_id, vote_type)
-
-        # Case 2: Try to set requires_vote=True and clear vote_type_id (should fail)
-        agenda.write({"requires_vote": False, "vote_type_id": False})
-        with self.assertRaises(ValidationError) as ctx:
-            agenda.write({"requires_vote": True, "vote_type_id": False})
-        msg = str(ctx.exception).lower()
-        self.assertIn("vote type", msg)
-        self.assertIn("requires", msg)
->>>>>>> origin/18.0
 
     def test_agenda_validation_with_voting_in_progress(self):
         """Agenda validation when voting is in progress."""

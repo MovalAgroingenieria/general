@@ -18,7 +18,6 @@ class AssemblyAttendeeVote(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
-<<<<<<< HEAD
         check_company=True,
     )
     company_id = fields.Many2one(
@@ -28,8 +27,6 @@ class AssemblyAttendeeVote(models.Model):
         store=True,
         readonly=True,
         index=True,
-=======
->>>>>>> origin/18.0
     )
     vote_type_id = fields.Many2one(
         "vote.type",

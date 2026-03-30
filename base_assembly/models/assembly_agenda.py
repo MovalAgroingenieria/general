@@ -2,7 +2,6 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, fields, models
-<<<<<<< HEAD
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.float_utils import float_compare, float_is_zero
 
@@ -17,18 +16,11 @@ _MANUAL_COUNT_FIELDS = (
     "manual_abstain",
     "manual_count_blank",
 )
-=======
-from odoo.exceptions import ValidationError
->>>>>>> origin/18.0
 
 
 class AssemblyAgenda(models.Model):
     _name = "assembly.agenda"
-<<<<<<< HEAD
     _inherit = ["mail.thread", "assembly.mixin.open.assembly"]
-=======
-    _inherit = ["assembly.mixin.open.assembly"]
->>>>>>> origin/18.0
     _description = "Assembly agenda item"
     _order = "assembly_id, sequence, id"
 
@@ -38,7 +30,6 @@ class AssemblyAgenda(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
-<<<<<<< HEAD
         check_company=True,
     )
     company_id = fields.Many2one(
@@ -48,8 +39,6 @@ class AssemblyAgenda(models.Model):
         store=True,
         readonly=True,
         index=True,
-=======
->>>>>>> origin/18.0
     )
     assembly_allowed_vote_type_ids = fields.Many2many(
         "vote.type",
@@ -57,7 +46,6 @@ class AssemblyAgenda(models.Model):
         string="Assembly vote types",
     )
     sequence = fields.Integer(default=10)
-<<<<<<< HEAD
     name = fields.Char(string="Title", required=True, translate=True)
     description = fields.Html()
     agenda_vote_mode = fields.Selection(
@@ -76,11 +64,6 @@ class AssemblyAgenda(models.Model):
         default=True,
         help="True when using weighted (roll-call) voting; False for other modes.",
     )
-=======
-    name = fields.Char(string="Title", required=True)
-    description = fields.Html()
-    requires_vote = fields.Boolean(default=True)
->>>>>>> origin/18.0
     vote_type_id = fields.Many2one(
         "vote.type",
         string="Vote type",
@@ -89,7 +72,6 @@ class AssemblyAgenda(models.Model):
             "[('active', '=', True), ('id', 'in', assembly_allowed_vote_type_ids)]"
         ),
         help=(
-<<<<<<< HEAD
             "Required in weighted (roll-call) mode. "
             "Must be one of the assembly vote types."
         ),
@@ -120,11 +102,6 @@ class AssemblyAgenda(models.Model):
         help=(
             "Optional HTML notes for this agenda item (e.g. after closing). "
             "Not filled automatically by the system."
-=======
-            "Required when 'Requires vote' is enabled. "
-            "Must be selected from the assembly's vote types. "
-            "Cannot be changed once voting has started."
->>>>>>> origin/18.0
         ),
     )
     voting_ids = fields.One2many(
@@ -161,7 +138,6 @@ class AssemblyAgenda(models.Model):
         for line in self:
             line.count_votings = len(line.voting_ids)
 
-<<<<<<< HEAD
     @api.onchange("agenda_vote_mode")
     def _onchange_agenda_vote_mode(self):
         if self.agenda_vote_mode == _AGENDA_VOTE_MODE_WEIGHTED:
@@ -250,20 +226,6 @@ class AssemblyAgenda(models.Model):
                     self.env._("A vote type is required in weighted (roll-call) mode.")
                 )
 
-=======
-    @api.constrains("requires_vote", "vote_type_id")
-    def _check_vote_type_required_when_requires_vote(self):
-        for line in self:
-            if line.requires_vote and not line.vote_type_id:
-                raise ValidationError(
-                    self.env._(
-                        "A vote type must be specified when the agenda item "
-                        "requires a vote. Please select a vote type or "
-                        "uncheck 'Requires vote'."
-                    )
-                )
-
->>>>>>> origin/18.0
     @api.constrains("vote_type_id", "assembly_id")
     def _check_vote_type_in_assembly(self):
         for line in self:
@@ -289,7 +251,6 @@ class AssemblyAgenda(models.Model):
                     )
                 )
 
-<<<<<<< HEAD
     @api.constrains("agenda_vote_mode", "option_ids")
     def _check_option_ids_coherence_with_vote_mode(self):
         """Options exist iff mode is ``manual_multi`` (one constraint, two rules)."""
@@ -442,10 +403,6 @@ class AssemblyAgenda(models.Model):
 
     def _assert_agenda_vote_type_constraints_after_write(self):
         self._check_vote_type_required_in_weighted_mode()
-=======
-    def _assert_agenda_vote_type_constraints_after_write(self):
-        self._check_vote_type_required_when_requires_vote()
->>>>>>> origin/18.0
         self._check_vote_type_in_assembly()
 
     def _validate_agenda_write_vals(self, vals):
@@ -463,7 +420,6 @@ class AssemblyAgenda(models.Model):
                             "the vote type becomes immutable."
                         )
                     )
-<<<<<<< HEAD
         if "agenda_vote_mode" in vals:
             for line in self:
                 if (
@@ -485,10 +441,6 @@ class AssemblyAgenda(models.Model):
                             "“Requires vote” applies only in weighted (roll-call) mode."
                         )
                     )
-=======
-        if "requires_vote" in vals and vals["requires_vote"]:
-            for line in self:
->>>>>>> origin/18.0
                 vote_type_id = vals.get(
                     "vote_type_id",
                     line.vote_type_id.id if line.vote_type_id else False,
@@ -496,19 +448,12 @@ class AssemblyAgenda(models.Model):
                 if not vote_type_id:
                     raise ValidationError(
                         self.env._(
-<<<<<<< HEAD
                             "A vote type must be specified when enabling requires vote "
                             "in weighted mode."
-=======
-                            "A vote type must be specified when the agenda item "
-                            "requires a vote. Please select a vote type before "
-                            "enabling 'Requires vote'."
->>>>>>> origin/18.0
                         )
                     )
         if "vote_type_id" in vals and not vals["vote_type_id"]:
             for line in self:
-<<<<<<< HEAD
                 effective_mode = vals.get("agenda_vote_mode", line.agenda_vote_mode)
                 if effective_mode == _AGENDA_VOTE_MODE_WEIGHTED and (
                     vals.get("requires_vote", line.requires_vote)
@@ -517,21 +462,11 @@ class AssemblyAgenda(models.Model):
                         self.env._(
                             "The vote type cannot be cleared in weighted mode while "
                             "requires vote is enabled."
-=======
-                will_require_vote = vals.get("requires_vote", line.requires_vote)
-                if will_require_vote:
-                    raise ValidationError(
-                        self.env._(
-                            "The vote type cannot be cleared while 'Requires vote' "
-                            "is enabled. Please either select a vote type or "
-                            "disable 'Requires vote' first."
->>>>>>> origin/18.0
                         )
                     )
 
     @api.model_create_multi
     def create(self, vals_list):
-<<<<<<< HEAD
         prepared = []
         for vals in vals_list:
             v = dict(vals)
@@ -544,8 +479,6 @@ class AssemblyAgenda(models.Model):
             v = self._sync_requires_vote_from_mode_vals(v)
             prepared.append(v)
         vals_list = prepared
-=======
->>>>>>> origin/18.0
         asm_ids = {v.get("assembly_id") for v in vals_list if v.get("assembly_id")}
         if asm_ids:
             self.env["assembly.assembly"].browse(
@@ -556,10 +489,7 @@ class AssemblyAgenda(models.Model):
         return agendas
 
     def write(self, vals):
-<<<<<<< HEAD
         vals = self._sync_requires_vote_from_mode_vals(vals)
-=======
->>>>>>> origin/18.0
         self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
         self._validate_agenda_write_vals(vals)
         res = super().write(vals)
@@ -570,7 +500,6 @@ class AssemblyAgenda(models.Model):
         self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
         return super().unlink()
 
-<<<<<<< HEAD
     def _validate_manual_finalize(self):
         self.ensure_one()
         if self.agenda_vote_mode == _AGENDA_VOTE_MODE_MANUAL_MULTI:
@@ -622,10 +551,6 @@ class AssemblyAgenda(models.Model):
                     "Roll-call voting can only be started in weighted (roll-call) mode."
                 )
             )
-=======
-    def action_start_voting(self):
-        self.ensure_one()
->>>>>>> origin/18.0
         if self.agenda_state not in ("pending", "in_progress"):
             raise ValidationError(self.env._("This item is not open for voting."))
         if self.requires_vote and not self.vote_type_id:

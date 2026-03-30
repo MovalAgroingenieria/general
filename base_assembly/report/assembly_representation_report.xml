@@ -29,7 +29,6 @@
                             <t t-if="o.location"> – <span t-field="o.location"/></t>
                         </div>
                     </div>
-<<<<<<< HEAD
                     <t t-set="asm" t-value="o"/>
                     <t t-call="base_assembly.report_assembly_publication_html_block"/>
                     <t t-set="rep_lines" t-value="o.representation_ids.filtered(lambda r: r.active)"/>
@@ -46,25 +45,6 @@
                                 <td><span t-field="line.agent_partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'vat'], 'no_marker': True}"/></td>
                             </tr>
                         </tbody>
-=======
-                    <p class="text-muted">
-                        Template for legal representation at this assembly. Complete representative
-                        and represented party details as required by your bylaws.
-                    </p>
-                    <table class="table table-sm table-bordered mt-3">
-                        <tr>
-                            <th style="width: 35%;">Represented party</th>
-                            <td><em>Name / ID</em></td>
-                        </tr>
-                        <tr>
-                            <th>Representative (agent)</th>
-                            <td><em>Name / ID</em></td>
-                        </tr>
-                        <tr>
-                            <th>Scope / powers</th>
-                            <td><em>As defined in the power of attorney</em></td>
-                        </tr>
->>>>>>> origin/18.0
                     </table>
                 </div>
             </t>

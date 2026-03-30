@@ -9,7 +9,6 @@ class AssemblyType(models.Model):
     _description = "Assembly type"
     _order = "name"
 
-<<<<<<< HEAD
     company_id = fields.Many2one(
         "res.company",
         string="Company",
@@ -17,8 +16,6 @@ class AssemblyType(models.Model):
         default=lambda self: self.env.company,
         index=True,
     )
-=======
->>>>>>> origin/18.0
     name = fields.Char(required=True, translate=True)
     code = fields.Char(required=True, index=True)
     description = fields.Text(translate=True)
@@ -72,7 +69,6 @@ class AssemblyType(models.Model):
         string="Default secretary",
         ondelete="set null",
     )
-<<<<<<< HEAD
     default_attendance_require_partner_vat_confirm = fields.Boolean(
         string="Default: require TIN to confirm attendance",
         default=False,
@@ -107,10 +103,4 @@ class AssemblyType(models.Model):
             "UNIQUE(company_id, code)",
             "The code must be unique per company.",
         ),
-=======
-    active = fields.Boolean(default=True)
-
-    _sql_constraints = [
-        ("code_uniq", "UNIQUE(code)", "The code must be unique."),
->>>>>>> origin/18.0
     ]

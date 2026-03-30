@@ -1,11 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-<<<<<<< HEAD
 """``assembly.attendee.write``: no hidden recompute; state via actions; identity locked."""
-=======
-"""``assembly.attendee.write``: sin recomputo oculto; estado vía acciones; identidad bloqueada."""
->>>>>>> origin/18.0
 
 from odoo.addons.base_assembly.models.assembly_attendee import (
     CTX_ATTENDEE_ALLOW_IDENTITY_WRITE,
@@ -18,17 +14,10 @@ from .common import AssemblyTestMixin
 
 
 class TestAttendeeWriteExplicitPaths(AssemblyTestMixin, TransactionCase):
-<<<<<<< HEAD
     """Strategy: minimal ``write``; votes only via ``recompute_votes`` in explicit flows."""
 
     def test_generic_write_cannot_change_registration_state(self):
         """Valid transition without internal context ⇒ error (use ``action_confirm``)."""
-=======
-    """Estrategia: ``write`` mínimo; votos solo con ``recompute_votes`` en flujos explícitos."""
-
-    def test_generic_write_cannot_change_registration_state(self):
-        """Transición válida sin contexto interno ⇒ error (usar ``action_confirm``)."""
->>>>>>> origin/18.0
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]

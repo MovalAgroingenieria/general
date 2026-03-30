@@ -10,7 +10,6 @@ Explicit functional contract (mandatory):
 - non-manager → ``test_att_06_non_manager_forbidden``;
 - disallowed assembly state → e.g. ``test_att_08_assembly_draft_returns_403``;
 - participant without attendee row → ``test_att_05_participant_not_attendee_returns_404``.
-<<<<<<< HEAD
 - tracked short URL → ``test_att_tracked_short_link_redirects_to_attendance_url``,
   ``test_att_tracked_short_link_resolves_same_as_direct_attendance_url``
   (``link_tracker`` ``/r/<code>`` → attendance target → manager form; no ``website`` in manifest).
@@ -18,10 +17,6 @@ Explicit functional contract (mandatory):
 
 from urllib.parse import parse_qs, urlparse
 
-=======
-"""
-
->>>>>>> origin/18.0
 from odoo.addons.base_assembly.controllers.attendance import AttendanceController
 
 from .http_common import AssemblyHttpCase
@@ -86,7 +81,6 @@ class TestHttpAttendance(AssemblyHttpCase):
             "base_assembly must not expose /assembly/c/* routes: %s" % bad,
         )
 
-<<<<<<< HEAD
     def test_att_tracked_short_link_redirects_to_attendance_url(self):
         """AF v2 / link_tracker: ``/r/<code>`` resolves to the stored attendance URL (301).
 
@@ -148,8 +142,6 @@ class TestHttpAttendance(AssemblyHttpCase):
         loc_direct = res_direct.headers.get("Location", "")
         self.assertURLEqual(loc_tracked, loc_direct)
 
-=======
->>>>>>> origin/18.0
     def test_att_01_manager_valid_params_redirects_to_form(self):
         """FS: valid access — manager, assembly ``open``, ``assembly_id`` + ``participant_id`` → 302/303."""
         self.assembly.action_announce()

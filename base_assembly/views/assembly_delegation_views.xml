@@ -54,14 +54,11 @@
                 <field name="assembly_id"/>
                 <filter string="Draft" name="filter_draft" domain="[('delegation_state','=','draft')]"/>
                 <filter string="Confirmed" name="filter_confirmed" domain="[('delegation_state','=','confirmed')]"/>
-<<<<<<< HEAD
                 <filter
                     string="Open (draft or confirmed)"
                     name="filter_open"
                     domain="[('delegation_state', 'in', ('draft', 'confirmed'))]"
                 />
-=======
->>>>>>> origin/18.0
                 <filter string="Revoked" name="filter_revoked" domain="[('delegation_state','=','revoked')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Assembly" name="group_assembly" context="{'group_by': 'assembly_id'}"/>

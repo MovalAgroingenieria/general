@@ -1,10 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-<<<<<<< HEAD
 from odoo.exceptions import UserError
-=======
->>>>>>> origin/18.0
 from odoo.tests import TransactionCase
 
 from .common import AssemblyTestMixin
@@ -56,7 +53,6 @@ class TestAssemblyAttendee(AssemblyTestMixin, TransactionCase):
         att.action_mark_absent()
         self.assertEqual(att.attendee_state, "absent")
 
-<<<<<<< HEAD
     def test_mark_absent_blocked_when_open_voting_has_recorded_vote(self):
         assembly, agenda = (
             self._create_assembly_with_agenda()
@@ -116,8 +112,6 @@ class TestAssemblyAttendee(AssemblyTestMixin, TransactionCase):
         att.action_mark_absent()
         self.assertEqual(att.attendee_state, "absent")
 
-=======
->>>>>>> origin/18.0
     def test_recompute_votes_creates_attendee_vote_for_assembly_types(self):
         assembly, _ = (
             self._create_assembly_with_agenda()

@@ -106,13 +106,9 @@ class TestAssemblyStateTransitionsSpec(AssemblyTestMixin, TransactionCase):
             ),
         ):
             with self.subTest(phase=label):
-<<<<<<< HEAD
                 assembly, agenda = self._create_assembly_with_agenda(
                     name="Cancel reach asm %s" % label,
                 )
-=======
-                assembly, agenda = self._create_assembly_with_agenda()
->>>>>>> origin/18.0
                 setup(assembly, agenda)
                 assembly.action_cancel()
                 self.assertEqual(
@@ -145,7 +141,6 @@ class TestAssemblyStateTransitionsSpec(AssemblyTestMixin, TransactionCase):
             )
         )
         self.assertTrue(all(a.agenda_state == "pending" for a in assembly.agenda_ids))
-<<<<<<< HEAD
 
 
 class TestAssemblyStateMachine(AssemblyTestMixin, TransactionCase):
@@ -194,5 +189,3 @@ class TestAssemblyStateMachine(AssemblyTestMixin, TransactionCase):
         )  # pylint: disable=protected-access
         with self.assertRaises(UserError):
             assembly.write({"assembly_state": "open"})
-=======
->>>>>>> origin/18.0

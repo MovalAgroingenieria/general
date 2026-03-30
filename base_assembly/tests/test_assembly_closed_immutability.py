@@ -1,11 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-<<<<<<< HEAD
 """Closed assembly immutability (AF): no related mutations except assembly → cancelled."""
-=======
-"""AF: assembly in ``closed`` is read-only except transition to ``cancelled``."""
->>>>>>> origin/18.0
 
 from odoo.exceptions import UserError
 from odoo.tests import TransactionCase
@@ -57,7 +53,6 @@ class TestAssemblyClosedImmutability(AssemblyTestMixin, TransactionCase):
                     "requires_vote": False,
                 }
             )
-<<<<<<< HEAD
 
     def test_closed_blocks_new_attendee(self):
         partner = self._create_partners(self.env, 1, prefix="ClosedAtt")[0]
@@ -130,5 +125,3 @@ class TestAssemblyClosedImmutability(AssemblyTestMixin, TransactionCase):
         self.assertTrue(assembly.attendee_ids)
         with self.assertRaises(UserError):
             Attendee.recompute_votes(assembly.attendee_ids)
-=======
->>>>>>> origin/18.0

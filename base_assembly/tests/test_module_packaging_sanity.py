@@ -100,7 +100,6 @@ class TestBaseAssemblyPackagingSanity(AssemblyTestMixin, TransactionCase):
         """AF §11.5: representation template report is declared."""
         self.env.ref("base_assembly.assembly_assembly_action_report_representation")
 
-<<<<<<< HEAD
     def test_af_v2_call_register_and_window_actions_exist(self):
         """AF v2: call-register report alias and navigation actions load."""
         self.env.ref("base_assembly.assembly_assembly_action_report_call_register")
@@ -135,8 +134,6 @@ class TestBaseAssemblyPackagingSanity(AssemblyTestMixin, TransactionCase):
         self.env.ref("base_assembly.assembly_representation_view_tree")
         self.env.ref("base_assembly.assembly_representation_view_form")
 
-=======
->>>>>>> origin/18.0
     def test_minimal_core_record_creation(self):
         """End-to-end: create type + assembly + agenda path used across the suite."""
         assembly, _agenda = (

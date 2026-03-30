@@ -1,21 +1,11 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-<<<<<<< HEAD
 """Vote recomputation: consistency, determinism, and persisted-row regression.
 
 Includes former ``test_vote_recomputation_regression`` (search-based persisted
 ``assembly.attendee.vote``) and ``test_recomputation_multiple_changes`` (multi-step
 delegation / vote-type churn).
-=======
-"""Production-grade tests for vote recomputation consistency.
-
-Tests that vote recomputation is:
-- Deterministic (same inputs → same outputs)
-- Idempotent (multiple calls = same result)
-- Complete (all vote types, all attendees)
-- Consistent across all scenarios
->>>>>>> origin/18.0
 """
 
 from odoo.tests import TransactionCase
@@ -436,11 +426,7 @@ class TestVoteRecomputationConsistency(AssemblyTestMixin, TransactionCase):
 
 
 class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
-<<<<<<< HEAD
     """Explicit QA on ``@api.model recompute_votes(attendees)`` (single batch entry point)."""
-=======
-    """QA explícita sobre ``@api.model recompute_votes(attendees)`` (única entrada batch)."""
->>>>>>> origin/18.0
 
     @staticmethod
     def _snapshot_all_vote_lines(env, attendee_ids):
@@ -498,11 +484,7 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
         self.assertEqual(restored, expected)
 
     def test_recompute_votes_no_duplicate_rows_per_pair(self):
-<<<<<<< HEAD
         """Several ``recompute_votes`` rounds: one row per (attendee, type)."""
-=======
-        """Varias rondas de ``recompute_votes``: una fila por (asistente, tipo)."""
->>>>>>> origin/18.0
         Attendee = self.env["assembly.attendee"]
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
@@ -525,11 +507,7 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
             )
 
     def test_recompute_votes_order_independent_snapshot(self):
-<<<<<<< HEAD
         """Input recordset order does not change the result."""
-=======
-        """El orden del recordset de entrada no altera el resultado."""
->>>>>>> origin/18.0
         Attendee = self.env["assembly.attendee"]
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
@@ -546,7 +524,6 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
         s_reverse = self._snapshot_all_vote_lines(self.env, assembly.attendee_ids.ids)
         self.assertEqual(s_forward, s_reverse)
 
-<<<<<<< HEAD
     def test_recompute_votes_empty_prefetch_delegator_no_partner_vote_stable(self):
         """Inbound delegators with no partner.vote rows: delegated_in is 0; double recompute stable."""
         Attendee = self.env["assembly.attendee"]
@@ -582,10 +559,6 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
 
     def test_recompute_votes_non_attendee_delegator_idempotent(self):
         """Delegator without attendee row: ``recompute_votes`` twice is stable."""
-=======
-    def test_recompute_votes_non_attendee_delegator_idempotent(self):
-        """Delegador sin fila de asistente: ``recompute_votes`` dos veces estable."""
->>>>>>> origin/18.0
         Attendee = self.env["assembly.attendee"]
         p_del = self.env["res.partner"].create(
             {"name": "StabDel", "is_company": False, "assembly_excluded": True}
@@ -634,11 +607,7 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
         self.assertEqual(tup2[1], 7.0)
 
     def test_trigger_delegation_confirm_via_write_recomputes_totals(self):
-<<<<<<< HEAD
         """``delegation.write`` (draft→confirmed) triggers ``recompute_votes`` via ORM."""
-=======
-        """``delegation.write`` (draft→confirmed) dispara ``recompute_votes`` vía ORM."""
->>>>>>> origin/18.0
         Av = self.env["assembly.attendee.vote"]
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
@@ -692,11 +661,7 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
         self.assertEqual(line_g.delegated_in_votes, 10.0)
 
     def test_trigger_action_confirm_persists_vote_lines_without_manual_recompute(self):
-<<<<<<< HEAD
         """``action_confirm`` must persist lines without calling ``recompute_votes`` in the test."""
-=======
-        """``action_confirm`` debe persistir líneas sin llamar a ``recompute_votes`` en el test."""
->>>>>>> origin/18.0
         Av = self.env["assembly.attendee.vote"]
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
@@ -714,11 +679,7 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
         self.assertEqual(lines.own_votes, 4.0)
 
     def test_trigger_action_mark_absent_recomputes_delegate_totals(self):
-<<<<<<< HEAD
         """``action_mark_absent`` on delegator updates delegate ``delegated_in``."""
-=======
-        """``action_mark_absent`` en delegador actualiza ``delegated_in`` del delegado."""
->>>>>>> origin/18.0
         Av = self.env["assembly.attendee.vote"]
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
@@ -756,11 +717,7 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
         self.assertEqual(line_g.delegated_in_votes, 0.0)
 
     def test_assembly_vote_type_write_auto_recomputes_attendee_vote_lines(self):
-<<<<<<< HEAD
         """``assembly.write`` with ``vote_type_ids`` triggers ``recompute_votes`` on attendees."""
-=======
-        """``assembly.write`` con ``vote_type_ids`` dispara ``recompute_votes`` en asistentes."""
->>>>>>> origin/18.0
         Attendee = self.env["assembly.attendee"]
         Av = self.env["assembly.attendee.vote"].sudo()
         assembly, _ = self._create_assembly_with_agenda()
@@ -789,7 +746,6 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
                 ]
             )
         )
-<<<<<<< HEAD
 
 
 class TestVoteRecomputationRegression(AssemblyTestMixin, TransactionCase):
@@ -1429,5 +1385,3 @@ class TestRecomputationMultipleChanges(AssemblyTestMixin, TransactionCase):
             "Mathematical consistency: total out = total in",
         )
         self.assertEqual(total_own, 23.0, "Total own votes is 23")
-=======
->>>>>>> origin/18.0

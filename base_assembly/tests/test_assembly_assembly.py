@@ -74,11 +74,7 @@ class TestAssemblyAssembly(  # pylint: disable=too-many-public-methods
         )  # pylint: disable=protected-access
         assembly = self.env["assembly.assembly"].create(
             {
-<<<<<<< HEAD
                 "name": "No agenda",
-=======
-                "name": "Sin agenda",
->>>>>>> origin/18.0
                 "assembly_type_id": assembly_type.id,
                 "partner_domain": "[]",
             }

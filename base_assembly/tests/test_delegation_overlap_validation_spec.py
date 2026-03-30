@@ -1,11 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-<<<<<<< HEAD
 """Overlap validation: effective types; draft/revoked do not block."""
-=======
-"""Validación de solape: tipos efectivos; borrador/revocada no bloquean."""
->>>>>>> origin/18.0
 
 from odoo.exceptions import ValidationError
 from odoo.tests import TransactionCase
@@ -32,11 +28,7 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
         return assembly, vt1, vt2
 
     def test_reject_two_confirmed_overlapping_same_vote_type(self):
-<<<<<<< HEAD
         """(1) Two confirmed delegations for same delegator overlapping on one type → error."""
-=======
-        """(1) Dos confirmadas del mismo delegador solapadas en un tipo → error."""
->>>>>>> origin/18.0
         Delegation = self.env["assembly.delegation"]
         assembly, vt1, _vt2 = self._assembly_three_attendees_two_vote_types()
         a, b, c = (
@@ -67,11 +59,7 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
         self.assertIn("vote type", str(ex.exception).lower())
 
     def test_full_delegation_covers_all_types_blocks_partial_overlap(self):
-<<<<<<< HEAD
         """(2)(3) Full delegation (empty M2M) overlaps any assembly vote type."""
-=======
-        """(2)(3) Delegación total (M2M vacío) solapa con cualquier tipo de la asamblea."""
->>>>>>> origin/18.0
         Delegation = self.env["assembly.delegation"]
         assembly, vt1, _vt2 = self._assembly_three_attendees_two_vote_types()
         a, b, c = (
@@ -130,7 +118,6 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
         )
         self.assertTrue(d2)
 
-<<<<<<< HEAD
     def test_confirm_draft_delegation_overlaps_existing_confirmed_rejected(self):
         """Draft→confirm cannot overlap another confirmed delegation for the same delegator."""
         Delegation = self.env["assembly.delegation"]
@@ -162,8 +149,6 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
         with self.assertRaises(ValidationError):
             d_draft.write({"delegation_state": "confirmed"})
 
-=======
->>>>>>> origin/18.0
     def test_draft_sibling_does_not_block_confirmed_same_vote_types(self):
         """(4) Borrador no cuenta: segunda confirmada misma cobertura permitida."""
         Delegation = self.env["assembly.delegation"]
@@ -226,11 +211,7 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
         self.assertTrue(d2)
 
     def test_intersect_effective_vote_types_matches_expanded_coverage(self):
-<<<<<<< HEAD
         """Symmetric intersection on expanded sets (empty M2M = all types)."""
-=======
-        """Intersección simétrica sobre conjuntos ya expandidos (vacío M2M = todos)."""
->>>>>>> origin/18.0
         Delegation = self.env["assembly.delegation"]
         assembly, vt1, vt2 = self._assembly_three_attendees_two_vote_types()
         a, b = assembly.attendee_ids[0], assembly.attendee_ids[1]
@@ -253,11 +234,7 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(set(overlap.ids), {vt2.id})
 
     def test_intersect_effective_vote_types_empty_when_disjoint(self):
-<<<<<<< HEAD
         """No overlap ⇒ empty intersection (validation does not fire for disjoint types)."""
-=======
-        """Sin solape ⇒ intersección vacía (validación no dispara por tipos disjuntos)."""
->>>>>>> origin/18.0
         Delegation = self.env["assembly.delegation"]
         assembly, vt1, vt2 = self._assembly_three_attendees_two_vote_types()
         a = Delegation._delegation_effective_vote_types(
@@ -270,11 +247,7 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
         self.assertFalse(inter)
 
     def test_write_confirmed_to_overlap_vote_types_rejected(self):
-<<<<<<< HEAD
         """Editing M2M on a confirmed delegation to overlap another confirmed for same delegator → error."""
-=======
-        """Editar M2M de una confirmada para solapar otra confirmada del mismo delegador → error."""
->>>>>>> origin/18.0
         Delegation = self.env["assembly.delegation"]
         assembly, vt1, vt2 = self._assembly_three_attendees_two_vote_types()
         a, b, c = (

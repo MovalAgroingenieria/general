@@ -2,10 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 # pylint: disable=too-many-lines
 
-<<<<<<< HEAD
 import re
-=======
->>>>>>> origin/18.0
 from collections import defaultdict
 
 from odoo import api, fields, models
@@ -52,7 +49,6 @@ class AssemblyAttendee(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
-<<<<<<< HEAD
         check_company=True,
     )
     company_id = fields.Many2one(
@@ -62,8 +58,6 @@ class AssemblyAttendee(models.Model):
         store=True,
         readonly=True,
         index=True,
-=======
->>>>>>> origin/18.0
     )
     partner_id = fields.Many2one(
         "res.partner",
@@ -143,7 +137,6 @@ class AssemblyAttendee(models.Model):
         string="Attendance notes",
         help="Free-text notes for this registration (not used by core quorum logic).",
     )
-<<<<<<< HEAD
     attendance_link_tracker_id = fields.Many2one(
         "link.tracker",
         string="Attendance link tracker",
@@ -158,14 +151,6 @@ class AssemblyAttendee(models.Model):
             "Short URL from link_tracker (destination: GET /assembly/attendance with "
             "assembly_id and participant_id). For managers with a session, opening "
             "it reaches the same flow as the direct attendance link."
-=======
-    attendance_url = fields.Char(
-        string="Back-end form URL",
-        compute="_compute_attendance_url",
-        help=(
-            "Internal link to this record (logged-in backend). Not a public route; "
-            "use manager flows (e.g. GET /assembly/attendance) to open the form."
->>>>>>> origin/18.0
         ),
     )
     partner_vat = fields.Char(
@@ -207,7 +192,6 @@ class AssemblyAttendee(models.Model):
             else:
                 rec.name = member
 
-<<<<<<< HEAD
     @api.depends("attendance_link_tracker_id", "attendance_link_tracker_id.short_url")
     def _compute_attendance_url(self):
         for rec in self:
@@ -287,18 +271,6 @@ class AssemblyAttendee(models.Model):
         if len(normalized) < 5 or len(normalized) > 32:
             return False
         return bool(re.fullmatch(r"[A-Z0-9]+", normalized))
-=======
-    @api.depends("assembly_id")
-    def _compute_attendance_url(self):
-        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
-        for rec in self:
-            if rec.id and base_url:
-                rec.attendance_url = (
-                    f"{base_url}/web#model=assembly.attendee&id={rec.id}&view_type=form"
-                )
-            else:
-                rec.attendance_url = ""
->>>>>>> origin/18.0
 
     @api.depends("attendee_vote_ids", "attendee_vote_ids.attendee_vote_total")
     def _compute_total_votes(self):
@@ -409,14 +381,10 @@ class AssemblyAttendee(models.Model):
             self.env["assembly.assembly"].browse(
                 list(asm_ids)
             ).exists()._assembly_ensure_not_closed_for_related_changes()
-<<<<<<< HEAD
         recs = super().create(vals_list)
         if not self.env.context.get("assembly_attendee_skip_link_tracker_resync"):
             recs._sync_attendance_link_trackers()
         return recs
-=======
-        return super().create(vals_list)
->>>>>>> origin/18.0
 
     def _raise_disallowed_attendee_state_transition(self, old_state, new_state):
         if new_state == "confirmed":
@@ -559,15 +527,11 @@ class AssemblyAttendee(models.Model):
                             "server actions / API those buttons call)."
                         )
                     )
-<<<<<<< HEAD
         res = super().write(vals)
         if not self.env.context.get("assembly_attendee_skip_link_tracker_resync"):
             if {"assembly_id", "partner_id"} & vals.keys():
                 self._sync_attendance_link_trackers()
         return res
-=======
-        return super().write(vals)
->>>>>>> origin/18.0
 
     def unlink(self):
         self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
@@ -588,7 +552,6 @@ class AssemblyAttendee(models.Model):
             raise ValidationError(no_partner_msg)
 
     def _validate_can_confirm(self):
-<<<<<<< HEAD
         """Gate for :meth:`action_confirm` (and internal confirm path).
 
         * ``assembly_id.attendance_require_partner_vat_confirm``: non-empty TIN; optional
@@ -596,13 +559,10 @@ class AssemblyAttendee(models.Model):
         * ``assembly.assembly_type_id.require_vat``: same TIN rule with type-scoped message
           when the assembly flag above is off.
         """
-=======
->>>>>>> origin/18.0
         self._ensure_assembly_and_partner_for_action(
             no_assembly_msg=self.env._("Cannot confirm attendee without an assembly."),
             no_partner_msg=self.env._("Cannot confirm attendee without a partner."),
         )
-<<<<<<< HEAD
         self.ensure_one()
         asm = self.assembly_id
         raw = (self.partner_id.vat or "").strip()
@@ -646,8 +606,6 @@ class AssemblyAttendee(models.Model):
         if asm.attendance_require_partner_vat_confirm or type_requires_vat:
             # AF v2.0 §2.5 / §4.11: use Odoo ``base_vat`` rules when TIN is required.
             self.partner_id.check_vat()
-=======
->>>>>>> origin/18.0
 
     def _apply_confirm_state(self):
         self.ensure_one()
@@ -817,7 +775,6 @@ class AssemblyAttendee(models.Model):
             ),
             no_partner_msg=self.env._("Cannot mark attendee absent without a partner."),
         )
-<<<<<<< HEAD
         open_cast = self.env["assembly.voting.line"].search(
             [
                 ("attendee_id", "=", self.id),
@@ -834,8 +791,6 @@ class AssemblyAttendee(models.Model):
                     "marking them absent."
                 )
             )
-=======
->>>>>>> origin/18.0
 
     def _apply_absent_state(self):
         self.ensure_one()
@@ -905,12 +860,9 @@ class AssemblyAttendee(models.Model):
         * :meth:`~assembly.assembly.action_generate_attendees` (all attendees on that assembly)
         * ``assembly.assembly.write`` when ``vote_type_ids`` is updated
 
-<<<<<<< HEAD
         Raises ``UserError`` if any related assembly is ``closed`` (same rule as
         other child mutations).
 
-=======
->>>>>>> origin/18.0
         Changing other assembly fields does **not** trigger a recompute. If
         ``partner.vote`` rows change after the last rebuild, use “Recompute votes”
         on the assembly (or call this method).
@@ -931,11 +883,8 @@ class AssemblyAttendee(models.Model):
         attendees = attendees.exists()
         if not attendees:
             return
-<<<<<<< HEAD
         assemblies = attendees.mapped("assembly_id").exists()
         assemblies._assembly_ensure_not_closed_for_related_changes()
-=======
->>>>>>> origin/18.0
         Attendee = self.env["assembly.attendee"]
         by_assembly = defaultdict(list)
         for attendee in attendees:
@@ -1008,11 +957,7 @@ class AssemblyAttendee(models.Model):
         ).sorted("id")
         if not delegations:
             return 0.0
-<<<<<<< HEAD
         if pv_by_partner_and_type:
-=======
-        if pv_by_partner_and_type is not None:
->>>>>>> origin/18.0
             return self._sum_delegators_own_votes_prefetched(
                 delegations, vote_type, pv_by_partner_and_type
             )
@@ -1035,7 +980,6 @@ class AssemblyAttendee(models.Model):
         total = 0.0
         vt_id = vote_type.id
         PartnerVote = self.env["partner.vote"]
-<<<<<<< HEAD
         delegations = delegations.sorted("id")
         missing_fetch = []
         for delegation in delegations:
@@ -1061,22 +1005,6 @@ class AssemblyAttendee(models.Model):
                     by_pid[opid] = pv.vote_count_display
             for __, pid in missing_fetch:
                 total += by_pid.get(pid, 0.0)
-=======
-        for delegation in delegations.sorted("id"):
-            inner = pv_by_partner_and_type.get(delegation.partner_id.id)
-            if inner and vt_id in inner:
-                total += inner[vt_id]
-                continue
-            pv = PartnerVote.search(
-                [
-                    ("partner_id", "=", delegation.partner_id.id),
-                    ("vote_type_id", "=", vt_id),
-                ],
-                limit=1,
-                order="id",
-            )
-            total += pv.vote_count_display if pv else 0.0
->>>>>>> origin/18.0
         return total
 
     @api.model
@@ -1363,11 +1291,8 @@ class AssemblyAttendee(models.Model):
             pv_map = self._prefetch_delegator_partner_votes_map(
                 effective_in, vote_types
             )
-<<<<<<< HEAD
             if not pv_map:
                 pv_map = None
-=======
->>>>>>> origin/18.0
         return {
             "vote_types": vote_types,
             "own_by_type": own_by_type,
@@ -1446,18 +1371,11 @@ class AssemblyAttendee(models.Model):
         """
         if not self:
             return
-<<<<<<< HEAD
         assemblies = self.mapped("assembly_id")
         if not assemblies:
             return
         vote_type_id_union = sorted(
             {vt.id for asm in assemblies for vt in asm.vote_type_ids}
-=======
-        if not self.mapped("assembly_id"):
-            return
-        vote_type_id_union = sorted(
-            {vt.id for asm in self.mapped("assembly_id") for vt in asm.vote_type_ids}
->>>>>>> origin/18.0
         )
         line_by_pair = self._prefetch_and_dedupe_attendee_vote_lines(
             self.ids, vote_type_id_union

@@ -3,11 +3,7 @@
 
 """Votes: totals, non-attendee delegator inbound, eligibility, recompute, frozen cast.
 
-<<<<<<< HEAD
 Chaining is asserted in ``test_delegation_no_chain`` and quorum/delegation suites.
-=======
-Chaining is asserted in ``test_delegation_no_chain`` and ``test_functional_spec_compliance_pack``.
->>>>>>> origin/18.0
 Cancelled-assembly quorum: ``test_quorum_people_functional_spec``.
 """
 
@@ -318,11 +314,7 @@ class TestVotes(AssemblyTestMixin, TransactionCase):
     def test_votes_applied_unchanged_when_second_delegation_increases_delegate_total(
         self,
     ):
-<<<<<<< HEAD
         """After casting the vote, a new delegation may raise delegate total; ``votes_applied`` does not."""
-=======
-        """Tras emitir el voto, nueva delegación puede subir el total del delegado; ``votes_applied`` no."""
->>>>>>> origin/18.0
         assembly, agenda = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]

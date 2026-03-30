@@ -1,11 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-<<<<<<< HEAD
 """Uniqueness (attendee, vote type): repeated recompute and SQL constraint."""
-=======
-"""Unicidad (asistente, tipo de voto): recomputo repetido y restricción SQL."""
->>>>>>> origin/18.0
 
 from odoo.tests import TransactionCase
 
@@ -13,11 +9,7 @@ from .common import AssemblyTestMixin
 
 
 class TestAttendeeVotePersistenceUniqueness(AssemblyTestMixin, TransactionCase):
-<<<<<<< HEAD
     """Guarantees: one row per pair; stable totals; duplicates rejected."""
-=======
-    """Garantías: una fila por par; totales estables; duplicados rechazados."""
->>>>>>> origin/18.0
 
     def test_repeated_recompute_single_row_and_stable_totals(self):
         """(1)(2)(3) Varios recomputos: una fila y totales correctos."""
@@ -46,11 +38,7 @@ class TestAttendeeVotePersistenceUniqueness(AssemblyTestMixin, TransactionCase):
         self.assertEqual(line.attendee_vote_total, 11.0)
 
     def test_repeated_recompute_two_vote_types_one_row_each(self):
-<<<<<<< HEAD
         """(2) Two types on the assembly → exactly two rows per attendee."""
-=======
-        """(2) Dos tipos en la asamblea → exactamente dos filas por asistente."""
->>>>>>> origin/18.0
         env = self.env
         vt1 = self._create_vote_type(env, name="Persist VT1")
         vt2 = self._create_vote_type(env, name="Persist VT2")
@@ -81,11 +69,7 @@ class TestAttendeeVotePersistenceUniqueness(AssemblyTestMixin, TransactionCase):
         self.assertEqual(l2.attendee_vote_total, 5.0)
 
     def test_regression_recompute_after_delegation_still_one_row_each_endpoint(self):
-<<<<<<< HEAD
         """Regression: delegation + multiple recomputes; one row per attendee/type."""
-=======
-        """Regresión: delegación + múltiples recomputos; una fila por asistente/tipo."""
->>>>>>> origin/18.0
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]
@@ -124,11 +108,7 @@ class TestAttendeeVotePersistenceUniqueness(AssemblyTestMixin, TransactionCase):
         self.assertEqual(lb.attendee_vote_total, 10.0)
 
     def test_duplicate_manual_create_same_pair_rejected(self):
-<<<<<<< HEAD
         """(4) Second ``create`` for same (attendee, type) fails (SQL unique)."""
-=======
-        """(4) Segundo ``create`` mismo (asistente, tipo) falla (SQL único)."""
->>>>>>> origin/18.0
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]
@@ -151,11 +131,7 @@ class TestAttendeeVotePersistenceUniqueness(AssemblyTestMixin, TransactionCase):
             )
 
     def test_repeated_recompute_preserves_same_database_row_id(self):
-<<<<<<< HEAD
         """Same physical row updated (write), no new rows from recompute."""
-=======
-        """Mismo registro físico actualizado (write), no nuevas filas por recomputo."""
->>>>>>> origin/18.0
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]

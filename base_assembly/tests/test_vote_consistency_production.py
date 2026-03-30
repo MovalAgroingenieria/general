@@ -12,17 +12,12 @@ It covers:
 - Complex edge cases (cascading changes, race conditions, state transitions)
 
 Goal: Guarantee mathematical consistency in ALL scenarios.
-<<<<<<< HEAD
 
 Includes former ``test_vote_edge_cases_production`` (delegation churn, overlapping
 types, empty assembly vote types).
 """
 
 from odoo.exceptions import ValidationError
-=======
-"""
-
->>>>>>> origin/18.0
 from odoo.tests import TransactionCase
 
 from .common import AssemblyTestMixin
@@ -890,7 +885,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
             av_del.attendee_vote_total + av_dec.attendee_vote_total
         )  # noqa: F841
         self.assertEqual(total_own, total_total)
-<<<<<<< HEAD
 
 
 class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
@@ -1444,5 +1438,3 @@ class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
                         av.attendee_vote_total,
                         av.own_votes + av.delegated_in_votes - av.delegated_out_votes,
                     )
-=======
->>>>>>> origin/18.0
