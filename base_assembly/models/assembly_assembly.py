@@ -8,7 +8,7 @@ from markupsafe import Markup, escape
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
-from odoo.tools import is_html_empty
+from odoo.tools import format_datetime, is_html_empty
 from odoo.tools.misc import clean_context
 from odoo.tools.safe_eval import safe_eval
 
@@ -142,10 +142,13 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         "fields for postal details in documents.",
     )
     street = fields.Char()
-    city = fields.Char()
+    city = fields.Char(
+        string="City (manual)",
+        help="Free text for documents when not using the city directory.",
+    )
     city_id = fields.Many2one(
         "res.city",
-        string="City",
+        string="City (directory)",
         ondelete="set null",
         domain="[('country_id', '=?', country_id), ('state_id', '=?', state_id)]",
     )
@@ -268,6 +271,19 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             "normalized format check (alphanumeric characters, minimum length)."
         ),
     )
+    allow_attendance_notes = fields.Boolean(
+        string="Allow attendance annotations",
+        default=True,
+        help="If disabled, attendance notes are hidden and cannot be set on registrations.",
+    )
+    include_qr_code = fields.Boolean(
+        string="Add QR code (tracked attendance link)",
+        default=True,
+        help=(
+            "If enabled, each attendee can have a short tracked link suitable for QR. "
+            "If disabled, link trackers are not created or are cleared."
+        ),
+    )
     partner_domain = fields.Text(
         string="Partner domain",
         default="[]",
@@ -349,6 +365,51 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         string="Results summary",
         compute="_compute_kanban_vote_digest",
     )
+    kanban_call_day = fields.Char(
+        string="Kanban first call day",
+        compute="_compute_kanban_call_datetime_parts",
+    )
+    kanban_call_month_year = fields.Char(
+        string="Kanban first call month year",
+        compute="_compute_kanban_call_datetime_parts",
+    )
+    kanban_call_time = fields.Char(
+        string="Kanban first call time",
+        compute="_compute_kanban_call_datetime_parts",
+    )
+    kanban_location_label = fields.Char(
+        string="Kanban location label",
+        compute="_compute_kanban_location_label",
+    )
+
+    @api.depends("date_first_call")
+    def _compute_kanban_call_datetime_parts(self):
+        for rec in self:
+            if not rec.date_first_call:
+                rec.kanban_call_day = ""
+                rec.kanban_call_month_year = ""
+                rec.kanban_call_time = ""
+                continue
+            d = rec.date_first_call
+            env = rec.env
+            rec.kanban_call_day = format_datetime(env, d, dt_format="d")
+            month_year = format_datetime(env, d, dt_format="MMM y")
+            rec.kanban_call_month_year = month_year.replace(" ", ". ").upper()
+            rec.kanban_call_time = format_datetime(env, d, dt_format="HH:mm")
+
+    @api.depends("city", "city_id", "state_id")
+    def _compute_kanban_location_label(self):
+        for rec in self:
+            city_name = (rec.city_id.name if rec.city_id else rec.city) or ""
+            state_name = rec.state_id.name if rec.state_id else ""
+            if city_name and state_name:
+                rec.kanban_location_label = "%s (%s)" % (city_name, state_name)
+            elif city_name:
+                rec.kanban_location_label = city_name
+            elif state_name:
+                rec.kanban_location_label = state_name
+            else:
+                rec.kanban_location_label = ""
 
     @api.depends(
         "agenda_ids",
@@ -484,9 +545,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                 )
         if self.date_start and self.date_end:
             if self.date_end < self.date_start:
-                msgs.append(
-                    self.env._("Session end cannot be before session start.")
-                )
+                msgs.append(self.env._("Session end cannot be before session start."))
         return msgs
 
     @api.constrains(
@@ -511,10 +570,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     )
     def _onchange_assembly_date_coherence_warn(self):
         if not self:
-            return
+            return None
         msgs = self._assembly_date_coherence_issue_messages()
         if not msgs:
-            return
+            return None
         return {
             "warning": {
                 "title": self.env._("Invalid dates"),
@@ -556,6 +615,8 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             self.attendance_partner_vat_format_strict = (
                 t.default_attendance_partner_vat_format_strict
             )
+            self.allow_attendance_notes = t.default_allow_attendance_notes
+            self.include_qr_code = t.default_include_qr_code
 
     @api.onchange("country_id")
     def _onchange_assembly_country_id(self):
@@ -763,6 +824,12 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             vals["attendance_partner_vat_format_strict"] = (
                 atype.default_attendance_partner_vat_format_strict
             )
+        if self._create_vals_matches_assembly_field_default(
+            "allow_attendance_notes", vals
+        ):
+            vals["allow_attendance_notes"] = atype.default_allow_attendance_notes
+        if self._create_vals_matches_assembly_field_default("include_qr_code", vals):
+            vals["include_qr_code"] = atype.default_include_qr_code
         if atype.company_id and self._create_vals_company_matches_default_or_empty(
             vals
         ):
@@ -983,6 +1050,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             attendees = self.mapped("attendee_ids")
             if attendees:
                 self.env["assembly.attendee"].recompute_votes(attendees)
+        if "include_qr_code" in vals:
+            for asm in self:
+                if asm.attendee_ids:
+                    asm.attendee_ids._sync_attendance_link_trackers()
         return res
 
     def _get_active_quorum_rule(self):
@@ -1289,6 +1360,16 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             "</section>"
         ) % escape(label)
 
+    def _assembly_publication_missing_body_hint_html(self):
+        self.ensure_one()
+        msg = self.env._(
+            "Add convocation text on this assembly for the full notice. Set the first "
+            "call date to show when and where."
+        )
+        return Markup(
+            '<aside class="o_assembly_publication_hint text-muted" role="note"><p>%s</p></aside>'
+        ) % escape(msg)
+
     def _render_assembly_mail_template_chain(
         self,
         override_template,
@@ -1329,6 +1410,14 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             "publication",
             raw_html_fallback=lambda: self.description or "",
         )
+        if is_html_empty(self.description or ""):
+            frag = str(html)
+            if "o_assembly_publication_hint" not in frag:
+                base = html if isinstance(html, Markup) else Markup(str(html))
+                html = Markup("%s%s") % (
+                    base,
+                    self._assembly_publication_missing_body_hint_html(),
+                )
         return self._assembly_markup_from_render_result(html)
 
     def get_rendered_publication_text(self):

@@ -55,15 +55,15 @@
                         </group>
                     </group>
                     <group string="Attendance">
-                        <field name="attendance_notes" placeholder="Notes for this attendance…" nolabel="1" colspan="2"/>
+                        <field name="attendance_notes" placeholder="Notes for this attendance…" nolabel="1" colspan="2" invisible="not assembly_id.allow_attendance_notes"/>
                         <field
                             name="attendance_signature"
                             string="Signature"
                             widget="signature"
                             options="{'size': [200, 100], 'full_name': 'partner_id'}"
                         />
-                        <field name="attendance_link_tracker_id" readonly="1"/>
-                        <field name="attendance_url" readonly="1" placeholder="Tracked URL (link_tracker) for QR" colspan="2"/>
+                        <field name="attendance_link_tracker_id" readonly="1" invisible="not assembly_id.include_qr_code"/>
+                        <field name="attendance_url" readonly="1" placeholder="Tracked URL (link_tracker) for QR" colspan="2" invisible="not assembly_id.include_qr_code"/>
                     </group>
                     <group string="Votes by type">
                         <field name="attendee_vote_ids" readonly="1" nolabel="1" colspan="2"/>
@@ -86,7 +86,7 @@
                 <field name="attendee_state" readonly="1"/>
                 <field name="date_register"/>
                 <field name="total_votes" sum="Total votes"/>
-                <field name="attendance_notes"/>
+                <field name="attendance_notes" invisible="not assembly_id.allow_attendance_notes"/>
                 <field name="attendance_signature" string="Signature" widget="signature" optional="hide"/>
             </list>
         </field>

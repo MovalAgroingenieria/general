@@ -15,6 +15,14 @@ from .common import AssemblyTestMixin
 
 
 class TestAssemblyAttendanceLinkTracker(AssemblyTestMixin, TransactionCase):
+    def test_no_tracker_when_include_qr_code_disabled(self):
+        assembly = self._create_assembly(name="No QR asm")
+        assembly.write({"include_qr_code": False})
+        assembly.action_generate_attendees()
+        self.assertTrue(assembly.attendee_ids)
+        for att in assembly.attendee_ids:
+            self.assertFalse(att.attendance_link_tracker_id)
+
     def test_attendance_tracked_link_is_generated(self):
         """After generating attendees, each row has a tracker and non-empty short URL."""
         assembly = self._create_assembly(name="Link gen asm")

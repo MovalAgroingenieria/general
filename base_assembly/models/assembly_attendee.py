@@ -233,6 +233,12 @@ class AssemblyAttendee(models.Model):
         for rec in self:
             if not rec.id or not rec.assembly_id or not rec.partner_id:
                 continue
+            if not rec.assembly_id.include_qr_code:
+                if rec.attendance_link_tracker_id:
+                    rec.with_context(
+                        assembly_attendee_skip_link_tracker_resync=True
+                    ).sudo().write({"attendance_link_tracker_id": False})
+                continue
             target = rec._attendance_flow_target_url()
             if not target:
                 continue
@@ -375,13 +381,29 @@ class AssemblyAttendee(models.Model):
         if not vals_list:
             return self.browse()
         vals_list = [dict(vals) for vals in vals_list]
+        self._validate_attendance_notes_on_create_vals_list(vals_list)
         self._validate_attendee_create_initial_states(vals_list)
         asm_ids = {v.get("assembly_id") for v in vals_list if v.get("assembly_id")}
         if asm_ids:
-            self.env["assembly.assembly"].browse(
-                list(asm_ids)
-            ).exists()._assembly_ensure_not_closed_for_related_changes()
-        recs = super().create(vals_list)
+            asm_existing = self.env["assembly.assembly"].browse(list(asm_ids)).exists()
+            asm_existing._assembly_ensure_not_closed_for_related_changes()
+        else:
+            asm_existing = self.env["assembly.assembly"]
+        bypass_attendee_create_acl = False
+        if (
+            not self.env.su
+            and not self.env["ir.model.access"].check(
+                self._name, "create", raise_exception=False
+            )
+            and asm_ids
+        ):
+            bypass_attendee_create_acl = len(asm_existing) == len(asm_ids) and all(
+                asm.has_access("write") for asm in asm_existing
+            )
+        if bypass_attendee_create_acl:
+            recs = self.env["assembly.attendee"].sudo().create(vals_list)
+        else:
+            recs = super().create(vals_list)
         if not self.env.context.get("assembly_attendee_skip_link_tracker_resync"):
             recs._sync_attendance_link_trackers()
         return recs
@@ -451,8 +473,41 @@ class AssemblyAttendee(models.Model):
             **{CTX_ATTENDEE_ALLOW_REGISTRATION_STATE_WRITE: True}
         ).write(vals)
 
+    @api.model
+    def _validate_attendance_notes_on_create_vals_list(self, vals_list):
+        assembly_model = self.env["assembly.assembly"]
+        for vals in vals_list:
+            note = vals.get("attendance_notes")
+            if note in (None, False, "") or not str(note).strip():
+                continue
+            aid = vals.get("assembly_id")
+            if not aid:
+                continue
+            asm_id = aid
+            if isinstance(aid, (list, tuple)):
+                asm_id = aid[0] if aid else False
+            if isinstance(asm_id, models.BaseModel):
+                asm_id = asm_id.id if asm_id else False
+            asm = assembly_model.browse(asm_id)
+            if asm.exists() and not asm.allow_attendance_notes:
+                raise UserError(
+                    self.env._(
+                        "Attendance annotations are not allowed for this assembly."
+                    )
+                )
+
     def _validate_and_sanitize_attendee_write_vals(self, vals):
         vals = dict(vals)
+        if "attendance_notes" in vals:
+            note = vals.get("attendance_notes")
+            if note not in (None, False, "") and str(note).strip():
+                for rec in self:
+                    if rec.assembly_id and not rec.assembly_id.allow_attendance_notes:
+                        raise UserError(
+                            self.env._(
+                                "Attendance annotations are not allowed for this assembly."
+                            )
+                        )
         if "attendee_state" in vals:
             new_state = vals["attendee_state"]
             if new_state not in _ATTENDEE_STATE_KEYS:

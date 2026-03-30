@@ -11,12 +11,12 @@
     <record id="assembly_group_user" model="res.groups">
         <field name="name">Assembly User</field>
         <field name="category_id" ref="module_category_assembly"/>
-        <field name="comment">Read-only on assemblies, agenda, attendees, delegations, votings, results. May create own voting lines (cast vote); no write/unlink on those lines. No create/write/unlink on attendees or delegations (managers use backend attendance links). Not implied by Assembly Manager—assign groups separately.</field>
+        <field name="comment">Read-only on assemblies, agenda, delegations, votings, results. Read/write/create attendees (no unlink); record rules limit attendee rows to the user&apos;s own partner, so bulk or third-party lines are blocked at rule level. May create own voting lines (cast vote); no write/unlink on those lines. Not implied by Assembly Manager—assign groups separately.</field>
     </record>
     <record id="assembly_group_manager" model="res.groups">
         <field name="name">Assembly Manager</field>
         <field name="category_id" ref="module_category_assembly"/>
-        <field name="comment">Full CRUD on assembly models (ACL). Implied by Settings / Administration (base.group_system). Does not imply Assembly User: avoid assigning both User and Manager to the same login, or combine with manager record rules (see ir.rule) for full visibility.</field>
+        <field name="comment">Full CRUD on assembly models (ACL). Implied by Settings / Administration (base.group_system). Does not imply Assembly User; if both groups are assigned, permissive manager ir.rule ORs with user rules so back-office rows stay visible.</field>
     </record>
 
     <!-- Multi-company: one rule per model (no groups = all users with ACL on that model). -->
@@ -78,13 +78,27 @@
 
     <!--
       Assembly User: further scope to the logged-in partner (AND with multi-company).
-      Managers rely on multi-company rules only (no per-partner rule).
+      Assembly Manager: permissive rule so ir.rule ORs with the user rule (Odoo combines
+      group rules with OR). Users with both groups therefore see all rows in company,
+      not only own-partner rows.
     -->
+    <record id="assembly_attendee_rule_manager" model="ir.rule">
+        <field name="name">assembly.attendee: manager sees all in company</field>
+        <field name="model_id" ref="model_assembly_attendee"/>
+        <field name="groups" eval="[(4, ref('assembly_group_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
     <record id="assembly_attendee_rule_user" model="ir.rule">
         <field name="name">assembly.attendee: user sees own partner row</field>
         <field name="model_id" ref="model_assembly_attendee"/>
         <field name="groups" eval="[(4, ref('assembly_group_user'))]"/>
         <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+    </record>
+    <record id="assembly_delegation_rule_manager" model="ir.rule">
+        <field name="name">assembly.delegation: manager sees all in company</field>
+        <field name="model_id" ref="model_assembly_delegation"/>
+        <field name="groups" eval="[(4, ref('assembly_group_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
     </record>
     <record id="assembly_delegation_rule_user" model="ir.rule">
         <field name="name">assembly.delegation: user sees own delegator rows</field>
@@ -92,11 +106,23 @@
         <field name="groups" eval="[(4, ref('assembly_group_user'))]"/>
         <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
     </record>
+    <record id="assembly_representation_rule_manager" model="ir.rule">
+        <field name="name">assembly.representation: manager sees all in company</field>
+        <field name="model_id" ref="model_assembly_representation"/>
+        <field name="groups" eval="[(4, ref('assembly_group_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
     <record id="assembly_representation_rule_user" model="ir.rule">
         <field name="name">assembly.representation: user sees owner or agent rows</field>
         <field name="model_id" ref="model_assembly_representation"/>
         <field name="groups" eval="[(4, ref('assembly_group_user'))]"/>
         <field name="domain_force">['|', ('owner_partner_id', '=', user.partner_id.id), ('agent_partner_id', '=', user.partner_id.id)]</field>
+    </record>
+    <record id="assembly_voting_line_rule_manager" model="ir.rule">
+        <field name="name">assembly.voting.line: manager sees all in company</field>
+        <field name="model_id" ref="model_assembly_voting_line"/>
+        <field name="groups" eval="[(4, ref('assembly_group_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
     </record>
     <record id="assembly_voting_line_rule_user" model="ir.rule">
         <field name="name">assembly.voting.line: user sees own attendee lines</field>

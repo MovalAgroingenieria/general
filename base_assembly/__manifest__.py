@@ -18,6 +18,11 @@
         "base_vote",
         "web",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "static/src/js/document_preview_wizard_form.js",
+        ],
+    },
     "data": [
         "security/assembly_security.xml",
         "security/assembly_group_system.xml",

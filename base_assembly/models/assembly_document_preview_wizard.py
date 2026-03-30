@@ -32,6 +32,15 @@ class AssemblyDocumentPreviewWizard(
     )
     preview_html = fields.Html(string="Rendered preview", readonly=True, sanitize=False)
 
+    def write(self, vals):
+        res = super().write(vals)
+        if any(k in vals for k in ("document_type", "assembly_id")):
+            for rec in self:
+                super(AssemblyDocumentPreviewWizard, rec).write(
+                    {"preview_html": rec._preview_html_from_selection()}
+                )
+        return res
+
     def _preview_html_from_selection(self):
         """HTML string for current ``assembly_id`` and ``document_type``.
 
@@ -59,14 +68,10 @@ class AssemblyDocumentPreviewWizard(
     def action_refresh_preview(self):
         self.ensure_one()
         self.write({"preview_html": self._preview_html_from_selection()})
-        return {
-            "type": "ir.actions.act_window",
-            "name": self.env._("Preview rendered document"),
-            "res_model": self._name,
-            "res_id": self.id,
-            "view_mode": "form",
-            "target": "new",
-        }
+        action = self.env["ir.actions.act_window"]._for_xml_id(
+            "base_assembly.action_assembly_document_preview_wizard"
+        )
+        return {**action, "res_id": self.id}
 
     @api.onchange("document_type", "assembly_id")
     def _onchange_document_type_refresh(self):

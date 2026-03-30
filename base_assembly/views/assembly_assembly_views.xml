@@ -285,12 +285,12 @@
                         </group>
                     </group>
                     <group string="Address (for documents)" readonly="assembly_state == 'closed'">
-                        <field name="street"/>
-                        <field name="country_id"/>
-                        <field name="state_id" domain="[('country_id', '=', country_id)]"/>
-                        <field name="zip"/>
-                        <field name="city_id" options="{'no_open': True, 'no_create': True}"/>
-                        <field name="city"/>
+                        <field name="street" autocomplete="chrome-off"/>
+                        <field name="country_id" autocomplete="off"/>
+                        <field name="state_id" domain="[('country_id', '=', country_id)]" autocomplete="off"/>
+                        <field name="zip" autocomplete="chrome-off"/>
+                        <field name="city_id" options="{'no_open': True, 'no_create': True}" autocomplete="off"/>
+                        <field name="city" autocomplete="chrome-off"/>
                     </group>
                     <notebook>
                         <page string="Agenda" name="agenda">
@@ -329,7 +329,7 @@
                                     <field name="attendee_state" readonly="1"/>
                                     <field name="date_register"/>
                                     <field name="total_votes" sum="Total"/>
-                                    <field name="attendance_notes"/>
+                                    <field name="attendance_notes" invisible="not parent.allow_attendance_notes"/>
                                     <field name="attendance_signature" column_invisible="1"/>
                                     <button name="action_confirm" string="Confirm" type="object" icon="fa-check" invisible="attendee_state == 'confirmed'" groups="base_assembly.assembly_group_manager"/>
                                     <button name="action_mark_absent" string="Absent" type="object" icon="fa-times" invisible="attendee_state == 'absent'" groups="base_assembly.assembly_group_manager"/>
@@ -368,6 +368,8 @@
                             <group readonly="assembly_state == 'closed'">
                                 <group string="Quorum &amp; online voting">
                                     <field name="allow_online_voting"/>
+                                    <field name="allow_attendance_notes"/>
+                                    <field name="include_qr_code"/>
                                     <field name="attendance_require_partner_vat_confirm"/>
                                     <field name="attendance_partner_vat_format_strict"
                                            invisible="not attendance_require_partner_vat_confirm"/>
@@ -471,12 +473,17 @@
         <field name="name">assembly.assembly.kanban</field>
         <field name="model">assembly.assembly</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="assembly_state" class="o_kanban_small_column" sample="1">
+            <kanban default_group_by="assembly_state" class="o_kanban_small_column o_assembly_kanban_classic" sample="1">
                 <field name="id"/>
                 <field name="name"/>
                 <field name="code"/>
                 <field name="assembly_state"/>
                 <field name="assembly_type_id"/>
+                <field name="date_first_call"/>
+                <field name="kanban_call_day"/>
+                <field name="kanban_call_month_year"/>
+                <field name="kanban_call_time"/>
+                <field name="kanban_location_label"/>
                 <field name="quorum_percentage"/>
                 <field name="quorum_reached"/>
                 <field name="total_present_attendees"/>
@@ -487,44 +494,74 @@
                 <field name="kanban_results_summary"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div class="oe_kanban_card oe_kanban_global_click o_kanban_card rounded-3 shadow-sm border overflow-hidden">
-                            <div class="d-flex justify-content-between align-items-start gap-2 px-3 py-2 border-bottom bg-100">
-                                <div class="min-w-0 flex-grow-1">
-                                    <div class="fw-bold text-truncate"><field name="name"/></div>
-                                    <div class="text-muted small font-monospace text-truncate"><field name="code"/></div>
+                        <div class="oe_kanban_card oe_kanban_global_click o_kanban_card o_assembly_kanban_card d-flex flex-row flex-nowrap rounded-2 shadow-sm border overflow-hidden">
+                            <div
+                                t-attf-class="o_assembly_kanban_date_rail flex-shrink-0 d-flex flex-column align-items-center justify-content-center px-2 py-3 text-center #{record.assembly_state.raw_value === 'closed' || record.assembly_state.raw_value === 'cancelled' ? 'bg-secondary-subtle text-secondary' : 'bg-warning-subtle'}"
+                                style="min-width: 4.75rem;"
+                            >
+                                <div t-if="record.kanban_call_day.raw_value" class="fs-3 fw-bold lh-1 mb-1">
+                                    <field name="kanban_call_day"/>
                                 </div>
-                                <field name="assembly_state" widget="badge"/>
+                                <div t-else="" class="fs-5 fw-bold text-muted lh-1 mb-1">—</div>
+                                <div t-if="record.kanban_call_month_year.raw_value" class="small text-uppercase fw-semibold lh-sm px-1">
+                                    <field name="kanban_call_month_year"/>
+                                </div>
+                                <div t-if="record.kanban_call_time.raw_value" class="small text-muted mt-2 lh-1">
+                                    <field name="kanban_call_time"/>
+                                </div>
                             </div>
-                            <div class="px-3 py-2 small">
-                                <div t-if="record.assembly_type_id.raw_value" class="text-muted text-truncate mb-2">
-                                    <i class="fa fa-tag me-1"/><field name="assembly_type_id"/>
-                                </div>
-                                <div class="mb-2">
-                                    <div class="d-flex justify-content-between text-muted mb-1">
-                                        <span><i class="fa fa-users me-1"/>Quorum</span>
-                                        <span><field name="total_present_attendees"/> / <field name="total_possible_attendees"/> · <field name="quorum_percentage"/>%</span>
+                            <div class="flex-grow-1 min-w-0 d-flex flex-column bg-view">
+                                <div class="d-flex justify-content-between align-items-start gap-2 px-3 pt-2 pb-1">
+                                    <div class="min-w-0 flex-grow-1">
+                                        <div class="fw-bold text-truncate fs-5"><field name="name"/></div>
+                                        <div class="text-muted small font-monospace text-truncate"><field name="code"/></div>
                                     </div>
-                                    <div class="progress rounded-pill" style="height: 7px;">
-                                        <div role="progressbar" t-att-class="'progress-bar ' + (record.quorum_reached.raw_value ? 'bg-success' : 'bg-warning')" t-attf-style="width: {{ Math.min(100, Math.round(100 * (record.total_present_attendees.raw_value || 0) / (record.total_possible_attendees.raw_value || 1))) }}%;"></div>
+                                    <field name="assembly_state" widget="badge"/>
+                                </div>
+                                <div class="px-3 pb-1 small">
+                                    <div t-if="record.kanban_location_label.raw_value" class="text-muted text-truncate mb-2">
+                                        <i class="fa fa-map-marker me-1"/><field name="kanban_location_label" class="d-inline"/>
                                     </div>
-                                    <div class="mt-1">
-                                        <span t-if="record.quorum_reached.raw_value" class="text-success"><i class="fa fa-check-circle me-1"/>Quorum reached</span>
-                                        <span t-else="" class="text-warning"><i class="fa fa-exclamation-circle me-1"/>Quorum pending</span>
+                                    <div t-if="record.assembly_type_id.raw_value" class="text-muted text-truncate mb-2">
+                                        <i class="fa fa-tag me-1"/><field name="assembly_type_id"/>
                                     </div>
-                                </div>
-                                <div class="d-flex flex-wrap gap-1 mb-2">
-                                    <span class="badge rounded-pill text-bg-primary">
-                                        <i class="fa fa-folder-open-o me-1"/><field name="kanban_open_votings_count"/> open
-                                    </span>
-                                    <span class="badge rounded-pill text-bg-secondary">
-                                        <i class="fa fa-check me-1"/><field name="kanban_closed_votings_count"/> closed
-                                    </span>
-                                </div>
-                                <div t-if="record.kanban_closed_votings_count.raw_value" class="text-muted mb-1">
-                                    <i class="fa fa-pie-chart me-1"/>Avg. participation (closed): <strong><field name="kanban_avg_participation"/>%</strong>
-                                </div>
-                                <div t-if="record.kanban_results_summary.raw_value" class="fw-bold border-top pt-2 mt-1 text-truncate">
-                                    <field name="kanban_results_summary"/>
+                                    <div class="d-flex align-items-center flex-wrap gap-1 small text-muted mb-2 user-select-none">
+                                        <i t-attf-class="fa fa-pencil fa-fw #{record.assembly_state.raw_value === 'cancelled' ? 'text-muted opacity-25' : (record.assembly_state.raw_value === 'draft' ? 'text-primary' : 'text-muted opacity-50')}"/>
+                                        <span class="text-muted opacity-50">&gt;</span>
+                                        <i t-attf-class="fa fa-bullhorn fa-fw #{record.assembly_state.raw_value === 'cancelled' ? 'text-muted opacity-25' : ((record.assembly_state.raw_value === 'announced' || record.assembly_state.raw_value === 'open' || record.assembly_state.raw_value === 'in_session' || record.assembly_state.raw_value === 'closed') ? 'text-primary' : 'text-muted opacity-50')}"/>
+                                        <span class="text-muted opacity-50">&gt;</span>
+                                        <i t-attf-class="fa fa-circle-o-notch fa-fw #{record.assembly_state.raw_value === 'cancelled' ? 'text-muted opacity-25' : ((record.assembly_state.raw_value === 'open' || record.assembly_state.raw_value === 'in_session' || record.assembly_state.raw_value === 'closed') ? 'text-primary' : 'text-muted opacity-50')}"/>
+                                        <span class="text-muted opacity-50">&gt;</span>
+                                        <i t-attf-class="fa fa-gavel fa-fw #{record.assembly_state.raw_value === 'cancelled' ? 'text-muted opacity-25' : (record.assembly_state.raw_value === 'closed' ? 'text-primary' : 'text-muted opacity-50')}"/>
+                                        <i t-if="record.assembly_state.raw_value === 'cancelled'" class="fa fa-ban fa-fw text-danger ms-1" title="Cancelled"/>
+                                    </div>
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between text-muted mb-1">
+                                            <span><i class="fa fa-users me-1"/>Quorum</span>
+                                            <span><field name="total_present_attendees"/> / <field name="total_possible_attendees"/> · <field name="quorum_percentage"/>%</span>
+                                        </div>
+                                        <div class="progress rounded-pill" style="height: 6px;">
+                                            <div role="progressbar" t-att-class="'progress-bar ' + (record.quorum_reached.raw_value ? 'bg-success' : 'bg-warning')" t-attf-style="width: {{ Math.min(100, Math.round(100 * (record.total_present_attendees.raw_value || 0) / (record.total_possible_attendees.raw_value || 1))) }}%;"></div>
+                                        </div>
+                                        <div class="mt-1 small">
+                                            <span t-if="record.quorum_reached.raw_value" class="text-success"><i class="fa fa-check-circle me-1"/>Quorum reached</span>
+                                            <span t-else="" class="text-warning"><i class="fa fa-exclamation-circle me-1"/>Quorum pending</span>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-1 mb-1">
+                                        <span class="badge rounded-pill text-bg-primary">
+                                            <i class="fa fa-folder-open-o me-1"/><field name="kanban_open_votings_count"/> open
+                                        </span>
+                                        <span class="badge rounded-pill text-bg-secondary">
+                                            <i class="fa fa-check me-1"/><field name="kanban_closed_votings_count"/> closed
+                                        </span>
+                                    </div>
+                                    <div t-if="record.kanban_closed_votings_count.raw_value" class="text-muted small mb-1">
+                                        <i class="fa fa-pie-chart me-1"/>Avg. participation (closed): <strong><field name="kanban_avg_participation"/>%</strong>
+                                    </div>
+                                    <div t-if="record.kanban_results_summary.raw_value" class="fw-bold border-top pt-2 mt-1 text-truncate small">
+                                        <field name="kanban_results_summary"/>
+                                    </div>
                                 </div>
                             </div>
                         </div>

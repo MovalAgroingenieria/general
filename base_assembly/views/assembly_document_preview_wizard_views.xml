@@ -13,12 +13,19 @@
                     Rendered with Odoo mail templates (QWeb on mail.template) when available;
                     otherwise AF QWeb views or convocation HTML are used. Refresh to rebuild.
                 </div>
-                <field name="preview_html" nolabel="1" colspan="2"/>
+                <field name="preview_html" nolabel="1" colspan="2" force_save="1"/>
                 <footer>
                     <button name="action_refresh_preview" string="Refresh" type="object" class="btn-primary"/>
                     <button string="Close" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
         </field>
+    </record>
+    <record id="action_assembly_document_preview_wizard" model="ir.actions.act_window">
+        <field name="name">Preview rendered document</field>
+        <field name="res_model">assembly.document.preview.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="assembly_document_preview_wizard_view_form"/>
+        <field name="target">new</field>
     </record>
 </odoo>

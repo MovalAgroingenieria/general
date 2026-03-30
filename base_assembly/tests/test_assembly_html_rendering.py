@@ -20,6 +20,14 @@ class TestAssemblyHtmlRendering(AssemblyTestMixin, TransactionCase):
         self.assertTrue(s.strip())
         self.assertFalse(is_html_empty(s))
         self.assertIn("Bare Pub Asm", s)
+        self.assertIn("o_assembly_publication_hint", s)
+
+    def test_get_rendered_publication_with_description_has_no_duplicate_hint(self):
+        assembly = self._create_assembly(name="Full Pub Asm")
+        assembly.write({"description": "<p>BODY_WITH_HINT_CLASS</p>"})
+        out = str(assembly.get_rendered_publication())
+        self.assertIn("BODY_WITH_HINT_CLASS", out)
+        self.assertEqual(out.count("o_assembly_publication_hint"), 0)
 
     def test_get_rendered_publication_returns_real_html_not_empty_with_body_data(self):
         """``get_rendered_publication()`` must yield non-empty HTML when ``description`` is set."""
@@ -258,6 +266,23 @@ class TestAssemblyHtmlRendering(AssemblyTestMixin, TransactionCase):
         body = html.decode() if isinstance(html, bytes) else html
         self.assertIn("PUBLISH_AF_V2_BLOCK", body)
         self.assertIn("o_assembly_report_publication", body)
+
+    def test_attendance_present_with_delegation_report_renders(self):
+        assembly = self._create_assembly(name="PresDel Asm")
+        assembly.write({"description": "<p>PRES_DEL_PUB</p>"})
+        partners = self._create_partners(self.env, 2, prefix="PresDel")
+        assembly.write({"partner_domain": "[('id', 'in', %s)]" % partners.ids})
+        assembly.action_generate_attendees()
+        vt = assembly.vote_type_ids[0]
+        self._confirm_attendees(assembly.attendee_ids, vote_type=vt, votes_each=1)
+        report = self.env.ref(
+            "base_assembly.assembly_assembly_action_report_attendance_present_with_delegationvote"
+        )
+        html, _ = report._render_qweb_html(report.id, assembly.ids, data={})
+        body = html.decode() if isinstance(html, bytes) else html
+        self.assertIn("PRES_DEL_PUB", body)
+        self.assertIn("Delegations received", body)
+        self.assertIn("Attendees list (present only, with delegated votes)", body)
 
     def test_individual_call_report_includes_agenda_manual_and_final_summary(self):
         assembly, agenda = self._create_assembly_with_agenda(

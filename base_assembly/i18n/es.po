@@ -41,6 +41,11 @@ msgid "'Attendees present - %s' % (object.name)"
 msgstr "'Asistentes presentes - %s' % (object.name)"
 
 #. module: base_assembly
+#: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_attendance_present_with_delegationvote
+msgid "'Attendees present and delegations - %s' % (object.name)"
+msgstr "'Asistentes presentes y delegaciones - %s' % (object.name)"
+
+#. module: base_assembly
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_attendee_action_report_voting_ballot_nominative
 msgid "'Ballot - %s - %s' % (object.assembly_id.name, object.partner_id.name)"
 msgstr ""
@@ -69,8 +74,7 @@ msgstr ""
 #. module: base_assembly
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_delegationvote
 msgid "'Delegation template - %s' % (object.name)"
-msgstr ""
-"'Delegación - %s - %s' % (object.assembly_id.name, object.partner_id.name)"
+msgstr "'Plantilla delegación voto - %s' % (object.name)"
 
 #. module: base_assembly
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_representation
@@ -387,17 +391,26 @@ msgstr "<strong>Asistente:</strong>"
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_present
 msgid "<strong>Attendees list (present only)</strong>"
-msgstr "<strong>Lista de asistentes (solo presentes)</strong>"
+msgstr "<strong>Hojas de asistencia (sólo los presentes)</strong>"
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_present_delegation
+msgid "<strong>Attendees list (present only, with delegated votes)</strong>"
+msgstr ""
+"<strong>Hojas de asistencia (sólo los presentes, con delegaciones de "
+"voto)</strong>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_delegation
 msgid "<strong>Attendees list (with delegated votes)</strong>"
-msgstr "<strong>Lista de asistentes (con votos delegados)</strong>"
+msgstr ""
+"<strong>Hojas de asistencia (todos los convocados, con delegaciones de "
+"voto)</strong>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_all
 msgid "<strong>Attendees list</strong>"
-msgstr "<strong>Lista de asistentes</strong>"
+msgstr "<strong>Hojas de asistencia (todos los convocados)</strong>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_delegation_doc
@@ -428,6 +441,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_all
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_delegation
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_present
+#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_present_delegation
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_table_block
 msgid "<strong>Representations (registered)</strong>"
 msgstr ""
@@ -549,10 +563,25 @@ msgid "Active delegations detected"
 msgstr ""
 
 #. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__include_qr_code
+msgid "Add QR code (tracked attendance link)"
+msgstr "Añadir código QR"
+
+#. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_agenda.py:0
 msgid "Add at least one ballot option before closing this point."
 msgstr ""
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/models/assembly_assembly.py:0
+msgid ""
+"Add convocation text on this assembly for the full notice. Set the first "
+"call date to show when and where."
+msgstr ""
+"Añada el texto de convocatoria en esta asamblea para completar el aviso. "
+"Establezca la fecha de la primera convocatoria para mostrar cuándo y dónde."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
@@ -613,6 +642,11 @@ msgid ""
 msgstr ""
 "Todos los puntos del orden del día deben votarse o omitirse antes de cerrar "
 "la asamblea."
+
+#. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__allow_attendance_notes
+msgid "Allow attendance annotations"
+msgstr "Permitir anotaciones"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__allow_online_voting
@@ -845,6 +879,12 @@ msgid "Attendance (defaults for new assemblies)"
 msgstr ""
 
 #. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/models/assembly_attendee.py:0
+msgid "Attendance annotations are not allowed for this assembly."
+msgstr "No se permiten anotaciones de asistencia en esta asamblea."
+
+#. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee__attendance_link_tracker_id
 msgid "Attendance link tracker"
 msgstr ""
@@ -894,17 +934,22 @@ msgstr "Asistentes"
 #. module: base_assembly
 #: model:ir.actions.report,name:base_assembly.assembly_assembly_action_report_attendance
 msgid "Attendees list (all)"
-msgstr "Listado de asistentes (todos)"
+msgstr "Hojas de asistencia (todos los convocados)"
 
 #. module: base_assembly
 #: model:ir.actions.report,name:base_assembly.assembly_assembly_action_report_attendance_with_signature
 msgid "Attendees list (present only)"
-msgstr "Listado de asistentes (solo presentes)"
+msgstr "Hojas de asistencia (sólo los presentes)"
+
+#. module: base_assembly
+#: model:ir.actions.report,name:base_assembly.assembly_assembly_action_report_attendance_present_with_delegationvote
+msgid "Attendees list (present only, with delegated votes)"
+msgstr "Hojas de asistencia (sólo los presentes, con delegaciones de voto)"
 
 #. module: base_assembly
 #: model:ir.actions.report,name:base_assembly.assembly_assembly_action_report_attendance_with_delegationvote
 msgid "Attendees list (with delegated votes)"
-msgstr "Listado de asistentes (con votos delegados)"
+msgstr "Hojas de asistencia (todos los convocados, con delegaciones de voto)"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__kanban_avg_participation
@@ -1071,9 +1116,14 @@ msgid "Channel"
 msgstr "Canal"
 
 #. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__city_id
+msgid "City (directory)"
+msgstr "Ciudad (catálogo)"
+
+#. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__city
-msgid "City"
-msgstr "Ciudad"
+msgid "City (manual)"
+msgstr "Ciudad (texto libre)"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
@@ -1173,6 +1223,11 @@ msgstr ""
 "cuando corresponda."
 
 #. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
+msgid "Controls (flags)"
+msgstr "Controles"
+
+#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Convocation / description"
 msgstr "Convocatoria / descripción"
@@ -1226,9 +1281,19 @@ msgid "Date Delegation"
 msgstr "Fecha de delegación"
 
 #. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
+msgid "Default address"
+msgstr "Dirección (valores por defecto)"
+
+#. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_city_id
+msgid "Default city (directory)"
+msgstr "Ciudad por defecto (catálogo)"
+
+#. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_city
-msgid "Default city"
-msgstr "Ciudad por defecto"
+msgid "Default city (manual)"
+msgstr "Ciudad por defecto (texto)"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_country_id
@@ -1256,6 +1321,11 @@ msgid "Default president"
 msgstr "Presidente por defecto"
 
 #. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
+msgid "Default responsible persons"
+msgstr "Personas responsables (valores por defecto)"
+
+#. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_secretary_id
 msgid "Default secretary"
 msgstr "Secretario por defecto"
@@ -1274,6 +1344,16 @@ msgstr "Calle por defecto"
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_zip
 msgid "Default zip"
 msgstr "Código postal por defecto"
+
+#. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_include_qr_code
+msgid "Default: add QR code (tracked attendance link)"
+msgstr "Añadir código QR"
+
+#. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_allow_attendance_notes
+msgid "Default: allow attendance annotations"
+msgstr "Permitir anotaciones"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_attendance_require_partner_vat_confirm
@@ -1367,7 +1447,7 @@ msgstr ""
 #. module: base_assembly
 #: model:ir.actions.report,name:base_assembly.assembly_assembly_action_report_delegationvote
 msgid "Delegation of vote (template)"
-msgstr "Plantilla de delegación de voto"
+msgstr "Delegación voto (plantilla)"
 
 #. module: base_assembly
 #. odoo-python
@@ -1563,6 +1643,16 @@ msgid "Followers (Partners)"
 msgstr ""
 
 #. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_assembly_type__default_city
+msgid "Free text default when not using the city directory."
+msgstr "Texto por defecto si no se usa el catálogo de ciudades."
+
+#. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_assembly_assembly__city
+msgid "Free text for documents when not using the city directory."
+msgstr "Texto libre para documentos si no se usa el catálogo de ciudades."
+
+#. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_attendee__attendance_notes
 msgid "Free-text notes for this registration (not used by core quorum logic)."
 msgstr ""
@@ -1652,11 +1742,29 @@ msgid "If checked, some messages have a delivery error."
 msgstr ""
 
 #. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_assembly_assembly__allow_attendance_notes
+msgid ""
+"If disabled, attendance notes are hidden and cannot be set on registrations."
+msgstr ""
+"Si está desactivado, las anotaciones de asistencia se ocultan y no se pueden"
+" rellenar en los registros."
+
+#. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_type__require_vat
 msgid ""
 "If enabled, confirming an assembly attendee is blocked when the member has "
 "no tax identification number (VAT/TIN) or only the exempt placeholder."
 msgstr ""
+
+#. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_assembly_assembly__include_qr_code
+msgid ""
+"If enabled, each attendee can have a short tracked link suitable for QR. If "
+"disabled, link trackers are not created or are cleared."
+msgstr ""
+"Si está activado, cada asistente puede tener un enlace corto rastreado "
+"adecuado para QR. Si está desactivado, no se crean link trackers o se "
+"eliminan."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_res_partner__assembly_excluded
@@ -1700,6 +1808,12 @@ msgstr "Transición de estado de asamblea no válida: %(old)s → %(new)s"
 
 #. module: base_assembly
 #. odoo-python
+#: code:addons/base_assembly/models/assembly_assembly.py:0
+msgid "Invalid dates"
+msgstr "Fechas no válidas"
+
+#. module: base_assembly
+#. odoo-python
 #: code:addons/base_assembly/models/assembly_delegation.py:0
 msgid "Invalid delegation status for new record: %(state)s"
 msgstr ""
@@ -1715,12 +1829,6 @@ msgstr ""
 #: code:addons/base_assembly/models/assembly_delegation.py:0
 msgid "Invalid delegation status: %(state)s"
 msgstr ""
-
-#. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_assembly.py:0
-msgid "Invalid dates"
-msgstr "Fechas no válidas"
 
 #. module: base_assembly
 #. odoo-python
@@ -2527,7 +2635,7 @@ msgstr "Representación"
 #. module: base_assembly
 #: model:ir.actions.report,name:base_assembly.assembly_assembly_action_report_representation
 msgid "Representation (template)"
-msgstr "Representación (plantilla)"
+msgstr "Representación (Plantilla)"
 
 #. module: base_assembly
 #. odoo-python
@@ -2589,7 +2697,7 @@ msgstr ""
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_type__require_vat
 msgid "Require VAT to confirm attendance"
-msgstr ""
+msgstr "DNI obligatorio"
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_agenda__vote_type_id
@@ -3218,7 +3326,7 @@ msgstr "Votación"
 #. module: base_assembly
 #: model:ir.actions.report,name:base_assembly.assembly_assembly_action_report_voting_ballot
 msgid "Voting ballot"
-msgstr "Papeleta de votación"
+msgstr "Papeleta votación asamblea"
 
 #. module: base_assembly
 #: model:ir.actions.report,name:base_assembly.assembly_attendee_action_report_voting_ballot_nominative
@@ -3309,6 +3417,20 @@ msgid ""
 "When attendance was last confirmed (set on confirmation; optional for other "
 "flows)."
 msgstr ""
+
+#. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_assembly_type__default_allow_attendance_notes
+msgid "When creating an assembly from this type, copy this to the assembly."
+msgstr "Al crear una asamblea de este tipo, se copia a la asamblea."
+
+#. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_assembly_type__default_include_qr_code
+msgid ""
+"When creating an assembly from this type, copy this to the assembly. If "
+"disabled, attendee short links for QR are not created."
+msgstr ""
+"Al crear una asamblea de este tipo, se copia a la asamblea. Si está "
+"desactivado, no se crean enlaces cortos de asistente para QR."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_type__default_attendance_partner_vat_format_strict

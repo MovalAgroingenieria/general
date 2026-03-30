@@ -36,6 +36,16 @@ class TestBaseAssemblyPackagingSanity(AssemblyTestMixin, TransactionCase):
                 "Manifest data file missing: %s" % rel,
             )
 
+    def test_manifest_asset_files_exist(self):
+        manifest = _load_manifest_dict()
+        for _bundle, paths in (manifest.get("assets") or {}).items():
+            for rel in paths:
+                path = _MODULE_ROOT / rel
+                self.assertTrue(
+                    path.is_file(),
+                    "Manifest asset file missing: %s" % rel,
+                )
+
     def test_manifest_dependencies_named(self):
         """Declared dependencies are non-empty (base + vote + web)."""
         manifest = _load_manifest_dict()
@@ -75,6 +85,9 @@ class TestBaseAssemblyPackagingSanity(AssemblyTestMixin, TransactionCase):
         self.env.ref("base_assembly.assembly_group_user")
         self.env.ref("base_assembly.assembly_group_manager")
 
+    def test_document_preview_wizard_action_xmlid_exists(self):
+        self.env.ref("base_assembly.action_assembly_document_preview_wizard")
+
     def test_assembly_code_sequence_loaded(self):
         """Sequence from ``data/assembly_sequence_data.xml`` is present."""
         seq = (
@@ -99,6 +112,12 @@ class TestBaseAssemblyPackagingSanity(AssemblyTestMixin, TransactionCase):
     def test_representation_report_action_xmlid_exists(self):
         """AF §11.5: representation template report is declared."""
         self.env.ref("base_assembly.assembly_assembly_action_report_representation")
+
+    def test_attendance_present_with_delegation_report_action_xmlid_exists(self):
+        """Present-only attendance report includes delegations column (bound action)."""
+        self.env.ref(
+            "base_assembly.assembly_assembly_action_report_attendance_present_with_delegationvote"
+        )
 
     def test_af_v2_call_register_and_window_actions_exist(self):
         """AF v2: call-register report alias and navigation actions load."""

@@ -47,10 +47,13 @@ class AssemblyType(models.Model):
         help="Default domain for convocable partners.",
     )
     default_street = fields.Char(string="Default street")
-    default_city = fields.Char(string="Default city")
+    default_city = fields.Char(
+        string="Default city (manual)",
+        help="Free text default when not using the city directory.",
+    )
     default_city_id = fields.Many2one(
         "res.city",
-        string="City",
+        string="Default city (directory)",
         ondelete="set null",
         domain="[('country_id', '=?', default_country_id), ('state_id', '=?', default_state_id)]",
     )
@@ -99,6 +102,19 @@ class AssemblyType(models.Model):
         help=(
             "If enabled, confirming an assembly attendee is blocked when the member "
             "has no tax identification number (VAT/TIN) or only the exempt placeholder."
+        ),
+    )
+    default_allow_attendance_notes = fields.Boolean(
+        string="Default: allow attendance annotations",
+        default=True,
+        help="When creating an assembly from this type, copy this to the assembly.",
+    )
+    default_include_qr_code = fields.Boolean(
+        string="Default: add QR code (tracked attendance link)",
+        default=True,
+        help=(
+            "When creating an assembly from this type, copy this to the assembly. "
+            "If disabled, attendee short links for QR are not created."
         ),
     )
     active = fields.Boolean(default=True)

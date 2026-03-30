@@ -33,20 +33,24 @@
                             <field name="active"/>
                         </group>
                     </group>
-                    <group string="Default location">
-                        <field name="default_street"/>
-                        <field name="default_country_id"/>
-                        <field name="default_state_id" domain="[('country_id', '=', default_country_id)]"/>
-                        <field name="default_zip"/>
-                        <field name="default_city_id" options="{'no_open': True, 'no_create': True}"/>
-                        <field name="default_city"/>
+                    <group string="Default address">
+                        <field name="default_street" autocomplete="chrome-off"/>
+                        <field name="default_country_id" autocomplete="off"/>
+                        <field name="default_state_id" domain="[('country_id', '=', default_country_id)]" autocomplete="off"/>
+                        <field name="default_zip" autocomplete="chrome-off"/>
+                        <field name="default_city_id" options="{'no_open': True, 'no_create': True}" autocomplete="off"/>
+                        <field name="default_city" autocomplete="chrome-off"/>
                     </group>
-                    <group string="Default officers">
+                    <group string="Default responsible persons">
                         <field name="default_president_id"/>
                         <field name="default_secretary_id"/>
                     </group>
-                    <group string="Attendance (defaults for new assemblies)">
+                    <group string="Controls (flags)">
                         <field name="require_vat"/>
+                        <field name="default_allow_attendance_notes"/>
+                        <field name="default_include_qr_code"/>
+                    </group>
+                    <group string="Attendance (defaults for new assemblies)">
                         <field name="default_attendance_require_partner_vat_confirm"/>
                         <field name="default_attendance_partner_vat_format_strict"/>
                     </group>

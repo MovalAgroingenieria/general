@@ -6,10 +6,11 @@
 
 Validates that:
 - Users without assembly group cannot access assembly models.
-- assembly_group_user: read + write own ``assembly.attendee`` (AF §8); create own
-  ``assembly.delegation`` (draft); record rules scope rows; may create own
-  ``assembly.voting.line``; representation rows only when owner/agent matches
-  partner; cannot write assembly/agenda/voting/result or run manager-only actions.
+- assembly_group_user: read + write + create own ``assembly.attendee`` (record
+  rule: own partner only); create own ``assembly.delegation`` (draft); record
+  rules scope rows; may create own ``assembly.voting.line``; representation rows
+  only when owner/agent matches partner; cannot write assembly/agenda/voting/result
+  or run manager-only actions.
 - assembly_group_manager has full access.
 """
 
@@ -237,19 +238,37 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         with self.assertRaises(AccessError):
             env["assembly.voting"].browse(voting.id).action_close()
 
-    # --- SEC-ACL-04: assembly user cannot unlink attendee, delegation, voting.line ---
+    # --- SEC-ACL-04: assembly user attendee create (own partner only); no unlink ---
 
-    def test_assembly_user_cannot_create_attendee(self):
-        """Attendees are created by managers (generate attendees), not assembly users."""
+    def test_assembly_user_can_create_attendee_for_own_partner(self):
         assembly, _ = (
             self._create_assembly_with_agenda()
         )  # pylint: disable=protected-access
+        env = self.env(user=self.user_assembly_user)
+        att = env["assembly.attendee"].create(
+            {
+                "assembly_id": assembly.id,
+                "partner_id": self.user_assembly_user.partner_id.id,
+            }
+        )
+        self.assertTrue(att)
+        self.assertEqual(att.partner_id, self.user_assembly_user.partner_id)
+
+    def test_assembly_user_cannot_create_attendee_for_other_partner(self):
+        partners = self._create_partners(
+            self.env, 2
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
+        )
         env = self.env(user=self.user_assembly_user)
         with self.assertRaises(AccessError):
             env["assembly.attendee"].create(
                 {
                     "assembly_id": assembly.id,
-                    "partner_id": self.user_assembly_user.partner_id.id,
+                    "partner_id": partners[0].id,
                 }
             )
 
@@ -299,6 +318,24 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
             env["assembly.voting.line"].browse(line.id).unlink()
 
     # --- SEC-ACL-05: manager full access (smoke) ---
+
+    def test_user_admin_has_attendee_create_acl(self):
+        admin = self.env.ref("base.user_admin")
+        env = self.env(user=admin)
+        self.assertTrue(env["assembly.attendee"].has_access("create"))
+
+    def test_user_admin_can_create_attendee_on_assembly(self):
+        admin = self.env.ref("base.user_admin")
+        assembly, _ = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        partner = self._create_partners(self.env, 1)  # pylint: disable=protected-access
+        env = self.env(user=admin)
+        att = env["assembly.attendee"].create(
+            {"assembly_id": assembly.id, "partner_id": partner[0].id}
+        )
+        self.assertTrue(att.exists())
+        self.assertEqual(att.assembly_id, assembly)
 
     def test_assembly_manager_can_read_and_write_assembly(self):
         assembly, _ = (
@@ -395,6 +432,99 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         )
         self.assertEqual(len(delegations), 1)
         self.assertEqual(delegations[0].id, delegation_own.id)
+
+    def test_dual_assembly_user_and_manager_sees_all_delegations(self):
+        """Regression: Mitchell-style login with User+Manager must read every delegation row."""
+        partners = self._create_partners(
+            self.env, 3
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
+        )
+        assembly.action_generate_attendees()
+        assembly.action_announce()
+        assembly.action_open_registration()
+        self.env["assembly.delegation"].create(
+            {
+                "assembly_id": assembly.id,
+                "partner_id": partners[0].id,
+                "delegate_partner_id": partners[1].id,
+                "vote_type_ids": [(6, 0, assembly.assembly_type_id.vote_type_ids.ids)],
+            }
+        )
+        self.env["assembly.delegation"].create(
+            {
+                "assembly_id": assembly.id,
+                "partner_id": partners[1].id,
+                "delegate_partner_id": partners[2].id,
+                "vote_type_ids": [(6, 0, assembly.assembly_type_id.vote_type_ids.ids)],
+            }
+        )
+        cid = self.env.company.id
+        dual = self.env["res.users"].create(
+            {
+                "name": "Assembly Dual User Manager",
+                "login": "assembly_dual_wm_%s" % assembly.id,
+                "password": "assembly_dual_wm",
+                "company_id": cid,
+                "company_ids": [(6, 0, [cid])],
+                "groups_id": [
+                    (
+                        6,
+                        0,
+                        [
+                            self.base_user.id,
+                            self.group_user.id,
+                            self.group_manager.id,
+                        ],
+                    )
+                ],
+            }
+        )
+        dual.write({"partner_id": partners[0].id})
+        env = self.env(user=dual)
+        delegations = env["assembly.delegation"].search(
+            [("assembly_id", "=", assembly.id)]
+        )
+        self.assertEqual(len(delegations), 2)
+
+    def test_dual_assembly_user_and_manager_sees_all_attendees(self):
+        partners = self._create_partners(
+            self.env, 2
+        )  # pylint: disable=protected-access
+        assembly, _ = (
+            self._create_assembly_with_agenda(  # pylint: disable=protected-access
+                partner_domain="[('id', 'in', %s)]" % partners.ids
+            )
+        )
+        assembly.action_generate_attendees()
+        cid = self.env.company.id
+        dual = self.env["res.users"].create(
+            {
+                "name": "Assembly Dual Attendees",
+                "login": "assembly_dual_att_%s" % assembly.id,
+                "password": "assembly_dual_att",
+                "company_id": cid,
+                "company_ids": [(6, 0, [cid])],
+                "groups_id": [
+                    (
+                        6,
+                        0,
+                        [
+                            self.base_user.id,
+                            self.group_user.id,
+                            self.group_manager.id,
+                        ],
+                    )
+                ],
+            }
+        )
+        dual.write({"partner_id": partners[0].id})
+        env = self.env(user=dual)
+        attendees = env["assembly.attendee"].search([("assembly_id", "=", assembly.id)])
+        self.assertEqual(len(attendees), 2)
 
     def test_assembly_user_cannot_write_other_partner_delegation(self):
         partners = self._create_partners(

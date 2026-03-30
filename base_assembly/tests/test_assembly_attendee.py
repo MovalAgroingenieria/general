@@ -144,3 +144,11 @@ class TestAssemblyAttendee(AssemblyTestMixin, TransactionCase):
             self.env["assembly.attendee"].create(
                 {"assembly_id": assembly.id, "partner_id": partner.id}
             )
+
+    def test_attendance_notes_rejected_when_assembly_disallows(self):
+        assembly, _ = self._create_assembly_with_agenda()
+        assembly.write({"allow_attendance_notes": False})
+        assembly.action_generate_attendees()
+        att = assembly.attendee_ids[0]
+        with self.assertRaises(UserError):
+            att.write({"attendance_notes": "not allowed"})
