@@ -6,11 +6,11 @@
         <field name="model">res.partner</field>
         <field name="priority" eval="20" />
         <field name="arch" type="xml">
-            <list>
+            <list default_order="entity_global_code asc">
                 <field name="is_primary_entity" column_invisible="True" />
                 <field name="company_type" column_invisible="True" />
-                <field name="name" />
                 <field name="entity_global_code" />
+                <field name="name" />
                 <field name="member_count" />
                 <field name="phone" />
                 <field name="email" />
@@ -40,7 +40,7 @@
                         </button>
                     </div>
                     <field name="image_1920" widget="image" class="oe_avatar" />
-                    <div class="oe_title">
+                    <div class="oe_title" name="title">
                         <h1>
                             <field name="name" placeholder="Entity Name..." />
                         </h1>
@@ -84,7 +84,7 @@
                     string="Active"
                     domain="[('active', '=', True)]"
                 />
-                <group expand="0" string="Group By">
+                <group expand="0" name="group_by" string="Group By">
                     <filter
                         name="group_by_country"
                         string="Country"
@@ -102,11 +102,11 @@
         <field name="model">res.partner</field>
         <field name="priority" eval="20" />
         <field name="arch" type="xml">
-            <list>
+            <list default_order="entity_global_code asc">
                 <field name="is_secondary_entity" column_invisible="True" />
                 <field name="company_type" column_invisible="True" />
-                <field name="name" />
                 <field name="entity_global_code" />
+                <field name="name" />
                 <field name="member_type_id" optional="show" />
                 <field name="phone" />
                 <field name="email" />
@@ -124,7 +124,7 @@
             <form string="Secondary Member">
                 <sheet>
                     <field name="image_1920" widget="image" class="oe_avatar" />
-                    <div class="oe_title">
+                    <div class="oe_title" name="title">
                         <h1>
                             <field name="name" placeholder="Member Name..." />
                         </h1>
@@ -192,7 +192,7 @@
                     string="Active"
                     domain="[('active', '=', True)]"
                 />
-                <group expand="0" string="Group By">
+                <group expand="0" name="group_by" string="Group By">
                     <filter
                         name="group_by_member_type"
                         string="Member Type"

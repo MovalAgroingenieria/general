@@ -18,7 +18,7 @@ class TestGeneralEntity(TransactionCase):
                 "name": "Test Primary Entity",
                 "is_primary_entity": True,
                 "company_type": "company",
-                "entity_global_code": "PE-TEST-001",
+                "entity_global_code": 1001,
             }
         )
         cls.primary_entity_2 = cls.partner_model.create(
@@ -26,7 +26,7 @@ class TestGeneralEntity(TransactionCase):
                 "name": "Test Primary Entity 2",
                 "is_primary_entity": True,
                 "company_type": "company",
-                "entity_global_code": "PE-TEST-002",
+                "entity_global_code": 1002,
             }
         )
         cls.secondary_member_1 = cls.partner_model.create(
@@ -34,7 +34,7 @@ class TestGeneralEntity(TransactionCase):
                 "name": "Test Secondary Member 1",
                 "is_secondary_entity": True,
                 "company_type": "person",
-                "entity_global_code": "SM-TEST-001",
+                "entity_global_code": 2001,
             }
         )
         cls.secondary_member_2 = cls.partner_model.create(
@@ -42,7 +42,7 @@ class TestGeneralEntity(TransactionCase):
                 "name": "Test Secondary Member 2",
                 "is_secondary_entity": True,
                 "company_type": "person",
-                "entity_global_code": "SM-TEST-002",
+                "entity_global_code": 2002,
             }
         )
 
@@ -72,7 +72,7 @@ class TestGeneralEntity(TransactionCase):
             }
         )
         self.assertTrue(member.id)
-        self.assertEqual(member.entity_global_code, "SM-TEST-001")
+        self.assertEqual(member.entity_global_code, 2001)
 
     def test_member_count(self):
         """Member count is computed correctly."""

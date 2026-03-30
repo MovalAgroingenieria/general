@@ -5,7 +5,7 @@
         <field name="name">general.entity.member.list</field>
         <field name="model">general.entity.member</field>
         <field name="arch" type="xml">
-            <list default_order="primary_partner_id, sequence" editable="bottom">
+            <list default_order="entity_global_code asc, primary_partner_id" editable="bottom">
                 <field name="sequence" widget="handle" />
                 <field
                     name="primary_partner_id"
@@ -13,13 +13,13 @@
                     context="{'form_view_ref': 'base_general_entity.view_partner_primary_entity_form'}"
                     options="{'no_create': True, 'no_quick_create': True}"
                 />
+                <field name="entity_global_code"/>
                 <field
                     name="member_partner_id"
                     context="{'form_view_ref': 'base_general_entity.view_partner_secondary_entity_form'}"
                     options="{'no_create': True, 'no_quick_create': True}"
                 />
                 <field name="member_code_in_entity" />
-                <field name="entity_global_code" />
                 <field name="company_id" column_invisible="True" />
                 <field name="active" column_invisible="True" />
             </list>
