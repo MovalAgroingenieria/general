@@ -943,11 +943,9 @@ for node_key, device_data in devices_plan.items():
 
                         ts_val = reading.get('timestamp')
                         val_str = reading.get('value')
-
                         if ts_val is None or val_str is None:
                             dev_errors += 1
                             continue
-
                         try:
                             valf = float(val_str)
                         except (ValueError, TypeError):

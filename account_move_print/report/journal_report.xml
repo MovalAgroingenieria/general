@@ -61,8 +61,8 @@
                                 class="text-left"
                                 groups="base.group_multi_currency"
                             >Amount in Currency</th>
-                            <th name="th_debit" class="text-left">Debit</th>
-                            <th name="th_credit" class="text-left">Credit</th>
+                            <th name="th_debit" class="text-left" style="white-space: nowrap;">Debit</th>
+                            <th name="th_credit" class="text-left" style="white-space: nowrap;">Credit</th>
                             <th name="th_tax_id" class="text-left">Originator Tax</th>
                             <th name="th_tax_ids" class="text-left">Taxes</th>
                         </tr>
@@ -92,10 +92,10 @@
                                     <span t-if="line['amount_currency_fmt']"
                                         t-esc="line['amount_currency_fmt']" />
                                 </td>
-                                <td name="tb_debit">
+                                <td name="tb_debit" style="white-space: nowrap;">
                                     <span t-esc="line['debit_fmt']" />
                                 </td>
-                                <td name="tb_credit">
+                                <td name="tb_credit" style="white-space: nowrap;">
                                     <span t-esc="line['credit_fmt']" />
                                 </td>
                                 <td name="tb_originator_tax">
@@ -120,10 +120,10 @@
                                 name="tf_amount_currency"
                                 groups="base.group_multi_currency"
                             />
-                            <td name="tf_debit">
+                            <td name="tf_debit" style="white-space: nowrap;">
                                 <strong><span t-esc="move_data.get('total_debit_fmt', '')" /></strong>
                             </td>
-                            <td name="tf_credit">
+                            <td name="tf_credit" style="white-space: nowrap;">
                                 <strong><span t-esc="move_data.get('total_credit_fmt', '')" /></strong>
                             </td>
                             <td name="tf_originator_tax" />
