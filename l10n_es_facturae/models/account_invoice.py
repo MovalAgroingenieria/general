@@ -574,9 +574,74 @@ class AccountInvoice(models.Model):
 
     @api.model
     def _facturae_amount_to_str(self, value, decimals=2):
-        value = self._facturae_decimal(value)
-        pattern = '%%.%sf' % decimals
-        return pattern % value
+        """Format for FacturaE / FACe XML (quantize then print; avoids float noise)."""
+        d = self._facturae_decimal(value)
+        decs = int(decimals)
+        if decs < 0:
+            decs = 2
+        if decs == 0:
+            qd = d.quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+        else:
+            exp = Decimal('1') / (Decimal(10) ** decs)
+            qd = d.quantize(exp, rounding=ROUND_HALF_UP)
+        return ('%%.%df' % decs) % float(qd)
+
+    @api.multi
+    def _facturae_tax_on_base_amount_str(self, taxable_base, tax_percent, decimals=2):
+        """Tax amount (invoice currency) string; ``decimals`` 2 for FACe (RCF06001)."""
+        self.ensure_one()
+        base = self._facturae_decimal(taxable_base)
+        rate = self._facturae_decimal(tax_percent)
+        amt = base * rate / Decimal('100.00')
+        decs = int(decimals)
+        if decs < 0:
+            decs = 2
+        if decs == 2:
+            amt = self._facturae_q2(amt)
+        else:
+            exp = Decimal('1') / (Decimal(10) ** decs)
+            amt = amt.quantize(exp, rounding=ROUND_HALF_UP)
+        return self._facturae_amount_to_str(amt, decs)
+
+    @api.multi
+    def _facturae_tax_on_base_str(self, taxable_base, tax_percent):
+        """Tax amount (invoice currency) with exactly two decimals (RCF06001)."""
+        return self._facturae_tax_on_base_amount_str(
+            taxable_base, tax_percent, decimals=2
+        )
+
+    @api.multi
+    def _facturae_exchange_rate_str(self, euro_rate, currency_rate, decimals=2):
+        """Print FX rate (euro_rate/currency_rate) with fixed decimal places."""
+        self.ensure_one()
+        er = self._facturae_decimal(euro_rate if euro_rate is not None else 1.0)
+        cr = self._facturae_decimal(currency_rate if currency_rate is not None else 1.0)
+        if cr == Decimal('0'):
+            cr = Decimal('1')
+        return self._facturae_amount_to_str(er / cr, int(decimals))
+
+    @api.multi
+    def _facturae_eur_equiv_str(self, amount, euro_rate, currency_rate):
+        """Invoice-currency amount converted to EUR, two decimals (EquivalentInEuros)."""
+        self.ensure_one()
+        amt = self._facturae_decimal(amount)
+        er = self._facturae_decimal(euro_rate if euro_rate is not None else 1.0)
+        cr = self._facturae_decimal(currency_rate if currency_rate is not None else 1.0)
+        if cr == Decimal('0'):
+            cr = Decimal('1')
+        conv = self._facturae_q2(amt * er / cr)
+        return self._facturae_amount_to_str(conv, 2)
+
+    @api.multi
+    def _facturae_tax_on_base_eur_str(
+        self, taxable_base, tax_percent, euro_rate, currency_rate
+    ):
+        """Tax amount in EUR (two decimals) from base and rate in invoice currency."""
+        self.ensure_one()
+        inv_amt = self._facturae_decimal(
+            self._facturae_tax_on_base_str(taxable_base, tax_percent)
+        )
+        return self._facturae_eur_equiv_str(inv_amt, euro_rate, currency_rate)
 
     @api.multi
     def get_facturae_line_amounts(self, line):

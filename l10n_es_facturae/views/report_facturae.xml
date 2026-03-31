@@ -198,7 +198,7 @@
                             t-esc="invoice._facturae_amount_to_str(facturae_invoice_vals['invoice_total'], 2)"
                         />
                         <EquivalentInEuros
-                            t-esc="'%.2f' % (float(facturae_invoice_vals['invoice_total']) * euro_rate / currency_rate)"
+                            t-esc="invoice._facturae_eur_equiv_str(facturae_invoice_vals['invoice_total'], euro_rate, currency_rate)"
                         />
                     </TotalInvoicesAmount>
                     <TotalOutstandingAmount>
@@ -206,7 +206,7 @@
                             t-esc="invoice._facturae_amount_to_str(facturae_invoice_vals['total_outstanding_amount'], 2)"
                         />
                         <EquivalentInEuros
-                            t-esc="'%.2f' % (float(facturae_invoice_vals['total_outstanding_amount']) * euro_rate / currency_rate)"
+                            t-esc="invoice._facturae_eur_equiv_str(facturae_invoice_vals['total_outstanding_amount'], euro_rate, currency_rate)"
                         />
                     </TotalOutstandingAmount>
                     <TotalExecutableAmount>
@@ -214,7 +214,7 @@
                             t-esc="invoice._facturae_amount_to_str(facturae_invoice_vals['total_executable_amount'], 2)"
                         />
                         <EquivalentInEuros
-                            t-esc="'%.2f' % (float(facturae_invoice_vals['total_executable_amount']) * euro_rate / currency_rate)"
+                            t-esc="invoice._facturae_eur_equiv_str(facturae_invoice_vals['total_executable_amount'], euro_rate, currency_rate)"
                         />
                     </TotalExecutableAmount>
 
@@ -308,10 +308,10 @@
                         <ExchangeRateDetails t-if="not facturae_is_eur">
                             <!-- Modify by moval on 04.08.2025 -->
                             <t t-if="facturae_use_two_decimals">
-                                <ExchangeRate t-esc="'%.2f' % (euro_rate / currency_rate)"/>
+                                <ExchangeRate t-esc="invoice._facturae_exchange_rate_str(euro_rate, currency_rate, 2)"/>
                             </t>
                             <t t-else="">
-                                <ExchangeRate t-esc="'%.8f' % (euro_rate / currency_rate)"/>
+                                <ExchangeRate t-esc="invoice._facturae_exchange_rate_str(euro_rate, currency_rate, 8)"/>
                             </t>
                             <ExchangeRateDate
                                 t-esc="invoice.get_exchange_rate(euro, currency)"
@@ -343,21 +343,21 @@
                         <t t-foreach="invoice.tax_line_ids" t-as="tax_line">
                             <Tax t-if="tax_line.tax_id.amount &gt;= 0">
                                 <TaxTypeCode t-esc="tax_line.tax_id.facturae_code"/>
-                                <TaxRate t-esc="'%.2f' % (tax_line.tax_id.amount)"/>
+                                <TaxRate t-esc="invoice._facturae_amount_to_str(tax_line.tax_id.amount, 2)"/>
                                 <TaxableBase>
                                     <TotalAmount
                                         t-esc="invoice._facturae_amount_to_str(facturae_invoice_vals['total_gross_amount_before_taxes'], 2)"
                                     />
                                     <EquivalentInEuros
-                                        t-esc="'%.2f' % (float(facturae_invoice_vals['total_gross_amount_before_taxes']) * euro_rate / currency_rate)"
+                                        t-esc="invoice._facturae_eur_equiv_str(facturae_invoice_vals['total_gross_amount_before_taxes'], euro_rate, currency_rate)"
                                     />
                                 </TaxableBase>
                                 <TaxAmount>
                                     <TotalAmount
-                                        t-esc="'%.2f' % (float(facturae_invoice_vals['total_gross_amount_before_taxes']) * (tax_line.tax_id.amount) / 100)"
+                                        t-esc="invoice._facturae_tax_on_base_str(facturae_invoice_vals['total_gross_amount_before_taxes'], tax_line.tax_id.amount)"
                                     />
                                     <EquivalentInEuros
-                                        t-esc="'%.2f' % (float(facturae_invoice_vals['total_gross_amount_before_taxes']) * (tax_line.tax_id.amount) / 100 * euro_rate / currency_rate)"
+                                        t-esc="invoice._facturae_tax_on_base_eur_str(facturae_invoice_vals['total_gross_amount_before_taxes'], tax_line.tax_id.amount, euro_rate, currency_rate)"
                                     />
                                 </TaxAmount>
                                 <SpecialTaxableBase t-if="False"/>
@@ -373,21 +373,21 @@
                         <t t-foreach="invoice.tax_line_ids" t-as="tax_line">
                             <Tax t-if="tax_line.tax_id.amount &lt; 0">
                                 <TaxTypeCode t-esc="tax_line.tax_id.facturae_code"/>
-                                <TaxRate t-esc="'%.2f' % (-tax_line.tax_id.amount)"/>
+                                <TaxRate t-esc="invoice._facturae_amount_to_str(-tax_line.tax_id.amount, 2)"/>
                                 <TaxableBase>
                                     <TotalAmount
                                         t-esc="invoice._facturae_amount_to_str(facturae_invoice_vals['total_gross_amount_before_taxes'], 2)"
                                     />
                                     <EquivalentInEuros
-                                        t-esc="'%.2f' % (float(facturae_invoice_vals['total_gross_amount_before_taxes']) * euro_rate / currency_rate)"
+                                        t-esc="invoice._facturae_eur_equiv_str(facturae_invoice_vals['total_gross_amount_before_taxes'], euro_rate, currency_rate)"
                                     />
                                 </TaxableBase>
                                 <TaxAmount>
                                     <TotalAmount
-                                        t-esc="'%.2f' % (float(facturae_invoice_vals['total_gross_amount_before_taxes']) * (-tax_line.tax_id.amount) / 100)"
+                                        t-esc="invoice._facturae_tax_on_base_str(facturae_invoice_vals['total_gross_amount_before_taxes'], -tax_line.tax_id.amount)"
                                     />
                                     <EquivalentInEuros
-                                        t-esc="'%.2f' % (float(facturae_invoice_vals['total_gross_amount_before_taxes']) * (-tax_line.tax_id.amount) / 100 * euro_rate / currency_rate)"
+                                        t-esc="invoice._facturae_tax_on_base_eur_str(facturae_invoice_vals['total_gross_amount_before_taxes'], -tax_line.tax_id.amount, euro_rate, currency_rate)"
                                     />
                                 </TaxAmount>
                             </Tax>
@@ -489,7 +489,7 @@
 
                         <ItemDescription t-length="2500" t-esc="line.name"/>
                         <t t-if="facturae_use_two_decimals">
-                            <Quantity t-esc="'%.2f' % float(line.quantity)"/>
+                            <Quantity t-esc="invoice._facturae_amount_to_str(line.quantity, 2)"/>
                         </t>
                         <t t-else="">
                             <Quantity t-esc="line.quantity"/>
@@ -520,10 +520,10 @@
                             <Discount>
                                 <DiscountReason t-esc="'Descuento'"/>
                                 <t t-if="facturae_use_two_decimals">
-                                    <DiscountRate t-esc="'%.2f' % (line.discount or 0.0)"/>
+                                    <DiscountRate t-esc="invoice._facturae_amount_to_str(line.discount or 0.0, 2)"/>
                                 </t>
                                 <t t-else="">
-                                    <DiscountRate t-esc="'%.8f' % (line.discount or 0.0)"/>
+                                    <DiscountRate t-esc="invoice._facturae_amount_to_str(line.discount or 0.0, 8)"/>
                                 </t>
                                 <t t-if="facturae_use_two_decimals">
                                     <DiscountAmount
@@ -571,10 +571,10 @@
                                     <TaxTypeCode t-esc="line_tax.facturae_code"/>
 
                                     <t t-if="facturae_use_two_decimals">
-                                        <TaxRate t-esc="'%.2f' % (-line_tax.amount)"/>
+                                        <TaxRate t-esc="invoice._facturae_amount_to_str(-line_tax.amount, 2)"/>
                                     </t>
                                     <t t-else="">
-                                        <TaxRate t-esc="'%.8f' % (-line_tax.amount)"/>
+                                        <TaxRate t-esc="invoice._facturae_amount_to_str(-line_tax.amount, 8)"/>
                                     </t>
 
                                     <TaxableBase>
@@ -589,23 +589,23 @@
                                             />
                                         </t>
                                         <EquivalentInEuros
-                                            t-esc="'%.2f' % (float(facturae_vals['taxable_base']) * euro_rate / currency_rate)"
+                                            t-esc="invoice._facturae_eur_equiv_str(facturae_vals['taxable_base'], euro_rate, currency_rate)"
                                         />
                                     </TaxableBase>
 
                                     <TaxAmount>
                                         <t t-if="facturae_use_two_decimals">
                                             <TotalAmount
-                                                t-esc="'%.2f' % (float(facturae_vals['taxable_base']) * (-line_tax.amount) / 100)"
+                                                t-esc="invoice._facturae_tax_on_base_str(facturae_vals['taxable_base'], -line_tax.amount)"
                                             />
                                         </t>
                                         <t t-else="">
                                             <TotalAmount
-                                                t-esc="'%.8f' % (float(facturae_vals['taxable_base']) * (-line_tax.amount) / 100)"
+                                                t-esc="invoice._facturae_tax_on_base_amount_str(facturae_vals['taxable_base'], -line_tax.amount, 8)"
                                             />
                                         </t>
                                         <EquivalentInEuros
-                                            t-esc="'%.2f' % (float(facturae_vals['taxable_base']) * (-line_tax.amount) / 100 * euro_rate / currency_rate)"
+                                            t-esc="invoice._facturae_tax_on_base_eur_str(facturae_vals['taxable_base'], -line_tax.amount, euro_rate, currency_rate)"
                                         />
                                     </TaxAmount>
                                 </Tax>
@@ -618,10 +618,10 @@
                                     <TaxTypeCode t-esc="line_tax.facturae_code"/>
 
                                     <t t-if="facturae_use_two_decimals">
-                                        <TaxRate t-esc="'%.2f' % (line_tax.amount)"/>
+                                        <TaxRate t-esc="invoice._facturae_amount_to_str(line_tax.amount, 2)"/>
                                     </t>
                                     <t t-else="">
-                                        <TaxRate t-esc="'%.8f' % (line_tax.amount)"/>
+                                        <TaxRate t-esc="invoice._facturae_amount_to_str(line_tax.amount, 8)"/>
                                     </t>
 
                                     <TaxableBase>
@@ -636,23 +636,23 @@
                                             />
                                         </t>
                                         <EquivalentInEuros
-                                            t-esc="'%.2f' % (float(facturae_vals['taxable_base']) * euro_rate / currency_rate)"
+                                            t-esc="invoice._facturae_eur_equiv_str(facturae_vals['taxable_base'], euro_rate, currency_rate)"
                                         />
                                     </TaxableBase>
 
                                     <TaxAmount>
                                         <t t-if="facturae_use_two_decimals">
                                             <TotalAmount
-                                                t-esc="'%.2f' % (float(facturae_vals['taxable_base']) * (line_tax.amount) / 100)"
+                                                t-esc="invoice._facturae_tax_on_base_str(facturae_vals['taxable_base'], line_tax.amount)"
                                             />
                                         </t>
                                         <t t-else="">
                                             <TotalAmount
-                                                t-esc="'%.8f' % (float(facturae_vals['taxable_base']) * (line_tax.amount) / 100)"
+                                                t-esc="invoice._facturae_tax_on_base_amount_str(facturae_vals['taxable_base'], line_tax.amount, 8)"
                                             />
                                         </t>
                                         <EquivalentInEuros
-                                            t-esc="'%.2f' % (float(facturae_vals['taxable_base']) * (line_tax.amount) / 100 * euro_rate / currency_rate)"
+                                            t-esc="invoice._facturae_tax_on_base_eur_str(facturae_vals['taxable_base'], line_tax.amount, euro_rate, currency_rate)"
                                         />
                                     </TaxAmount>
                                 </Tax>
@@ -678,7 +678,7 @@
                                     t-esc="invoice.date_due or invoice.date_invoice"
                                 />
                                 <InstallmentAmount
-                                    t-esc="'%.2f' % (invoice.residual)"
+                                    t-esc="invoice._facturae_amount_to_str(invoice.residual, 2)"
                                 />
                                 <PaymentMeans
                                     t-esc="invoice.payment_mode_id.facturae_code"
