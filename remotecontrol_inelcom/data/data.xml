@@ -43,7 +43,7 @@
 <h3>2) Available Procedures</h3>
 <p>The following predefined procedures are included:</p>
 <ul>
-  <li><strong>Inelcom: Daily Sync</strong> → automatically performs (1) device/sensor planning, (2) reading download, and (3) upsert of readings into Odoo.</li>
+  <li><strong>Inelcom: Daily Sync</strong> → automatically performs (1) device/sensor planning, (2) reading download, (3) location variables download, (4) analog inputs download, and (5) upsert of readings into Odoo.</li>
   <li><strong>Inelcom: Get Devices</strong> → fetches the complete list of available devices from Inelcom API for configuration purposes.</li>
 </ul>
 
@@ -180,6 +180,8 @@
   <li><code>GET /restws/webresources/hidrantes/contadores</code> → retrieves device counters for a specific sector.</li>
   <li><code>GET /isrlrestws/resources/hidrantes/&lt;route&gt;</code>
     → retrieves readings (requires query parameters: <code>sesion</code>, <code>contador</code>, <code>fecha</code>, <code>dias</code>).</li>
+  <li><code>GET /isrlrestws/resources/hidrantes/histanalogicas</code>
+    → retrieves analog input history (requires query parameters: <code>sesion</code>, <code>hidrante</code>, <code>entrada</code>, <code>fecha</code>, <code>dias</code>).</li>
 </ul>
 
 <h3>7) Generated File Structure</h3>
@@ -374,6 +376,50 @@ for sensor in location_sensors:
     })
 
 bag['location_variables_plan'] = location_variables_plan
+
+analog_inputs_plan = []
+for sensor in Sensor.search([
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id)
+] + ([('device_id', 'in', selected_device_ids)] if selected_device_ids else [])):
+    device = sensor.device_id
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+    hidrante = device_cfg.get('hidrante')
+    entrada = sensor_cfg.get('entrada')
+    if not (hidrante and entrada is not None):
+        continue
+    last_reading_time = last_readings_map.get(sensor.id)
+    start_dev = device_cfg.get('start_date')
+    start_sensor = sensor_cfg.get('start_date')
+    if last_reading_time:
+        try:
+            last_dt = fields.Datetime.from_string(last_reading_time)
+            initial_date = fields.Date.to_string(last_dt)
+        except Exception:
+            initial_date = str(last_reading_time)[:10]
+    elif start_sensor:
+        initial_date = start_sensor[:10]
+    elif start_dev:
+        initial_date = start_dev[:10]
+    else:
+        initial_date = '%s-01-01' % today_str[:4]
+    if isinstance(initial_date, unicode):
+        initial_date = initial_date.encode('utf-8')
+    analog_inputs_plan.append({
+        'sensor_id': sensor.id,
+        'device_id': device.id,
+        'hidrante': hidrante,
+        'entrada': entrada,
+        'initial_date': initial_date,
+    })
+bag['analog_inputs_plan'] = analog_inputs_plan
             ]]></field>
         </record>
 
@@ -749,6 +795,170 @@ bag['raw_readings'] = existing_raw
             ]]></field>
         </record>
 
+        <record id="remotecontrol_inelcom_action_get_analog_inputs_readings" model="remotecontrol.action">
+            <field name="name">Inelcom: Get Analog Inputs Data</field>
+            <field name="remote_id" ref="remotecontrol_inelcom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import time
+import pytz
+from datetime import datetime
+
+Remote = self.remote_id
+today = datetime.now()
+plan = bag.get('analog_inputs_plan') or []
+api_url = '	https://almassora-isrl.inelcom.com:8181/isrlrestws/resources/hidrantes/histanalogicas'
+total_upserts = 0
+total_errors = 0
+items = []
+
+
+def get_token():
+    cfg = {}
+    try:
+        cfg = json.loads(Remote.connection_params or '{}')
+    except Exception:
+        cfg = {}
+    username = (cfg.get('username') or '').strip()
+    password = (cfg.get('password') or '').strip()
+    if not username or not password:
+        raise Exception("Missing inelcom credentials: set username/password")
+    url = 'https://almassora-isrl.inelcom.com:8181/restws/webresources/sesiones'
+    resp = request_retry('POST', url, json={
+        'usuario': username,
+        'clave': password
+    })
+    if resp.status_code >= 400:
+        raise Exception("Login failed: %s %s" % (resp.status_code, resp.text))
+    id_session = resp.text.strip()
+    if not id_session:
+        raise Exception("Login OK but empty token response")
+    return id_session
+
+
+for idx, entry_plan in enumerate(plan, 1):
+    sensor_id = entry_plan['sensor_id']
+    device_id = entry_plan['device_id']
+    hidrante = entry_plan['hidrante']
+    entrada = entry_plan['entrada']
+    initial_date = entry_plan['initial_date']
+
+    dt_initial = datetime.strptime(initial_date, '%Y-%m-%d')
+    days = (today.date() - dt_initial.date()).days + 1
+    if days < 1:
+        days = 1
+    date_ddmmyy = dt_initial.strftime('%d/%m/%y')
+
+    try:
+        id_session = get_token()
+    except Exception as e:
+        items.append({
+            'sensor_id': sensor_id,
+            'error': 'Token error: %s' % str(e),
+        })
+        total_errors += 1
+        continue
+
+    url = "%s?sesion=%s&hidrante=%s&entrada=%s&fecha=%s&dias=%s" % (
+        api_url, id_session, hidrante, entrada, date_ddmmyy, days
+    )
+
+    try:
+        resp = request_retry('GET', url, timeout=timeout)
+        code = resp.status_code
+        full_url = getattr(resp, 'url', url)
+        if code < 400:
+            payload = resp.json() or {}
+            upserts = 0
+            errs = 0
+            all_readings = []
+            readings_summary = []
+            lista = payload.get('lista') or (
+                payload if isinstance(payload, list) else []
+            )
+            for rec in lista:
+                try:
+                    date_str = rec.get('fecha')
+                    time_str = rec.get('hora')
+                    value = rec.get('valor')
+                    try:
+                        dt = datetime.strptime(date_str, '%d/%m/%y')
+                        dt = dt.replace(
+                            hour=int(time_str[:2]),
+                            minute=int(time_str[3:]),
+                            second=0
+                        )
+                        date_time_read = pytz.timezone(
+                            'Europe/Madrid').localize(dt)
+                        date_time_read = date_time_read.astimezone(
+                            pytz.timezone('UTC'))
+                        ts_str = date_time_read.strftime('%Y-%m-%d %H:%M:%S')
+                    except Exception:
+                        ts_str = initial_date + ' ' + time_str + ':00'
+                    valf = float(value)
+                    all_readings.append({'ts': ts_str, 'value': valf})
+                    upserts += 1
+                    if len(readings_summary) < 5:
+                        readings_summary.append({'ts': ts_str, 'value': valf})
+                except Exception as e:
+                    errs += 1
+                    if len(readings_summary) < 5:
+                        readings_summary.append({'error': str(e), 'raw': rec})
+            total_upserts += upserts
+            total_errors += errs
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'hidrante': hidrante,
+                'entrada': entrada,
+                'status': 200,
+                'url': full_url,
+                'points_found': len(lista),
+                'upserts': upserts,
+                'errors': errs,
+                'readings': all_readings,
+                'readings_summary': readings_summary,
+            })
+        else:
+            items.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'hidrante': hidrante,
+                'entrada': entrada,
+                'status': code,
+                'error': (resp.text or '')[:400],
+                'url': full_url,
+            })
+    except Exception as e:
+        items.append({
+            'sensor_id': sensor_id,
+            'device_id': device_id,
+            'hidrante': hidrante,
+            'entrada': entrada,
+            'status': -1,
+            'error': str(e),
+        })
+    time.sleep(1)
+
+existing_raw = bag.get('raw_readings') or []
+for item in items:
+    if item.get('status') == 200 and 'readings' in item:
+        for reading in item['readings']:
+            if 'ts' in reading and 'value' in reading:
+                existing_raw.append({
+                    'sensor_id': item['sensor_id'],
+                    'device_id': item['device_id'],
+                    'measurement_time': reading['ts'],
+                    'value': reading['value'],
+                })
+bag['raw_readings'] = existing_raw
+            ]]></field>
+        </record>
+
         <record id="remotecontrol_inelcom_action_upsert_readings" model="remotecontrol.action">
             <field name="name">Inelcom: Upsert Readings</field>
             <field name="remote_id" ref="remotecontrol_inelcom"/>
@@ -1000,6 +1210,13 @@ bag['inelcom_devices_filename'] = fname
             <field name="procedure_id" ref="remotecontrol_inelcom_procedure"/>
             <field name="action_id" ref="remotecontrol_inelcom_action_get_location_variables_readings"/>
             <field name="sequence">25</field>
+        </record>
+
+        <record id="remotecontrol_inelcom_step_27_analog_inputs_readings" model="remotecontrol.step">
+            <field name="name">Get Analog Inputs Data</field>
+            <field name="procedure_id" ref="remotecontrol_inelcom_procedure"/>
+            <field name="action_id" ref="remotecontrol_inelcom_action_get_analog_inputs_readings"/>
+            <field name="sequence">27</field>
         </record>
 
         <record id="remotecontrol_inelcom_step_30_upsert" model="remotecontrol.step">
