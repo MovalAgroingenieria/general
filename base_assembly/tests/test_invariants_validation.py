@@ -65,7 +65,6 @@ class TestInvariantsValidation(AssemblyTestMixin, TransactionCase):
                     "partner_id": delegator.partner_id.id,
                     "delegate_partner_id": non_attendee_partner.id,
                     "vote_type_ids": [(6, 0, vote_type.ids)],
-                    "delegation_state": "confirmed",
                 }
             )
         error_msg = str(cm.exception).lower()
@@ -73,7 +72,7 @@ class TestInvariantsValidation(AssemblyTestMixin, TransactionCase):
         self.assertIn("attendee", error_msg)
 
     def test_no_effective_delegation_without_confirmed_delegate(self):
-        """Constraint prevents confirming delegation when delegate is not confirmed."""
+        """Delegation row exists but vote transfer waits for a confirmed delegate."""
         assembly, _ = (
             self._create_assembly_with_agenda()
         )  # pylint: disable=protected-access
@@ -81,25 +80,38 @@ class TestInvariantsValidation(AssemblyTestMixin, TransactionCase):
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         delegator = assembly.attendee_ids[0]
         delegate = assembly.attendee_ids[1]
-
-        # Confirm delegator only
+        self._give_partner_votes(delegator.partner_id, vote_type, 4)
+        self._give_partner_votes(delegate.partner_id, vote_type, 2)
         delegator.action_confirm()
-
-        # Try to create confirmed delegation with unconfirmed delegate (should fail)
-        with self.assertRaises(ValidationError) as cm:
-            self.env["assembly.delegation"].create(
-                {
-                    "assembly_id": assembly.id,
-                    "partner_id": delegator.partner_id.id,
-                    "delegate_partner_id": delegate.partner_id.id,
-                    "vote_type_ids": [(6, 0, vote_type.ids)],
-                    "delegation_state": "confirmed",
-                }
-            )
-        error_msg = str(cm.exception).lower()
-        self.assertIn("delegate", error_msg)
-        self.assertIn("attendee", error_msg)
-        self.assertTrue("confirmed" in error_msg or "confirm" in error_msg)
+        self.env["assembly.delegation"].create(
+            {
+                "assembly_id": assembly.id,
+                "partner_id": delegator.partner_id.id,
+                "delegate_partner_id": delegate.partner_id.id,
+                "vote_type_ids": [(6, 0, vote_type.ids)],
+            }
+        )
+        delegator.recompute_attendee_vote_lines()
+        delegate.recompute_attendee_vote_lines()
+        d_line = delegator.attendee_vote_ids.filtered(
+            lambda v: v.vote_type_id == vote_type
+        )
+        g_line = delegate.attendee_vote_ids.filtered(
+            lambda v: v.vote_type_id == vote_type
+        )
+        self.assertEqual(d_line.delegated_out_votes, 0.0)
+        self.assertEqual(g_line.delegated_in_votes, 0.0)
+        delegate.action_confirm()
+        delegator.recompute_attendee_vote_lines()
+        delegate.recompute_attendee_vote_lines()
+        d_line = delegator.attendee_vote_ids.filtered(
+            lambda v: v.vote_type_id == vote_type
+        )
+        g_line = delegate.attendee_vote_ids.filtered(
+            lambda v: v.vote_type_id == vote_type
+        )
+        self.assertEqual(d_line.delegated_out_votes, 4.0)
+        self.assertEqual(g_line.delegated_in_votes, 4.0)
 
     def test_mathematical_consistency_invariant(self):
         """Verify mathematical consistency: total = own + in - out."""
@@ -127,7 +139,6 @@ class TestInvariantsValidation(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -188,7 +199,6 @@ class TestInvariantsValidation(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -245,7 +255,6 @@ class TestInvariantsValidation(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -300,7 +309,6 @@ class TestInvariantsValidation(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator1.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegation2 = self.env["assembly.delegation"].create(  # noqa: F841
@@ -309,7 +317,6 @@ class TestInvariantsValidation(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator2.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -365,7 +372,6 @@ class TestInvariantsValidation(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
 
@@ -384,7 +390,6 @@ class TestInvariantsValidation(AssemblyTestMixin, TransactionCase):
 
         # Confirm delegate then confirm delegation: becomes effective
         delegate.action_confirm()
-        delegation.write({"delegation_state": "confirmed"})
         assembly.attendee_ids.recompute_attendee_vote_lines()
 
         # Verify delegation is now effective

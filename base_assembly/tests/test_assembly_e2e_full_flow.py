@@ -115,10 +115,8 @@ class TestAssemblyE2EFullFlow(AssemblyTestMixin, TransactionCase):
                 "assembly_id": assembly.id,
                 "partner_id": david.partner_id.id,
                 "delegate_partner_id": bruno.partner_id.id,
-                "delegation_state": "draft",
             }
         )
-        delegation.write({"delegation_state": "confirmed"})
         assembly.attendee_ids.recompute_attendee_vote_lines()
         assembly.invalidate_recordset()
         self.assertEqual(assembly._count_present_attendees(), 4)
@@ -218,7 +216,6 @@ class TestAssemblyE2EFullFlow(AssemblyTestMixin, TransactionCase):
         self.assertEqual(len(assembly.attendee_ids), 5)
         self.assertEqual(assembly._count_present_attendees(), 4)
         self.assertEqual(len(assembly.delegation_ids), 1)
-        self.assertEqual(assembly.delegation_ids.delegation_state, "confirmed")
 
         result_yes_1 = voting1.result_ids.filtered(lambda r: r.vote_option == "yes")
         self.assertEqual(len(result_yes_1), 1)

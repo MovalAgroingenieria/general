@@ -1,7 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-"""Single filter for delegations that affect votes (confirmed + delegate confirmed)."""
+"""Delegations affect votes when saved and the delegate is a confirmed attendee."""
 
 from odoo.exceptions import ValidationError
 from odoo.tests import TransactionCase
@@ -10,7 +10,7 @@ from .common import AssemblyTestMixin
 
 
 class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
-    """Spec: only confirmed delegation + confirmed delegate attendee changes vote lines."""
+    """Spec: saved delegation + confirmed delegate attendee changes vote lines."""
 
     @staticmethod
     def _line(attendee, vote_type):
@@ -23,7 +23,7 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
         )
 
     def test_spec_confirmed_delegation_and_delegate_confirmed_has_effect(self):
-        """(1) Confirmed delegation + confirmed delegate → out/in persisted."""
+        """(1) Saved delegation + confirmed delegate → out/in persisted."""
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]
@@ -38,7 +38,6 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vt.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -46,11 +45,7 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(self._line(delegate, vt).delegated_in_votes, 6.0)
         self.assertEqual(self._line(delegate, vt).attendee_vote_total, 8.0)
 
-    def test_spec_confirmed_row_but_delegate_not_confirmed_no_vote_effect(self):
-        """(2)(3) Inconsistent DB row: confirmed delegation without confirmed delegate → no effect.
-
-        The ORM blocks normal confirmation; SQL simulates a bad import.
-        """
+    def test_saved_delegation_without_confirmed_delegate_has_no_vote_effect(self):
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]
@@ -58,27 +53,19 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
         self._give_partner_votes(delegator.partner_id, vt, 5)
         self._give_partner_votes(delegate.partner_id, vt, 3)
         delegator.action_confirm()
-        del_rec = self.env["assembly.delegation"].create(
+        self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vt.ids)],
-                "delegation_state": "draft",
             }
         )
-        self.env.cr.execute(
-            "UPDATE assembly_delegation SET delegation_state = %s WHERE id = %s",
-            ("confirmed", del_rec.id),
-        )
-        del_rec.invalidate_recordset()
         assembly.attendee_ids.recompute_attendee_vote_lines()
         self.assertEqual(self._line(delegator, vt).delegated_out_votes, 0.0)
-        self.assertEqual(self._line(delegator, vt).attendee_vote_total, 5.0)
         self.assertEqual(self._line(delegate, vt).delegated_in_votes, 0.0)
 
-    def test_spec_draft_and_revoked_no_vote_effect(self):
-        """(3) Draft or revoked do not change persisted totals."""
+    def test_unlink_delegation_clears_vote_effect(self):
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]
@@ -86,22 +73,18 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
         self._give_partner_votes(a.partner_id, vt, 4)
         self._give_partner_votes(b.partner_id, vt, 1)
         (a | b).action_confirm()
-        d_draft = self.env["assembly.delegation"].create(
+        d_rec = self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(6, 0, vt.ids)],
-                "delegation_state": "draft",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
-        self.assertEqual(self._line(a, vt).delegated_out_votes, 0.0)
-        self.assertEqual(self._line(b, vt).delegated_in_votes, 0.0)
-        d_draft.write({"delegation_state": "confirmed"})
-        assembly.attendee_ids.recompute_attendee_vote_lines()
         self.assertEqual(self._line(a, vt).delegated_out_votes, 4.0)
-        d_draft.write({"delegation_state": "revoked"})
+        self.assertEqual(self._line(b, vt).delegated_in_votes, 4.0)
+        d_rec.unlink()
         assembly.attendee_ids.recompute_attendee_vote_lines()
         self.assertEqual(self._line(a, vt).delegated_out_votes, 0.0)
         self.assertEqual(self._line(b, vt).delegated_in_votes, 0.0)
@@ -127,7 +110,6 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": p0.partner_id.id,
                 "delegate_partner_id": p1.partner_id.id,
                 "vote_type_ids": [(6, 0, vt.ids)],
-                "delegation_state": "confirmed",
             }
         )
         with self.assertRaises(ValidationError):
@@ -137,12 +119,10 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
                     "partner_id": p1.partner_id.id,
                     "delegate_partner_id": p2.partner_id.id,
                     "vote_type_ids": [(6, 0, vt.ids)],
-                    "delegation_state": "confirmed",
                 }
             )
 
-    def test_spec_filter_helper_excludes_non_effective(self):
-        """Partner layer: draft / unconfirmed delegate → empty ``_get_effective_delegations(delegations=)``."""
+    def test_partner_layer_excludes_delegate_not_confirmed_attendee(self):
         Delegation = self.env["assembly.delegation"]
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
@@ -151,18 +131,17 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
         self._give_partner_votes(a.partner_id, vt, 1)
         self._give_partner_votes(b.partner_id, vt, 1)
         a.action_confirm()
-        d1 = Delegation.create(
+        shell = Delegation.new(
             {
                 "assembly_id": assembly.id,
-                "partner_id": a.partner_id.id,
-                "delegate_partner_id": b.partner_id.id,
+                "partner_id": a.partner_id,
+                "delegate_partner_id": b.partner_id,
                 "vote_type_ids": [(6, 0, vt.ids)],
-                "delegation_state": "draft",
             }
         )
-        eff = Delegation._get_effective_delegations(delegations=d1)
+        eff = Delegation._get_effective_delegations(delegations=shell)
         self.assertFalse(eff)
-        self.assertFalse(Delegation._apply_vote_effect_partner_filters(d1))
+        self.assertFalse(Delegation._apply_vote_effect_partner_filters(shell))
 
     def test_spec_partial_vote_type_ids_only_affect_listed_types(self):
         """Non-empty ``vote_type_ids`` ⇒ effect only on those types (others unchanged)."""
@@ -190,7 +169,6 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -225,7 +203,6 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, [])],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -239,13 +216,16 @@ class TestDelegationVoteEffectFilteringSpec(AssemblyTestMixin, TransactionCase):
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
         vt = assembly.assembly_type_id.vote_type_ids[0]
+        a0, a1 = assembly.attendee_ids[0], assembly.attendee_ids[1]
+        self._give_partner_votes(a0.partner_id, vt, 1)
+        self._give_partner_votes(a1.partner_id, vt, 1)
+        (a0 | a1).action_confirm()
         d = self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
-                "partner_id": assembly.attendee_ids[0].partner_id.id,
-                "delegate_partner_id": assembly.attendee_ids[1].partner_id.id,
+                "partner_id": a0.partner_id.id,
+                "delegate_partner_id": a1.partner_id.id,
                 "vote_type_ids": [(6, 0, vt.ids)],
-                "delegation_state": "draft",
             }
         )
         self.assertTrue(d.delegation_covers_vote_type(vt))

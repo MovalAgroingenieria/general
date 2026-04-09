@@ -166,7 +166,6 @@ class AssemblyTestMixin:
         delegator_partner,
         delegate_partner,
         vote_type_ids_command,
-        delegation_state="confirmed",
     ):
         """One ``assembly.delegation``; caller must satisfy confirm/attendee rules."""
         return self.env["assembly.delegation"].create(
@@ -175,7 +174,6 @@ class AssemblyTestMixin:
                 "partner_id": delegator_partner.id,
                 "delegate_partner_id": delegate_partner.id,
                 "vote_type_ids": vote_type_ids_command,
-                "delegation_state": delegation_state,
             }
         )
 

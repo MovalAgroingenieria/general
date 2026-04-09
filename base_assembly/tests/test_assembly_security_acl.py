@@ -7,7 +7,7 @@
 Validates that:
 - Users without assembly group cannot access assembly models.
 - assembly_group_user: read + write + create own ``assembly.attendee`` (record
-  rule: own partner only); create own ``assembly.delegation`` (draft); record
+  rule: own partner only); create own ``assembly.delegation``; record
   rules scope rows; may create own ``assembly.voting.line``; representation rows
   only when owner/agent matches partner; cannot write assembly/agenda/voting/result
   or run manager-only actions.
@@ -16,6 +16,7 @@ Validates that:
 
 import unittest
 
+from odoo import fields
 from odoo.exceptions import AccessError
 from odoo.tests import TransactionCase
 
@@ -536,6 +537,7 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
             )
         )
         assembly.action_generate_attendees()
+        assembly.attendee_ids.action_confirm()
         assembly.action_announce()
         assembly.action_open_registration()
         delegation_other = self.env["assembly.delegation"].create(
@@ -553,7 +555,7 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         )
         with self.assertRaises(AccessError):
             env["assembly.delegation"].browse(delegation_other.id).write(
-                {"delegation_state": "confirmed"}
+                {"date_delegation": fields.Datetime.now()}
             )
 
     def test_assembly_user_sees_representations_as_owner_or_agent_only(self):
@@ -730,25 +732,26 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         env["assembly.attendee"].browse(att.id).action_confirm()
         self.assertEqual(att.sudo().attendee_state, "confirmed")
 
-    def test_assembly_user_can_create_own_draft_delegation(self):
-        """AF §8: assembly_group_user may create own delegation (draft)."""
+    def test_assembly_user_can_create_own_delegation(self):
+        """AF §8: assembly_group_user may create own delegation."""
         partners = self._create_partners(self.env, 2)
         self.user_assembly_user.partner_id = partners[0]
         assembly, _ = self._create_assembly_with_agenda(
             partner_domain="[('id', 'in', %s)]" % partners.ids
         )
         assembly.action_generate_attendees()
+        assembly.attendee_ids.filtered(
+            lambda a: a.partner_id in partners
+        ).action_confirm()
         env = self.env(user=self.user_assembly_user)
         rec = env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": partners[0].id,
                 "delegate_partner_id": partners[1].id,
-                "delegation_state": "draft",
             }
         )
         self.assertTrue(rec.id)
-        self.assertEqual(rec.delegation_state, "draft")
 
     # --- SEC-DATA-01/02: read/write other partner's record ---
 
@@ -869,7 +872,6 @@ class TestAssemblySecurityRegression(AssemblyTestMixin, TransactionCase):
                     "partner_id": partners[1].id,
                     "delegate_partner_id": partners[0].id,
                     "vote_type_ids": [(6, 0, vt.ids)],
-                    "delegation_state": "draft",
                 }
             )
 
@@ -884,6 +886,7 @@ class TestAssemblySecurityRegression(AssemblyTestMixin, TransactionCase):
             )
         )
         assembly.action_generate_attendees()
+        assembly.attendee_ids.action_confirm()
         vt = assembly.assembly_type_id.vote_type_ids[0]
         del_rec = self.env["assembly.delegation"].create(
             {
@@ -917,6 +920,9 @@ class TestAssemblySecurityRegression(AssemblyTestMixin, TransactionCase):
             asm.write({"vote_type_ids": [(6, 0, atype.vote_type_ids.ids)]})
         asm.write({"name": "Mgr regression asm (updated)"})
         env_m["assembly.assembly"].browse(asm.id).action_generate_attendees()
+        env_m["assembly.attendee"].search(
+            [("assembly_id", "=", asm.id)]
+        ).action_confirm()
         attendee = env_m["assembly.attendee"].search(
             [("assembly_id", "=", asm.id)], limit=1
         )
@@ -931,7 +937,6 @@ class TestAssemblySecurityRegression(AssemblyTestMixin, TransactionCase):
                 "vote_type_ids": [(6, 0, vt.ids)],
             }
         )
-        del_rec.write({"delegation_state": "revoked"})
         del_rec.unlink()
         rep = env_m["assembly.representation"].create(
             {

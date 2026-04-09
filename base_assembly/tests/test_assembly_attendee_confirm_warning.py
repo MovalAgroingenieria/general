@@ -45,7 +45,6 @@ class TestAssemblyAttendeeConfirmWarning(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -58,7 +57,6 @@ class TestAssemblyAttendeeConfirmWarning(AssemblyTestMixin, TransactionCase):
 
         # Verify delegation still active (not revoked)
         delegation.invalidate_recordset()
-        self.assertEqual(delegation.delegation_state, "confirmed")
 
         # Verify warning returned
         self.assertIsInstance(result, dict)
@@ -94,7 +92,6 @@ class TestAssemblyAttendeeConfirmWarning(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate1.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type_a.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegation2 = self.env["assembly.delegation"].create(  # noqa: F841
@@ -103,7 +100,6 @@ class TestAssemblyAttendeeConfirmWarning(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate2.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type_b.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -116,8 +112,6 @@ class TestAssemblyAttendeeConfirmWarning(AssemblyTestMixin, TransactionCase):
         # Verify both delegations still active
         delegation1.invalidate_recordset()
         delegation2.invalidate_recordset()
-        self.assertEqual(delegation1.delegation_state, "confirmed")
-        self.assertEqual(delegation2.delegation_state, "confirmed")
 
         # Verify warning mentions both delegates
         self.assertIsInstance(result, dict)
@@ -144,7 +138,6 @@ class TestAssemblyAttendeeConfirmWarning(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",  # Not confirmed
             }
         )
 
@@ -175,10 +168,8 @@ class TestAssemblyAttendeeConfirmWarning(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
-        delegation.write({"delegation_state": "revoked"})
 
         # Confirm delegator
         result = delegator.action_confirm()
@@ -211,7 +202,6 @@ class TestAssemblyAttendeeConfirmWarning(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -253,7 +243,6 @@ class TestAssemblyAttendeeConfirmWarning(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator1.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         _ = self.env["assembly.delegation"].create(
@@ -262,7 +251,6 @@ class TestAssemblyAttendeeConfirmWarning(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator2.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -298,7 +286,6 @@ class TestAssemblyAttendeeConfirmWarning(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 

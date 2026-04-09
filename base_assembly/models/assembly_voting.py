@@ -21,6 +21,11 @@ class AssemblyVoting(models.Model):
         index=True,
         check_company=True,
     )
+    agenda_vote_mode = fields.Selection(
+        related="agenda_id.agenda_vote_mode",
+        string="Vote mode",
+        readonly=True,
+    )
     assembly_id = fields.Many2one(
         "assembly.assembly",
         related="agenda_id.assembly_id",
@@ -85,6 +90,34 @@ class AssemblyVoting(models.Model):
         string="Results count",
         compute="_compute_count_lines_results",
     )
+    count_recorded_votes = fields.Integer(
+        string="Recorded votes",
+        compute="_compute_voting_session_indicators",
+    )
+    count_pending_votes = fields.Integer(
+        string="Pending votes",
+        compute="_compute_voting_session_indicators",
+    )
+    remaining_votes = fields.Float(
+        string="Remaining votes",
+        compute="_compute_voting_session_indicators",
+    )
+
+    @api.depends(
+        "vote_line_ids",
+        "vote_line_ids.vote_option",
+        "total_votes_possible",
+        "total_votes_cast",
+    )
+    def _compute_voting_session_indicators(self):
+        for rec in self:
+            lines = rec.vote_line_ids
+            voted = lines.filtered(lambda line: line.vote_option != "unset")
+            rec.count_recorded_votes = len(voted)
+            rec.count_pending_votes = len(lines) - len(voted)
+            rec.remaining_votes = (rec.total_votes_possible or 0.0) - (
+                rec.total_votes_cast or 0.0
+            )
 
     @api.depends("vote_line_ids", "result_ids")
     def _compute_count_lines_results(self):
@@ -108,6 +141,51 @@ class AssemblyVoting(models.Model):
             domain=[("voting_id", "=", self.id)],
             context={"default_voting_id": self.id},
         )
+
+    def action_open_session_control(self):
+        self.ensure_one()
+        view = self.env.ref(
+            "base_assembly.assembly_voting_view_form_session",
+            raise_if_not_found=False,
+        )
+        action = {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Voting session"),
+            "res_model": "assembly.voting",
+            "res_id": self.id,
+            "view_mode": "form",
+            "target": "current",
+            "context": dict(self.env.context, form_view_initial_mode="edit"),
+        }
+        if view:
+            action["views"] = [(view.id, "form")]
+        return action
+
+    def action_session_go_previous_agenda(self):
+        self.ensure_one()
+        return self.agenda_id.action_session_navigate_live_voting(-1)
+
+    def action_session_go_next_agenda(self):
+        self.ensure_one()
+        return self.agenda_id.action_session_navigate_live_voting(1)
+
+    def action_session_close_and_next(self):
+        self.ensure_one()
+        agenda = self.agenda_id
+        self.action_close()
+        return agenda.action_session_navigate_live_voting(1)
+
+    def action_session_cancel_and_next(self):
+        self.ensure_one()
+        agenda = self.agenda_id
+        self.action_cancel()
+        return agenda.action_session_navigate_live_voting(1)
+
+    def action_session_skip_agenda_item(self):
+        self.ensure_one()
+        agenda = self.agenda_id
+        agenda.action_session_safe_skip()
+        return agenda.action_session_navigate_live_voting(1)
 
     def _iter_roll_call_attendee_records(self):
         """Confirmed attendees with positive vote weight for this voting's type."""
@@ -275,7 +353,7 @@ class AssemblyVoting(models.Model):
             )
 
     def _cancel_other_open_votings_same_agenda(self):
-        """Drop duplicate open sessions for the same agenda (legacy UX / double clicks)."""
+        """Cancel extra open voting rows for the same agenda item (dedup after double start)."""
         self.ensure_one()
         if not self.agenda_id:
             return

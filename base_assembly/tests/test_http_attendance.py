@@ -5,14 +5,16 @@
 """HTTP tests: GET /assembly/attendance (auth=user, assembly manager, open/in_session).
 
 Explicit functional contract (mandatory):
-- valid access → ``test_att_01_manager_valid_params_redirects_to_form``,
-  ``test_att_12_assembly_in_session_accepts``;
+- HTML landing (default) → ``test_att_landing_happy_path_html``,
+  ``test_att_landing_non_manager_error_html``;
+- direct redirect → ``test_att_01_manager_valid_params_redirects_to_form``,
+  ``test_att_12_assembly_in_session_accepts`` (``direct=1``);
 - non-manager → ``test_att_06_non_manager_forbidden``;
 - disallowed assembly state → e.g. ``test_att_08_assembly_draft_returns_403``;
 - participant without attendee row → ``test_att_05_participant_not_attendee_returns_404``.
 - tracked short URL → ``test_att_tracked_short_link_redirects_to_attendance_url``,
   ``test_att_tracked_short_link_resolves_same_as_direct_attendance_url``
-  (``link_tracker`` ``/r/<code>`` → attendance target → manager form; no ``website`` in manifest).
+  (``link_tracker`` ``/r/<code>`` → attendance target → HTML landing; no ``website`` in manifest).
 """
 
 from urllib.parse import parse_qs, urlparse
@@ -127,27 +129,35 @@ class TestHttpAttendance(AssemblyHttpCase):
         self.assertTrue(loc, "link_tracker must return a redirect target")
         self.authenticate(self.user_manager.login, "assembly_manager_http")
         res_tracked = self.url_open(loc, allow_redirects=False)
-        self.assertIn(
+        self.assertEqual(
             res_tracked.status_code,
-            (302, 303),
-            "Resolved attendance URL must redirect manager to backend form",
+            200,
+            "Resolved attendance URL must return the HTML landing for managers",
         )
-        loc_tracked = res_tracked.headers.get("Location", "")
+        self.assertIn(
+            "text/html",
+            (res_tracked.headers.get("Content-Type") or "").lower(),
+        )
         direct = "/assembly/attendance?assembly_id=%s&participant_id=%s" % (
             self.assembly.id,
             att.partner_id.id,
         )
         res_direct = self.url_open(direct, allow_redirects=False)
-        self.assertIn(res_direct.status_code, (302, 303))
-        loc_direct = res_direct.headers.get("Location", "")
-        self.assertURLEqual(loc_tracked, loc_direct)
+        self.assertEqual(res_direct.status_code, 200)
+        self.assertIn(
+            "text/html",
+            (res_direct.headers.get("Content-Type") or "").lower(),
+        )
+        needle = ("id=%s" % att.id).encode()
+        self.assertIn(needle, res_tracked.content)
+        self.assertIn(needle, res_direct.content)
 
     def test_att_01_manager_valid_params_redirects_to_form(self):
         """FS: valid access — manager, assembly ``open``, ``assembly_id`` + ``participant_id`` → 302/303."""
         self.assembly.action_announce()
         self.assembly.action_open_registration()
         self.authenticate(self.user_manager.login, "assembly_manager_http")
-        url = "/assembly/attendance?assembly_id=%s&participant_id=%s" % (
+        url = "/assembly/attendance?assembly_id=%s&participant_id=%s&direct=1" % (
             self.assembly.id,
             self.attendee.partner_id.id,
         )
@@ -155,7 +165,7 @@ class TestHttpAttendance(AssemblyHttpCase):
         self.assertIn(
             res.status_code,
             (302, 303),
-            "Manager should get redirect to form",
+            "Manager should get redirect to form when direct=1",
         )
         location = res.headers.get("Location", "")
         self.assertTrue(
@@ -303,12 +313,46 @@ class TestHttpAttendance(AssemblyHttpCase):
         self.assembly.action_open_registration()
         self.assembly.action_start_session()
         self.authenticate(self.user_manager.login, "assembly_manager_http")
-        url = "/assembly/attendance?assembly_id=%s&participant_id=%s" % (
+        url = "/assembly/attendance?assembly_id=%s&participant_id=%s&direct=1" % (
             self.assembly.id,
             self.attendee.partner_id.id,
         )
         res = self.url_open(url, allow_redirects=False)
         self.assertIn(res.status_code, (302, 303))
+
+    def test_att_landing_happy_path_html(self):
+        """Default URL returns HTML with assembly context and form link (no redirect)."""
+        self.assembly.action_announce()
+        self.assembly.action_open_registration()
+        self.authenticate(self.user_manager.login, "assembly_manager_http")
+        url = "/assembly/attendance?assembly_id=%s&participant_id=%s" % (
+            self.assembly.id,
+            self.attendee.partner_id.id,
+        )
+        res = self.url_open(url, allow_redirects=False)
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("text/html", (res.headers.get("Content-Type") or "").lower())
+        low = res.content.lower()
+        self.assertIn(self.assembly.name.lower().encode(), low)
+        self.assertIn(self.attendee.partner_id.name.lower().encode(), low)
+        self.assertIn(b"model=assembly.attendee", low)
+        self.assertIn(("id=%s" % self.attendee.id).encode(), res.content)
+
+    def test_att_landing_non_manager_error_html(self):
+        """Non-manager gets 403 HTML (no assembly or partner names)."""
+        self.assembly.action_announce()
+        self.assembly.action_open_registration()
+        self.authenticate(self.user_assembly_user.login, "assembly_user_http")
+        url = "/assembly/attendance?assembly_id=%s&participant_id=%s" % (
+            self.assembly.id,
+            self.attendee.partner_id.id,
+        )
+        res = self.url_open(url, allow_redirects=False)
+        self.assertEqual(res.status_code, 403)
+        self.assertIn("text/html", (res.headers.get("Content-Type") or "").lower())
+        low = res.content.lower()
+        self.assertIn(b"manager", low)
+        self.assertNotIn(self.assembly.name.lower().encode(), low)
 
     def test_att_14_non_positive_ids_return_400(self):
         """Invalid numeric ids (e.g. zero) are rejected before DB lookup."""

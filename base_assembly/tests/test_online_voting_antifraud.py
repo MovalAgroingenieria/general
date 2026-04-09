@@ -230,7 +230,6 @@ class TestOnlineVotingDelegationChange(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegator.recompute_attendee_vote_lines()
@@ -259,8 +258,8 @@ class TestOnlineVotingDelegationChange(AssemblyTestMixin, TransactionCase):
             }
         )
 
-    def test_existing_line_unchanged_after_delegation_revoke(self):
-        """After revoking delegation, existing voting.line keeps same votes_applied."""
+    def test_existing_line_unchanged_after_delegation_removed(self):
+        """After removing the delegation, existing voting.line keeps same votes_applied."""
         assembly, agenda = (
             self._create_assembly_with_agenda()
         )  # pylint: disable=protected-access
@@ -279,7 +278,6 @@ class TestOnlineVotingDelegationChange(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegator.recompute_attendee_vote_lines()
@@ -300,7 +298,7 @@ class TestOnlineVotingDelegationChange(AssemblyTestMixin, TransactionCase):
                 "vote_channel": "online",
             }
         )
-        delegation.delegation_state = "revoked"
+        delegation.unlink()
         delegator.recompute_attendee_vote_lines()
         delegate.recompute_attendee_vote_lines()
         line.invalidate_recordset()
@@ -367,7 +365,7 @@ class TestOnlineVotingResultModification(AssemblyTestMixin, TransactionCase):
 
 
 class TestOnlineVotingConcurrency(AssemblyTestMixin, TransactionCase):
-    """Unicidad (voting_id, attendee_id): segundo create rechazado."""
+    """Uniqueness on (voting_id, attendee_id): a second create must be rejected."""
 
     def test_concurrent_double_vote_only_one_succeeds(self):
         """Second create with same (voting_id, attendee_id) must fail;

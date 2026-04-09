@@ -50,7 +50,6 @@ class TestVotes(AssemblyTestMixin, TransactionCase):
                 "partner_id": p_a.id,
                 "delegate_partner_id": p_b.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -76,7 +75,6 @@ class TestVotes(AssemblyTestMixin, TransactionCase):
                 "partner_id": a_att.partner_id.id,
                 "delegate_partner_id": b_att.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -110,7 +108,6 @@ class TestVotes(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -143,7 +140,6 @@ class TestVotes(AssemblyTestMixin, TransactionCase):
                 "partner_id": a_att.partner_id.id,
                 "delegate_partner_id": b_att.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -180,7 +176,6 @@ class TestVotes(AssemblyTestMixin, TransactionCase):
                 "partner_id": a_att.partner_id.id,
                 "delegate_partner_id": b_att.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         Av = self.env["assembly.attendee.vote"]
@@ -330,7 +325,6 @@ class TestVotes(AssemblyTestMixin, TransactionCase):
                 "partner_id": a_att.partner_id.id,
                 "delegate_partner_id": b_att.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -364,7 +358,6 @@ class TestVotes(AssemblyTestMixin, TransactionCase):
                 "partner_id": c_att.partner_id.id,
                 "delegate_partner_id": b_att.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()

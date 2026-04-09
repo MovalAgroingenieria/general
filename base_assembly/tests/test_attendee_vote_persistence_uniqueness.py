@@ -83,7 +83,6 @@ class TestAttendeeVotePersistenceUniqueness(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(6, 0, vt.ids)],
-                "delegation_state": "confirmed",
             }
         )
         Av = self.env["assembly.attendee.vote"]

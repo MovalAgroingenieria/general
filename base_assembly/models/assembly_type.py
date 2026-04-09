@@ -79,16 +79,16 @@ class AssemblyType(models.Model):
         ondelete="set null",
     )
     default_attendance_require_partner_vat_confirm = fields.Boolean(
-        string="Default: require TIN to confirm attendance",
+        string="Default: require TIN to mark attended",
         default=False,
         help=(
             "When creating an assembly from this type, copy this to the assembly. "
-            "If enabled, confirming an attendee is blocked when the member has no TIN "
-            "or uses the exempt placeholder."
+            "If enabled, recording a member as attended is blocked when the member has "
+            "no TIN or uses the exempt placeholder."
         ),
     )
     default_attendance_partner_vat_format_strict = fields.Boolean(
-        string="Default: strict TIN format for attendance confirmation",
+        string="Default: strict TIN format when marking attended",
         default=False,
         help=(
             "When creating an assembly from this type, copy this to the assembly. "
@@ -97,11 +97,12 @@ class AssemblyType(models.Model):
         ),
     )
     require_vat = fields.Boolean(
-        string="Require VAT to confirm attendance",
+        string="Require VAT to mark attended",
         default=False,
         help=(
-            "If enabled, confirming an assembly attendee is blocked when the member "
-            "has no tax identification number (VAT/TIN) or only the exempt placeholder."
+            "If enabled, recording an assembly attendee as attended is blocked when the "
+            "member has no tax identification number (VAT/TIN) or only the exempt "
+            "placeholder."
         ),
     )
     default_allow_attendance_notes = fields.Boolean(
@@ -110,11 +111,13 @@ class AssemblyType(models.Model):
         help="When creating an assembly from this type, copy this to the assembly.",
     )
     default_include_qr_code = fields.Boolean(
-        string="Default: add QR code (tracked attendance link)",
+        string="Default: tracked attendance links & QR",
         default=True,
         help=(
-            "When creating an assembly from this type, copy this to the assembly. "
-            "If disabled, attendee short links for QR are not created."
+            "Copied to new assemblies of this type. When enabled, managers get per-"
+            "attendee short URLs (opens counted) and QR actions on each attendee; the "
+            "assembly form shows the Links & QR smart button. When disabled, trackers "
+            "are not created for new assemblies using this default."
         ),
     )
     active = fields.Boolean(default=True)

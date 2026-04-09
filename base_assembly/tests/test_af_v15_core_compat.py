@@ -53,7 +53,6 @@ class TestAfV15CoreCompat(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vt.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.invalidate_recordset()
@@ -79,7 +78,6 @@ class TestAfV15CoreCompat(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vt.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.action_recompute_attendee_votes()
@@ -131,13 +129,17 @@ class TestAfV15CoreCompat(AssemblyTestMixin, TransactionCase):
         self.assertIn("participant_id=%s" % att.partner_id.id, url)
 
     def test_v15_voting_ballot_report_keeps_weighted_roll_call_row(self):
-        """Original ballot layout: weighted items still show the roll-call checkbox row (not manual-only)."""
+        """Weighted agenda items still show the roll-call checkbox row on per-attendee ballots."""
         assembly, agenda = self._create_assembly_with_agenda(name="V15 ballot weighted")
         self.assertEqual(agenda.agenda_vote_mode, "weighted")
+        partners = self._create_partners(self.env, 1, prefix="V15Ball")
+        assembly.write({"partner_domain": "[('id', 'in', %s)]" % partners.ids})
+        assembly.action_generate_attendees()
         report = self.env.ref(
-            "base_assembly.assembly_assembly_action_report_voting_ballot"
+            "base_assembly.assembly_attendee_action_report_voting_ballot_nominative"
         )
-        html, _ = report._render_qweb_html(report.id, assembly.ids, data={})
+        att = assembly.attendee_ids[0]
+        html, _ = report._render_qweb_html(report.id, att.ids, data={})
         body = html.decode() if isinstance(html, bytes) else html
         self.assertIn("Yes ☐", body)
 

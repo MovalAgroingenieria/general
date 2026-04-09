@@ -1,13 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
 <odoo>
     <record id="assembly_assembly_action_report_representation" model="ir.actions.report">
-        <field name="name">Representation (template)</field>
+        <field name="name">Representation register (assembly)</field>
         <field name="model">assembly.assembly</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">base_assembly.report_assembly_representation</field>
         <field name="report_file">base_assembly.report_assembly_representation</field>
-        <field name="print_report_name">'Representation - %s' % (object.name)</field>
+        <field name="print_report_name">'Representation_register - %s' % (object._get_report_base_filename())</field>
         <field name="binding_model_id" ref="model_assembly_assembly"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="assembly_representation_action_report_power_of_attorney" model="ir.actions.report">
+        <field name="name">Representation (power of attorney)</field>
+        <field name="model">assembly.representation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_assembly.report_assembly_representation_record</field>
+        <field name="report_file">base_assembly.report_assembly_representation_record</field>
+        <field name="print_report_name">'Representation_POA - %s' % (object._get_report_base_filename())</field>
+        <field name="binding_model_id" ref="model_assembly_representation"/>
         <field name="binding_type">report</field>
     </record>
 
@@ -20,33 +32,87 @@
     <template id="report_assembly_representation_doc">
         <t t-call="web.html_container">
             <t t-call="web.external_layout">
-                <div class="page">
-                    <div class="text-center mb-4">
-                        <h4><strong>Representation (power of attorney)</strong></h4>
-                        <h5><span t-field="o.name"/></h5>
-                        <div t-if="o.date_first_call">
-                            <span t-field="o.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
-                            <t t-if="o.location"> – <span t-field="o.location"/></t>
-                        </div>
-                    </div>
+                <div class="page o_assembly_representation_register">
+                    <h3 class="text-center mb-2"><strong>Representation register</strong></h3>
+                    <p class="text-muted small text-center mb-3">
+                        Schedule of active representation records for this assembly (who acts for whom). This list is not a voting ballot and not a vote-delegation certificate.
+                    </p>
                     <t t-set="asm" t-value="o"/>
-                    <t t-call="base_assembly.report_assembly_publication_html_block"/>
+                    <t t-call="base_assembly.report_assembly_asm_meta_block"/>
                     <t t-set="rep_lines" t-value="o.representation_ids.filtered(lambda r: r.active)"/>
-                    <table class="table table-sm table-bordered mt-3" t-if="rep_lines">
+                    <table class="table table-sm table-bordered mt-2 o_assembly_representation_register_table" t-if="rep_lines">
                         <thead>
                             <tr>
                                 <th>Represented member</th>
                                 <th>Representative (agent)</th>
+                                <th>Notes</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr t-foreach="rep_lines.sorted(key=lambda r: r.owner_partner_id.name)" t-as="line">
+                            <tr t-foreach="rep_lines.sorted(key=lambda r: r.owner_partner_id.name or '')" t-as="line">
                                 <td><span t-field="line.owner_partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'vat'], 'no_marker': True}"/></td>
                                 <td><span t-field="line.agent_partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'vat'], 'no_marker': True}"/></td>
+                                <td><span t-field="line.notes"/></td>
                             </tr>
                         </tbody>
                     </table>
+                    <p t-if="not rep_lines" class="text-muted mt-3">No active representation records for this assembly.</p>
                 </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_assembly_representation_record">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page o_assembly_representation_poa">
+                        <h3 class="text-center mb-1"><strong>Power of attorney — assembly representation</strong></h3>
+                        <p class="small text-muted text-center mb-3 o_assembly_representation_poa_scope">
+                            Legal or physical representation for attendance and acts permitted by the bylaws. This document does not transfer voting rights by itself; vote delegation is separate.
+                        </p>
+                        <t t-set="asm" t-value="o.assembly_id"/>
+                        <t t-call="base_assembly.report_assembly_asm_meta_block"/>
+                        <section class="mb-3 small o_assembly_representation_poa_formal">
+                            <p class="fw-semibold mb-2">Formal statement</p>
+                            <ol class="mb-0 ps-3">
+                                <li class="mb-2">
+                                    The <strong>represented member</strong> identified below appoints the <strong>representative</strong> identified below to represent them at the assembly referenced above.
+                                </li>
+                                <li class="mb-2">
+                                    The representative may register attendance and perform other acts expressly allowed by the applicable rules, to the exclusion of any matter not covered by representation.
+                                </li>
+                                <li>
+                                    The represented member declares that the information stated is correct and undertakes to notify the assembly secretariat of any change that affects this appointment.
+                                </li>
+                            </ol>
+                        </section>
+                        <table class="table table-bordered table-sm o_assembly_representation_poa_parties">
+                            <tr>
+                                <th class="w-25">Represented member</th>
+                                <td>
+                                    <span t-field="o.owner_partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'address', 'vat', 'phone', 'email'], 'no_marker': True}"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Representative (agent)</th>
+                                <td>
+                                    <span t-field="o.agent_partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'address', 'vat', 'phone', 'email'], 'no_marker': True}"/>
+                                </td>
+                            </tr>
+                        </table>
+                        <div t-if="o.notes" class="mt-3 o_assembly_representation_poa_notes">
+                            <strong>Notes</strong>
+                            <div class="small"><span t-field="o.notes"/></div>
+                        </div>
+                        <div class="mt-5 pt-3 o_assembly_representation_poa_signatures">
+                            <p><strong>Signature (represented member):</strong> _____________________________</p>
+                            <p class="mt-3"><strong>Signature (representative):</strong> _____________________________</p>
+                            <p class="mt-3"><strong>Date:</strong> _____________________________</p>
+                            <p><strong>Place:</strong> _____________________________</p>
+                        </div>
+                    </div>
+                </t>
             </t>
         </t>
     </template>

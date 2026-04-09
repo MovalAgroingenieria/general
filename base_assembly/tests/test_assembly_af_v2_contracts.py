@@ -168,7 +168,7 @@ class TestAssemblyAfV2Contracts(AssemblyTestMixin, TransactionCase):
                 )
         err = str(ctx.exception).lower()
         self.assertTrue(
-            "unique" in err or "unicidad" in err or "assembly_representation" in err,
+            "unique" in err or "duplicate" in err or "assembly_representation" in err,
             err,
         )
 

@@ -25,10 +25,10 @@
                         <field name="assembly_excluded"/>
                     </group>
                     <field name="assembly_attendee_ids" readonly="1">
-                        <list>
+                        <list decoration-muted="attendee_state == 'registered'" decoration-success="attendee_state == 'confirmed'" decoration-danger="attendee_state == 'absent'">
                             <field name="assembly_id"/>
                             <field name="participant_partner_id"/>
-                            <field name="attendee_state"/>
+                            <field name="attendee_state" widget="badge"/>
                             <field name="date_register"/>
                         </list>
                     </field>
@@ -36,7 +36,8 @@
                         <list>
                             <field name="assembly_id"/>
                             <field name="delegate_partner_id"/>
-                            <field name="delegation_state"/>
+                            <field name="vote_type_ids" widget="many2many_tags" optional="show"/>
+                            <field name="date_delegation" optional="hide"/>
                         </list>
                     </field>
                     <field name="assembly_representation_owner_ids" readonly="1">

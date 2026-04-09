@@ -1,160 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
 <odoo>
-    <!-- 11.6 Voting ballot (per assembly) -->
-    <record id="assembly_assembly_action_report_voting_ballot" model="ir.actions.report">
-        <field name="name">Voting ballot</field>
-        <field name="model">assembly.assembly</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">base_assembly.report_assembly_voting_ballot</field>
-        <field name="report_file">base_assembly.report_assembly_voting_ballot</field>
-        <field name="print_report_name">'Voting ballot - %s' % (object.name)</field>
-        <field name="binding_model_id" ref="model_assembly_assembly"/>
-        <field name="binding_type">report</field>
-    </record>
-
-    <!-- 11.7 Nominative voting ballot (per attendee) -->
     <record id="assembly_attendee_action_report_voting_ballot_nominative" model="ir.actions.report">
-        <field name="name">Voting ballot (nominative)</field>
+        <field name="name">Member ballot (attendee)</field>
         <field name="model">assembly.attendee</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">base_assembly.report_assembly_voting_ballot_nominative</field>
-        <field name="report_file">base_assembly.report_assembly_voting_ballot_nominative</field>
-        <field name="print_report_name">'Ballot - %s - %s' % (object.assembly_id.name, object.partner_id.name)</field>
+        <field name="report_name">base_assembly.report_assembly_attendee_voting_ballot_nominative</field>
+        <field name="report_file">base_assembly.report_assembly_attendee_voting_ballot_nominative</field>
+        <field name="print_report_name">'Ballot_nominative - %s' % (object._get_report_base_filename())</field>
         <field name="binding_model_id" ref="model_assembly_attendee"/>
         <field name="binding_type">report</field>
     </record>
 
-    <template id="report_assembly_voting_ballot">
-        <t t-foreach="docs" t-as="o">
-            <t t-call="base_assembly.report_assembly_voting_ballot_doc"/>
-        </t>
-    </template>
+    <record id="assembly_attendee_action_report_voting_ballot" model="ir.actions.report">
+        <field name="name">Member ballot — generic intro (optional)</field>
+        <field name="model">assembly.attendee</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_assembly.report_assembly_attendee_voting_ballot</field>
+        <field name="report_file">base_assembly.report_assembly_attendee_voting_ballot</field>
+        <field name="print_report_name">'Ballot_template - %s' % (object._get_report_base_filename())</field>
+        <field name="binding_model_id" eval="False"/>
+    </record>
 
-    <template id="report_assembly_voting_ballot_doc">
+    <template id="report_assembly_attendee_voting_ballot">
         <t t-call="web.html_container">
-            <t t-call="web.external_layout">
-                <div class="page">
-                    <div class="text-center mb-4">
-                        <h4><strong>Voting ballot</strong></h4>
-                        <h5><span t-field="o.name"/></h5>
-                        <div t-if="o.date_first_call">
-                            <span t-field="o.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
-                            <t t-if="o.location"> – <span t-field="o.location"/></t>
-                        </div>
-                    </div>
-                    <t t-set="ballot_intro" t-value="o.get_rendered_ballot_intro_text()"/>
-                    <div t-if="ballot_intro" class="mb-4 o_assembly_ballot_intro" t-out="ballot_intro"/>
-                    <p><strong>Attendee / representative:</strong> _________________________________</p>
-                    <p><strong>Total votes:</strong> _________________________________</p>
-                    <hr/>
-                    <div class="row mt-4"><div class="col-12"><strong>Agenda items to vote</strong></div></div>
-                    <t t-set="vote_items" t-value="o.agenda_ids.filtered(lambda a: a.agenda_state != 'skipped' and (a.requires_vote or a.agenda_vote_mode in ('manual_yes_no', 'manual_multi'))).sorted(key=lambda x: x.sequence)"/>
-                    <t t-foreach="vote_items" t-as="item">
-                        <div class="mt-3 p-2 border o_assembly_ballot_item">
-                            <strong><span t-esc="item.sequence"/>.</strong> <span t-field="item.name"/>
-                            <t t-if="item.vote_type_id"> (<span t-field="item.vote_type_id.name"/>)</t>
-                            <div t-if="item.description" class="mt-2 small">
-                                <span t-field="item.description"/>
-                            </div>
-                            <t t-if="item.agenda_vote_mode == 'manual_yes_no'">
-                                <div class="small mt-1 text-muted o_assembly_ballot_manual_counts">
-                                    Recorded — Yes: <span t-field="item.manual_yes"/>,
-                                    No: <span t-field="item.manual_no"/>,
-                                    Abstention: <span t-field="item.manual_abstain"/>,
-                                    Blank: <span t-field="item.manual_count_blank"/>
-                                </div>
-                            </t>
-                            <t t-if="item.agenda_vote_mode == 'manual_multi'">
-                                <div class="row mt-2">
-                                    <div class="col-12"><em>Options</em></div>
-                                </div>
-                                <t t-foreach="item.option_ids.sorted(key=lambda x: (x.sequence, x.id))" t-as="opt">
-                                    <div class="ms-2 mt-1"><span t-field="opt.name"/> — <span t-field="opt.manual_vote_count"/></div>
-                                </t>
-                            </t>
-                            <t t-if="item.agenda_vote_mode not in ('manual_yes_no', 'manual_multi')">
-                                <div class="row mt-2">
-                                    <span class="col-3">Yes ☐</span>
-                                    <span class="col-3">No ☐</span>
-                                    <span class="col-3">Abstention ☐</span>
-                                    <span class="col-3">Blank ☐</span>
-                                </div>
-                            </t>
-                            <div t-if="item.final_summary" class="mt-2 small border-start ps-2 o_assembly_ballot_final_summary" t-out="item.final_summary"/>
-                        </div>
-                    </t>
-                </div>
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <t t-set="assembly" t-value="o.assembly_id"/>
+                    <t t-set="ballot_intro_html" t-value="assembly.get_rendered_ballot_intro_text()"/>
+                    <t t-call="base_assembly.report_assembly_attendee_voting_ballot_page"/>
+                </t>
             </t>
         </t>
     </template>
 
-    <template id="report_assembly_voting_ballot_nominative">
-        <t t-foreach="docs" t-as="o">
-            <t t-call="base_assembly.report_assembly_voting_ballot_nominative_doc"/>
+    <template id="report_assembly_attendee_voting_ballot_nominative">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <t t-set="assembly" t-value="o.assembly_id"/>
+                    <t t-set="ballot_intro_html" t-value="assembly.get_rendered_ballot_nominative_intro_text()"/>
+                    <t t-call="base_assembly.report_assembly_attendee_voting_ballot_page"/>
+                </t>
+            </t>
         </t>
     </template>
 
-    <template id="report_assembly_voting_ballot_nominative_doc">
-        <t t-call="web.html_container">
-            <t t-call="web.external_layout">
-                <t t-set="assembly" t-value="o.assembly_id"/>
-                <t t-set="total_votes" t-value="sum(o.attendee_vote_ids.mapped('attendee_vote_total'))"/>
-                <div class="page">
-                    <div class="text-center mb-4">
-                        <h4><strong>Voting ballot (nominative)</strong></h4>
-                        <h5><span t-field="assembly.name"/></h5>
-                        <div t-if="assembly.date_first_call">
-                            <span t-field="assembly.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
-                            <t t-if="assembly.location"> – <span t-field="assembly.location"/></t>
-                        </div>
+    <template id="report_assembly_attendee_voting_ballot_page">
+        <div
+            class="page o_assembly_ballot_print small"
+            t-att-style="'page-break-after: always;' if not o_last else ''"
+        >
+            <h4 class="text-center mb-2 text-uppercase fw-bold o_assembly_ballot_print_title">Voting ballot</h4>
+            <t t-set="asm" t-value="assembly"/>
+            <t t-call="base_assembly.report_assembly_asm_meta_block"/>
+            <p class="small text-muted mb-2 o_assembly_ballot_print_instructions">
+                Mark choices clearly. Weighted items apply to your voting power. Manual agenda lines show recorded totals for information only.
+            </p>
+            <div t-if="ballot_intro_html" class="mb-2 border rounded p-2 bg-light o_assembly_ballot_intro_block" t-out="ballot_intro_html"/>
+            <table class="table table-sm table-bordered mb-3 o_assembly_ballot_identity">
+                <tr>
+                    <th class="w-25">Attendee name</th>
+                    <td><span t-field="o.name"/></td>
+                </tr>
+                <tr>
+                    <th>Member (convocable)</th>
+                    <td>
+                        <span t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'email', 'phone'], 'no_marker': True}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <th>TIN / VAT (NIF)</th>
+                    <td><span t-field="o.partner_vat"/></td>
+                </tr>
+                <tr t-if="o.participant_partner_id and o.participant_partner_id != o.partner_id">
+                    <th>Represented entity</th>
+                    <td>
+                        <span t-field="o.participant_partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'vat'], 'no_marker': True}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Total voting power</th>
+                    <td><span t-field="o.total_votes"/></td>
+                </tr>
+            </table>
+            <t t-if="o.attendee_vote_ids">
+                <p class="fw-semibold mb-1">Votes by type (entitlements)</p>
+                <table class="table table-sm table-bordered mb-3">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Vote type</th>
+                            <th class="text-end">Own</th>
+                            <th class="text-end">Delegated in</th>
+                            <th class="text-end">Delegated out</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="o.attendee_vote_ids" t-as="av">
+                            <td><span t-field="av.vote_type_id.name"/></td>
+                            <td class="text-end"><span t-field="av.own_votes"/></td>
+                            <td class="text-end"><span t-field="av.delegated_in_votes"/></td>
+                            <td class="text-end"><span t-field="av.delegated_out_votes"/></td>
+                            <td class="text-end"><span t-field="av.attendee_vote_total"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+            <p class="fw-semibold mb-2 border-top pt-2">Agenda items</p>
+            <t t-set="vote_items" t-value="assembly.agenda_ids.filtered(lambda a: a.agenda_state != 'skipped' and ((a.agenda_vote_mode == 'weighted' and a.requires_vote and a.vote_type_id) or a.agenda_vote_mode in ('manual_yes_no', 'manual_multi'))).sorted(key=lambda x: x.sequence)"/>
+            <p t-if="not vote_items" class="text-muted small">No ballot items for this assembly.</p>
+            <t t-foreach="vote_items" t-as="item">
+                <div class="mb-3 pb-2 border-bottom o_assembly_ballot_item">
+                    <div class="fw-semibold">
+                        <span t-esc="item.sequence"/>. <span t-field="item.name"/>
+                        <span class="text-muted fw-normal small"> — <span t-field="item.agenda_vote_mode"/></span>
+                        <t t-if="item.vote_type_id and item.agenda_vote_mode == 'weighted'"> (<span t-field="item.vote_type_id.name"/>)</t>
                     </div>
-                    <t t-set="ballot_nominative_intro" t-value="assembly.get_rendered_ballot_nominative_intro_text()"/>
-                    <div t-if="ballot_nominative_intro" class="mb-4 o_assembly_ballot_nom_intro" t-out="ballot_nominative_intro"/>
-                    <p><strong>Attendee:</strong> <span t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
-                        <t t-if="o.participant_partner_id and o.participant_partner_id != o.partner_id">
-                            <span class="text-muted"> (represents <span t-field="o.participant_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>)</span>
-                        </t>
-                    </p>
-                    <p><strong>Total votes:</strong> <span t-esc="total_votes"/></p>
-                    <hr/>
-                    <div class="row mt-4"><div class="col-12"><strong>Agenda items to vote</strong></div></div>
-                    <t t-set="vote_items" t-value="assembly.agenda_ids.filtered(lambda a: a.agenda_state != 'skipped' and (a.requires_vote or a.agenda_vote_mode in ('manual_yes_no', 'manual_multi'))).sorted(key=lambda x: x.sequence)"/>
-                    <t t-foreach="vote_items" t-as="item">
-                        <div class="mt-3 p-2 border o_assembly_ballot_item">
-                            <strong><span t-esc="item.sequence"/>.</strong> <span t-field="item.name"/>
-                            <t t-if="item.vote_type_id"> (<span t-field="item.vote_type_id.name"/>)</t>
-                            <div t-if="item.description" class="mt-2 small">
-                                <span t-field="item.description"/>
-                            </div>
-                            <t t-if="item.agenda_vote_mode == 'manual_yes_no'">
-                                <div class="small mt-1 text-muted o_assembly_ballot_manual_counts">
-                                    Recorded — Yes: <span t-field="item.manual_yes"/>,
-                                    No: <span t-field="item.manual_no"/>,
-                                    Abstention: <span t-field="item.manual_abstain"/>,
-                                    Blank: <span t-field="item.manual_count_blank"/>
-                                </div>
-                            </t>
-                            <t t-if="item.agenda_vote_mode == 'manual_multi'">
-                                <div class="row mt-2">
-                                    <div class="col-12"><em>Options</em></div>
-                                </div>
-                                <t t-foreach="item.option_ids.sorted(key=lambda x: (x.sequence, x.id))" t-as="opt">
-                                    <div class="ms-2 mt-1"><span t-field="opt.name"/> — <span t-field="opt.manual_vote_count"/></div>
-                                </t>
-                            </t>
-                            <t t-if="item.agenda_vote_mode not in ('manual_yes_no', 'manual_multi')">
-                                <div class="row mt-2">
-                                    <span class="col-3">Yes ☐</span>
-                                    <span class="col-3">No ☐</span>
-                                    <span class="col-3">Abstention ☐</span>
-                                    <span class="col-3">Blank ☐</span>
-                                </div>
-                            </t>
-                            <div t-if="item.final_summary" class="mt-2 small border-start ps-2 o_assembly_ballot_final_summary" t-out="item.final_summary"/>
+                    <div t-if="item.description" class="mt-1 small text-muted o_assembly_ballot_item_description">
+                        <span t-field="item.description"/>
+                    </div>
+                    <t t-if="item.agenda_vote_mode == 'weighted' and item.requires_vote and item.vote_type_id">
+                        <table class="table table-borderless table-sm mb-0 mt-2 o_assembly_ballot_weighted_choices">
+                            <tr>
+                                <td class="w-25">Yes ☐</td>
+                                <td class="w-25">No ☐</td>
+                                <td class="w-25">Abstention ☐</td>
+                                <td class="w-25">Blank ☐</td>
+                            </tr>
+                        </table>
+                    </t>
+                    <t t-if="item.agenda_vote_mode == 'manual_yes_no'">
+                        <div class="small mt-1 text-muted o_assembly_ballot_manual_counts">
+                            Recorded — Yes: <span t-field="item.manual_yes"/>,
+                            No: <span t-field="item.manual_no"/>,
+                            Abstention: <span t-field="item.manual_abstain"/>,
+                            Blank: <span t-field="item.manual_count_blank"/>
                         </div>
                     </t>
+                    <t t-if="item.agenda_vote_mode == 'manual_multi'">
+                        <p class="small mb-1 mt-2"><em>Options (recorded)</em></p>
+                        <ul class="small mb-0 o_assembly_ballot_manual_multi_options">
+                            <li t-foreach="item.option_ids.sorted(key=lambda x: (x.sequence, x.id))" t-as="opt">
+                                <span t-field="opt.name"/> — <span t-field="opt.manual_vote_count"/>
+                            </li>
+                        </ul>
+                    </t>
+                    <div t-if="item.final_summary" class="mt-2 small border-start ps-2 o_assembly_ballot_final_summary">
+                        <span t-field="item.final_summary"/>
+                    </div>
                 </div>
             </t>
-        </t>
+            <div class="mt-4 pt-3 small o_assembly_ballot_signatures border-top">
+                <p class="mb-1"><strong>Signature (voter / representative):</strong> _____________________________</p>
+                <p class="mb-1"><strong>Date:</strong> _____________________________</p>
+                <p class="mb-0"><strong>Place:</strong> _____________________________</p>
+            </div>
+        </div>
     </template>
 </odoo>

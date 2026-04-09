@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="assembly_agenda_view_form_session_manual" model="ir.ui.view">
+        <field name="name">assembly.agenda.form.session.manual</field>
+        <field name="model">assembly.agenda</field>
+        <field name="priority">40</field>
+        <field name="arch" type="xml">
+            <form string="Manual vote (session)">
+                <header>
+                    <button
+                        name="action_session_manual_prev"
+                        string="Previous item"
+                        type="object"
+                        class="btn-secondary"
+                        groups="base_assembly.assembly_group_manager"
+                    />
+                    <button
+                        name="action_session_manual_next"
+                        string="Next item"
+                        type="object"
+                        class="btn-secondary"
+                        groups="base_assembly.assembly_group_manager"
+                    />
+                    <button
+                        name="action_session_manual_skip_and_next"
+                        string="Skip and next"
+                        type="object"
+                        class="btn-secondary"
+                        invisible="agenda_state not in ('pending','in_progress')"
+                        groups="base_assembly.assembly_group_manager"
+                    />
+                    <button
+                        name="action_finalize_manual"
+                        string="Finalize"
+                        type="object"
+                        class="btn-primary"
+                        invisible="agenda_state not in ('pending','in_progress')"
+                        groups="base_assembly.assembly_group_manager"
+                    />
+                </header>
+                <sheet>
+                    <field name="session_manual_has_variance" invisible="1"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_assembly" type="object" class="oe_stat_button" icon="fa-building-o">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_text">Assembly</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="alert alert-info mb-3 py-3 px-3" role="status">
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <span class="text-muted small">Assembly</span>
+                                <div class="fw-bold"><field name="assembly_id" readonly="1" nolabel="1"/></div>
+                            </div>
+                            <div class="col-12">
+                                <span class="text-muted small">Agenda item</span>
+                                <div class="fw-bold"><field name="name" readonly="1" nolabel="1"/></div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <span class="text-muted small">Mode</span>
+                                <div><field name="agenda_vote_mode" readonly="1" nolabel="1"/></div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <span class="text-muted small">State</span>
+                                <div><field name="agenda_state" readonly="1" nolabel="1" widget="badge"/></div>
+                            </div>
+                        </div>
+                    </div>
+                    <group string="Final vote totals (simple count)" invisible="agenda_vote_mode != 'manual_yes_no'">
+                        <group>
+                            <field name="manual_yes" readonly="agenda_state not in ('pending','in_progress')"/>
+                            <field name="manual_no" readonly="agenda_state not in ('pending','in_progress')"/>
+                            <field name="manual_abstain" readonly="agenda_state not in ('pending','in_progress')"/>
+                            <field name="manual_count_blank" readonly="agenda_state not in ('pending','in_progress')"/>
+                        </group>
+                        <group string="Expected total and check">
+                            <field name="manual_total_expected" readonly="agenda_state not in ('pending','in_progress')"/>
+                            <field name="session_manual_expected_display" readonly="1"/>
+                            <field name="session_manual_entered_total" readonly="1"/>
+                            <field name="session_manual_delta" readonly="1"/>
+                        </group>
+                    </group>
+                    <div
+                        class="alert alert-secondary mb-3 py-2 px-3 small"
+                        role="status"
+                        invisible="agenda_vote_mode != 'manual_yes_no'"
+                    >
+                        <strong>Simple count mode:</strong>
+                        only final aggregate numbers are stored; votes are not recorded per attendee.
+                    </div>
+                    <div
+                        class="alert alert-warning mb-3 py-2 px-3"
+                        role="status"
+                        invisible="agenda_vote_mode != 'manual_yes_no' or not session_manual_has_variance"
+                    >
+                        Entered total votes do not match the expected reference total. Adjust the counters or expected total before finalizing.
+                    </div>
+                    <group string="1. Ballot options (choices)" invisible="agenda_vote_mode != 'manual_multi'">
+                        <div class="alert alert-secondary mb-0 py-2 px-3 small" role="status" colspan="2">
+                            <strong>Define the choices:</strong>
+                            each row is one option on the ballot. Set the <em>Choice</em> label and order with the handle; enter <em>Votes</em> in the next block.
+                        </div>
+                    </group>
+                    <group string="2. Manual results (final vote counts)" invisible="agenda_vote_mode != 'manual_multi'">
+                        <div class="alert alert-secondary mb-2 py-2 px-3 small" role="status" colspan="2">
+                            <strong>Enter final totals:</strong>
+                            <em>Votes</em> is the aggregate count for each choice only; per-attendee votes are not recorded.
+                        </div>
+                        <field
+                            name="option_ids"
+                            nolabel="1"
+                            colspan="2"
+                            readonly="agenda_state not in ('pending','in_progress')"
+                        >
+                            <list editable="bottom">
+                                <field name="sequence" widget="handle"/>
+                                <field name="name" string="Choice"/>
+                                <field name="manual_vote_count" string="Votes"/>
+                            </list>
+                        </field>
+                    </group>
+                    <div
+                        class="alert alert-secondary mb-3 py-2 px-3 small"
+                        role="status"
+                        invisible="agenda_vote_mode != 'manual_multi'"
+                    >
+                        <strong>Multi-option mode:</strong>
+                        options define the available choices; <em>Votes</em> stores final counts only.
+                    </div>
+                    <group string="Expected total and check" invisible="agenda_vote_mode != 'manual_multi'">
+                        <group>
+                            <field name="manual_total_expected" readonly="agenda_state not in ('pending','in_progress')"/>
+                        </group>
+                        <group>
+                            <field name="session_manual_entered_total" readonly="1"/>
+                            <field name="session_manual_expected_display" readonly="1"/>
+                            <field name="session_manual_delta" readonly="1"/>
+                        </group>
+                    </group>
+                    <div
+                        class="alert alert-warning mb-3 py-2 px-3"
+                        role="status"
+                        invisible="agenda_vote_mode != 'manual_multi' or not session_manual_has_variance"
+                    >
+                        Sum of votes in the table does not match the expected reference total. Adjust the Votes column or expected total before finalizing.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

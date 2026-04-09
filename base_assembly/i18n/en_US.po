@@ -27,54 +27,74 @@ msgstr ""
 
 #. module: base_assembly
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_attendance
-msgid "'Attendees - %s' % (object.name)"
+msgid "'Attendees - %s' % (object._get_report_base_filename())"
 msgstr ""
 
 #. module: base_assembly
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_attendance_with_delegationvote
-msgid "'Attendees and delegations - %s' % (object.name)"
+msgid "'Attendees_delegations - %s' % (object._get_report_base_filename())"
 msgstr ""
 
 #. module: base_assembly
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_attendance_with_signature
-msgid "'Attendees present - %s' % (object.name)"
+msgid "'Attendees_present - %s' % (object._get_report_base_filename())"
+msgstr ""
+
+#. module: base_assembly
+#: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_attendance_present_with_delegationvote
+msgid ""
+"'Attendees_present_delegations - %s' % (object._get_report_base_filename())"
 msgstr ""
 
 #. module: base_assembly
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_attendee_action_report_voting_ballot_nominative
-msgid "'Ballot - %s - %s' % (object.assembly_id.name, object.partner_id.name)"
+msgid "'Ballot_nominative - %s' % (object._get_report_base_filename())"
+msgstr ""
+
+#. module: base_assembly
+#: model:ir.actions.report,print_report_name:base_assembly.assembly_attendee_action_report_voting_ballot
+msgid "'Ballot_template - %s' % (object._get_report_base_filename())"
 msgstr ""
 
 #. module: base_assembly
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_attendee_action_report_individual_call
-msgid "'Call - %s - %s' % (object.assembly_id.name, object.partner_id.name)"
+msgid "'Call - %s' % (object._get_report_base_filename())"
 msgstr ""
 
 #. module: base_assembly
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_call_register
-msgid "'Call register - %s' % (object.name)"
+msgid "'Call_register - %s' % (object._get_report_base_filename())"
 msgstr ""
 
 #. module: base_assembly
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_attendee_action_report_individual_call_with_votes
-msgid ""
-"'Call with votes - %s - %s' % (object.assembly_id.name, "
-"object.partner_id.name)"
+msgid "'Call_votes - %s' % (object._get_report_base_filename())"
 msgstr ""
 
 #. module: base_assembly
-#: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_delegationvote
-msgid "'Delegation template - %s' % (object.name)"
+#: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_publication_document
+msgid "'Publication - %s' % (object._get_report_base_filename())"
+msgstr ""
+
+#. module: base_assembly
+#: model:ir.actions.report,print_report_name:base_assembly.assembly_representation_action_report_power_of_attorney
+msgid "'Representation_POA - %s' % (object._get_report_base_filename())"
 msgstr ""
 
 #. module: base_assembly
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_representation
-msgid "'Representation - %s' % (object.name)"
+msgid "'Representation_register - %s' % (object._get_report_base_filename())"
 msgstr ""
 
 #. module: base_assembly
-#: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_voting_ballot
-msgid "'Voting ballot - %s' % (object.name)"
+#: model:ir.actions.report,print_report_name:base_assembly.assembly_delegation_action_report_vote_delegation_certificate
+msgid ""
+"'Vote_delegation_certificate - %s' % (object._get_report_base_filename())"
+msgstr ""
+
+#. module: base_assembly
+#: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_delegationvote
+msgid "'Vote_delegation_register - %s' % (object._get_report_base_filename())"
 msgstr ""
 
 #. module: base_assembly
@@ -1906,6 +1926,11 @@ msgid ""
 msgstr ""
 
 #. module: base_assembly
+#: model_terms:ir.actions.act_window,help:base_assembly.assembly_attendee_action_called_members
+msgid "Member registrations across assemblies."
+msgstr ""
+
+#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
 msgid "Member:"
 msgstr ""
@@ -2457,11 +2482,6 @@ msgid ""
 msgstr ""
 
 #. module: base_assembly
-#: model_terms:ir.actions.act_window,help:base_assembly.assembly_attendee_action_called_members
-msgid "Registrations across assemblies (convocados)."
-msgstr ""
-
-#. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_attendee__attendance_type__remote
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_search
 msgid "Remote"
@@ -2796,8 +2816,8 @@ msgid ""
 msgstr ""
 
 #. module: base_assembly
-#: model:ir.model.constraint,message:base_assembly.constraint_assembly_assembly_assembly_code_uniq
-msgid "The assembly reference code must be unique."
+#: model:ir.model.constraint,message:base_assembly.constraint_assembly_assembly_assembly_company_code_uniq
+msgid "The assembly reference code must be unique per company."
 msgstr ""
 
 #. module: base_assembly

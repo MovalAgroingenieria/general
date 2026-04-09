@@ -482,6 +482,7 @@ class TestAssemblyAgendaVoteModes(AssemblyTestMixin, TransactionCase):
             }
         )
         self.assertEqual(sum(agenda.option_ids.mapped("manual_vote_count")), n)
+        self.assertEqual(agenda.manual_multi_votes_sum, n)
 
     def test_manual_multi_option_negative_vote_count_rejected(self):
         assembly = self._create_assembly(name="Multi neg asm")

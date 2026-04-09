@@ -16,16 +16,19 @@
         <field name="name">assembly.voting.line.tree</field>
         <field name="model">assembly.voting.line</field>
         <field name="arch" type="xml">
-            <list editable="bottom" create="1">
+            <list editable="bottom" create="1" default_order="session_row_group_order,partner_id,attendee_id">
+                <field name="session_row_group_order" column_invisible="1"/>
                 <field name="assembly_id" column_invisible="1"/>
                 <field
                     name="attendee_id"
                     domain="[('assembly_id', '=', assembly_id), ('attendee_state', '!=', 'absent')]"
                     options="{'no_create': True}"
                 />
+                <field name="session_context_label" string="Delegation / representation" optional="show" readonly="1"/>
+                <field name="votes_applied" string="Voting weight"/>
+                <field name="vote_option" string="Vote"/>
+                <field name="session_control_state" string="Status" widget="badge" readonly="1"/>
                 <field name="partner_id" optional="show"/>
-                <field name="vote_option"/>
-                <field name="votes_applied"/>
                 <field name="vote_channel"/>
                 <field name="vote_cast_at"/>
                 <field name="vote_cast_by_user_id"/>
@@ -36,6 +39,7 @@
     <record id="assembly_voting_view_form" model="ir.ui.view">
         <field name="name">assembly.voting.form</field>
         <field name="model">assembly.voting</field>
+        <field name="priority">40</field>
         <field name="arch" type="xml">
             <form string="Voting">
                 <header>
@@ -158,23 +162,23 @@
                 <field name="participation_percentage"/>
                 <field name="count_results"/>
                 <templates>
-                    <t t-name="kanban-box">
+                    <t t-name="card">
                         <div class="oe_kanban_card oe_kanban_global_click o_kanban_card rounded-3 shadow-sm border overflow-hidden">
                             <div class="d-flex justify-content-between align-items-start gap-2 px-3 py-2 border-bottom bg-100">
                                 <div class="min-w-0 flex-grow-1">
                                     <div class="fw-bold text-truncate"><field name="name"/></div>
                                     <div class="text-muted small text-truncate">
-                                        <i class="fa fa-sitemap me-1"/><field name="assembly_id"/>
+                                        <i class="fa fa-sitemap me-1" title="Assembly"/><field name="assembly_id"/>
                                     </div>
                                     <div class="text-muted small text-truncate">
-                                        <i class="fa fa-list-alt me-1"/><field name="agenda_id"/>
+                                        <i class="fa fa-list-alt me-1" title="Agenda"/><field name="agenda_id"/>
                                     </div>
                                 </div>
                                 <field name="voting_state" widget="badge"/>
                             </div>
                             <div class="px-3 py-2 small">
                                 <div class="mb-2 text-truncate">
-                                    <span class="text-muted"><i class="fa fa-tag me-1"/></span><field name="vote_type_id"/>
+                                    <span class="text-muted"><i class="fa fa-tag me-1" title="Vote type"/></span><field name="vote_type_id"/>
                                 </div>
                                 <div class="mb-2">
                                     <div class="d-flex justify-content-between text-muted mb-1">
@@ -187,7 +191,7 @@
                                 </div>
                                 <div class="d-flex flex-wrap gap-1">
                                     <span class="badge text-bg-light border">
-                                        <i class="fa fa-database me-1"/><field name="count_results"/> <span class="text-muted">results</span>
+                                        <i class="fa fa-database me-1" title="Results"/><field name="count_results"/> <span class="text-muted">results</span>
                                     </span>
                                 </div>
                             </div>

@@ -6,15 +6,9 @@
 from collections import defaultdict, deque
 
 from odoo import api, fields, models
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import ValidationError
 
-_DELEGATION_STATE_KEYS = frozenset({"draft", "confirmed", "revoked"})
-
-_DELEGATION_ALLOWED_STATE_TRANSITIONS = {
-    "draft": frozenset({"confirmed", "revoked"}),
-    "confirmed": frozenset({"revoked"}),
-    "revoked": frozenset({"confirmed"}),
-}
+from .assembly_mixin import assembly_safe_report_filename
 
 
 class AssemblyDelegation(models.Model):
@@ -24,6 +18,19 @@ class AssemblyDelegation(models.Model):
     _inherit = ["assembly.mixin.open.assembly"]
     _description = "Vote delegation"
     _order = "assembly_id, partner_id"
+
+    def _get_report_base_filename(self):
+        self.ensure_one()
+        delegator = assembly_safe_report_filename(
+            self.partner_id.display_name, default=self.env._("Delegator")
+        )
+        delegate = assembly_safe_report_filename(
+            self.delegate_partner_id.display_name, default=self.env._("Delegate")
+        )
+        asm = assembly_safe_report_filename(
+            self.assembly_id.display_name, default=self.env._("Assembly")
+        )
+        return f"{asm} - {delegator} - {delegate}"
 
     assembly_id = fields.Many2one(
         "assembly.assembly",
@@ -47,6 +54,11 @@ class AssemblyDelegation(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
+        help=(
+            "Member who transfers voting units. Saving this row registers the delegation; "
+            "units move only after the delegate is Attended (confirmed present) (see vote "
+            "transfer status). Delete the row to stop delegating."
+        ),
     )
     delegate_partner_id = fields.Many2one(
         "res.partner",
@@ -54,6 +66,11 @@ class AssemblyDelegation(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
+        help=(
+            "Must already be listed as an assembly attendee. Vote transfer for the covered "
+            "types becomes active when they are recorded as Attended (confirmed present); "
+            "until then the delegation is waiting."
+        ),
     )
     vote_type_ids = fields.Many2many(
         "vote.type",
@@ -62,18 +79,57 @@ class AssemblyDelegation(models.Model):
         "vote_type_id",
         string="Vote types",
         domain="[('active', '=', True)]",
-        help="Leave empty to delegate all vote types for this assembly.",
+        help=(
+            "Vote types covered by this delegation. Leave empty to delegate every vote "
+            "type configured on the assembly. Totals and roll-call use the stored "
+            "snapshot on each attendee row (delegated out / delegated in)."
+        ),
     )
     date_delegation = fields.Datetime(default=fields.Datetime.now)
-    delegation_state = fields.Selection(
+    delegation_vote_transfer_state = fields.Selection(
         [
-            ("draft", "Draft"),
-            ("confirmed", "Confirmed"),
-            ("revoked", "Revoked"),
+            ("waiting_delegate", "Waiting (delegate not attended yet)"),
+            ("active", "Active (votes transfer to delegate)"),
         ],
-        string="State",
-        default="draft",
-        required=True,
+        string="Vote transfer",
+        compute="_compute_delegation_ux_display",
+        help=(
+            "Waiting: the delegation is saved but the delegate is not Attended "
+            "(confirmed present), so units are not transferred yet. Active: the delegate "
+            "is attended (confirmed present); covered types are transferred for vote totals "
+            "(other rules such as vote-type overlap still apply in the engine)."
+        ),
+    )
+    delegation_delegate_attendee_state = fields.Selection(
+        [
+            ("no_row", "Not listed as attendee"),
+            (
+                "registered",
+                "Listed — not finalized",
+            ),
+            ("confirmed", "Attended (confirmed present)"),
+            ("absent", "Did not attend"),
+        ],
+        string="Delegate attendance",
+        compute="_compute_delegation_ux_display",
+    )
+    delegation_snapshot_units_out = fields.Float(
+        string="Delegator units delegated out",
+        digits=(16, 4),
+        compute="_compute_delegation_ux_display",
+        help=(
+            "Sum of stored delegated-out units on the delegator's vote lines for the types "
+            "covered by this delegation, when transfer is active."
+        ),
+    )
+    delegation_snapshot_units_in = fields.Float(
+        string="Delegate units from this delegation",
+        digits=(16, 4),
+        compute="_compute_delegation_ux_display",
+        help=(
+            "Sum of stored delegated-in units on the delegate's vote lines for the types "
+            "covered by this delegation, when transfer is active."
+        ),
     )
 
     _sql_constraints = [
@@ -89,11 +145,10 @@ class AssemblyDelegation(models.Model):
         "partner_id",
         "delegate_partner_id",
         "vote_type_ids",
-        "delegation_state",
     )
     def _check_delegation_constraints(self):
         for rec in self:
-            rec._delegation_validate_before_write({})
+            rec._delegation_validate_record_state()
 
     @api.model
     def _delegation_effective_vote_types(self, assembly, m2m_vote_types):
@@ -120,7 +175,7 @@ class AssemblyDelegation(models.Model):
 
     @api.model
     def _effective_delegations_partner_layer(self, delegations):
-        """Partner-layer rules only: ``delegation_state == confirmed`` and delegate is a confirmed attendee.
+        """Partner-layer rules only: delegate is a confirmed attendee.
 
         Vote-type expansion (empty M2M ⇒ all assembly types) is defined by
         :meth:`_get_effective_vote_types` / :meth:`delegation_covers_vote_type` at
@@ -129,9 +184,6 @@ class AssemblyDelegation(models.Model):
         **Not applied here:** inbound/outbound chain exclusion; those run inside
         :meth:`_get_effective_delegations` for a member edge when requested.
         """
-        if not delegations:
-            return delegations
-        delegations = delegations.filtered(lambda d: d.delegation_state == "confirmed")
         if not delegations:
             return delegations
         Attendee = self.env["assembly.attendee"]
@@ -160,16 +212,11 @@ class AssemblyDelegation(models.Model):
         return self._get_effective_delegations(delegations=delegations)
 
     @api.model
-    def _search_all_confirmed_delegations_for_assembly(self, assembly_id):
-        """All confirmed rows for an assembly (no partner or delegate filter)."""
+    def _search_all_delegations_for_assembly(self, assembly_id):
+        """All delegation rows for an assembly (no partner or delegate filter)."""
         if not assembly_id:
             return self.browse()
-        return self.search(
-            [
-                ("assembly_id", "=", assembly_id),
-                ("delegation_state", "=", "confirmed"),
-            ]
-        )
+        return self.search([("assembly_id", "=", assembly_id)])
 
     def _get_effective_vote_types(self):
         """Canonical expanded ``vote.type`` set for **this** delegation.
@@ -200,7 +247,7 @@ class AssemblyDelegation(models.Model):
         """
         if not delegations_out or not assembly_id or not delegator_partner_id:
             return delegations_out
-        inbound = self._search_confirmed_delegations_for_member_edge(
+        inbound = self._search_delegations_for_member_edge(
             "delegate", assembly_id, delegator_partner_id
         )
         inbound = self._get_effective_delegations(delegations=inbound)
@@ -224,7 +271,7 @@ class AssemblyDelegation(models.Model):
         """
         if not delegations_in or not assembly_id or not delegate_partner_id:
             return delegations_in
-        outbound = self._search_confirmed_delegations_for_member_edge(
+        outbound = self._search_delegations_for_member_edge(
             "delegator", assembly_id, delegate_partner_id
         )
         outbound = self._get_effective_delegations(delegations=outbound)
@@ -238,10 +285,10 @@ class AssemblyDelegation(models.Model):
         )
 
     @api.model
-    def _search_confirmed_delegations_for_member_edge(
+    def _search_delegations_for_member_edge(
         self, role, assembly_id, partner_id, pool=None
     ):
-        """Confirmed delegations where ``partner_id`` acts as ``role`` on the edge."""
+        """Delegations where ``partner_id`` acts as ``role`` on the edge."""
         if pool is not None:
             scoped = pool.filtered(lambda d, a=assembly_id: d.assembly_id.id == a)
             if role == "delegator":
@@ -249,10 +296,7 @@ class AssemblyDelegation(models.Model):
             return scoped.filtered(
                 lambda d, x=partner_id: d.delegate_partner_id.id == x
             )
-        domain = [
-            ("assembly_id", "=", assembly_id),
-            ("delegation_state", "=", "confirmed"),
-        ]
+        domain = [("assembly_id", "=", assembly_id)]
         if role == "delegator":
             domain.append(("partner_id", "=", partner_id))
         else:
@@ -303,7 +347,7 @@ class AssemblyDelegation(models.Model):
 
         **Two call shapes:**
 
-        1. ``delegations=<recordset>`` — apply only the partner layer (confirmed row +
+        1. ``delegations=<recordset>`` — apply only the partner layer (saved row +
            confirmed delegate attendee). Used for quorum *presence* (delegators
            without their own attendee row), vote recompute batching, and internal
            chain helpers. Unrelated to ``assembly.representation`` (legal/agent
@@ -316,8 +360,8 @@ class AssemblyDelegation(models.Model):
            :meth:`_exclude_inbound_vote_chain_overlap` so votes cannot chain through
            overlapping expanded vote types.
 
-        **Always enforced on the member-edge path:** ``delegation_state == confirmed``,
-        delegate is a confirmed attendee when partner layer is applied, and
+        **Always enforced on the member-edge path:** delegate is a confirmed attendee
+        when partner layer is applied, and
         vote-type semantics follow :meth:`_get_effective_vote_types` at callers.
 
         ``assembly.attendee._get_effective_delegations`` delegates here with
@@ -332,7 +376,7 @@ class AssemblyDelegation(models.Model):
         ):
             return self.browse()
 
-        delegations = self._search_confirmed_delegations_for_member_edge(
+        delegations = self._search_delegations_for_member_edge(
             role, assembly_id, member_partner_id, pool=confirmed_delegations_pool
         )
         if apply_delegate_attendee_effect:
@@ -377,22 +421,6 @@ class AssemblyDelegation(models.Model):
             for att in recs:
                 found.add((att.assembly_id.id, att.partner_id.id))
         return found
-
-    def _validate_confirmed_delegate_attendee(
-        self, assembly_id, delegate_partner_id, message
-    ):
-        if not assembly_id or not delegate_partner_id:
-            return
-        if not self.env["assembly.assembly"].browse(assembly_id).exists():
-            return
-        Attendee = self.env["assembly.attendee"].sudo()
-        if not Attendee._search_for_assembly_partner(
-            assembly_id,
-            delegate_partner_id,
-            limit=1,
-            attendee_state="confirmed",
-        ):
-            raise ValidationError(message)
 
     @api.model
     def _delegation_many2one_id_from_vals_or_record(self, vals, record, fname):
@@ -535,7 +563,7 @@ class AssemblyDelegation(models.Model):
             return
         confirmed = confirmed_delegations
         if confirmed is None:
-            confirmed = self._search_all_confirmed_delegations_for_assembly(assembly_id)
+            confirmed = self._search_all_delegations_for_assembly(assembly_id)
         edge_lists_by_vt = self._delegation_cycle_edge_lists_by_vote_type(
             self._get_effective_delegations(delegations=confirmed),
             exclude_delegation_id,
@@ -568,11 +596,11 @@ class AssemblyDelegation(models.Model):
         effective_out_types,
         exclude_delegation_id=None,
     ):
-        """Block overlapping confirmed delegations that would chain received votes.
+        """Block overlapping delegations that would chain received votes.
 
-        A partner cannot delegate vote types they receive via another confirmed
-        delegation, nor receive a delegation while delegating the same types
-        outward (no A→B→C on overlapping ``vote.type`` coverage).
+        A partner cannot delegate vote types they receive via another delegation,
+        nor receive a delegation while delegating the same types outward (no
+        A→B→C on overlapping ``vote.type`` coverage).
         """
         if (
             not assembly_id
@@ -583,16 +611,16 @@ class AssemblyDelegation(models.Model):
             return
         err_inbound = self.env._(
             "Chained delegations are not allowed: this delegator already receives "
-            "votes (confirmed delegation to them) on at least one of the same vote "
+            "votes (delegation to them) on at least one of the same vote "
             "types. Only your own votes can be delegated, not votes received from "
             "someone else."
         )
         err_outbound = self.env._(
             "Chained delegations are not allowed: this delegate already delegates "
-            "outward on overlapping vote types. Revoke or narrow that delegation "
+            "outward on overlapping vote types. Remove or narrow that delegation "
             "before they can receive these votes."
         )
-        inbound_to_delegator = self._search_confirmed_delegations_for_member_edge(
+        inbound_to_delegator = self._search_delegations_for_member_edge(
             "delegate", assembly_id, delegator_partner_id
         )
         if exclude_delegation_id:
@@ -605,7 +633,7 @@ class AssemblyDelegation(models.Model):
         for inc in inbound_to_delegator:
             if effective_out_types & inc._get_effective_vote_types():
                 raise ValidationError(err_inbound)
-        outbound_from_delegate = self._search_confirmed_delegations_for_member_edge(
+        outbound_from_delegate = self._search_delegations_for_member_edge(
             "delegator", assembly_id, delegate_partner_id
         )
         if exclude_delegation_id:
@@ -623,7 +651,7 @@ class AssemblyDelegation(models.Model):
     def _delegation_intersect_effective_vote_types(self, effective_a, effective_b):
         """Intersection of two **expanded** ``vote.type`` recordsets.
 
-        Overlap for duplicate-confirmed validation is non-empty intersection.
+        Overlap for duplicate outbound validation is non-empty intersection.
         Either side may come from :meth:`_get_effective_vote_types` or from
         :meth:`_delegation_effective_vote_types` at create time.
         """
@@ -631,40 +659,34 @@ class AssemblyDelegation(models.Model):
             return self.env["vote.type"].browse()
         return effective_a & effective_b
 
-    def _delegation_validate_no_duplicate_confirmed(
+    def _delegation_validate_no_overlapping_outbound(
         self,
         assembly_id,
         partner_id,
-        delegation_state,
         exclude_delegation_id,
         effective_vote_type_rs,
-        confirmed_siblings=None,
+        sibling_delegations=None,
     ):
-        """Reject two **confirmed** outbound delegations for the same partner with overlapping types.
-
-        Compared rows: **only** ``delegation_state == 'confirmed'`` for this
-        ``(assembly_id, partner_id)`` (draft/revoked are not in the sibling set).
+        """Reject two outbound delegations for the same partner with overlapping types.
 
         Each row's coverage is its **expanded** effective types
         (:meth:`_get_effective_vote_types`): empty M2M ⇒ all assembly types;
         non-empty M2M ⇒ only selected types. Disjoint partial delegations are
         allowed (empty intersection).
         """
-        if delegation_state != "confirmed" or not assembly_id or not partner_id:
+        if not assembly_id or not partner_id:
             return
         err = self.env._(
-            "A confirmed delegation already exists in this "
-            "assembly that covers the same vote type(s). "
-            "Please revoke or edit the existing delegation first."
+            "A delegation already exists in this assembly that covers the same vote "
+            "type(s). Remove or edit the existing delegation first."
         )
-        if confirmed_siblings is not None:
-            siblings = confirmed_siblings
+        if sibling_delegations is not None:
+            siblings = sibling_delegations
         else:
             siblings = self.search(
                 [
                     ("assembly_id", "=", assembly_id),
                     ("partner_id", "=", partner_id),
-                    ("delegation_state", "=", "confirmed"),
                 ]
             )
         candidate = effective_vote_type_rs
@@ -676,71 +698,8 @@ class AssemblyDelegation(models.Model):
             ):
                 raise ValidationError(err)
 
-    def _delegation_validate_before_write(self, vals):
-        self.ensure_one()
-        vals = dict(vals or {})
-        if not vals:
-            self.env["assembly.delegation"]._delegation_validate_record_state(self)
-            return
-        if "delegation_state" not in vals:
-            return
-        new_state = vals["delegation_state"]
-        if new_state not in _DELEGATION_STATE_KEYS:
-            raise UserError(
-                self.env._(
-                    "Invalid delegation status: %(state)s",
-                    state=repr(new_state),
-                )
-            )
-        self._validate_delegation_state_transition(self.delegation_state, new_state)
-        if new_state != "confirmed":
-            return
-        msg_draft = self.env._(
-            "Cannot confirm a delegation when the delegate "
-            "is not a confirmed attendee in the assembly. "
-            "The delegate must confirm attendance first."
-        )
-        msg_reconfirm = self.env._(
-            "Cannot re-confirm a delegation when the delegate "
-            "is not a confirmed attendee. "
-            "The delegate must confirm attendance first."
-        )
-        old_state = self.delegation_state
-        if old_state == new_state:
-            return
-        if not self.delegate_partner_id or not self.assembly_id:
-            return
-        if old_state == "revoked":
-            self._validate_confirmed_delegate_attendee(
-                self.assembly_id.id,
-                self.delegate_partner_id.id,
-                msg_reconfirm,
-            )
-        elif old_state == "draft":
-            self._validate_confirmed_delegate_attendee(
-                self.assembly_id.id,
-                self.delegate_partner_id.id,
-                msg_draft,
-            )
-
     @api.model
     def _delegation_validate_create_vals(self, vals):
-        initial = vals.get("delegation_state", "draft")
-        if initial not in _DELEGATION_STATE_KEYS:
-            raise ValidationError(
-                self.env._(
-                    "Invalid delegation status for new record: %(state)s",
-                    state=initial,
-                )
-            )
-        if initial not in ("draft", "confirmed"):
-            raise ValidationError(
-                self.env._(
-                    "New delegations must be created in draft or confirmed status. "
-                    "Got: %(state)s",
-                    state=initial,
-                )
-            )
         assembly_id = self._delegation_many2one_id_from_vals_or_record(
             vals, None, "assembly_id"
         )
@@ -760,127 +719,62 @@ class AssemblyDelegation(models.Model):
         self._delegation_validate_delegate_convocable(assembly, delegate_partner)
         self._delegation_validate_vote_types_in_assembly(vote_type_rs, assembly)
         effective_types = self._delegation_effective_vote_types(assembly, vote_type_rs)
-        confirmed_all = None
-        confirmed_siblings = None
-        if initial == "confirmed":
-            self._validate_confirmed_delegate_attendee(
-                assembly_id,
-                delegate_partner_id,
-                self.env._(
-                    "Cannot create a confirmed delegation "
-                    "when the delegate is not a confirmed attendee. "
-                    "The delegate must confirm attendance first."
-                ),
-            )
-            confirmed_all = self._search_all_confirmed_delegations_for_assembly(
-                assembly_id
-            )
-            confirmed_siblings = confirmed_all.filtered(
-                lambda r: r.partner_id.id == partner_id
-            )
-        self._delegation_validate_no_duplicate_confirmed(
+        all_asm = self._search_all_delegations_for_assembly(assembly_id)
+        siblings = all_asm.filtered(lambda r: r.partner_id.id == partner_id)
+        self._delegation_validate_no_overlapping_outbound(
             assembly_id,
             partner_id,
-            initial,
             False,
             effective_types,
-            confirmed_siblings=confirmed_siblings,
+            sibling_delegations=siblings,
         )
-        if initial == "confirmed":
-            self._delegation_validate_no_vote_delegation_chain(
-                assembly_id,
-                partner_id,
-                delegate_partner_id,
-                effective_types,
-                exclude_delegation_id=None,
-            )
+        self._delegation_validate_no_vote_delegation_chain(
+            assembly_id,
+            partner_id,
+            delegate_partner_id,
+            effective_types,
+            exclude_delegation_id=None,
+        )
 
-    def _delegation_validate_record_state(self, record):
-        assembly = record.assembly_id
+    def _delegation_validate_record_state(self):
+        assembly = self.assembly_id
         assembly_id = assembly.id if assembly else False
-        partner_id = record.partner_id.id if record.partner_id else False
+        partner_id = self.partner_id.id if self.partner_id else False
         delegate_partner_id = (
-            record.delegate_partner_id.id if record.delegate_partner_id else False
+            self.delegate_partner_id.id if self.delegate_partner_id else False
         )
-        vote_type_rs = record.vote_type_ids
-        effective_types = record._get_effective_vote_types()
-        state = record.delegation_state
-        delegate_partner = record.delegate_partner_id
+        vote_type_rs = self.vote_type_ids
+        effective_types = self._get_effective_vote_types()
+        delegate_partner = self.delegate_partner_id
         self._delegation_validate_not_self_delegation(partner_id, delegate_partner_id)
         self._delegation_validate_endpoints_are_attendees(
             assembly_id, partner_id, delegate_partner_id
         )
         self._delegation_validate_delegate_convocable(assembly, delegate_partner)
         self._delegation_validate_vote_types_in_assembly(vote_type_rs, assembly)
-        if state == "confirmed" and assembly_id and delegate_partner_id:
-            self._validate_confirmed_delegate_attendee(
-                assembly_id,
-                delegate_partner_id,
-                self.env._(
-                    "Cannot confirm a delegation when the delegate "
-                    "is not a confirmed attendee in the assembly. "
-                    "The delegate must confirm attendance first."
-                ),
-            )
-        self._delegation_validate_no_duplicate_confirmed(
+        self._delegation_validate_no_overlapping_outbound(
             assembly_id,
             partner_id,
-            state,
-            record.id,
+            self.id,
             effective_types,
         )
-        if state == "confirmed" and assembly_id and partner_id and delegate_partner_id:
+        if assembly_id and partner_id and delegate_partner_id:
             self._delegation_validate_no_vote_delegation_chain(
                 assembly_id,
                 partner_id,
                 delegate_partner_id,
                 effective_types,
-                exclude_delegation_id=record.id,
+                exclude_delegation_id=self.id,
             )
-        if state == "confirmed" and assembly_id and partner_id and delegate_partner_id:
-            record._delegation_assert_no_delegation_cycles(
+        if assembly_id and partner_id and delegate_partner_id:
+            self._delegation_assert_no_delegation_cycles(
                 assembly_id=assembly_id,
                 delegator_partner_id=partner_id,
                 delegate_partner_id=delegate_partner_id,
                 effective_vote_type_rs=effective_types,
                 assembly=assembly,
-                exclude_delegation_id=record.id,
+                exclude_delegation_id=self.id,
             )
-
-    def _raise_disallowed_delegation_state_transition(self, old_state, new_state):
-        if new_state == "confirmed":
-            raise UserError(
-                self.env._("Only draft or revoked delegations can be confirmed.")
-            )
-        if new_state == "revoked":
-            raise UserError(
-                self.env._("Only draft or confirmed delegations can be revoked.")
-            )
-        raise UserError(
-            self.env._(
-                "Invalid delegation status transition: %(old)s → %(new)s",
-                old=old_state,
-                new=new_state,
-            )
-        )
-
-    def _validate_delegation_state_transition(self, old_state, new_state):
-        if old_state == new_state:
-            return
-        if (
-            old_state not in _DELEGATION_STATE_KEYS
-            or new_state not in _DELEGATION_STATE_KEYS
-        ):
-            raise UserError(
-                self.env._(
-                    "Invalid delegation status transition: %(old)s → %(new)s",
-                    old=old_state,
-                    new=new_state,
-                )
-            )
-        allowed_next = _DELEGATION_ALLOWED_STATE_TRANSITIONS.get(old_state, frozenset())
-        if new_state not in allowed_next:
-            self._raise_disallowed_delegation_state_transition(old_state, new_state)
 
     @api.model
     def _delegation_recompute_add_endpoint_partners(self, by_assembly, rec):
@@ -897,7 +791,6 @@ class AssemblyDelegation(models.Model):
     def _delegation_collect_vote_recompute_attendees(  # pylint: disable=too-many-nested-blocks
         self,
         vals=None,
-        prev_state_by_id=None,
         post_create=False,
         prev_endpoint_partners_by_id=None,
     ):
@@ -911,8 +804,8 @@ class AssemblyDelegation(models.Model):
                 )
         else:
             prev_eps = prev_endpoint_partners_by_id or {}
-            state_changed = prev_state_by_id is not None
             vote_types_changed = "vote_type_ids" in vals
+            assembly_changed = "assembly_id" in vals
             for rec in self:
                 aid = rec.assembly_id.id
                 snap = prev_eps.get(rec.id)
@@ -923,18 +816,7 @@ class AssemblyDelegation(models.Model):
                         for pid in (op, od, np, nd):
                             if pid:
                                 by_assembly[aid].add(pid)
-                if state_changed:
-                    new_state = vals.get("delegation_state", rec.delegation_state)
-                    old_state = prev_state_by_id[rec.id]
-                    need = new_state != old_state and new_state in (
-                        "confirmed",
-                        "revoked",
-                    )
-                elif vote_types_changed:
-                    need = True
-                else:
-                    need = False
-                if need:
+                if vote_types_changed or assembly_changed:
                     self._delegation_recompute_add_endpoint_partners(by_assembly, rec)
         attendees = Attendee.browse()
         for aid, partner_ids in by_assembly.items():
@@ -963,23 +845,74 @@ class AssemblyDelegation(models.Model):
     def _recompute_votes_after_delegation_persist(
         self,
         vals,
-        prev_state_by_id=None,
         post_create=False,
         prev_endpoint_partners_by_id=None,
     ):
         attendees = self._delegation_collect_vote_recompute_attendees(
             vals,
-            prev_state_by_id,
             post_create=post_create,
             prev_endpoint_partners_by_id=prev_endpoint_partners_by_id,
         )
         self.env["assembly.attendee"].recompute_votes(attendees)
 
-    def _transition_delegation_state_via_write(self, new_state, extra_vals=None):
-        self.ensure_one()
-        vals = dict(extra_vals or ())
-        vals["delegation_state"] = new_state
-        return self.write(vals)
+    @api.depends(
+        "partner_id",
+        "delegate_partner_id",
+        "vote_type_ids",
+        "assembly_id",
+        "assembly_id.attendee_ids.attendee_state",
+        "assembly_id.attendee_ids.partner_id",
+        "assembly_id.attendee_ids.attendee_vote_ids.delegated_out_votes",
+        "assembly_id.attendee_ids.attendee_vote_ids.delegated_in_votes",
+        "assembly_id.attendee_ids.attendee_vote_ids.vote_type_id",
+    )
+    def _compute_delegation_ux_display(self):
+        Attendee = self.env["assembly.attendee"]
+        effective_rs = self.env["assembly.delegation"]._get_effective_delegations(
+            delegations=self
+        )
+        for rec in self:
+            rec.delegation_snapshot_units_out = 0.0
+            rec.delegation_snapshot_units_in = 0.0
+            rec.delegation_delegate_attendee_state = "no_row"
+            rec.delegation_vote_transfer_state = "waiting_delegate"
+            if not rec.assembly_id or not rec.delegate_partner_id:
+                continue
+            delegate_att = Attendee._search_for_assembly_partner(
+                rec.assembly_id.id,
+                rec.delegate_partner_id.id,
+                limit=1,
+            )
+            if not delegate_att:
+                rec.delegation_delegate_attendee_state = "no_row"
+            else:
+                rec.delegation_delegate_attendee_state = delegate_att.attendee_state
+            if rec in effective_rs:
+                rec.delegation_vote_transfer_state = "active"
+            if rec.delegation_vote_transfer_state != "active":
+                continue
+            vt_ids = set(rec._get_effective_vote_types().ids)
+            if not vt_ids:
+                continue
+            delegator_att = Attendee._search_for_assembly_partner(
+                rec.assembly_id.id,
+                rec.partner_id.id,
+                limit=1,
+            )
+            if delegator_att:
+                lines_out = delegator_att.attendee_vote_ids.filtered(
+                    lambda line, ids=vt_ids: line.vote_type_id.id in ids
+                )
+                rec.delegation_snapshot_units_out = sum(
+                    lines_out.mapped("delegated_out_votes")
+                )
+            if delegate_att:
+                lines_in = delegate_att.attendee_vote_ids.filtered(
+                    lambda line, ids=vt_ids: line.vote_type_id.id in ids
+                )
+                rec.delegation_snapshot_units_in = sum(
+                    lines_in.mapped("delegated_in_votes")
+                )
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -1003,22 +936,14 @@ class AssemblyDelegation(models.Model):
             self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
             self.check_access("write")
             self.check_field_access_rights("write", list(vals))
-        prev_state_by_id = (
-            {d.id: d.delegation_state for d in self}
-            if "delegation_state" in vals
-            else None
-        )
         prev_endpoint_partners_by_id = None
         if self and ("partner_id" in vals or "delegate_partner_id" in vals):
             prev_endpoint_partners_by_id = {
                 d.id: (d.partner_id.id, d.delegate_partner_id.id) for d in self
             }
-        for rec in self:
-            rec._delegation_validate_before_write(vals)
         res = super().write(vals)
         self._recompute_votes_after_delegation_persist(
             vals,
-            prev_state_by_id,
             prev_endpoint_partners_by_id=prev_endpoint_partners_by_id,
         )
         return res

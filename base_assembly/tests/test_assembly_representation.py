@@ -1,6 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
+from odoo import fields
 from odoo.exceptions import UserError
 from odoo.tests import TransactionCase
 
@@ -133,9 +134,68 @@ class TestAssemblyRepresentation(AssemblyTestMixin, TransactionCase):
         body = html.decode() if isinstance(html, bytes) else html
         self.assertIn(partners[0].name, body)
         self.assertIn(partners[1].name, body)
+        self.assertIn("Representation register", body)
+        self.assertNotIn("o_assembly_report_publication", body)
+        self.assertNotIn("o_assembly_publication_hint", body)
+        self.assertNotIn("o_assembly_ballot", body)
+
+    def test_representation_poa_report_renders_without_publication_or_ballot(self):
+        assembly, partners = self._assembly_with_three_convocable()
+        assembly.write(
+            {
+                "date_first_call": fields.Datetime.now(),
+                "location": "Venue representation POA test",
+            }
+        )
+        rec = self.env["assembly.representation"].create(
+            {
+                "assembly_id": assembly.id,
+                "owner_partner_id": partners[0].id,
+                "agent_partner_id": partners[1].id,
+                "notes": "Internal note for POA row",
+            }
+        )
+        report = self.env.ref(
+            "base_assembly.assembly_representation_action_report_power_of_attorney"
+        )
+        html, _ = report._render_qweb_html(report.id, rec.ids, data={})
+        body = html.decode() if isinstance(html, bytes) else html
+        self.assertIn("Power of attorney", body)
+        self.assertIn("o_assembly_representation_poa_formal", body)
+        self.assertIn("Venue representation POA test", body)
+        self.assertIn("Internal note for POA row", body)
+        self.assertIn("vote delegation is separate", body)
+        self.assertNotIn("o_assembly_report_publication", body)
+        self.assertNotIn("o_assembly_publication_hint", body)
+        self.assertNotIn("o_assembly_ballot", body)
+        pos = body.find("o_assembly_representation_poa_formal")
+        self.assertGreater(pos, -1)
+        snippet = body[pos : pos + 1200]
+        self.assertNotIn(
+            "&lt;p",
+            snippet,
+            "Legal body paragraphs must render as HTML, not escaped tags",
+        )
+
+    def test_representation_poa_pdf_render_succeeds(self):
+        assembly, partners = self._assembly_with_three_convocable()
+        rec = self.env["assembly.representation"].create(
+            {
+                "assembly_id": assembly.id,
+                "owner_partner_id": partners[0].id,
+                "agent_partner_id": partners[1].id,
+            }
+        )
+        report = self.env.ref(
+            "base_assembly.assembly_representation_action_report_power_of_attorney"
+        )
+        pdf_data, _ctype = self.env["ir.actions.report"]._render_qweb_pdf(
+            report.report_name, res_ids=rec.ids
+        )
+        self.assertTrue(pdf_data)
 
     def test_representation_in_delegation_vote_report_html(self):
-        """Delegation PDF includes ``report_assembly_representation_table_block`` when lines exist."""
+        """Delegation PDF must not embed the representation register (separate legal instrument)."""
         assembly, partners = self._assembly_with_three_convocable()
         self.env["assembly.representation"].create(
             {
@@ -149,9 +209,9 @@ class TestAssemblyRepresentation(AssemblyTestMixin, TransactionCase):
         )
         html, _ = report._render_qweb_html(report.id, assembly.ids, data={})
         body = html.decode() if isinstance(html, bytes) else html
-        self.assertIn("Representations (registered)", body)
-        self.assertIn(partners[0].name, body)
-        self.assertIn(partners[1].name, body)
+        self.assertIn("Vote delegation register", body)
+        self.assertIn("o_assembly_delegation_register", body)
+        self.assertNotIn("Representation register", body)
 
     def test_representation_in_individual_call_report_html(self):
         assembly, partners = self._assembly_with_three_convocable()
@@ -169,11 +229,13 @@ class TestAssemblyRepresentation(AssemblyTestMixin, TransactionCase):
         )
         html, _ = report._render_qweb_html(report.id, attendee.ids, data={})
         body = html.decode() if isinstance(html, bytes) else html
-        self.assertIn("Representations (registered)", body)
+        self.assertNotIn("Representations (registered)", body)
+        self.assertIn("representation register report", body.lower())
         self.assertIn(partners[0].name, body)
 
     def test_representation_in_attendance_all_report_html(self):
         assembly, partners = self._assembly_with_three_convocable()
+        assembly.action_generate_attendees()
         self.env["assembly.representation"].create(
             {
                 "assembly_id": assembly.id,
@@ -186,7 +248,12 @@ class TestAssemblyRepresentation(AssemblyTestMixin, TransactionCase):
         )
         html, _ = report._render_qweb_html(report.id, assembly.ids, data={})
         body = html.decode() if isinstance(html, bytes) else html
-        self.assertIn("(registered)", body)
+        self.assertIn("Representation", body)
+        self.assertIn("Delegations received", body)
+        self.assertTrue(
+            "Acts for" in body or "Represented by" in body,
+            "Expected representation column to describe owner/agent link",
+        )
         self.assertIn(partners[0].name, body)
         self.assertIn(partners[1].name, body)
 
@@ -207,7 +274,9 @@ class TestAssemblyRepresentation(AssemblyTestMixin, TransactionCase):
         )
         html, _ = report._render_qweb_html(report.id, assembly.ids, data={})
         body = html.decode() if isinstance(html, bytes) else html
-        self.assertIn("(registered)", body)
+        self.assertIn("Representation", body)
+        self.assertIn("Delegations received", body)
+        self.assertTrue("Acts for" in body or "Represented by" in body)
         self.assertIn(partners[0].name, body)
         self.assertIn(partners[1].name, body)
 

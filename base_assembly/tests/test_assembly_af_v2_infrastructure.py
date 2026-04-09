@@ -103,6 +103,39 @@ class TestAssemblyAfV2Infrastructure(AssemblyTestMixin, TransactionCase):
         self.assertEqual(a1.name, a2.name)
         self.assertNotEqual(a1.company_id, a2.company_id)
 
+    def test_assembly_code_unique_per_company(self):
+        a1 = self._create_assembly(name="Code dup same co")
+        a2 = self._create_assembly(name="Code dup same co 2")
+        shared = "ASM_TEST_CODE_DUP_%s" % self.env.company.id
+        a1.write({"code": shared})
+        with mute_logger("odoo.sql_db"):
+            with self.assertRaises(Exception):
+                a2.write({"code": shared})
+
+    def test_same_assembly_code_allowed_in_different_companies(self):
+        c2 = self._secondary_company()
+        vt2 = self._create_vote_type(self.env, name="VT C2 code test")
+        at2 = self.AssemblyType.with_company(c2).create(
+            {
+                "name": "T2 code",
+                "code": "T2CODE_%s" % c2.id,
+                "company_id": c2.id,
+                "vote_type_ids": [(6, 0, vt2.ids)],
+            }
+        )
+        a1 = self._create_assembly(name="Code cross C1")
+        shared = "ASM_TEST_SHAREDCODE_%s" % a1.id
+        a1.write({"code": shared})
+        a2 = self.Assembly.with_company(c2).create(
+            {
+                "name": "Code cross C2",
+                "assembly_type_id": at2.id,
+                "code": shared,
+            }
+        )
+        self.assertEqual(a1.code, a2.code)
+        self.assertNotEqual(a1.company_id, a2.company_id)
+
     def test_temporal_second_call_must_be_after_first(self):
         assembly = self._create_assembly(name="Temporal 1")
         with self.assertRaises(ValidationError):

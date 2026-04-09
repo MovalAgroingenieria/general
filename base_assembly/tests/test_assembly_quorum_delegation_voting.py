@@ -153,7 +153,6 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegator.recompute_attendee_vote_lines()
@@ -189,20 +188,14 @@ class TestQuorumScenarios(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
-        delegator.recompute_attendee_vote_lines()
-        delegate.recompute_attendee_vote_lines()
         assembly.invalidate_recordset()
         present = assembly._count_present_attendees()
         self.assertEqual(
             present,
             1,
-            (
-                "Only delegator is confirmed; delegate not confirmed so "
-                "delegator not represented"
-            ),
+            "Delegate not confirmed: delegation row exists but is not quorum-effective",
         )
 
     def test_Q8_quorum_state_change_confirm_attendee(self):
@@ -302,7 +295,6 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(5, 0, 0)],
-                "delegation_state": "confirmed",
             }
         )
         delegator.recompute_attendee_vote_lines()
@@ -366,7 +358,6 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(6, 0, vt1.ids)],
-                "delegation_state": "confirmed",
             }
         )
         a.recompute_attendee_vote_lines()
@@ -407,7 +398,6 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegator.recompute_attendee_vote_lines()
@@ -423,8 +413,8 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
         self.assertEqual(av_del.attendee_vote_total, 0.0)
         self.assertEqual(av_dec.attendee_vote_total, 5.0)
 
-    def test_D4_delegate_not_confirmed_then_confirm(self):
-        """D4: Delegate not confirmed → on confirm, delegated_in applied."""
+    def test_D4_delegation_applies_when_delegate_confirmed(self):
+        """D4: After both are confirmed, saving a delegation applies delegated_in."""
         assembly, _ = (
             self._create_assembly_with_agenda()
         )  # pylint: disable=protected-access
@@ -436,19 +426,17 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
         self._give_partner_votes(delegate.partner_id, vote_type, 1)
         # pylint: disable=protected-access
         delegator.action_confirm()
-        delegation = self.env["assembly.delegation"].create(
+        delegate.action_confirm()
+        self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
         delegator.recompute_attendee_vote_lines()
         delegate.recompute_attendee_vote_lines()
-        delegate.action_confirm()
-        delegation.write({"delegation_state": "confirmed"})
         av = self.env["assembly.attendee.vote"].search(
             [("attendee_id", "=", delegate.id), ("vote_type_id", "=", vote_type.id)],
             limit=1,
@@ -456,8 +444,8 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
         self.assertEqual(av.delegated_in_votes, 3.0)
         self.assertEqual(av.attendee_vote_total, 1.0 + 3.0)
 
-    def test_D5_duplicate_confirmed_delegation_same_type_raises(self):
-        """D5: Two confirmed delegations same type → ValidationError."""
+    def test_D5_duplicate_delegation_same_type_raises(self):
+        """D5: Two delegations same type for same delegator → ValidationError."""
         assembly, _ = (
             self._create_assembly_with_agenda()
         )  # pylint: disable=protected-access
@@ -476,7 +464,6 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "partner_id": p1.id,
                 "delegate_partner_id": p2.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         with self.assertRaises(ValidationError) as ctx:
@@ -486,13 +473,12 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                     "partner_id": p1.id,
                     "delegate_partner_id": p3.id,
                     "vote_type_ids": [(6, 0, vote_type.ids)],
-                    "delegation_state": "confirmed",
                 }
             )
         self.assertIn("same vote type", str(ctx.exception).lower())
 
-    def test_D6_revoked_delegation_reverts_votes(self):
-        """D6: Revoke delegation → recompute restores own and removes in."""
+    def test_D6_removed_delegation_reverts_votes(self):
+        """D6: Remove delegation → recompute restores own and removes in."""
         assembly, _ = (
             self._create_assembly_with_agenda()
         )  # pylint: disable=protected-access
@@ -505,13 +491,12 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
         # pylint: disable=protected-access
         delegator.action_confirm()
         delegate.action_confirm()
-        d = self.env["assembly.delegation"].create(  # noqa: F841
+        d = self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegator.recompute_attendee_vote_lines()
@@ -521,14 +506,17 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
             limit=1,
         )
         self.assertEqual(av_dec.attendee_vote_total, 5.0)
-        d.delegation_state = "revoked"
+        d.unlink()
         delegator.recompute_attendee_vote_lines()
         delegate.recompute_attendee_vote_lines()
-        av_del = self.env["assembly.attendee.vote"].search(  # noqa: F841
+        av_del = self.env["assembly.attendee.vote"].search(
             [("attendee_id", "=", delegator.id), ("vote_type_id", "=", vote_type.id)],
             limit=1,
         )
-        av_dec.invalidate_recordset()
+        av_dec = self.env["assembly.attendee.vote"].search(
+            [("attendee_id", "=", delegate.id), ("vote_type_id", "=", vote_type.id)],
+            limit=1,
+        )
         self.assertEqual(av_del.attendee_vote_total, 4.0)
         self.assertEqual(av_dec.attendee_vote_total, 1.0)
 
@@ -554,7 +542,6 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         with self.assertRaises(ValidationError):
@@ -564,7 +551,6 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                     "partner_id": b.partner_id.id,
                     "delegate_partner_id": a.partner_id.id,
                     "vote_type_ids": [(6, 0, vote_type.ids)],
-                    "delegation_state": "confirmed",
                 }
             )
 
@@ -591,7 +577,6 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         a.recompute_attendee_vote_lines()
@@ -691,7 +676,6 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(6, 0, vt1.ids)],
-                "delegation_state": "confirmed",
             }
         )
         self.env["assembly.delegation"].create(
@@ -700,7 +684,6 @@ class TestDelegationScenarios(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": c.partner_id.id,
                 "vote_type_ids": [(6, 0, vt2.ids)],
-                "delegation_state": "confirmed",
             }
         )
         a.recompute_attendee_vote_lines()

@@ -12,6 +12,8 @@ from odoo.tools import format_datetime, is_html_empty
 from odoo.tools.misc import clean_context
 from odoo.tools.safe_eval import safe_eval
 
+from .assembly_mixin import assembly_safe_report_filename
+
 _DOMAIN_OPERATORS = frozenset(("&", "|", "!"))
 
 _ASSEMBLY_STATE_KEYS = frozenset(
@@ -40,6 +42,10 @@ _ASSEMBLY_STATES_ALLOW_GENERATE_ATTENDEES = frozenset(("draft", "announced", "op
 # Set on ``assembly.assembly`` writes that cascade to related models while the
 # assembly row still reads ``closed`` (e.g. cancel → close open votings).
 CTX_ASSEMBLY_INTERNAL_TRANSITION = "assembly_internal_transition"
+
+# Set only by :meth:`AssemblyAssembly.action_reopen_from_closed` so ``closed → in_session``
+# is not writable from RPC without audit (chatter) and ACL.
+CTX_ASSEMBLY_REOPEN_FROM_CLOSED = "assembly_reopen_from_closed"
 
 
 def _eval_partner_domain_text(partner_domain_text):
@@ -79,6 +85,22 @@ _AF_QWEB_FALLBACK_XMLIDS = {
     "ballot_nominative_intro": "base_assembly.assembly_af_ballot_nominative_intro_qweb",
 }
 
+_MAIL_SUFFIX_TO_COMPANY_FIELD = {
+    "publication": "assembly_default_publication_mail_template_id",
+    "delegation_document": "assembly_default_delegation_document_mail_template_id",
+    "delegation_footer": "assembly_default_delegation_footer_mail_template_id",
+    "ballot_intro": "assembly_default_ballot_intro_mail_template_id",
+    "ballot_nominative_intro": "assembly_default_ballot_nominative_intro_mail_template_id",
+}
+
+_AF_SUFFIX_TO_COMPANY_VIEW_FIELD = {
+    "publication": "assembly_af_publication_fallback_qweb_id",
+    "delegation_document": "assembly_af_delegation_document_fallback_qweb_id",
+    "delegation_footer": "assembly_af_delegation_footer_fallback_qweb_id",
+    "ballot_intro": "assembly_af_ballot_intro_fallback_qweb_id",
+    "ballot_nominative_intro": "assembly_af_ballot_nominative_intro_fallback_qweb_id",
+}
+
 
 class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     """Assembly lifecycle, quorum (stored), convocation.
@@ -99,9 +121,9 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     _sql_constraints = [
         (
-            "assembly_code_uniq",
-            "UNIQUE(code)",
-            "The assembly reference code must be unique.",
+            "assembly_company_code_uniq",
+            "UNIQUE(company_id, code)",
+            "The assembly reference code must be unique per company.",
         ),
         (
             "assembly_name_company_uniq",
@@ -109,6 +131,12 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             "An assembly with this name already exists in this company.",
         ),
     ]
+
+    def _get_report_base_filename(self):
+        self.ensure_one()
+        return assembly_safe_report_filename(
+            self.display_name, default=self.env._("Assembly")
+        )
 
     company_id = fields.Many2one(
         "res.company",
@@ -256,15 +284,15 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         ),
     )
     attendance_require_partner_vat_confirm = fields.Boolean(
-        string="Require TIN to confirm attendance",
+        string="Require TIN to mark attended",
         default=False,
         help=(
-            "When set, confirming an attendee is blocked if the member has no TIN (VAT) "
-            "or it is the exempt placeholder (/)."
+            "When set, recording a member as attended (confirmed present) is blocked if "
+            "the member has no TIN (VAT) or it is the exempt placeholder (/)."
         ),
     )
     attendance_partner_vat_format_strict = fields.Boolean(
-        string="Strict TIN format for attendance confirmation",
+        string="Strict TIN format when marking attended",
         default=False,
         help=(
             "When set together with the requirement above, the TIN must pass a light "
@@ -277,11 +305,16 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         help="If disabled, attendance notes are hidden and cannot be set on registrations.",
     )
     include_qr_code = fields.Boolean(
-        string="Add QR code (tracked attendance link)",
+        string="Tracked attendance links & QR",
         default=True,
         help=(
-            "If enabled, each attendee can have a short tracked link suitable for QR. "
-            "If disabled, link trackers are not created or are cleared."
+            "When enabled, each attendee gets a short link-tracker URL to the "
+            "attendance flow (opens counted) and the same URL can be shown as a QR "
+            "code. Managers open it from the assembly smart button Links & QR, from "
+            "each attendee form (header: Open attendance link / Show QR), or from the "
+            "Configuration tab help on this assembly. When disabled, existing trackers "
+            "for this assembly's attendees are cleared and new ones are not created. "
+            "Landing and error pages: Settings → Assemblies → Attendance deep links."
         ),
     )
     partner_domain = fields.Text(
@@ -347,6 +380,18 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         string="Voting sessions",
         compute="_compute_counts",
         help="Number of assembly.voting records linked to this assembly's agenda.",
+    )
+    mail_outbound_email_count = fields.Integer(
+        string="Outgoing emails",
+        compute="_compute_mail_trace_counters",
+    )
+    assembly_communication_message_count = fields.Integer(
+        string="Thread messages",
+        compute="_compute_mail_trace_counters",
+    )
+    attendee_tracked_link_count = fields.Integer(
+        string="Attendance links ready",
+        compute="_compute_attendee_tracked_link_count",
     )
     kanban_open_votings_count = fields.Integer(
         string="Open votings (Kanban)",
@@ -426,6 +471,32 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                 assembly.agenda_ids.mapped("voting_ids")
             )
 
+    @api.depends("message_ids")
+    def _compute_mail_trace_counters(self):
+        mail_mail = self.env["mail.mail"]
+        for rec in self:
+            rec.assembly_communication_message_count = len(rec.message_ids)
+            rec.mail_outbound_email_count = mail_mail.search_count(
+                [
+                    ("model", "=", "assembly.assembly"),
+                    ("res_id", "=", rec.id),
+                ]
+            )
+
+    @api.depends(
+        "include_qr_code",
+        "attendee_ids",
+        "attendee_ids.attendance_link_tracker_id",
+    )
+    def _compute_attendee_tracked_link_count(self):
+        for rec in self:
+            if not rec.include_qr_code:
+                rec.attendee_tracked_link_count = 0
+            else:
+                rec.attendee_tracked_link_count = len(
+                    rec.attendee_ids.filtered("attendance_link_tracker_id")
+                )
+
     @api.depends(
         "agenda_ids.voting_ids",
         "agenda_ids.voting_ids.voting_state",
@@ -480,9 +551,9 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         "attendee_ids.attendee_state",
         "attendee_ids.partner_id",
         "delegation_ids",
-        "delegation_ids.delegation_state",
         "delegation_ids.partner_id",
         "delegation_ids.delegate_partner_id",
+        "delegation_ids.vote_type_ids",
         "quorum_type",
         "quorum_value",
         "quorum_second_call_type",
@@ -849,9 +920,18 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     def _prepare_and_validate_assembly_create_vals_list(self, vals_list):
         for vals in vals_list:
             if vals.get("code", self.env._("New")) == self.env._("New"):
-                vals["code"] = self.env["ir.sequence"].next_by_code(
-                    "assembly.assembly"
-                ) or self.env._("New")
+                cid = vals.get("company_id") or self.env.company.id
+                company = self.env["res.company"].browse(cid)
+                seq = company.assembly_sequence_id
+                if seq:
+                    next_code = seq.next_by_id()
+                else:
+                    next_code = (
+                        self.env["ir.sequence"]
+                        .with_company(cid)
+                        .next_by_code("assembly.assembly")
+                    )
+                vals["code"] = next_code or self.env._("New")
             if vals.get("assembly_type_id"):
                 atype = self.env["assembly.type"].browse(vals["assembly_type_id"])
                 self._apply_assembly_type_to_create_vals(vals, atype)
@@ -896,8 +976,13 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         * Sequential: draft→announced→open→in_session→closed
         * From **any** lifecycle state (including closed): → cancelled
         * cancelled → draft (reopen)
+        * closed → in_session only with :data:`CTX_ASSEMBLY_REOPEN_FROM_CLOSED`
         """
-        return (old_state, new_state) in _ASSEMBLY_ALLOWED_STATE_TRANSITIONS
+        if (old_state, new_state) in _ASSEMBLY_ALLOWED_STATE_TRANSITIONS:
+            return True
+        if (old_state, new_state) == ("closed", "in_session"):
+            return bool(self.env.context.get(CTX_ASSEMBLY_REOPEN_FROM_CLOSED))
+        return False
 
     def _validate_state_transition(self, old_state, new_state):
         if old_state == new_state:
@@ -1007,31 +1092,40 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         return self._transition_assembly_state_via_write(new_state, extra_vals)
 
     def _assembly_closed_write_allowed_vals(self, vals):
-        """When ``assembly_state`` is ``closed``, only transition to ``cancelled`` is allowed."""
+        """When ``assembly_state`` is ``closed``, only controlled transitions apply."""
         if not vals:
             return True
-        if (
-            set(vals.keys()) == {"assembly_state"}
-            and vals.get("assembly_state") == "cancelled"
+        if set(vals.keys()) != {"assembly_state"}:
+            return False
+        new_state = vals.get("assembly_state")
+        if new_state == "cancelled":
+            return True
+        if new_state == "in_session" and self.env.context.get(
+            CTX_ASSEMBLY_REOPEN_FROM_CLOSED
         ):
             return True
         return False
 
-    def _assembly_ensure_not_closed_for_related_changes(self):
-        """Raise if any assembly in ``self`` is closed (child models call this).
-
-        Skipped during :data:`CTX_ASSEMBLY_INTERNAL_TRANSITION` (e.g. cancel cascades).
-        """
+    @api.model
+    def _assembly_raise_if_closed(self, assemblies):
         if self.env.context.get(CTX_ASSEMBLY_INTERNAL_TRANSITION):
             return
-        bad = self.filtered(lambda a: a.assembly_state == "closed")
+        bad = assemblies.filtered(lambda a: a.assembly_state == "closed")
         if bad:
             raise UserError(
-                self.env._(
-                    "This assembly is closed. You cannot change related records. "
-                    "Use Cancel on the assembly if you need to void it."
-                )
+                self.env._("This assembly is closed and cannot be modified.")
             )
+
+    def _assembly_ensure_not_closed_for_related_changes(self):
+        self.env["assembly.assembly"]._assembly_raise_if_closed(self)
+
+    def unlink(self):
+        for rec in self:
+            if rec.assembly_state == "closed":
+                raise UserError(  # pylint: disable=no-raise-unlink
+                    self.env._("This assembly is closed and cannot be modified.")
+                )
+        return super().unlink()
 
     def write(self, vals):
         vals = dict(vals)
@@ -1040,10 +1134,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         locked = self.filtered(lambda r: r.assembly_state == "closed")
         if locked and not locked._assembly_closed_write_allowed_vals(vals):
             raise UserError(
-                self.env._(
-                    "This assembly is closed and cannot be edited. "
-                    "Use Cancel if you need to void it (then you may reopen from cancelled)."
-                )
+                self.env._("This assembly is closed and cannot be modified.")
             )
         res = super().write(vals)
         if "vote_type_ids" in vals:
@@ -1212,8 +1303,18 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             },
         }
 
+    def _assembly_ensure_active_for_operational_views(self):
+        if self.filtered(lambda a: not a.active):
+            raise UserError(
+                self.env._(
+                    "Operational lists and shortcuts are not available for archived "
+                    "assemblies. Unarchive the assembly first."
+                )
+            )
+
     def _action_open_related(self, res_model, title):
         self.ensure_one()
+        self._assembly_ensure_active_for_operational_views()
         return self._action_window(
             res_model,
             title,
@@ -1234,6 +1335,40 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         )
         return self._session_start_ui_result(res)
 
+    def action_open_live_voting_dashboard(self):
+        self.ensure_one()
+        self._assembly_ensure_active_for_operational_views()
+        if self.assembly_state != "in_session":
+            raise UserError(
+                self.env._(
+                    "The live voting screen is only available while the assembly is in session."
+                )
+            )
+        agendas = self.agenda_ids.sorted(lambda a: (a.sequence, a.id))
+        for agenda in agendas:
+            open_v = agenda.voting_ids.filtered(lambda v: v.voting_state == "open")
+            if open_v:
+                v0 = open_v[0]
+                v0._ensure_roll_call_lines()
+                return v0.action_open_session_control()
+        for agenda in agendas:
+            if agenda.agenda_vote_mode == "weighted" and agenda.agenda_state in (
+                "pending",
+                "in_progress",
+            ):
+                return agenda.action_open_live_voting_screen()
+        for agenda in agendas:
+            if agenda.agenda_vote_mode in (
+                "manual_yes_no",
+                "manual_multi",
+            ) and agenda.agenda_state in ("pending", "in_progress"):
+                return agenda.action_open_live_voting_screen()
+        raise UserError(
+            self.env._(
+                "No agenda item is ready for live voting. Open an item from the agenda list."
+            )
+        )
+
     def action_close(self):
         return self._transition_assembly_state(
             "closed", {"date_end": fields.Datetime.now()}
@@ -1244,6 +1379,25 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     def action_reopen(self):
         return self._transition_assembly_state("draft")
+
+    def action_reopen_from_closed(self):
+        self.ensure_one()
+        if self.assembly_state != "closed":
+            raise UserError(
+                self.env._("This action is only available when the assembly is closed.")
+            )
+        if not self.env.user.has_group("base_assembly.assembly_group_manager"):
+            raise UserError(
+                self.env._("Only assembly managers can reopen a closed assembly.")
+            )
+        self.check_access("write")
+        self.message_post(
+            body=self.env._("Assembly reopened from closed (session restored)."),
+            message_type="notification",
+        )
+        return self.with_context(**{CTX_ASSEMBLY_REOPEN_FROM_CLOSED: True}).write(
+            {"assembly_state": "in_session"}
+        )
 
     def action_generate_attendees(self):
         self.ensure_one()
@@ -1270,6 +1424,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     def action_recompute_attendee_votes(self):
         """AF §6: Recompute stored vote lines for all attendees from base_vote and delegations."""
         self.ensure_one()
+        self.env["assembly.assembly"]._assembly_raise_if_closed(self)
         if not self.attendee_ids:
             return True
         self.env["assembly.attendee"].recompute_votes(self.attendee_ids)
@@ -1306,6 +1461,20 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             raise_if_not_found=False,
         )
 
+    def _assembly_company_default_mail_template(self, xmlid_suffix):
+        self.ensure_one()
+        field_name = _MAIL_SUFFIX_TO_COMPANY_FIELD.get(xmlid_suffix)
+        if not field_name or not self.company_id:
+            return self.env["mail.template"]
+        return getattr(self.company_id, field_name, self.env["mail.template"])
+
+    def _assembly_company_af_fallback_view(self, default_xmlid_suffix):
+        self.ensure_one()
+        field_name = _AF_SUFFIX_TO_COMPANY_VIEW_FIELD.get(default_xmlid_suffix)
+        if not field_name or not self.company_id:
+            return self.env["ir.ui.view"]
+        return getattr(self.company_id, field_name, self.env["ir.ui.view"])
+
     @staticmethod
     def _assembly_markup_from_render_result(fragment):
         """Normalize renderer output to ``markupsafe.Markup`` (never None)."""
@@ -1331,15 +1500,17 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     def _render_assembly_af_qweb_fallback(self, default_xmlid_suffix):
         """Render bundled AF QWeb ``ir.ui.view`` templates when mail templates are empty."""
         self.ensure_one()
+        company_view = self._assembly_company_af_fallback_view(default_xmlid_suffix)
         xmlid = _AF_QWEB_FALLBACK_XMLIDS.get(default_xmlid_suffix)
-        if not xmlid:
+        template_ref = company_view.id if company_view else (xmlid or None)
+        if not template_ref:
             return Markup("")
         qweb = self.env["ir.qweb"]
         values = {"object": self}
         for minimal in (True, False):
             try:
                 html = qweb._render(
-                    xmlid,
+                    template_ref,
                     values,
                     minimal_qcontext=minimal,
                 )
@@ -1383,10 +1554,15 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         Always returns non-empty ``Markup`` when the assembly has a name or id.
         """
         self.ensure_one()
+        company_tmpl = self._assembly_company_default_mail_template(
+            default_xmlid_suffix
+        )
         default_tmpl = self._assembly_mail_template_xmlid(default_xmlid_suffix)
         candidates = []
         if override_template:
             candidates.append(override_template)
+        if company_tmpl and company_tmpl not in candidates:
+            candidates.append(company_tmpl)
         if default_tmpl and default_tmpl not in candidates:
             candidates.append(default_tmpl)
         for tmpl in candidates:
@@ -1493,65 +1669,77 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                 return str(val)
         return fallback_subject
 
-    def _assembly_action_mail_compose_with_rendered_body(
-        self,
-        *,
-        window_name,
-        body_html,
-        subject,
-    ):
+    def action_open_communication_send_wizard(self):
+        self.ensure_one()
+        preferred_kind = self.env.context.get("default_primary_message_kind")
+        ctx = clean_context(self.env.context)
+        ctx.setdefault("default_assembly_id", self.id)
+        ctx["default_primary_message_kind"] = preferred_kind or "publication"
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Send communication"),
+            "res_model": "assembly.communication.send.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": ctx,
+        }
+
+    def action_open_ballot_print_wizard(self):
         self.ensure_one()
         return {
             "type": "ir.actions.act_window",
-            "name": window_name,
-            "res_model": "mail.compose.message",
+            "name": self.env._("Print ballots"),
+            "res_model": "assembly.ballot.print.wizard",
             "view_mode": "form",
             "target": "new",
-            "context": {
-                **clean_context(self.env.context),
-                "default_composition_mode": "comment",
-                "default_model": self._name,
-                "default_res_ids": str([self.id]),
-                "default_subject": subject,
-                "default_body": body_html,
-                "assembly_use_rendered_mail_body": True,
-            },
+            "context": {"default_assembly_id": self.id},
         }
 
     def action_mail_compose_publication(self):
-        """Open standard email composer with AF-rendered convocation HTML in the body."""
         self.ensure_one()
-        body_html = self.get_rendered_publication_text()
-        tmpl = self.publication_mail_template_id or self._assembly_mail_template_xmlid(
-            "publication"
-        )
-        subject = self._assembly_render_mail_subject(
-            tmpl,
-            self.env._("Assembly convocation: %s", self.name),
-        )
-        return self._assembly_action_mail_compose_with_rendered_body(
-            window_name=self.env._("Send convocation by email"),
-            body_html=body_html,
-            subject=subject,
-        )
+        return self.with_context(
+            default_primary_message_kind="publication",
+        ).action_open_communication_send_wizard()
+
+    def action_mail_compose_ballot_intro(self):
+        self.ensure_one()
+        return self.with_context(
+            default_primary_message_kind="ballot_intro",
+        ).action_open_communication_send_wizard()
 
     def action_mail_compose_delegation(self):
-        """Open standard email composer with AF-rendered delegation HTML in the body."""
         self.ensure_one()
-        body_html = str(self.get_rendered_delegation())
-        tmpl = (
-            self.delegation_document_mail_template_id
-            or self._assembly_mail_template_xmlid("delegation_document")
-        )
-        subject = self._assembly_render_mail_subject(
-            tmpl,
-            self.env._("Vote delegation: %s", self.name),
-        )
-        return self._assembly_action_mail_compose_with_rendered_body(
-            window_name=self.env._("Send delegation by email"),
-            body_html=body_html,
-            subject=subject,
-        )
+        return self.with_context(
+            default_primary_message_kind="delegation",
+        ).action_open_communication_send_wizard()
+
+    def action_open_assembly_outbound_mails(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Outgoing emails"),
+            "res_model": "mail.mail",
+            "view_mode": "list,form",
+            "domain": [
+                ("model", "=", "assembly.assembly"),
+                ("res_id", "=", self.id),
+            ],
+            "context": {"create": False, "edit": False},
+        }
+
+    def action_open_assembly_communication_messages(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Communication log"),
+            "res_model": "mail.message",
+            "view_mode": "list,form",
+            "domain": [
+                ("model", "=", "assembly.assembly"),
+                ("res_id", "=", self.id),
+            ],
+            "context": {"create": False},
+        }
 
     def action_open_document_preview_wizard(self):
         self.ensure_one()
@@ -1567,6 +1755,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     def action_open_agenda_items(self):
         self.ensure_one()
+        self._assembly_ensure_active_for_operational_views()
         return self._action_window(
             "assembly.agenda",
             self.env._("Agenda items"),
@@ -1578,6 +1767,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     def action_open_votings(self):
         """Open all votings for this assembly (list + form)."""
         self.ensure_one()
+        self._assembly_ensure_active_for_operational_views()
         return self._action_window(
             "assembly.voting",
             self.env._("Votings"),
@@ -1597,3 +1787,21 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     def action_open_attendees(self):
         return self._action_open_related("assembly.attendee", self.env._("Attendees"))
+
+    def action_open_attendance_links(self):
+        self.ensure_one()
+        self._assembly_ensure_active_for_operational_views()
+        ctx = dict(self.env.context)
+        ctx.update(
+            {
+                "default_assembly_id": self.id,
+                "search_default_filter_attendance_tracked_link": 1,
+            }
+        )
+        return self._action_window(
+            "assembly.attendee",
+            self.env._("Attendees (tracked links & QR)"),
+            "list,form",
+            domain=[("assembly_id", "=", self.id)],
+            context=ctx,
+        )

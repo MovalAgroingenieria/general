@@ -70,7 +70,6 @@ class TestAttendeeStateTransitionsSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(6, 0, vt.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()

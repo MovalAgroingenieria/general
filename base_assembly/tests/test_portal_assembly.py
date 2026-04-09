@@ -388,7 +388,6 @@ class PortalDelegationTests(AssemblyHttpCase):
                 "assembly_id": self.assembly.id,
                 "partner_id": self.portal_partner.id,
                 "delegate_partner_id": other.id,
-                "delegation_state": "confirmed",
                 "vote_type_ids": [
                     (6, 0, self.assembly.assembly_type_id.vote_type_ids.ids)
                 ],
@@ -429,7 +428,6 @@ class PortalDelegationTests(AssemblyHttpCase):
                 "assembly_id": self.assembly.id,
                 "partner_id": p_a.id,
                 "delegate_partner_id": p_b.id,
-                "delegation_state": "confirmed",
                 "vote_type_ids": [
                     (6, 0, self.assembly.assembly_type_id.vote_type_ids.ids)
                 ],

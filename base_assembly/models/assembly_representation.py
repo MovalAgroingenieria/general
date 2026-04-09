@@ -8,11 +8,26 @@ Not vote delegation: separate from ``assembly.delegation`` and its business rule
 
 from odoo import api, fields, models
 
+from .assembly_mixin import assembly_safe_report_filename
+
 
 class AssemblyRepresentation(models.Model):
     _name = "assembly.representation"
     _description = "Assembly representation"
     _order = "assembly_id, owner_partner_id"
+
+    def _get_report_base_filename(self):
+        self.ensure_one()
+        owner = assembly_safe_report_filename(
+            self.owner_partner_id.display_name, default=self.env._("Represented")
+        )
+        agent = assembly_safe_report_filename(
+            self.agent_partner_id.display_name, default=self.env._("Representative")
+        )
+        asm = assembly_safe_report_filename(
+            self.assembly_id.display_name, default=self.env._("Assembly")
+        )
+        return f"{asm} - {owner} - {agent}"
 
     assembly_id = fields.Many2one(
         "assembly.assembly",

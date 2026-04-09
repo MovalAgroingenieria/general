@@ -4,6 +4,19 @@
 from odoo import models
 
 
+def assembly_safe_report_filename(label, default="record"):
+    if label in (None, False):
+        text = ""
+    else:
+        text = str(label).strip()
+    if not text:
+        return default
+    for char in ("/", "\\", ":", "*", "?", '"', "<", ">", "|", "\n", "\r"):
+        text = text.replace(char, "-")
+    text = " ".join(text.split())
+    return text[:120] if text else default
+
+
 class AssemblyWindowActionMixin(models.AbstractModel):
     _name = "assembly.mixin.window_action"
     _description = "Mixin: standard window actions"

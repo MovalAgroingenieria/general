@@ -4,10 +4,14 @@
 
 import re
 from collections import defaultdict
+from urllib.parse import urlencode
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
+from odoo.osv.expression import OR
 from psycopg2 import IntegrityError, errorcodes
+
+from .assembly_mixin import assembly_safe_report_filename
 
 _ATTENDEE_STATE_KEYS = frozenset({"registered", "confirmed", "absent"})
 
@@ -42,6 +46,16 @@ class AssemblyAttendee(models.Model):
         "partner_id.vat",
         "participant_partner_id.name",
     ]
+
+    def _get_report_base_filename(self):
+        self.ensure_one()
+        asm = assembly_safe_report_filename(
+            self.assembly_id.display_name, default=self.env._("Assembly")
+        )
+        partner = assembly_safe_report_filename(
+            self.partner_id.display_name, default=self.env._("Member")
+        )
+        return f"{asm} - {partner}"
 
     assembly_id = fields.Many2one(
         "assembly.assembly",
@@ -95,12 +109,15 @@ class AssemblyAttendee(models.Model):
         index=True,
         help=(
             "Whether participation is on-site or remote. Quorum and voting eligibility "
-            "use Registration status (confirmed), not this field."
+            "follow attendance status (Listed / Attended / Did not attend), not this field."
         ),
     )
     date_register = fields.Datetime(
         string="Registration date",
-        help="When attendance was last confirmed (set on confirmation; optional for other flows).",
+        help=(
+            "When the member was last recorded as attended (set when using "
+            "Record as attended; optional for other flows)."
+        ),
     )
     attendee_vote_ids = fields.One2many(
         "assembly.attendee.vote",
@@ -109,24 +126,38 @@ class AssemblyAttendee(models.Model):
         help=(
             "Stored snapshot per assembly vote type (own / delegated in-out). "
             "It is rebuilt when you generate attendees, change the assembly vote types, "
-            "confirm or mark absent, when delegations change, or via “Recompute votes” "
+            "Record as attended or Record as absent, when delegations change, or via "
+            "“Recompute votes” "
             "on the assembly. Contact “Votes per contact” (partner.vote) is the source "
             "for own amounts; until a rebuild runs, lines here can be missing or stale."
         ),
     )
     attendee_state = fields.Selection(
         [
-            ("registered", "Registered"),
-            ("confirmed", "Confirmed"),
-            ("absent", "Absent"),
+            (
+                "registered",
+                "Listed — not finalized",
+            ),
+            (
+                "confirmed",
+                "Attended (confirmed present)",
+            ),
+            (
+                "absent",
+                "Did not attend",
+            ),
         ],
-        string="Registration status",
+        string="Attendance status",
         default="registered",
         required=True,
         index=True,
         help=(
-            "registered: on the list, not yet counted for quorum; "
-            "confirmed: attended (counts for quorum); absent: did not attend."
+            "Listed — not finalized: the member is on the list only; attendance is not "
+            "finalized yet, so they are not counted as present for quorum or as a confirmed "
+            "delegate for vote transfer. "
+            "Attended (confirmed present): the member actually attended; counts for quorum "
+            "and voting, and a delegate in this state receives delegated votes. "
+            "Did not attend: recorded as absent."
         ),
     )
     attendance_signature = fields.Binary(
@@ -139,18 +170,22 @@ class AssemblyAttendee(models.Model):
     )
     attendance_link_tracker_id = fields.Many2one(
         "link.tracker",
-        string="Attendance link tracker",
+        string="Link tracker (opens counted)",
         copy=False,
         ondelete="set null",
-        help="link.tracker row whose target URL is GET /assembly/attendance for this row.",
+        help=(
+            "Odoo link tracker for this attendee: short URL to the attendance entry "
+            "(GET /assembly/attendance). Each open is counted on the tracker."
+        ),
     )
     attendance_url = fields.Char(
-        string="Tracked attendance link (QR)",
+        string="Tracked attendance URL",
         compute="_compute_attendance_url",
         help=(
-            "Short URL from link_tracker (destination: GET /assembly/attendance with "
-            "assembly_id and participant_id). For managers with a session, opening "
-            "it reaches the same flow as the direct attendance link."
+            "Short URL from the link tracker to this member's attendance flow. Share it "
+            "or encode it in a QR; opens are counted. With a manager session, the "
+            "landing page opens first (append direct=1 on the target URL to skip to the "
+            "form). Configure landing/error QWeb under Settings → Assemblies."
         ),
     )
     partner_vat = fields.Char(
@@ -165,6 +200,29 @@ class AssemblyAttendee(models.Model):
     count_attendee_votes = fields.Integer(
         string="Vote types count",
         compute="_compute_count_attendee_votes",
+    )
+    call_register_has_outbound_delegation = fields.Boolean(
+        string="Outbound vote delegation",
+        compute="_compute_call_register_context",
+        search="_search_call_register_has_outbound_delegation",
+    )
+    call_register_has_inbound_delegation = fields.Boolean(
+        string="Inbound vote delegation (as delegate)",
+        compute="_compute_call_register_context",
+        search="_search_call_register_has_inbound_delegation",
+    )
+    call_register_has_representation = fields.Boolean(
+        string="Representation record",
+        compute="_compute_call_register_context",
+        search="_search_call_register_has_representation",
+    )
+    call_register_representation_agent = fields.Char(
+        string="Representative (agent)",
+        compute="_compute_call_register_context",
+    )
+    call_register_link_ready = fields.Boolean(
+        string="Tracked link ready",
+        compute="_compute_call_register_link_ready",
     )
 
     @api.depends("attendee_vote_ids")
@@ -285,6 +343,115 @@ class AssemblyAttendee(models.Model):
                 attendee.attendee_vote_ids.mapped("attendee_vote_total")
             )
 
+    @api.depends(
+        "partner_id",
+        "assembly_id",
+        "assembly_id.delegation_ids.partner_id",
+        "assembly_id.delegation_ids.delegate_partner_id",
+        "assembly_id.representation_ids.active",
+        "assembly_id.representation_ids.owner_partner_id",
+        "assembly_id.representation_ids.agent_partner_id",
+    )
+    def _compute_call_register_context(self):
+        for rec in self:
+            asm = rec.assembly_id
+            mem = rec.partner_id
+            if not asm or not mem:
+                rec.call_register_has_outbound_delegation = False
+                rec.call_register_has_inbound_delegation = False
+                rec.call_register_has_representation = False
+                rec.call_register_representation_agent = ""
+                continue
+            outbound = False
+            inbound = False
+            for d in asm.delegation_ids:
+                if d.partner_id == mem:
+                    outbound = True
+                if d.delegate_partner_id == mem:
+                    inbound = True
+            has_rep = False
+            agent_label = ""
+            for rep in asm.representation_ids:
+                if not rep.active or rep.owner_partner_id != mem:
+                    continue
+                has_rep = True
+                agent_label = (
+                    rep.agent_partner_id.display_name if rep.agent_partner_id else ""
+                )
+                break
+            rec.call_register_has_outbound_delegation = outbound
+            rec.call_register_has_inbound_delegation = inbound
+            rec.call_register_has_representation = has_rep
+            rec.call_register_representation_agent = agent_label
+
+    @api.depends("assembly_id.include_qr_code", "attendance_link_tracker_id")
+    def _compute_call_register_link_ready(self):
+        for rec in self:
+            rec.call_register_link_ready = bool(
+                rec.assembly_id.include_qr_code and rec.attendance_link_tracker_id
+            )
+
+    @api.model
+    def _call_register_boolean_search_domain(self, operator, value, positive_ids):
+        if operator not in ("=", "!="):
+            raise UserError(self.env._("Unsupported search operator for this field."))
+        if operator == "=":
+            if value:
+                return (
+                    [("id", "in", positive_ids)]
+                    if positive_ids
+                    else [("id", "=", False)]
+                )
+            return [("id", "not in", positive_ids)] if positive_ids else []
+        if value:
+            return [("id", "not in", positive_ids)] if positive_ids else []
+        return [("id", "in", positive_ids)] if positive_ids else [("id", "=", False)]
+
+    @api.model
+    def _search_call_register_has_outbound_delegation(self, operator, value):
+        dels = self.env["assembly.delegation"].search([(1, "=", 1)])
+        doms = [
+            [
+                "&",
+                ("assembly_id", "=", d.assembly_id.id),
+                ("partner_id", "=", d.partner_id.id),
+            ]
+            for d in dels
+            if d.assembly_id and d.partner_id
+        ]
+        positive_ids = self.search(OR(doms)).ids if doms else []
+        return self._call_register_boolean_search_domain(operator, value, positive_ids)
+
+    @api.model
+    def _search_call_register_has_inbound_delegation(self, operator, value):
+        dels = self.env["assembly.delegation"].search([(1, "=", 1)])
+        doms = [
+            [
+                "&",
+                ("assembly_id", "=", d.assembly_id.id),
+                ("partner_id", "=", d.delegate_partner_id.id),
+            ]
+            for d in dels
+            if d.assembly_id and d.delegate_partner_id
+        ]
+        positive_ids = self.search(OR(doms)).ids if doms else []
+        return self._call_register_boolean_search_domain(operator, value, positive_ids)
+
+    @api.model
+    def _search_call_register_has_representation(self, operator, value):
+        reps = self.env["assembly.representation"].search([("active", "=", True)])
+        doms = [
+            [
+                "&",
+                ("assembly_id", "=", r.assembly_id.id),
+                ("partner_id", "=", r.owner_partner_id.id),
+            ]
+            for r in reps
+            if r.assembly_id and r.owner_partner_id
+        ]
+        positive_ids = self.search(OR(doms)).ids if doms else []
+        return self._call_register_boolean_search_domain(operator, value, positive_ids)
+
     def action_open_attendee_votes(self):
         return self._action_window(
             "assembly.attendee.vote",
@@ -293,6 +460,14 @@ class AssemblyAttendee(models.Model):
             domain=[("attendee_id", "=", self.id)],
             context={"default_attendee_id": self.id},
         )
+
+    def action_print_ballot(self):
+        self.ensure_one()
+        report = self.env.ref(
+            "base_assembly.assembly_attendee_action_report_voting_ballot_nominative",
+            raise_if_not_found=True,
+        )
+        return report.report_action(self.ids)
 
     _sql_constraints = [
         (
@@ -363,14 +538,14 @@ class AssemblyAttendee(models.Model):
             if initial_state not in _ATTENDEE_STATE_KEYS:
                 raise UserError(
                     self.env._(
-                        "Invalid registration status for new attendee: %(state)s",
+                        "Invalid attendance status for new attendee: %(state)s",
                         state=initial_state,
                     )
                 )
             if initial_state != "registered":
                 raise UserError(
                     self.env._(
-                        "New attendees must be created in registered status. "
+                        "New attendees must be created as listed (not finalized). "
                         "Got: %(state)s",
                         state=initial_state,
                     )
@@ -412,18 +587,20 @@ class AssemblyAttendee(models.Model):
         if new_state == "confirmed":
             raise UserError(
                 self.env._(
-                    "Only attendees in Registered or Absent status can be confirmed."
+                    "Only members listed (not finalized) or recorded as did not attend "
+                    "can be marked as attended (confirmed present)."
                 )
             )
         if new_state == "absent":
             raise UserError(
                 self.env._(
-                    "Only attendees in Registered or Confirmed status can be marked absent."
+                    "Only members listed (not finalized) or already attended "
+                    "(confirmed present) can be recorded as did not attend."
                 )
             )
         raise UserError(
             self.env._(
-                "Invalid registration status transition: %(old)s → %(new)s",
+                "Invalid attendance status transition: %(old)s → %(new)s",
                 old=old_state,
                 new=new_state,
             )
@@ -454,7 +631,7 @@ class AssemblyAttendee(models.Model):
         ):
             raise UserError(
                 self.env._(
-                    "Invalid registration status transition: %(old)s → %(new)s",
+                    "Invalid attendance status transition: %(old)s → %(new)s",
                     old=old_state,
                     new=new_state,
                 )
@@ -513,7 +690,7 @@ class AssemblyAttendee(models.Model):
             if new_state not in _ATTENDEE_STATE_KEYS:
                 raise UserError(
                     self.env._(
-                        "Invalid registration status: %(state)s",
+                        "Invalid attendance status: %(state)s",
                         state=repr(new_state),
                     )
                 )
@@ -577,9 +754,9 @@ class AssemblyAttendee(models.Model):
                 ):
                     raise UserError(
                         self.env._(
-                            "Registration status cannot be changed with a generic save. "
-                            "Use Confirm or Mark absent on the attendee (or the same "
-                            "server actions / API those buttons call)."
+                            "Attendance status cannot be changed with a generic save. "
+                            'Use "Record as attended" or "Record as absent" on the '
+                            "attendee (or the same server actions / API those buttons call)."
                         )
                     )
         res = super().write(vals)
@@ -615,8 +792,10 @@ class AssemblyAttendee(models.Model):
           when the assembly flag above is off.
         """
         self._ensure_assembly_and_partner_for_action(
-            no_assembly_msg=self.env._("Cannot confirm attendee without an assembly."),
-            no_partner_msg=self.env._("Cannot confirm attendee without a partner."),
+            no_assembly_msg=self.env._(
+                "Cannot record as attended without an assembly."
+            ),
+            no_partner_msg=self.env._("Cannot record as attended without a member."),
         )
         self.ensure_one()
         asm = self.assembly_id
@@ -628,7 +807,8 @@ class AssemblyAttendee(models.Model):
                 raise ValidationError(
                     self.env._(
                         "This assembly requires a tax identification number (TIN/VAT) "
-                        "on the member before attendance can be confirmed."
+                        "on the member before they can be marked as attended "
+                        "(confirmed present)."
                     )
                 )
             if asm.attendance_partner_vat_format_strict:
@@ -645,8 +825,8 @@ class AssemblyAttendee(models.Model):
                 raise ValidationError(
                     self.env._(
                         "This assembly type requires a tax identification number "
-                        "(TIN/VAT) on the member before attendance can be "
-                        "confirmed."
+                        "(TIN/VAT) on the member before they can be marked as attended "
+                        "(confirmed present)."
                     )
                 )
             if asm.attendance_partner_vat_format_strict:
@@ -690,8 +870,8 @@ class AssemblyAttendee(models.Model):
         return True
 
     @api.model
-    def _confirmed_delegations_for_assemblies(self, assembly_ids):
-        """All ``delegation_state == confirmed`` rows per assembly (no partner filter).
+    def _delegations_for_assemblies(self, assembly_ids):
+        """All delegation rows per assembly (no partner filter).
 
         Delegate/delegator **effectiveness** (confirmed delegate attendee, chain rules,
         etc.) is applied in :meth:`assembly.delegation._get_effective_delegations`.
@@ -700,12 +880,7 @@ class AssemblyAttendee(models.Model):
         aids = [int(x) for x in assembly_ids if x]
         if not aids:
             return {}
-        delegations = Delegation.search(
-            [
-                ("assembly_id", "in", list(set(aids))),
-                ("delegation_state", "=", "confirmed"),
-            ]
-        )
+        delegations = Delegation.search([("assembly_id", "in", list(set(aids)))])
         buckets = defaultdict(list)
         for d in delegations:
             buckets[d.assembly_id.id].append(d.id)
@@ -769,10 +944,9 @@ class AssemblyAttendee(models.Model):
             return ""
         delegate_names = ", ".join(active.mapped("delegate_partner_id.name"))
         return self.env._(
-            "%(partner)s has %(count)d active confirmed delegation(s) "
-            "to: %(delegates)s. These delegations remain active and "
-            "have not been revoked. "
-            "You can revoke them manually if needed.",
+            "%(partner)s has %(count)d active delegation(s) "
+            "to: %(delegates)s. Voting units stay assigned until those delegation "
+            "records are removed from the assembly.",
             partner=self.partner_id.name,
             count=len(active),
             delegates=delegate_names,
@@ -792,7 +966,7 @@ class AssemblyAttendee(models.Model):
         delegators_to_recompute = self.env["assembly.attendee"]
         delegates_outbound_touch = self.env["assembly.attendee"]
         warnings = []
-        delegations_by_assembly = self._confirmed_delegations_for_assemblies(
+        delegations_by_assembly = self._delegations_for_assemblies(
             self.mapped("assembly_id").ids
         )
         Delegation = self.env["assembly.delegation"]
@@ -825,10 +999,8 @@ class AssemblyAttendee(models.Model):
 
     def _validate_can_mark_absent(self):
         self._ensure_assembly_and_partner_for_action(
-            no_assembly_msg=self.env._(
-                "Cannot mark attendee absent without an assembly."
-            ),
-            no_partner_msg=self.env._("Cannot mark attendee absent without a partner."),
+            no_assembly_msg=self.env._("Cannot record as absent without an assembly."),
+            no_partner_msg=self.env._("Cannot record as absent without a member."),
         )
         open_cast = self.env["assembly.voting.line"].search(
             [
@@ -843,7 +1015,7 @@ class AssemblyAttendee(models.Model):
                 self.env._(
                     "This member has already cast a vote in an open roll-call voting. "
                     "Cancel or close that voting (or clear the vote line) before "
-                    "marking them absent."
+                    "recording them as absent."
                 )
             )
 
@@ -900,6 +1072,60 @@ class AssemblyAttendee(models.Model):
             )
         if attendees_to_recompute:
             self.env["assembly.attendee"].recompute_votes(attendees_to_recompute)
+
+    def _attendance_ensure_tracked_url_or_raise(self):
+        self.ensure_one()
+        if not self.assembly_id.include_qr_code:
+            raise UserError(
+                self.env._(
+                    "Tracked attendance links and QR codes are disabled for this "
+                    'assembly. Enable "Add QR code (tracked attendance link)" on the '
+                    "assembly Configuration tab."
+                )
+            )
+        if not self.id:
+            raise UserError(
+                self.env._(
+                    "Save the attendee before opening the attendance link or QR."
+                )
+            )
+        if not self.attendance_link_tracker_id:
+            self._sync_attendance_link_trackers()
+        url = (self.attendance_url or "").strip()
+        if not url:
+            raise UserError(
+                self.env._(
+                    "No attendance URL is available. Ensure the assembly has members "
+                    "and that QR links are enabled, then save this attendee again."
+                )
+            )
+        return url
+
+    def action_open_attendance_url(self):
+        self.ensure_one()
+        url = self._attendance_ensure_tracked_url_or_raise()
+        return {
+            "type": "ir.actions.act_url",
+            "url": url,
+            "target": "new",
+        }
+
+    def action_show_attendance_qr(self):
+        self.ensure_one()
+        url = self._attendance_ensure_tracked_url_or_raise()
+        barcode_path = "/report/barcode/?%s" % urlencode(
+            {
+                "barcode_type": "QR",
+                "value": url,
+                "width": 320,
+                "height": 320,
+            }
+        )
+        return {
+            "type": "ir.actions.act_url",
+            "url": barcode_path,
+            "target": "new",
+        }
 
     @api.model
     def recompute_votes(self, attendees):

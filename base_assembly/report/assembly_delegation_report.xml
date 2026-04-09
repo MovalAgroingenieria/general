@@ -1,75 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
 <odoo>
-    <!-- 11.4 Delegation of vote template (from assembly; generic template) -->
     <record id="assembly_assembly_action_report_delegationvote" model="ir.actions.report">
-        <field name="name">Delegation of vote (template)</field>
+        <field name="name">Vote delegation register (assembly)</field>
         <field name="model">assembly.assembly</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">base_assembly.report_assembly_delegation</field>
-        <field name="report_file">base_assembly.report_assembly_delegation</field>
-        <field name="print_report_name">'Delegation template - %s' % (object.name)</field>
+        <field name="report_name">base_assembly.report_assembly_delegation_register</field>
+        <field name="report_file">base_assembly.report_assembly_delegation_register</field>
+        <field name="print_report_name">'Vote_delegation_register - %s' % (object._get_report_base_filename())</field>
         <field name="binding_model_id" ref="model_assembly_assembly"/>
         <field name="binding_type">report</field>
     </record>
 
-    <template id="report_assembly_delegation">
+    <record id="assembly_delegation_action_report_vote_delegation_certificate" model="ir.actions.report">
+        <field name="name">Vote delegation certificate</field>
+        <field name="model">assembly.delegation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_assembly.report_assembly_delegation_certificate</field>
+        <field name="report_file">base_assembly.report_assembly_delegation_certificate</field>
+        <field name="print_report_name">'Vote_delegation_certificate - %s' % (object._get_report_base_filename())</field>
+        <field name="binding_model_id" ref="model_assembly_delegation"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_assembly_delegation_register">
         <t t-foreach="docs" t-as="o">
-            <t t-call="base_assembly.report_assembly_delegation_doc"/>
+            <t t-call="base_assembly.report_assembly_delegation_register_doc"/>
         </t>
     </template>
 
-    <template id="report_assembly_delegation_doc">
+    <template id="report_assembly_delegation_register_doc">
         <t t-call="web.html_container">
             <t t-call="web.external_layout">
-                <div class="page">
-                    <div class="text-center mb-4">
-                        <h4><strong>Delegation of vote</strong></h4>
-                        <h5><span t-field="o.name"/></h5>
-                        <div t-if="o.date_first_call">
-                            <span t-field="o.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
-                            <t t-if="o.location"> – <span t-field="o.location"/></t>
-                        </div>
-                    </div>
-                    <t t-set="delegation_intro" t-value="o.get_rendered_delegation_document_text()"/>
-                    <div t-if="delegation_intro" class="mb-4 o_assembly_delegation_intro" t-out="delegation_intro"/>
-                    <table class="table table-sm table-bordered">
-                        <tr>
-                            <th style="width: 30%;">Delegator</th>
-                            <td><em>Name / TIN</em></td>
-                        </tr>
-                        <tr>
-                            <th>Delegate</th>
-                            <td><em>Name / TIN</em></td>
-                        </tr>
-                        <tr>
-                            <th>Vote types delegated</th>
-                            <td>
-                                <t t-if="o.vote_type_ids">
-                                    <em>
-                                        <t t-foreach="o.vote_type_ids" t-as="vt">
-                                            <span t-field="vt.name"/>
-                                            <t t-if="vt != o.vote_type_ids[-1]">, </t>
-                                        </t>
-                                    </em>
-                                </t>
-                                <t t-else=""><em>All vote types of the assembly</em></t>
-                            </td>
-                        </tr>
-                    </table>
-                    <t t-set="delegation_footer" t-value="o.get_rendered_delegation_footer_text()"/>
-                    <div t-if="delegation_footer" class="mt-4 o_assembly_delegation_footer" t-out="delegation_footer"/>
-                    <p t-if="not delegation_footer" class="mt-4 text-muted o_assembly_delegation_footer_fallback">
-                        This document certifies the delegation of vote for the above assembly. The delegator authorizes the delegate to cast votes on their behalf for the indicated vote type(s).
+                <div class="page o_assembly_delegation_register">
+                    <h3 class="text-center mb-2"><strong>Vote delegation register</strong></h3>
+                    <p class="small text-muted text-center mb-3">
+                        Recorded vote delegations for this assembly (operational list). For a printable certificate per delegation row, use <strong>Vote delegation certificate</strong> on the delegation. Legal representation uses the representation reports, not this document.
                     </p>
                     <t t-set="asm" t-value="o"/>
-                    <t t-call="base_assembly.report_assembly_representation_table_block"/>
-                    <p class="mt-4">
-                        <strong>Signature (delegator):</strong> _____________________________
-                    </p>
-                    <p>
-                        <strong>Date:</strong> _____________________________
-                    </p>
+                    <t t-call="base_assembly.report_assembly_asm_meta_block"/>
+                    <table class="table table-sm table-bordered mt-2 o_assembly_delegation_register_table" t-if="o.delegation_ids">
+                        <thead>
+                            <tr>
+                                <th>Delegator</th>
+                                <th>Delegate</th>
+                                <th>Vote types</th>
+                                <th>Vote transfer</th>
+                                <th>Date recorded</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="o.delegation_ids.sorted(key=lambda d: (d.partner_id.name or '', d.delegate_partner_id.name or '', d.id))" t-as="d">
+                                <td><span t-field="d.partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'vat'], 'no_marker': True}"/></td>
+                                <td><span t-field="d.delegate_partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'vat'], 'no_marker': True}"/></td>
+                                <td>
+                                    <t t-if="d.vote_type_ids">
+                                        <t t-foreach="d.vote_type_ids" t-as="vt"><span t-field="vt.name"/><t t-if="not vt_last">, </t></t>
+                                    </t>
+                                    <t t-else=""><span class="text-muted">All vote types on the assembly</span></t>
+                                </td>
+                                <td><span t-field="d.delegation_vote_transfer_state"/></td>
+                                <td><span t-field="d.date_delegation" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p t-else="" class="text-muted mt-3">No delegation rows are registered for this assembly.</p>
                 </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_assembly_delegation_certificate">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page o_assembly_delegation_certificate">
+                        <h3 class="text-center mb-2"><strong>Vote delegation certificate</strong></h3>
+                        <p class="small text-muted text-center mb-3">
+                            Delegation of voting rights only. This is not a power of attorney for legal representation at the assembly.
+                        </p>
+                        <t t-set="asm" t-value="o.assembly_id"/>
+                        <t t-call="base_assembly.report_assembly_asm_meta_block"/>
+                        <section class="mb-3 o_assembly_delegation_certificate_parties">
+                            <table class="table table-bordered table-sm">
+                                <tr>
+                                    <th class="w-25">Delegator</th>
+                                    <td><span t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'address', 'vat', 'phone', 'email'], 'no_marker': True}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Delegate</th>
+                                    <td><span t-field="o.delegate_partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'address', 'vat', 'phone', 'email'], 'no_marker': True}"/></td>
+                                </tr>
+                                <tr>
+                                    <th>Vote types</th>
+                                    <td>
+                                        <t t-if="o.vote_type_ids">
+                                            <t t-foreach="o.vote_type_ids" t-as="vt"><span t-field="vt.name"/><t t-if="not vt_last">, </t></t>
+                                        </t>
+                                        <t t-else=""><span class="text-muted">All vote types configured on the assembly</span></t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Transfer status</th>
+                                    <td><span t-field="o.delegation_vote_transfer_state"/></td>
+                                </tr>
+                            </table>
+                        </section>
+                        <section class="mb-3 small o_assembly_delegation_certificate_formal">
+                            <p>
+                                The delegator named above authorizes the delegate to cast votes on their behalf at the assembly identified in this document,
+                                strictly within the scope of the vote type(s) listed (or all assembly vote types when “all types” applies), subject to the assembly rules in force.
+                            </p>
+                            <p>
+                                The delegate acknowledges that voting power transfers according to system rules (for example, once the delegate is recorded as attended, where applicable).
+                            </p>
+                        </section>
+                        <t t-set="delegation_footer" t-value="o.assembly_id.get_rendered_delegation_footer_text()"/>
+                        <div t-if="delegation_footer" class="mb-3 small o_assembly_delegation_certificate_footer" t-out="delegation_footer"/>
+                        <p t-else="" class="mb-3 small text-muted o_assembly_delegation_certificate_footer_fallback">
+                            The delegator confirms the accuracy of the data above and accepts that votes may be cast by the delegate within the stated scope.
+                        </p>
+                        <div class="mt-4 pt-2 o_assembly_delegation_certificate_signatures">
+                            <p><strong>Signature (delegator):</strong> _____________________________</p>
+                            <p class="mt-3"><strong>Signature (delegate):</strong> _____________________________</p>
+                            <p class="mt-3"><strong>Date:</strong> _____________________________</p>
+                            <p><strong>Place:</strong> _____________________________</p>
+                        </div>
+                    </div>
+                </t>
             </t>
         </t>
     </template>

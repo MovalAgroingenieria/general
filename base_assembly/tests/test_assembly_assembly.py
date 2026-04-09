@@ -346,3 +346,19 @@ class TestAssemblyAssembly(  # pylint: disable=too-many-public-methods
         with self.assertRaises(UserError) as ctx:
             assembly.action_reopen()
         self.assertIn("closed → draft", str(ctx.exception))
+
+    def test_operational_shortcuts_blocked_when_assembly_archived(self):
+        assembly, _agenda = (
+            self._create_assembly_with_agenda()
+        )  # pylint: disable=protected-access
+        assembly.active = False
+        for opener in (
+            assembly.action_open_agenda_items,
+            assembly.action_open_votings,
+            assembly.action_open_delegations,
+            assembly.action_open_representations,
+            assembly.action_open_attendees,
+        ):
+            with self.assertRaises(UserError) as ctx:
+                opener()
+            self.assertIn("archived", str(ctx.exception).lower())

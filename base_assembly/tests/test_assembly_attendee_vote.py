@@ -52,7 +52,6 @@ class TestAssemblyAttendeeVote(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegator.recompute_attendee_vote_lines()

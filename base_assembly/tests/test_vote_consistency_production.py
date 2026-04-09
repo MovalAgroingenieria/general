@@ -72,7 +72,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
 
@@ -122,23 +121,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
             lambda v: v.vote_type_id == vote_type
         )
 
-        # Both confirmed but delegation still draft: no effect
-        self.assertEqual(av_del.delegated_out_votes, 0.0)
-        self.assertEqual(av_dec.delegated_in_votes, 0.0)
-
-        # Confirm delegation
-        delegation.write({"delegation_state": "confirmed"})
-        delegator.recompute_attendee_vote_lines()
-        delegate.recompute_attendee_vote_lines()
-
-        av_del = delegator.attendee_vote_ids.filtered(
-            lambda v: v.vote_type_id == vote_type
-        )
-        av_dec = delegate.attendee_vote_ids.filtered(
-            lambda v: v.vote_type_id == vote_type
-        )
-
-        # Now effective: delegator loses, delegate gains
         self.assertEqual(av_del.own_votes, 10.0)
         self.assertEqual(av_del.delegated_out_votes, 10.0)
         self.assertEqual(av_del.delegated_in_votes, 0.0)
@@ -160,7 +142,7 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
         )
 
         # Revoke delegation
-        delegation.write({"delegation_state": "revoked"})
+        delegation.unlink()
         delegator.recompute_attendee_vote_lines()
         delegate.recompute_attendee_vote_lines()
 
@@ -223,7 +205,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator1.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegation2 = self.env["assembly.delegation"].create(  # noqa: F841
@@ -232,7 +213,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator2.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegation3 = self.env["assembly.delegation"].create(  # noqa: F841
@@ -241,7 +221,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator3.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -342,7 +321,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -424,7 +402,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -499,7 +476,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -621,7 +597,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, [vote_type1.id, vote_type2.id])],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -696,7 +671,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator1.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
         delegation2 = self.env["assembly.delegation"].create(  # noqa: F841
@@ -705,7 +679,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator2.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
 
@@ -715,8 +688,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
         delegate.action_confirm()
 
         # Confirm delegations (cascading: both become effective simultaneously)
-        delegation1.write({"delegation_state": "confirmed"})
-        delegation2.write({"delegation_state": "confirmed"})
 
         # Recompute all
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -790,7 +761,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -854,7 +824,6 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -890,8 +859,8 @@ class TestVoteConsistencyProduction(AssemblyTestMixin, TransactionCase):
 class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
     """Production-grade tests for vote edge cases."""
 
-    def test_vote_consistency_delegation_state_transitions(self):
-        """Test vote consistency through all delegation state transitions."""
+    def test_vote_consistency_delegation_create_then_unlink(self):
+        """Saved delegation applies immediately; unlink clears transfer."""
         assembly, _ = (
             self._create_assembly_with_agenda()
         )  # pylint: disable=protected-access
@@ -899,88 +868,39 @@ class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         delegator = assembly.attendee_ids[0]
         delegate = assembly.attendee_ids[1]
-
-        # Give votes
         self._give_partner_votes(delegator.partner_id, vote_type, 10)
-        # pylint: disable=protected-access
         self._give_partner_votes(delegate.partner_id, vote_type, 5)
-        # pylint: disable=protected-access
-        # Confirm both
         delegator.action_confirm()
         delegate.action_confirm()
-
-        # Create draft delegation
-        delegation = self.env["assembly.delegation"].create(  # noqa: F841
+        delegation = self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
-
         delegator.recompute_attendee_vote_lines()
         delegate.recompute_attendee_vote_lines()
-
         av_del = delegator.attendee_vote_ids.filtered(
             lambda v: v.vote_type_id == vote_type
         )
         av_dec = delegate.attendee_vote_ids.filtered(
             lambda v: v.vote_type_id == vote_type
         )
-
-        # Draft: no effect
-        self.assertEqual(av_del.delegated_out_votes, 0.0)
-        self.assertEqual(av_dec.delegated_in_votes, 0.0)
-
-        # Transition: draft → confirmed
-        delegation.write({"delegation_state": "confirmed"})
-        delegator.recompute_attendee_vote_lines()
-        delegate.recompute_attendee_vote_lines()
-
-        av_del = delegator.attendee_vote_ids.filtered(
-            lambda v: v.vote_type_id == vote_type
-        )
-        av_dec = delegate.attendee_vote_ids.filtered(
-            lambda v: v.vote_type_id == vote_type
-        )
-
-        # Confirmed: effective
         self.assertEqual(av_del.delegated_out_votes, 10.0)
         self.assertEqual(av_dec.delegated_in_votes, 10.0)
-
-        # Transition: confirmed → revoked
-        delegation.write({"delegation_state": "revoked"})
+        delegation.unlink()
         delegator.recompute_attendee_vote_lines()
         delegate.recompute_attendee_vote_lines()
-
         av_del = delegator.attendee_vote_ids.filtered(
             lambda v: v.vote_type_id == vote_type
         )
         av_dec = delegate.attendee_vote_ids.filtered(
             lambda v: v.vote_type_id == vote_type
         )
-
-        # Revoked: no effect
         self.assertEqual(av_del.delegated_out_votes, 0.0)
         self.assertEqual(av_dec.delegated_in_votes, 0.0)
-
-        # Transition: revoked → confirmed (re-confirm)
-        delegation.write({"delegation_state": "confirmed"})
-        delegator.recompute_attendee_vote_lines()
-        delegate.recompute_attendee_vote_lines()
-
-        av_del = delegator.attendee_vote_ids.filtered(
-            lambda v: v.vote_type_id == vote_type
-        )
-        av_dec = delegate.attendee_vote_ids.filtered(
-            lambda v: v.vote_type_id == vote_type
-        )
-
-        # Re-confirmed: effective again
-        self.assertEqual(av_del.delegated_out_votes, 10.0)
-        self.assertEqual(av_dec.delegated_in_votes, 10.0)
 
     def test_vote_consistency_vote_type_removed_from_assembly(self):
         """Test vote consistency when vote type is removed from assembly."""
@@ -1038,7 +958,6 @@ class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, [vote_type1.id])],
-                "delegation_state": "confirmed",
             }
         )
         delegation2 = self.env["assembly.delegation"].create(  # noqa: F841
@@ -1047,7 +966,6 @@ class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, [vote_type2.id])],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -1118,7 +1036,6 @@ class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -1140,7 +1057,6 @@ class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
                     "partner_id": delegate.partner_id.id,
                     "delegate_partner_id": final_delegate.partner_id.id,
                     "vote_type_ids": [(6, 0, vote_type.ids)],
-                    "delegation_state": "confirmed",
                 }
             )
 
@@ -1170,7 +1086,6 @@ class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -1225,11 +1140,9 @@ class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
 
-        # Confirm delegate while delegation is draft
         delegate.action_confirm()
         delegator.recompute_attendee_vote_lines()
         delegate.recompute_attendee_vote_lines()
@@ -1241,23 +1154,6 @@ class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
             lambda v: v.vote_type_id == vote_type
         )
 
-        # Draft delegation: no effect
-        self.assertEqual(av_del.delegated_out_votes, 0.0)
-        self.assertEqual(av_dec.delegated_in_votes, 0.0)
-
-        # Confirm delegation
-        delegation.write({"delegation_state": "confirmed"})
-        delegator.recompute_attendee_vote_lines()
-        delegate.recompute_attendee_vote_lines()
-
-        av_del = delegator.attendee_vote_ids.filtered(
-            lambda v: v.vote_type_id == vote_type
-        )
-        av_dec = delegate.attendee_vote_ids.filtered(
-            lambda v: v.vote_type_id == vote_type
-        )
-
-        # Now effective
         self.assertEqual(av_del.delegated_out_votes, 10.0)
         self.assertEqual(av_dec.delegated_in_votes, 10.0)
 
@@ -1370,7 +1266,6 @@ class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator1.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, [vote_type1.id, vote_type2.id])],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -1381,7 +1276,6 @@ class TestVoteEdgeCasesProduction(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator2.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, [vote_type2.id, vote_type3.id])],
-                "delegation_state": "confirmed",
             }
         )
 

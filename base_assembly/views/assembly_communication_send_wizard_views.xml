@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
+<odoo>
+    <record id="assembly_communication_send_wizard_view_form" model="ir.ui.view">
+        <field name="name">assembly.communication.send.wizard.form</field>
+        <field name="model">assembly.communication.send.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Send communication">
+                <group string="Message">
+                    <field name="assembly_id" readonly="1"/>
+                    <field name="primary_message_kind"/>
+                </group>
+                <group string="Recipients">
+                    <field name="recipient_mode"/>
+                    <field name="recipient_audience" invisible="recipient_mode != 'all'"/>
+                    <field name="allowed_partner_ids" invisible="1"/>
+                    <field name="partner_id" invisible="recipient_mode != 'single'" required="recipient_mode == 'single'"/>
+                    <field name="email_recipient_count" invisible="1"/>
+                    <div class="text-muted small" colspan="2">
+                        <field name="email_recipient_hint" nolabel="1" readonly="1"/>
+                    </div>
+                </group>
+                <group string="PDF attachments">
+                    <field name="attach_publication_pdf"/>
+                    <field name="attach_generic_ballot_pdf"/>
+                    <field name="attach_nominative_ballot_pdf"/>
+                    <field name="attach_delegation_pdf"/>
+                </group>
+                <div class="alert alert-light py-2 small mb-0" role="status">
+                    <p class="mb-1">
+                        One <strong>outgoing email per recipient</strong>. Nominative ballot PDFs are built per addressee; publication and delegation PDFs are identical for all.
+                    </p>
+                    <p class="mb-0 text-muted">
+                        After sending, use the assembly <strong>Outgoing emails</strong> smart button to review the mail queue (status: outgoing, sent, or exception). Open tracking depends on your mail stack; delivery state is stored on each email.
+                    </p>
+                </div>
+                <footer>
+                    <button name="action_send_communication" string="Send" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_assembly_communication_send_wizard" model="ir.actions.act_window">
+        <field name="name">Send communication</field>
+        <field name="res_model">assembly.communication.send.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="assembly_communication_send_wizard_view_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

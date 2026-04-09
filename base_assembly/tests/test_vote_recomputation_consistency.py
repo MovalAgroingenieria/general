@@ -42,7 +42,6 @@ class TestVoteRecomputationConsistency(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -246,23 +245,10 @@ class TestVoteRecomputationConsistency(AssemblyTestMixin, TransactionCase):
         delegator = assembly.attendee_ids[0]
         delegate = assembly.attendee_ids[1]
 
-        # Give votes
         self._give_partner_votes(delegator.partner_id, vote_type, 10)
-        # pylint: disable=protected-access
         self._give_partner_votes(delegate.partner_id, vote_type, 5)
-        # pylint: disable=protected-access
-        # Create delegation (draft, not effective yet)
-        delegation = self.env["assembly.delegation"].create(  # noqa: F841
-            {
-                "assembly_id": assembly.id,
-                "partner_id": delegator.partner_id.id,
-                "delegate_partner_id": delegate.partner_id.id,
-                "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
-            }
-        )
 
-        # State 1: Both registered (no effect)
+        # State 1: Both registered, no delegation row
         delegator.recompute_attendee_vote_lines()
         delegate.recompute_attendee_vote_lines()
         av_del_1 = delegator.attendee_vote_ids.filtered(
@@ -271,7 +257,7 @@ class TestVoteRecomputationConsistency(AssemblyTestMixin, TransactionCase):
         self.assertEqual(av_del_1.delegated_out_votes, 0.0, "State 1: no effect")
         out_after_state_1 = av_del_1.delegated_out_votes
 
-        # State 2: Delegator confirmed (still no effect, delegate not confirmed)
+        # State 2: Delegator confirmed, still no delegation
         delegator.action_confirm()
         delegator.recompute_attendee_vote_lines()
         delegate.recompute_attendee_vote_lines()
@@ -281,9 +267,16 @@ class TestVoteRecomputationConsistency(AssemblyTestMixin, TransactionCase):
         self.assertEqual(av_del_2.delegated_out_votes, 0.0, "State 2: no effect")
         out_after_state_2 = av_del_2.delegated_out_votes
 
-        # State 3: Both confirmed and delegation confirmed (effective)
+        # State 3: Delegate confirmed, then create delegation (effective immediately)
         delegate.action_confirm()
-        delegation.write({"delegation_state": "confirmed"})
+        self.env["assembly.delegation"].create(
+            {
+                "assembly_id": assembly.id,
+                "partner_id": delegator.partner_id.id,
+                "delegate_partner_id": delegate.partner_id.id,
+                "vote_type_ids": [(6, 0, vote_type.ids)],
+            }
+        )
         assembly.attendee_ids.recompute_attendee_vote_lines()
         av_del_3 = self.env["assembly.attendee.vote"].search(
             [
@@ -295,7 +288,7 @@ class TestVoteRecomputationConsistency(AssemblyTestMixin, TransactionCase):
         self.assertEqual(av_del_3.delegated_out_votes, 10.0, "State 3: effective")
         out_after_state_3 = av_del_3.delegated_out_votes
 
-        # State 4: Delegate absent (ineffective again)
+        # State 4: Delegate absent (inbound delegation no longer counts for stored lines)
         delegate.action_mark_absent()
         delegator.recompute_attendee_vote_lines()
         delegate.recompute_attendee_vote_lines()
@@ -305,7 +298,6 @@ class TestVoteRecomputationConsistency(AssemblyTestMixin, TransactionCase):
         self.assertEqual(av_del_4.delegated_out_votes, 0.0, "State 4: ineffective")
         out_after_state_4 = av_del_4.delegated_out_votes
 
-        # Same assembly.attendee.vote row is updated in place across states; use snapshots
         self.assertEqual(out_after_state_1, 0.0)
         self.assertEqual(out_after_state_2, 0.0)
         self.assertEqual(out_after_state_3, 10.0)
@@ -383,7 +375,6 @@ class TestVoteRecomputationConsistency(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -542,7 +533,6 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator_att.partner_id.id,
                 "delegate_partner_id": delegate_att.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         Attendee.recompute_votes(delegate_att)
@@ -580,7 +570,6 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
                 "partner_id": p_del.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         Attendee.recompute_votes(delegate_att)
@@ -606,8 +595,8 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
         self.assertEqual(tup1, tup2)
         self.assertEqual(tup2[1], 7.0)
 
-    def test_trigger_delegation_confirm_via_write_recomputes_totals(self):
-        """``delegation.write`` (draft→confirmed) triggers ``recompute_votes`` via ORM."""
+    def test_create_delegation_triggers_vote_recompute(self):
+        """Creating a delegation runs vote recomputation for affected attendees."""
         Av = self.env["assembly.attendee.vote"]
         assembly, _ = self._create_assembly_with_agenda()
         assembly.action_generate_attendees()
@@ -617,32 +606,14 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
         self._give_partner_votes(delegate.partner_id, vote_type, 5)
         delegator.action_confirm()
         delegate.action_confirm()
-        delegation = self.env["assembly.delegation"].create(
+        self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
-        line_d = Av.search(
-            [
-                ("attendee_id", "=", delegator.id),
-                ("vote_type_id", "=", vote_type.id),
-            ]
-        )
-        line_g = Av.search(
-            [
-                ("attendee_id", "=", delegate.id),
-                ("vote_type_id", "=", vote_type.id),
-            ]
-        )
-        self.assertEqual(len(line_d), 1)
-        self.assertEqual(len(line_g), 1)
-        self.assertEqual(line_d.delegated_out_votes, 0.0)
-        self.assertEqual(line_g.delegated_in_votes, 0.0)
-        delegation.write({"delegation_state": "confirmed"})
         line_d = Av.search(
             [
                 ("attendee_id", "=", delegator.id),
@@ -695,7 +666,6 @@ class TestRecomputeVotesPublicAPI(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         line_g = Av.search(
@@ -846,7 +816,6 @@ class TestVoteRecomputationRegression(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         d_line = self._stored_vote_line(delegator, vote_type)
@@ -877,12 +846,8 @@ class TestVoteRecomputationRegression(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
-        d_line_before = self._stored_vote_line(delegator, vote_type)
-        self.assertEqual(d_line_before.delegated_out_votes, 0.0)
-        assembly.delegation_ids.write({"delegation_state": "confirmed"})
         d_line = self._stored_vote_line(delegator, vote_type)
         g_line = self._stored_vote_line(delegate, vote_type)
         self.assertEqual(d_line.delegated_out_votes, 5.0)
@@ -903,14 +868,13 @@ class TestVoteRecomputationRegression(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         d_line = self._stored_vote_line(delegator, vote_type)
         g_line = self._stored_vote_line(delegate, vote_type)
         self.assertEqual(d_line.delegated_out_votes, 3.0)
         self.assertEqual(g_line.delegated_in_votes, 3.0)
-        del_rec.write({"delegation_state": "revoked"})
+        del_rec.unlink()
         d_line = self._stored_vote_line(delegator, vote_type)
         g_line = self._stored_vote_line(delegate, vote_type)
         self.assertEqual(d_line.delegated_out_votes, 0.0)
@@ -932,7 +896,6 @@ class TestVoteRecomputationRegression(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         attendees = assembly.attendee_ids
@@ -951,20 +914,18 @@ class TestVoteRecomputationRegression(AssemblyTestMixin, TransactionCase):
         assembly, vote_type, delegator, delegate = self._minimal_two_attendees()
         self._give_partner_votes(delegator.partner_id, vote_type, 5)
         self._give_partner_votes(delegate.partner_id, vote_type, 1)
-        del_rec = self.env["assembly.delegation"].create(
+        self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
         delegator.action_confirm()
         d_line = self._stored_vote_line(delegator, vote_type)
         self.assertEqual(d_line.delegated_out_votes, 0.0)
         delegate.action_confirm()
-        del_rec.write({"delegation_state": "confirmed"})
         delegator.recompute_attendee_vote_lines()
         delegate.recompute_attendee_vote_lines()
         d_line = self._stored_vote_line(delegator, vote_type)
@@ -1007,7 +968,6 @@ class TestRecomputationMultipleChanges(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator1.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegation2 = self.env["assembly.delegation"].create(  # noqa: F841
@@ -1016,7 +976,6 @@ class TestRecomputationMultipleChanges(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator2.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -1062,33 +1021,26 @@ class TestRecomputationMultipleChanges(AssemblyTestMixin, TransactionCase):
         # pylint: disable=protected-access
         self._give_partner_votes(delegate.partner_id, vote_type, 5)
         # pylint: disable=protected-access
-        # Confirm delegate first (required for confirmed delegations)
+        delegator1.action_confirm()
+        delegator2.action_confirm()
         delegate.action_confirm()
 
-        # Create delegations
-        delegation1 = self.env["assembly.delegation"].create(  # noqa: F841
+        self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator1.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
-        delegation2 = self.env["assembly.delegation"].create(  # noqa: F841
+        self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator2.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
-
-        # Sequential confirmations
-        delegator1.action_confirm()  # Step 1
-        delegator2.action_confirm()  # Step 2
-        delegate.action_confirm()  # Step 3: both delegations become effective
 
         # Final recomputation
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -1145,7 +1097,6 @@ class TestRecomputationMultipleChanges(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type1.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -1203,8 +1154,8 @@ class TestRecomputationMultipleChanges(AssemblyTestMixin, TransactionCase):
         )
         self.assertTrue(av_del_vt2, "VT2 records still exist")
 
-    def test_recomputation_consistency_multiple_state_changes(self):
-        """Recomputation remains consistent across multiple delegation state changes."""
+    def test_recomputation_consistency_multiple_unlink_and_recreate(self):
+        """Recomputation stays consistent when a delegation is removed and recreated."""
         assembly, _ = (
             self._create_assembly_with_agenda()
         )  # pylint: disable=protected-access
@@ -1213,60 +1164,53 @@ class TestRecomputationMultipleChanges(AssemblyTestMixin, TransactionCase):
         delegator = assembly.attendee_ids[0]
         delegate = assembly.attendee_ids[1]
 
-        # Give votes
         self._give_partner_votes(delegator.partner_id, vote_type, 10)
-        # pylint: disable=protected-access
         self._give_partner_votes(delegate.partner_id, vote_type, 5)
-        # pylint: disable=protected-access
-        # Confirm both
         delegator.action_confirm()
         delegate.action_confirm()
 
-        # Create delegation
-        delegation = self.env["assembly.delegation"].create(  # noqa: F841
+        delegation = self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
-
-        # Multiple state changes
-        delegation.write({"delegation_state": "revoked"})  # Step 1: revoke
         assembly.attendee_ids.recompute_attendee_vote_lines()
         av_del = delegator.attendee_vote_ids.filtered(
             lambda v: v.vote_type_id == vote_type
         )
-        self.assertEqual(av_del.delegated_out_votes, 0.0, "Revoked: no effect")
+        self.assertEqual(av_del.delegated_out_votes, 10.0)
 
-        delegation.write({"delegation_state": "confirmed"})  # Step 2: re-confirm
+        delegation.unlink()
         assembly.attendee_ids.recompute_attendee_vote_lines()
         av_del = delegator.attendee_vote_ids.filtered(
             lambda v: v.vote_type_id == vote_type
         )
-        self.assertEqual(av_del.delegated_out_votes, 10.0, "Re-confirmed: effective")
+        self.assertEqual(av_del.delegated_out_votes, 0.0)
 
-        delegation.write({"delegation_state": "revoked"})  # Step 3: revoke again
+        self.env["assembly.delegation"].create(
+            {
+                "assembly_id": assembly.id,
+                "partner_id": delegator.partner_id.id,
+                "delegate_partner_id": delegate.partner_id.id,
+                "vote_type_ids": [(6, 0, vote_type.ids)],
+            }
+        )
         assembly.attendee_ids.recompute_attendee_vote_lines()
         av_del = delegator.attendee_vote_ids.filtered(
             lambda v: v.vote_type_id == vote_type
         )
-        self.assertEqual(av_del.delegated_out_votes, 0.0, "Revoked again: no effect")
-
-        # Final consistency check
         av_dec = delegate.attendee_vote_ids.filtered(
             lambda v: v.vote_type_id == vote_type
         )
-        self.assertEqual(
-            av_dec.delegated_in_votes, 0.0, "Delegate has no delegated votes"
-        )
-        self.assertEqual(av_del.attendee_vote_total, 10.0, "Delegator total is 10")
-        self.assertEqual(av_dec.attendee_vote_total, 5.0, "Delegate total is 5")
+        self.assertEqual(av_del.delegated_out_votes, 10.0)
+        self.assertEqual(av_dec.delegated_in_votes, 10.0)
+        self.assertEqual(av_dec.attendee_vote_total, 15.0)
 
     def test_recomputation_consistency_complex_scenario(self):
-        """Recomputation remains consistent in complex multi-step scenario."""
+        """Two inbound delegations, then remove one; totals stay consistent."""
         assembly, _ = (
             self._create_assembly_with_agenda()
         )  # pylint: disable=protected-access
@@ -1276,46 +1220,36 @@ class TestRecomputationMultipleChanges(AssemblyTestMixin, TransactionCase):
         delegator2 = assembly.attendee_ids[1]
         delegate = assembly.attendee_ids[2]
 
-        # Give votes
         self._give_partner_votes(delegator1.partner_id, vote_type, 10)
-        # pylint: disable=protected-access
         self._give_partner_votes(delegator2.partner_id, vote_type, 8)
-        # pylint: disable=protected-access
         self._give_partner_votes(delegate.partner_id, vote_type, 5)
-        # pylint: disable=protected-access
-        # Step 1: Create delegations (not effective yet - delegate not confirmed)
-        delegation1 = self.env["assembly.delegation"].create(  # noqa: F841
+        delegator1.action_confirm()
+        delegator2.action_confirm()
+        delegate.action_confirm()
+
+        delegation1 = self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator1.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",  # Start as draft
             }
         )
-        delegation2 = self.env["assembly.delegation"].create(  # noqa: F841
+        self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator2.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
-
-        # Step 2: Confirm delegator1 (delegation still not effective - delegate not confirmed)
-        delegator1.action_confirm()
         assembly.attendee_ids.recompute_attendee_vote_lines()
-        av_del1 = delegator1.attendee_vote_ids.filtered(
+        av_dec = delegate.attendee_vote_ids.filtered(
             lambda v: v.vote_type_id == vote_type
         )
-        self.assertEqual(
-            av_del1.delegated_out_votes, 0.0, "No effect: delegate not confirmed"
-        )
+        self.assertEqual(av_dec.delegated_in_votes, 18.0)
 
-        # Step 3: Confirm delegate and confirm delegation1 (becomes effective)
-        delegate.action_confirm()
-        delegation1.write({"delegation_state": "confirmed"})
+        delegation1.unlink()
         assembly.attendee_ids.recompute_attendee_vote_lines()
         av_del1 = delegator1.attendee_vote_ids.filtered(
             lambda v: v.vote_type_id == vote_type
@@ -1323,40 +1257,10 @@ class TestRecomputationMultipleChanges(AssemblyTestMixin, TransactionCase):
         av_dec = delegate.attendee_vote_ids.filtered(
             lambda v: v.vote_type_id == vote_type
         )
-        self.assertEqual(av_del1.delegated_out_votes, 10.0, "Delegation1 effective")
-        self.assertEqual(
-            av_dec.delegated_in_votes, 10.0, "Delegate receives from delegator1"
-        )
+        self.assertEqual(av_del1.delegated_out_votes, 0.0)
+        self.assertEqual(av_dec.delegated_in_votes, 8.0)
 
-        # Step 4: Confirm delegator2 and confirm delegation2
-        delegator2.action_confirm()
-        delegation2.write({"delegation_state": "confirmed"})
-        assembly.attendee_ids.recompute_attendee_vote_lines()
-        av_del2 = delegator2.attendee_vote_ids.filtered(  # noqa: F841
-            lambda v: v.vote_type_id == vote_type
-        )
-        av_dec = delegate.attendee_vote_ids.filtered(
-            lambda v: v.vote_type_id == vote_type
-        )
-        self.assertEqual(av_del2.delegated_out_votes, 8.0, "Delegation2 effective")
-        self.assertEqual(av_dec.delegated_in_votes, 18.0, "Delegate receives from both")
-
-        # Step 5: Revoke delegation1
-        delegation1.write({"delegation_state": "revoked"})
-        assembly.attendee_ids.recompute_attendee_vote_lines()
-        av_del1 = delegator1.attendee_vote_ids.filtered(  # noqa: F841
-            lambda v: v.vote_type_id == vote_type
-        )
-        av_dec = delegate.attendee_vote_ids.filtered(  # noqa: F841
-            lambda v: v.vote_type_id == vote_type
-        )
-        self.assertEqual(av_del1.delegated_out_votes, 0.0, "Delegation1 revoked")
-        self.assertEqual(
-            av_dec.delegated_in_votes, 8.0, "Delegate receives only from delegator2"
-        )
-
-        # Final consistency check
-        total_own = (  # noqa: F841
+        total_own = (
             delegator1.attendee_vote_ids.filtered(
                 lambda v: v.vote_type_id == vote_type
             ).own_votes
@@ -1367,7 +1271,7 @@ class TestRecomputationMultipleChanges(AssemblyTestMixin, TransactionCase):
                 lambda v: v.vote_type_id == vote_type
             ).own_votes
         )
-        total_delegated_out = (  # noqa: F841
+        total_delegated_out = (
             delegator1.attendee_vote_ids.filtered(
                 lambda v: v.vote_type_id == vote_type
             ).delegated_out_votes
@@ -1375,13 +1279,9 @@ class TestRecomputationMultipleChanges(AssemblyTestMixin, TransactionCase):
                 lambda v: v.vote_type_id == vote_type
             ).delegated_out_votes
         )
-        total_delegated_in = delegate.attendee_vote_ids.filtered(  # noqa: F841
+        total_delegated_in = delegate.attendee_vote_ids.filtered(
             lambda v: v.vote_type_id == vote_type
         ).delegated_in_votes
 
-        self.assertEqual(
-            total_delegated_out,
-            total_delegated_in,
-            "Mathematical consistency: total out = total in",
-        )
-        self.assertEqual(total_own, 23.0, "Total own votes is 23")
+        self.assertEqual(total_delegated_out, total_delegated_in)
+        self.assertEqual(total_own, 23.0)

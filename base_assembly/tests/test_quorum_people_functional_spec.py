@@ -52,7 +52,6 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.invalidate_recordset()
@@ -77,7 +76,6 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.invalidate_recordset()
@@ -109,7 +107,6 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
         assembly.invalidate_recordset()
@@ -133,7 +130,6 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.invalidate_recordset()
@@ -155,25 +151,23 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         self.assertEqual(assembly.total_present_attendees, 2)
 
     def test_spec_negative_draft_delegation_does_not_add_delegator(self):
-        """(QA6) Non-confirmed delegator + draft delegation → delegator not present."""
+        """(QA6) Delegation row with no confirmed endpoints → nobody present for quorum."""
         assembly, _partners = self._assembly_four_partners()
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         delegator = assembly.attendee_ids[0]
         delegate = assembly.attendee_ids[1]
         self._give_partner_votes(delegator.partner_id, vote_type, 1)
         self._give_partner_votes(delegate.partner_id, vote_type, 1)
-        delegate.action_confirm()
         self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
         assembly.invalidate_recordset()
-        self.assertEqual(assembly.total_present_attendees, 1)
+        self.assertEqual(assembly.total_present_attendees, 0)
         self.assertNotIn(delegator.partner_id.id, assembly._get_present_partner_ids())
 
     def test_spec_negative_revoked_delegation_does_not_add_delegator(self):
@@ -191,12 +185,11 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.invalidate_recordset()
         self.assertEqual(assembly.total_present_attendees, 2)
-        del_rec.write({"delegation_state": "revoked"})
+        del_rec.unlink()
         assembly.invalidate_recordset()
         self.assertEqual(assembly.total_present_attendees, 1)
         self.assertNotIn(delegator.partner_id.id, assembly._get_present_partner_ids())
@@ -216,7 +209,6 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
         assembly.invalidate_recordset()
@@ -251,7 +243,6 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": p_del.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.invalidate_recordset()
@@ -261,7 +252,7 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         self.assertIn(p_def.id, present)
 
     def test_spec_negative_excluded_delegator_draft_delegation_not_quorum_present(self):
-        """Until delegation is confirmed, the external delegator is not counted as present."""
+        """With delegate not confirmed, excluded delegator is not represented in quorum."""
         env = self.env
         p_del = env["res.partner"].create(
             {"name": "QSpec ExclDraft", "is_company": False, "assembly_excluded": True}
@@ -275,19 +266,16 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
         vote_type = assembly.assembly_type_id.vote_type_ids[0]
         self._give_partner_votes(p_del, vote_type, 1)
         self._give_partner_votes(p_def, vote_type, 1)
-        delegate_att = assembly.attendee_ids.filtered(lambda a: a.partner_id == p_def)
-        delegate_att.action_confirm()
         env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": p_del.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
         assembly.invalidate_recordset()
-        self.assertEqual(assembly.total_present_attendees, 1)
+        self.assertEqual(assembly.total_present_attendees, 0)
         self.assertNotIn(p_del.id, assembly._get_present_partner_ids())
 
     def test_regression_two_excluded_delegators_distinct_people_in_quorum(self):
@@ -318,7 +306,6 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
                     "partner_id": p_del.id,
                     "delegate_partner_id": p_def.id,
                     "vote_type_ids": [(6, 0, vote_type.ids)],
-                    "delegation_state": "confirmed",
                 }
             )
         assembly.invalidate_recordset()
@@ -368,7 +355,6 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": p_out.id,
                 "delegate_partner_id": p_in.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.invalidate_recordset()
@@ -392,7 +378,6 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": a_att.partner_id.id,
                 "delegate_partner_id": b_att.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.invalidate_recordset()
@@ -460,7 +445,6 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.invalidate_recordset()
@@ -494,7 +478,6 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": p_del.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.invalidate_recordset()
@@ -529,7 +512,6 @@ class TestQuorumPeopleFunctionalSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
         assembly.invalidate_recordset()

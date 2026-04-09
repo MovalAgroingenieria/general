@@ -106,7 +106,6 @@ class TestVoteRecomputationRegression(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         d_line = self._stored_vote_line(delegator, vote_type)
@@ -137,12 +136,10 @@ class TestVoteRecomputationRegression(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
         d_line_before = self._stored_vote_line(delegator, vote_type)
         self.assertEqual(d_line_before.delegated_out_votes, 0.0)
-        assembly.delegation_ids.write({"delegation_state": "confirmed"})
         d_line = self._stored_vote_line(delegator, vote_type)
         g_line = self._stored_vote_line(delegate, vote_type)
         self.assertEqual(d_line.delegated_out_votes, 5.0)
@@ -163,14 +160,13 @@ class TestVoteRecomputationRegression(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         d_line = self._stored_vote_line(delegator, vote_type)
         g_line = self._stored_vote_line(delegate, vote_type)
         self.assertEqual(d_line.delegated_out_votes, 3.0)
         self.assertEqual(g_line.delegated_in_votes, 3.0)
-        del_rec.write({"delegation_state": "revoked"})
+        del_rec.unlink()
         d_line = self._stored_vote_line(delegator, vote_type)
         g_line = self._stored_vote_line(delegate, vote_type)
         self.assertEqual(d_line.delegated_out_votes, 0.0)
@@ -192,7 +188,6 @@ class TestVoteRecomputationRegression(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         attendees = assembly.attendee_ids
@@ -211,20 +206,18 @@ class TestVoteRecomputationRegression(AssemblyTestMixin, TransactionCase):
         assembly, vote_type, delegator, delegate = self._minimal_two_attendees()
         self._give_partner_votes(delegator.partner_id, vote_type, 5)
         self._give_partner_votes(delegate.partner_id, vote_type, 1)
-        del_rec = self.env["assembly.delegation"].create(
+        self.env["assembly.delegation"].create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
             }
         )
         delegator.action_confirm()
         d_line = self._stored_vote_line(delegator, vote_type)
         self.assertEqual(d_line.delegated_out_votes, 0.0)
         delegate.action_confirm()
-        del_rec.write({"delegation_state": "confirmed"})
         delegator.recompute_attendee_vote_lines()
         delegate.recompute_attendee_vote_lines()
         d_line = self._stored_vote_line(delegator, vote_type)

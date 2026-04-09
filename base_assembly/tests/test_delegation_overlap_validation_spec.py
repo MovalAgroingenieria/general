@@ -1,7 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-"""Overlap validation: effective types; draft/revoked do not block."""
+"""Overlap validation: expanded vote types; removed rows no longer block."""
 
 from odoo.exceptions import ValidationError
 from odoo.tests import TransactionCase
@@ -10,7 +10,7 @@ from .common import AssemblyTestMixin
 
 
 class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
-    """Rules 1–4: overlap on expanded types; only confirmed delegations compete."""
+    """Rules 1–4: overlap on expanded types; all saved delegations compete."""
 
     def _assembly_three_attendees_two_vote_types(self):
         env = self.env
@@ -28,7 +28,7 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
         return assembly, vt1, vt2
 
     def test_reject_two_confirmed_overlapping_same_vote_type(self):
-        """(1) Two confirmed delegations for same delegator overlapping on one type → error."""
+        """(1) Two delegations for same delegator overlapping on one type → error."""
         Delegation = self.env["assembly.delegation"]
         assembly, vt1, _vt2 = self._assembly_three_attendees_two_vote_types()
         a, b, c = (
@@ -43,7 +43,6 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
         with self.assertRaises(ValidationError) as ex:
@@ -53,7 +52,6 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
                     "partner_id": a.partner_id.id,
                     "delegate_partner_id": c.partner_id.id,
                     "vote_type_ids": [(6, 0, [vt1.id])],
-                    "delegation_state": "confirmed",
                 }
             )
         self.assertIn("vote type", str(ex.exception).lower())
@@ -74,7 +72,6 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(5, 0, 0)],
-                "delegation_state": "confirmed",
             }
         )
         with self.assertRaises(ValidationError):
@@ -84,12 +81,11 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
                     "partner_id": a.partner_id.id,
                     "delegate_partner_id": c.partner_id.id,
                     "vote_type_ids": [(6, 0, [_vt2.id])],
-                    "delegation_state": "confirmed",
                 }
             )
 
     def test_disjoint_partial_delegations_allowed(self):
-        """(4) A→B vt1 only and A→C vt2 only: both confirmed allowed."""
+        """(4) A→B vt1 only and A→C vt2 only: both allowed."""
         Delegation = self.env["assembly.delegation"]
         assembly, vt1, vt2 = self._assembly_three_attendees_two_vote_types()
         a, b, c = (
@@ -104,7 +100,6 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
         d2 = Delegation.create(
@@ -113,74 +108,11 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": c.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt2.id])],
-                "delegation_state": "confirmed",
             }
         )
         self.assertTrue(d2)
 
-    def test_confirm_draft_delegation_overlaps_existing_confirmed_rejected(self):
-        """Draft→confirm cannot overlap another confirmed delegation for the same delegator."""
-        Delegation = self.env["assembly.delegation"]
-        assembly, vt1, _vt2 = self._assembly_three_attendees_two_vote_types()
-        a, b, c = (
-            assembly.attendee_ids[0],
-            assembly.attendee_ids[1],
-            assembly.attendee_ids[2],
-        )
-        (a | b | c).action_confirm()
-        Delegation.create(
-            {
-                "assembly_id": assembly.id,
-                "partner_id": a.partner_id.id,
-                "delegate_partner_id": b.partner_id.id,
-                "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
-            }
-        )
-        d_draft = Delegation.create(
-            {
-                "assembly_id": assembly.id,
-                "partner_id": a.partner_id.id,
-                "delegate_partner_id": c.partner_id.id,
-                "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "draft",
-            }
-        )
-        with self.assertRaises(ValidationError):
-            d_draft.write({"delegation_state": "confirmed"})
-
-    def test_draft_sibling_does_not_block_confirmed_same_vote_types(self):
-        """(4) Draft ignored: second confirmed with same coverage allowed."""
-        Delegation = self.env["assembly.delegation"]
-        assembly, vt1, _vt2 = self._assembly_three_attendees_two_vote_types()
-        a, b, c = (
-            assembly.attendee_ids[0],
-            assembly.attendee_ids[1],
-            assembly.attendee_ids[2],
-        )
-        (a | b | c).action_confirm()
-        Delegation.create(
-            {
-                "assembly_id": assembly.id,
-                "partner_id": a.partner_id.id,
-                "delegate_partner_id": b.partner_id.id,
-                "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "draft",
-            }
-        )
-        d2 = Delegation.create(
-            {
-                "assembly_id": assembly.id,
-                "partner_id": a.partner_id.id,
-                "delegate_partner_id": c.partner_id.id,
-                "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
-            }
-        )
-        self.assertTrue(d2)
-
-    def test_revoked_sibling_does_not_block_confirmed_same_vote_types(self):
-        """(4) Revoked ignored: new confirmed with same coverage allowed."""
+    def test_unlinked_delegation_no_longer_blocks_same_coverage(self):
         Delegation = self.env["assembly.delegation"]
         assembly, vt1, _vt2 = self._assembly_three_attendees_two_vote_types()
         a, b, c = (
@@ -195,17 +127,15 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
-        d1.write({"delegation_state": "revoked"})
+        d1.unlink()
         d2 = Delegation.create(
             {
                 "assembly_id": assembly.id,
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": c.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
         self.assertTrue(d2)
@@ -222,7 +152,6 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(5, 0, 0)],
-                "delegation_state": "draft",
             }
         )
         eff_partial = Delegation._delegation_effective_vote_types(
@@ -262,7 +191,6 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
         d2 = Delegation.create(
@@ -271,7 +199,6 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": c.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt2.id])],
-                "delegation_state": "confirmed",
             }
         )
         with self.assertRaises(ValidationError):
@@ -291,7 +218,6 @@ class TestDelegationOverlapValidationSpec(AssemblyTestMixin, TransactionCase):
                     "partner_id": a.partner_id.id,
                     "delegate_partner_id": b.partner_id.id,
                     "vote_type_ids": [(6, 0, other_vt.ids)],
-                    "delegation_state": "draft",
                 }
             )
         self.assertIn("assembly", str(ctx.exception).lower())

@@ -108,7 +108,6 @@ class TestAssemblySecurityRegression(AssemblyTestMixin, TransactionCase):
                     "partner_id": partners[1].id,
                     "delegate_partner_id": partners[0].id,
                     "vote_type_ids": [(6, 0, vt.ids)],
-                    "delegation_state": "draft",
                 }
             )
 
@@ -170,6 +169,5 @@ class TestAssemblySecurityRegression(AssemblyTestMixin, TransactionCase):
                 "vote_type_ids": [(6, 0, vt.ids)],
             }
         )
-        del_rec.write({"delegation_state": "revoked"})
         del_rec.unlink()
         env_m["assembly.assembly"].browse(asm.id).unlink()

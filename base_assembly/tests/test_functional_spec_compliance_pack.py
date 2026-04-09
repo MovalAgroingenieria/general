@@ -63,7 +63,6 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
                 "partner_id": p_del.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegate_att.recompute_attendee_vote_lines()
@@ -118,7 +117,6 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -149,7 +147,6 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(5, 0, 0)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -179,7 +176,6 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -228,7 +224,6 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
                 "partner_id": a_att.partner_id.id,
                 "delegate_partner_id": b_att.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
         with self.assertRaises(ValidationError):
@@ -238,7 +233,6 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
                     "partner_id": b_att.partner_id.id,
                     "delegate_partner_id": c_att.partner_id.id,
                     "vote_type_ids": [(6, 0, [vt1.id])],
-                    "delegation_state": "confirmed",
                 }
             )
 
@@ -257,7 +251,6 @@ class TestFunctionalSpecCompliancePack(AssemblyTestMixin, TransactionCase):
                 "partner_id": a.partner_id.id,
                 "delegate_partner_id": b.partner_id.id,
                 "vote_type_ids": [(6, 0, vt.ids)],
-                "delegation_state": "confirmed",
             }
         )
         Av = self.env["assembly.attendee.vote"]

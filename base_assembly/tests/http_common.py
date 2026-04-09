@@ -6,7 +6,9 @@
 
 Provides a sample assembly, attendees, and users (manager / assembly user). The
 mandatory contract for ``GET /assembly/attendance`` is asserted with concrete
-status codes (without :meth:`_skip_if_route_404`).
+status codes (without :meth:`_skip_if_route_404`). Default response is an HTML
+landing page; append ``direct=1`` for an immediate redirect to the
+backend form and plain-text errors.
 
 :meth:`_skip_if_route_404` is for optional or environment-dependent routes
 (portal, public display, HTTP voting), not for the manager deep link.
@@ -29,7 +31,8 @@ class AssemblyHttpCase(AssemblyTestMixin, HttpCase):
 
             if not getattr(getattr(server, "server", None), "httpd", None):
                 raise unittest.SkipTest(
-                    "HTTP server not running (e.g. --stop-after-init)"
+                    "HTTP server not running (use --workers=0 with tests; "
+                    "worker mode has no main httpd for HttpCase)"
                 )
         except (AttributeError, TypeError) as exc:
             raise unittest.SkipTest("HTTP server not running") from exc

@@ -20,8 +20,11 @@
         <field name="arch" type="xml">
             <form string="Attendee">
                 <header>
-                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary" invisible="attendee_state == 'confirmed'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_mark_absent" string="Mark absent" type="object" invisible="attendee_state == 'absent'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_confirm" string="Record as attended" type="object" class="btn-primary" title="Set attendance to Attended (confirmed present): member actually attended; counts for quorum and voting." invisible="attendee_state == 'confirmed'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_mark_absent" string="Record as absent" type="object" title="Set attendance to Did not attend (absent): excluded from quorum; delegations received by this person stay inactive until attendance is confirmed." invisible="attendee_state == 'absent'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_print_ballot" string="Print ballot" type="object" class="btn-secondary" title="Member ballot PDF (per attendee, includes voting power and agenda)." groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_open_attendance_url" string="Open attendance link" type="object" class="btn-secondary" title="Open the tracked short URL for this member's attendance flow (opens counted)." invisible="not assembly_id.include_qr_code" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_show_attendance_qr" string="Show QR" type="object" class="btn-secondary" title="Show the QR code for this member's tracked attendance URL." invisible="not assembly_id.include_qr_code" groups="base_assembly.assembly_group_manager"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -42,19 +45,28 @@
                         <h1><field name="partner_id" options="{'no_create': True}" style="margin-top:5px;"/></h1>
                     </div>
                     <group>
-                        <group string="Attendee data">
+                        <group name="assembly_attendee_attendee_data" string="Attendee data">
                             <field name="assembly_id"/>
                             <field name="participant_partner_id"/>
                             <field name="partner_vat" string="TIN"/>
                             <field name="attendance_type"/>
-                            <field name="attendee_state" readonly="1"/>
+                            <div class="alert alert-light py-2 px-3 small mb-2" colspan="2" role="status">
+                                <strong>Attendance status:</strong>
+                                <em>Listed — not finalized</em> = on the list only (not counted for quorum or as an active delegate).
+                                <em>Attended (confirmed present)</em> = actually present; counts for quorum and voting; delegations to this person can become active.
+                                <em>Did not attend</em> = recorded absent; does not count for quorum; use <strong>Record as attended</strong> if that changes.
+                            </div>
+                            <field name="attendee_state" readonly="1" widget="badge"/>
                             <field name="date_register"/>
                         </group>
                         <group string="Votes">
                             <field name="total_votes" readonly="1"/>
                         </group>
                     </group>
-                    <group string="Attendance">
+                    <group string="Attendance &amp; sign-in (tracked link)">
+                        <div class="alert alert-light py-2 px-3 small mb-2" role="status" colspan="2" invisible="not assembly_id.include_qr_code">
+                            Each member can have a <strong>tracked attendance URL</strong> (opens counted). Use <strong>Open attendance link</strong> or <strong>Show QR</strong> in the header, or open the assembly <strong>Links &amp; QR</strong> smart button to list all. Finalize presence with <strong>Record as attended</strong>.
+                        </div>
                         <field name="attendance_notes" placeholder="Notes for this attendance…" nolabel="1" colspan="2" invisible="not assembly_id.allow_attendance_notes"/>
                         <field
                             name="attendance_signature"
@@ -63,7 +75,7 @@
                             options="{'size': [200, 100], 'full_name': 'partner_id'}"
                         />
                         <field name="attendance_link_tracker_id" readonly="1" invisible="not assembly_id.include_qr_code"/>
-                        <field name="attendance_url" readonly="1" placeholder="Tracked URL (link_tracker) for QR" colspan="2" invisible="not assembly_id.include_qr_code"/>
+                        <field name="attendance_url" readonly="1" widget="url" placeholder="Tracked short URL (from link tracker)" colspan="2" invisible="not assembly_id.include_qr_code"/>
                     </group>
                     <group string="Votes by type">
                         <field name="attendee_vote_ids" readonly="1" nolabel="1" colspan="2"/>
@@ -76,18 +88,20 @@
     <record id="assembly_attendee_view_tree" model="ir.ui.view">
         <field name="name">assembly.attendee.tree</field>
         <field name="model">assembly.attendee</field>
+        <field name="priority">10</field>
         <field name="arch" type="xml">
-            <list>
+            <list decoration-muted="attendee_state == 'registered'" decoration-success="attendee_state == 'confirmed'" decoration-danger="attendee_state == 'absent'">
                 <field name="assembly_id"/>
                 <field name="partner_id"/>
                 <field name="participant_partner_id"/>
                 <field name="partner_vat" string="TIN"/>
                 <field name="attendance_type"/>
-                <field name="attendee_state" readonly="1"/>
+                <field name="attendee_state" readonly="1" widget="badge"/>
                 <field name="date_register"/>
                 <field name="total_votes" sum="Total votes"/>
                 <field name="attendance_notes" invisible="not assembly_id.allow_attendance_notes"/>
                 <field name="attendance_signature" string="Signature" widget="signature" optional="hide"/>
+                <button name="action_print_ballot" type="object" icon="fa-print" title="Print ballot (PDF) for this attendee" groups="base_assembly.assembly_group_manager"/>
             </list>
         </field>
     </record>
@@ -95,15 +109,17 @@
     <record id="assembly_attendee_view_search" model="ir.ui.view">
         <field name="name">assembly.attendee.search</field>
         <field name="model">assembly.attendee</field>
+        <field name="priority">10</field>
         <field name="arch" type="xml">
             <search string="Attendees">
                 <field name="partner_id"/>
                 <field name="participant_partner_id"/>
                 <field name="partner_vat" string="TIN"/>
                 <field name="assembly_id"/>
-                <filter string="Registered" name="filter_registered" domain="[('attendee_state','=','registered')]"/>
-                <filter string="Confirmed" name="filter_confirmed" domain="[('attendee_state','=','confirmed')]"/>
-                <filter string="Absent" name="filter_absent" domain="[('attendee_state','=','absent')]"/>
+                <filter string="Listed — not finalized" name="filter_registered" domain="[('attendee_state','=','registered')]"/>
+                <filter string="Attended (confirmed)" name="filter_confirmed" domain="[('attendee_state','=','confirmed')]"/>
+                <filter string="Did not attend" name="filter_absent" domain="[('attendee_state','=','absent')]"/>
+                <filter string="With tracked sign-in URL" name="filter_attendance_tracked_link" domain="[('attendance_link_tracker_id', '!=', False)]"/>
                 <separator/>
                 <filter string="On-site" name="filter_present" domain="[('attendance_type','=','present')]"/>
                 <filter string="Remote" name="filter_remote" domain="[('attendance_type','=','remote')]"/>
@@ -111,6 +127,104 @@
                     <filter string="Assembly" name="group_assembly" context="{'group_by': 'assembly_id'}"/>
                 </group>
             </search>
+        </field>
+    </record>
+
+    <record id="assembly_attendee_view_tree_call_register" model="ir.ui.view">
+        <field name="name">assembly.attendee.list.call.register</field>
+        <field name="model">assembly.attendee</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <list string="Call register" default_order="assembly_id desc, partner_id" multi_edit="1" decoration-muted="attendee_state == 'registered'" decoration-success="attendee_state == 'confirmed'" decoration-danger="attendee_state == 'absent'">
+                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <field name="assembly_id"/>
+                <field name="partner_id" string="Member"/>
+                <field name="participant_partner_id" string="Present as"/>
+                <field name="call_register_representation_agent" string="Representative" optional="show"/>
+                <field name="partner_vat" string="TIN"/>
+                <field name="attendee_state" widget="badge"/>
+                <field name="date_register" string="Registration date"/>
+                <field name="total_votes" sum="Total votes"/>
+                <field name="call_register_link_ready" string="Tracked link ready" optional="show"/>
+                <field name="attendance_url" string="Tracked URL" optional="show" widget="url"/>
+                <field name="call_register_has_outbound_delegation" string="Out. deleg." optional="hide"/>
+                <field name="call_register_has_inbound_delegation" string="In. deleg." optional="hide"/>
+                <field name="call_register_has_representation" string="Representation" optional="hide"/>
+                <button name="action_confirm" string="Record as attended" type="object" icon="fa-check" title="Set attendance to Attended (confirmed present): member actually attended; counts for quorum and voting." invisible="attendee_state == 'confirmed'" groups="base_assembly.assembly_group_manager"/>
+                <button name="action_mark_absent" string="Record as absent" type="object" icon="fa-times" title="Set attendance to Did not attend." invisible="attendee_state == 'absent'" groups="base_assembly.assembly_group_manager"/>
+                <button name="action_print_ballot" type="object" icon="fa-print" title="Print ballot (PDF) for this attendee" groups="base_assembly.assembly_group_manager"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="assembly_attendee_view_form_call_register" model="ir.ui.view">
+        <field name="name">assembly.attendee.form.call.register</field>
+        <field name="model">assembly.attendee</field>
+        <field name="inherit_id" ref="base_assembly.assembly_attendee_view_form"/>
+        <field name="mode">primary</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='assembly_attendee_attendee_data']" position="after">
+                <group name="assembly_attendee_call_register" string="Call register" groups="base_assembly.assembly_group_manager">
+                    <field name="company_id" readonly="1" groups="base.group_multi_company"/>
+                    <field name="call_register_representation_agent" readonly="1"/>
+                    <field name="call_register_has_outbound_delegation" readonly="1"/>
+                    <field name="call_register_has_inbound_delegation" readonly="1"/>
+                    <field name="call_register_has_representation" readonly="1"/>
+                    <field name="call_register_link_ready" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="assembly_attendee_view_search_call_register" model="ir.ui.view">
+        <field name="name">assembly.attendee.search.call.register</field>
+        <field name="model">assembly.attendee</field>
+        <field name="inherit_id" ref="base_assembly.assembly_attendee_view_search"/>
+        <field name="mode">primary</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='assembly_id']" position="after">
+                <field name="company_id"/>
+            </xpath>
+            <xpath expr="//filter[@name='filter_absent']" position="after">
+                <separator/>
+                <filter
+                    string="Outbound vote delegation"
+                    name="filter_outbound_delegation"
+                    domain="[('call_register_has_outbound_delegation', '=', True)]"
+                />
+                <filter
+                    string="Inbound vote delegation"
+                    name="filter_inbound_delegation"
+                    domain="[('call_register_has_inbound_delegation', '=', True)]"
+                />
+                <filter
+                    string="With representation"
+                    name="filter_with_representation"
+                    domain="[('call_register_has_representation', '=', True)]"
+                />
+                <separator/>
+                <filter
+                    string="Missing TIN or VAT"
+                    name="filter_missing_vat"
+                    domain="['|', ('partner_vat', '=', False), ('partner_vat', '=', '')]"
+                />
+                <filter
+                    string="Attendance link / QR ready"
+                    name="filter_attendance_link_ready"
+                    domain="[('assembly_id.include_qr_code', '=', True), ('attendance_link_tracker_id', '!=', False)]"
+                />
+                <filter
+                    string="Active companies"
+                    name="filter_active_companies"
+                    domain="[('company_id', 'in', allowed_company_ids)]"
+                />
+            </xpath>
+            <xpath expr="//filter[@name='group_assembly']" position="after">
+                <filter string="Attendance status" name="group_attendee_state" context="{'group_by': 'attendee_state'}"/>
+                <filter string="Company" name="group_company" context="{'group_by': 'company_id'}"/>
+            </xpath>
         </field>
     </record>
 </odoo>

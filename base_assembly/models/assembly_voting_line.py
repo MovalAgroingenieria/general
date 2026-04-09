@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools.float_utils import float_compare
 
 _VOTES_APPLIED_FLOAT_DIGITS = 6
@@ -87,6 +87,105 @@ class AssemblyVotingLine(models.Model):
         ondelete="set null",
         help="User who cast the vote (portal/backend). Empty if cast via token.",
     )
+    session_context_label = fields.Char(
+        string="Delegation / representation",
+        compute="_compute_session_context_label",
+    )
+    session_row_group_order = fields.Integer(
+        compute="_compute_session_row_group_order",
+        store=True,
+    )
+    session_row_status_label = fields.Char(
+        string="Recording status",
+        compute="_compute_session_row_ui",
+    )
+    session_control_state = fields.Selection(
+        [
+            ("pending", "Pending"),
+            ("recorded", "Recorded"),
+            ("ineligible", "Not eligible"),
+        ],
+        string="Status",
+        compute="_compute_session_row_ui",
+    )
+
+    @api.depends(
+        "attendee_id",
+        "attendee_id.call_register_has_representation",
+        "attendee_id.call_register_representation_agent",
+        "attendee_id.call_register_has_inbound_delegation",
+        "attendee_id.call_register_has_outbound_delegation",
+        "attendee_id.participant_partner_id",
+    )
+    def _compute_session_context_label(self):
+        for line in self:
+            att = line.attendee_id
+            if not att:
+                line.session_context_label = ""
+                continue
+            parts = []
+            if (
+                att.participant_partner_id
+                and att.participant_partner_id != att.partner_id
+            ):
+                parts.append(
+                    self.env._(
+                        "Representing %(name)s",
+                        name=att.participant_partner_id.display_name,
+                    )
+                )
+            if (
+                att.call_register_has_representation
+                and att.call_register_representation_agent
+            ):
+                parts.append(
+                    self.env._(
+                        "Representation: %(agent)s",
+                        agent=att.call_register_representation_agent,
+                    )
+                )
+            if att.call_register_has_inbound_delegation:
+                parts.append(self.env._("Receives delegated votes"))
+            if att.call_register_has_outbound_delegation:
+                parts.append(self.env._("Votes delegated out"))
+            line.session_context_label = " · ".join(parts) if parts else ""
+
+    @api.depends("vote_option", "votes_applied")
+    def _compute_session_row_group_order(self):
+        for line in self:
+            if (
+                float_compare(
+                    line.votes_applied,
+                    0.0,
+                    precision_digits=_VOTES_APPLIED_FLOAT_DIGITS,
+                )
+                <= 0
+            ):
+                line.session_row_group_order = 3
+            elif line.vote_option == "unset":
+                line.session_row_group_order = 1
+            else:
+                line.session_row_group_order = 2
+
+    @api.depends("vote_option", "votes_applied")
+    def _compute_session_row_ui(self):
+        for line in self:
+            if (
+                float_compare(
+                    line.votes_applied,
+                    0.0,
+                    precision_digits=_VOTES_APPLIED_FLOAT_DIGITS,
+                )
+                <= 0
+            ):
+                line.session_control_state = "ineligible"
+                line.session_row_status_label = self.env._("Not eligible")
+            elif line.vote_option == "unset":
+                line.session_control_state = "pending"
+                line.session_row_status_label = self.env._("Pending")
+            else:
+                line.session_control_state = "recorded"
+                line.session_row_status_label = self.env._("Recorded")
 
     _sql_constraints = [
         (
@@ -180,6 +279,10 @@ class AssemblyVotingLine(models.Model):
             )
         return res
 
+    def unlink(self):
+        self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
+        return super().unlink()
+
     @api.model_create_multi
     def create(self, vals_list):
         vids = {v.get("voting_id") for v in vals_list if v.get("voting_id")}
@@ -191,6 +294,38 @@ class AssemblyVotingLine(models.Model):
         for vals in vals_list:
             self._set_votes_applied_snapshot_on_create_vals(vals)
         return super().create(vals_list)
+
+    def _session_require_open_voting(self):
+        for line in self:
+            if line.voting_id.voting_state != "open":
+                raise UserError(
+                    self.env._(
+                        "Votes can only be changed while the voting session is open."
+                    )
+                )
+
+    def _session_write_vote_option(self, option):
+        self._session_require_open_voting()
+        vals = {"vote_option": option}
+        if option == "unset":
+            vals["vote_cast_at"] = False
+            vals["vote_cast_by_user_id"] = False
+        return self.write(vals)
+
+    def action_session_vote_yes(self):
+        return self._session_write_vote_option("yes")
+
+    def action_session_vote_no(self):
+        return self._session_write_vote_option("no")
+
+    def action_session_vote_abstention(self):
+        return self._session_write_vote_option("abstention")
+
+    def action_session_vote_blank(self):
+        return self._session_write_vote_option("blank")
+
+    def action_session_vote_clear(self):
+        return self._session_write_vote_option("unset")
 
     @api.constrains("votes_applied")
     def _check_votes_applied_non_negative(self):

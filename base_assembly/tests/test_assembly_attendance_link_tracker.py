@@ -144,3 +144,33 @@ class TestAssemblyAttendanceLinkTracker(AssemblyTestMixin, TransactionCase):
             )
         finally:
             icp.set_param(key, previous or "http://localhost")
+
+    def test_action_open_attendance_url_returns_act_url(self):
+        assembly = self._create_assembly(name="Act URL asm")
+        assembly.action_generate_attendees()
+        att = assembly.attendee_ids[0]
+        act = att.action_open_attendance_url()
+        self.assertEqual(act.get("type"), "ir.actions.act_url")
+        self.assertEqual(act.get("target"), "new")
+        self.assertEqual(act.get("url"), att.attendance_url)
+
+    def test_action_show_attendance_qr_returns_barcode_url(self):
+        assembly = self._create_assembly(name="QR act asm")
+        assembly.action_generate_attendees()
+        att = assembly.attendee_ids[0]
+        act = att.action_show_attendance_qr()
+        self.assertEqual(act.get("type"), "ir.actions.act_url")
+        self.assertEqual(act.get("target"), "new")
+        url = act.get("url") or ""
+        self.assertIn("/report/barcode/", url)
+        self.assertIn("barcode_type=QR", url)
+
+    def test_assembly_attendee_tracked_link_count(self):
+        assembly = self._create_assembly(name="Count asm")
+        assembly.action_generate_attendees()
+        self.assertEqual(
+            assembly.attendee_tracked_link_count,
+            len(assembly.attendee_ids.filtered("attendance_link_tracker_id")),
+        )
+        assembly.write({"include_qr_code": False})
+        self.assertEqual(assembly.attendee_tracked_link_count, 0)

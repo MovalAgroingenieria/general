@@ -1,6 +1,8 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
+import uuid
+
 from odoo.tests import TransactionCase
 
 from .common import AssemblyTestMixin
@@ -55,7 +57,6 @@ class TestAssemblyAttendeeConfirmImproved(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -66,13 +67,8 @@ class TestAssemblyAttendeeConfirmImproved(AssemblyTestMixin, TransactionCase):
         self.assertEqual(delegator.attendee_state, "confirmed")
         self.assertTrue(delegator.date_register)
 
-        # Verify delegation still active (NOT revoked automatically)
         delegation.invalidate_recordset()
-        self.assertEqual(
-            delegation.delegation_state,
-            "confirmed",
-            "Delegation must NOT be revoked automatically",
-        )
+        self.assertTrue(delegation.exists())
 
         # Verify votes were recomputed
         delegator.recompute_attendee_vote_lines()
@@ -99,14 +95,12 @@ class TestAssemblyAttendeeConfirmImproved(AssemblyTestMixin, TransactionCase):
         self.assertIn(delegate.partner_id.name, result["warning"]["message"])
         self.assertIn(delegator.partner_id.name, result["warning"]["message"])
         self.assertIn(
-            "remain active",
+            "Voting units stay assigned",
             result["warning"]["message"],
-            "Message should state delegations remain active",
         )
         self.assertIn(
-            "manually",
-            result["warning"]["message"],
-            "Message should mention manual revocation option",
+            "delegation",
+            result["warning"]["message"].lower(),
         )
 
     def test_action_confirm_with_multiple_delegations_shows_all(self):
@@ -137,7 +131,6 @@ class TestAssemblyAttendeeConfirmImproved(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate1.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type_a.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegation2 = self.env["assembly.delegation"].create(  # noqa: F841
@@ -146,7 +139,6 @@ class TestAssemblyAttendeeConfirmImproved(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate2.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type_b.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -159,8 +151,6 @@ class TestAssemblyAttendeeConfirmImproved(AssemblyTestMixin, TransactionCase):
         # Verify both delegations still active (NOT revoked)
         delegation1.invalidate_recordset()
         delegation2.invalidate_recordset()
-        self.assertEqual(delegation1.delegation_state, "confirmed")
-        self.assertEqual(delegation2.delegation_state, "confirmed")
 
         # Verify notification mentions both delegates
         self.assertIsInstance(result, dict)
@@ -171,48 +161,61 @@ class TestAssemblyAttendeeConfirmImproved(AssemblyTestMixin, TransactionCase):
         self.assertIn("2", message)  # Count of delegations
 
     def test_action_confirm_only_confirmed_delegations_notified(self):
-        """action_confirm() only notifies about confirmed delegations,
-        not draft/revoked."""
-        assembly, _ = (
-            self._create_assembly_with_agenda()
-        )  # pylint: disable=protected-access
-        assembly.action_generate_attendees()
-        vote_type = assembly.assembly_type_id.vote_type_ids[0]
-        delegator = assembly.attendee_ids[0]
-        delegate = assembly.attendee_ids[1]
-        delegate.action_confirm()
+        """action_confirm() warns only for effective outbound delegations.
 
-        # Create draft delegation (should NOT trigger notification)
-        draft_delegation = self.env["assembly.delegation"].create(  # noqa: F841
+        Ineffective rows (delegate not confirmed yet) and removed rows must not warn.
+        """
+        assembly_a, _ = self._create_assembly_with_agenda(
+            name="Confirm notify A %s" % uuid.uuid4().hex[:8],
+        )
+        assembly_a.action_generate_attendees()
+        vote_a = assembly_a.assembly_type_id.vote_type_ids[0]
+        delegator_a = assembly_a.attendee_ids[0]
+        delegate_a = assembly_a.attendee_ids[1]
+        self._give_partner_votes(delegator_a.partner_id, vote_a, 1)
+        self._give_partner_votes(delegate_a.partner_id, vote_a, 1)
+        self.env["assembly.delegation"].create(
             {
-                "assembly_id": assembly.id,
-                "partner_id": delegator.partner_id.id,
-                "delegate_partner_id": delegate.partner_id.id,
-                "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
+                "assembly_id": assembly_a.id,
+                "partner_id": delegator_a.partner_id.id,
+                "delegate_partner_id": delegate_a.partner_id.id,
+                "vote_type_ids": [(6, 0, vote_a.ids)],
             }
         )
+        result_a = delegator_a.action_confirm()
+        self.assertEqual(delegator_a.attendee_state, "confirmed")
+        self.assertTrue(
+            result_a,
+            "No warning while delegate is not confirmed (delegation not effective)",
+        )
+        self.assertNotIsInstance(result_a, dict)
 
-        # Create revoked delegation (should NOT trigger notification)
-        revoked_delegation = self.env["assembly.delegation"].create(  # noqa: F841
+        assembly_b, _ = self._create_assembly_with_agenda(
+            name="Confirm notify B %s" % uuid.uuid4().hex[:8],
+        )
+        assembly_b.action_generate_attendees()
+        vote_b = assembly_b.assembly_type_id.vote_type_ids[0]
+        delegator_b = assembly_b.attendee_ids[0]
+        delegate_b = assembly_b.attendee_ids[1]
+        self._give_partner_votes(delegator_b.partner_id, vote_b, 1)
+        self._give_partner_votes(delegate_b.partner_id, vote_b, 1)
+        delegate_b.action_confirm()
+        eff = self.env["assembly.delegation"].create(
             {
-                "assembly_id": assembly.id,
-                "partner_id": delegator.partner_id.id,
-                "delegate_partner_id": delegate.partner_id.id,
-                "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
+                "assembly_id": assembly_b.id,
+                "partner_id": delegator_b.partner_id.id,
+                "delegate_partner_id": delegate_b.partner_id.id,
+                "vote_type_ids": [(6, 0, vote_b.ids)],
             }
         )
-        revoked_delegation.write({"delegation_state": "revoked"})
-
-        # Confirm delegator
-        result = delegator.action_confirm()
-
-        # Verify confirmation
-        self.assertEqual(delegator.attendee_state, "confirmed")
-
-        # Verify no notification (only confirmed delegations count)
-        self.assertTrue(result, "Should return True when no confirmed delegations")
+        eff.unlink()
+        result_b = delegator_b.action_confirm()
+        self.assertEqual(delegator_b.attendee_state, "confirmed")
+        self.assertTrue(
+            result_b,
+            "No warning after effective delegation record was removed",
+        )
+        self.assertNotIsInstance(result_b, dict)
 
     def test_action_confirm_backend_friendly_format(self):
         """action_confirm() returns backend-friendly notification format for API/RPC."""
@@ -234,7 +237,6 @@ class TestAssemblyAttendeeConfirmImproved(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
 

@@ -61,7 +61,6 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
                 "partner_id": p_del.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegate_att.recompute_attendee_vote_lines()
@@ -92,7 +91,6 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
                 "partner_id": p_del.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -104,8 +102,8 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
         ).filtered(lambda r: r.vote_type_id == vote_type)
         self.assertEqual(line_def.delegated_in_votes, 10.0)
 
-    def test_negative_revoked_delegation_does_not_transfer(self):
-        """(5) Revoked: no longer counts as effective inbound."""
+    def test_removed_delegation_does_not_transfer(self):
+        """(5) After unlink, inbound delegation no longer counts."""
         assembly, vote_type, p_del, p_def, _p_other = (
             self._setup_assembly_with_excluded_delegator()
         )
@@ -119,7 +117,6 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
                 "partner_id": p_del.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegate_att.recompute_attendee_vote_lines()
@@ -127,15 +124,15 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
             self.env, assembly, p_def
         ).filtered(lambda r: r.vote_type_id == vote_type)
         self.assertEqual(line_def.delegated_in_votes, 10.0)
-        del_rec.write({"delegation_state": "revoked"})
+        del_rec.unlink()
         delegate_att.recompute_attendee_vote_lines()
         line_def = self._vote_lines_for_partner_on_assembly(
             self.env, assembly, p_def
         ).filtered(lambda r: r.vote_type_id == vote_type)
         self.assertEqual(line_def.delegated_in_votes, 0.0)
 
-    def test_negative_draft_delegation_does_not_transfer(self):
-        """(5) Draft: no effective transfer."""
+    def test_without_delegation_no_transfer(self):
+        """(5) No delegation row → no inbound transfer."""
         assembly, vote_type, p_del, p_def, _p_other = (
             self._setup_assembly_with_excluded_delegator()
         )
@@ -143,15 +140,6 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
         self._give_partner_votes(p_def, vote_type, 4)
         delegate_att = assembly.attendee_ids.filtered(lambda a: a.partner_id == p_def)
         delegate_att.action_confirm()
-        self.env["assembly.delegation"].create(
-            {
-                "assembly_id": assembly.id,
-                "partner_id": p_del.id,
-                "delegate_partner_id": p_def.id,
-                "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "draft",
-            }
-        )
         delegate_att.recompute_attendee_vote_lines()
         line_def = self._vote_lines_for_partner_on_assembly(
             self.env, assembly, p_def
@@ -186,7 +174,6 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
                 "partner_id": p_del.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegate_att.recompute_attendee_vote_lines()
@@ -210,7 +197,6 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
                 "partner_id": p_del.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegate_att.recompute_attendee_vote_lines()
@@ -262,7 +248,6 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
                 "partner_id": p_del.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         delegate_att.recompute_attendee_vote_lines()
@@ -289,7 +274,6 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
         n_inbound = self.env["assembly.delegation"].search_count(
             [
                 ("assembly_id", "=", assembly.id),
-                ("delegation_state", "=", "confirmed"),
                 ("delegate_partner_id", "=", p_def.id),
             ]
         )
@@ -323,7 +307,6 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
                 "partner_id": p_a.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         Delegation.create(
@@ -332,7 +315,6 @@ class TestVoteRecomputeNonAttendeeDelegator(AssemblyTestMixin, TransactionCase):
                 "partner_id": p_b.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -362,7 +344,6 @@ class TestNonAttendeeDelegatorMandatoryQA(TestVoteRecomputeNonAttendeeDelegator)
                 "partner_id": p_del.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         self.assertFalse(
@@ -387,8 +368,8 @@ class TestNonAttendeeDelegatorMandatoryQA(TestVoteRecomputeNonAttendeeDelegator)
             "delegated_in must match delegator partner.vote",
         )
 
-    def test_mandatory_revoke_delegation_clears_delegated_in_via_write_hook_only(self):
-        """Revoke with ``write`` only: no manual ``recompute_attendee_vote_lines``."""
+    def test_mandatory_unlink_delegation_clears_delegated_in_via_orm_hook(self):
+        """Unlink triggers vote recompute without manual ``recompute_attendee_vote_lines``."""
         assembly, vote_type, p_del, p_def, _p_other = (
             self._setup_assembly_with_excluded_delegator()
         )
@@ -402,14 +383,13 @@ class TestNonAttendeeDelegatorMandatoryQA(TestVoteRecomputeNonAttendeeDelegator)
                 "partner_id": p_del.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         line_def = self._vote_lines_for_partner_on_assembly(
             self.env, assembly, p_def
         ).filtered(lambda r: r.vote_type_id == vote_type)
         self.assertEqual(line_def.delegated_in_votes, 6.0)
-        del_rec.write({"delegation_state": "revoked"})
+        del_rec.unlink()
         line_def = self._vote_lines_for_partner_on_assembly(
             self.env, assembly, p_def
         ).filtered(lambda r: r.vote_type_id == vote_type)
@@ -433,7 +413,6 @@ class TestNonAttendeeDelegatorMandatoryQA(TestVoteRecomputeNonAttendeeDelegator)
                 "partner_id": p_del.id,
                 "delegate_partner_id": p_def.id,
                 "vote_type_ids": [(6, 0, vote_type.ids)],
-                "delegation_state": "confirmed",
             }
         )
         p_del.write({"assembly_excluded": False})

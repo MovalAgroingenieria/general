@@ -1,8 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
 <odoo>
-    <!-- Shared AF v2.0 report fragments (no new report actions). Context: ``asm`` = assembly.assembly. -->
+    <!-- Shared fragments. Set ``asm`` = assembly.assembly before calling meta / publication blocks. -->
+    <template id="report_assembly_asm_meta_block">
+        <div class="text-center mb-3 o_assembly_report_asm_meta">
+            <div t-if="asm.code" class="small text-muted mb-1">
+                <span>Reference</span>:
+                <span t-field="asm.code"/>
+            </div>
+            <h4><span t-field="asm.name"/></h4>
+            <div t-if="asm.company_id" class="small" groups="base.group_multi_company">
+                <span class="text-muted">Company:</span>
+                <span t-field="asm.company_id"/>
+            </div>
+            <div t-if="asm.date_announcement" class="small">
+                <span class="text-muted">Announcement:</span>
+                <span t-field="asm.date_announcement" t-options="{'format': 'dd/MM/yyyy'}"/>
+            </div>
+            <div t-if="asm.date_first_call" class="small">
+                <span class="text-muted">First call:</span>
+                <span t-field="asm.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
+                <t t-if="asm.location"> — <span t-field="asm.location"/></t>
+            </div>
+            <div t-if="asm.date_second_call" class="small">
+                <span class="text-muted">Second call:</span>
+                <span t-field="asm.date_second_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
+            </div>
+            <div t-if="asm.president_id or asm.secretary_id" class="small mt-1">
+                <t t-if="asm.president_id">
+                    <span class="text-muted">President:</span>
+                    <span t-field="asm.president_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
+                </t>
+                <t t-if="asm.president_id and asm.secretary_id"> — </t>
+                <t t-if="asm.secretary_id">
+                    <span class="text-muted">Secretary:</span>
+                    <span t-field="asm.secretary_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
+                </t>
+            </div>
+        </div>
+    </template>
+
+    <template id="report_assembly_operational_roster_note">
+        <p class="small text-muted text-center mb-3 o_assembly_report_operational_note">
+            Working list for the chair and minutes. It is not the legal convocation: use <strong>Assembly publication (PDF)</strong> for the formal notice text.
+        </p>
+    </template>
+
+    <template id="report_assembly_attendance_roster_footer">
+        <div class="small text-muted mt-3 pt-2 border-top o_assembly_report_roster_footer">
+            <span>Convocable members:</span>
+            <strong><span t-field="asm.total_possible_attendees"/></strong>
+            <span class="ms-3">Attended (confirmed):</span>
+            <strong><span t-field="asm.total_present_attendees"/></strong>
+            <span class="ms-3">Attendance ratio:</span>
+            <strong><span t-field="asm.quorum_percentage"/>%</strong>
+            <span class="ms-3">Quorum reached:</span>
+            <strong t-if="asm.quorum_reached">Yes</strong>
+            <strong t-else="">No</strong>
+        </div>
+    </template>
+
+    <template id="report_assembly_attendee_representation_cell">
+        <t t-set="rep_as_owner" t-value="asm.representation_ids.filtered(lambda r: r.active and r.owner_partner_id == att.partner_id)[:1]"/>
+        <t t-set="rep_as_agent" t-value="asm.representation_ids.filtered(lambda r: r.active and r.agent_partner_id == att.partner_id)"/>
+        <t t-if="rep_as_owner">
+            <span class="text-muted">Represented by </span>
+            <span t-field="rep_as_owner.agent_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
+        </t>
+        <t t-elif="rep_as_agent">
+            <span class="text-muted">Acts for </span>
+            <t t-foreach="rep_as_agent" t-as="ra">
+                <span t-field="ra.owner_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
+                <t t-if="not ra_last">; </t>
+            </t>
+        </t>
+        <t t-else="">–</t>
+    </template>
+
+    <template id="report_assembly_attendee_delegations_received_cell">
+        <t t-set="delegations_in" t-value="asm.delegation_ids.filtered(lambda d: d.delegate_partner_id == att.partner_id)"/>
+        <t t-if="delegations_in">
+            <t t-foreach="delegations_in" t-as="del_in">
+                <span t-field="del_in.partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
+                <t t-if="del_in.vote_type_ids"> (<t t-foreach="del_in.vote_type_ids" t-as="vt"><span t-field="vt.name"/><t t-if="not vt_last">, </t></t>)</t>
+                <t t-if="not del_in_last">; </t>
+            </t>
+        </t>
+        <t t-else="">–</t>
+    </template>
+
+    <template id="report_assembly_attendee_delegations_given_cell">
+        <t t-set="delegations_out" t-value="asm.delegation_ids.filtered(lambda d: d.partner_id == att.partner_id)"/>
+        <t t-if="delegations_out">
+            <t t-foreach="delegations_out" t-as="del_out">
+                <span class="text-muted">To</span>
+                <span t-field="del_out.delegate_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
+                <t t-if="del_out.vote_type_ids"> (<t t-foreach="del_out.vote_type_ids" t-as="vt"><span t-field="vt.name"/><t t-if="not vt_last">, </t></t>)</t>
+                <t t-if="del_out.delegation_vote_transfer_state"> <span class="text-muted">(<span t-field="del_out.delegation_vote_transfer_state"/>)</span></t>
+                <t t-if="not del_out_last">; </t>
+            </t>
+        </t>
+        <t t-else="">–</t>
+    </template>
+
+    <template id="report_assembly_attendee_signature_cell">
+        <t t-if="att.attendance_signature">
+            <img
+                t-att-src="image_data_uri(att.attendance_signature)"
+                class="o_assembly_report_signature img-fluid"
+                style="max-height: 48px;"
+                alt=""
+            />
+        </t>
+        <t t-else="">—</t>
+    </template>
+
     <template id="report_assembly_publication_html_block">
-        <t t-set="pub_html" t-value="asm.get_rendered_publication_text()"/>
+        <t t-set="pub_html" t-value="asm.get_rendered_publication()"/>
         <div t-if="pub_html" class="mb-3 o_assembly_report_publication" t-out="pub_html"/>
         <div t-elif="asm.description" class="mb-3 o_assembly_report_publication_fallback">
             <div t-field="asm.description"/>
@@ -28,6 +142,20 @@
                 </tr>
             </tbody>
         </table>
+    </template>
+
+    <template id="report_assembly_agenda_summary_compact_block">
+        <t t-if="assembly.agenda_ids">
+            <div class="row mt-4"><div class="col-12"><strong>Agenda summary</strong></div></div>
+            <p class="small text-muted mb-2">Item titles and voting mode only; full wording stays in the notice body or the detailed agenda report.</p>
+            <ol class="mt-1 small o_assembly_report_agenda_compact">
+                <li t-foreach="assembly.agenda_ids.sorted(key=lambda x: x.sequence)" t-as="item">
+                    <span t-field="item.name"/>
+                    <span class="text-muted"> — <span t-field="item.agenda_vote_mode"/></span>
+                    <t t-if="item.requires_vote and item.vote_type_id"> (<span t-field="item.vote_type_id.name"/>)</t>
+                </li>
+            </ol>
+        </t>
     </template>
 
     <template id="report_assembly_agenda_af_list_block">
@@ -58,7 +186,9 @@
                         </li>
                     </ul>
                 </t>
-                <div t-if="item.final_summary" class="mt-1 ms-3 small border-start ps-2 o_assembly_report_final_summary" t-out="item.final_summary"/>
+                <div t-if="item.final_summary" class="mt-1 ms-3 small border-start ps-2 o_assembly_report_final_summary">
+                    <span t-field="item.final_summary"/>
+                </div>
             </li>
         </ol>
     </template>

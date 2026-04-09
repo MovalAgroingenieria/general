@@ -11,6 +11,7 @@ from odoo.tests import TransactionCase
 from .common import AssemblyTestMixin
 
 _MODULE_ROOT = Path(__file__).resolve().parents[1]
+_MODULE_TECHNICAL_NAME = _MODULE_ROOT.name
 
 
 def _load_manifest_dict():
@@ -40,7 +41,9 @@ class TestBaseAssemblyPackagingSanity(AssemblyTestMixin, TransactionCase):
         manifest = _load_manifest_dict()
         for _bundle, paths in (manifest.get("assets") or {}).items():
             for rel in paths:
-                path = _MODULE_ROOT / rel
+                prefix = "%s/" % _MODULE_TECHNICAL_NAME
+                fs_rel = rel[len(prefix) :] if rel.startswith(prefix) else rel
+                path = _MODULE_ROOT / fs_rel
                 self.assertTrue(
                     path.is_file(),
                     "Manifest asset file missing: %s" % rel,
@@ -112,6 +115,14 @@ class TestBaseAssemblyPackagingSanity(AssemblyTestMixin, TransactionCase):
     def test_representation_report_action_xmlid_exists(self):
         """AF §11.5: representation template report is declared."""
         self.env.ref("base_assembly.assembly_assembly_action_report_representation")
+        self.env.ref(
+            "base_assembly.assembly_representation_action_report_power_of_attorney"
+        )
+
+    def test_delegation_certificate_report_action_xmlid_exists(self):
+        self.env.ref(
+            "base_assembly.assembly_delegation_action_report_vote_delegation_certificate"
+        )
 
     def test_attendance_present_with_delegation_report_action_xmlid_exists(self):
         """Present-only attendance report includes delegations column (bound action)."""

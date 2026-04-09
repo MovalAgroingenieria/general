@@ -63,7 +63,6 @@ class TestDelegationNoChain(AssemblyTestMixin, TransactionCase):
                 "partner_id": a_att.partner_id.id,
                 "delegate_partner_id": b_att.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
         d2 = Delegation.create(
@@ -72,7 +71,6 @@ class TestDelegationNoChain(AssemblyTestMixin, TransactionCase):
                 "partner_id": b_att.partner_id.id,
                 "delegate_partner_id": c_att.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt2.id])],
-                "delegation_state": "confirmed",
             }
         )
         self.assertTrue(d1 and d2)
@@ -89,7 +87,6 @@ class TestDelegationNoChain(AssemblyTestMixin, TransactionCase):
                 "partner_id": a_att.partner_id.id,
                 "delegate_partner_id": b_att.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
         with self.assertRaises(ValidationError):
@@ -99,7 +96,6 @@ class TestDelegationNoChain(AssemblyTestMixin, TransactionCase):
                     "partner_id": b_att.partner_id.id,
                     "delegate_partner_id": c_att.partner_id.id,
                     "vote_type_ids": [(6, 0, [vt1.id])],
-                    "delegation_state": "confirmed",
                 }
             )
 
@@ -115,7 +111,6 @@ class TestDelegationNoChain(AssemblyTestMixin, TransactionCase):
                 "partner_id": b_att.partner_id.id,
                 "delegate_partner_id": c_att.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
         with self.assertRaises(ValidationError):
@@ -125,7 +120,6 @@ class TestDelegationNoChain(AssemblyTestMixin, TransactionCase):
                     "partner_id": a_att.partner_id.id,
                     "delegate_partner_id": b_att.partner_id.id,
                     "vote_type_ids": [(6, 0, [vt1.id])],
-                    "delegation_state": "confirmed",
                 }
             )
 
@@ -140,7 +134,6 @@ class TestDelegationNoChain(AssemblyTestMixin, TransactionCase):
                 "partner_id": a_att.partner_id.id,
                 "delegate_partner_id": b_att.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()
@@ -168,7 +161,6 @@ class TestDelegationNoChain(AssemblyTestMixin, TransactionCase):
                 "partner_id": a_att.partner_id.id,
                 "delegate_partner_id": b_att.partner_id.id,
                 "vote_type_ids": [(6, 0, [vt1.id])],
-                "delegation_state": "confirmed",
             }
         )
         assembly.attendee_ids.recompute_attendee_vote_lines()

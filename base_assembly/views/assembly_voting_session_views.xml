@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
+<odoo>
+    <record id="assembly_voting_view_form_session" model="ir.ui.view">
+        <field name="name">assembly.voting.form.session</field>
+        <field name="model">assembly.voting</field>
+        <field name="priority">5</field>
+        <field name="arch" type="xml">
+            <form string="Voting session" class="o_voting_session_panel">
+                <header>
+                    <button
+                        name="action_refresh_roll_call"
+                        string="Refresh roll call"
+                        type="object"
+                        class="btn-secondary"
+                        invisible="voting_state != 'open'"
+                        groups="base_assembly.assembly_group_manager"
+                    />
+                    <button
+                        name="action_session_go_previous_agenda"
+                        string="Previous item"
+                        type="object"
+                        class="btn-secondary"
+                        groups="base_assembly.assembly_group_manager"
+                    />
+                    <button
+                        name="action_session_go_next_agenda"
+                        string="Next item"
+                        type="object"
+                        class="btn-secondary"
+                        groups="base_assembly.assembly_group_manager"
+                    />
+                    <button
+                        name="action_session_skip_agenda_item"
+                        string="Skip item"
+                        type="object"
+                        class="btn-secondary"
+                        invisible="voting_state != 'open'"
+                        groups="base_assembly.assembly_group_manager"
+                    />
+                    <button
+                        name="action_cancel"
+                        string="Cancel voting"
+                        type="object"
+                        invisible="voting_state != 'open'"
+                        groups="base_assembly.assembly_group_manager"
+                    />
+                    <button
+                        name="action_close"
+                        string="Close voting"
+                        type="object"
+                        class="btn-primary"
+                        invisible="voting_state != 'open'"
+                        groups="base_assembly.assembly_group_manager"
+                    />
+                    <button
+                        name="action_session_close_and_next"
+                        string="Close and next item"
+                        type="object"
+                        class="btn-primary"
+                        invisible="voting_state != 'open'"
+                        groups="base_assembly.assembly_group_manager"
+                    />
+                    <field name="voting_state" widget="statusbar" statusbar_visible="open,closed,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_assembly" type="object" class="oe_stat_button" icon="fa-building-o">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_text">Assembly</span>
+                            </div>
+                        </button>
+                        <button name="action_open_agenda_item" type="object" class="oe_stat_button" icon="fa-list-ol">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_text">Agenda item</span>
+                            </div>
+                        </button>
+                        <button name="action_open_results" type="object" class="oe_stat_button" icon="fa-bar-chart" invisible="voting_state != 'closed'">
+                            <div class="o_form_field o_stat_info">
+                                <span class="o_stat_value"><field name="count_results"/></span>
+                                <span class="o_stat_text">Results</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="o_voting_session_header mb-3 border rounded-3 shadow-sm overflow-hidden bg-view">
+                        <div class="px-3 py-3 border-bottom bg-200">
+                            <div class="text-muted text-uppercase small fw-semibold mb-2" style="letter-spacing: 0.05em;">Voting session</div>
+                            <h2 class="h4 mb-0 fw-bold"><field name="name" readonly="1" nolabel="1"/></h2>
+                        </div>
+                        <div class="px-3 py-2 small">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-lg-auto">
+                                    <span class="text-muted">Assembly</span>
+                                    <div class="fw-semibold"><field name="assembly_id" readonly="1" nolabel="1"/></div>
+                                </div>
+                                <div class="col-12 col-lg-auto">
+                                    <span class="text-muted">Agenda item</span>
+                                    <div class="fw-semibold"><field name="agenda_id" readonly="1" nolabel="1"/></div>
+                                </div>
+                                <div class="col-6 col-md-auto">
+                                    <span class="text-muted">Vote mode</span>
+                                    <div><field name="agenda_vote_mode" readonly="1" nolabel="1" widget="badge"/></div>
+                                </div>
+                                <div class="col-6 col-md-auto">
+                                    <span class="text-muted">Vote type</span>
+                                    <div class="fw-semibold"><field name="vote_type_id" readonly="1" nolabel="1"/></div>
+                                </div>
+                                <div class="col-12 col-md-auto ms-md-auto text-md-end">
+                                    <span class="text-muted">Session state</span>
+                                    <div><field name="voting_state" readonly="1" nolabel="1" widget="badge"/></div>
+                                </div>
+                            </div>
+                            <div class="mt-2 pt-2 border-top d-flex flex-wrap gap-3 text-muted" invisible="not allow_online_voting">
+                                <span><i class="fa fa-globe me-1"/>Online voting is allowed on this assembly.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="o_voting_session_kpis row g-2 mb-3" role="region" aria-label="Voting totals">
+                        <div class="col-6 col-md-3">
+                            <div class="h-100 p-3 border rounded-3 text-center bg-view">
+                                <div class="text-muted small text-uppercase">Total possible votes</div>
+                                <div class="fs-3 fw-bold text-primary"><field name="total_votes_possible" readonly="1" nolabel="1"/></div>
+                                <div class="text-muted small">vote weight pool</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="h-100 p-3 border rounded-3 text-center bg-view">
+                                <div class="text-muted small text-uppercase">Votes cast</div>
+                                <div class="fs-3 fw-bold text-success"><field name="total_votes_cast" readonly="1" nolabel="1"/></div>
+                                <div class="text-muted small">recorded weight</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="h-100 p-3 border rounded-3 text-center bg-view">
+                                <div class="text-muted small text-uppercase">Remaining</div>
+                                <div class="fs-3 fw-bold text-warning"><field name="remaining_votes" readonly="1" nolabel="1"/></div>
+                                <div class="text-muted small">weight not cast</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="h-100 p-3 border rounded-3 text-center bg-view">
+                                <div class="text-muted small text-uppercase">Participation</div>
+                                <div class="fs-3 fw-bold"><field name="participation_percentage" readonly="1" nolabel="1"/> %</div>
+                                <div class="text-muted small">by weight</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-light border py-2 px-3 mb-3 small" role="status">
+                        <span class="me-3"><strong><field name="count_pending_votes" readonly="1" nolabel="1" class="oe_inline"/></strong> pending</span>
+                        <span class="me-3"><strong><field name="count_recorded_votes" readonly="1" nolabel="1" class="oe_inline"/></strong> recorded</span>
+                        <span class="text-muted"><strong><field name="count_vote_lines" readonly="1" nolabel="1" class="oe_inline"/></strong> voters on roll call</span>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                        <h4 class="mb-0">Roll call</h4>
+                        <span class="text-muted small">Rows: pending first, then recorded, then not eligible.</span>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Set each member’s <strong>Vote</strong> when the session is open. <strong>Voting weight</strong> is fixed for this round. Use <strong>Refresh roll call</strong> to add new eligible seats without clearing recorded votes.
+                    </p>
+                    <field name="vote_line_ids" readonly="voting_state != 'open'">
+                        <list
+                            string="Roll call"
+                            editable="top"
+                            create="0"
+                            delete="0"
+                            default_order="session_row_group_order,partner_id,attendee_id"
+                            class="o_voting_session_roll_table"
+                            decoration-muted="session_control_state == 'ineligible'"
+                            decoration-info="session_control_state == 'pending'"
+                            decoration-success="vote_option == 'yes'"
+                            decoration-danger="vote_option == 'no'"
+                            decoration-warning="vote_option in ('abstention','blank')"
+                        >
+                            <field name="session_row_group_order" column_invisible="1"/>
+                            <field name="assembly_id" column_invisible="1"/>
+                            <field name="voting_id" column_invisible="1"/>
+                            <field name="attendee_id" string="Attendee" readonly="1" force_save="1"/>
+                            <field name="session_context_label" string="Delegation / representation" readonly="1"/>
+                            <field name="votes_applied" string="Voting weight" readonly="1"/>
+                            <field name="vote_option" string="Vote"/>
+                            <field name="session_control_state" string="Status" readonly="1" widget="badge"/>
+                            <field name="vote_channel" optional="hide" readonly="1"/>
+                            <field name="vote_cast_at" string="Recorded at" optional="hide" readonly="1"/>
+                            <field name="vote_cast_by_user_id" string="Recorded by" optional="hide" readonly="1"/>
+                            <field name="partner_id" optional="hide" readonly="1"/>
+                        </list>
+                    </field>
+                    <separator string="Results (after close)" invisible="voting_state != 'closed'"/>
+                    <field name="result_ids" invisible="voting_state != 'closed'" readonly="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

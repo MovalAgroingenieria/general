@@ -8,7 +8,7 @@
                 <field name="company_id" groups="base.group_multi_company" optional="show"/>
                 <field name="name"/>
                 <field name="code"/>
-                <field name="vote_type_ids" widget="many2many_tags"/>
+                <field name="vote_type_ids" widget="many2many_tags" options="{'no_create': True, 'no_open': True}"/>
             </list>
         </field>
     </record>
@@ -23,7 +23,7 @@
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="name"/>
                             <field name="code"/>
-                            <field name="vote_type_ids" widget="many2many_tags"/>
+                            <field name="vote_type_ids" widget="many2many_tags" options="{'no_create': True, 'no_open': True}"/>
                         </group>
                         <group>
                             <field name="default_quorum_type"/>
@@ -49,6 +49,9 @@
                         <field name="require_vat"/>
                         <field name="default_allow_attendance_notes"/>
                         <field name="default_include_qr_code"/>
+                        <div class="alert alert-light py-2 px-3 small mb-0" colspan="2" role="status" invisible="not default_include_qr_code">
+                            New assemblies will show the <strong>Links &amp; QR</strong> smart button and per-attendee <strong>Open attendance link</strong> / <strong>Show QR</strong> when this default is on.
+                        </div>
                     </group>
                     <group string="Attendance (defaults for new assemblies)">
                         <field name="default_attendance_require_partner_vat_confirm"/>

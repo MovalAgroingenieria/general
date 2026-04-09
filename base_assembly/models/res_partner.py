@@ -2,6 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, fields, models
+from odoo.osv import expression
 
 
 class ResPartner(models.Model):
@@ -49,19 +50,31 @@ class ResPartner(models.Model):
             partner.count_assembly_delegations = len(partner.assembly_delegation_ids)
 
     def action_open_assembly_attendees(self):
+        domain = expression.AND(
+            [
+                [("partner_id", "=", self.id)],
+                [("assembly_id.active", "=", True)],
+            ]
+        )
         return self._action_window(
             "assembly.attendee",
             self.env._("Assembly attendances"),
             "list,form",
-            domain=[("partner_id", "=", self.id)],
+            domain=domain,
             context={"default_partner_id": self.id},
         )
 
     def action_open_assembly_delegations(self):
+        domain = expression.AND(
+            [
+                [("partner_id", "=", self.id)],
+                [("assembly_id.active", "=", True)],
+            ]
+        )
         return self._action_window(
             "assembly.delegation",
             self.env._("Delegations (as delegator)"),
             "list,form",
-            domain=[("partner_id", "=", self.id)],
+            domain=domain,
             context={"default_partner_id": self.id},
         )

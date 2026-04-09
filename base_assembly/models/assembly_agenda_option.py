@@ -8,8 +8,6 @@ _AGENDA_VOTE_MODE_MANUAL_MULTI = "manual_multi"
 
 
 class AssemblyAgendaOption(models.Model):
-    """Line of ballot options for an agenda item (structure only; no vote tallies here)."""
-
     _name = "assembly.agenda.option"
     _description = "Assembly agenda option"
     _order = "agenda_id, sequence, id"
@@ -22,12 +20,20 @@ class AssemblyAgendaOption(models.Model):
         index=True,
         check_company=True,
     )
-    name = fields.Char(required=True, translate=True)
+    name = fields.Char(
+        string="Choice",
+        required=True,
+        translate=True,
+        help="Label for this choice as it appears on the ballot.",
+    )
     sequence = fields.Integer(default=10)
     manual_vote_count = fields.Integer(
-        string="Manual vote units",
+        string="Votes",
         default=0,
-        help="Recorded vote weight for this option (manual multi-option mode, AF v2.0).",
+        help=(
+            "Final total votes cast for this choice. "
+            "Enter aggregate counts only; votes are not recorded per attendee."
+        ),
     )
 
     @api.constrains("manual_vote_count")
@@ -35,7 +41,7 @@ class AssemblyAgendaOption(models.Model):
         for rec in self:
             if rec.manual_vote_count < 0:
                 raise ValidationError(
-                    self.env._("Manual vote units per option cannot be negative.")
+                    self.env._("Votes per option cannot be negative.")
                 )
 
     def _revalidate_parent_agenda_manual_multi(self):
@@ -47,17 +53,28 @@ class AssemblyAgendaOption(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        agenda_ids = [v.get("agenda_id") for v in vals_list if v.get("agenda_id")]
+        if agenda_ids:
+            self.env["assembly.agenda"].browse(agenda_ids).mapped(
+                "assembly_id"
+            )._assembly_ensure_not_closed_for_related_changes()
         records = super().create(vals_list)
         records._revalidate_parent_agenda_manual_multi()
         return records
 
     def write(self, vals):
+        self.mapped(
+            "agenda_id.assembly_id"
+        )._assembly_ensure_not_closed_for_related_changes()
         res = super().write(vals)
         if any(k in vals for k in ("manual_vote_count", "agenda_id")):
             self._revalidate_parent_agenda_manual_multi()
         return res
 
     def unlink(self):
+        self.mapped(
+            "agenda_id.assembly_id"
+        )._assembly_ensure_not_closed_for_related_changes()
         agendas = self.mapped("agenda_id")
         res = super().unlink()
         agendas.filtered(

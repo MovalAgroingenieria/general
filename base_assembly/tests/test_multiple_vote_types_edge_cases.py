@@ -67,7 +67,6 @@ class TestMultipleVoteTypesEdgeCases(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, [vote_type1.id, vote_type2.id])],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -164,7 +163,6 @@ class TestMultipleVoteTypesEdgeCases(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator1.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [],  # Empty = all types
-                "delegation_state": "confirmed",
             }
         )
 
@@ -175,7 +173,6 @@ class TestMultipleVoteTypesEdgeCases(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator2.partner_id.id,
                 "delegate_partner_id": delegate.partner_id.id,
                 "vote_type_ids": [(6, 0, vote_type1.ids)],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -326,7 +323,6 @@ class TestMultipleVoteTypesEdgeCases(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator1.partner_id.id,
                 "delegate_partner_id": delegate_attendee.partner_id.id,
                 "vote_type_ids": [(6, 0, [vote_type1.id, vote_type2.id])],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -337,7 +333,6 @@ class TestMultipleVoteTypesEdgeCases(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator2.partner_id.id,
                 "delegate_partner_id": delegate_attendee.partner_id.id,
                 "vote_type_ids": [(6, 0, [vote_type2.id, vote_type3.id])],
-                "delegation_state": "confirmed",
             }
         )
 
@@ -348,7 +343,6 @@ class TestMultipleVoteTypesEdgeCases(AssemblyTestMixin, TransactionCase):
                 "partner_id": delegator3.partner_id.id,
                 "delegate_partner_id": delegate_attendee.partner_id.id,
                 "vote_type_ids": [(6, 0, [vote_type1.id, vote_type3.id])],
-                "delegation_state": "confirmed",
             }
         )
 

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
+<odoo>
+    <record id="assembly_ballot_print_wizard_view_form" model="ir.ui.view">
+        <field name="name">assembly.ballot.print.wizard.form</field>
+        <field name="model">assembly.ballot.print.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Print ballots">
+                <p class="text-muted small mb-3">
+                    Generates one <strong>member ballot PDF per attendee</strong> (name, VAT/NIF, voting power with delegations, agenda items).
+                    Enable <em>Merge into one PDF</em> for a single file; otherwise you get a ZIP with one PDF per attendee.
+                </p>
+                <group>
+                    <field name="assembly_id" readonly="1"/>
+                    <field name="only_present"/>
+                    <field name="merge_single_pdf"/>
+                    <field name="use_generic_intro_template"/>
+                </group>
+                <footer>
+                    <button name="action_print_ballots" string="Print PDFs" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_assembly_ballot_print_wizard" model="ir.actions.act_window">
+        <field name="name">Print ballots</field>
+        <field name="res_model">assembly.ballot.print.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="assembly_ballot_print_wizard_view_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

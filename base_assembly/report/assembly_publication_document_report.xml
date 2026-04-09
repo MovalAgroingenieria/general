@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
+<odoo>
+    <record id="assembly_assembly_action_report_publication_document" model="ir.actions.report">
+        <field name="name">Assembly publication (PDF)</field>
+        <field name="model">assembly.assembly</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_assembly.report_assembly_publication_document</field>
+        <field name="report_file">base_assembly.report_assembly_publication_document</field>
+        <field name="print_report_name">'Publication - %s' % (object._get_report_base_filename())</field>
+    </record>
+
+    <template id="report_assembly_publication_document">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="base_assembly.report_assembly_publication_document_doc"/>
+        </t>
+    </template>
+
+    <template id="report_assembly_publication_document_doc">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page o_assembly_report_publication_doc">
+                    <h3 class="text-center mb-2"><strong>Assembly notice</strong></h3>
+                    <p class="small text-muted text-center mb-3">Formal convocation text below; agenda titles are summarized after it for quick reference.</p>
+                    <t t-set="asm" t-value="o"/>
+                    <t t-call="base_assembly.report_assembly_asm_meta_block"/>
+                    <t t-call="base_assembly.report_assembly_publication_html_block"/>
+                    <t t-set="assembly" t-value="o"/>
+                    <t t-call="base_assembly.report_assembly_agenda_summary_compact_block"/>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

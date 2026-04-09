@@ -7,8 +7,8 @@
             <list editable="bottom">
                 <field name="agenda_id"/>
                 <field name="sequence" widget="handle"/>
-                <field name="name"/>
-                <field name="manual_vote_count"/>
+                <field name="name" string="Choice"/>
+                <field name="manual_vote_count" string="Votes"/>
             </list>
         </field>
     </record>
@@ -16,13 +16,13 @@
         <field name="name">assembly.agenda.option.form</field>
         <field name="model">assembly.agenda.option</field>
         <field name="arch" type="xml">
-            <form string="Agenda option">
+            <form string="Ballot option">
                 <sheet>
                     <group>
                         <field name="agenda_id" options="{'no_create': True}"/>
                         <field name="sequence"/>
-                        <field name="name"/>
-                        <field name="manual_vote_count"/>
+                        <field name="name" string="Choice"/>
+                        <field name="manual_vote_count" string="Votes"/>
                     </group>
                 </sheet>
             </form>
@@ -32,7 +32,7 @@
         <field name="name">assembly.agenda.option.search</field>
         <field name="model">assembly.agenda.option</field>
         <field name="arch" type="xml">
-            <search string="Agenda options">
+            <search string="Options">
                 <field name="name"/>
                 <field name="agenda_id"/>
             </search>

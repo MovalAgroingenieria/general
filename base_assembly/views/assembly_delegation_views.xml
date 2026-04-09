@@ -3,13 +3,14 @@
     <record id="assembly_delegation_view_tree" model="ir.ui.view">
         <field name="name">assembly.delegation.tree</field>
         <field name="model">assembly.delegation</field>
+        <field name="priority">10</field>
         <field name="arch" type="xml">
-            <list editable="bottom" default_order="partner_id">
+            <list editable="bottom" default_order="partner_id" decoration-success="delegation_vote_transfer_state == 'active'" decoration-warning="delegation_vote_transfer_state == 'waiting_delegate'">
                 <field name="assembly_id"/>
                 <field name="partner_id" string="Delegator"/>
                 <field name="delegate_partner_id" string="Delegate"/>
+                <field name="delegation_vote_transfer_state" widget="badge" optional="show"/>
                 <field name="vote_type_ids" widget="many2many_tags"/>
-                <field name="delegation_state"/>
                 <field name="date_delegation"/>
             </list>
         </field>
@@ -20,6 +21,15 @@
         <field name="arch" type="xml">
             <form string="Delegation">
                 <sheet>
+                    <div class="alert alert-info mb-3" role="status">
+                        <p class="mb-2 fw-semibold">How vote delegation works</p>
+                        <ul class="mb-0 ps-3 small">
+                            <li>This form defines who delegates (<strong>Delegator</strong>) and who receives units (<strong>Delegate</strong>). Saving writes the rule; <strong>delete the record</strong> to revoke it.</li>
+                            <li>Counted units move only when the delegate’s attendance is <strong>Attended (confirmed present)</strong>. Until then, <em>Vote transfer</em> stays <em>Waiting (delegate not attended yet)</em>.</li>
+                            <li>Empty <em>Vote types</em> = delegate all vote types configured on the assembly; otherwise only the tags you set.</li>
+                            <li>Totals use the stored snapshot on <em>Votes by type</em> (delegated out / delegated in) on each attendee; open delegator or delegate rows to verify.</li>
+                        </ul>
+                    </div>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_assembly" type="object" class="oe_stat_button" icon="fa-building-o" title="Assembly">
                             <div class="o_form_field o_stat_info">
@@ -36,8 +46,13 @@
                             <field name="assembly_id"/>
                             <field name="delegate_partner_id" string="Delegate" options="{'no_create': True}"/>
                             <field name="vote_type_ids" widget="many2many_tags"/>
-                            <field name="delegation_state"/>
                             <field name="date_delegation"/>
+                        </group>
+                        <group string="Status and impact">
+                            <field name="delegation_vote_transfer_state" widget="badge"/>
+                            <field name="delegation_delegate_attendee_state"/>
+                            <field name="delegation_snapshot_units_out" readonly="1"/>
+                            <field name="delegation_snapshot_units_in" readonly="1"/>
                         </group>
                     </group>
                 </sheet>
@@ -47,23 +62,69 @@
     <record id="assembly_delegation_view_search" model="ir.ui.view">
         <field name="name">assembly.delegation.search</field>
         <field name="model">assembly.delegation</field>
+        <field name="priority">10</field>
         <field name="arch" type="xml">
             <search string="Delegations">
                 <field name="partner_id" string="Delegator"/>
                 <field name="delegate_partner_id" string="Delegate"/>
                 <field name="assembly_id"/>
-                <filter string="Draft" name="filter_draft" domain="[('delegation_state','=','draft')]"/>
-                <filter string="Confirmed" name="filter_confirmed" domain="[('delegation_state','=','confirmed')]"/>
-                <filter
-                    string="Open (draft or confirmed)"
-                    name="filter_open"
-                    domain="[('delegation_state', 'in', ('draft', 'confirmed'))]"
-                />
-                <filter string="Revoked" name="filter_revoked" domain="[('delegation_state','=','revoked')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Assembly" name="group_assembly" context="{'group_by': 'assembly_id'}"/>
                 </group>
             </search>
+        </field>
+    </record>
+
+    <record id="assembly_delegation_view_tree_manager" model="ir.ui.view">
+        <field name="name">assembly.delegation.list.manager</field>
+        <field name="model">assembly.delegation</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <list string="Delegations" default_order="assembly_id desc, id desc" multi_edit="1" decoration-success="delegation_vote_transfer_state == 'active'" decoration-warning="delegation_vote_transfer_state == 'waiting_delegate'">
+                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <field name="assembly_id"/>
+                <field name="partner_id" string="Delegator"/>
+                <field name="delegate_partner_id" string="Delegate"/>
+                <field name="delegation_vote_transfer_state" widget="badge" optional="show"/>
+                <field name="vote_type_ids" widget="many2many_tags" optional="show"/>
+                <field name="date_delegation" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="assembly_delegation_view_form_manager" model="ir.ui.view">
+        <field name="name">assembly.delegation.form.manager</field>
+        <field name="model">assembly.delegation</field>
+        <field name="inherit_id" ref="base_assembly.assembly_delegation_view_form"/>
+        <field name="mode">primary</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='assembly_id']" position="after">
+                <field name="company_id" readonly="1" groups="base.group_multi_company"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="assembly_delegation_view_search_manager" model="ir.ui.view">
+        <field name="name">assembly.delegation.search.manager</field>
+        <field name="model">assembly.delegation</field>
+        <field name="inherit_id" ref="base_assembly.assembly_delegation_view_search"/>
+        <field name="mode">primary</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='assembly_id']" position="after">
+                <field name="company_id"/>
+                <field name="vote_type_ids"/>
+                <separator/>
+                <filter
+                    string="Active companies"
+                    name="filter_active_companies"
+                    domain="[('company_id', 'in', allowed_company_ids)]"
+                />
+            </xpath>
+            <xpath expr="//filter[@name='group_assembly']" position="after">
+                <filter string="Company" name="group_company" context="{'group_by': 'company_id'}"/>
+            </xpath>
         </field>
     </record>
 </odoo>
