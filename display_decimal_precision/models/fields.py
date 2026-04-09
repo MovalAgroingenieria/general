@@ -18,7 +18,9 @@ def new_get_description(self, env, attributes=None):
         application = self._related__digits
         # Force digits in the field description to the configured display precision.
         # get_display_precision is implemented on decimal.precision (in this module).
-        desc["digits"] = env["decimal.precision"].get_display_precision(application)
+        dp_model = env["decimal.precision"]
+        if hasattr(dp_model, "get_display_precision"):
+            desc["digits"] = dp_model.get_display_precision(application)
     return desc
 
 

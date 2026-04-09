@@ -54,7 +54,7 @@ class CensusGenerateLinesWizard(models.TransientModel):
 
         if census.state == "locked":
             raise UserError(
-                self.env._("Cannot add lines to a locked census. " "Unlock it first.")
+                self.env._("Cannot add lines to a locked census. Unlock it first.")
             )
 
         existing_partners = census.line_ids.mapped("member_partner_id")

@@ -16,7 +16,7 @@ class ResPartner(models.Model):
         index=True,
         help="Check if this contact is a secondary member",
     )
-    entity_global_code = fields.Char(
+    entity_global_code = fields.Integer(
         index=True,
         copy=False,
         help="Global shared code (applies to primary and secondary entities)",
@@ -52,6 +52,54 @@ class ResPartner(models.Model):
                     self.env._(
                         "A contact cannot be both a primary entity and "
                         "a secondary member simultaneously."
+                    )
+                )
+
+    @api.constrains("entity_global_code", "is_primary_entity")
+    def _check_unique_code_primary(self):
+        """Code must be unique among primary entities."""
+        for partner in self:
+            if not partner.entity_global_code or not partner.is_primary_entity:
+                continue
+            duplicate = self.search(
+                [
+                    ("entity_global_code", "=", partner.entity_global_code),
+                    ("is_primary_entity", "=", True),
+                    ("id", "!=", partner.id),
+                ],
+                limit=1,
+            )
+            if duplicate:
+                raise ValidationError(
+                    self.env._(
+                        "A primary entity with code %(code)s already "
+                        "exists: %(name)s",
+                        code=partner.entity_global_code,
+                        name=duplicate.name,
+                    )
+                )
+
+    @api.constrains("entity_global_code", "member_type_id", "is_secondary_entity")
+    def _check_unique_code_per_type(self):
+        """Code must be unique per member_type (for secondary members)."""
+        for partner in self:
+            if not partner.entity_global_code or not partner.is_secondary_entity:
+                continue
+            domain = [
+                ("entity_global_code", "=", partner.entity_global_code),
+                ("member_type_id", "=", partner.member_type_id.id),
+                ("is_secondary_entity", "=", True),
+                ("id", "!=", partner.id),
+            ]
+            duplicate = self.search(domain, limit=1)
+            if duplicate:
+                raise ValidationError(
+                    self.env._(
+                        "A member with code %(code)s and type '%(type)s' "
+                        "already exists: %(name)s",
+                        code=partner.entity_global_code,
+                        type=partner.member_type_id.name or "-",
+                        name=duplicate.name,
                     )
                 )
 

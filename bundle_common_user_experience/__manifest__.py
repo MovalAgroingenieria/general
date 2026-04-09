@@ -34,6 +34,4 @@
         "web_widget_one2many_tree_line_duplicate",
         "web_disable_export_group",
     ],
-    "data": [
-    ],
 }

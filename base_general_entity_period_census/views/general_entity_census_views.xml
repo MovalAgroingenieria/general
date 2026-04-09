@@ -104,13 +104,13 @@
                     <field name="state" widget="statusbar" />
                 </header>
                 <sheet>
-                    <div class="oe_title">
+                    <div class="oe_title" name="title">
                         <h1>
                             <field name="name" readonly="1" />
                         </h1>
                     </div>
-                    <group>
-                        <group>
+                    <group name="main_info">
+                        <group name="main_info_left">
                             <field
                                 name="primary_partner_id"
                                 readonly="state == 'locked'"
@@ -131,20 +131,20 @@
                             />
                             <field name="period_name" />
                         </group>
-                        <group>
+                        <group name="main_info_right">
                             <field name="period_days" />
                             <field name="line_count" />
                             <field name="total_shares" />
                         </group>
                     </group>
-                    <group string="Distribution Configuration">
-                        <group>
+                    <group name="distribution_config" string="Distribution Configuration">
+                        <group name="distribution_config_left">
                             <field
                                 name="distribution_product_id"
                                 readonly="state == 'locked'"
                             />
                         </group>
-                        <group>
+                        <group name="distribution_config_right">
                             <field
                                 name="distribution_amount_day"
                                 readonly="state == 'locked'"
@@ -170,12 +170,12 @@
                                     decoration-warning="shares_changed and state != 'validated'"
                                 >
                                     <field name="state" column_invisible="1" />
+                                    <field name="entity_global_code" optional="show" />
                                     <field
                                         name="member_partner_id"
                                         readonly="id"
                                         options="{'no_create': True, 'no_create_edit': True}"
                                     />
-                                    <field name="entity_global_code" optional="show" />
                                     <field name="previous_line_id" optional="hide" />
                                     <field name="shares" sum="Total" optional="show" />
                                     <field
@@ -333,13 +333,13 @@
                     column_invisible="context.get('hide_primary_partner')"
                     optional="show"
                 />
+                <field name="entity_global_code" optional="show" />
                 <field
                     name="member_partner_id"
                     column_invisible="context.get('default_member_partner_id')"
                     readonly="id"
                     options="{'no_create': True, 'no_create_edit': True}"
                 />
-                <field name="entity_global_code" optional="show" />
                 <field name="previous_line_id" optional="hide" />
                 <field name="shares" optional="show" />
                 <field
@@ -418,18 +418,18 @@
                 </header>
                 <sheet>
                     <field name="census_state" invisible="1" />
-                    <group>
-                        <group>
+                    <group name="line_main_info">
+                        <group name="line_main_info_left">
                             <field name="census_id" />
                             <field name="period_date" />
                             <field name="primary_partner_id" />
+                            <field name="entity_global_code" />
                             <field
                                 name="member_partner_id"
                                 options="{'no_create': True, 'no_create_edit': True}"
                             />
-                            <field name="entity_global_code" />
                         </group>
-                        <group>
+                        <group name="line_main_info_right">
                             <field name="previous_line_id" />
                             <field name="shares" readonly="census_state == 'locked'" />
                             <field
@@ -455,7 +455,7 @@
                             </field>
                         </page>
                     </notebook>
-                    <group>
+                    <group name="line_notes">
                         <field name="note" placeholder="Observations..." />
                     </group>
                 </sheet>

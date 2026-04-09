@@ -28,7 +28,7 @@ class GeneralEntityMember(models.Model):
         index=True,
         help="Member code within this specific entity",
     )
-    entity_global_code = fields.Char(
+    entity_global_code = fields.Integer(
         related="member_partner_id.entity_global_code",
         readonly=True,
         store=True,

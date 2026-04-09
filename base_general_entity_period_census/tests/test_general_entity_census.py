@@ -23,7 +23,7 @@ class TestGeneralEntityCensus(TransactionCase):
                 "name": "Test Entity Primary",
                 "is_primary_entity": True,
                 "company_type": "company",
-                "entity_global_code": "TEST-001",
+                "entity_global_code": 1001,
             }
         )
 
@@ -32,21 +32,21 @@ class TestGeneralEntityCensus(TransactionCase):
             {
                 "name": "Member A",
                 "is_secondary_entity": True,
-                "entity_global_code": "SM-A01",
+                "entity_global_code": 2001,
             }
         )
         cls.member_b = cls.env["res.partner"].create(
             {
                 "name": "Member B",
                 "is_secondary_entity": True,
-                "entity_global_code": "SM-B02",
+                "entity_global_code": 2002,
             }
         )
         cls.member_c = cls.env["res.partner"].create(
             {
                 "name": "Member C",
                 "is_secondary_entity": True,
-                "entity_global_code": "SM-C03",
+                "entity_global_code": 2003,
             }
         )
 
@@ -342,14 +342,14 @@ class TestCensusLineProtections(TransactionCase):
             {
                 "name": "Test Entity Write",
                 "is_primary_entity": True,
-                "entity_global_code": "TW-001",
+                "entity_global_code": 3001,
             }
         )
         cls.member = cls.env["res.partner"].create(
             {
                 "name": "Member Write",
                 "is_secondary_entity": True,
-                "entity_global_code": "SM-W01",
+                "entity_global_code": 3101,
             }
         )
 
@@ -465,7 +465,7 @@ class TestCensusLineProtections(TransactionCase):
             {
                 "name": "Member Mass B",
                 "is_secondary_entity": True,
-                "entity_global_code": "SM-MB",
+                "entity_global_code": 4001,
             }
         )
         line_b = self.CensusLine.create(
@@ -505,14 +505,14 @@ class TestCensusSharesChanged(TransactionCase):
             {
                 "name": "Test Entity SC",
                 "is_primary_entity": True,
-                "entity_global_code": "TSC-001",
+                "entity_global_code": 5001,
             }
         )
         cls.member = cls.env["res.partner"].create(
             {
                 "name": "Member SC",
                 "is_secondary_entity": True,
-                "entity_global_code": "SM-SC1",
+                "entity_global_code": 5101,
             }
         )
 
@@ -599,21 +599,21 @@ class TestCopyToNextPeriod(TransactionCase):
             {
                 "name": "Test Entity Copy",
                 "is_primary_entity": True,
-                "entity_global_code": "TC-001",
+                "entity_global_code": 6001,
             }
         )
         cls.member_a = cls.env["res.partner"].create(
             {
                 "name": "Member Copy A",
                 "is_secondary_entity": True,
-                "entity_global_code": "SM-CA",
+                "entity_global_code": 6101,
             }
         )
         cls.member_b = cls.env["res.partner"].create(
             {
                 "name": "Member Copy B",
                 "is_secondary_entity": True,
-                "entity_global_code": "SM-CB",
+                "entity_global_code": 6102,
             }
         )
 
@@ -720,28 +720,28 @@ class TestCensusWizards(TransactionCase):
             {
                 "name": "Test Entity Wizard",
                 "is_primary_entity": True,
-                "entity_global_code": "TWZ-001",
+                "entity_global_code": 7001,
             }
         )
         cls.member_a = cls.env["res.partner"].create(
             {
                 "name": "Wizard Member A",
                 "is_secondary_entity": True,
-                "entity_global_code": "SM-WA",
+                "entity_global_code": 7101,
             }
         )
         cls.member_b = cls.env["res.partner"].create(
             {
                 "name": "Wizard Member B",
                 "is_secondary_entity": True,
-                "entity_global_code": "SM-WB",
+                "entity_global_code": 7102,
             }
         )
         cls.member_c = cls.env["res.partner"].create(
             {
                 "name": "Wizard Member C",
                 "is_secondary_entity": True,
-                "entity_global_code": "SM-WC",
+                "entity_global_code": 7103,
             }
         )
 
@@ -868,14 +868,14 @@ class TestCensusPartnerExtension(TransactionCase):
             {
                 "name": "Test Entity Partner",
                 "is_primary_entity": True,
-                "entity_global_code": "TP-001",
+                "entity_global_code": 8001,
             }
         )
         cls.member = cls.env["res.partner"].create(
             {
                 "name": "Member Partner",
                 "is_secondary_entity": True,
-                "entity_global_code": "SM-P01",
+                "entity_global_code": 8101,
             }
         )
 
