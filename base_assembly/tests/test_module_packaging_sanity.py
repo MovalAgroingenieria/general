@@ -88,6 +88,29 @@ class TestBaseAssemblyPackagingSanity(AssemblyTestMixin, TransactionCase):
         self.env.ref("base_assembly.assembly_group_user")
         self.env.ref("base_assembly.assembly_group_manager")
 
+    def test_res_config_settings_assembly_app_not_suppressed(self):
+        """Odoo 18 skips ``notApp="1"`` settings apps (blank Assembly settings)."""
+        view = self.env.ref(
+            "base_assembly.res_config_settings_view_form_inherit_assembly"
+        )
+        arch = view.arch_db or ""
+        self.assertIn('name="assembly_settings"', arch)
+        self.assertNotIn('notApp="1"', arch)
+        self.assertIn('company_dependent="1"', arch)
+
+    def test_assembly_res_config_settings_execute_writes_company(self):
+        """Related settings fields persist on ``res.company`` after save (execute)."""
+        company = self.env.company
+        prev = company.assembly_allow_edit_closed_assembly
+        self.env["res.config.settings"].create(
+            {"assembly_allow_edit_closed_assembly": not prev}
+        ).execute()
+        self.assertEqual(company.assembly_allow_edit_closed_assembly, not prev)
+        self.env["res.config.settings"].create(
+            {"assembly_allow_edit_closed_assembly": prev}
+        ).execute()
+        self.assertEqual(company.assembly_allow_edit_closed_assembly, prev)
+
     def test_document_preview_wizard_action_xmlid_exists(self):
         self.env.ref("base_assembly.action_assembly_document_preview_wizard")
 
@@ -137,10 +160,9 @@ class TestBaseAssemblyPackagingSanity(AssemblyTestMixin, TransactionCase):
         act_called = self.env.ref(
             "base_assembly.assembly_attendee_action_called_members"
         )
-        act_opt = self.env.ref("base_assembly.assembly_agenda_option_action")
+        self.env.ref("base_assembly.assembly_agenda_option_view_tree")
         self.assertEqual(act_rep.res_model, "assembly.representation")
         self.assertEqual(act_called.res_model, "assembly.attendee")
-        self.assertEqual(act_opt.res_model, "assembly.agenda.option")
 
     def test_af_v2_form_views_chatter_and_agenda_fields(self):
         """Single check: assembly/agenda chatter + agenda vote/manual/summary fields + rep views."""

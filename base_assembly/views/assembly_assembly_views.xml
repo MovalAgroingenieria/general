@@ -8,19 +8,18 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="agenda_vote_mode"/>
-                <field name="requires_vote" column_invisible="0" invisible="agenda_vote_mode != 'weighted'" optional="show"/>
+                <field name="requires_vote" invisible="agenda_vote_mode != 'weighted'" optional="show"/>
                 <field
                     name="vote_type_id"
                     required="agenda_vote_mode == 'weighted'"
-                    column_invisible="0"
                     invisible="agenda_vote_mode != 'weighted'"
                     options="{'no_create': True, 'no_open': True}"
                 />
-                <field name="manual_yes" string="Yes (total)" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
-                <field name="manual_no" string="No (total)" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
-                <field name="manual_abstain" string="Abstention (total)" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
-                <field name="manual_count_blank" string="Blank (total)" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
-                <field name="manual_total_expected" string="Expected total votes" column_invisible="0" optional="hide" invisible="agenda_vote_mode not in ('manual_yes_no','manual_multi')"/>
+                <field name="manual_yes" string="Yes (total)" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                <field name="manual_no" string="No (total)" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                <field name="manual_abstain" string="Abstention (total)" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                <field name="manual_count_blank" string="Blank (total)" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                <field name="manual_total_expected" string="Expected total votes" optional="hide" invisible="agenda_vote_mode not in ('manual_yes_no','manual_multi')"/>
                 <field name="assembly_state" column_invisible="1"/>
                 <field name="agenda_state"/>
                 <button name="action_open_live_voting_screen" string="Live" type="object" icon="fa-desktop" title="Open live voting screen" invisible="assembly_state == 'closed' or assembly_state != 'in_session' or agenda_vote_mode == 'no_vote' or agenda_state == 'skipped'" groups="base_assembly.assembly_group_manager"/>
@@ -143,18 +142,11 @@
                     >
                         Entered total votes do not match the expected reference total. Adjust the counters or expected total before finalizing.
                     </div>
-                    <group string="1. Ballot options (choices on the ballot)" invisible="agenda_vote_mode != 'manual_multi'">
-                        <div class="alert alert-secondary mb-0 p-2 small" role="status" colspan="2">
-                            <strong>Define the choices:</strong>
-                            each row is one option voters may pick. Use <em>Choice</em> for the label and reorder with the handle.
-                            Final totals are entered in the same table in the next section.
-                        </div>
-                    </group>
-                    <group string="2. Manual results (final vote counts)" invisible="agenda_vote_mode != 'manual_multi'">
+                    <group string="Voting options (choices and vote totals)" invisible="agenda_vote_mode != 'manual_multi'">
                         <div class="alert alert-secondary mb-2 p-2 small" role="status" colspan="2">
-                            <strong>Enter final totals:</strong>
-                            use <em>Votes</em> for the total ballots counted for each choice.
-                            Only aggregate numbers are stored; the system does not record how each attendee voted.
+                            <strong>Choices and totals for this agenda item only:</strong>
+                            add one row per ballot choice (<em>Choice</em>), reorder with the handle, then enter <em>Votes</em> (aggregate counts per choice).
+                            Only totals are stored; individual attendee votes are not recorded.
                         </div>
                         <div class="alert alert-warning py-2 px-3 mb-2" role="status" colspan="2" invisible="manual_multi_options_count != 0">
                             Add at least one ballot option row before entering vote counts.
@@ -210,7 +202,7 @@
                 <field name="agenda_state"/>
                 <templates>
                     <t t-name="card">
-                        <div class="oe_kanban_card oe_kanban_global_click o_kanban_card rounded-3 shadow-sm border overflow-hidden">
+                        <div class="o_kanban_card rounded-3 shadow-sm border overflow-hidden">
                             <div class="d-flex align-items-center justify-content-between gap-2 px-3 py-2 border-bottom bg-100">
                                 <span class="badge rounded-pill text-bg-secondary"><i class="fa fa-list-ol me-1" title="Sequence"/><field name="sequence"/></span>
                                 <field name="agenda_state" widget="badge"/>
@@ -257,22 +249,14 @@
         <field name="arch" type="xml">
             <form string="Assembly">
                 <header>
-                    <button name="action_announce" string="Announce" type="object" class="btn-primary" invisible="assembly_state != 'draft'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_open_registration" string="Open registration" type="object" invisible="assembly_state != 'announced'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_start_session" string="Start session" type="object" invisible="assembly_state != 'open'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_open_live_voting_dashboard" string="Live voting" type="object" class="btn-primary" invisible="assembly_state != 'in_session'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_close" string="Close" type="object" invisible="assembly_state != 'in_session'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_reopen_from_closed" string="Reopen session" type="object" invisible="assembly_state != 'closed'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_cancel" string="Cancel" type="object" invisible="assembly_state == 'cancelled'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_reopen" string="Reopen" type="object" invisible="assembly_state != 'cancelled'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_generate_attendees" string="Generate attendees" type="object" invisible="assembly_state not in ('draft','announced','open')" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_recompute_attendee_votes" string="Recompute votes" type="object" invisible="not attendee_ids or assembly_state == 'closed'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_open_document_preview_wizard" string="Preview documents" type="object" invisible="assembly_state == 'closed'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_open_communication_send_wizard" string="Send communication" type="object" invisible="assembly_state == 'closed'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_open_ballot_print_wizard" string="Print ballots" type="object" invisible="assembly_state == 'closed' or not attendee_ids" groups="base_assembly.assembly_group_manager" title="Generate member ballot PDFs (merge or ZIP per attendee)."/>
-                    <button name="action_mail_compose_publication" string="Publication / call email" type="object" invisible="assembly_state == 'closed'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_mail_compose_ballot_intro" string="Ballot email" type="object" invisible="assembly_state == 'closed'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_mail_compose_delegation" string="Delegation email" type="object" invisible="assembly_state == 'closed'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_announce" string="Anunciar asamblea" type="object" class="oe_highlight" invisible="assembly_state != 'draft'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_open_registration" string="Abrir registro de asistentes" type="object" class="oe_highlight" invisible="assembly_state != 'announced'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_start_session" string="Iniciar sesión" type="object" class="oe_highlight" invisible="assembly_state != 'open'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_open_live_voting_dashboard" string="Panel de votación" type="object" class="oe_highlight" invisible="assembly_state != 'in_session'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_close" string="Cerrar asamblea" type="object" invisible="assembly_state != 'in_session'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_reopen_from_closed" string="Reabrir sesión" type="object" class="oe_highlight" invisible="assembly_state != 'closed'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_reopen" string="Volver a borrador" type="object" class="oe_highlight" invisible="assembly_state != 'cancelled'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_open_header_actions_wizard" string="Acciones" type="object" invisible="assembly_state == 'cancelled'" groups="base_assembly.assembly_group_manager"/>
                 </header>
                 <sheet>
                     <div class="alert alert-warning mb-3" role="alert" invisible="assembly_state != 'closed'">
@@ -401,19 +385,18 @@
                                     <field name="sequence" widget="handle"/>
                                     <field name="name"/>
                                     <field name="agenda_vote_mode"/>
-                                    <field name="requires_vote" column_invisible="0" invisible="agenda_vote_mode != 'weighted'" optional="hide"/>
+                                    <field name="requires_vote" invisible="agenda_vote_mode != 'weighted'" optional="hide"/>
                                     <field
                                         name="vote_type_id"
                                         required="agenda_vote_mode == 'weighted'"
-                                        column_invisible="0"
                                         invisible="agenda_vote_mode != 'weighted'"
                                         options="{'no_create': True, 'no_open': True}"
                                     />
-                                    <field name="manual_yes" string="Yes (total)" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
-                                    <field name="manual_no" string="No (total)" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
-                                    <field name="manual_abstain" string="Abstention (total)" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
-                                    <field name="manual_count_blank" string="Blank (total)" column_invisible="0" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
-                                    <field name="manual_total_expected" string="Expected total votes" column_invisible="0" optional="hide" invisible="agenda_vote_mode not in ('manual_yes_no','manual_multi')"/>
+                                    <field name="manual_yes" string="Yes (total)" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                                    <field name="manual_no" string="No (total)" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                                    <field name="manual_abstain" string="Abstention (total)" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                                    <field name="manual_count_blank" string="Blank (total)" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
+                                    <field name="manual_total_expected" string="Expected total votes" optional="hide" invisible="agenda_vote_mode not in ('manual_yes_no','manual_multi')"/>
                                     <field name="assembly_state" column_invisible="1"/>
                                     <field name="agenda_state"/>
                                     <button name="action_open_live_voting_screen" string="Live" type="object" icon="fa-desktop" title="Open live voting screen" invisible="assembly_state == 'closed' or assembly_state != 'in_session' or agenda_vote_mode == 'no_vote' or agenda_state == 'skipped'" groups="base_assembly.assembly_group_manager"/>
@@ -617,7 +600,7 @@
                 <field name="kanban_results_summary"/>
                 <templates>
                     <t t-name="card">
-                        <div class="oe_kanban_card oe_kanban_global_click o_kanban_card o_assembly_kanban_card d-flex flex-row flex-nowrap rounded-2 shadow-sm border overflow-hidden">
+                        <div class="o_kanban_card o_assembly_kanban_card d-flex flex-row flex-nowrap rounded-2 shadow-sm border overflow-hidden">
                             <div
                                 t-attf-class="o_assembly_kanban_date_rail flex-shrink-0 d-flex flex-column align-items-center justify-content-center px-2 py-3 text-center #{record.assembly_state.raw_value === 'closed' || record.assembly_state.raw_value === 'cancelled' ? 'bg-secondary-subtle text-secondary' : 'bg-warning-subtle'}"
                                 style="min-width: 4.75rem;"

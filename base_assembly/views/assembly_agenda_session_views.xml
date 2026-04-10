@@ -96,16 +96,10 @@
                     >
                         Entered total votes do not match the expected reference total. Adjust the counters or expected total before finalizing.
                     </div>
-                    <group string="1. Ballot options (choices)" invisible="agenda_vote_mode != 'manual_multi'">
-                        <div class="alert alert-secondary mb-0 py-2 px-3 small" role="status" colspan="2">
-                            <strong>Define the choices:</strong>
-                            each row is one option on the ballot. Set the <em>Choice</em> label and order with the handle; enter <em>Votes</em> in the next block.
-                        </div>
-                    </group>
-                    <group string="2. Manual results (final vote counts)" invisible="agenda_vote_mode != 'manual_multi'">
+                    <group string="Voting options (choices and vote totals)" invisible="agenda_vote_mode != 'manual_multi'">
                         <div class="alert alert-secondary mb-2 py-2 px-3 small" role="status" colspan="2">
-                            <strong>Enter final totals:</strong>
-                            <em>Votes</em> is the aggregate count for each choice only; per-attendee votes are not recorded.
+                            <strong>Choices and totals for this agenda item only:</strong>
+                            one row per ballot option; <em>Choice</em> is the label, <em>Votes</em> the aggregate count (not per attendee).
                         </div>
                         <field
                             name="option_ids"

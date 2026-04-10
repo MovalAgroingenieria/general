@@ -58,6 +58,16 @@ _ASSEMBLY_COMPANY_DEFAULT_CONFIG_REFS = (
 class ResCompany(models.Model):
     _inherit = "res.company"
 
+    assembly_default_use_qr = fields.Boolean(
+        string="Default tracked attendance links & QR",
+        default=True,
+        help="Default for Include QR / tracked links on new assemblies in this company.",
+    )
+    assembly_allow_edit_closed_assembly = fields.Boolean(
+        string="Allow editing closed assemblies",
+        default=False,
+        help="If set, assemblies in closed state can still be edited (per company).",
+    )
     assembly_sequence_id = fields.Many2one(
         "ir.sequence",
         string="Assembly reference sequence",

@@ -5,54 +5,58 @@
         <field name="name">res.config.settings.view.form.inherit.base_assembly</field>
         <field name="model">res.config.settings</field>
         <field name="priority" eval="40"/>
-        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
-                <app notApp="1" string="Assemblies" data-string="Assemblies" name="assembly_settings" groups="base_assembly.assembly_group_manager">
-                    <block title="Numbering" name="assembly_numbering_setting_container">
-                        <setting id="assembly_sequence_setting" string="Assembly reference sequence" help="Sequence used to generate assembly reference codes for this company. Leave empty to resolve by sequence code.">
+                <app string="Assemblies" data-string="Assemblies" name="assembly_settings" logo="/base_assembly/static/description/icon.svg" groups="base_assembly.assembly_group_manager">
+                    <block title="General" name="assembly_general_setting_container">
+                        <setting id="assembly_default_use_qr_setting" string="Tracked attendance links &amp; QR by default" help="Default for new assemblies when no assembly type is applied yet; the assembly type still overrides when chosen." company_dependent="1">
+                            <field name="assembly_default_use_qr"/>
+                        </setting>
+                        <setting id="assembly_allow_edit_closed_setting" string="Allow editing closed assemblies" help="When enabled, assemblies in closed state can still be edited for this company." company_dependent="1">
+                            <field name="assembly_allow_edit_closed_assembly"/>
+                        </setting>
+                        <setting id="assembly_sequence_setting" string="Assembly reference sequence" help="Sequence used to generate assembly reference codes. Leave empty to resolve by sequence code assembly.assembly." company_dependent="1">
                             <field name="assembly_sequence_id" domain="[('code', '=', 'assembly.assembly'), '|', ('company_id', '=', False), ('company_id', '=', company_id)]"/>
                         </setting>
                     </block>
-                    <block title="Default mail templates" name="assembly_mail_defaults_setting_container">
-                        <setting id="assembly_default_publication_mail_template_setting" string="Publication" help="Default convocation / publication template when an assembly has no override.">
+                    <block title="Default mail templates" name="assembly_mail_defaults_setting_container" help="Used when an assembly has no override on the corresponding document.">
+                        <setting id="assembly_default_publication_mail_template_setting" string="Publication" company_dependent="1">
                             <field name="assembly_default_publication_mail_template_id" domain="[('model', '=', 'assembly.assembly')]"/>
                         </setting>
-                        <setting id="assembly_default_delegation_document_mail_template_setting" string="Delegation document" help="Default delegation document body when an assembly has no override.">
+                        <setting id="assembly_default_delegation_document_mail_template_setting" string="Delegation document" company_dependent="1">
                             <field name="assembly_default_delegation_document_mail_template_id" domain="[('model', '=', 'assembly.assembly')]"/>
                         </setting>
-                        <setting id="assembly_default_delegation_footer_mail_template_setting" string="Delegation footer" help="Default delegation footer when an assembly has no override.">
+                        <setting id="assembly_default_delegation_footer_mail_template_setting" string="Delegation footer" company_dependent="1">
                             <field name="assembly_default_delegation_footer_mail_template_id" domain="[('model', '=', 'assembly.assembly')]"/>
                         </setting>
-                        <setting id="assembly_default_ballot_intro_mail_template_setting" string="Ballot introduction" help="Default ballot introduction when an assembly has no override.">
+                        <setting id="assembly_default_ballot_intro_mail_template_setting" string="Ballot introduction" company_dependent="1">
                             <field name="assembly_default_ballot_intro_mail_template_id" domain="[('model', '=', 'assembly.assembly')]"/>
                         </setting>
-                        <setting id="assembly_default_ballot_nominative_intro_mail_template_setting" string="Nominative ballot introduction" help="Default nominative ballot introduction when an assembly has no override.">
+                        <setting id="assembly_default_ballot_nominative_intro_mail_template_setting" string="Nominative ballot introduction" company_dependent="1">
                             <field name="assembly_default_ballot_nominative_intro_mail_template_id" domain="[('model', '=', 'assembly.assembly')]"/>
                         </setting>
                     </block>
-                    <block title="AF QWeb fallbacks" name="assembly_af_qweb_fallback_setting_container">
-                        <setting id="assembly_af_publication_fallback_qweb_setting" string="Publication" help="Used when mail template bodies are empty (after sanitization, etc.).">
+                    <block title="Fallback QWeb views" name="assembly_qweb_fallback_setting_container" help="QWeb used when mail template bodies are empty, and pages for tracked attendance deep links (landing before the form and errors for invalid or expired links).">
+                        <setting id="assembly_af_publication_fallback_qweb_setting" string="Publication" company_dependent="1">
                             <field name="assembly_af_publication_fallback_qweb_id" domain="[('type', '=', 'qweb')]"/>
                         </setting>
-                        <setting id="assembly_af_delegation_document_fallback_qweb_setting" string="Delegation document">
+                        <setting id="assembly_af_delegation_document_fallback_qweb_setting" string="Delegation document" company_dependent="1">
                             <field name="assembly_af_delegation_document_fallback_qweb_id" domain="[('type', '=', 'qweb')]"/>
                         </setting>
-                        <setting id="assembly_af_delegation_footer_fallback_qweb_setting" string="Delegation footer">
+                        <setting id="assembly_af_delegation_footer_fallback_qweb_setting" string="Delegation footer" company_dependent="1">
                             <field name="assembly_af_delegation_footer_fallback_qweb_id" domain="[('type', '=', 'qweb')]"/>
                         </setting>
-                        <setting id="assembly_af_ballot_intro_fallback_qweb_setting" string="Ballot introduction">
+                        <setting id="assembly_af_ballot_intro_fallback_qweb_setting" string="Ballot introduction" company_dependent="1">
                             <field name="assembly_af_ballot_intro_fallback_qweb_id" domain="[('type', '=', 'qweb')]"/>
                         </setting>
-                        <setting id="assembly_af_ballot_nominative_intro_fallback_qweb_setting" string="Nominative ballot introduction">
+                        <setting id="assembly_af_ballot_nominative_intro_fallback_qweb_setting" string="Nominative ballot introduction" company_dependent="1">
                             <field name="assembly_af_ballot_nominative_intro_fallback_qweb_id" domain="[('type', '=', 'qweb')]"/>
                         </setting>
-                    </block>
-                    <block title="Attendance deep links (HTTP)" name="assembly_attendance_http_setting_container" help="Shown when someone opens a tracked attendance URL from an assembly or attendee (managers see the landing page unless the link uses direct=1). Does not create links; enable tracked links per assembly under Configuration.">
-                        <setting id="assembly_attendance_landing_qweb_setting" string="Landing page" help="HTML shown before the attendance form when a manager opens a tracked sign-in URL (omit direct=1).">
+                        <setting id="assembly_attendance_landing_qweb_setting" string="Attendance deep link — landing page" company_dependent="1">
                             <field name="assembly_attendance_landing_qweb_id" domain="[('type', '=', 'qweb')]"/>
                         </setting>
-                        <setting id="assembly_attendance_error_qweb_setting" string="Error page" help="HTML for invalid, expired, or disallowed tracked attendance / deep links.">
+                        <setting id="assembly_attendance_error_qweb_setting" string="Attendance deep link — error page" company_dependent="1">
                             <field name="assembly_attendance_error_qweb_id" domain="[('type', '=', 'qweb')]"/>
                         </setting>
                     </block>

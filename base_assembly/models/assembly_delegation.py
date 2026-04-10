@@ -3,12 +3,16 @@
 # Large delegation + vote-recompute surface kept in one module for cohesion.
 # pylint: disable=too-many-lines
 
+import logging
+import re
 from collections import defaultdict, deque
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 from .assembly_mixin import assembly_safe_report_filename
+
+_logger = logging.getLogger(__name__)
 
 
 class AssemblyDelegation(models.Model):
@@ -129,6 +133,20 @@ class AssemblyDelegation(models.Model):
         help=(
             "Sum of stored delegated-in units on the delegate's vote lines for the types "
             "covered by this delegation, when transfer is active."
+        ),
+    )
+    delegation_state = fields.Selection(
+        [
+            ("draft", "Draft"),
+            ("confirmed", "Confirmed"),
+            ("revoked", "Revoked"),
+        ],
+        string="Delegation state",
+        compute="_compute_delegation_ux_display",
+        help=(
+            "Maps vote transfer for older UI and exports: Waiting → Draft, Active → "
+            "Confirmed. Prefer Vote transfer; revoked rows no longer exist (unlink the "
+            "delegation to revoke)."
         ),
     )
 
@@ -876,6 +894,7 @@ class AssemblyDelegation(models.Model):
             rec.delegation_snapshot_units_in = 0.0
             rec.delegation_delegate_attendee_state = "no_row"
             rec.delegation_vote_transfer_state = "waiting_delegate"
+            rec.delegation_state = "draft"
             if not rec.assembly_id or not rec.delegate_partner_id:
                 continue
             delegate_att = Attendee._search_for_assembly_partner(
@@ -889,6 +908,8 @@ class AssemblyDelegation(models.Model):
                 rec.delegation_delegate_attendee_state = delegate_att.attendee_state
             if rec in effective_rs:
                 rec.delegation_vote_transfer_state = "active"
+            if rec.delegation_vote_transfer_state == "active":
+                rec.delegation_state = "confirmed"
             if rec.delegation_vote_transfer_state != "active":
                 continue
             vt_ids = set(rec._get_effective_vote_types().ids)
@@ -913,6 +934,125 @@ class AssemblyDelegation(models.Model):
                 rec.delegation_snapshot_units_in = sum(
                     lines_in.mapped("delegated_in_votes")
                 )
+
+    @api.model
+    def _assembly_cleanup_delegation_state_in_views(self):
+        ir_ui_view = self.env["ir.ui.view"].sudo()
+        candidates = ir_ui_view.search(
+            [
+                ("arch_db", "ilike", "delegation_state"),
+                ("type", "not in", ("qweb",)),
+            ]
+        )
+        field_attr_re = re.compile(r"""(?m)\bname\s*=\s*(['"])delegation_state\1""")
+        replacements = (
+            (
+                "delegation_state == 'confirmed'",
+                "delegation_vote_transfer_state == 'active'",
+            ),
+            (
+                'delegation_state == "confirmed"',
+                "delegation_vote_transfer_state == 'active'",
+            ),
+            (
+                "delegation_state == 'draft'",
+                "delegation_vote_transfer_state == 'waiting_delegate'",
+            ),
+            (
+                'delegation_state == "draft"',
+                "delegation_vote_transfer_state == 'waiting_delegate'",
+            ),
+            (
+                "delegation_state == 'revoked'",
+                "delegation_vote_transfer_state == 'waiting_delegate'",
+            ),
+            (
+                'delegation_state == "revoked"',
+                "delegation_vote_transfer_state == 'waiting_delegate'",
+            ),
+            (
+                "'delegation_state', '=', 'confirmed'",
+                "'delegation_vote_transfer_state', '=', 'active'",
+            ),
+            (
+                "'delegation_state', '=', 'draft'",
+                "'delegation_vote_transfer_state', '=', 'waiting_delegate'",
+            ),
+            (
+                "'delegation_state', '=', 'revoked'",
+                "'delegation_vote_transfer_state', '=', 'waiting_delegate'",
+            ),
+            (
+                '"delegation_state", "=", "confirmed"',
+                '"delegation_vote_transfer_state", "=", "active"',
+            ),
+            (
+                '"delegation_state", "=", "draft"',
+                '"delegation_vote_transfer_state", "=", "waiting_delegate"',
+            ),
+            (
+                '"delegation_state", "=", "revoked"',
+                '"delegation_vote_transfer_state", "=", "waiting_delegate"',
+            ),
+            (
+                "group_by': 'delegation_state'",
+                "group_by': 'delegation_vote_transfer_state'",
+            ),
+            (
+                'group_by": "delegation_state"',
+                'group_by": "delegation_vote_transfer_state"',
+            ),
+            (
+                "default_delegation_state",
+                "default_delegation_vote_transfer_state",
+            ),
+        )
+        for view in candidates:
+            arch = view.arch_db
+            if not arch or "delegation_state" not in arch:
+                continue
+            new_arch = field_attr_re.sub(
+                r"name=\1delegation_vote_transfer_state\1",
+                arch,
+            )
+            for old, new in replacements:
+                new_arch = new_arch.replace(old, new)
+            if new_arch == arch:
+                continue
+            if "delegation_state" in new_arch:
+                _logger.warning(
+                    "base_assembly: view id=%s model=%s type=%s still contains "
+                    "delegation_state; fix manually or in Studio",
+                    view.id,
+                    view.model,
+                    view.type,
+                )
+                continue
+            try:
+                view.write({"arch_db": new_arch})
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                _logger.warning(
+                    "base_assembly: could not write cleaned view id=%s: %s",
+                    view.id,
+                    exc,
+                )
+                continue
+            _logger.info(
+                "base_assembly: updated view id=%s (%s) delegation_state references",
+                view.id,
+                view.name,
+            )
+        return True
+
+    def _register_hook(self):
+        super()._register_hook()
+        try:
+            self._assembly_cleanup_delegation_state_in_views()
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _logger.warning(
+                "base_assembly: delegation view cleanup at registry init failed: %s",
+                exc,
+            )
 
     @api.model_create_multi
     def create(self, vals_list):

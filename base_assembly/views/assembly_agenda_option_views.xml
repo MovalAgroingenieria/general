@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
 <odoo>
     <record id="assembly_agenda_option_view_tree" model="ir.ui.view">
         <field name="name">assembly.agenda.option.tree</field>
         <field name="model">assembly.agenda.option</field>
         <field name="arch" type="xml">
-            <list editable="bottom">
-                <field name="agenda_id"/>
+            <list editable="bottom" string="Voting options">
                 <field name="sequence" widget="handle"/>
                 <field name="name" string="Choice"/>
                 <field name="manual_vote_count" string="Votes"/>
@@ -16,10 +16,10 @@
         <field name="name">assembly.agenda.option.form</field>
         <field name="model">assembly.agenda.option</field>
         <field name="arch" type="xml">
-            <form string="Ballot option">
+            <form string="Voting option">
                 <sheet>
                     <group>
-                        <field name="agenda_id" options="{'no_create': True}"/>
+                        <field name="agenda_id" options="{'no_create': True}" groups="base.group_no_one"/>
                         <field name="sequence"/>
                         <field name="name" string="Choice"/>
                         <field name="manual_vote_count" string="Votes"/>
@@ -32,9 +32,9 @@
         <field name="name">assembly.agenda.option.search</field>
         <field name="model">assembly.agenda.option</field>
         <field name="arch" type="xml">
-            <search string="Options">
+            <search string="Voting options">
                 <field name="name"/>
-                <field name="agenda_id"/>
+                <field name="agenda_id" groups="base.group_no_one"/>
             </search>
         </field>
     </record>

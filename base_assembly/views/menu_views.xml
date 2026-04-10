@@ -85,15 +85,6 @@
             <p class="o_view_nocontent_smiling_face">Member registrations across assemblies.</p>
         </field>
     </record>
-    <record id="assembly_agenda_option_action" model="ir.actions.act_window">
-        <field name="name">Ballot options</field>
-        <field name="res_model">assembly.agenda.option</field>
-        <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="assembly_agenda_option_view_search"/>
-        <field name="domain" eval="[('agenda_id.assembly_id.active', '=', True)]"/>
-        <field name="context">{}</field>
-        <field name="groups_id" eval="[(4, ref('base_assembly.assembly_group_manager'))]"/>
-    </record>
 
     <record id="action_assembly_configuration" model="ir.actions.act_window">
         <field name="name">Assembly settings</field>
@@ -102,20 +93,21 @@
         <field name="view_mode">form</field>
         <field name="target">inline</field>
         <field name="context">{'module': 'assembly_settings', 'bin_size': False}</field>
+        <field name="groups_id" eval="[(4, ref('base_assembly.assembly_group_manager'))]"/>
     </record>
 
     <menuitem id="assembly_menu_root" name="Assemblies" sequence="60" groups="base_assembly.assembly_group_user"/>
-    <menuitem id="assembly_assembly_menu" name="Assemblies" parent="base_assembly.assembly_menu_root" action="base_assembly.assembly_assembly_action" sequence="10"/>
-    <menuitem id="assembly_agenda_menu" name="Agenda items" parent="base_assembly.assembly_menu_root" action="base_assembly.assembly_agenda_action" sequence="15"/>
-    <menuitem id="assembly_attendee_call_register_menu" name="Call register" parent="base_assembly.assembly_menu_root" action="base_assembly.assembly_attendee_action_call_register" sequence="16" groups="base_assembly.assembly_group_manager"/>
-    <menuitem id="assembly_attendee_called_menu" name="Called members" parent="base_assembly.assembly_menu_root" action="base_assembly.assembly_attendee_action_called_members" sequence="17"/>
-    <menuitem id="assembly_delegation_menu" name="Delegations" parent="base_assembly.assembly_menu_root" action="base_assembly.assembly_delegation_action_manager" sequence="18" groups="base_assembly.assembly_group_manager"/>
-    <menuitem id="assembly_voting_menu" name="Votings" parent="base_assembly.assembly_menu_root" action="base_assembly.assembly_voting_action" sequence="19"/>
-    <menuitem id="assembly_representation_menu" name="Representations" parent="base_assembly.assembly_menu_root" action="base_assembly.assembly_representation_action" sequence="20"/>
+    <menuitem id="assembly_menu_operational" name="Assemblies" parent="base_assembly.assembly_menu_root" sequence="10"/>
+    <menuitem id="assembly_assembly_menu" name="Assemblies" parent="base_assembly.assembly_menu_operational" action="base_assembly.assembly_assembly_action" sequence="10"/>
+    <menuitem id="assembly_agenda_menu" name="Agenda items" parent="base_assembly.assembly_menu_operational" action="base_assembly.assembly_agenda_action" sequence="15"/>
+    <menuitem id="assembly_attendee_call_register_menu" name="Call register" parent="base_assembly.assembly_menu_operational" action="base_assembly.assembly_attendee_action_call_register" sequence="16" groups="base_assembly.assembly_group_manager"/>
+    <menuitem id="assembly_attendee_called_menu" name="Called members" parent="base_assembly.assembly_menu_operational" action="base_assembly.assembly_attendee_action_called_members" sequence="17"/>
+    <menuitem id="assembly_delegation_menu" name="Delegations" parent="base_assembly.assembly_menu_operational" action="base_assembly.assembly_delegation_action_manager" sequence="18" groups="base_assembly.assembly_group_manager"/>
+    <menuitem id="assembly_voting_menu" name="Votings" parent="base_assembly.assembly_menu_operational" action="base_assembly.assembly_voting_action" sequence="19"/>
+    <menuitem id="assembly_representation_menu" name="Representations" parent="base_assembly.assembly_menu_operational" action="base_assembly.assembly_representation_action" sequence="20"/>
     <menuitem id="assembly_menu_config" name="Configuration" parent="base_assembly.assembly_menu_root" sequence="40" groups="base_assembly.assembly_group_manager"/>
     <menuitem id="assembly_menu_app_settings" name="Assembly settings" parent="base_assembly.assembly_menu_config" action="base_assembly.action_assembly_configuration" sequence="5"/>
     <menuitem id="assembly_type_menu" name="Assembly types" parent="base_assembly.assembly_menu_config" action="base_assembly.assembly_type_action" sequence="10"/>
-    <menuitem id="assembly_agenda_option_menu" name="Ballot options" parent="base_assembly.assembly_menu_config" action="base_assembly.assembly_agenda_option_action" sequence="20"/>
     <menuitem id="assembly_vote_type_menu" name="Vote Types" parent="base_assembly.assembly_menu_config" action="base_vote.vote_type_action" sequence="30" groups="base_assembly.assembly_group_manager"/>
     <menuitem id="assembly_partner_vote_menu" name="Votes by Contact" parent="base_assembly.assembly_menu_config" action="base_vote.partner_vote_action" sequence="40" groups="base_assembly.assembly_group_manager"/>
 </odoo>

@@ -9,7 +9,7 @@ _AGENDA_VOTE_MODE_MANUAL_MULTI = "manual_multi"
 
 class AssemblyAgendaOption(models.Model):
     _name = "assembly.agenda.option"
-    _description = "Assembly agenda option"
+    _description = "Agenda voting option"
     _order = "agenda_id, sequence, id"
 
     agenda_id = fields.Many2one(
@@ -97,6 +97,6 @@ class AssemblyAgendaOption(models.Model):
         (
             "assembly_agenda_option_agenda_sequence_uniq",
             "UNIQUE(agenda_id, sequence)",
-            "Ballot option sequence must be unique per agenda item.",
+            "Voting option sequence must be unique per agenda item.",
         ),
     ]

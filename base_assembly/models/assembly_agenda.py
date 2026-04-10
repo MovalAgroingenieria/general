@@ -94,7 +94,7 @@ class AssemblyAgenda(models.Model):
     option_ids = fields.One2many(
         "assembly.agenda.option",
         "agenda_id",
-        string="Ballot options",
+        string="Voting options",
         help=(
             "Manual vote (multi-option): add one row per choice on the ballot. "
             "Use the Choice column for the label members see, and the Votes column for "
@@ -694,7 +694,7 @@ class AssemblyAgenda(models.Model):
                     "Close or cancel it before starting a new one."
                 )
             )
-        self.env["assembly.voting"].create(
+        voting = self.env["assembly.voting"].create(
             {
                 "agenda_id": self.id,
                 "vote_type_id": self.vote_type_id.id,
@@ -704,6 +704,21 @@ class AssemblyAgenda(models.Model):
             }
         )
         self.write({"agenda_state": "in_progress"})
+        form_view = self.env.ref(
+            "base_assembly.assembly_voting_view_form", raise_if_not_found=False
+        )
+        action = {
+            "type": "ir.actions.act_window",
+            "name": voting.name,
+            "res_model": "assembly.voting",
+            "res_id": voting.id,
+            "view_mode": "form",
+            "target": "current",
+            "context": dict(self.env.context),
+        }
+        if form_view:
+            action["views"] = [(form_view.id, "form")]
+        return action
 
     def action_skip(self):
         self.ensure_one()

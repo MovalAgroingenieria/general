@@ -5,7 +5,7 @@
         <field name="name">assembly.ballot.print.wizard.form</field>
         <field name="model">assembly.ballot.print.wizard</field>
         <field name="arch" type="xml">
-            <form string="Print ballots">
+            <form string="Generate voting ballots">
                 <p class="text-muted small mb-3">
                     Generates one <strong>member ballot PDF per attendee</strong> (name, VAT/NIF, voting power with delegations, agenda items).
                     Enable <em>Merge into one PDF</em> for a single file; otherwise you get a ZIP with one PDF per attendee.
@@ -24,7 +24,7 @@
         </field>
     </record>
     <record id="action_assembly_ballot_print_wizard" model="ir.actions.act_window">
-        <field name="name">Print ballots</field>
+        <field name="name">Generate voting ballots</field>
         <field name="res_model">assembly.ballot.print.wizard</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="assembly_ballot_print_wizard_view_form"/>

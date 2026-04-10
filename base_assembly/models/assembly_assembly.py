@@ -3,6 +3,8 @@
 # pylint: disable=too-many-lines
 
 import math
+import re
+from html import unescape as html_unescape
 
 from markupsafe import Markup, escape
 from odoo import api, fields, models
@@ -137,6 +139,34 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         return assembly_safe_report_filename(
             self.display_name, default=self.env._("Assembly")
         )
+
+    assembly_id = fields.Many2one(
+        "assembly.assembly",
+        string="Assembly",
+        compute="_compute_report_filename_compat_fields",
+        store=False,
+    )
+    partner_id = fields.Many2one(
+        "res.partner",
+        string="Report filename contact",
+        compute="_compute_report_filename_compat_fields",
+        store=False,
+    )
+
+    @api.depends(
+        "name",
+        "president_id",
+        "president_id.partner_id",
+        "company_id",
+        "company_id.partner_id",
+    )
+    def _compute_report_filename_compat_fields(self):
+        for rec in self:
+            rec.assembly_id = rec
+            if rec.president_id and rec.president_id.partner_id:
+                rec.partner_id = rec.president_id.partner_id
+            else:
+                rec.partner_id = rec.company_id.partner_id
 
     company_id = fields.Many2one(
         "res.company",
@@ -306,7 +336,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     )
     include_qr_code = fields.Boolean(
         string="Tracked attendance links & QR",
-        default=True,
+        default=lambda self: bool(self.env.company.assembly_default_use_qr),
         help=(
             "When enabled, each attendee gets a short link-tracker URL to the "
             "attendance flow (opens counted) and the same URL can be shown as a QR "
@@ -935,6 +965,13 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             if vals.get("assembly_type_id"):
                 atype = self.env["assembly.type"].browse(vals["assembly_type_id"])
                 self._apply_assembly_type_to_create_vals(vals, atype)
+            else:
+                cid = vals.get("company_id") or self.env.company.id
+                company = self.env["res.company"].browse(cid)
+                if self._create_vals_matches_assembly_field_default(
+                    "include_qr_code", vals
+                ):
+                    vals["include_qr_code"] = bool(company.assembly_default_use_qr)
             initial_state = vals.get("assembly_state", "draft")
             if initial_state != "draft":
                 raise UserError(
@@ -1110,7 +1147,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     def _assembly_raise_if_closed(self, assemblies):
         if self.env.context.get(CTX_ASSEMBLY_INTERNAL_TRANSITION):
             return
-        bad = assemblies.filtered(lambda a: a.assembly_state == "closed")
+        bad = assemblies.filtered(
+            lambda a: a.assembly_state == "closed"
+            and not a.company_id.assembly_allow_edit_closed_assembly
+        )
         if bad:
             raise UserError(
                 self.env._("This assembly is closed and cannot be modified.")
@@ -1121,7 +1161,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     def unlink(self):
         for rec in self:
-            if rec.assembly_state == "closed":
+            if (
+                rec.assembly_state == "closed"
+                and not rec.company_id.assembly_allow_edit_closed_assembly
+            ):
                 raise UserError(  # pylint: disable=no-raise-unlink
                     self.env._("This assembly is closed and cannot be modified.")
                 )
@@ -1131,7 +1174,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         vals = dict(vals)
         self._assembly_apply_city_id_to_vals(vals)
         self._validate_assembly_state_write_and_apply_transition_side_effects(vals)
-        locked = self.filtered(lambda r: r.assembly_state == "closed")
+        locked = self.filtered(
+            lambda r: r.assembly_state == "closed"
+            and not r.company_id.assembly_allow_edit_closed_assembly
+        )
         if locked and not locked._assembly_closed_write_allowed_vals(vals):
             raise UserError(
                 self.env._("This assembly is closed and cannot be modified.")
@@ -1399,6 +1445,21 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             {"assembly_state": "in_session"}
         )
 
+    def action_open_header_actions_wizard(self):
+        self.ensure_one()
+        self._assembly_ensure_active_for_operational_views()
+        wiz = self.env["assembly.assembly.header.actions.wizard"].create(
+            {"assembly_id": self.id}
+        )
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Actions"),
+            "res_model": wiz._name,
+            "res_id": wiz.id,
+            "view_mode": "form",
+            "target": "new",
+        }
+
     def action_generate_attendees(self):
         self.ensure_one()
         if self.assembly_state not in _ASSEMBLY_STATES_ALLOW_GENERATE_ATTENDEES:
@@ -1484,15 +1545,45 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             return fragment
         return Markup(str(fragment))
 
+    @api.model
+    def _assembly_sanitize_mail_qweb_body_html(self, html):
+        """Fix broken QWeb in stored mail bodies (e.g. ``object`` renamed to ``objeto``)."""
+        if not html:
+            return ""
+        s = html_unescape(str(html))
+        if "objeto" not in s.lower():
+            return s
+        for old, new in (
+            ("objeto.descripci&#xF3;n", "object.description"),
+            ("objeto.descripción", "object.description"),
+            ("objeto.ubicaci&#xF3;n", "object.location"),
+            ("objeto.ubicación", "object.location"),
+            ("objeto.fecha_primera_llamada", "object.date_first_call"),
+            ("objeto.nombre", "object.name"),
+        ):
+            s = re.sub(re.escape(old), new, s, flags=re.IGNORECASE)
+        s = re.sub(r"\bobjeto\.", "object.", s, flags=re.IGNORECASE)
+        return s
+
     def _render_mail_template_body_html(self, template, res_id):
-        """Render ``mail.template`` ``body_html`` using standard ``_render_field`` (QWeb)."""
+        """Render ``mail.template`` ``body_html`` using QWeb (with QWeb variable fixup)."""
         if not template:
             return ""
-        out = template.sudo()._render_field(
-            "body_html",
+        body = self._assembly_sanitize_mail_qweb_body_html(
+            str(template.body_html or "")
+        )
+        if not body.strip():
+            return ""
+        field = template._fields["body_html"]
+        field_options = dict(getattr(field, "render_options", None) or {})
+        field_options["post_process"] = False
+        engine = getattr(field, "render_engine", "qweb")
+        out = template.sudo()._render_template(
+            body,
+            template.model,
             [res_id],
-            compute_lang=False,
-            options={"post_process": False},
+            engine=engine,
+            options=field_options,
         )
         html = out.get(res_id)
         return str(html) if html is not None else ""
@@ -1688,7 +1779,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         self.ensure_one()
         return {
             "type": "ir.actions.act_window",
-            "name": self.env._("Print ballots"),
+            "name": self.env._("Generate voting ballots"),
             "res_model": "assembly.ballot.print.wizard",
             "view_mode": "form",
             "target": "new",

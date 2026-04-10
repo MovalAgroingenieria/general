@@ -39,6 +39,7 @@
         "views/assembly_delegation_views.xml",
         "views/assembly_representation_views.xml",
         "views/assembly_agenda_option_views.xml",
+        "views/assembly_assembly_header_actions_wizard_views.xml",
         "views/assembly_document_preview_wizard_views.xml",
         "views/assembly_communication_send_wizard_views.xml",
         "views/assembly_ballot_print_wizard_views.xml",
@@ -54,5 +55,6 @@
         "report/assembly_representation_report.xml",
         "report/assembly_voting_ballot_reports.xml",
         "report/assembly_publication_document_report.xml",
+        "data/assembly_cleanup_delegation_views.xml",
     ],
 }

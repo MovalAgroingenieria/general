@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-09 10:51+0000\n"
-"PO-Revision-Date: 2026-04-09 10:51+0000\n"
+"POT-Creation-Date: 2026-04-10 04:14+0000\n"
+"PO-Revision-Date: 2026-04-10 04:14+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1047,6 +1047,13 @@ msgid "Allow attendance annotations"
 msgstr ""
 
 #. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_allow_edit_closed_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_allow_edit_closed_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+msgid "Allow editing closed assemblies"
+msgstr ""
+
+#. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__allow_online_voting
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting__allow_online_voting
 msgid "Allow online voting"
@@ -1098,6 +1105,7 @@ msgstr ""
 #. module: base_assembly
 #: model:ir.actions.act_window,name:base_assembly.assembly_assembly_action
 #: model:ir.ui.menu,name:base_assembly.assembly_assembly_menu
+#: model:ir.ui.menu,name:base_assembly.assembly_menu_operational
 #: model:ir.ui.menu,name:base_assembly.assembly_menu_root
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_graph
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_pivot
@@ -1117,6 +1125,7 @@ msgstr ""
 #: code:addons/base_assembly/models/assembly_representation.py:0
 #: model:ir.model,name:base_assembly.model_assembly_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__assembly_id
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__assembly_id
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee__assembly_id
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_ballot_print_wizard__assembly_id
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_communication_send_wizard__assembly_id
@@ -2020,6 +2029,13 @@ msgid "Default domain for convocable partners."
 msgstr ""
 
 #. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_res_company__assembly_default_use_qr
+#: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_default_use_qr
+msgid ""
+"Default for Include QR / tracked links on new assemblies in this company."
+msgstr ""
+
+#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
 msgid "Default mail templates"
 msgstr ""
@@ -2068,6 +2084,19 @@ msgid "Default street"
 msgstr ""
 
 #. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_default_use_qr
+#: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_default_use_qr
+msgid "Default tracked attendance links & QR"
+msgstr ""
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+msgid ""
+"Default value for new assemblies (assembly type still overrides when "
+"applied)."
+msgstr ""
+
+#. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_zip
 msgid "Default zip"
 msgstr ""
@@ -2090,6 +2119,11 @@ msgstr ""
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_include_qr_code
 msgid "Default: tracked attendance links & QR"
+msgstr ""
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+msgid "Defaults"
 msgstr ""
 
 #. module: base_assembly
@@ -2748,6 +2782,12 @@ msgid ""
 "If enabled, recording an assembly attendee as attended is blocked when the "
 "member has no tax identification number (VAT/TIN) or only the exempt "
 "placeholder."
+msgstr ""
+
+#. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_res_company__assembly_allow_edit_closed_assembly
+#: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_allow_edit_closed_assembly
+msgid "If set, assemblies in closed state can still be edited (per company)."
 msgstr ""
 
 #. module: base_assembly
@@ -4150,6 +4190,11 @@ msgid "Reopen session"
 msgstr ""
 
 #. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__partner_id
+msgid "Report filename contact"
+msgstr ""
+
+#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_call_register
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_representation_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_all
@@ -5047,6 +5092,11 @@ msgid "Tracked attendance links & QR"
 msgstr ""
 
 #. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+msgid "Tracked attendance links & QR by default"
+msgstr ""
+
+#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Tracked attendance links and QR (per attendee)"
 msgstr ""
@@ -5526,6 +5576,13 @@ msgid ""
 "When creating an assembly from this type, copy this to the assembly. If "
 "enabled, recording a member as attended is blocked when the member has no "
 "TIN or uses the exempt placeholder."
+msgstr ""
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+msgid ""
+"When enabled, closed assemblies can be modified in this company (use with "
+"care)."
 msgstr ""
 
 #. module: base_assembly

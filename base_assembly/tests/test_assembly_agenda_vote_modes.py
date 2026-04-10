@@ -517,7 +517,7 @@ class TestAssemblyAgenda(AssemblyTestMixin, TransactionCase):
         assembly.action_open_registration()
         assembly.action_start_session()
         self.assertEqual(agenda.agenda_state, "pending")
-        agenda.action_start_voting()
+        action = agenda.action_start_voting()
         self.assertEqual(agenda.agenda_state, "in_progress")
         voting = self.env["assembly.voting"].search(
             [("agenda_id", "=", agenda.id)], limit=1
@@ -525,6 +525,11 @@ class TestAssemblyAgenda(AssemblyTestMixin, TransactionCase):
         self.assertTrue(voting)
         self.assertEqual(voting.voting_state, "open")
         self.assertTrue(voting.date_open)
+        self.assertEqual(action.get("type"), "ir.actions.act_window")
+        self.assertEqual(action.get("res_model"), "assembly.voting")
+        self.assertEqual(action.get("res_id"), voting.id)
+        self.assertEqual(action.get("view_mode"), "form")
+        self.assertEqual(action.get("target"), "current")
 
     def test_action_start_voting_without_vote_type_raises(self):
         assembly, agenda = (

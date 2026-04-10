@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
+<odoo>
+    <record id="assembly_assembly_header_actions_wizard_view_form" model="ir.ui.view">
+        <field name="name">assembly.assembly.header.actions.wizard.form</field>
+        <field name="model">assembly.assembly.header.actions.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Acciones">
+                <group>
+                    <field name="assembly_id" invisible="1"/>
+                    <field name="assembly_state" invisible="1"/>
+                    <field name="has_attendees" invisible="1"/>
+                </group>
+                <footer>
+                    <button name="action_wizard_generate_attendees" string="Generar asistentes" type="object" class="btn-secondary" invisible="assembly_state not in ('draft', 'announced', 'open')"/>
+                    <button name="action_wizard_recompute_votes" string="Recalcular votos" type="object" class="btn-secondary" invisible="not has_attendees or assembly_state == 'closed'"/>
+                    <button name="action_wizard_document_preview" string="Vista previa de documentos" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
+                    <button name="action_wizard_communication_send" string="Enviar comunicación" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
+                    <button name="action_wizard_ballot_print" string="Generar papeletas de votación" type="object" class="btn-secondary" invisible="assembly_state == 'closed' or not has_attendees"/>
+                    <button name="action_wizard_mail_publication" string="Correo de convocatoria" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
+                    <button name="action_wizard_mail_ballot_intro" string="Correo de papeletas" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
+                    <button name="action_wizard_mail_delegation" string="Correo de delegación" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
+                    <button name="action_wizard_cancel_assembly" string="Anular asamblea" type="object" class="btn-secondary" invisible="assembly_state == 'cancelled'"/>
+                    <button special="cancel" string="Cerrar" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
