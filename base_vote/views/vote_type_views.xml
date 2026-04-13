@@ -30,11 +30,11 @@
                             <field name="partner_domain" widget="domain" options="{'model': 'res.partner'}"/>
                         </page>
                         <page string="Fórmula" name="formula">
-                            <field name="formula" placeholder="ej. partner.ter_parcel_ids | length" nolabel="1"/>
+                            <field name="formula" placeholder="ej. partner.parcel_ids | length" nolabel="1"/>
                             <div class="alert alert-info" role="alert">
                                 <p><strong>Fórmula Jinja2:</strong> variable <code>partner</code> (contacto). Debe devolver un número.</p>
                                 <p>Filtros: <code>length</code>, <code>map(attribute='...')</code>, <code>sum</code>, <code>int</code>, <code>float</code>, <code>round(2)</code>, <code>default</code>, <code>max</code>, <code>min</code>.</p>
-                                <p>Ejemplos: <code>partner.ter_parcel_ids | length</code>; <code>partner.ter_parcel_ids | map(attribute='surface') | sum / 10</code>.</p>
+                                <p>Ejemplos: <code>partner.parcel_ids | length</code>; <code>partner.parcel_ids | map(attribute='surface') | sum / 10</code>.</p>
                             </div>
                         </page>
                         <page string="Resultados" name="results">
