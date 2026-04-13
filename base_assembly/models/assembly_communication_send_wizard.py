@@ -16,6 +16,7 @@ class AssemblyCommunicationSendWizard(
         string="Assembly",
         required=True,
         ondelete="cascade",
+        check_company=True,
     )
     primary_message_kind = fields.Selection(
         [

@@ -16,6 +16,7 @@ class AssemblyDocumentPreviewWizard(
         required=True,
         readonly=True,
         ondelete="cascade",
+        check_company=True,
     )
     document_type = fields.Selection(
         [

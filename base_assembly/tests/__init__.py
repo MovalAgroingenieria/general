@@ -47,6 +47,7 @@ from . import (
     test_assembly_representation,
     test_res_company_assembly_template_defaults,
     test_assembly_html_rendering,
+    test_assembly_multicompany_hardening,
     test_assembly_communication_mail,
     test_assembly_voting,
     # State machines + spec transitions (assembly graph merged into spec module)

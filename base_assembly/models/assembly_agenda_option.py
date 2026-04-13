@@ -20,6 +20,14 @@ class AssemblyAgendaOption(models.Model):
         index=True,
         check_company=True,
     )
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        related="agenda_id.company_id",
+        store=True,
+        readonly=True,
+        index=True,
+    )
     name = fields.Char(
         string="Choice",
         required=True,

@@ -21,6 +21,7 @@ from urllib.parse import parse_qs, urlparse
 
 from odoo.addons.base_assembly.controllers.attendance import AttendanceController
 
+from .common import AssemblyTestMixin
 from .http_common import AssemblyHttpCase
 
 
@@ -227,6 +228,30 @@ class TestHttpAttendance(AssemblyHttpCase):
             % (self.assembly.id, other_partner.id),
             allow_redirects=False,
         )
+        self.assertEqual(res.status_code, 404)
+
+    def test_att_cross_company_assembly_returns_404(self):
+        """Manager scoped to company A must not resolve assemblies in company B by raw id."""
+        c2 = self.env["res.company"].create(
+            {
+                "name": "HTTP MC isol company",
+                "currency_id": self.env.company.currency_id.id,
+            }
+        )
+        env2 = self.env.with_company(c2)
+        mixin = AssemblyTestMixin()
+        mixin.env = env2
+        asm2, _ag = mixin._create_assembly_with_agenda(name="Asm HTTP MC only C2")
+        asm2.action_generate_attendees()
+        att2 = asm2.attendee_ids[0]
+        asm2.action_announce()
+        asm2.action_open_registration()
+        self.authenticate(self.user_manager.login, "assembly_manager_http")
+        url = "/assembly/attendance?assembly_id=%s&participant_id=%s" % (
+            asm2.id,
+            att2.partner_id.id,
+        )
+        res = self.url_open(url, allow_redirects=False)
         self.assertEqual(res.status_code, 404)
 
     def test_att_06_non_manager_forbidden(self):

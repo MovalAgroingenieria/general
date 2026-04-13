@@ -27,6 +27,7 @@
     },
     "data": [
         "security/assembly_security.xml",
+        "security/assembly_security_multicompany_sync.xml",
         "security/assembly_group_system.xml",
         "security/ir.model.access.csv",
         "data/assembly_sequence_data.xml",

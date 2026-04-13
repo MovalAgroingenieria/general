@@ -37,6 +37,14 @@ class AssemblyRepresentation(models.Model):
         index=True,
         check_company=True,
     )
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        related="assembly_id.company_id",
+        store=True,
+        readonly=True,
+        index=True,
+    )
     owner_partner_id = fields.Many2one(
         "res.partner",
         string="Represented member",

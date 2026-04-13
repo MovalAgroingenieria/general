@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo noupdate="1">
+<odoo>
+    <data noupdate="1">
     <!-- Groups -->
     <!-- Assembly category -->
     <record id="module_category_assembly" model="ir.module.category">
@@ -18,8 +19,16 @@
         <field name="category_id" ref="module_category_assembly"/>
         <field name="comment">Full CRUD on assembly models (ACL). Implied by Settings / Administration (base.group_system). Does not imply Assembly User; if both groups are assigned, permissive manager ir.rule ORs with user rules so back-office rows stay visible.</field>
     </record>
+    </data>
 
-    <!-- Multi-company: one rule per model (no groups = all users with ACL on that model). -->
+    <data>
+    <!--
+      Multi-company: global rules use [('company_id', 'in', company_ids)] on models with a
+      stored company_id (no assembly_id.company_id / agenda_id.company_id). Per-group
+      rules below AND with these; manager rules use [(1,'=',1)] and OR with user rules
+      when both assembly groups apply. mail.mail: company isolation from standard mail;
+      assembly rules here only narrow by res_model.
+    -->
     <record id="assembly_type_rule_multicompany" model="ir.rule">
         <field name="name">assembly.type: multi-company</field>
         <field name="model_id" ref="model_assembly_type"/>
@@ -38,7 +47,7 @@
     <record id="assembly_agenda_option_rule_multicompany" model="ir.rule">
         <field name="name">assembly.agenda.option: multi-company</field>
         <field name="model_id" ref="model_assembly_agenda_option"/>
-        <field name="domain_force">[('agenda_id.company_id', 'in', company_ids)]</field>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
     <record id="assembly_attendee_rule_multicompany" model="ir.rule">
         <field name="name">assembly.attendee: multi-company</field>
@@ -53,7 +62,7 @@
     <record id="assembly_representation_rule_multicompany" model="ir.rule">
         <field name="name">assembly.representation: multi-company</field>
         <field name="model_id" ref="model_assembly_representation"/>
-        <field name="domain_force">[('assembly_id.company_id', 'in', company_ids)]</field>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
     <record id="assembly_voting_rule_multicompany" model="ir.rule">
         <field name="name">assembly.voting: multi-company</field>
@@ -76,12 +85,6 @@
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
 
-    <!--
-      Assembly User: further scope to the logged-in partner (AND with multi-company).
-      Assembly Manager: permissive rule so ir.rule ORs with the user rule (Odoo combines
-      group rules with OR). Users with both groups therefore see all rows in company,
-      not only own-partner rows.
-    -->
     <record id="assembly_attendee_rule_manager" model="ir.rule">
         <field name="name">assembly.attendee: manager sees all in company</field>
         <field name="model_id" ref="model_assembly_attendee"/>
@@ -143,5 +146,6 @@
         <field name="groups" eval="[(4, ref('base.group_system'))]"/>
         <field name="domain_force">[(1, '=', 1)]</field>
     </record>
+    </data>
 
 </odoo>

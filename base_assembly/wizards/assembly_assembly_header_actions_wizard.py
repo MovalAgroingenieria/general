@@ -12,6 +12,7 @@ class AssemblyAssemblyHeaderActionsWizard(models.TransientModel):
         "assembly.assembly",
         required=True,
         readonly=True,
+        check_company=True,
     )
     assembly_state = fields.Selection(
         related="assembly_id.assembly_state",

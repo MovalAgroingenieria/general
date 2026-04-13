@@ -5,10 +5,14 @@
 
 Default: HTML landing (context + button to backend form). Append ``direct=1`` for an
 immediate redirect to the form and ``text/plain`` error bodies (automation / deep-link).
+
+Lookups intersect ``env.companies`` so deep links stay within the session-allowed
+companies (in addition to ``ir.rule`` multi-company domains).
 """
 
 from odoo import http
 from odoo.http import request
+from odoo.osv import expression
 
 _ALLOWED_ASSEMBLY_STATES = frozenset(("open", "in_session"))
 _MANAGER_GROUP_XMLID = "base_assembly.assembly_group_manager"
@@ -87,6 +91,14 @@ def _assembly_state_label(env, assembly):
     return selection.get(key, key or "")
 
 
+def _attendance_domain_scoped_to_session_companies(base_domain, env):
+    """AND ``base_domain`` with allowed session companies (defense beyond ir.rule)."""
+    cids = env.companies.ids
+    if not cids:
+        return base_domain
+    return expression.AND([base_domain, [("company_id", "in", cids)]])
+
+
 def _parse_assembly_and_participant_ids(assembly_id, participant_id):
     """Return ``(assembly_id, participant_id)`` as positive ints, or ``None`` if invalid."""
     if assembly_id is None or participant_id is None:
@@ -147,10 +159,13 @@ class AttendanceController(http.Controller):
         title_state = env._("Assembly not available")
 
         attendee = env["assembly.attendee"].search(
-            [
-                ("assembly_id", "=", aid),
-                ("partner_id", "=", participant_id_int),
-            ],
+            _attendance_domain_scoped_to_session_companies(
+                [
+                    ("assembly_id", "=", aid),
+                    ("partner_id", "=", participant_id_int),
+                ],
+                env,
+            ),
             limit=1,
         )
         if attendee:
@@ -210,8 +225,11 @@ class AttendanceController(http.Controller):
                 ],
             )
 
-        assembly = env["assembly.assembly"].browse(aid)
-        if not assembly.exists():
+        assembly = env["assembly.assembly"].search(
+            _attendance_domain_scoped_to_session_companies([("id", "=", aid)], env),
+            limit=1,
+        )
+        if not assembly:
             msg = env._("Assembly not found.")
             title = env._("Not found")
             if direct:

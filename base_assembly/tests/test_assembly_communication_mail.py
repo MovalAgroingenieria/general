@@ -98,6 +98,30 @@ class TestAssemblyCommunicationMail(MailCommon, AssemblyTestMixin):
         self.assertTrue(mail)
         self.assertEqual(len(mail.attachment_ids), 2)
 
+    def test_send_to_partners_rejects_assembly_outside_session_companies(self):
+        assembly = self._assembly_with_emailed_attendees()
+        c_asm = assembly.company_id
+        self.assertTrue(c_asm)
+        c_other = self.env["res.company"].create(
+            {
+                "name": "Mail MC other company",
+                "currency_id": c_asm.currency_id.id,
+            }
+        )
+        self.env.user.sudo().write({"company_ids": [(4, c_other.id)]})
+        partner = assembly.attendee_ids[0].partner_id
+        narrow = self.env(
+            context={**self.env.context, "allowed_company_ids": [c_other.id]}
+        )
+        svc = narrow["assembly.mail.communication"]
+        with self.assertRaises(UserError):
+            svc.send_to_partners(
+                assembly,
+                partner,
+                primary_kind="publication",
+                attachment_options={},
+            )
+
     def test_resolve_send_all_one_mail_per_partner(self):
         assembly = self._assembly_with_emailed_attendees()
         partners = assembly.attendee_ids.mapped("partner_id")

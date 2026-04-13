@@ -211,3 +211,25 @@ class ResCompany(models.Model):
         companies._assembly_ensure_numbering_sequence()
         companies._assembly_ensure_default_template_configuration()
         return companies
+
+    @api.model
+    def _assembly_sync_multicompany_ir_rule_domains(self):
+        target = "[('company_id', 'in', company_ids)]"
+        xmlids = (
+            "base_assembly.assembly_type_rule_multicompany",
+            "base_assembly.assembly_assembly_rule_multicompany",
+            "base_assembly.assembly_agenda_rule_multicompany",
+            "base_assembly.assembly_agenda_option_rule_multicompany",
+            "base_assembly.assembly_attendee_rule_multicompany",
+            "base_assembly.assembly_delegation_rule_multicompany",
+            "base_assembly.assembly_representation_rule_multicompany",
+            "base_assembly.assembly_voting_rule_multicompany",
+            "base_assembly.assembly_voting_line_rule_multicompany",
+            "base_assembly.assembly_voting_result_rule_multicompany",
+            "base_assembly.assembly_attendee_vote_rule_multicompany",
+        )
+        for xid in xmlids:
+            rule = self.env.ref(xid, raise_if_not_found=False)
+            if not rule or rule.domain_force == target:
+                continue
+            rule.domain_force = target

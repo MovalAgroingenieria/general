@@ -5,6 +5,7 @@ import base64
 
 from markupsafe import Markup
 from odoo import api, models
+from odoo.exceptions import UserError
 
 
 class AssemblyMailCommunication(models.AbstractModel):
@@ -181,6 +182,16 @@ class AssemblyMailCommunication(models.AbstractModel):
     def send_to_partners(self, assembly, partners, *, primary_kind, attachment_options):
         """Send one email per partner; return ``(sent_count, skipped_no_email, errors)``."""
         assembly.ensure_one()
+        session_cids = self.env.companies.ids
+        ac = assembly.company_id
+        if ac and session_cids and ac.id not in session_cids:
+            raise UserError(
+                self.env._(
+                    "The assembly belongs to a company that is not in your current "
+                    "session. Switch to that company or include it among your allowed "
+                    "companies before sending mail."
+                )
+            )
         assembly._assembly_ensure_not_closed_for_related_changes()
         mail_composer_model = self.env["mail.compose.message"].with_context(
             assembly_use_rendered_mail_body=True,

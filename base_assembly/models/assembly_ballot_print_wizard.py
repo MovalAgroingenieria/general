@@ -20,6 +20,7 @@ class AssemblyBallotPrintWizard(
         string="Assembly",
         required=True,
         ondelete="cascade",
+        check_company=True,
     )
     only_present = fields.Boolean(
         string="Present attendees only",

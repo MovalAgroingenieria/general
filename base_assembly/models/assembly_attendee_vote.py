@@ -23,7 +23,7 @@ class AssemblyAttendeeVote(models.Model):
     company_id = fields.Many2one(
         "res.company",
         string="Company",
-        related="attendee_id.assembly_id.company_id",
+        related="attendee_id.company_id",
         store=True,
         readonly=True,
         index=True,
