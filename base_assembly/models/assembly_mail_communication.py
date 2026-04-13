@@ -13,6 +13,12 @@ class AssemblyMailCommunication(models.AbstractModel):
     _description = "Assembly outbound communication helpers"
 
     @api.model
+    def _partner_mail_lang(self, partner):
+        if partner and partner.lang:
+            return partner.lang
+        return self.env.user.lang or "en_US"
+
+    @api.model
     def _attendee_domain_for_audience(self, assembly, audience):
         domain = [("assembly_id", "=", assembly.id)]
         if audience == "confirmed":
@@ -45,17 +51,18 @@ class AssemblyMailCommunication(models.AbstractModel):
         return partners.filtered("email")
 
     @api.model
-    def _render_primary_body_html(self, assembly, primary_kind):
+    def _render_primary_body_html(self, assembly, primary_kind, lang=None):
+        asm = assembly.with_context(lang=lang) if lang else assembly
         if primary_kind == "publication":
-            return Markup(assembly.get_rendered_publication_text() or "")
+            return Markup(asm.get_rendered_publication_text() or "")
         if primary_kind == "ballot_intro":
-            return Markup(str(assembly.get_rendered_ballot_intro_text() or ""))
+            return Markup(str(asm.get_rendered_ballot_intro_text() or ""))
         if primary_kind == "delegation":
-            return Markup(str(assembly.get_rendered_delegation() or ""))
+            return Markup(str(asm.get_rendered_delegation() or ""))
         return Markup("")
 
     @api.model
-    def _subject_for_kind(self, assembly, primary_kind):
+    def _subject_for_kind(self, assembly, primary_kind, lang=None):
         if primary_kind == "publication":
             tmpl = (
                 assembly.publication_mail_template_id
@@ -65,6 +72,7 @@ class AssemblyMailCommunication(models.AbstractModel):
             return assembly._assembly_render_mail_subject(
                 tmpl,
                 self.env._("Assembly convocation: %s", assembly.name),
+                lang=lang,
             )
         if primary_kind == "ballot_intro":
             tmpl = (
@@ -75,6 +83,7 @@ class AssemblyMailCommunication(models.AbstractModel):
             return assembly._assembly_render_mail_subject(
                 tmpl,
                 self.env._("Voting ballot: %s", assembly.name),
+                lang=lang,
             )
         tmpl = (
             assembly.delegation_document_mail_template_id
@@ -84,14 +93,18 @@ class AssemblyMailCommunication(models.AbstractModel):
         return assembly._assembly_render_mail_subject(
             tmpl,
             self.env._("Vote delegation: %s", assembly.name),
+            lang=lang,
         )
 
     @api.model
-    def _render_report_pdf(self, report_xmlid, res_ids):
+    def _render_report_pdf(self, report_xmlid, res_ids, lang=None):
         report = self.env.ref(report_xmlid, raise_if_not_found=False)
         if not report or not res_ids:
             return None
-        pdf_data, _ctype = self.env["ir.actions.report"]._render_qweb_pdf(
+        ir_report = self.env["ir.actions.report"]
+        if lang:
+            ir_report = ir_report.with_context(lang=lang)
+        pdf_data, _ctype = ir_report._render_qweb_pdf(
             report.report_name,
             res_ids=res_ids,
         )
@@ -111,13 +124,14 @@ class AssemblyMailCommunication(models.AbstractModel):
         )
 
     @api.model
-    def build_attachment_ids_for_partner(self, assembly, partner, options):
+    def build_attachment_ids_for_partner(self, assembly, partner, options, lang=None):
         """Return ir.attachment ids for *options* (wizard-like dict) and *partner*."""
         att_ids = []
         if options.get("attach_publication_pdf"):
             pdf_bytes = self._render_report_pdf(
                 "base_assembly.assembly_assembly_action_report_publication_document",
                 [assembly.id],
+                lang=lang,
             )
             if pdf_bytes:
                 att = self._create_pdf_attachment(
@@ -134,6 +148,7 @@ class AssemblyMailCommunication(models.AbstractModel):
                 pdf_bytes = self._render_report_pdf(
                     "base_assembly.assembly_attendee_action_report_voting_ballot_nominative",
                     attendees_all.ids,
+                    lang=lang,
                 )
                 if pdf_bytes:
                     att = self._create_pdf_attachment(
@@ -154,6 +169,7 @@ class AssemblyMailCommunication(models.AbstractModel):
                 pdf_bytes = self._render_report_pdf(
                     "base_assembly.assembly_attendee_action_report_voting_ballot_nominative",
                     [attendee.id],
+                    lang=lang,
                 )
                 if pdf_bytes:
                     att = self._create_pdf_attachment(
@@ -169,6 +185,7 @@ class AssemblyMailCommunication(models.AbstractModel):
             pdf_bytes = self._render_report_pdf(
                 "base_assembly.assembly_assembly_action_report_delegationvote",
                 [assembly.id],
+                lang=lang,
             )
             if pdf_bytes:
                 att = self._create_pdf_attachment(
@@ -197,8 +214,6 @@ class AssemblyMailCommunication(models.AbstractModel):
             assembly_use_rendered_mail_body=True,
             mail_create_nosubscribe=True,
         )
-        body_base = self._render_primary_body_html(assembly, primary_kind)
-        subject = self._subject_for_kind(assembly, primary_kind)
         sent = 0
         skipped = 0
         errors = []
@@ -207,8 +222,13 @@ class AssemblyMailCommunication(models.AbstractModel):
             if not partner.email:
                 skipped += 1
                 continue
+            lang = self._partner_mail_lang(partner)
+            body_base = self._render_primary_body_html(
+                assembly, primary_kind, lang=lang
+            )
+            subject = self._subject_for_kind(assembly, primary_kind, lang=lang)
             att_ids = self.build_attachment_ids_for_partner(
-                assembly, partner, attach_opts
+                assembly, partner, attach_opts, lang=lang
             )
             try:
                 composer = mail_composer_model.create(

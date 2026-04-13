@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
 <odoo>
     <record id="assembly_document_preview_wizard_view_form" model="ir.ui.view">
         <field name="name">assembly.document.preview.wizard.form</field>
@@ -7,11 +8,22 @@
             <form string="Preview rendered document">
                 <group>
                     <field name="assembly_id"/>
-                    <field name="document_type"/>
+                    <field name="document_type_whitelist" invisible="1"/>
+                    <field name="document_category"/>
+                    <field name="document_type"
+                           widget="filterable_selection"
+                           options="{'whitelist_fname': 'document_type_whitelist'}"/>
                 </group>
-                <div class="alert alert-info" role="status">
-                    Rendered with Odoo mail templates (QWeb on mail.template) when available;
-                    otherwise AF QWeb views or convocation HTML are used. Refresh to rebuild.
+                <div class="alert alert-secondary small mb-2 py-2" role="status">
+                    <p class="mb-1">
+                        <strong>How this preview works:</strong>
+                        Odoo renders configured <em>mail templates</em> when they produce body content; otherwise the
+                        built-in QWeb fallbacks below are used. Use <strong>Refresh</strong> after changing templates,
+                        agenda lines, or assembly fields.
+                    </p>
+                    <p class="mb-0 text-muted">
+                        The framed area simulates a printed page; it is not a stored legal document.
+                    </p>
                 </div>
                 <field name="preview_html" nolabel="1" colspan="2" force_save="1"/>
                 <footer>

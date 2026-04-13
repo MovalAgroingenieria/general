@@ -1632,17 +1632,17 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             '<aside class="o_assembly_publication_hint text-muted" role="note"><p>%s</p></aside>'
         ) % escape(msg)
 
-    def _render_assembly_mail_template_chain(
+    def _render_assembly_mail_template_chain_detail(
         self,
         override_template,
         default_xmlid_suffix,
         *,
         raw_html_fallback=None,
     ):
-        """Render document HTML: ``mail.template`` (QWeb) → optional raw HTML → QWeb view → title.
+        """Like :meth:`_render_assembly_mail_template_chain` but returns ``{html, source}``.
 
-        Uses ``mail.template._render_field`` (standard Odoo path for template bodies).
-        Always returns non-empty ``Markup`` when the assembly has a name or id.
+        *source* is ``mail`` (template body), ``description`` (raw HTML fallback, typically
+        assembly description), ``qweb`` (bundled/company AF QWeb view), or ``minimal``.
         """
         self.ensure_one()
         company_tmpl = self._assembly_company_default_mail_template(
@@ -1659,24 +1659,48 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         for tmpl in candidates:
             html = self._render_mail_template_body_html(tmpl, self.id)
             if html and not is_html_empty(html):
-                return Markup(html)
+                return {"html": Markup(html), "source": "mail"}
         if raw_html_fallback:
             raw = raw_html_fallback()
             if raw and not is_html_empty(str(raw)):
-                return Markup(str(raw))
+                return {"html": Markup(str(raw)), "source": "description"}
         fb = self._render_assembly_af_qweb_fallback(default_xmlid_suffix)
         if fb and str(fb).strip() and not is_html_empty(str(fb)):
-            return fb
-        return self._assembly_render_minimal_title_html()
+            return {"html": fb, "source": "qweb"}
+        return {
+            "html": self._assembly_render_minimal_title_html(),
+            "source": "minimal",
+        }
 
-    def get_rendered_publication(self):
-        """Convocation HTML: ``mail.template._render_field`` (QWeb) → description → QWeb fallback → title."""
+    def _render_assembly_mail_template_chain(
+        self,
+        override_template,
+        default_xmlid_suffix,
+        *,
+        raw_html_fallback=None,
+    ):
+        """Render document HTML: ``mail.template`` (QWeb) → optional raw HTML → QWeb view → title.
+
+        Uses ``mail.template._render_field`` (standard Odoo path for template bodies).
+        Always returns non-empty ``Markup`` when the assembly has a name or id.
+        """
         self.ensure_one()
-        html = self._render_assembly_mail_template_chain(
+        detail = self._render_assembly_mail_template_chain_detail(
+            override_template,
+            default_xmlid_suffix,
+            raw_html_fallback=raw_html_fallback,
+        )
+        return detail["html"]
+
+    def _get_rendered_publication_parts(self):
+        self.ensure_one()
+        detail = self._render_assembly_mail_template_chain_detail(
             self.publication_mail_template_id,
             "publication",
             raw_html_fallback=lambda: self.description or "",
         )
+        html = detail["html"]
+        source = detail["source"]
         if is_html_empty(self.description or ""):
             frag = str(html)
             if "o_assembly_publication_hint" not in frag:
@@ -1685,22 +1709,68 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                     base,
                     self._assembly_publication_missing_body_hint_html(),
                 )
-        return self._assembly_markup_from_render_result(html)
+        return self._assembly_markup_from_render_result(html), source
+
+    def get_rendered_publication(self):
+        """Convocation HTML: ``mail.template._render_field`` (QWeb) → description → QWeb fallback → title."""
+        self.ensure_one()
+        html, _src = self._get_rendered_publication_parts()
+        return html
 
     def get_rendered_publication_text(self):
         """String form of :meth:`get_rendered_publication` (for mail composer / plain consumers)."""
         self.ensure_one()
         return str(self.get_rendered_publication())
 
+    def _get_rendered_delegation_document_parts(self):
+        self.ensure_one()
+        detail = self._render_assembly_mail_template_chain_detail(
+            self.delegation_document_mail_template_id,
+            "delegation_document",
+        )
+        return (
+            self._assembly_markup_from_render_result(detail["html"]),
+            detail["source"],
+        )
+
+    def _get_rendered_delegation_footer_parts(self):
+        self.ensure_one()
+        detail = self._render_assembly_mail_template_chain_detail(
+            self.delegation_footer_mail_template_id,
+            "delegation_footer",
+        )
+        return (
+            self._assembly_markup_from_render_result(detail["html"]),
+            detail["source"],
+        )
+
+    def _get_rendered_ballot_intro_parts(self):
+        self.ensure_one()
+        detail = self._render_assembly_mail_template_chain_detail(
+            self.ballot_intro_mail_template_id,
+            "ballot_intro",
+        )
+        return (
+            self._assembly_markup_from_render_result(detail["html"]),
+            detail["source"],
+        )
+
+    def _get_rendered_ballot_nominative_intro_parts(self):
+        self.ensure_one()
+        detail = self._render_assembly_mail_template_chain_detail(
+            self.ballot_nominative_intro_mail_template_id,
+            "ballot_nominative_intro",
+        )
+        return (
+            self._assembly_markup_from_render_result(detail["html"]),
+            detail["source"],
+        )
+
     def get_rendered_delegation(self):
         """Delegation HTML: document + footer, each rendered like :meth:`get_rendered_publication` (QWeb chain)."""
         self.ensure_one()
-        body = self._assembly_markup_from_render_result(
-            self.get_rendered_delegation_document_text()
-        )
-        foot = self._assembly_markup_from_render_result(
-            self.get_rendered_delegation_footer_text()
-        )
+        body, _bs = self._get_rendered_delegation_document_parts()
+        foot, _fs = self._get_rendered_delegation_footer_parts()
         out = (
             Markup('<div class="o_assembly_af_delegation_bundle">')
             + Markup('<div class="o_assembly_af_delegation_intro">')
@@ -1720,40 +1790,47 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     def get_rendered_delegation_document_text(self):
         self.ensure_one()
-        return self._render_assembly_mail_template_chain(
-            self.delegation_document_mail_template_id,
-            "delegation_document",
-        )
+        html, _src = self._get_rendered_delegation_document_parts()
+        return html
 
     def get_rendered_delegation_footer_text(self):
         self.ensure_one()
-        return self._render_assembly_mail_template_chain(
-            self.delegation_footer_mail_template_id,
-            "delegation_footer",
-        )
+        html, _src = self._get_rendered_delegation_footer_parts()
+        return html
 
     def get_rendered_ballot_intro_text(self):
         self.ensure_one()
-        return self._render_assembly_mail_template_chain(
-            self.ballot_intro_mail_template_id,
-            "ballot_intro",
-        )
+        html, _src = self._get_rendered_ballot_intro_parts()
+        return html
 
     def get_rendered_ballot_nominative_intro_text(self):
         self.ensure_one()
-        return self._render_assembly_mail_template_chain(
-            self.ballot_nominative_intro_mail_template_id,
-            "ballot_nominative_intro",
-        )
+        html, _src = self._get_rendered_ballot_nominative_intro_parts()
+        return html
 
-    def _assembly_render_mail_subject(self, template, fallback_subject):
+    def _preview_template_kind_from_sources(self, *sources):
+        """Return ``custom`` if any source is mail/description; else ``default``."""
+        if any(s in ("mail", "description") for s in sources):
+            return "custom"
+        return "default"
+
+    def _preview_badge_label_from_kind(self, kind):
+        self.ensure_one()
+        if kind == "custom":
+            return self.env._("Using custom template")
+        return self.env._("Using default template")
+
+    def _assembly_render_mail_subject(self, template, fallback_subject, *, lang=None):
         """Render ``mail.template`` ``subject`` for this assembly, or use *fallback_subject*."""
         self.ensure_one()
         if template:
+            render_kw = {"compute_lang": False}
+            if lang:
+                render_kw["set_lang"] = lang
             out = template.sudo()._render_field(
                 "subject",
                 [self.id],
-                compute_lang=False,
+                **render_kw,
             )
             val = out.get(self.id)
             if val and str(val).strip():

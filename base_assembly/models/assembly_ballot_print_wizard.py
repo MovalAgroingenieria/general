@@ -62,7 +62,8 @@ class AssemblyBallotPrintWizard(
         asm = self.assembly_id
         with zipfile.ZipFile(zbuff, "w", zipfile.ZIP_DEFLATED) as zfile:
             for att in attendees:
-                pdf_bytes, _ctype = ir_report._render_qweb_pdf(
+                lang = att.partner_id.lang or self.env.user.lang or "en_US"
+                pdf_bytes, _ctype = ir_report.with_context(lang=lang)._render_qweb_pdf(
                     report.report_name,
                     res_ids=att.ids,
                 )

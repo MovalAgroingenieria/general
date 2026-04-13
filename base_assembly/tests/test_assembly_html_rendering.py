@@ -158,6 +158,22 @@ class TestAssemblyHtmlRendering(AssemblyTestMixin, TransactionCase):
         self.assertFalse(is_html_empty(wiz.preview_html))
         self.assertIn("Wiz Del Asm", wiz.preview_html)
 
+    def test_preview_wizard_document_category_aligns_with_type(self):
+        assembly = self._create_assembly(name="Cat Wiz")
+        wiz = self.env["assembly.document.preview.wizard"].create(
+            {"assembly_id": assembly.id, "document_type": "delegation_combined"}
+        )
+        self.assertEqual(wiz.document_category, "delegation")
+        wiz_ballots = self.env["assembly.document.preview.wizard"].create(
+            {
+                "assembly_id": assembly.id,
+                "document_category": "ballots",
+                "document_type": "publication",
+            }
+        )
+        self.assertEqual(wiz_ballots.document_category, "ballots")
+        self.assertEqual(wiz_ballots.document_type, "ballot_intro")
+
     def test_af_qweb_fallback_views_are_loadable(self):
         for xmlid in (
             "base_assembly.assembly_af_publication_qweb",

@@ -5,23 +5,78 @@
         <field name="name">assembly.assembly.header.actions.wizard.form</field>
         <field name="model">assembly.assembly.header.actions.wizard</field>
         <field name="arch" type="xml">
-            <form string="Acciones">
-                <group>
-                    <field name="assembly_id" invisible="1"/>
-                    <field name="assembly_state" invisible="1"/>
-                    <field name="has_attendees" invisible="1"/>
-                </group>
+            <form string="Actions">
+                <sheet class="pb-3">
+                    <group>
+                        <field name="assembly_id" invisible="1"/>
+                        <field name="assembly_state" invisible="1"/>
+                        <field name="has_attendees" invisible="1"/>
+                    </group>
+                    <div class="row mb-4 pb-3 border-bottom gy-2 align-items-start">
+                        <div class="col-12 col-lg-5">
+                            <h5 class="mb-2 fw-bold">Preparation</h5>
+                            <p class="text-muted small mb-0">Prepare the assembly by generating attendees and calculating voting power.</p>
+                        </div>
+                        <div class="col-12 col-lg-7">
+                            <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                                <button name="action_wizard_generate_attendees" string="Generate attendees" type="object" class="btn-primary" invisible="assembly_state not in ('draft', 'announced', 'open')"/>
+                                <button name="action_wizard_recompute_votes" string="Recalculate votes" type="object" class="btn-secondary" invisible="not has_attendees or assembly_state == 'closed'"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-4 pb-3 border-bottom gy-2 align-items-start">
+                        <div class="col-12 col-lg-5">
+                            <h5 class="mb-2 fw-bold">Communication</h5>
+                            <p class="text-muted small mb-0">Send convocation and related communications to participants.</p>
+                        </div>
+                        <div class="col-12 col-lg-7">
+                            <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                                <button name="action_wizard_mail_publication" string="Send convocation email" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
+                                <button name="action_wizard_mail_ballot_intro" string="Send ballots email" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
+                                <button name="action_wizard_mail_delegation" string="Send delegation email" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
+                                <button name="action_wizard_communication_send" string="Send communication" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-4 pb-3 border-bottom gy-2 align-items-start">
+                        <div class="col-12 col-lg-5">
+                            <h5 class="mb-2 fw-bold">Documents</h5>
+                            <p class="text-muted small mb-0">Preview and generate documents related to the assembly.</p>
+                        </div>
+                        <div class="col-12 col-lg-7">
+                            <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                                <button name="action_wizard_document_preview" string="Preview documents" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
+                                <button name="action_wizard_ballot_print" string="Generate ballots" type="object" class="btn-secondary" invisible="assembly_state == 'closed' or not has_attendees"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-4 pb-3 border-bottom gy-2 align-items-start">
+                        <div class="col-12 col-lg-5">
+                            <h5 class="mb-2 fw-bold">Control</h5>
+                            <p class="text-muted small mb-0">Review messages and outbound mail for this assembly.</p>
+                        </div>
+                        <div class="col-12 col-lg-7">
+                            <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                                <button name="action_wizard_open_communication_log" string="Communication log" type="object" class="btn-outline-secondary btn-sm"/>
+                                <button name="action_wizard_open_outgoing_emails" string="Outgoing emails" type="object" class="btn-outline-secondary btn-sm"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2 gy-2 align-items-start">
+                        <div class="col-12 col-lg-5">
+                            <h5 class="mb-2 fw-bold text-danger">Closing</h5>
+                            <p class="text-muted small mb-0">Final actions. These operations may be irreversible.</p>
+                        </div>
+                        <div class="col-12 col-lg-7">
+                            <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                                <button name="action_wizard_close_assembly" string="Close assembly" type="object" class="btn-warning" invisible="assembly_state != 'in_session'" confirm="Close this assembly? Ensure voting and the agenda are complete. Reopening a closed assembly may be restricted by your settings."/>
+                                <button name="action_wizard_cancel_assembly" string="Cancel assembly" type="object" class="btn-danger" invisible="assembly_state == 'cancelled'" confirm="Cancel this assembly? It will be marked as cancelled for participants."/>
+                            </div>
+                        </div>
+                    </div>
+                </sheet>
                 <footer>
-                    <button name="action_wizard_generate_attendees" string="Generar asistentes" type="object" class="btn-secondary" invisible="assembly_state not in ('draft', 'announced', 'open')"/>
-                    <button name="action_wizard_recompute_votes" string="Recalcular votos" type="object" class="btn-secondary" invisible="not has_attendees or assembly_state == 'closed'"/>
-                    <button name="action_wizard_document_preview" string="Vista previa de documentos" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
-                    <button name="action_wizard_communication_send" string="Enviar comunicación" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
-                    <button name="action_wizard_ballot_print" string="Generar papeletas de votación" type="object" class="btn-secondary" invisible="assembly_state == 'closed' or not has_attendees"/>
-                    <button name="action_wizard_mail_publication" string="Correo de convocatoria" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
-                    <button name="action_wizard_mail_ballot_intro" string="Correo de papeletas" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
-                    <button name="action_wizard_mail_delegation" string="Correo de delegación" type="object" class="btn-secondary" invisible="assembly_state == 'closed'"/>
-                    <button name="action_wizard_cancel_assembly" string="Anular asamblea" type="object" class="btn-secondary" invisible="assembly_state == 'cancelled'"/>
-                    <button special="cancel" string="Cerrar" class="btn-secondary"/>
+                    <button special="cancel" string="Dismiss" class="btn-secondary"/>
                 </footer>
             </form>
         </field>

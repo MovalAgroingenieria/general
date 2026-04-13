@@ -116,7 +116,7 @@ class AssemblyAttendee(models.Model):
         string="Registration date",
         help=(
             "When the member was last recorded as attended (set when using "
-            "Record as attended; optional for other flows)."
+            "Mark Present; optional for other flows)."
         ),
     )
     attendee_vote_ids = fields.One2many(
@@ -126,7 +126,7 @@ class AssemblyAttendee(models.Model):
         help=(
             "Stored snapshot per assembly vote type (own / delegated in-out). "
             "It is rebuilt when you generate attendees, change the assembly vote types, "
-            "Record as attended or Record as absent, when delegations change, or via "
+            "Mark Present or Mark Absent, when delegations change, or via "
             "“Recompute votes” "
             "on the assembly. Contact “Votes per contact” (partner.vote) is the source "
             "for own amounts; until a rebuild runs, lines here can be missing or stale."
@@ -755,7 +755,7 @@ class AssemblyAttendee(models.Model):
                     raise UserError(
                         self.env._(
                             "Attendance status cannot be changed with a generic save. "
-                            'Use "Record as attended" or "Record as absent" on the '
+                            'Use "Mark Present" or "Mark Absent" on the '
                             "attendee (or the same server actions / API those buttons call)."
                         )
                     )

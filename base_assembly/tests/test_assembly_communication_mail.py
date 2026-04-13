@@ -71,6 +71,35 @@ class TestAssemblyCommunicationMail(MailCommon, AssemblyTestMixin):
         self.assertTrue(deleg.attach_delegation_pdf)
         self.assertFalse(deleg.attach_publication_pdf)
 
+    def test_send_to_partners_uses_partner_language(self):
+        assembly = self._assembly_with_emailed_attendees()
+        partner = assembly.attendee_ids[0].partner_id
+        lang_es = self.env.ref("base.lang_es", raise_if_not_found=False)
+        if not lang_es:
+            self.skipTest("Spanish language pack not available")
+        lang_es.sudo().write({"active": True})
+        partner.write({"lang": "es_ES"})
+        svc = self.env["assembly.mail.communication"]
+        with self.mock_mail_gateway():
+            sent, skipped, errors = svc.send_to_partners(
+                assembly,
+                partner,
+                primary_kind="publication",
+                attachment_options={"attach_publication_pdf": False},
+            )
+        self.assertEqual(sent, 1)
+        self.assertEqual(skipped, 0)
+        self.assertFalse(errors)
+        mail = self.env["mail.mail"].search(
+            [
+                ("model", "=", "assembly.assembly"),
+                ("res_id", "=", assembly.id),
+            ],
+            limit=1,
+        )
+        self.assertTrue(mail)
+        self.assertIn("Convocatoria de asamblea", mail.subject or "")
+
     def test_send_to_partners_attaches_selected_pdfs(self):
         assembly = self._assembly_with_emailed_attendees()
         partner = assembly.attendee_ids[0].partner_id

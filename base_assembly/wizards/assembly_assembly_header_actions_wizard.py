@@ -63,3 +63,16 @@ class AssemblyAssemblyHeaderActionsWizard(models.TransientModel):
         self.ensure_one()
         self.assembly_id.action_cancel()
         return {"type": "ir.actions.act_window_close"}
+
+    def action_wizard_close_assembly(self):
+        self.ensure_one()
+        self.assembly_id.action_close()
+        return {"type": "ir.actions.act_window_close"}
+
+    def action_wizard_open_communication_log(self):
+        self.ensure_one()
+        return self.assembly_id.action_open_assembly_communication_messages()
+
+    def action_wizard_open_outgoing_emails(self):
+        self.ensure_one()
+        return self.assembly_id.action_open_assembly_outbound_mails()

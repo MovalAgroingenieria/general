@@ -1,35 +1,192 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
 <odoo>
     <template id="assembly_af_publication_qweb" name="AF: publication (QWeb fallback)">
-        <div class="o_assembly_publication">
-            <h2 t-out="object.name"/>
-            <p t-if="object.date_first_call">
-                <span t-field="object.date_first_call"/>
-                <t t-if="object.location"> — <span t-field="object.location"/></t>
-            </p>
-            <div t-if="object.description" t-field="object.description"/>
+        <div class="o_assembly_publication o_assembly_af_doc_body">
+            <article>
+                <h1 class="h3 mb-3" t-out="object.name"/>
+                <p class="lead mb-3">
+                    This notice constitutes the official convocation for the assembly named above.
+                    Members and invited participants are requested to attend at the date, time, and venue indicated below,
+                    and to review the agenda. Voting rights and quorum rules follow the bylaws of the convening body and
+                    the configuration of this assembly in Odoo.
+                </p>
+                <section class="mb-4">
+                    <h2 class="h5 text-uppercase text-muted">Schedule and venue</h2>
+                    <ul class="list-unstyled small mb-0">
+                        <li t-if="object.date_first_call" class="mb-1">
+                            <strong>First call: </strong>
+                            <span t-field="object.date_first_call" t-options="{&quot;widget&quot;: &quot;datetime&quot;}"/>
+                        </li>
+                        <li t-if="object.date_second_call" class="mb-1">
+                            <strong>Second call: </strong>
+                            <span t-field="object.date_second_call" t-options="{&quot;widget&quot;: &quot;datetime&quot;}"/>
+                        </li>
+                        <li t-if="object.date_start" class="mb-1">
+                            <strong>Session start: </strong>
+                            <span t-field="object.date_start" t-options="{&quot;widget&quot;: &quot;datetime&quot;}"/>
+                        </li>
+                        <li class="mb-1">
+                            <strong>Location: </strong>
+                            <span t-if="object.location" t-out="object.location"/>
+                            <span t-else="" class="fst-italic text-muted">(To be confirmed)</span>
+                        </li>
+                    </ul>
+                </section>
+                <section t-if="object.agenda_ids" class="mb-4">
+                    <h2 class="h5 text-uppercase text-muted">Agenda</h2>
+                    <ol class="ps-3 mb-0">
+                        <t t-foreach="object.agenda_ids" t-as="agenda_line">
+                            <li class="mb-1"><span t-field="agenda_line.name"/></li>
+                        </t>
+                    </ol>
+                </section>
+                <section t-if="not object.agenda_ids" class="mb-4">
+                    <h2 class="h5 text-uppercase text-muted">Agenda</h2>
+                    <p class="text-muted fst-italic small mb-0">
+                        Agenda items will appear here once they are added to this assembly.
+                        Use the agenda tab on the assembly form to define each point, vote mode, and materials.
+                    </p>
+                </section>
+                <section t-if="object.description" class="mb-0" t-field="object.description"/>
+                <section t-else="" class="mb-0">
+                    <p class="text-muted fst-italic small mb-0">
+                        Additional legal or practical wording can be stored in the assembly description field,
+                        or supplied through a configured convocation mail template.
+                    </p>
+                </section>
+            </article>
         </div>
     </template>
     <template id="assembly_af_delegation_document_qweb" name="AF: delegation document (QWeb fallback)">
-        <div class="o_assembly_delegation_intro">
-            <p>Vote delegation form for the assembly <strong t-out="object.name"/>.</p>
-            <p>Identify the delegator and the delegate below and specify the vote types delegated.</p>
+        <div class="o_assembly_delegation_intro o_assembly_af_doc_body">
+            <h2 class="h5 mb-3">Vote delegation — <span t-out="object.name"/></h2>
+            <p class="mb-3">
+                The delegator named below transfers the exercise of voting rights for this assembly to the delegate,
+                within the limits of applicable law and the vote types specified on the delegation record.
+                The delegate must be recorded as present for the delegation to take effect.
+            </p>
+            <table class="table table-sm table-bordered w-100 mb-3">
+                <tbody>
+                    <tr>
+                        <th class="w-25 bg-light">Delegator</th>
+                        <td>
+                            <t t-if="object.attendee_ids">
+                                <span t-out="object.attendee_ids[0].partner_id.display_name"/>
+                            </t>
+                            <t t-else="">
+                                <span class="fst-italic text-muted">(Member name — generate attendees to preview a sample)</span>
+                            </t>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Delegate</th>
+                        <td>
+                            <t t-if="object.attendee_ids[1:2]">
+                                <span t-out="object.attendee_ids[1].partner_id.display_name"/>
+                            </t>
+                            <t t-else="">
+                                <span class="fst-italic text-muted">(Delegate name)</span>
+                            </t>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Assembly</th>
+                        <td><span t-out="object.name"/></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="small text-muted mb-0">
+                Replace this block with your organisation’s delegation form text using a mail template or a company-level
+                fallback view when you need clauses specific to your statutes.
+            </p>
         </div>
     </template>
     <template id="assembly_af_delegation_footer_qweb" name="AF: delegation footer (QWeb fallback)">
-        <div class="o_assembly_delegation_footer">
-            <p>The delegator certifies the accuracy of the information above and authorizes the delegate to cast votes on their behalf for the indicated vote type(s).</p>
+        <div class="o_assembly_delegation_footer o_assembly_af_doc_body">
+            <p class="mb-3">
+                By signing below, the delegator confirms that the information provided is accurate and that they authorise
+                the delegate to cast votes on their behalf for the assembly <strong t-out="object.name"/>, subject to the
+                limits recorded in the system. The delegate confirms acceptance of this mandate.
+            </p>
+            <div class="row mt-4 pt-2">
+                <div class="col-md-6 mb-4">
+                    <p class="small fw-bold text-uppercase text-muted mb-1">Delegator</p>
+                    <div class="border-bottom border-2 border-dark mb-2" style="min-height: 2.5rem;"/>
+                    <p class="small text-muted mb-0">Name and signature</p>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <p class="small fw-bold text-uppercase text-muted mb-1">Delegate</p>
+                    <div class="border-bottom border-2 border-dark mb-2" style="min-height: 2.5rem;"/>
+                    <p class="small text-muted mb-0">Name and signature</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="small fw-bold text-uppercase text-muted mb-1">Date</p>
+                    <div class="border-bottom border-2 border-dark" style="min-height: 2rem;"/>
+                </div>
+            </div>
         </div>
     </template>
     <template id="assembly_af_ballot_intro_qweb" name="AF: ballot intro (QWeb fallback)">
-        <div class="o_assembly_ballot_intro">
-            <p>Voting ballot for <strong t-out="object.name"/>.</p>
-            <p>Mark your choice clearly for each agenda item.</p>
+        <div class="o_assembly_ballot_intro o_assembly_af_doc_body">
+            <h2 class="h5 mb-2">Voting ballot</h2>
+            <p class="mb-2"><strong t-out="object.name"/></p>
+            <p class="mb-3">
+                Please clearly mark your voting choice for each agenda item according to the instructions printed beside
+                each question. Use only the official channels established by the chair. If you delegate your vote,
+                ensure the delegation is active before the vote is opened.
+            </p>
+            <p class="small text-muted mb-0">
+                This introduction can be replaced with your standard ballot preamble via mail template or company settings.
+            </p>
         </div>
     </template>
     <template id="assembly_af_ballot_nominative_intro_qweb" name="AF: nominative ballot intro (QWeb fallback)">
-        <div class="o_assembly_ballot_nominative_intro">
-            <p>Personalized voting ballot for the assembly <strong t-out="object.name"/>.</p>
+        <div class="o_assembly_ballot_nominative_intro o_assembly_af_doc_body">
+            <h2 class="h5 mb-2">Nominative voting ballot</h2>
+            <p class="mb-1"><strong>Assembly: </strong><span t-out="object.name"/></p>
+            <p class="mb-3">
+                <strong>Member: </strong>
+                <t t-if="object.attendee_ids">
+                    <span t-out="object.attendee_ids[0].partner_id.display_name"/>
+                </t>
+                <t t-else="">
+                    <span class="fst-italic text-muted">(Member — generate attendees for a sample name)</span>
+                </t>
+            </p>
+            <p class="mb-3">
+                Mark exactly one option per row unless the chair instructs otherwise. Illegible or ambiguous marks may be
+                treated as abstention under your internal rules.
+            </p>
+            <table class="table table-bordered table-sm w-100">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:3rem;">#</th>
+                        <th>Agenda item</th>
+                        <th style="width:35%;">Your vote / notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-if="object.agenda_ids">
+                        <t t-foreach="object.agenda_ids" t-as="ag">
+                            <tr>
+                                <td class="text-center" t-out="ag.sequence"/>
+                                <td><span t-field="ag.name"/></td>
+                                <td class="bg-light"> </td>
+                            </tr>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <tr>
+                            <td class="text-center">1</td>
+                            <td class="fst-italic text-muted">(Agenda items appear when defined on the assembly)</td>
+                            <td class="bg-light"> </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
         </div>
     </template>
 </odoo>
