@@ -19,8 +19,9 @@ Usage
 =====
 
 #. Create a vote type (code, result type, formula, partner domain).
-#. Use "Recompute votes" on a vote type to compute votes for all partners in the domain.
+#. Use **Recompute votes** on a vote type to compute votes for all partners in the domain.
 #. View partner votes from the vote type (Results tab) or from the partner form.
+#. From a contact form, **Recompute my votes** updates only vote types whose partner domain includes that contact; stale lines are removed when the domain no longer matches.
 
 Credits
 =======

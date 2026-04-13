@@ -35,12 +35,11 @@ class ResPartner(models.Model):
             partner.total_votes_display = total
 
     def action_recompute_my_votes(self):
-        """Recompute all active vote types for this partner."""
         self.ensure_one()
         active_types = self.env["vote.type"].search([("active", "=", True)])
+        partner_vote_model = self.env["partner.vote"]
         for vote_type in active_types:
-            value, detail = vote_type.evaluate_formula(self)
-            partner_vote_model = self.env["partner.vote"]
+            partners = vote_type._get_partners_to_compute()
             vote = partner_vote_model.search(
                 [
                     ("partner_id", "=", self.id),
@@ -48,6 +47,11 @@ class ResPartner(models.Model):
                 ],
                 limit=1,
             )
+            if self not in partners:
+                if vote:
+                    vote.unlink()
+                continue
+            value, detail = vote_type.evaluate_formula(self)
             now = fields.Datetime.now()
             if vote_type.vote_value_type == "integer":
                 vals = {

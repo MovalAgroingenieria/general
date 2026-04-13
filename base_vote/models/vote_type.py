@@ -20,7 +20,11 @@ class VoteType(models.Model):
     code = fields.Char(required=True, index=True)
     description = fields.Text(translate=True)
     formula = fields.Text(
-        help="Jinja2 formula. Variable: partner (contact). Must return a number.",
+        help=(
+            "Jinja2 formula. Variable: partner (contact). Must return a number. "
+            "TER parcels on partner.parcel_ids use numeric field area_official (ha); "
+            "totals: partner.area_official_parcels."
+        ),
     )
     vote_value_type = fields.Selection(
         [("integer", "Integer"), ("float", "Decimal")],
@@ -150,13 +154,28 @@ class VoteType(models.Model):
         if not self.active:
             raise UserError(self.env._("Cannot recompute an archived vote type."))
         partners = self._get_partners_to_compute()
-        log_lines = []
         partner_vote_model = self.env["partner.vote"]
+        if partners:
+            stale_votes = partner_vote_model.search(
+                [
+                    ("vote_type_id", "=", self.id),
+                    ("partner_id", "not in", partners.ids),
+                ]
+            )
+        else:
+            stale_votes = partner_vote_model.search([("vote_type_id", "=", self.id)])
+        stale_votes.unlink()
+        log_lines = []
         for partner in partners:
             value, detail = self.evaluate_formula(partner)
             if "Error:" in detail:
                 log_lines.append(
-                    "Partner %s (%s): %s" % (partner.id, partner.display_name, detail),
+                    self.env._(
+                        "Partner %(pid)s (%(name)s): %(detail)s",
+                        pid=partner.id,
+                        name=partner.display_name,
+                        detail=detail,
+                    ),
                 )
             vote = partner_vote_model.search(
                 [

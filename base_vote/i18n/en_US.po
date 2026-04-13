@@ -6,10 +6,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-20 08:27+0000\n"
+"POT-Creation-Date: 2026-04-13 07:29+0000\n"
 "PO-Revision-Date: 2026-03-20 08:27+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -18,14 +19,14 @@ msgstr ""
 #. module: base_vote
 #. odoo-python
 #: code:addons/base_vote/models/vote_type.py:0
-msgid "%s partners processed."
+msgid "%(count)s partners processed."
 msgstr ""
 
 #. module: base_vote
 #: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
 msgid ""
-"<strong>Fórmula Jinja2:</strong> variable <code>partner</code> (contacto). "
-"Debe devolver un número."
+"<strong>Jinja2 formula:</strong> the variable <code>partner</code> is the "
+"contact; the expression must evaluate to a number."
 msgstr ""
 
 #. module: base_vote
@@ -52,6 +53,15 @@ msgstr ""
 #. module: base_vote
 #: model:ir.model.fields,field_description:base_vote.field_vote_type__code
 msgid "Code"
+msgstr ""
+
+#. module: base_vote
+#: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
+msgid ""
+"Common filters: <code>length</code>, <code>map(attribute='...')</code>, "
+"<code>sum</code>, <code>int</code>, <code>float</code>, "
+"<code>round(2)</code>, <code>default</code>, <code>max</code>, "
+"<code>min</code>."
 msgstr ""
 
 #. module: base_vote
@@ -122,21 +132,16 @@ msgstr ""
 #. module: base_vote
 #: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
 msgid ""
-"Ejemplos: <code>partner.parcel_ids | length</code>; "
-"<code>partner.parcel_ids | map(attribute='surface') | sum / 10</code>."
-msgstr ""
-
-#. module: base_vote
-#: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
-msgid ""
-"Filtros: <code>length</code>, <code>map(attribute='...')</code>, "
-"<code>sum</code>, <code>int</code>, <code>float</code>, "
-"<code>round(2)</code>, <code>default</code>, <code>max</code>, "
-"<code>min</code>."
+"Examples: <code>partner.number_of_parcels</code>; "
+"<code>partner.area_official_parcels / 10</code>; <code>partner.parcel_ids | "
+"map(attribute='area_official') | sum / 10</code> (TER parcels: numeric field"
+" <code>area_official</code> in ha; the field <code>surface</code> is not "
+"used)."
 msgstr ""
 
 #. module: base_vote
 #: model:ir.model.fields,field_description:base_vote.field_vote_type__formula
+#: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
 msgid "Formula"
 msgstr ""
 
@@ -152,8 +157,11 @@ msgid "Formula is empty."
 msgstr ""
 
 #. module: base_vote
-#: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
-msgid "Fórmula"
+#. odoo-python
+#: code:addons/base_vote/models/vote_type.py:0
+msgid ""
+"Formula: %(formula)s\n"
+"Result: %(result)s"
 msgstr ""
 
 #. module: base_vote
@@ -169,7 +177,10 @@ msgstr ""
 
 #. module: base_vote
 #: model:ir.model.fields,help:base_vote.field_vote_type__formula
-msgid "Jinja2 formula. Variable: partner (contact). Must return a number."
+msgid ""
+"Jinja2 formula. Variable: partner (contact). Must return a number. TER "
+"parcels on partner.parcel_ids use numeric field area_official (ha); totals: "
+"partner.area_official_parcels."
 msgstr ""
 
 #. module: base_vote
@@ -217,6 +228,12 @@ msgid "Partner"
 msgstr ""
 
 #. module: base_vote
+#. odoo-python
+#: code:addons/base_vote/models/vote_type.py:0
+msgid "Partner %(pid)s (%(name)s): %(detail)s"
+msgstr ""
+
+#. module: base_vote
 #: model:ir.model,name:base_vote.model_partner_vote
 msgid "Partner Vote"
 msgstr ""
@@ -251,12 +268,12 @@ msgstr ""
 
 #. module: base_vote
 #: model_terms:ir.ui.view,arch_db:base_vote.res_partner_view_form_vote
-msgid "Recalcular mis votos"
+msgid "Recompute my votes"
 msgstr ""
 
 #. module: base_vote
 #: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
-msgid "Recalcular votos"
+msgid "Recompute votes"
 msgstr ""
 
 #. module: base_vote
@@ -267,7 +284,7 @@ msgstr ""
 #. module: base_vote
 #. odoo-python
 #: code:addons/base_vote/models/vote_type.py:0
-msgid "Result: %s"
+msgid "Result: %(result)s"
 msgstr ""
 
 #. module: base_vote
@@ -301,18 +318,18 @@ msgstr ""
 #. module: base_vote
 #: model_terms:ir.actions.act_window,help:base_vote.vote_type_action
 msgid ""
-"Use \"Recompute votes\" to calculate votes for all partners matching the "
-"domain."
+"Use <strong>Recompute votes</strong> to calculate votes for all partners "
+"matching the domain."
 msgstr ""
 
 #. module: base_vote
 #: model:ir.model,name:base_vote.model_vote_type
+#: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
 msgid "Vote Type"
 msgstr ""
 
 #. module: base_vote
 #: model:ir.model.fields,field_description:base_vote.field_partner_vote__vote_type_id
-#: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
 msgid "Vote type"
 msgstr ""
 
@@ -348,5 +365,5 @@ msgstr ""
 
 #. module: base_vote
 #: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
-msgid "ej. partner.parcel_ids | length"
+msgid "e.g. partner.parcel_ids | length"
 msgstr ""

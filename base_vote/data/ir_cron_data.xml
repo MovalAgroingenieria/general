@@ -3,6 +3,7 @@
     <record id="ir_cron_vote_recompute" model="ir.cron">
         <field name="name">Vote: Recompute all vote types</field>
         <field name="model_id" ref="base_vote.model_vote_type"/>
+        <field name="user_id" ref="base.user_root"/>
         <field name="state">code</field>
         <field name="code">model._recompute_all_active_vote_types()</field>
         <field name="interval_number">1</field>

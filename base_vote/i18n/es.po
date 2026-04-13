@@ -6,10 +6,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-20 08:27+0000\n"
+"POT-Creation-Date: 2026-04-13 07:29+0000\n"
 "PO-Revision-Date: 2026-03-20 08:27+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -24,9 +25,11 @@ msgstr "%(count)s contactos procesados."
 #. module: base_vote
 #: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
 msgid ""
-"<strong>Fórmula Jinja2:</strong> variable <code>partner</code> (contacto). "
-"Debe devolver un número."
+"<strong>Jinja2 formula:</strong> the variable <code>partner</code> is the "
+"contact; the expression must evaluate to a number."
 msgstr ""
+"<strong>Fórmula Jinja2:</strong> la variable <code>partner</code> es el "
+"contacto; la expresión debe evaluar a un número."
 
 #. module: base_vote
 #: model:ir.model.constraint,message:base_vote.constraint_partner_vote_partner_vote_type_uniq
@@ -53,6 +56,19 @@ msgstr "No se puede recalcular un tipo de voto archivado."
 #: model:ir.model.fields,field_description:base_vote.field_vote_type__code
 msgid "Code"
 msgstr "Código"
+
+#. module: base_vote
+#: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
+msgid ""
+"Common filters: <code>length</code>, <code>map(attribute='...')</code>, "
+"<code>sum</code>, <code>int</code>, <code>float</code>, "
+"<code>round(2)</code>, <code>default</code>, <code>max</code>, "
+"<code>min</code>."
+msgstr ""
+"Filtros habituales: <code>length</code>, <code>map(attribute='...')</code>, "
+"<code>sum</code>, <code>int</code>, <code>float</code>, "
+"<code>round(2)</code>, <code>default</code>, <code>max</code>, "
+"<code>min</code>."
 
 #. module: base_vote
 #: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
@@ -124,21 +140,21 @@ msgstr "Dominio para filtrar a qué contactos aplica este tipo de voto."
 #. module: base_vote
 #: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
 msgid ""
-"Ejemplos: <code>partner.parcel_ids | length</code>; "
-"<code>partner.parcel_ids | map(attribute='surface') | sum / 10</code>."
+"Examples: <code>partner.number_of_parcels</code>; "
+"<code>partner.area_official_parcels / 10</code>; <code>partner.parcel_ids | "
+"map(attribute='area_official') | sum / 10</code> (TER parcels: numeric field"
+" <code>area_official</code> in ha; the field <code>surface</code> is not "
+"used)."
 msgstr ""
-
-#. module: base_vote
-#: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
-msgid ""
-"Filtros: <code>length</code>, <code>map(attribute='...')</code>, "
-"<code>sum</code>, <code>int</code>, <code>float</code>, "
-"<code>round(2)</code>, <code>default</code>, <code>max</code>, "
-"<code>min</code>."
-msgstr ""
+"Ejemplos: <code>partner.number_of_parcels</code>; "
+"<code>partner.area_official_parcels / 10</code>; <code>partner.parcel_ids | "
+"map(attribute='area_official') | sum / 10</code> (parcelas TER: campo "
+"numérico <code>area_official</code> en ha; no se usa el campo "
+"<code>surface</code>)."
 
 #. module: base_vote
 #: model:ir.model.fields,field_description:base_vote.field_vote_type__formula
+#: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
 msgid "Formula"
 msgstr "Fórmula"
 
@@ -164,11 +180,6 @@ msgstr ""
 "Resultado: %(result)s"
 
 #. module: base_vote
-#: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
-msgid "Fórmula"
-msgstr ""
-
-#. module: base_vote
 #: model:ir.model.fields,field_description:base_vote.field_partner_vote__id
 #: model:ir.model.fields,field_description:base_vote.field_vote_type__id
 msgid "ID"
@@ -181,9 +192,14 @@ msgstr "Entero"
 
 #. module: base_vote
 #: model:ir.model.fields,help:base_vote.field_vote_type__formula
-msgid "Jinja2 formula. Variable: partner (contact). Must return a number."
+msgid ""
+"Jinja2 formula. Variable: partner (contact). Must return a number. TER "
+"parcels on partner.parcel_ids use numeric field area_official (ha); totals: "
+"partner.area_official_parcels."
 msgstr ""
-"Fórmula Jinja2. Variable: partner (contacto). Debe devolver un número."
+"Fórmula Jinja2. Variable: partner (contacto). Debe devolver un número. Las "
+"parcelas TER en partner.parcel_ids usan el campo numérico area_official "
+"(ha); total acumulado: partner.area_official_parcels."
 
 #. module: base_vote
 #: model:ir.model.fields,field_description:base_vote.field_partner_vote__write_uid
@@ -230,6 +246,12 @@ msgid "Partner"
 msgstr "Contacto"
 
 #. module: base_vote
+#. odoo-python
+#: code:addons/base_vote/models/vote_type.py:0
+msgid "Partner %(pid)s (%(name)s): %(detail)s"
+msgstr "Contacto %(pid)s (%(name)s): %(detail)s"
+
+#. module: base_vote
 #: model:ir.model,name:base_vote.model_partner_vote
 msgid "Partner Vote"
 msgstr "Voto por Contacto"
@@ -264,13 +286,13 @@ msgstr "Número de votos por contacto"
 
 #. module: base_vote
 #: model_terms:ir.ui.view,arch_db:base_vote.res_partner_view_form_vote
-msgid "Recalcular mis votos"
-msgstr ""
+msgid "Recompute my votes"
+msgstr "Recalcular mis votos"
 
 #. module: base_vote
 #: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
-msgid "Recalcular votos"
-msgstr ""
+msgid "Recompute votes"
+msgstr "Recalcular votos"
 
 #. module: base_vote
 #: model:ir.model.fields,field_description:base_vote.field_vote_type__vote_value_type
@@ -315,20 +337,20 @@ msgstr "Total de votos (informativo)"
 #. module: base_vote
 #: model_terms:ir.actions.act_window,help:base_vote.vote_type_action
 msgid ""
-"Use \"Recompute votes\" to calculate votes for all partners matching the "
-"domain."
+"Use <strong>Recompute votes</strong> to calculate votes for all partners "
+"matching the domain."
 msgstr ""
-"Usa \"Recalcular votos\" para calcular los votos de todos los contactos que "
-"cumplan el dominio."
+"Usa <strong>Recalcular votos</strong> para calcular los votos de todos los "
+"contactos que cumplan el dominio."
 
 #. module: base_vote
 #: model:ir.model,name:base_vote.model_vote_type
+#: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
 msgid "Vote Type"
 msgstr "Tipo de Voto"
 
 #. module: base_vote
 #: model:ir.model.fields,field_description:base_vote.field_partner_vote__vote_type_id
-#: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
 msgid "Vote type"
 msgstr "Tipo de voto"
 
@@ -364,5 +386,5 @@ msgstr "Votos (entero)"
 
 #. module: base_vote
 #: model_terms:ir.ui.view,arch_db:base_vote.vote_type_view_form
-msgid "ej. partner.parcel_ids | length"
-msgstr ""
+msgid "e.g. partner.parcel_ids | length"
+msgstr "p. ej. partner.parcel_ids | length"

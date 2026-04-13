@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
 <odoo>
     <record id="res_partner_view_form_vote" model="ir.ui.view">
         <field name="name">res.partner.form.vote</field>
@@ -6,9 +7,9 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
-                <page string="Votos" name="votes">
+                <page string="Votes" name="votes">
                     <field name="total_votes_display" readonly="1"/>
-                    <button name="action_recompute_my_votes" string="Recalcular mis votos" type="object" class="btn-link"/>
+                    <button name="action_recompute_my_votes" string="Recompute my votes" type="object" class="btn-link"/>
                     <field name="partner_vote_ids" readonly="1" nolabel="1" domain="[('vote_type_id.active','=',True)]"/>
                 </page>
             </xpath>

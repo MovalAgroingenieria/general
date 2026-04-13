@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
 <odoo>
     <record id="vote_type_view_form" model="ir.ui.view">
         <field name="name">vote.type.form</field>
         <field name="model">vote.type</field>
         <field name="arch" type="xml">
-            <form string="Tipo de Voto">
+            <form string="Vote Type">
                 <header>
-                    <button name="action_recompute_votes" string="Recalcular votos" type="object"
+                    <button name="action_recompute_votes" string="Recompute votes" type="object"
                             class="btn-primary" groups="base.group_system"/>
                 </header>
                 <sheet>
@@ -25,19 +26,19 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Configuración" name="config">
-                            <field name="description" placeholder="Descripción / ayuda para el usuario" nolabel="1"/>
+                        <page string="Configuration" name="config">
+                            <field name="description" placeholder="Description / help for users" nolabel="1"/>
                             <field name="partner_domain" widget="domain" options="{'model': 'res.partner'}"/>
                         </page>
-                        <page string="Fórmula" name="formula">
-                            <field name="formula" placeholder="ej. partner.parcel_ids | length" nolabel="1"/>
+                        <page string="Formula" name="formula">
+                            <field name="formula" placeholder="e.g. partner.parcel_ids | length" nolabel="1"/>
                             <div class="alert alert-info" role="alert">
-                                <p><strong>Fórmula Jinja2:</strong> variable <code>partner</code> (contacto). Debe devolver un número.</p>
-                                <p>Filtros: <code>length</code>, <code>map(attribute='...')</code>, <code>sum</code>, <code>int</code>, <code>float</code>, <code>round(2)</code>, <code>default</code>, <code>max</code>, <code>min</code>.</p>
-                                <p>Ejemplos: <code>partner.parcel_ids | length</code>; <code>partner.parcel_ids | map(attribute='surface') | sum / 10</code>.</p>
+                                <p><strong>Jinja2 formula:</strong> the variable <code>partner</code> is the contact; the expression must evaluate to a number.</p>
+                                <p>Common filters: <code>length</code>, <code>map(attribute='...')</code>, <code>sum</code>, <code>int</code>, <code>float</code>, <code>round(2)</code>, <code>default</code>, <code>max</code>, <code>min</code>.</p>
+                                <p>Examples: <code>partner.number_of_parcels</code>; <code>partner.area_official_parcels / 10</code>; <code>partner.parcel_ids | map(attribute='area_official') | sum / 10</code> (TER parcels: numeric field <code>area_official</code> in ha; the field <code>surface</code> is not used).</p>
                             </div>
                         </page>
-                        <page string="Resultados" name="results">
+                        <page string="Results" name="results">
                             <field name="last_compute_log" readonly="1" nolabel="1" invisible="not last_compute_log"/>
                             <field name="partner_vote_ids" readonly="1" nolabel="1"/>
                         </page>
@@ -62,24 +63,24 @@
     </record>
 
     <record id="vote_type_action" model="ir.actions.act_window">
-        <field name="name">Tipos de Voto</field>
+        <field name="name">Vote types</field>
         <field name="res_model">vote.type</field>
         <field name="view_mode">list,form</field>
         <field name="context">{'search_default_active': 1}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">Crear un tipo de voto</p>
-            <p>Define un código, tipo de resultado (entero o decimal) y una fórmula Jinja2 con <code>partner</code> como variable.</p>
-            <p>Usa "Recalcular votos" para calcular los votos de todos los contactos que cumplan el dominio.</p>
+            <p class="o_view_nocontent_smiling_face">Create a vote type</p>
+            <p>Define a code, result type (integer or decimal), and a Jinja2 formula with <code>partner</code> as variable.</p>
+            <p>Use <strong>Recompute votes</strong> to calculate votes for all partners matching the domain.</p>
         </field>
     </record>
 
     <record id="partner_vote_action" model="ir.actions.act_window">
-        <field name="name">Votos por Contacto</field>
+        <field name="name">Partner votes</field>
         <field name="res_model">partner.vote</field>
         <field name="view_mode">list,form</field>
     </record>
 
-    <menuitem id="vote_menu_root" name="Votos" parent="base.menu_config" sequence="50"/>
-    <menuitem id="vote_type_menu" name="Tipos de Voto" parent="base_vote.vote_menu_root" action="base_vote.vote_type_action" sequence="10"/>
-    <menuitem id="partner_vote_menu" name="Votos por Contacto" parent="base_vote.vote_menu_root" action="base_vote.partner_vote_action" sequence="20"/>
+    <menuitem id="vote_menu_root" name="Votes" parent="base.menu_config" sequence="50"/>
+    <menuitem id="vote_type_menu" name="Vote types" parent="base_vote.vote_menu_root" action="base_vote.vote_type_action" sequence="10"/>
+    <menuitem id="partner_vote_menu" name="Partner votes" parent="base_vote.vote_menu_root" action="base_vote.partner_vote_action" sequence="20"/>
 </odoo>
