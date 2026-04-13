@@ -28,7 +28,7 @@ class VoteType(models.Model):
     )
     formula_relation_name = fields.Char(
         string="Lista del contacto",
-        help="Nombre técnico del campo (ej. ter_parcel_ids).",
+        help="Nombre técnico del campo (ej. parcel_ids).",
     )
     formula_attribute = fields.Char(
         string="Campo a sumar",

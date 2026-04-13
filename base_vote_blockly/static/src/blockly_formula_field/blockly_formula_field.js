@@ -53,8 +53,8 @@ export class BlocklyFormulaField extends Component {
         try {
             const Blockly = await loadBlockly();
             let relationOptions = [
-                [_t("(campo lista)"), "ter_parcel_ids"],
-                [_t("Parcelas"), "ter_parcel_ids"],
+                [_t("(campo lista)"), "parcel_ids"],
+                [_t("Parcelas"), "parcel_ids"],
                 [_t("Contactos relacionados"), "child_ids"],
             ];
             let sumFieldOptions = [

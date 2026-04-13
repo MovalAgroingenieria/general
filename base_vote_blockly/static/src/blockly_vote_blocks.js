@@ -19,7 +19,7 @@ export function defineVoteBlocks(
     const relationOptions =
         Array.isArray(relationFieldOptions) && relationFieldOptions.length
             ? relationFieldOptions.map((o) => [String(o[0]), String(o[1])])
-            : [[_t("(campo lista)"), "ter_parcel_ids"]];
+            : [[_t("(campo lista)"), "parcel_ids"]];
 
     const attrOptions =
         Array.isArray(sumFieldOptions) && sumFieldOptions.length
@@ -142,7 +142,7 @@ export function defineVoteBlocks(
 
     Blockly.JavaScript["vote_sum"] = function (block) {
         const attr = block.getFieldValue("ATTR") || "surface";
-        const rel = block.getFieldValue("RELATION") || "ter_parcel_ids";
+        const rel = block.getFieldValue("RELATION") || "parcel_ids";
         const div = block.getFieldValue("DIVISOR") || 10;
         const code = `(partner.${rel} | map(attribute='${attr}') | sum) / ${div}`;
         return [code, Blockly.JavaScript.ORDER_ATOMIC];
@@ -169,7 +169,7 @@ function createJinjaGenerator(Blockly) {
             /[^a-zA-Z0-9_]/g,
             ""
         );
-        const rel = (block.getFieldValue("RELATION") || "ter_parcel_ids").replace(
+        const rel = (block.getFieldValue("RELATION") || "parcel_ids").replace(
             /[^a-zA-Z0-9_]/g,
             ""
         );
