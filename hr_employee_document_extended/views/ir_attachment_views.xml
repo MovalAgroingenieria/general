@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_ir_attachment_kanban_employee_document" model="ir.ui.view">
+        <field name="name">ir.attachment.kanban.employee.document</field>
+        <field name="model">ir.attachment</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="mail.view_document_file_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//t[@t-name='menu']/a[@download='']" position="before">
+                <a t-if="record.type.raw_value != 'url'"
+                   t-attf-href="/web/content/ir.attachment/#{record.id.raw_value}/datas?download=false"
+                   target="_blank"
+                   class="dropdown-item">Ver</a>
+            </xpath>
+            <xpath expr="//aside[hasclass('o_kanban_image')]" position="replace">
+                <aside class="o_kanban_image m-1">
+                    <a t-if="record.type.raw_value != 'url'"
+                       t-attf-href="/web/content/ir.attachment/#{record.id.raw_value}/datas?download=false"
+                       target="_blank">
+                        <div class="o_kanban_image_wrapper d-flex align-items-center justify-content-center">
+                            <t t-set="webimage" t-value="new RegExp('image.*(gif|jpeg|jpg|png|webp)').test(record.mimetype.value)"/>
+                            <img t-if="webimage" t-attf-src="/web/image/#{record.id.raw_value}" width="100" height="100" alt="Document" class="o_attachment_image"/>
+                            <div t-else="!webimage" class="o_image o_image_thumbnail" t-att-data-mimetype="record.mimetype.value"/>
+                        </div>
+                    </a>
+                    <div t-if="record.type.raw_value == 'url'" class="o_kanban_image_wrapper d-flex align-items-center justify-content-center">
+                        <div class="fa fa-link fa-3x text-muted" aria-label="Image is a link"/>
+                    </div>
+                </aside>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
