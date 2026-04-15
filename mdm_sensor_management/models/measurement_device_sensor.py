@@ -4,7 +4,7 @@
 
 
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 
 class MeasurementDeviceSensor(models.Model):
@@ -64,6 +64,23 @@ class MeasurementDeviceSensor(models.Model):
         default=True,
     )
 
+    last_measurement = fields.Many2one(
+        comodel_name='mdm.measurement.device.sensor.reading',
+        string="Last measurement",
+        compute="_compute_last_measurement",
+    )
+
+    last_measurement_time = fields.Datetime(
+        string="Last measurement time",
+        compute='_compute_last_measurement',
+        search='_search_last_measurement_time',
+    )
+
+    last_measurement_value = fields.Float(
+        string="Last measurement value",
+        digits=(32, 2),
+        compute="_compute_last_measurement")
+
     @api.constrains('name', 'device_id')
     def _check_unique_sensor_per_device(self):
         for sensor in self:
@@ -93,6 +110,35 @@ class MeasurementDeviceSensor(models.Model):
                         active_test=False).sensor_readings
                     readings.write({'active': True})
         return res
+
+    @api.multi
+    def _compute_last_measurement(self):
+        for record in self:
+            self.env.cr.execute("""
+                SELECT id, measurement_time, value
+                FROM mdm_measurement_device_sensor_reading
+                WHERE sensor_id = %s AND active = TRUE
+                ORDER BY measurement_time DESC
+                LIMIT 1
+            """, (record.id,))
+            result = self.env.cr.fetchone()
+            if result:
+                record.last_measurement = result[0]
+                record.last_measurement_time = result[1]
+                record.last_measurement_value = result[2]
+            else:
+                record.last_measurement = False
+                record.last_measurement_time = False
+                record.last_measurement_value = 0.0
+
+    def _search_last_measurement_time(self, operator, value):
+        if operator in (">=", ">"):
+            return [("date_to", operator, value)]
+        elif operator in ("<=", "<"):
+            return [("date_from", operator, value)]
+        raise UserError(
+            _("Unsupported operator %s for searching on date") % (operator,)
+        )
 
     def action_view_readings(self):
         self.ensure_one()

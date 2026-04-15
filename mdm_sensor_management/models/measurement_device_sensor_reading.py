@@ -76,6 +76,12 @@ class MeasurementDeviceSensorReading(models.Model):
         help='Date in Europe/Madrid timezone',
     )
 
+    is_last_sensor_reading = fields.Boolean(
+        string='Last Reading',
+        compute='_compute_is_last_sensor_reading',
+        search='_search_is_last_sensor_reading',
+    )
+
     _sql_constraints = [
         ('unique_name', 'unique(name)', 'The sensor reading must be unique.'),
     ]
@@ -132,3 +138,36 @@ class MeasurementDeviceSensorReading(models.Model):
             if old_readings:
                 old_readings.write({'active': False})
         return True
+
+    @api.multi
+    def _compute_is_last_sensor_reading(self):
+        # Batch: prefetch sensor_id and last_measurement
+        sensors = self.mapped('sensor_id')
+        if sensors:
+            sensors.mapped('last_measurement')
+        for record in self:
+            is_last_reading = False
+            if record.sensor_id and record.sensor_id.last_measurement:
+                is_last_reading = (
+                    record.id == record.sensor_id.last_measurement.id)
+            record.is_last_sensor_reading = is_last_reading
+
+    def _search_is_last_sensor_reading(self, operator, value):
+        domain = [('id', '=', 0)]
+        sql_query = """
+            SELECT DISTINCT ON (sensor_id) id
+            FROM mdm_measurement_device_sensor_reading
+            WHERE active = TRUE
+            ORDER BY sensor_id, measurement_time DESC
+        """
+        self.env.cr.execute(sql_query)
+        result = [rec[0] for rec in self.env.cr.fetchall()]
+        if operator == '=' and value:
+            domain = [('id', 'in', result)]
+        elif operator == '=' and not value:
+            domain = [('id', 'not in', result)]
+        elif operator == '!=' and value:
+            domain = [('id', 'not in', result)]
+        elif operator == '!=' and not value:
+            domain = [('id', 'in', result)]
+        return domain

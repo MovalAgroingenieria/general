@@ -13,6 +13,7 @@
                             <field name="measurement_time" attrs="{'readonly': [('id', '>', 0)]}" />
                             <field name="value"/>
                             <field name="uom_id" readonly="1"/>
+                            <field name="is_last_sensor_reading"/>
                         </group>
                     </sheet>
                 </form>
@@ -29,6 +30,7 @@
                     <field name="measurement_time"/>
                     <field name="value"/>
                     <field name="uom_id"/>
+                    <field name="is_last_sensor_reading"/>
                 </tree>
             </field>
         </record>
@@ -45,6 +47,10 @@
                     <filter string="Device" name="device_id" context="{'group_by':'device_id'}"/>
                     <filter string="Sensor" name="sensor_id" context="{'group_by':'sensor_id'}"/>
                     <filter string="Sensor Type" name="type_id" context="{'group_by':'type_id'}"/>
+                    <filter string="Last Reading" name="is_last_sensor_reading"
+                            domain="[('is_last_sensor_reading', '=', True)]"/>
+                    <filter string="Last Reading: No" name="is_last_sensor_reading_no"
+                            domain="[('is_last_sensor_reading','=',False)]"/>
                     <separator/>
                     <filter string="Day" name="group_by_day_madrid" context="{'group_by':'measurement_date_madrid:day'}"/>
                     <separator/>
