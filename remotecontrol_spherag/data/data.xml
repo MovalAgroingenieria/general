@@ -372,6 +372,7 @@ headers = {
     'Authorization': 'Bearer %s' % access_token,
     'Accept': 'application/json'
 }
+target_elements = bag.get('target_elements') or []
 
 final_date = fields.Date.today()
 window_start_suffix = ' 00:00:00'
@@ -894,6 +895,301 @@ bag['attachment_name'] = fname
 ]]></field>
         </record>
 
+        <!-- ACTION: Get Last Readings (for wua.reading integration) -->
+        <record id="remotecontrol_spherag_action_get_last_readings" model="remotecontrol.action">
+            <field name="name">Spherag: Get Last Readings</field>
+            <field name="remote_id" ref="remotecontrol_spherag"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="code"><![CDATA[
+import time
+from datetime import datetime
+
+Remote = self.remote_id
+access_token = bag.get('access_token')
+
+if not access_token:
+    raise Exception("Missing Spherag access_token in bag")
+
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+api_core_url = (cfg.get('api_core_url') or 'https://apicore.spherag.com').rstrip('/')
+system_id = cfg.get('system_id') or bag.get('system_id')
+if not system_id:
+    raise Exception("Missing system_id in connection_params. Please add 'system_id'.")
+
+headers = {
+    'Authorization': 'Bearer %s' % access_token,
+    'Accept': 'application/json'
+}
+
+target_elements = bag.get('target_elements') or []
+
+def _extract_latest_payload_value(payload):
+    latest_ts = 0
+    latest_value = None
+
+    data_containers = []
+    if isinstance(payload, dict):
+        for key in ['accumulatedFlowData', 'sensorData', 'flowRateData']:
+            value = payload.get(key)
+            if isinstance(value, dict):
+                data_containers.append(value)
+
+    for container in data_containers:
+        arrays = container.get('data') or []
+        if not isinstance(arrays, list):
+            continue
+        for array_item in arrays:
+            if not isinstance(array_item, dict):
+                continue
+            points = array_item.get('data') or []
+            if not isinstance(points, list):
+                continue
+            for point in points:
+                if not isinstance(point, dict):
+                    continue
+                ts = point.get('dateTS')
+                raw_value = point.get('value')
+                if ts is None:
+                    continue
+                if isinstance(raw_value, list):
+                    value = None
+                    for item in raw_value:
+                        if item is not None and item != '':
+                            value = item
+                            break
+                else:
+                    value = raw_value
+                if value is None or value == '':
+                    continue
+                try:
+                    ts_int = int(ts)
+                    value_float = float(value)
+                except Exception:
+                    continue
+                if ts_int >= latest_ts:
+                    latest_ts = ts_int
+                    latest_value = value_float
+
+        # Newer Spherag payloads expose monitoring points in logs[]
+        logs = container.get('logs') or []
+        if not isinstance(logs, list):
+            continue
+        for log_item in logs:
+            if not isinstance(log_item, dict):
+                continue
+            ts = log_item.get('dateTS')
+            values = log_item.get('data') or []
+            raw_value = None
+            if isinstance(values, list):
+                for val_item in values:
+                    if not isinstance(val_item, dict):
+                        continue
+                    if val_item.get('value') is not None:
+                        raw_value = val_item.get('value')
+                        break
+            if ts is None or raw_value is None or raw_value == '':
+                continue
+            try:
+                ts_int = int(ts)
+                value_float = float(raw_value)
+            except Exception:
+                continue
+            if ts_int >= latest_ts:
+                latest_ts = ts_int
+                latest_value = value_float
+
+    return latest_ts, latest_value
+
+api_calls = []
+atlas_devices = []
+if not target_elements:
+    page = 1
+    limit = 100
+    has_next_page = True
+
+    while has_next_page:
+        url_atlas = '%s/systems/%s/Atlas?Init=%s&Limit=%s' % (
+            api_core_url, system_id, page, limit)
+        resp_atlas = request_retry(
+            'GET', url_atlas, headers=headers, timeout=timeout)
+        if resp_atlas.status_code >= 400:
+            raise Exception(
+                "Error fetching Atlas devices from URL %s: HTTP %s - %s" % (
+                    url_atlas, resp_atlas.status_code, resp_atlas.text))
+
+        resp_data = resp_atlas.json() or {}
+        items = resp_data.get('items') or []
+        atlas_devices.extend(items)
+        api_calls.append({
+            'url': url_atlas,
+            'method': 'GET',
+            'status': resp_atlas.status_code,
+            'page': page,
+            'items_in_page': len(items),
+        })
+        has_next_page = resp_data.get('hasNextPage', False)
+        page += 1
+        if page > 50:
+            break
+
+now_ms = int(time.time() * 1000)
+start_ms = now_ms - (3 * 24 * 60 * 60 * 1000)
+
+last_readings = {}
+if target_elements:
+    for target in target_elements:
+        if not isinstance(target, dict):
+            continue
+        element_id = target.get('element_id')
+        target_imei = target.get('imei')
+        target_system_id = target.get('system_id') or system_id
+        chart_type_id = target.get('chart_type_id')
+
+        if (not element_id or not target_imei or
+                not target_system_id or not chart_type_id):
+            continue
+
+        url_monitor = (
+            '%s/systems/%s/Atlas/%s/AtlasElements/%s/monitoring'
+            '?ChartType=%s&StartDate=%s&EndDate=%s'
+        ) % (
+            api_core_url,
+            target_system_id,
+            target_imei,
+            element_id,
+            chart_type_id,
+            start_ms,
+            now_ms,
+        )
+
+        resp_monitor = request_retry(
+            'GET', url_monitor, headers=headers, timeout=timeout)
+        api_calls.append({
+            'url': url_monitor,
+            'method': 'GET',
+            'status': resp_monitor.status_code,
+            'mode': 'target',
+        })
+        if resp_monitor.status_code >= 400:
+            continue
+
+        payload = resp_monitor.json() or {}
+        latest_ts, latest_value = _extract_latest_payload_value(payload)
+        if latest_ts and latest_value is not None:
+            dt = datetime.fromtimestamp(latest_ts / 1000.0)
+            last_readings[int(element_id)] = {
+                'date': dt.strftime('%Y-%m-%d %H:%M:%S'),
+                'value': latest_value,
+                'chart_type': int(chart_type_id),
+                'element_name': target.get('element_name') or '',
+                'subsystem_id': target.get('subsystem_id'),
+                'subsystem_name': target.get('subsystem_name') or '',
+                'imei': str(target_imei),
+                'system_id': int(target_system_id),
+            }
+else:
+    for atlas in atlas_devices:
+        if not isinstance(atlas, dict):
+            continue
+        imei = atlas.get('imei')
+        if not imei or str(imei).strip() == '':
+            continue
+        url_elements = '%s/systems/%s/Atlas/%s/AtlasElements' % (
+            api_core_url, system_id, imei)
+        resp_elements = request_retry(
+            'GET', url_elements, headers=headers, timeout=timeout)
+        if resp_elements.status_code >= 400:
+            continue
+
+        elements = resp_elements.json() or []
+        for element in elements:
+            if not isinstance(element, dict):
+                continue
+
+            element_id = element.get('id') or element.get('elementId')
+            if element_id is None:
+                continue
+
+            subsystem = element.get('subsystem') or {}
+            subsystem_id = element.get('subsystem_id')
+            subsystem_name = element.get('subsystem_name')
+            if isinstance(subsystem, dict):
+                if subsystem.get('id'):
+                    subsystem_id = subsystem.get('id')
+                if subsystem.get('name'):
+                    subsystem_name = subsystem.get('name')
+
+            charts = element.get('chart_types') or element.get('chartTypes') or []
+            if not charts:
+                url_charts = '%s/AtlasElement/Charts/%s' % (
+                    api_core_url, element_id)
+                resp_charts = request_retry(
+                    'GET', url_charts, headers=headers, timeout=timeout)
+                if resp_charts.status_code < 400:
+                    charts = resp_charts.json() or []
+
+            flow_accumulated_chart = None
+            for chart in charts:
+                if (isinstance(chart, dict) and
+                        chart.get('name') == 'FLOW_ACCUMULATED' and
+                        chart.get('id') is not None):
+                    flow_accumulated_chart = chart
+                    break
+
+            if not flow_accumulated_chart:
+                continue
+
+            chart_type_id = flow_accumulated_chart.get('id')
+            url_monitor = (
+                '%s/systems/%s/Atlas/%s/AtlasElements/%s/monitoring'
+                '?ChartType=%s&StartDate=%s&EndDate=%s'
+            ) % (
+                api_core_url,
+                system_id,
+                imei,
+                element_id,
+                chart_type_id,
+                start_ms,
+                now_ms,
+            )
+
+            resp_monitor = request_retry(
+                'GET', url_monitor, headers=headers, timeout=timeout)
+            if resp_monitor.status_code >= 400:
+                continue
+
+            payload = resp_monitor.json() or {}
+            latest_ts, latest_value = _extract_latest_payload_value(payload)
+            if latest_ts and latest_value is not None:
+                dt = datetime.fromtimestamp(latest_ts / 1000.0)
+                last_readings[int(element_id)] = {
+                    'date': dt.strftime('%Y-%m-%d %H:%M:%S'),
+                    'value': latest_value,
+                    'chart_type': chart_type_id,
+                    'element_name': element.get('name') or '',
+                    'subsystem_id': subsystem_id,
+                    'subsystem_name': subsystem_name or '',
+                    'imei': str(imei),
+                    'system_id': int(system_id),
+                }
+
+bag['last_readings'] = last_readings
+bag['total_last_readings'] = len(last_readings)
+bag['api_calls'] = api_calls
+
+result = 'Retrieved last readings for %d Spherag elements' % len(last_readings)
+            ]]></field>
+        </record>
+
         <!-- PROCEDURE: Import Devices and Metrics -->
         <record id="remotecontrol_spherag_procedure_import" model="remotecontrol.procedure">
             <field name="name">Spherag: Import Devices and Metrics</field>
@@ -946,6 +1242,29 @@ bag['attachment_name'] = fname
             <field name="procedure_id" ref="remotecontrol_spherag_procedure"/>
             <field name="action_id" ref="remotecontrol_spherag_action_get_readings"/>
             <field name="sequence">30</field>
+        </record>
+
+        <!-- PROCEDURE: Get Last Readings (for wua.reading) -->
+        <record id="remotecontrol_spherag_procedure_last_readings" model="remotecontrol.procedure">
+            <field name="name">Spherag: Get Last Readings</field>
+            <field name="remote_id" ref="remotecontrol_spherag"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_spherag_step_last_readings_10_token" model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id" ref="remotecontrol_spherag_procedure_last_readings"/>
+            <field name="action_id" ref="remotecontrol_spherag_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_spherag_step_last_readings_20_readings" model="remotecontrol.step">
+            <field name="name">Get Last Readings</field>
+            <field name="procedure_id" ref="remotecontrol_spherag_procedure_last_readings"/>
+            <field name="action_id" ref="remotecontrol_spherag_action_get_last_readings"/>
+            <field name="sequence">20</field>
         </record>
 
     </data>

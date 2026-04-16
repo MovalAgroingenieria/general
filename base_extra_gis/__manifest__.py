@@ -3,7 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 {
-    "name": "Base-Extra-Gis Module" ,
+    "name": "Base-Extra-Gis Module",
     "summary": "Additional GIS tools",
     "version": '10.0.1.1.1',
     "category": "Hidden",

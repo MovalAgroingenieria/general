@@ -137,7 +137,7 @@ class MeasurementDeviceSensor(models.Model):
         elif operator in ("<=", "<"):
             return [("date_from", operator, value)]
         raise UserError(
-            _("Unsupported operator %s for searching on date") % (operator,)
+            _("Unsupported operator %s for searching on date") % (operator,),
         )
 
     def action_view_readings(self):
