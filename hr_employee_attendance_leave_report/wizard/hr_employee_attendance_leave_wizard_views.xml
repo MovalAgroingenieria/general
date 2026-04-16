@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="attendance_leave_wizard_form_view" model="ir.ui.view">
+        <field name="name">attendance_leave_wizard.form_view</field>
+        <field name="model">attendance.leave.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="start_date"/>
+                        <field name="end_date"/>
+                    </group>
+                    <group>
+                        <field name="number_of_selected_employees"/>
+                        <field name="employee_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="print_employee_attendance_leave_report"
+                        type="object" class="oe_highlight">
+                        <div class="o_form_field">
+                            <span class="fa fa-print"/>
+                            <span style="margin-left:8px;">Print</span>
+                        </div>
+                    </button>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Droplist actions -->
+    <record id="action_hr_employee_attendance_leave_report_single" model="ir.actions.act_window">
+        <field name="name">Employee Attendances / Leaves Report</field>
+        <field name="res_model">attendance.leave.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{
+            'default_composition_mode': 'mass',
+            'default_mass_keep_log': True,
+            'default_res_ids': active_ids}
+        </field>
+        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="binding_view_types">list</field>
+        <!-- groups="hr.group_hr_manager" -->
+    </record>
+
+    <record id="action_hr_employee_attendance_leave_report_multi" model="ir.actions.act_window">
+        <field name="name">Employee Attendances / Leaves Report</field>
+        <field name="res_model">attendance.leave.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{
+            'default_composition_mode': 'comment',
+            'default_res_id': active_id}
+        </field>
+        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="binding_view_types">form</field>
+        <!-- groups="hr.group_hr_manager" -->
+    </record>
+
+</odoo>
