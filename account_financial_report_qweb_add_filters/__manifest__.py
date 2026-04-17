@@ -16,6 +16,7 @@
         "security/ir.model.access.csv",
         "views/account_views.xml",
         "wizard/trial_balance_wizard_view.xml",
+        "views/trial_balance_report_templates.xml",
         "report/general_ledger_balance.xml",
     ],
 }
