@@ -1,78 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
 <odoo>
-    <!-- 11.1 Attendees list (all) -->
-    <record id="assembly_assembly_action_report_attendance" model="ir.actions.report">
-        <field name="name">Attendees list (all)</field>
-        <field name="model">assembly.assembly</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">base_assembly.report_assembly_attendance</field>
-        <field name="report_file">base_assembly.report_assembly_attendance</field>
-        <field name="print_report_name">'Attendees - %s' % (object._get_report_base_filename())</field>
-        <field name="binding_model_id" ref="model_assembly_assembly"/>
-        <field name="binding_type">report</field>
-    </record>
-
-    <!-- 11.2 Attendees list (present only) -->
-    <record id="assembly_assembly_action_report_attendance_with_signature" model="ir.actions.report">
-        <field name="name">Attendees list (present only)</field>
-        <field name="model">assembly.assembly</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">base_assembly.report_assembly_attendance_present</field>
-        <field name="report_file">base_assembly.report_assembly_attendance_present</field>
-        <field name="print_report_name">'Attendees_present - %s' % (object._get_report_base_filename())</field>
-        <field name="binding_model_id" ref="model_assembly_assembly"/>
-        <field name="binding_type">report</field>
-    </record>
-
-    <!-- 11.3 Attendees list with delegated votes -->
-    <record id="assembly_assembly_action_report_attendance_with_delegationvote" model="ir.actions.report">
-        <field name="name">Attendees list (with delegated votes)</field>
-        <field name="model">assembly.assembly</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">base_assembly.report_assembly_attendance_delegation</field>
-        <field name="report_file">base_assembly.report_assembly_attendance_delegation</field>
-        <field name="print_report_name">'Attendees_delegations - %s' % (object._get_report_base_filename())</field>
-        <field name="binding_model_id" ref="model_assembly_assembly"/>
-        <field name="binding_type">report</field>
-    </record>
-
-    <!-- 11.2b Attendees list (present only, with delegated votes) -->
-    <record id="assembly_assembly_action_report_attendance_present_with_delegationvote" model="ir.actions.report">
-        <field name="name">Attendees list (present only, with delegated votes)</field>
-        <field name="model">assembly.assembly</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">base_assembly.report_assembly_attendance_present_delegation</field>
-        <field name="report_file">base_assembly.report_assembly_attendance_present_delegation</field>
-        <field name="print_report_name">'Attendees_present_delegations - %s' % (object._get_report_base_filename())</field>
-        <field name="binding_model_id" ref="model_assembly_assembly"/>
-        <field name="binding_type">report</field>
-    </record>
-
-    <!-- 11.8 Individual call -->
-    <record id="assembly_attendee_action_report_individual_call" model="ir.actions.report">
-        <field name="name">Individual call</field>
-        <field name="model">assembly.attendee</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">base_assembly.report_assembly_attendee_individual_call</field>
-        <field name="report_file">base_assembly.report_assembly_attendee_individual_call</field>
-        <field name="print_report_name">'Call - %s' % (object._get_report_base_filename())</field>
-        <field name="binding_model_id" ref="model_assembly_attendee"/>
-        <field name="binding_type">report</field>
-    </record>
-
-    <!-- 11.9 Individual call with votes -->
-    <record id="assembly_attendee_action_report_individual_call_with_votes" model="ir.actions.report">
-        <field name="name">Individual call (with votes)</field>
-        <field name="model">assembly.attendee</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">base_assembly.report_assembly_attendee_individual_call_votes</field>
-        <field name="report_file">base_assembly.report_assembly_attendee_individual_call_votes</field>
-        <field name="print_report_name">'Call_votes - %s' % (object._get_report_base_filename())</field>
-        <field name="binding_model_id" ref="model_assembly_attendee"/>
-        <field name="binding_type">report</field>
-    </record>
-
     <!-- Template: full attendees list -->
     <template id="report_assembly_attendance">
         <t t-foreach="docs" t-as="o">
@@ -416,19 +344,6 @@
             </t>
         </t>
     </template>
-
-    <!-- 11.8a Call register report action -->
-    <record id="assembly_assembly_action_report_call_register" model="ir.actions.report">
-        <field name="name">Call register (present)</field>
-        <field name="model">assembly.assembly</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">base_assembly.report_assembly_attendance_call_register</field>
-        <field name="report_file">base_assembly.report_assembly_attendance_call_register</field>
-        <field name="print_report_name">'Call_register - %s' % (object._get_report_base_filename())</field>
-        <field name="binding_model_id" ref="model_assembly_assembly"/>
-        <field name="binding_type">report</field>
-    </record>
-
     <!-- 11.8 Individual call (document) -->
     <template id="report_assembly_attendee_individual_call">
         <t t-foreach="docs" t-as="o">

@@ -1,28 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
 <odoo>
-    <record id="assembly_assembly_action_report_representation" model="ir.actions.report">
-        <field name="name">Representation register (assembly)</field>
-        <field name="model">assembly.assembly</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">base_assembly.report_assembly_representation</field>
-        <field name="report_file">base_assembly.report_assembly_representation</field>
-        <field name="print_report_name">'Representation_register - %s' % (object._get_report_base_filename())</field>
-        <field name="binding_model_id" ref="model_assembly_assembly"/>
-        <field name="binding_type">report</field>
-    </record>
-
-    <record id="assembly_representation_action_report_power_of_attorney" model="ir.actions.report">
-        <field name="name">Representation (power of attorney)</field>
-        <field name="model">assembly.representation</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">base_assembly.report_assembly_representation_record</field>
-        <field name="report_file">base_assembly.report_assembly_representation_record</field>
-        <field name="print_report_name">'Representation_POA - %s' % (object._get_report_base_filename())</field>
-        <field name="binding_model_id" ref="model_assembly_representation"/>
-        <field name="binding_type">report</field>
-    </record>
-
     <template id="report_assembly_representation">
         <t t-foreach="docs" t-as="o">
             <t t-call="base_assembly.report_assembly_representation_doc"/>

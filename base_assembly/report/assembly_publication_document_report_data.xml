@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
+<odoo>
+    <record id="assembly_assembly_action_report_publication_document" model="ir.actions.report">
+        <field name="name">Assembly publication (PDF)</field>
+        <field name="model">assembly.assembly</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">base_assembly.report_assembly_publication_document</field>
+        <field name="report_file">base_assembly.report_assembly_publication_document</field>
+        <field name="print_report_name">'Publication - %s' % (object._get_report_base_filename())</field>
+    </record>
+</odoo>

@@ -1,27 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
 <odoo>
-    <record id="assembly_attendee_action_report_voting_ballot_nominative" model="ir.actions.report">
-        <field name="name">Member ballot (attendee)</field>
-        <field name="model">assembly.attendee</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">base_assembly.report_assembly_attendee_voting_ballot_nominative</field>
-        <field name="report_file">base_assembly.report_assembly_attendee_voting_ballot_nominative</field>
-        <field name="print_report_name">'Ballot_nominative - %s' % (object._get_report_base_filename())</field>
-        <field name="binding_model_id" ref="model_assembly_attendee"/>
-        <field name="binding_type">report</field>
-    </record>
-
-    <record id="assembly_attendee_action_report_voting_ballot" model="ir.actions.report">
-        <field name="name">Member ballot — generic intro (optional)</field>
-        <field name="model">assembly.attendee</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">base_assembly.report_assembly_attendee_voting_ballot</field>
-        <field name="report_file">base_assembly.report_assembly_attendee_voting_ballot</field>
-        <field name="print_report_name">'Ballot_template - %s' % (object._get_report_base_filename())</field>
-        <field name="binding_model_id" eval="False"/>
-    </record>
-
     <template id="report_assembly_attendee_voting_ballot">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
