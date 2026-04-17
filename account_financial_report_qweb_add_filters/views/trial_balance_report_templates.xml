@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
 <odoo>
+    <!-- Sub-document: expects variable "o" (wizard) and layout_document_title if needed -->
     <template id="report_general_ledger_balance_grouped">
         <t t-call="web.external_layout">
-            <t t-set="o" t-value="o.with_context(lang=es_ES)"/>
             <div class="page">
                 <h2>Trial Balance Report</h2>
-                <h3>Year <t t-out="o.date_range_id.name"/> - From <t t-out="o.date_from"/> to <t t-out="o.date_to"/></h3>
-                <table class="table table-condensed" name="principal_table">
+                <h3>
+                    Year <span t-out="o.date_range_id.name or ''"/>
+                    — From <span t-out="o.date_from"/>
+                    to <span t-out="o.date_to"/>
+                </h3>
+                <table class="table table-sm" name="principal_table">
                     <thead name="principal_thead">
                         <tr style="page-break-before: always; page-break-after: auto; page-break-inside: avoid;">
                             <th style="width: 30%;">Account</th>
@@ -17,7 +21,7 @@
                     <tbody name="principal_tbody">
                         <t t-foreach="o.get_accounts()" t-as="account">
                             <t t-set="items" t-value="o.get_item_ids(account, o.date_from, o.date_to)"/>
-                            <t t-if="not items and o.show_account_zero or items">
+                            <t t-if="items or (o.show_account_zero and not items)">
                                 <tr style="page-break-before: always; page-break-after: auto; page-break-inside: avoid;">
                                     <td name="account_td">
                                         <span t-out="account.code or ''"/>
@@ -25,28 +29,16 @@
                                         <span t-out="account.name or ''"/>
                                     </td>
                                     <td colspan="6" name="columns_td">
-                                        <table class="table table-condensed" name="internal_table">
+                                        <table class="table table-sm" name="internal_table">
                                             <thead name="internal_thead">
                                                 <tr style="page-break-before: always; page-break-after: auto; page-break-inside: avoid;">
                                                     <th style="width: 20%;">
-                                                        <t t-if="account.group_by == 'product_id'">
-                                                            Product
-                                                        </t>
-                                                        <t t-elif="account.group_by == 'partner_id'">
-                                                            Partner
-                                                        </t>
-                                                        <t t-elif="account.group_by == 'journal_id'">
-                                                            Journal
-                                                        </t>
-                                                        <t t-elif="account.group_by == 'tag'">
-                                                            Tag
-                                                        </t>
-                                                        <t t-elif="account.group_by == 'analytic_account_id'">
-                                                            Analytic Account
-                                                        </t>
-                                                        <t t-else="">
-                                                            N/A
-                                                        </t>
+                                                        <t t-if="account.group_by == 'product_id'">Product</t>
+                                                        <t t-elif="account.group_by == 'partner_id'">Partner</t>
+                                                        <t t-elif="account.group_by == 'journal_id'">Journal</t>
+                                                        <t t-elif="account.group_by == 'tag'">Tag</t>
+                                                        <t t-elif="account.group_by == 'analytic_account_id'">Analytic Account</t>
+                                                        <t t-else="">N/A</t>
                                                     </th>
                                                     <th style="width: 16%;">Credit</th>
                                                     <th style="width: 16%;">Debit</th>
@@ -56,42 +48,42 @@
                                                 </tr>
                                             </thead>
                                             <tbody name="internal_tbody">
-                                                <t t-foreach="o.get_item_ids(account, o.date_from, o.date_to)" t-as="item_line">
+                                                <t t-foreach="items" t-as="item_line">
                                                     <tr style="page-break-before: always; page-break-after: auto; page-break-inside: avoid;">
                                                         <td>
                                                             <t t-if="account.group_by == 'product_id'">
-                                                                <span t-out="item_line['product_id']"/>
+                                                                <span t-out="item_line.get('product_id')"/>
                                                             </t>
-                                                            <t t-elif="account.group_by == 'partner_id' and item_line['partner_id']">
-                                                                <span t-out="item_line['partner_id'][1] or False"/>
+                                                            <t t-elif="account.group_by == 'partner_id' and item_line.get('partner_id')">
+                                                                <span t-out="item_line['partner_id'][1] if item_line['partner_id'] else ''"/>
                                                             </t>
-                                                            <t t-elif="account.group_by == 'journal_id' and item_line['journal_id']">
-                                                                <span t-out="item_line['journal_id'][1] or False"/>
+                                                            <t t-elif="account.group_by == 'journal_id' and item_line.get('journal_id')">
+                                                                <span t-out="item_line['journal_id'][1] if item_line['journal_id'] else ''"/>
                                                             </t>
                                                             <t t-elif="account.group_by == 'tag'">
-                                                                <span t-out="item_line['tag']"/>
+                                                                <span t-out="item_line.get('tag')"/>
                                                             </t>
                                                             <t t-elif="account.group_by == 'analytic_account_id'">
-                                                                <span t-out="item_line['analytic_account_id']"/>
+                                                                <span t-out="item_line.get('analytic_account_id')"/>
                                                             </t>
                                                             <t t-else="">
-                                                                <span t-out="'N/A'"/>
+                                                                <span>N/A</span>
                                                             </t>
                                                         </td>
                                                         <td>
-                                                            <span t-out="o.env['wua.parcel'].transform_float_to_locale(item_line['credit'] or 0.0, 2)"/>
+                                                            <span t-out="o.format_trial_balance_number(item_line.get('credit'), 2)"/>
                                                         </td>
                                                         <td>
-                                                            <span t-out="o.env['wua.parcel'].transform_float_to_locale(item_line['debit'] or 0.0, 2)"/>
+                                                            <span t-out="o.format_trial_balance_number(item_line.get('debit'), 2)"/>
                                                         </td>
                                                         <td>
-                                                            <span t-out="o.env['wua.parcel'].transform_float_to_locale(item_line['balance'] or 0.0, 2)"/>
+                                                            <span t-out="o.format_trial_balance_number(item_line.get('balance'), 2)"/>
                                                         </td>
                                                         <td>
-                                                            <span t-out="o.env['wua.parcel'].transform_float_to_locale(item_line['initial_balance'] or 0.0, 2)"/>
+                                                            <span t-out="o.format_trial_balance_number(item_line.get('initial_balance'), 2)"/>
                                                         </td>
                                                         <td>
-                                                            <span t-out="o.env['wua.parcel'].transform_float_to_locale(item_line['final_balance'] or 0.0, 2)"/>
+                                                            <span t-out="o.format_trial_balance_number(item_line.get('final_balance'), 2)"/>
                                                         </td>
                                                     </tr>
                                                 </t>
@@ -107,9 +99,13 @@
         </t>
     </template>
 
+    <!-- Main QWeb entry: must match ir.actions.report report_name exactly -->
     <template id="template_report_trial_balance">
-        <t t-call="report.html_container">
-            <t t-foreach="docs" t-as="o">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="wiz">
+                <t t-set="lang" t-value="lang or wiz.env.lang"/>
+                <t t-set="o" t-value="wiz.with_context(lang=lang)"/>
+                <t t-set="layout_document_title" t-value="'Trial Balance Report'"/>
                 <t t-call="account_financial_report_qweb_add_filters.report_general_ledger_balance_grouped"/>
             </t>
         </t>

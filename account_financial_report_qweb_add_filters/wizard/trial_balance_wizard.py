@@ -8,6 +8,7 @@ import logging
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.tools.misc import formatLang
 
 _logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ class TrialBalanceReportWizard(models.TransientModel):
 
     company_id = fields.Many2one(
         comodel_name="res.company",
-        default=lambda self: self.env.user.company_id,
+        default=lambda self: self.env.company,
         required=False,
         string="Company",
     )
@@ -397,14 +398,17 @@ class TrialBalanceReportWizard(models.TransientModel):
     #         self, data=data)
     #     return res
 
-    # @api.multi
+    def format_trial_balance_number(self, value, digits=2):
+        """Locale-aware float formatting for QWeb (replaces legacy wua helpers)."""
+        self.ensure_one()
+        return formatLang(self.env, float(value or 0.0), digits=digits)
+
     def button_export_pdf(self):
         self.ensure_one()
-        return self.env["report"].get_action(
-            self,
+        return self.env.ref(
             "account_financial_report_qweb_add_filters."
-            "template_report_trial_balance",
-        )
+            "report_general_ledger_balance_grouped_action"
+        ).report_action(self)
 
     def button_export_excel(self):
         return {

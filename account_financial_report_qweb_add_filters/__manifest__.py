@@ -9,6 +9,7 @@
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "depends": [
+        "web",
         "account_financial_report",
         "account",
     ],
