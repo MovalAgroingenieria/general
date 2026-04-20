@@ -143,6 +143,12 @@ The system then extracts the correct data series using <code>group</code> / <cod
 
 <h3>Changelog</h3>
 <ul>
+  <li><strong>1.0.11</strong> (2026-04-17)
+    <ul>
+      <li>Fixed crash when API returns a non-dict response (e.g. expired JWT token string) with HTTP 200. Now validates <code>resp.json()</code> is a <code>dict</code> before calling <code>.get()</code> and logs the actual API response content in the audit for diagnosis.</li>
+      <li>Batch-level <code>cr.commit()</code>: upserts are persisted after each device batch so that a failure in a later batch does not roll back readings already saved.</li>
+    </ul>
+  </li>
   <li><strong>1.0.9</strong> (2026-04-13)
     <ul>
       <li>Date-range chunking: long date windows are automatically split into 30-day chunks to prevent 502/504 gateway timeouts on the 4eGrowth API when sensors have months of data to fetch.</li>
@@ -383,134 +389,172 @@ for (growth_id, parameter), batch_entries in batches.items():
       'chunks': [],
     }
 
-  for chunk_start, chunk_end in _date_chunks(min_initial, final_date, MAX_DAYS_PER_CHUNK):
-    params = {'initial_date': chunk_start, 'final_date': chunk_end}
-    if parameter:
-      if len(batch_entries) > 1:
-        params[parameter] = 'all'
-      else:
-        pv = batch_entries[0].get('parameter_value', '')
-        if pv not in (None, ''):
-          params[parameter] = str(pv)
-    params_snapshot = dict(params)
+  try:
+    for chunk_start, chunk_end in _date_chunks(min_initial, final_date, MAX_DAYS_PER_CHUNK):
+      params = {'initial_date': chunk_start, 'final_date': chunk_end}
+      if parameter:
+        if len(batch_entries) > 1:
+          params[parameter] = 'all'
+        else:
+          pv = batch_entries[0].get('parameter_value', '')
+          if pv not in (None, ''):
+            params[parameter] = str(pv)
+      params_snapshot = dict(params)
 
-    try:
-      resp = request_retry(
-        'GET', base, headers=headers, timeout=timeout, params=params
-      )
-      code = resp.status_code
-      full_url = getattr(resp, 'url', base)
+      try:
+        resp = request_retry(
+          'GET', base, headers=headers, timeout=timeout, params=params
+        )
+        code = resp.status_code
+        full_url = getattr(resp, 'url', base)
 
-      for entry in batch_entries:
-        sid = entry['sensor_id']
-        sensor_acc[sid]['last_url'] = full_url
-        sensor_acc[sid]['chunk_calls'] += 1
+        for entry in batch_entries:
+          sid = entry['sensor_id']
+          sensor_acc[sid]['last_url'] = full_url
+          sensor_acc[sid]['chunk_calls'] += 1
 
-      if code < 400:
-        payload = resp.json() or {}
-        for sp in batch_entries:
-          sid = sp['sensor_id']
-          acc = sensor_acc[sid]
-          sensor_initial = sp['initial_date']
-          window_start = sensor_initial + window_start_suffix
-          window_end = final_date + window_end_suffix
-          chunk_info = {
-            'chunk_start': chunk_start,
-            'chunk_end': chunk_end,
-            'status': code,
-            'url': full_url,
-            'params': params_snapshot,
-            'window_start': window_start,
-            'window_end': window_end,
-            'points_total': 0,
-            'points_in_window': 0,
-            'upserts': 0,
-            'errors': 0,
-          }
-
-          group_data = payload.get(sp['parameter_group'])
-          if not group_data:
-            acc['missing_group'] += 1
-            acc['errs'] += 1
-            chunk_info['warning'] = (
-              "Group '%s' not found. Available groups: %s" %
-              (sp['parameter_group'], list(payload.keys()))
-            )
-            acc['chunks'].append(chunk_info)
-            continue
-
-          key_data = group_data.get(sp['parameter_key'])
-          if not key_data:
-            acc['missing_key'] += 1
-            acc['errs'] += 1
-            chunk_info['warning'] = (
-              "Key '%s' not found in group '%s'. Available keys: %s" %
-              (
-                sp['parameter_key'],
-                sp['parameter_group'],
-                list(group_data.keys()),
-              )
-            )
-            acc['chunks'].append(chunk_info)
-            continue
-
-          data_list = key_data.get('data') or []
-          chunk_info['points_total'] = len(data_list)
-          for reading in data_list:
-            try:
-              ts_s = reading['ts']
-              raw_value = reading.get('value')
-              valf = float(raw_value) if raw_value is not None else 0.0
-              if (ts_s >= window_start) and (ts_s <= window_end):
-                chunk_info['points_in_window'] += 1
-                Remote.upsert(
-                  'mdm.measurement.device.sensor.reading',
-                  {
-                    'sensor_id': sensor_records[sid].id,
-                    'measurement_time': ts_s,
-                  },
-                  {
-                    'value': valf,
-                    'remotecontrol_origin_id': Remote.id,
-                  }
-                )
-                acc['upserts'] += 1
-                chunk_info['upserts'] += 1
-            except Exception as e:
+        if code < 400:
+          raw_payload = resp.json()
+          if not isinstance(raw_payload, dict):
+            error_txt = (str(raw_payload) or 'Empty/non-dict response')[:400]
+            for entry in batch_entries:
+              sid = entry['sensor_id']
+              acc = sensor_acc[sid]
               acc['errs'] += 1
-              chunk_info['errors'] += 1
+              acc['chunk_exceptions'] += 1
+              acc['chunks'].append({
+                'chunk_start': chunk_start,
+                'chunk_end': chunk_end,
+                'status': code,
+                'url': full_url,
+                'params': params_snapshot,
+                'error': 'API returned non-dict payload: %s' % error_txt,
+              })
+            continue
+          payload = raw_payload
+          for sp in batch_entries:
+            sid = sp['sensor_id']
+            acc = sensor_acc[sid]
+            sensor_initial = sp['initial_date']
+            window_start = sensor_initial + window_start_suffix
+            window_end = final_date + window_end_suffix
+            chunk_info = {
+              'chunk_start': chunk_start,
+              'chunk_end': chunk_end,
+              'status': code,
+              'url': full_url,
+              'params': params_snapshot,
+              'window_start': window_start,
+              'window_end': window_end,
+              'points_total': 0,
+              'points_in_window': 0,
+              'upserts': 0,
+              'errors': 0,
+            }
 
-          acc['chunks'].append(chunk_info)
-      else:
-        error_txt = (resp.text or '')[:400]
+            group_data = payload.get(sp['parameter_group'])
+            if not group_data:
+              acc['missing_group'] += 1
+              acc['errs'] += 1
+              chunk_info['warning'] = (
+                "Group '%s' not found. Available groups: %s" %
+                (sp['parameter_group'], list(payload.keys()))
+              )
+              acc['chunks'].append(chunk_info)
+              continue
+
+            key_data = group_data.get(sp['parameter_key'])
+            if not key_data:
+              acc['missing_key'] += 1
+              acc['errs'] += 1
+              chunk_info['warning'] = (
+                "Key '%s' not found in group '%s'. Available keys: %s" %
+                (
+                  sp['parameter_key'],
+                  sp['parameter_group'],
+                  list(group_data.keys()),
+                )
+              )
+              acc['chunks'].append(chunk_info)
+              continue
+
+            data_list = key_data.get('data') or []
+            chunk_info['points_total'] = len(data_list)
+            for reading in data_list:
+              try:
+                ts_s = reading['ts']
+                raw_value = reading.get('value')
+                valf = float(raw_value) if raw_value is not None else 0.0
+                if (ts_s >= window_start) and (ts_s <= window_end):
+                  chunk_info['points_in_window'] += 1
+                  Remote.upsert(
+                    'mdm.measurement.device.sensor.reading',
+                    {
+                      'sensor_id': sensor_records[sid].id,
+                      'measurement_time': ts_s,
+                    },
+                    {
+                      'value': valf,
+                      'remotecontrol_origin_id': Remote.id,
+                    }
+                  )
+                  acc['upserts'] += 1
+                  chunk_info['upserts'] += 1
+              except Exception as e:
+                acc['errs'] += 1
+                chunk_info['errors'] += 1
+
+            acc['chunks'].append(chunk_info)
+        else:
+          error_txt = (resp.text or '')[:400]
+          for entry in batch_entries:
+            sid = entry['sensor_id']
+            acc = sensor_acc[sid]
+            acc['errs'] += 1
+            acc['chunk_http_errors'] += 1
+            acc['chunks'].append({
+              'chunk_start': chunk_start,
+              'chunk_end': chunk_end,
+              'status': code,
+              'url': full_url,
+              'params': params_snapshot,
+              'error': error_txt,
+            })
+      except Exception as ex:
         for entry in batch_entries:
           sid = entry['sensor_id']
           acc = sensor_acc[sid]
           acc['errs'] += 1
-          acc['chunk_http_errors'] += 1
+          acc['chunk_calls'] += 1
+          acc['chunk_exceptions'] += 1
           acc['chunks'].append({
             'chunk_start': chunk_start,
             'chunk_end': chunk_end,
-            'status': code,
-            'url': full_url,
+            'status': -1,
+            'url': base,
             'params': params_snapshot,
-            'error': error_txt,
+            'error': str(ex),
           })
-    except Exception as ex:
-      for entry in batch_entries:
-        sid = entry['sensor_id']
-        acc = sensor_acc[sid]
-        acc['errs'] += 1
-        acc['chunk_calls'] += 1
-        acc['chunk_exceptions'] += 1
-        acc['chunks'].append({
-          'chunk_start': chunk_start,
-          'chunk_end': chunk_end,
-          'status': -1,
-          'url': base,
-          'params': params_snapshot,
-          'error': str(ex),
-        })
+  except Exception as batch_ex:
+    for entry in batch_entries:
+      sid = entry['sensor_id']
+      acc = sensor_acc[sid]
+      acc['errs'] += 1
+      acc['chunk_exceptions'] += 1
+      acc['chunks'].append({
+        'chunk_start': '',
+        'chunk_end': '',
+        'status': -1,
+        'url': base,
+        'params': {},
+        'error': 'Batch error: %s' % str(batch_ex),
+      })
+
+  # Persist upserts for this batch so they survive if a later batch fails
+  try:
+    env.cr.commit()
+  except Exception:
+    pass
 
   # Build one audit item per sensor
   for sp in batch_entries:
