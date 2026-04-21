@@ -154,9 +154,12 @@ for device in (devices or []):
         last_reading_time = last_readings_map.get(sensor.id)
         if last_reading_time:
             try:
-                # last_reading_time comes as string from SQL execute
-                start_date = fields.Date.to_string(
-                    fields.Datetime.from_string(last_reading_time))
+                # psycopg2 returns timestamp columns as Python datetime objects
+                if hasattr(last_reading_time, 'strftime'):
+                    start_date = last_reading_time.strftime('%Y-%m-%d')
+                else:
+                    start_date = fields.Date.to_string(
+                        fields.Datetime.from_string(last_reading_time))
             except Exception:
                 start_date = default_initial_date
         sensor_plan['initial_date'] = start_date
@@ -179,6 +182,7 @@ bag['sensors_plan'] = plan]]></field>
             <field name="code"><![CDATA[# Action B: fetch readings by group/key, upsert (generic), and attach audit
 import json
 import base64
+import time
 import pytz
 from datetime import datetime, timedelta
 
@@ -190,7 +194,16 @@ total_upserts = 0
 total_errors = 0
 items = []
 
-for sensor_plan in (plan or []):
+# SiAR rate limit: 5 req/min. Authentication already consumed 3 requests
+# (cifrarCadena x2 + obtenerToken), so wait 60 s for the window to reset
+# before making any reading request.
+if plan:
+    time.sleep(60)
+
+for idx, sensor_plan in enumerate(plan or []):
+    # Wait 13 s between reading calls to stay within 5 req/min limit
+    if idx > 0:
+        time.sleep(13)
     siar_token = sensor_plan['siar_token']
     device_id = sensor_plan['device_id']
     sensor_id = sensor_plan['sensor_id']
@@ -215,7 +228,9 @@ for sensor_plan in (plan or []):
             # Response is not valid JSON (empty or malformed)
             payload = {}
 
-        mensaje_respuesta = (payload.get('MensajeRespuesta') or '').strip()
+        message_error = (payload.get('MensajeRespuesta') or '').strip()
+        if not message_error:
+            message_error = resp.text[:300].strip()
 
         if code < 400:
             # Try both 'datos' (lowercase) and 'Datos' (uppercase) for compatibility
@@ -257,17 +272,21 @@ for sensor_plan in (plan or []):
                     continue
 
                 try:
+                    env.cr.execute('SAVEPOINT siar_reading_upsert')
                     remotecontrol.upsert(
                         'mdm.measurement.device.sensor.reading',
                         {'sensor_id': sensor_id,
                          'measurement_time': measurement_time_utc},
                         {'remotecontrol_origin_id': remotecontrol.id,
                          'value': value})
+                    env.cr.execute('RELEASE SAVEPOINT siar_reading_upsert')
                     upserts = upserts + 1
                     readings_summary.append({
                         'measurement_time': measurement_time_utc,
                         'value': value})
                 except Exception as e:
+                    env.cr.execute(
+                        'ROLLBACK TO SAVEPOINT siar_reading_upsert')
                     errs = errs + 1
                     readings_summary.append({
                         'measurement_time': reading.get('Fecha', 'unknown'),
