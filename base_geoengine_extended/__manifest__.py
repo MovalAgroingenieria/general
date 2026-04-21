@@ -11,6 +11,7 @@
     "license": "AGPL-3",
     "application": True,
     "installable": True,
+    "post_load": "post_load",
     "depends": [
         "base_geoengine",
     ],
