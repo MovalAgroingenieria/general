@@ -1,14 +1,231 @@
-.o_report_layout_background {
-    
-    .report_main_title {
-        margin-top: 0px;
-        padding-top: 0px;
-        margin-bottom: 32px;
+/* 2026 Moval Agroingeniería | attendance / leave PDF report */
+
+.o_report_layout_background .o_attendance_leave_report {
+    font-size: 11px;
+    color: #2d3436;
+
+    .o-alr-hero {
+        margin-bottom: 22px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid rgba(45, 52, 54, 0.12);
     }
 
-    .report_section_title {
-        border-bottom: 2px solid;
-        padding: 2px 4px;
+    .o-alr-title {
+        margin: 0 0 8px;
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: #1a252f;
     }
-    
+
+    .o-alr-hero-accent {
+        height: 4px;
+        width: 72px;
+        border-radius: 2px;
+        background: linear-gradient(90deg, #6c757d 0%, #adb5bd 100%);
+    }
+
+    .o-alr-section {
+        margin-top: 18px;
+
+        &:first-of-type {
+            margin-top: 0;
+        }
+    }
+
+    .o-alr-section-head {
+        margin-bottom: 10px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #2d3436;
+        overflow: hidden;
+    }
+
+    .o-alr-section-icon {
+        float: left;
+        font-size: 14px;
+        width: 26px;
+        margin-right: 8px;
+        text-align: center;
+        color: #495057;
+        line-height: 1.4;
+    }
+
+    .o-alr-section-title {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #343a40;
+        line-height: 1.4;
+        display: block;
+        overflow: hidden;
+    }
+
+    .o-alr-card {
+        padding: 14px 16px;
+        border: 1px solid rgba(45, 52, 54, 0.1);
+        border-radius: 6px;
+        background: linear-gradient(180deg, #fafbfc 0%, #ffffff 48%);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .o-alr-emp-row {
+        align-items: flex-start;
+    }
+
+    .o-alr-emp-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a252f;
+        padding-top: 2px;
+    }
+
+    .o-alr-meta-table {
+        width: 100%;
+        margin: 0;
+
+        td {
+            padding: 4px 8px;
+            vertical-align: middle;
+            border: none;
+        }
+
+        .o-alr-meta-label {
+            font-weight: 600;
+            color: #6c757d;
+            white-space: nowrap;
+            padding-right: 12px;
+        }
+
+        .o-alr-meta-value {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            color: #212529;
+        }
+    }
+
+    .o-alr-data-table {
+        margin-top: 4px;
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        border: 1px solid rgba(45, 52, 54, 0.12);
+        border-radius: 6px;
+        overflow: hidden;
+
+        thead th {
+            padding: 10px 12px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #fff;
+            background: linear-gradient(180deg, #495057 0%, #343a40 100%);
+            border: none;
+            vertical-align: middle;
+        }
+
+        tbody td {
+            padding: 8px 12px;
+            vertical-align: top;
+            border-top: 1px solid rgba(45, 52, 54, 0.08);
+        }
+
+        tbody tr:first-child td {
+            border-top: none;
+        }
+
+        tbody tr:nth-child(even) td {
+            background-color: rgba(248, 249, 250, 0.85);
+        }
+    }
+
+    .o-alr-tfoot-row td {
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+        border-top: 2px solid #adb5bd !important;
+        background-color: rgba(248, 249, 250, 0.95) !important;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .o-alr-empty-msg {
+        margin: 8px 0 0;
+        padding: 12px 14px;
+        border-radius: 6px;
+        border-left: 4px solid #dee2e6;
+        background: #f8f9fa;
+        color: #495057;
+        font-style: italic;
+    }
+
+    .o-alr-footnote {
+        margin: 10px 0 0;
+        font-size: 10px;
+        color: #856404;
+    }
+
+    .o-alr-section--conformity {
+        margin-top: 28px;
+    }
+
+    .o-alr-conformity-date {
+        margin-bottom: 14px;
+        font-size: 11px;
+        color: #495057;
+    }
+
+    .o-alr-signatures {
+        display: table;
+        width: 100%;
+        border: 1px solid rgba(45, 52, 54, 0.14);
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .o-alr-sign-cell {
+        display: table-cell;
+        width: 50%;
+        vertical-align: top;
+        padding: 16px 18px;
+
+        &.o-alr-sign-cell--company {
+            border-right: 1px solid rgba(45, 52, 54, 0.12);
+        }
+    }
+
+    .o-alr-sign-inner {
+        min-height: 120px;
+        position: relative;
+    }
+
+    .o-alr-sign-caption {
+        margin: 0 0 28px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #212529;
+        min-height: 18px;
+    }
+
+    .o-alr-sign-line {
+        margin: 0 0 8px;
+        border-bottom: 1px solid #adb5bd;
+        height: 36px;
+    }
+
+    .o-alr-sign-label {
+        text-align: right;
+        font-size: 9px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #adb5bd;
+    }
+
+    .o-alr-page-break {
+        margin: 0;
+        padding: 0;
+        border: none;
+        height: 0;
+    }
 }

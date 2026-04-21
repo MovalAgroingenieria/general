@@ -267,6 +267,42 @@ class HrEmployeeAttendanceLeaveReport(models.AbstractModel):
                 )
         return data
 
+    def _get_report_labels(self):
+        return {
+            "title": self.env._("Attendances / Leaves Report"),
+            "section_employee": self.env._("Employee"),
+            "section_attendance": self.env._("Attendances"),
+            "section_leave": self.env._("Leaves"),
+            "section_holidays": self.env._("Public holidays"),
+            "section_conformity": self.env._("Conformity"),
+            "label_from": self.env._("From"),
+            "label_to": self.env._("To"),
+            "th_check_in": self.env._("Check-in"),
+            "th_check_out": self.env._("Check-out"),
+            "th_working_hours": self.env._("Working hours"),
+            "total_working_hours": self.env._("Total working hours"),
+            "no_attendance": self.env._(
+                "No attendance was found during this period for the employee."
+            ),
+            "th_leave_type": self.env._("Type"),
+            "th_leave_period": self.env._("From / To"),
+            "th_leave_days": self.env._("Period / Total days"),
+            "th_leave_reason": self.env._("Reason"),
+            "non_validated_note": self.env._(
+                "(*) There are non-validated leaves in the selected period."
+            ),
+            "no_leave": self.env._(
+                "No leave was found during this period for the employee."
+            ),
+            "th_holiday_date": self.env._("Date"),
+            "th_holiday_name": self.env._("Name"),
+            "no_public_holidays": self.env._(
+                "There are no public holidays for the selected period."
+            ),
+            "company_signature": self.env._("Company signature"),
+            "employee_signature": self.env._("Employee signature"),
+        }
+
     @api.model
     def _get_report_values(self, docids, data=None):  # pylint: disable=unused-argument
         if not data.get("form"):
@@ -281,6 +317,7 @@ class HrEmployeeAttendanceLeaveReport(models.AbstractModel):
             "doc_ids": self.ids,
             "doc_model": attendance_leave_report.model,
             "docs": docs,
+            "labels": self._get_report_labels(),
             "get_data_from_wizard": self._get_data_from_wizard(data["form"]),
             "get_employee_data": self._get_employee_data,
             "get_attendance_data": self._get_attendance_data,

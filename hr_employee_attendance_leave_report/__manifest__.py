@@ -4,7 +4,7 @@
 {
     "name": "Employee Attendances / Leaves Report",
     "summary": "Create a employee attendance/leaves report",
-    "version": "18.0.1.1.0",
+    "version": "18.0.1.2.0",
     "category": "Moval General Addons",
     "website": "https://www.moval.es",
     "author": "Moval Agroingeniería",
@@ -18,7 +18,8 @@
     "data": [
         "security/ir.model.access.csv",
         "wizard/hr_employee_attendance_leave_wizard_views.xml",
-        "report/hr_employee_attendance_leave_report_views.xml",
+        "report/hr_employee_attendance_leave_report_data.xml",
+        "report/hr_employee_attendance_leave_report_templates.xml",
     ],
     "assets": {
         "web.report_assets_common": [

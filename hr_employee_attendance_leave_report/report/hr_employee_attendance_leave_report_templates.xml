@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
+<odoo>
+    <template id="att_lea_template">
+        <t t-set="wizard_data" t-value="get_data_from_wizard"/>
+        <t t-set="employee_ids" t-value="wizard_data[0]['data'][0]['employee_ids']"/>
+
+        <t t-foreach="employee_ids" t-as="employee_id">
+
+            <t t-set="employee" t-value="get_employee_data(employee_id)"/>
+            <t t-set="attendance_data" t-value="get_attendance_data(employee_id,
+                wizard_data[0]['data'][0]['start_date'], wizard_data[0]['data'][0]['end_date'])"/>
+            <t t-set="leave_data" t-value="get_leaves_data(employee_id,
+                wizard_data[0]['data'][0]['start_date'], wizard_data[0]['data'][0]['end_date'])"/>
+            <t t-set="public_holidays_data" t-value="get_public_holidays_data(
+                wizard_data[0]['data'][0]['start_date'], wizard_data[0]['data'][0]['end_date'])"/>
+            <t t-call="web.html_container">
+                <t t-call="web.external_layout">
+                    <div class="page o_attendance_leave_report">
+
+                        <div class="o-alr-hero">
+                            <h2 class="o-alr-title" t-esc="labels['title']"/>
+                            <div class="o-alr-hero-accent"/>
+                        </div>
+
+                        <div class="o-alr-section o-alr-section--employee">
+                            <div class="o-alr-section-head">
+                                <span class="o-alr-section-icon fa fa-user"/>
+                                <span class="o-alr-section-title" t-esc="labels['section_employee']"/>
+                            </div>
+                            <div class="o-alr-card">
+                                <div class="row o-alr-emp-row">
+                                    <div class="col-sm-7 o-alr-emp-name">
+                                        <span t-field="employee.name"/>
+                                    </div>
+                                    <div class="col-sm-5 o-alr-period">
+                                        <table class="o-alr-meta-table">
+                                            <tbody>
+                                                <tr>
+                                                    <td class="o-alr-meta-label">
+                                                        <span t-esc="labels['label_from']"/>
+                                                    </td>
+                                                    <td class="o-alr-meta-value">
+                                                        <span t-esc="wizard_data[0]['data'][0]['start_date_show']"/>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="o-alr-meta-label">
+                                                        <span t-esc="labels['label_to']"/>
+                                                    </td>
+                                                    <td class="o-alr-meta-value">
+                                                        <span t-esc="wizard_data[0]['data'][0]['end_date_show']"/>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="o-alr-section">
+                            <div class="o-alr-section-head">
+                                <span class="o-alr-section-icon fa fa-clock-o"/>
+                                <span class="o-alr-section-title" t-esc="labels['section_attendance']"/>
+                            </div>
+                            <t t-if="attendance_data">
+                                <table name="attendances_table" class="table table-sm o-alr-data-table">
+                                    <thead>
+                                        <tr>
+                                            <th><span t-esc="labels['th_check_in']"/></th>
+                                            <th><span t-esc="labels['th_check_out']"/></th>
+                                            <th name="th_working_hours" class="text-right">
+                                                <span t-esc="labels['th_working_hours']"/>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="attendance_data" t-as="attendance">
+                                            <td><span t-esc="attendance['check_in']"/></td>
+                                            <td><span t-esc="attendance['check_out']"/></td>
+                                            <td name="td_attendance_difference" class="text-right">
+                                                <span t-esc="attendance['difference']"/>
+                                            </td>
+                                        </tr>
+                                        <tr class="o-alr-tfoot-row">
+                                            <td colspan="2">
+                                                <strong t-esc="labels['total_working_hours']"/>
+                                            </td>
+                                            <td name="td_total_hours" class="text-right">
+                                                <t t-set="total_time" t-value="attendance_data[-1]"/>
+                                                <strong t-esc="total_time['total_working_time_show']"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <p class="o-alr-empty-msg" t-esc="labels['no_attendance']"/>
+                            </t>
+                        </div>
+
+                        <div class="o-alr-section" style="page-break-inside: avoid">
+                            <div class="o-alr-section-head">
+                                <span class="o-alr-section-icon fa fa-sun-o"/>
+                                <span class="o-alr-section-title" t-esc="labels['section_leave']"/>
+                            </div>
+                            <t t-set="unvalidated_leaves" t-value="false"/>
+                            <t t-if="leave_data">
+                                <table name="leaves_table" class="table table-sm o-alr-data-table">
+                                    <thead>
+                                        <tr>
+                                            <th><span t-esc="labels['th_leave_type']"/></th>
+                                            <th><span t-esc="labels['th_leave_period']"/></th>
+                                            <th class="text-center">
+                                                <span t-esc="labels['th_leave_days']"/>
+                                            </th>
+                                            <th><span t-esc="labels['th_leave_reason']"/></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="leave_data" t-as="leave">
+                                            <t t-if="leave['state'] != 'validate'">
+                                                <t t-set="unvalidated_leaves" t-value="true"/>
+                                            </t>
+                                            <t t-else="">
+                                                <td><span t-esc="leave['type']"/></td>
+                                                <td>
+                                                    <span t-esc="leave['from']"/><br/>
+                                                    <span t-esc="leave['to']"/>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span t-esc="leave['period_num_of_days']"/>
+                                                    <span> / </span>
+                                                    <span t-esc="leave['total_num_of_days']"/>
+                                                </td>
+                                                <td><span t-esc="leave['reason']"/></td>
+                                            </t>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <t t-if="unvalidated_leaves">
+                                    <p class="o-alr-footnote" t-esc="labels['non_validated_note']"/>
+                                </t>
+                            </t>
+                            <t t-else="">
+                                <p class="o-alr-empty-msg" t-esc="labels['no_leave']"/>
+                            </t>
+                        </div>
+
+                        <div class="o-alr-section" style="page-break-inside: avoid">
+                            <div class="o-alr-section-head">
+                                <span class="o-alr-section-icon fa fa-calendar"/>
+                                <span class="o-alr-section-title" t-esc="labels['section_holidays']"/>
+                            </div>
+                            <t t-if="public_holidays_data">
+                                <table name="public_holidays_table" class="table table-sm o-alr-data-table">
+                                    <thead>
+                                        <tr>
+                                            <th><span t-esc="labels['th_holiday_date']"/></th>
+                                            <th><span t-esc="labels['th_holiday_name']"/></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="public_holidays_data" t-as="public_holiday">
+                                            <td><span t-esc="public_holiday['holiday_date']"/></td>
+                                            <td><span t-esc="public_holiday['holiday_name']"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <p class="o-alr-empty-msg" t-esc="labels['no_public_holidays']"/>
+                            </t>
+                        </div>
+
+                        <div class="o-alr-section o-alr-section--conformity" style="page-break-inside: avoid">
+                            <div class="o-alr-section-head">
+                                <span class="o-alr-section-icon fa fa-check-square-o"/>
+                                <span class="o-alr-section-title" t-esc="labels['section_conformity']"/>
+                            </div>
+                            <div class="o-alr-conformity-date">
+                                <t t-if="res_company.city">
+                                    <span t-esc="res_company.city"/>,
+                                </t>
+                                <t t-else=""><span t-esc="str('_' * 20)"/>,</t>
+                                <span t-esc="wizard_data[0]['data'][0]['report_date']"/>
+                            </div>
+                            <div name="signatures" class="o-alr-signatures">
+                                <div class="o-alr-sign-cell o-alr-sign-cell--company">
+                                    <div class="o-alr-sign-inner">
+                                        <p class="o-alr-sign-caption" t-if="res_company.city">
+                                            <span t-esc="res_company.name"/>
+                                        </p>
+                                        <div class="o-alr-sign-line"/>
+                                        <div class="o-alr-sign-label" t-esc="labels['company_signature']"/>
+                                    </div>
+                                </div>
+                                <div class="o-alr-sign-cell">
+                                    <div class="o-alr-sign-inner">
+                                        <p class="o-alr-sign-caption">
+                                            <span t-field="employee.name"/>
+                                            <t t-if="employee.user_id and employee.user_id.partner_id.vat">
+                                                <span> (<span t-field="employee.user_id.partner_id.vat"/>)</span>
+                                            </t>
+                                        </p>
+                                        <div class="o-alr-sign-line"/>
+                                        <div class="o-alr-sign-label" t-esc="labels['employee_signature']"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <t t-if="not employee_id_last">
+                            <p class="o-alr-page-break" style="page-break-after: always;"/>
+                        </t>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
