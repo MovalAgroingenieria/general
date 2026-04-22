@@ -54,9 +54,7 @@ class TestHrEmployeeAttendanceLeaveReport(TransactionCase):
     def test_get_attendance_data_returns_list_and_meta(self):
         start = fields.Datetime.to_datetime(self.leave_day)
         end = start + timedelta(days=1)
-        rows, meta = self.report._get_attendance_data(
-            self.employee.id, start, end
-        )
+        rows, meta = self.report._get_attendance_data(self.employee.id, start, end)
         self.assertIsInstance(rows, list)
         self.assertIsInstance(meta, dict)
         self.assertIn("show_extras", meta)
