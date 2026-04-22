@@ -51,6 +51,17 @@ class TestHrEmployeeAttendanceLeaveReport(TransactionCase):
         self.assertTrue(rows)
         self.assertIn("holiday_name", rows[0])
 
+    def test_get_attendance_data_returns_list_and_meta(self):
+        start = fields.Datetime.to_datetime(self.leave_day)
+        end = start + timedelta(days=1)
+        rows, meta = self.report._get_attendance_data(
+            self.employee.id, start, end
+        )
+        self.assertIsInstance(rows, list)
+        self.assertIsInstance(meta, dict)
+        self.assertIn("show_extras", meta)
+        self.assertIn("extra_col_count", meta)
+
     def test_get_leaves_data_domain(self):
         self.env["hr.leave"].create(
             {

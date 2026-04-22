@@ -116,10 +116,36 @@ class HrEmployeeAttendanceLeaveReport(models.AbstractModel):
             translated_weekday = self.env._("Sunday")
         return translated_weekday
 
+    @staticmethod
+    def _format_float_as_hhmm(total_hours_float):
+        """Format accumulated hours (float) as HH:MM (same idea as the v16 custom report)."""
+        total = float(total_hours_float or 0.0)
+        if total < 0.0:
+            total = 0.0
+        total_minutes = int(round(total * 60.0))
+        hours, minutes = divmod(total_minutes, 60)
+        return f"{int(hours):02d}:{int(minutes):02d}"
+
     def _get_attendance_data(self, employee_id, start_date, end_date):
+        """Return (line list, metadata dict) for the attendance table and footers.
+
+        Optional ``hr.attendance`` fields (from Moval/OCA add-ons) are read when present:
+        ``is_extra_hours``, ``theoretical_hours``,
+        ``attendance_edited``, ``attendance_observations``.
+        """
         data = []
         start = self.get_formatted_date(start_date)
         end = self.get_formatted_date(end_date)
+        att_fields = self.env["hr.attendance"]._fields
+        has_extra_flag = "is_extra_hours" in att_fields
+        has_theoretical = "theoretical_hours" in att_fields
+        has_edited = "attendance_edited" in att_fields
+        has_obs = "attendance_observations" in att_fields
+        show_extras = has_extra_flag or has_edited or has_obs
+        extra_hours_sum = 0.0
+        days_seen = set()
+        total_theoretical = 0.0
+
         attendance_ids = self.env["hr.attendance"].search(
             [
                 ("check_in", ">=", str(start)),
@@ -129,47 +155,97 @@ class HrEmployeeAttendanceLeaveReport(models.AbstractModel):
             order="check_in",
         )
         if attendance_ids:
-            difference_time = ""
-            total_working_time = relativedelta(days=0, hours=0, minutes=0, seconds=0)
+            total_working_time = relativedelta(
+                days=0, hours=0, minutes=0, seconds=0
+            )
             total_working_time_show = ""
-            for attendance in attendance_ids:
-                check_in = self.get_formatted_date(attendance.check_in)
-                check_out = ""
-                check_in_show = self.get_formatted_date_show(attendance.check_in)
-                check_in_weekday = self.get_translated_weekday(
-                    attendance.check_in.weekday()
+            for rec in attendance_ids:
+                difference_time = ""
+                is_extra = bool(rec.is_extra_hours) if has_extra_flag else False
+                att_edited = bool(rec.attendance_edited) if has_edited else False
+                att_obs = (
+                    (rec.attendance_observations or "").strip() if has_obs else ""
                 )
+                check_in = self.get_formatted_date(rec.check_in)
+                check_in_show = self.get_formatted_date_show(rec.check_in)
+                check_in_weekday = self.get_translated_weekday(rec.check_in.weekday())
                 check_in_show = check_in_show + " - " + check_in_weekday
                 check_out_show = ""
-                if attendance.check_out:
-                    check_out = self.get_formatted_date(attendance.check_out)
-                    difference_time, difference = self.get_difference(
-                        check_in, check_out
-                    )
+                difference = None
+                if rec.check_out:
+                    check_out = self.get_formatted_date(rec.check_out)
+                    difference_time, difference = self.get_difference(check_in, check_out)
                     total_working_time += difference
                     days_in_hours = total_working_time.days * 24
                     total_hours = days_in_hours + total_working_time.hours
-                    if total_hours < 10:
-                        total_hours = str(total_hours).zfill(2)
-                    else:
-                        total_hours = str(total_hours)
-                    total_working_time_show = (
-                        total_hours + ":" + str(total_working_time.minutes).zfill(2)
+                    total_hours_str = (
+                        str(total_hours).zfill(2)
+                        if total_hours < 10
+                        else str(total_hours)
                     )
-                    check_out_show = self.get_formatted_date_show(attendance.check_out)
+                    total_working_time_show = total_hours_str + ":" + str(
+                        total_working_time.minutes
+                    ).zfill(2)
+                    check_out_show = self.get_formatted_date_show(rec.check_out)
                     check_out_weekday = self.get_translated_weekday(
-                        attendance.check_out.weekday()
+                        rec.check_out.weekday()
                     )
                     check_out_show = check_out_show + " - " + check_out_weekday
-                data.append(
-                    {
-                        "check_in": check_in_show,
-                        "check_out": check_out_show,
-                        "difference": difference_time,
-                        "total_working_time_show": total_working_time_show,
-                    }
-                )
-        return data
+                    if is_extra and difference and has_extra_flag:
+                        extra_hours_sum += (
+                            float(difference.hours)
+                            + float(difference.minutes) / 60.0
+                            + float(difference.seconds) / 3600.0
+                        )
+                if has_theoretical and rec.check_out:
+                    cdate = check_in.date() if hasattr(check_in, "date") else check_in
+                    if cdate not in days_seen:
+                        days_seen.add(cdate)
+                        total_theoretical += rec.theoretical_hours
+
+                row = {
+                    "check_in": check_in_show,
+                    "check_out": check_out_show,
+                    "difference": difference_time,
+                    "total_working_time_show": total_working_time_show,
+                    "is_extra_hours": is_extra,
+                    "attendance_edited": att_edited,
+                    "attendance_observations": att_obs,
+                }
+                if has_theoretical:
+                    row["total_theoretical_hours_format"] = (
+                        self._format_float_as_hhmm(total_theoretical)
+                    )
+                data.append(row)
+
+        theo_for_footer = (
+            self._format_float_as_hhmm(total_theoretical)
+            if (has_theoretical and data)
+            else None
+        )
+        extra_for_footer = (
+            self._format_float_as_hhmm(extra_hours_sum)
+            if (has_extra_flag and data)
+            else None
+        )
+        n_extra = 0
+        if show_extras:
+            n_extra = (
+                (1 if has_extra_flag else 0)
+                + (1 if has_edited else 0)
+                + (1 if has_obs else 0)
+            )
+        meta = {
+            "show_extras": show_extras,
+            "has_extra_flag": has_extra_flag,
+            "has_edited": has_edited,
+            "has_obs": has_obs,
+            "has_theoretical": has_theoretical,
+            "theoretical_time_show": theo_for_footer,
+            "extra_time_show": extra_for_footer,
+            "extra_col_count": n_extra,
+        }
+        return data, meta
 
     def _get_leaves_data(self, employee_id, start_date, end_date):
         data = []
@@ -280,7 +356,12 @@ class HrEmployeeAttendanceLeaveReport(models.AbstractModel):
             "th_check_in": self.env._("Check-in"),
             "th_check_out": self.env._("Check-out"),
             "th_working_hours": self.env._("Working hours"),
+            "th_flag_extra": self.env._("Overtime"),
+            "th_attendance_edited": self.env._("Edited"),
+            "th_observations": self.env._("Observations"),
             "total_working_hours": self.env._("Total working hours"),
+            "theoretical_total": self.env._("Theoretical hours (total)"),
+            "total_extra_worked": self.env._("Extra hours (tot.)"),
             "no_attendance": self.env._(
                 "No attendance was found during this period for the employee."
             ),

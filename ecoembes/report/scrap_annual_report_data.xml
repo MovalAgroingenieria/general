@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_scrap_annual" model="ir.actions.report">
+        <field name="name">SCRAP Annual Report</field>
+        <field name="model">scrap.annual.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">ecoembes.report_scrap_annual_document</field>
+        <field name="report_file">ecoembes.report_scrap_annual_document</field>
+        <field name="print_report_name">'SCRAP annual report - %s' % (object.year)</field>
+        <field name="binding_model_id" ref="model_scrap_annual_report_wizard"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

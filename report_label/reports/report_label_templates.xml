@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="report_label_template">
+
+        <t t-call="web.report_layout">
+            <style type="text/css">
+html, body {
+    margin: 0px;
+    padding: 0px;
+}
+.label_style {
+    height:             <t t-out="label_format['label_height']" />mm;
+    width:              <t t-out="label_format['label_width']" />mm;
+    padding-top:        <t t-out="label_format['label_padding_top']" />mm;
+    padding-right:      <t t-out="label_format['label_padding_right']" />mm;
+    padding-bottom:     <t t-out="label_format['label_padding_bottom']" />mm;
+    padding-left:       <t t-out="label_format['label_padding_left']" />mm;
+    margin-top:         <t t-out="label_format['label_margin_top']" />mm;
+    margin-right:       <t t-out="label_format['label_margin_right']" />mm;
+    margin-bottom:      <t t-out="label_format['label_margin_bottom']" />mm;
+    margin-left:        <t t-out="label_format['label_margin_left']" />mm;
+    background-color:   <t t-out="label_format['label_background_color']" />;
+    display: inline-block;
+    overflow: hidden;
+    float: left;
+    position: relative;
+    page-break-inside: avoid;
+    box-sizing: border-box;
+}
+            </style>
+
+            <t t-foreach="range(0, offset)" t-as="i">
+                <div class="label_style" />
+            </t>
+            <t t-foreach="lines" t-as="line">
+                <t t-foreach="range(0, line['quantity'])" t-as="i">
+                    <div class="label_style">
+                        <t t-call="{{label_template}}">
+                            <t
+                                t-set="record"
+                                t-value="docs.env[res_model].browse(line['res_id'])"
+                            />
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

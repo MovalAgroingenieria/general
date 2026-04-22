@@ -8,8 +8,10 @@
         <t t-foreach="employee_ids" t-as="employee_id">
 
             <t t-set="employee" t-value="get_employee_data(employee_id)"/>
-            <t t-set="attendance_data" t-value="get_attendance_data(employee_id,
+            <t t-set="att_pack" t-value="get_attendance_data(employee_id,
                 wizard_data[0]['data'][0]['start_date'], wizard_data[0]['data'][0]['end_date'])"/>
+            <t t-set="attendance_data" t-value="att_pack[0]"/>
+            <t t-set="ar_meta" t-value="att_pack[1]"/>
             <t t-set="leave_data" t-value="get_leaves_data(employee_id,
                 wizard_data[0]['data'][0]['start_date'], wizard_data[0]['data'][0]['end_date'])"/>
             <t t-set="public_holidays_data" t-value="get_public_holidays_data(
@@ -70,9 +72,20 @@
                                         <tr>
                                             <th><span t-esc="labels['th_check_in']"/></th>
                                             <th><span t-esc="labels['th_check_out']"/></th>
-                                            <th name="th_working_hours" class="text-right">
+                                            <th name="th_working_hours" class="text-right o-alr-th-hours">
                                                 <span t-esc="labels['th_working_hours']"/>
                                             </th>
+                                            <t t-if="ar_meta['show_extras']">
+                                                <th t-if="ar_meta['has_extra_flag']" class="text-center o-alr-th-icon">
+                                                    <span t-esc="labels['th_flag_extra']"/>
+                                                </th>
+                                                <th t-if="ar_meta['has_edited']" class="text-center o-alr-th-icon">
+                                                    <span t-esc="labels['th_attendance_edited']"/>
+                                                </th>
+                                                <th t-if="ar_meta['has_obs']">
+                                                    <span t-esc="labels['th_observations']"/>
+                                                </th>
+                                            </t>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -82,16 +95,66 @@
                                             <td name="td_attendance_difference" class="text-right">
                                                 <span t-esc="attendance['difference']"/>
                                             </td>
+                                            <t t-if="ar_meta['show_extras']">
+                                                <td t-if="ar_meta['has_extra_flag']" class="text-center o-alr-td-icon">
+                                                    <t t-if="attendance.get('is_extra_hours')">
+                                                        <span class="fa fa-check o-alr-ok" title="1"/>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="fa fa-times o-alr-nok" title="0"/>
+                                                    </t>
+                                                </td>
+                                                <td t-if="ar_meta['has_edited']" class="text-center o-alr-td-icon">
+                                                    <t t-if="attendance.get('attendance_edited')">
+                                                        <span class="fa fa-check o-alr-ok" title="1"/>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="fa fa-times o-alr-nok" title="0"/>
+                                                    </t>
+                                                </td>
+                                                <td t-if="ar_meta['has_obs']" class="o-alr-obs">
+                                                    <span t-esc="attendance.get('attendance_observations') or ''"/>
+                                                </td>
+                                            </t>
                                         </tr>
+                                        <t t-set="total_time" t-value="attendance_data[-1]"/>
                                         <tr class="o-alr-tfoot-row">
                                             <td colspan="2">
                                                 <strong t-esc="labels['total_working_hours']"/>
                                             </td>
-                                            <td name="td_total_hours" class="text-right">
-                                                <t t-set="total_time" t-value="attendance_data[-1]"/>
+                                            <td class="text-right" name="td_total_hours">
                                                 <strong t-esc="total_time['total_working_time_show']"/>
                                             </td>
+                                            <t t-foreach="range(0, ar_meta['extra_col_count'])" t-as="i">
+                                                <td class="o-alr-tfoot-skip">&#160;</td>
+                                            </t>
                                         </tr>
+                                        <t t-if="ar_meta.get('theoretical_time_show')">
+                                            <tr class="o-alr-tfoot-row o-alr-tfoot-aux">
+                                                <td colspan="2">
+                                                    <strong t-esc="labels['theoretical_total']"/>
+                                                </td>
+                                                <td class="text-right">
+                                                    <strong t-esc="ar_meta['theoretical_time_show']"/>
+                                                </td>
+                                                <t t-foreach="range(0, ar_meta['extra_col_count'])" t-as="j">
+                                                    <td class="o-alr-tfoot-skip">&#160;</td>
+                                                </t>
+                                            </tr>
+                                        </t>
+                                        <t t-if="ar_meta.get('extra_time_show')">
+                                            <tr class="o-alr-tfoot-row o-alr-tfoot-aux">
+                                                <td colspan="2">
+                                                    <strong t-esc="labels['total_extra_worked']"/>
+                                                </td>
+                                                <td class="text-right">
+                                                    <strong t-esc="ar_meta['extra_time_show']"/>
+                                                </td>
+                                                <t t-foreach="range(0, ar_meta['extra_col_count'])" t-as="k">
+                                                    <td class="o-alr-tfoot-skip">&#160;</td>
+                                                </t>
+                                            </tr>
+                                        </t>
                                     </tbody>
                                 </table>
                             </t>

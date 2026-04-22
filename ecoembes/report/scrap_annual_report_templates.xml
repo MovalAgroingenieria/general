@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_scrap_annual_document">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+
+                    <div name="report_title" class="report_main_title text-center">
+                        <h2>SCRAP Annual Contribution Report</h2>
+                        <h3>Year <t t-out="year or ''"/></h3>
+                    </div>
+
+                    <div class="mt-4">
+                        <t t-set="report_data" t-value="report_data or []"/>
+                        <t t-set="total_weight" t-value="0"/>
+                        <t t-set="total_contribution" t-value="0"/>
+
+                            <t t-if="report_data">
+                                <table class="table table-condensed">
+                                    <thead>
+                                        <tr style="border-bottom: 2px solid black;">
+                                            <th class="text-left" style="width: 20%;">Material / Submaterial / Type</th>
+                                            <th class="text-right" style="width: 20%;">Weight (kg)</th>
+                                            <th class="text-right" style="width: 20%;">Fee (€/kg)</th>
+                                            <th class="text-right" style="width: 20%;">Contribution (€)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="report_data" t-as="material">
+                                        <!-- Material Header -->
+                                        <tr style="background-color: #f0f0f0; font-weight: bold;">
+                                            <td><strong t-out="material['material_name']"/></td>
+                                            <td class="text-right">
+                                                <strong t-out="'{:,.2f}'.format(material['total_weight_kg'])"/>
+                                            </td>
+                                            <td class="text-right">-</td>
+                                            <td class="text-right">
+                                                <strong t-out="'{:,.2f}'.format(material['total_contribution'])"/>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Submaterials -->
+                                        <t t-foreach="material['submaterials'].items()" t-as="submaterial_item">
+                                            <t t-set="submaterial" t-value="submaterial_item[1]"/>
+                                            <!-- Submaterial Header -->
+                                            <tr style="background-color: #f8f8f8; font-style: italic;">
+                                                <td style="padding-left: 20px;">
+                                                    <em t-out="submaterial['submaterial_name']"/>
+                                                </td>
+                                                <td class="text-right">
+                                                    <em t-out="'{:,.2f}'.format(submaterial['total_weight_kg'])"/>
+                                                </td>
+                                                <td class="text-right">-</td>
+                                                <td class="text-right">
+                                                    <em t-out="'{:,.2f}'.format(submaterial['total_contribution'])"/>
+                                                </td>
+                                            </tr>
+
+                                            <!-- Types -->
+                                            <t t-foreach="submaterial['types']" t-as="type_data">
+                                                <tr>
+                                                    <td style="padding-left: 40px;">
+                                                        <span t-out="type_data['submaterial_type_name']"/>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <span t-out="'{:,.2f}'.format(type_data['total_weight_kg'])"/>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <span t-out="'{:,.4f}'.format(type_data['fee_per_kg'])"/>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <span t-out="'{:,.2f}'.format(type_data['total_contribution'])"/>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </t>
+
+                                        <t t-set="total_weight" t-value="total_weight + material['total_weight_kg']"/>
+                                        <t t-set="total_contribution" t-value="total_contribution + material['total_contribution']"/>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr style="border-top: 2px solid black; font-weight: bold;">
+                                        <td class="text-right"><strong>TOTAL GENERAL:</strong></td>
+                                        <td class="text-right">
+                                            <strong><span t-out="'{:,.2f}'.format(total_weight)"/></strong>
+                                        </td>
+                                        <td class="text-right">-</td>
+                                        <td class="text-right">
+                                            <strong><span t-out="'{:,.2f}'.format(total_contribution)"/></strong>
+                                        </td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <div class="alert alert-info">
+                                    <p><strong>No data found</strong></p>
+                                    <p>No SCRAP contributions were found for the selected year. This could be because:</p>
+                                    <ul>
+                                        <li>No products with material components were sold</li>
+                                        <li>No products are marked as "Is Manufactured"</li>
+                                        <li>No invoices exist for the selected year</li>
+                                    </ul>
+                                </div>
+                            </t>
+                        </div>
+
+                    <div class="mt-4">
+                        <p><strong>Note:</strong> This report shows the SCRAP (Extended Producer Responsibility System) contributions
+                           calculated based on the packaging materials used in products sold during the selected year.</p>
+                        <p><strong>Calculation:</strong> Weight (kg) * Official fee per kg = Contribution amount</p>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
