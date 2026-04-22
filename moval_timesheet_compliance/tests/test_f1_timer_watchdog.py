@@ -140,3 +140,167 @@ class TestTimerWatchdogF1(TransactionCase):
             self.assertEqual(noatt_inc.notify_count, 1)
             self.assertTrue(long_inc.last_notified_at)
             self.assertTrue(noatt_inc.last_notified_at)
+
+    def test_f1_skips_excluded_employee(self):
+        """Timer watchdog must ignore employees excluded from compliance."""
+        self.employee.x_timesheet_compliance_excluded = True
+        self.company.write(
+            {
+                "x_timer_max_active_hours": 0.1,
+                "x_timer_check_no_attendance": False,
+                "x_timer_escalation_enabled": False,
+            }
+        )
+        started_at = fields.Datetime.now() - timedelta(hours=2)
+        timer = DummyTimer(timer_id=11, started_at=started_at, employee=self.employee)
+        watchdog_cls = type(self.watchdog)
+        with patch.object(
+            watchdog_cls,
+            "_get_active_timers",
+            return_value=[timer],
+        ), patch.object(
+            watchdog_cls,
+            "_notify_employee",
+            autospec=True,
+            return_value=True,
+        ) as mock_notify:
+            self.watchdog.cron_watchdog_timers()
+            self.assertEqual(mock_notify.call_count, 0)
+        self.assertEqual(
+            self.Incident.search_count([("timer_ref", "=", "project.task,11")]),
+            0,
+        )
+
+    def test_f1_timer_department_max_active_hours_overrides_company(self):
+        """
+        Production uses per-dept stricter rules: a low dept limit must trigger
+        "long running" even when the company default is very high.
+        """
+        self.department.x_timer_max_active_hours = 0.5
+        self.company.write(
+            {
+                "x_timer_max_active_hours": 24.0,
+                "x_timer_check_no_attendance": False,
+                "x_timer_escalation_enabled": False,
+            }
+        )
+        started_at = fields.Datetime.now() - timedelta(hours=1)
+        timer = DummyTimer(timer_id=99, started_at=started_at, employee=self.employee)
+        watchdog_cls = type(self.watchdog)
+        with patch.object(
+            watchdog_cls,
+            "_get_active_timers",
+            return_value=[timer],
+        ), patch.object(
+            watchdog_cls,
+            "_notify_employee",
+            autospec=True,
+            return_value=True,
+        ) as mock_notify:
+            self.watchdog.cron_watchdog_timers()
+            self.assertGreaterEqual(
+                mock_notify.call_count,
+                1,
+                "Dept stricter than company must open incident",
+            )
+        self.assertEqual(
+            self.Incident.search_count(
+                [
+                    ("timer_ref", "=", "project.task,99"),
+                    ("incident_type", "=", "long_running"),
+                ]
+            ),
+            1,
+        )
+
+    def test_f1_get_watchdog_config_merges_department_overrides(self):
+        self.company.write(
+            {
+                "x_timer_max_active_hours": 6.0,
+                "x_timer_notify_cooldown_hours": 10.0,
+            }
+        )
+        self.department.write(
+            {
+                "x_timer_max_active_hours": 0.5,
+                "x_timer_notify_cooldown_hours": 1.25,
+            }
+        )
+        cfg = self.watchdog._get_watchdog_config(employee=self.employee)
+        self.assertEqual(cfg["max_active_hours"], 0.5)
+        self.assertEqual(cfg["notify_cooldown_hours"], 1.25)
+
+    def test_f1_get_watchdog_config_empty_department_uses_company(self):
+        self.company.write(
+            {
+                "x_timer_max_active_hours": 4.0,
+                "x_timer_notify_cooldown_hours": 3.0,
+            }
+        )
+        self.department.write(
+            {
+                "x_timer_max_active_hours": False,
+                "x_timer_notify_cooldown_hours": False,
+            }
+        )
+        cfg = self.watchdog._get_watchdog_config(employee=self.employee)
+        self.assertEqual(cfg["max_active_hours"], 4.0)
+        self.assertEqual(cfg["notify_cooldown_hours"], 3.0)
+
+    def test_f1_get_watchdog_config_zero_on_department_keeps_company(self):
+        self.company.write(
+            {
+                "x_timer_max_active_hours": 4.0,
+                "x_timer_notify_cooldown_hours": 3.0,
+            }
+        )
+        self.department.write(
+            {
+                "x_timer_max_active_hours": 0.0,
+                "x_timer_notify_cooldown_hours": 0.0,
+            }
+        )
+        cfg = self.watchdog._get_watchdog_config(employee=self.employee)
+        self.assertEqual(cfg["max_active_hours"], 4.0)
+        self.assertEqual(cfg["notify_cooldown_hours"], 3.0)
+
+    def test_f1_timer_department_higher_max_may_exceed_company_without_long_running(
+        self,
+    ):
+        # A department can raise the cap above a strict company default to avoid false positives.
+        self.department.x_timer_max_active_hours = 4.0
+        self.company.write(
+            {
+                "x_timer_max_active_hours": 0.2,
+                "x_timer_check_no_attendance": False,
+                "x_timer_escalation_enabled": False,
+            }
+        )
+        started_at = fields.Datetime.now() - timedelta(hours=1)
+        timer = DummyTimer(timer_id=100, started_at=started_at, employee=self.employee)
+        watchdog_cls = type(self.watchdog)
+        with patch.object(
+            watchdog_cls,
+            "_get_active_timers",
+            return_value=[timer],
+        ), patch.object(
+            watchdog_cls,
+            "_notify_employee",
+            autospec=True,
+            return_value=True,
+        ) as mock_notify:
+            self.watchdog.cron_watchdog_timers()
+            self.assertEqual(
+                mock_notify.call_count,
+                0,
+                "Higher dept max must not mark timer as long-running",
+            )
+        self.assertEqual(
+            self.Incident.search_count(
+                [
+                    ("timer_ref", "=", "project.task,100"),
+                    ("incident_type", "=", "long_running"),
+                ]
+            ),
+            0,
+        )

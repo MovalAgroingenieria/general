@@ -6,6 +6,8 @@ from datetime import date as py_date
 
 from odoo.tests.common import TransactionCase
 
+from .common import cleanup_employee_workday_for_tests, skip_compliance_recompute_on
+
 
 class TestComplianceDailyA1(TransactionCase):
     @classmethod
@@ -67,7 +69,10 @@ class TestComplianceDailyA1(TransactionCase):
 
         cls.compliance_model = cls.env["timesheet.compliance"]
 
-    def _create_timesheet_line(self, day, hours, name="Work", project=False):
+    def _create_timesheet_line(self, day, hours, name="Work", project=False, **kw):
+        e = kw.pop("env", None) or self.env
+        if kw:
+            raise TypeError("unexpected keyword arguments: %r" % (kw,))
         vals = {
             "name": name,
             "date": day,
@@ -77,26 +82,32 @@ class TestComplianceDailyA1(TransactionCase):
         }
         if project:
             vals["project_id"] = project.id
-        return self.env["account.analytic.line"].create(vals)
+        return e["account.analytic.line"].create(vals)
 
     def test_compute_ok_when_delta_zero(self):
-        day = py_date(2026, 1, 10)
+        day = py_date(2099, 1, 10)
+        cleanup_employee_workday_for_tests(self.env, self.employee, day)
 
-        self.env["hr.attendance"].create(
-            {
-                "employee_id": self.employee.id,
-                "check_in": "2026-01-10 09:00:00",
-                "check_out": "2026-01-10 17:00:00",
-            }
-        )
-        self._create_timesheet_line(
-            day,
-            8.0,
-            name="Work",
-            project=self.project_generic,
-        )
+        with skip_compliance_recompute_on(self.env) as e:
+            e["hr.attendance"].create(
+                {
+                    "employee_id": self.employee.id,
+                    "check_in": "2099-01-10 09:00:00",
+                    "check_out": "2099-01-10 17:00:00",
+                }
+            )
+            self._create_timesheet_line(
+                day,
+                8.0,
+                name="Work",
+                project=self.project_generic,
+                env=e,
+            )
 
-        self.compliance_model.compute_for_dates([day])
+        # Single day/company: avoid multi-company compute side effects in shared DBs.
+        self.compliance_model.with_company(self.company).sudo()._compute_employee_date(
+            self.employee, day
+        )
         rec = self.compliance_model.search(
             [("employee_id", "=", self.employee.id), ("date", "=", day)],
             limit=1,

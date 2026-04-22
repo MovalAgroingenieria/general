@@ -19,15 +19,12 @@
 
         <field name="body_html" type="html">
             <div>
-                <p>Hello<t t-esc="object.employee_id.name"/>,
-                </p>
-
+                <p>Hello <t t-esc="object.employee_id.name"/>,</p>
                 <p>
-                    Here is your timesheet compliance summary for
+                    Below is your timesheet compliance summary for
                     <b>
                         <t t-esc="object.date"/>
-                    </b>
-                    .
+                    </b>.
                 </p>
 
                 <h3>Summary</h3>
@@ -126,7 +123,7 @@
                     </tbody>
                 </table>
 
-                <h3>Generic allocation ("drawer time")</h3>
+                <h3>Generic allocation (non-project / &quot;drawer&quot; time)</h3>
                 <t t-set="g_pct" t-value="object.generic_pct"/>
                 <ul>
                     <li>
@@ -156,10 +153,13 @@
                 </ul>
 
                 <p>
-                    <a t-att-href="ctx.get('my_timesheets_url') or '#'">Open “My timesheets for this day”</a>
+                    <a t-att-href="ctx.get('my_timesheets_url') or '#'">View your timesheet lines for this day</a>
+                </p>
+                <p>
+                    <a t-att-href="ctx.get('compliance_form_url') or '#'">Open this day&apos;s compliance record</a>
                 </p>
 
-                <p>Regards,</p>
+                <p>Kind regards,</p>
                 <p>
                     <t t-esc="object.company_id.name"/>
                 </p>
@@ -181,7 +181,7 @@
         </field>
 
         <!-- FIX: subject MUST be single-line and LF/CR-free -->
-        <field name="subject">Timesheet compliance incidents</field>
+        <field name="subject">Timesheet compliance: manager digest</field>
 
         <field name="auto_delete" eval="True"/>
 
@@ -190,15 +190,14 @@
                 <p>Hello,</p>
 
                 <p>
-                    Here is the timesheet compliance incidents summary for
+                    Open timesheet compliance incidents for
                     <b>
                         <t t-esc="ctx.get('department_name', '')"/>
                     </b>
                     on
                     <b>
                         <t t-esc="ctx.get('target_date', '')"/>
-                    </b>
-                    .
+                    </b>.
                 </p>
 
                 <h3>Incidents</h3>
@@ -249,7 +248,7 @@
                                     </td>
                                     <td>
                                         <t t-if="row.get('detail_url')">
-                                            <a t-att-href="row.get('detail_url')">Open</a>
+                                            <a t-att-href="row.get('detail_url')">View</a>
                                         </t>
                                         <t t-else="">-</t>
                                     </td>
@@ -266,11 +265,11 @@
 
                 <p>
                     <t t-if="ctx.get('department_timesheets_url')">
-                        <a t-att-href="ctx.get('department_timesheets_url')">Open department timesheets (filtered)</a>
+                        <a t-att-href="ctx.get('department_timesheets_url')">View department timesheet lines (day and team filter)</a>
                     </t>
                 </p>
 
-                <p>Regards,</p>
+                <p>Kind regards,</p>
                 <p>
                     <t t-esc="object.company_id.name"/>
                 </p>
@@ -297,7 +296,7 @@
             <div>
                 <p>Hello,</p>
 
-                <p>This is an escalation for an unresolved timesheet compliance incident older than 48 hours.</p>
+                <p>The record below was in <i>Warning</i> or <i>Issue</i> for more than 48 hours. This message escalates the case to you as the department head.</p>
 
                 <h3>Summary</h3>
                 <ul>
@@ -337,11 +336,11 @@
 
                 <p>
                     <t t-if="ctx.get('detail_url')">
-                        <a t-att-href="ctx.get('detail_url')">Open “My timesheets for this day”</a>
+                        <a t-att-href="ctx.get('detail_url')">View this employee&#39;s timesheet lines for that day</a>
                     </t>
                 </p>
 
-                <p>Regards,</p>
+                <p>Kind regards,</p>
                 <p>
                     <t t-esc="object.company_id.name"/>
                 </p>
@@ -360,7 +359,7 @@
         <field name="email_to">
             ${ctx.get('email_to_override') or (object.department_id.manager_id.user_id.email if object.department_id and object.department_id.manager_id and object.department_id.manager_id.user_id else '')}
         </field>
-        <field name="subject">Timesheet generic allocation</field>
+        <field name="subject">Timesheet compliance: weekly generic allocation</field>
         <field name="auto_delete" eval="True"/>
 
         <field name="body_html" type="html">
@@ -368,13 +367,14 @@
                 <p>Hello,</p>
 
                 <p>
-                    Weekly generic allocation quality for
+                    Generic allocation (non-project hours) for
                     <b>
                         <t t-esc="ctx.get('department_name','')"/>
                     </b>
-                    (
                     <t t-esc="ctx.get('date_from','')"/>
-                    →<t t-esc="ctx.get('date_to','')"/>).
+                    to
+                    <t t-esc="ctx.get('date_to','')"/>
+                    .
                 </p>
 
                 <h3>By employee</h3>
@@ -416,11 +416,11 @@
 
                 <p>
                     <t t-if="ctx.get('pivot_url')">
-                        <a t-att-href="ctx.get('pivot_url')">Open compliance view (filtered)</a>
+                        <a t-att-href="ctx.get('pivot_url')">Open the compliance analysis view (pivot) for this department and period</a>
                     </t>
                 </p>
 
-                <p>Regards,</p>
+                <p>Kind regards,</p>
                 <p>
                     <t t-esc="object.company_id.name"/>
                 </p>

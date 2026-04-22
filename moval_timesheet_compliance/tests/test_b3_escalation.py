@@ -169,3 +169,42 @@ class TestComplianceDailyB3Escalation(TimesheetComplianceCase):
         )
         self.assertEqual(rec.state, "warn")
         self.assertEqual(mocked_send.call_count, 0)
+
+    def test_b3_escalates_after_48h_by_incident_open_since(self):
+        """Recent day but incident_open_since > 48h in the past must escalate."""
+        rec = self._create_unresolved(
+            state="warn",
+            date=self.today - timedelta(days=1),
+        )
+        open_since = fields.Datetime.now() - timedelta(hours=50)
+        rec.write({"incident_open_since": open_since})
+
+        with patch(
+            "odoo.addons.mail.models.mail_template.MailTemplate.send_mail"
+        ) as mocked_send:
+            mocked_send.return_value = 1
+            self.Compliance._cron_send_b3_escalate_unresolved()
+
+        rec.invalidate_recordset()
+        self.assertEqual(rec.state, "escalated")
+        self.assertFalse(rec.incident_open_since)
+        self.assertEqual(mocked_send.call_count, 1)
+
+    def test_b3_does_not_escalate_before_48h_on_recent_date(self):
+        """Without legacy calendar path, a recent date must not escalate < 48h open."""
+        rec = self._create_unresolved(
+            state="issue",
+            date=self.today,
+        )
+        rec.write({"incident_open_since": fields.Datetime.now() - timedelta(hours=10)})
+
+        with patch(
+            "odoo.addons.mail.models.mail_template.MailTemplate.send_mail"
+        ) as mocked_send:
+            mocked_send.return_value = 1
+            self.Compliance._cron_send_b3_escalate_unresolved()
+
+        rec.invalidate_recordset()
+        self.assertEqual(rec.state, "issue")
+        self.assertFalse(rec.escalated_at)
+        self.assertEqual(mocked_send.call_count, 0)

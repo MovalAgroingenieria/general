@@ -12,9 +12,12 @@
                     <field name="x_generic_warn_pct"/>
                     <field name="x_generic_issue_pct"/>
                 </group>
-                <group string="Timer Watchdog (overrides)">
-                    <field name="x_timer_max_active_hours" placeholder="Company default"/>
-                    <field name="x_timer_notify_cooldown_hours" placeholder="Company default"/>
+                <group name="moval_hr_dept_timer_watchdog" string="Timer Watchdog">
+                    <separator
+                        name="moval_hr_dept_timer_watchdog_hint"
+                        string="Empty fields use the company default (see Timesheet Compliance in Settings &gt; Human Resources)."/>
+                    <field name="x_timer_max_active_hours"/>
+                    <field name="x_timer_notify_cooldown_hours"/>
                 </group>
             </xpath>
         </field>

@@ -16,16 +16,22 @@ class HrDepartment(models.Model):
         help="Department-specific generic allocation issue threshold.",
     )
 
-    # Timer watchdog: department overrides (optional)
+    # Timer watchdog: optional per-department values (see company for defaults)
     # -------------------------------------------------------------------------
     x_timer_max_active_hours = fields.Float(
-        string="Timer max active hours (override)",
-        help="If set, overrides the company limit for this department. "
-        "Use a lower value for roles with many context switches (e.g. support, "
-        "many tasks per day); leave empty to use company default.",
+        string="Max Active Timer (Hours)",
+        help=(
+            "Optional. Leave empty to use the company value (see Timesheet & Compliance in "
+            "Settings). A positive value overrides the company for this department. "
+            "Set lower than the company to detect long-running timers sooner (e.g. teams "
+            "with many context switches, short-burst work). Set higher to be more lenient."
+        ),
     )
     x_timer_notify_cooldown_hours = fields.Float(
-        string="Timer notify cooldown hours (override)",
-        help="If set, overrides the company notification cooldown for this department. "
-        "Leave empty to use company default.",
+        string="Notification Cooldown (Hours)",
+        help=(
+            "Optional. Leave empty to use the company value. A positive value overrides the "
+            "company minimum time between repeat employee notifications for the same open "
+            "incident. Set lower to re-notify more often; set higher to reduce noise. "
+        ),
     )

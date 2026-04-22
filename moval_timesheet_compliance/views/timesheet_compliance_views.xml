@@ -1,27 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 2026 Moval Agroingeniería
-     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl-3.0). -->
 <odoo>
 
         <record id="view_moval_timesheet_compliance_tree" model="ir.ui.view">
             <field name="name">timesheet.compliance.tree</field>
             <field name="model">timesheet.compliance</field>
             <field name="arch" type="xml">
-                <tree default_order="date desc">
+                <list string="Timesheet compliance"
+                      default_order="date desc, employee_id"
+                      create="0"
+                      decoration-info="state in ('ok', 'fixed', 'justified')"
+                      decoration-warning="state in ('warn',) or generic_state in ('warn',)"
+                      decoration-danger="state in ('issue', 'escalated') or generic_state in ('issue',)">
                     <field name="date"/>
-                    <field name="employee_id"/>
-                    <field name="department_id"/>
-                    <field name="telework"/>
-                    <field name="attendance_hours"/>
-                    <field name="timesheet_hours"/>
-                    <field name="delta_hours"/>
-                    <field name="state"/>
-                    <field name="generic_hours"/>
-                    <field name="generic_pct"/>
-                    <field name="generic_state"/>
-                    <field name="email_sent_at"/>
-                    <field name="escalated_at"/>
-                </tree>
+                    <field name="employee_id" optional="show"/>
+                    <field name="department_id" optional="show"/>
+                    <field name="state" optional="show"/>
+                    <field name="generic_state" optional="show"/>
+                    <field name="telework" optional="hide"/>
+                    <field name="attendance_hours" sum="Total"/>
+                    <field name="timesheet_hours" sum="Total"/>
+                    <field name="delta_hours" sum="Total"/>
+                    <field name="generic_pct" optional="show"/>
+                    <field name="generic_hours" optional="hide"/>
+                    <field name="email_sent_at" optional="hide" groups="moval_timesheet_compliance.group_timesheet_compliance_manager"/>
+                    <field name="escalated_at" optional="hide" groups="moval_timesheet_compliance.group_timesheet_compliance_manager"/>
+                </list>
             </field>
         </record>
 
@@ -30,25 +35,31 @@
             <field name="model">timesheet.compliance</field>
             <field name="arch" type="xml">
                 <form>
+                    <header>
+                        <field name="state" widget="statusbar"
+                               statusbar_visible="ok,warn,issue,justified,fixed,escalated"/>
+                        <button name="action_mark_justified"
+                                type="object"
+                                string="Mark as justified"
+                                class="btn-primary"
+                                attrs="{'invisible': [('state','not in',('warn','issue'))]}"
+                                groups="moval_timesheet_compliance.group_timesheet_compliance_manager"/>
+                        <button name="action_open_timesheets"
+                                type="object"
+                                string="View timesheet lines"
+                                class="btn-secondary"
+                                help="Open analytic lines (timesheet data) for this day"/>
+                        <button name="action_open_attendances"
+                                type="object"
+                                string="View attendances"
+                                class="btn-secondary"
+                                help="Open check-ins for this day"/>
+                    </header>
+
+                    <div class="alert alert-warning" role="alert" attrs="{'invisible': [('state','not in',('warn','issue'))]}">
+                        This record has a pending compliance incident. Review the hours and the employee information below.
+                    </div>
                     <sheet>
-
-                        <header>
-                            <button name="action_mark_justified"
-                                    type="object"
-                                    string="Mark as justified"
-                                    class="btn-primary"
-                                    attrs="{'invisible': [('state','not in',('warn','issue'))]}"
-                                    groups="moval_timesheet_compliance.group_timesheet_compliance_manager"/>
-                            <button name="action_open_timesheets"
-                                    type="object"
-                                    string="View timesheets"
-                                    class="btn-secondary"/>
-                            <button name="action_open_attendances"
-                                    type="object"
-                                    string="View attendances"
-                                    class="btn-secondary"/>
-                        </header>
-
                         <group>
                             <group>
                                 <field name="employee_id" readonly="1"/>
@@ -58,8 +69,9 @@
                             </group>
                             <group>
                                 <field name="telework" readonly="1"/>
-                                <field name="state"/>
+                                <field name="generic_state" readonly="1"/>
                                 <field name="email_sent_at" readonly="1"/>
+                                <field name="incident_open_since" readonly="1" groups="moval_timesheet_compliance.group_timesheet_compliance_manager"/>
                                 <field name="escalated_at" readonly="1"/>
                             </group>
                         </group>
@@ -70,10 +82,15 @@
                             <field name="delta_hours" readonly="1"/>
                         </group>
 
-                        <group string="Generic Allocation Quality">
+                        <group string="Generic allocation quality">
                             <field name="generic_hours" readonly="1"/>
-                            <field name="generic_pct" readonly="1"/>
-                            <field name="generic_state" readonly="1"/>
+                            <field name="generic_pct" readonly="1"
+                                   attrs="{'invisible': [('generic_state','=', False)]}"/>
+                        </group>
+
+                        <group string="Employee email (B1)" groups="moval_timesheet_compliance.group_timesheet_compliance_manager">
+                            <field name="b1_last_log_at" readonly="1"/>
+                            <field name="b1_last_log" readonly="1" nolabel="0"/>
                         </group>
                     </sheet>
                     <chatter/>
@@ -85,49 +102,49 @@
             <field name="name">timesheet.compliance.search</field>
             <field name="model">timesheet.compliance</field>
             <field name="arch" type="xml">
-                <search string="Timesheet Compliance">
-
+                <search string="Search compliance">
                     <field name="date"/>
                     <field name="department_id"/>
                     <field name="employee_id"/>
+                    <field name="user_id" groups="moval_timesheet_compliance.group_timesheet_compliance_manager"/>
 
-                    <filter string="Telework" name="telework" domain="[('telework','=',True)]"/>
-
-                    <filter string="Pending incidents" name="pending"
-                            domain="[('state','in',('warn','issue'))]"/>
+                    <filter name="compliance_date" string="Date" date="date"/>
 
                     <separator/>
 
-                    <filter string="OK" name="state_ok" domain="[('state','=','ok')]"/>
-                    <filter string="Warning" name="state_warn" domain="[('state','=','warn')]"/>
-                    <filter string="Issue" name="state_issue" domain="[('state','=','issue')]"/>
-                    <filter string="Justified" name="state_justified" domain="[('state','=','justified')]"/>
-                    <filter string="Fixed" name="state_fixed" domain="[('state','=','fixed')]"/>
-                    <filter string="Escalated" name="state_escalated" domain="[('state','=','escalated')]"/>
+                    <filter name="open_incident" string="Open incidents" domain="[('state', 'in', ('warn', 'issue'))]"/>
+                    <filter name="needs_attention" string="Open &amp; escalated" domain="[('state', 'in', ('warn', 'issue', 'escalated'))]"/>
+                    <filter name="escalated_only" string="Escalated" domain="[('state', '=', 'escalated')]"/>
+
+                    <filter name="telework" string="Telework" domain="[('telework', '=', True)]"/>
+                    <separator/>
+                    <filter name="g_warn_issue" string="Any generic alert" domain="[('generic_state', 'in', ('warn', 'issue'))]"/>
+                    <filter name="g_ok" string="Generic state: OK" domain="[('generic_state', '=', 'ok')]"/>
 
                     <separator/>
+                    <filter name="state_ok" string="State: OK" domain="[('state', '=', 'ok')]"/>
+                    <filter name="state_warn" string="State: Warning" domain="[('state', '=', 'warn')]"/>
+                    <filter name="state_issue" string="State: Issue" domain="[('state', '=', 'issue')]"/>
+                    <filter name="state_justified" string="State: Justified" domain="[('state', '=', 'justified')]"/>
+                    <filter name="state_fixed" string="State: Fixed" domain="[('state', '=', 'fixed')]"/>
 
-                    <filter string="Generic OK" name="g_ok" domain="[('generic_state','=','ok')]"/>
-                    <filter string="Generic Warning" name="g_warn" domain="[('generic_state','=','warn')]"/>
-                    <filter string="Generic Issue" name="g_issue" domain="[('generic_state','=','issue')]"/>
-
-                    <group expand="0" string="Group By">
-                        <filter string="Date" name="groupby_date" context="{'group_by':'date'}"/>
-                        <filter string="Department" name="groupby_dept" context="{'group_by':'department_id'}"/>
-                        <filter string="Employee" name="groupby_emp" context="{'group_by':'employee_id'}"/>
-                        <filter string="State" name="groupby_state" context="{'group_by':'state'}"/>
-                        <filter string="Generic state" name="groupby_gstate" context="{'group_by':'generic_state'}"/>
+                    <group expand="0" string="Group by">
+                        <filter name="groupby_date" string="Date (day)" context="{'group_by': 'date'}"/>
+                        <filter name="groupby_date_week" string="Date (week)" context="{'group_by': 'date:week'}"/>
+                        <filter name="groupby_emp" string="Employee" context="{'group_by': 'employee_id'}"/>
+                        <filter name="groupby_dept" string="Department" context="{'group_by': 'department_id'}"/>
+                        <filter name="groupby_state" string="State" context="{'group_by': 'state'}"/>
+                        <filter name="groupby_gstate" string="Generic state" context="{'group_by': 'generic_state'}"/>
                     </group>
-
                 </search>
             </field>
         </record>
+
         <record id="view_moval_timesheet_compliance_pivot" model="ir.ui.view">
             <field name="name">timesheet.compliance.pivot</field>
             <field name="model">timesheet.compliance</field>
             <field name="arch" type="xml">
-                <pivot string="Timesheet Compliance Analysis">
-                    <!-- Dimensions -->
+                <pivot string="Timesheet compliance (analysis)">
                     <field name="date" type="row" interval="day"/>
                     <field name="employee_id" type="row"/>
                     <field name="department_id" type="row"/>
@@ -135,13 +152,11 @@
                     <field name="state" type="col"/>
                     <field name="generic_state" type="col"/>
 
-                    <!-- Measures -->
                     <field name="attendance_hours" type="measure"/>
                     <field name="timesheet_hours" type="measure"/>
                     <field name="delta_hours" type="measure"/>
                     <field name="generic_hours" type="measure"/>
 
-                    <!-- generic_pct is a ratio (0..1). avg makes the most sense in pivot. -->
                     <field name="generic_pct" type="measure" operator="avg"/>
                 </pivot>
             </field>
@@ -150,15 +165,13 @@
             <field name="name">timesheet.compliance.graph</field>
             <field name="model">timesheet.compliance</field>
             <field name="arch" type="xml">
-                <graph string="Timesheet Compliance Trends" type="line">
+                <graph string="Timesheet compliance (trends)" type="line" stacked="0">
                     <field name="date" type="row" interval="day"/>
                     <field name="timesheet_hours" type="measure"/>
                     <field name="generic_hours" type="measure"/>
                     <field name="generic_pct" type="measure" operator="avg"/>
-                    <field name="department_id" type="col"/>
                 </graph>
             </field>
         </record>
-
 
 </odoo>

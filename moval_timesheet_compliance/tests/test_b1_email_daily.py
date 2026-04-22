@@ -130,3 +130,111 @@ class TestComplianceDailyB1(TransactionCase):
         with self._patch_send_mail() as mocked_send:
             self.Compliance._cron_send_b1_employee_daily_emails()
             self.assertEqual(mocked_send.call_count, 0)
+
+    def _create_employee_user_no_email(self, login):
+        user = self.Users.with_context(
+            no_reset_password=True, mail_create_nosubscribe=True
+        ).create(
+            {
+                "name": login,
+                "login": login,
+            }
+        )
+        return self.Employee.create(
+            {
+                "name": f"Emp {login}",
+                "user_id": user.id,
+            }
+        )
+
+    def test_b1_no_send_cron_and_action_when_user_email_missing(self):
+        """Cron domain excludes; direct action logs skip, does not mark sent."""
+        employee = self._create_employee_user_no_email("user_b1_noe")
+        rec = self._create_compliance(employee, state="warn", telework=False)
+        with self._patch_send_mail() as mocked_send:
+            self.Compliance._cron_send_b1_employee_daily_emails()
+            self.assertEqual(mocked_send.call_count, 0)
+        res = rec.action_send_b1_employee_email()
+        self.assertFalse(res)
+        self.assertFalse(rec.email_sent_at)
+        rec.invalidate_recordset()
+        self.assertIn("Skipped", rec.b1_last_log or "")
+
+    def test_b1_tech_log_and_chatter_on_success(self):
+        employee = self._create_employee_with_user(
+            "user_b1_ch", "user_b1_ch@example.com"
+        )
+        rec = self._create_compliance(employee, state="issue", telework=False)
+        with self._patch_send_mail():
+            self.Compliance._cron_send_b1_employee_daily_emails()
+        rec.invalidate_recordset()
+        self.assertTrue(rec.email_sent_at)
+        self.assertIn("Sent to", rec.b1_last_log or "")
+        self.assertIn("user_b1_ch@example.com", rec.b1_last_log)
+        self.assertTrue(
+            self.env["mail.message"].search_count(
+                [
+                    ("model", "=", "timesheet.compliance"),
+                    ("res_id", "=", rec.id),
+                ]
+            )
+        )
+
+    def test_b1_send_error_logs_and_chatter(self):
+        employee = self._create_employee_with_user(
+            "user_b1_err", "user_b1_err@example.com"
+        )
+        rec = self._create_compliance(employee, state="warn", telework=False)
+        with patch.object(
+            type(self.env["mail.template"]),
+            "send_mail",
+            side_effect=RuntimeError("test smtp error"),
+        ):
+            res = rec.action_send_b1_employee_email()
+        self.assertFalse(res)
+        rec.invalidate_recordset()
+        self.assertFalse(rec.email_sent_at)
+        self.assertIn("Failed", rec.b1_last_log or "")
+        self.assertIn(
+            "B1: sending failed",
+            "".join(
+                m.body or ""
+                for m in self.env["mail.message"].search(
+                    [("model", "=", "timesheet.compliance"), ("res_id", "=", rec.id)]
+                )
+            ),
+        )
+
+    def test_b1_cron_idempotent_does_not_duplicate_tech_log_lines(self):
+        """Second cron: no new send, no new duplicate Sent log (early exit)."""
+        employee = self._create_employee_with_user(
+            "user_b1_idemlog", "user_b1_idemlog@example.com"
+        )
+        self._create_compliance(employee, state="warn", telework=False)
+        with self._patch_send_mail():
+            self.Compliance._cron_send_b1_employee_daily_emails()
+        first = self.Compliance.search(
+            [
+                ("employee_id", "=", employee.id),
+                ("date", "=", self.target_date),
+            ],
+            limit=1,
+        )
+        log1 = first.b1_last_log
+        t1 = first.b1_last_log_at
+        with self._patch_send_mail() as mocked:
+            self.Compliance._cron_send_b1_employee_daily_emails()
+        first.invalidate_recordset()
+        self.assertEqual(mocked.call_count, 0)
+        self.assertEqual(first.b1_last_log, log1)
+        self.assertEqual(first.b1_last_log_at, t1)
+
+    def test_b1_debug_cron_info_matches_domain(self):
+        self._create_employee_with_user("user_b1_dbg", "user_b1_dbg@example.com")
+        # ensure one new compliance
+        e = self.Employee.search([("user_id.login", "=", "user_b1_dbg")], limit=1)
+        self._create_compliance(e, state="warn", telework=False)
+        info = self.Compliance._b1_debug_cron_info(self.target_date)
+        self.assertEqual(info["target_date"], str(self.target_date))
+        self.assertGreaterEqual(info["count"], 1)
+        self.assertTrue(info["ids"])

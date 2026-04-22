@@ -1,5 +1,6 @@
 # 2026 Moval Agroingeniería
-# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl-3.0).
+# pylint: disable=protected-access,translation-not-lazy
 
 from datetime import timedelta
 
@@ -12,21 +13,26 @@ class TimesheetComplianceAnalysis(models.Model):
     @api.model
     def action_open_analysis_today(self):
         today = fields.Date.context_today(self)
-        return self._get_analysis_action_with_domain([("date", "=", today)])
+        return self._get_analysis_action_with_domain(
+            [("date", "=", today)],
+        )
 
     @api.model
     def action_open_analysis_yesterday(self):
         today = fields.Date.context_today(self)
         yesterday = today - timedelta(days=1)
-        return self._get_analysis_action_with_domain([("date", "=", yesterday)])
+        return self._get_analysis_action_with_domain(
+            [("date", "=", yesterday)],
+        )
 
     @api.model
     def action_open_analysis_this_week(self):
         today = fields.Date.context_today(self)
         start_week = today - timedelta(days=today.weekday())
         end_week = start_week + timedelta(days=6)
-        domain = [("date", ">=", start_week), ("date", "<=", end_week)]
-        return self._get_analysis_action_with_domain(domain)
+        return self._get_analysis_action_with_domain(
+            [("date", ">=", start_week), ("date", "<=", end_week)],
+        )
 
     @api.model
     def action_open_analysis_this_month(self):
@@ -36,6 +42,7 @@ class TimesheetComplianceAnalysis(models.Model):
             [("date", ">=", start_month), ("date", "<=", today)]
         )
 
+    @api.model
     def _get_analysis_action_with_domain(self, domain):
         action = self.env.ref(
             "moval_timesheet_compliance.action_moval_timesheet_compliance_pivot",
@@ -45,4 +52,7 @@ class TimesheetComplianceAnalysis(models.Model):
             return {}
         result = action.read()[0]
         result["domain"] = domain
-        return result
+        return self._moval_action_merge_context(
+            result,
+            search_default_groupby_date=1,
+        )

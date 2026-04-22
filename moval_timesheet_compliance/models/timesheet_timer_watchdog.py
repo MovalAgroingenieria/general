@@ -24,7 +24,6 @@ class TimesheetTimerWatchdog(models.AbstractModel):
         - Auto-resolve incidents when the timer stops
         """
         now = fields.Datetime.now()
-        cfg = self._get_watchdog_config()
 
         timers = self._get_active_timers()
         active_refs = self._get_timer_ref_set(timers)
@@ -39,6 +38,8 @@ class TimesheetTimerWatchdog(models.AbstractModel):
         for timer in timers:
             employee = self._get_timer_employee(timer)
             if not employee:
+                continue
+            if employee.x_timesheet_compliance_excluded:
                 continue
 
             cfg = self._get_watchdog_config(employee=employee)
@@ -84,6 +85,8 @@ class TimesheetTimerWatchdog(models.AbstractModel):
     @api.model
     def handle_checkout(self, employee):
         """Checkout hook: create an incident for any running timer."""
+        if employee.x_timesheet_compliance_excluded:
+            return True
         now = fields.Datetime.now()
         cfg = self._get_watchdog_config(employee=employee)
 
@@ -122,8 +125,22 @@ class TimesheetTimerWatchdog(models.AbstractModel):
         return True
 
     @api.model
+    def _dept_timer_override_hours(self, value):
+        """Return True if department set a positive override. Empty/False/0: company.
+
+        Using ``is not None`` and ``>= 0`` alone is wrong for empty Odoo floats: unset
+        fields are often False and ``(False is not None) and (False >= 0)`` is true, which
+        would incorrectly override the company value.
+        """
+        return value is not None and value is not False and value > 0.0
+
+    @api.model
     def _get_watchdog_config(self, employee=None):
-        """Get watchdog config (company defaults + optional department overrides)."""
+        """Get watchdog config (company defaults + optional department overrides).
+
+        For optional department timer fields, only a strictly positive value applies;
+        empty, zero, or false means use the company setting.
+        """
         company = self.env.company
         cfg = {
             "max_active_hours": company.x_timer_max_active_hours or 0.0,
@@ -138,16 +155,10 @@ class TimesheetTimerWatchdog(models.AbstractModel):
         }
         if employee and employee.department_id:
             dept = employee.department_id
-            if (
-                dept.x_timer_max_active_hours is not None
-                and dept.x_timer_max_active_hours > 0
-            ):
-                cfg["max_active_hours"] = dept.x_timer_max_active_hours
-            if (
-                dept.x_timer_notify_cooldown_hours is not None
-                and dept.x_timer_notify_cooldown_hours >= 0
-            ):
-                cfg["notify_cooldown_hours"] = dept.x_timer_notify_cooldown_hours
+            if self._dept_timer_override_hours(dept.x_timer_max_active_hours):
+                cfg["max_active_hours"] = float(dept.x_timer_max_active_hours)
+            if self._dept_timer_override_hours(dept.x_timer_notify_cooldown_hours):
+                cfg["notify_cooldown_hours"] = float(dept.x_timer_notify_cooldown_hours)
         return cfg
 
     # Helpers

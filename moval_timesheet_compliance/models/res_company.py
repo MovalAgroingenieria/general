@@ -13,6 +13,22 @@ class ResCompany(models.Model):
         help="Projects considered generic for timesheet quality evaluation.",
     )
 
+    x_compliance_excluded_project_ids = fields.Many2many(
+        comodel_name="project.project",
+        relation="res_company_compliance_excl_project_rel",
+        column1="res_company_id",
+        column2="project_id",
+        string="Compliance-Excluded Projects",
+        help=(
+            "Timesheet lines on these projects are ignored when computing total "
+            "compliance time (for attendance vs timesheet delta) and in project/task "
+            "email breakdowns, so internal absence- or leave-like projects do not create "
+            "false positives. Such projects are also removed from the generic (quality) "
+            "denominator/numerator, even if they are listed as generic projects. "
+            "Unconfigured projects (lines without a project) are not excluded by this list."
+        ),
+    )
+
     x_generic_warn_pct = fields.Float(
         string="Generic Warning Threshold (%)",
         help="Generic allocation percentage triggering a warning.",
@@ -54,14 +70,19 @@ class ResCompany(models.Model):
     x_timer_max_active_hours = fields.Float(
         string="Timer Max Active Hours",
         default=6.0,
-        help="Maximum allowed running time (in hours) for an active timer.",
+        help=(
+            "Default maximum time (in hours) a timer may run before a long-running "
+            "incident is created. Lower values are stricter. Departments may set their "
+            "own limit; leave a department value empty to use this default."
+        ),
     )
     x_timer_notify_cooldown_hours = fields.Float(
         string="Timer Notify Cooldown (Hours)",
         default=6.0,
         help=(
-            "Minimum hours between employee notifications "
-            "for the same incident/timer."
+            "Default minimum time (in hours) between repeat employee notifications for the "
+            "same open timer incident. Lower means more frequent reminders, higher means less "
+            "frequent. Departments can override; leave a department value empty to use this."
         ),
     )
     x_timer_check_no_attendance = fields.Boolean(

@@ -25,6 +25,22 @@
                         </div>
                     </div>
 
+                    <div class="col-12 col-lg-6 o_setting_box" id="compliance_excluded_projects_setting">
+                        <div class="o_setting_left_pane"/>
+                        <div class="o_setting_right_pane">
+                            <div class="o_form_label">Compliance-Excluded Projects</div>
+                            <div class="text-muted">
+                                Time on these projects is ignored for the compliance total, generic
+                                quality (even if a project is also in Generic Projects), and for
+                                project and task sections in B1/B2 breakdowns. Use for internal
+                                codes, leave buckets, or other non-billable time you do not want in totals.
+                            </div>
+                            <div class="content-group mt8">
+                                <field name="x_compliance_excluded_project_ids" widget="many2many_tags"/>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="col-12 col-lg-6 o_setting_box" id="generic_min_hours_setting">
                         <div class="o_setting_left_pane"/>
                         <div class="o_setting_right_pane">
@@ -99,9 +115,10 @@
                     <div class="col-12 col-lg-6 o_setting_box" id="timer_max_active_hours_setting">
                         <div class="o_setting_left_pane"/>
                         <div class="o_setting_right_pane">
-                            <div class="o_form_label">Max Active Timer Hours</div>
+                            <div class="o_form_label">Timer Max Active Hours</div>
                             <div class="text-muted">
-                                Trigger an incident when a timer stays active longer than this limit.
+                                Company default. Departments may set a stricter (lower) or more lenient
+                                (higher) value on the Department form. Leave a department value empty to inherit.
                             </div>
                             <div class="content-group mt8">
                                 <field name="x_timer_max_active_hours" class="w-auto"/>
@@ -112,9 +129,10 @@
                     <div class="col-12 col-lg-6 o_setting_box" id="timer_notify_cooldown_hours_setting">
                         <div class="o_setting_left_pane"/>
                         <div class="o_setting_right_pane">
-                            <div class="o_form_label">Notification Cooldown (hours)</div>
+                            <div class="o_form_label">Timer Notify Cooldown (Hours)</div>
                             <div class="text-muted">
-                                Avoid spam: at most one notification per timer within this cooldown window.
+                                Company default. Repeat notifications for the same open incident are throttled to
+                                this minimum interval. Departments can override. Leave a department value empty to inherit.
                             </div>
                             <div class="content-group mt8">
                                 <field name="x_timer_notify_cooldown_hours" class="w-auto"/>

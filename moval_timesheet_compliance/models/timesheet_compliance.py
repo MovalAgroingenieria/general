@@ -2,6 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 # pylint: disable=protected-access,translation-not-lazy
 
+import ast
 import json
 import logging
 from datetime import timedelta
@@ -9,7 +10,12 @@ from urllib.parse import quote
 
 from odoo import _, api, fields, models
 
+# Core model: one row per (employee, day) with delta, telework, generic Q.
+# Cron, mail (B1/B2/B3/E3), and recompute hooks are implemented in this file.
+
 _logger = logging.getLogger(__name__)
+
+B1_DAILY_LOG_PREFIX = "[B1]"
 
 
 class TimesheetCompliance(models.Model):
@@ -76,8 +82,26 @@ class TimesheetCompliance(models.Model):
     )
 
     email_sent_at = fields.Datetime(readonly=True)
+    b1_last_log_at = fields.Datetime(
+        string="B1 last log (timestamp)",
+        readonly=True,
+        help="Timestamp of the last B1 email attempt or status update.",
+    )
+    b1_last_log = fields.Text(
+        string="B1 last log",
+        readonly=True,
+        help="Last B1 result for operators (outcome, short reason, recipient, in English).",
+    )
     b2_manager_sent_at = fields.Datetime(readonly=True)
     escalated_at = fields.Datetime(readonly=True)
+    incident_open_since = fields.Datetime(
+        string="Incident open since",
+        readonly=True,
+        help=(
+            "Set when the record first enters Warning or Issue; used for 48h "
+            "(B3) automatic escalation. Cleared on OK, Fixed, or Justified."
+        ),
+    )
 
     generic_hours = fields.Float(readonly=True)
     generic_pct = fields.Float(readonly=True)
@@ -97,6 +121,51 @@ class TimesheetCompliance(models.Model):
             value = str(value)
         return value.replace("\n", " ").replace("\r", " ").strip()
 
+    @api.model
+    def _moval_build_webclient_url(self, hash_params):
+        """Assemble a /web# URL from ordered (key, value) pairs (Odoo 16 webclient)."""
+        base = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
+        if not base:
+            return False
+        parts = []
+        for key, value in hash_params:
+            if value in (None, False, ""):
+                continue
+            parts.append("%s=%s" % (key, quote(str(value), safe="")))
+        if not parts:
+            return False
+        return "%s/web#%s" % (base.rstrip("/"), "&".join(parts))
+
+    @api.model
+    def _moval_build_window_action_url(
+        self,
+        action_xmlid,
+        res_model,
+        view_type,
+        domain,
+        company=None,
+        res_id=None,
+        context=None,
+    ):
+        """/web# with cids, window action, model, view, optional id/domain/context."""
+        action = self.env.ref(action_xmlid, raise_if_not_found=False)
+        if not action:
+            return False
+        company = company or self.env.company
+        params = [
+            ("cids", str(company.id) if company else "1"),
+            ("action", str(action.id)),
+            ("model", res_model),
+            ("view_type", view_type),
+        ]
+        if res_id is not None:
+            params.append(("id", str(res_id)))
+        if domain is not None:
+            params.append(("domain", json.dumps(domain, separators=(",", ":"))))
+        if context is not None:
+            params.append(("context", json.dumps(context, separators=(",", ":"))))
+        return self._moval_build_webclient_url(params)
+
     # Cron
     # -------------------------------------------------------------------------
 
@@ -109,19 +178,80 @@ class TimesheetCompliance(models.Model):
         ]
         self.compute_for_dates(dates)
 
+    @api.model
+    def _cron_timer_watchdog(self):
+        """Scheduled action: scan active timers and open incidents."""
+        return self.env["timesheet.timer.watchdog"].cron_watchdog_timers()
+
     # Public API
     # -------------------------------------------------------------------------
 
     def compute_for_dates(self, dates):
+        """Compute compliances; iterates all companies."""
+        companies = self.env["res.company"].search([])
+        for company in companies:
+            self._compute_for_dates_for_company(company, dates)
+
+    @api.model
+    def _compute_for_dates_for_company(self, company, dates):
+        """Compute for employees belonging to a single company."""
         employees = self.env["hr.employee"].search(
-            [
-                ("user_id", "!=", False),
-                ("x_timesheet_compliance_excluded", "=", False),
-            ]
+            self._compliance_employee_domain(company)
         )
         for employee in employees:
             for day in dates:
-                self._compute_employee_date(employee, day)
+                self.with_company(company).sudo()._compute_employee_date(employee, day)
+
+    @api.model
+    def _compliance_employee_domain(self, company):
+        """Employees included in the daily compliance batch for one company."""
+        return [
+            ("user_id", "!=", False),
+            ("x_timesheet_compliance_excluded", "=", False),
+            "|",
+            ("company_id", "=", False),
+            ("company_id", "child_of", company.id),
+        ]
+
+    # Recompute on timesheet/attendance changes
+    # -------------------------------------------------------------------------
+    @api.model
+    def _compliance_date_for_attendance_checkin(self, check_in, employee):
+        """Calendar date matching :meth:`_get_attendance_hours` bucketing of check_in."""
+        if not check_in or not employee:
+            return False
+        ci = fields.Datetime.to_datetime(check_in)
+        if not ci:
+            return False
+        base = fields.Date.to_date(ci)
+        for delta in (-1, 0, 1):
+            d = base + timedelta(days=delta)
+            start = fields.Datetime.to_datetime(d)
+            end = fields.Datetime.to_datetime(d + timedelta(days=1))
+            if start <= ci < end:
+                return d
+        return base
+
+    @api.model
+    def recompute_employee_date_pairs(self, pairs):
+        """Recompute daily compliance for unique (employee_id, date) pairs.
+
+        Safe entry point for hooks: one :meth:`_compute_employee_date` per pair, keeping
+        justified / fixed handling. Context skip_timesheet_compliance_recompute
+        disables. Excluded employees (no user or excluded flag) are skipped.
+        """
+        if not pairs or self.env.context.get("skip_timesheet_compliance_recompute"):
+            return
+        for emp_id, the_date in sorted(
+            pairs, key=lambda t: (t[0], t[1].isoformat() if t[1] else "")
+        ):
+            employee = self.env["hr.employee"].browse(emp_id)
+            if not employee.exists() or not the_date:
+                continue
+            if employee.x_timesheet_compliance_excluded or not employee.user_id:
+                continue
+            company = employee.company_id or self.env.company
+            self.with_company(company).sudo()._compute_employee_date(employee, the_date)
 
     # Core logic
     # -------------------------------------------------------------------------
@@ -166,7 +296,37 @@ class TimesheetCompliance(models.Model):
         ):
             new_state = "fixed"
 
-        compliance.state = new_state
+        state_before = compliance.state
+        extra = compliance._incident_open_since_on_state_change(state_before, new_state)
+        wvals = {"state": new_state}
+        if extra:
+            wvals.update(extra)
+        compliance.write(wvals)
+
+    def _incident_open_since_on_state_change(self, state_before, new_state):
+        """Update `incident_open_since` (48h B3) on state transitions."""
+        self.ensure_one()
+        if new_state in ("warn", "issue"):
+            if self.incident_open_since and state_before in ("warn", "issue"):
+                return {}
+            return {"incident_open_since": fields.Datetime.now()}
+        if new_state in ("ok", "fixed", "justified"):
+            return {"incident_open_since": False}
+        return {}
+
+    def write(self, vals):
+        """Keep `incident_open_since` aligned when the state changes."""
+        if self.env.context.get("skip_compliance_incident_open_since_sync"):
+            return super().write(vals)
+        if "state" in vals and "incident_open_since" not in vals:
+            n = vals.get("state")
+            for rec in self:
+                o = rec.state
+                ex = rec._incident_open_since_on_state_change(o, n) if o != n else {}
+                w = {**vals, **ex} if ex else dict(vals)
+                super(TimesheetCompliance, rec).write(w)
+            return True
+        return super().write(vals)
 
     def _compute_values(self, employee, day):
         attendance_hours = self._get_attendance_hours(employee, day)
@@ -246,6 +406,31 @@ class TimesheetCompliance(models.Model):
 
     # Data sources
     # -------------------------------------------------------------------------
+    # Compliance total hours and generic quality use
+    # `company_id.x_compliance_excluded_project_ids` (see res.company) so internal
+    # absence- or leave-like projects do not distort delta, generic %, or mail tables.
+    # Generic projects that are also compliance-excluded do not contribute to
+    # `generic_hours` (exclusion takes precedence for quality metrics).
+    # -------------------------------------------------------------------------
+
+    @api.model
+    def _compliance_excluded_aal_domain_part(self, company):
+        """Appendable domain: keep analytic lines on non-excluded projects (or no project)."""
+        comp = company or self.env.company
+        excl = comp.sudo().x_compliance_excluded_project_ids.ids
+        if not excl:
+            return []
+        return ["|", ("project_id", "=", False), ("project_id", "not in", excl)]
+
+    @api.model
+    def _generic_project_ids_for_compliance(self, company):
+        """Generic projects whose hours still count toward generic (quality) metrics."""
+        comp = company or self.env.company
+        generic = comp.sudo().x_generic_project_ids
+        if not generic:
+            return self.env["project.project"].browse([])
+        excl = comp.sudo().x_compliance_excluded_project_ids
+        return generic - excl
 
     def _get_attendance_hours(self, employee, day):
         start_dt = fields.Datetime.to_datetime(day)
@@ -266,6 +451,7 @@ class TimesheetCompliance(models.Model):
             domain.append(("employee_id", "=", employee.id))
         else:
             domain.append(("user_id", "=", employee.user_id.id))
+        domain += self._compliance_excluded_aal_domain_part(self.env.company)
         lines = aal.search(domain)
         return sum(lines.mapped("unit_amount"))
 
@@ -273,7 +459,7 @@ class TimesheetCompliance(models.Model):
         if not total_hours:
             return 0.0
 
-        generic_projects = self.env.company.x_generic_project_ids
+        generic_projects = self._generic_project_ids_for_compliance(self.env.company)
         if not generic_projects:
             return 0.0
 
@@ -312,37 +498,120 @@ class TimesheetCompliance(models.Model):
     # -------------------------------------------------------------------------
 
     @api.model
+    def _b1_employee_cron_domain(self, target_date):
+        """Narrow B1 search: D-1, eligible, not sent, not excluded, user with email."""
+        return [
+            ("date", "=", target_date),
+            ("email_sent_at", "=", False),
+            ("employee_id.x_timesheet_compliance_excluded", "=", False),
+            ("user_id", "!=", False),
+            ("user_id.email", "!=", False),
+            "|",
+            ("telework", "=", True),
+            ("state", "in", ("warn", "issue")),
+        ]
+
+    @api.model
+    def _b1_debug_cron_info(self, target_date=None):
+        """Read-only: who the B1 cron would process (for support, safe to call in shell)."""
+        if target_date is None:
+            today = fields.Date.context_today(self.env.user)
+            target_date = today - timedelta(days=1)
+        compliances = self.search(self._b1_employee_cron_domain(target_date))
+        return {
+            "target_date": str(target_date),
+            "count": len(compliances),
+            "ids": compliances.ids,
+        }
+
+    @api.model
     def _cron_send_b1_employee_daily_emails(self):
         """B1: Send D-1 compliance summary to employees when required."""
         today = fields.Date.context_today(self.env.user)
         target_date = today - timedelta(days=1)
-
-        compliances = self.search(
-            [
-                ("date", "=", target_date),
-                ("employee_id.user_id", "!=", False),
-                ("email_sent_at", "=", False),
-            ]
+        compliances = self.search(self._b1_employee_cron_domain(target_date))
+        if not compliances:
+            _logger.info(
+                "%s cron: no records for date=%s", B1_DAILY_LOG_PREFIX, target_date
+            )
+            return True
+        _logger.info(
+            "%s cron: %s record(s) for date=%s",
+            B1_DAILY_LOG_PREFIX,
+            len(compliances),
+            target_date,
         )
         for compliance in compliances:
-            if compliance._should_send_b1_employee_email():
-                compliance.action_send_b1_employee_email()
+            comp = compliance.company_id or self.env.company
+            with self.env.cr.savepoint(flush=True):
+                try:
+                    res = (
+                        compliance.with_company(comp)
+                        .sudo()
+                        .action_send_b1_employee_email()
+                    )
+                    _logger.debug(
+                        "%s id=%s action_send_b1_employee_email -> %s",
+                        B1_DAILY_LOG_PREFIX,
+                        compliance.id,
+                        res,
+                    )
+                except Exception:  # pylint: disable=broad-except
+                    _logger.exception(
+                        "%s id=%s failed in cron send",
+                        B1_DAILY_LOG_PREFIX,
+                        compliance.id,
+                    )
+        return True
+
+    def _b1_employee_recipient_email(self):
+        self.ensure_one()
+        if not self.user_id or not (self.user_id.email or "").strip():
+            return False
+        return self._sanitize_mail_header((self.user_id.email or "").strip())
+
+    def _b1_employee_log(self, message):
+        self.ensure_one()
+        text = f"{B1_DAILY_LOG_PREFIX} {message}".strip()
+        return self.sudo().write(
+            {
+                "b1_last_log_at": fields.Datetime.now(),
+                "b1_last_log": text,
+            }
+        )
+
+    def _b1_employee_chatter(self, body):
+        self.ensure_one()
+        self.sudo().message_post(
+            body=body,
+            message_type="notification",
+            subtype_xmlid="mail.mt_note",
+        )
 
     def _should_send_b1_employee_email(self):
-        """B1 rule: send if telework=True or state in warn/issue."""
+        """B1: send if telework or warn/issue, not excluded, and not sent yet."""
         self.ensure_one()
         if self.employee_id.x_timesheet_compliance_excluded:
             return False
         if self.email_sent_at:
             return False
-        if not self.user_id or not self.user_id.email:
+        if not self._b1_employee_recipient_email():
             return False
         return bool(self.telework) or self.state in ("warn", "issue")
 
     def action_send_b1_employee_email(self):
-        """B1: Render template + mark as sent (idempotent)."""
+        """B1: queue mail, set sent flag, technical log, and chatter (idempotent)."""
         self.ensure_one()
-        if not self._should_send_b1_employee_email():
+        me = self.sudo().browse(self.id)
+        if me.email_sent_at:
+            return False
+        if not me._should_send_b1_employee_email():
+            me._b1_employee_log(
+                "Skipped: not eligible (excluded, no recipient email, or business rules)."
+            )
+            return False
+        if self.sudo().browse(self.id).email_sent_at:
+            me._b1_employee_log("Skipped: already sent (concurrent).")
             return False
 
         template = self.env.ref(
@@ -350,42 +619,57 @@ class TimesheetCompliance(models.Model):
             raise_if_not_found=False,
         )
         if not template:
+            me._b1_employee_log("Failed: mail template missing (B1).")
+            me._b1_employee_chatter(
+                "B1: mail template is missing. No email was sent. "
+                "Check module data or contact an administrator."
+            )
             return False
 
-        ctx = self._get_b1_email_render_context()
-        ctx["timesheet_entries_count"] = self._get_timesheet_entries_count()
+        ctx = me._get_b1_email_render_context()
+        ctx["timesheet_entries_count"] = me._get_timesheet_entries_count()
+        recipient = me._b1_employee_recipient_email()
+        if not recipient:
+            me._b1_employee_log("Failed: no recipient address on user account.")
+            me._b1_employee_chatter(
+                "B1: not sent: the employee user account has no email address."
+            )
+            return False
 
         email_from = (
-            self.env.company.email or self.env.user.email or "no-reply@example.com"
-        ).strip()
-        email_from = email_from.replace("\n", " ").replace("\r", " ")
-
-        subject = _("Timesheet compliance - %(date)s") % {"date": self.date}
-
-        template.with_context(**ctx).send_mail(
-            self.id,
-            force_send=True,
-            raise_exception=True,
-            email_values={
-                "email_from": email_from,
-                "subject": subject,
-            },
+            (me.company_id or self.env.company).email
+            or self.env.user.email
+            or "no-reply@example.com"
         )
+        email_from = email_from.replace("\n", " ").replace("\r", " ").strip()
+        subject = f"Timesheet compliance - {me.date}"
 
-        self.email_sent_at = fields.Datetime.now()
-        self.message_post(
-            body=self._get_b1_email_sent_message_body(),
-            message_type="notification",
-            subtype_xmlid="mail.mt_note",
+        try:
+            comp = me.company_id or self.env.company
+            template.with_context(**ctx).with_company(comp).send_mail(
+                me.id,
+                force_send=True,
+                raise_exception=True,
+                email_values={
+                    "email_from": email_from,
+                    "email_to": recipient,
+                    "subject": subject,
+                },
+            )
+        except Exception as err:  # pylint: disable=broad-except
+            me._b1_employee_log(f"Failed: mail send error ({err}).")
+            me._b1_employee_chatter(
+                f"B1: sending failed: {err}. The compliance record was not marked as sent."
+            )
+            _logger.exception("%s id=%s send_mail", B1_DAILY_LOG_PREFIX, me.id)
+            return False
+
+        me.write({"email_sent_at": fields.Datetime.now()})
+        me._b1_employee_log(f"Sent to {recipient}.")
+        me._b1_employee_chatter(
+            _("Daily compliance email (B1) sent to %(email)s.") % {"email": recipient}
         )
         return True
-
-    def _get_b1_email_sent_message_body(self):
-        """Body for chatter when B1 email is sent."""
-        self.ensure_one()
-        return _("Daily compliance email (B1) sent to employee on %(date)s.") % {
-            "date": fields.Datetime.now().strftime("%d/%m/%Y %H:%M")
-        }
 
     def _get_timesheet_entries_count(self):
         self.ensure_one()
@@ -395,12 +679,15 @@ class TimesheetCompliance(models.Model):
             domain.append(("employee_id", "=", self.employee_id.id))
         else:
             domain.append(("user_id", "=", self.user_id.id))
+        domain += self._compliance_excluded_aal_domain_part(
+            self.company_id or self.env.company
+        )
         return aal.search_count(domain)
 
     def _get_b1_email_render_context(self):
         """Context consumed by the B1 mail template."""
         self.ensure_one()
-        company = self.env.company
+        company = self.company_id
         dept = self.employee_id.department_id
 
         min_hours = company.x_generic_min_hours or 0.0
@@ -420,10 +707,11 @@ class TimesheetCompliance(models.Model):
         else:
             generic_pct_fmt = (self._format_hours_for_mail(g_pct or 0) or "0") + "%"
 
-        return {
+        result = {
             "project_rows": project_rows,
             "task_rows": task_rows,
             "my_timesheets_url": self._get_my_timesheets_action_url(),
+            "compliance_form_url": self._get_compliance_record_form_url(),
             "generic_min_hours": min_hours,
             "generic_warn_pct": warn_pct,
             "generic_issue_pct": issue_pct,
@@ -433,12 +721,20 @@ class TimesheetCompliance(models.Model):
             "generic_hours_fmt": self._format_hours_for_mail(self.generic_hours),
             "generic_pct_fmt": generic_pct_fmt,
         }
+        rcp = self._b1_employee_recipient_email()
+        if rcp:
+            result["email_to_override"] = rcp
+        return result
 
-    def _format_hours_for_mail(self, value):
+    def _format_hours_for_mail(self, value, lang_code=None):
         """Format float hours for email (2 decimals, locale-aware decimal separator)."""
         try:
             lang = self.env["res.lang"]._lang_get(
-                self.env.user.lang or self.env.context.get("lang") or "en_US"
+                lang_code
+                or (self.employee_id.user_id.lang if self.employee_id.user_id else None)
+                or self.env.user.lang
+                or self.env.context.get("lang")
+                or "en_US"
             )
             decimal_point = getattr(lang, "decimal_point", ".") or "."
         except (ValueError, TypeError, AttributeError, KeyError):
@@ -448,26 +744,33 @@ class TimesheetCompliance(models.Model):
 
     def _get_my_timesheets_action_url(self):
         self.ensure_one()
-        action = self.env.ref(
+        if not self.user_id:
+            return False
+        d = [
+            ("date", "=", fields.Date.to_string(self.date)),
+            ("user_id", "=", self.user_id.id),
+        ]
+        d += self._compliance_excluded_aal_domain_part(
+            self.company_id or self.env.company
+        )
+        return self._moval_build_window_action_url(
             "moval_timesheet_compliance.action_moval_my_timesheets_by_date",
-            raise_if_not_found=False,
+            "account.analytic.line",
+            "list",
+            d,
+            self.company_id,
         )
-        if not action:
-            return False
 
-        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
-        if not base_url:
-            return False
-
-        ctx = {"moval_timesheet_date": fields.Date.to_string(self.date)}
-        fragment = (
-            "#action=%s&model=account.analytic.line&view_type=list&context=%s"
-            % (
-                action.id,
-                quote(json.dumps(ctx), safe=""),
-            )
+    def _get_compliance_record_form_url(self):
+        self.ensure_one()
+        return self._moval_build_window_action_url(
+            "moval_timesheet_compliance.action_moval_timesheet_compliance_manager",
+            "timesheet.compliance",
+            "form",
+            None,
+            self.company_id,
+            res_id=self.id,
         )
-        return "%s/web%s" % (base_url.rstrip("/"), fragment)
 
     # Backward-compatible wrappers
     # -------------------------------------------------------------------------
@@ -490,6 +793,9 @@ class TimesheetCompliance(models.Model):
             domain.append(("employee_id", "=", self.employee_id.id))
         else:
             domain.append(("user_id", "=", self.user_id.id))
+        domain += self._compliance_excluded_aal_domain_part(
+            self.company_id or self.env.company
+        )
 
         lines = aal.search(domain)
         totals = {}
@@ -515,6 +821,9 @@ class TimesheetCompliance(models.Model):
             domain.append(("employee_id", "=", self.employee_id.id))
         else:
             domain.append(("user_id", "=", self.user_id.id))
+        domain += self._compliance_excluded_aal_domain_part(
+            self.company_id or self.env.company
+        )
 
         lines = aal.search(domain)
         totals = {}
@@ -595,7 +904,9 @@ class TimesheetCompliance(models.Model):
             )
             email_to = self._sanitize_mail_header(manager_email)
             email_from = (
-                self.env.company.email or self.env.user.email or "no-reply@example.com"
+                recs[0].company_id.email
+                or self.env.user.email
+                or "no-reply@example.com"
             ).strip()
             email_from = email_from.replace("\n", " ").replace("\r", " ")
 
@@ -612,8 +923,10 @@ class TimesheetCompliance(models.Model):
             recs.write({"b2_manager_sent_at": fields.Datetime.now()})
             for rec in recs:
                 rec.message_post(
-                    body=_("Included in manager incident email (B2) on %s.")
-                    % fields.Datetime.now().strftime("%d/%m/%Y %H:%M"),
+                    body=_("Included in the manager incident digest (B2) at %(when)s.")
+                    % {
+                        "when": fields.Datetime.to_string(fields.Datetime.now()),
+                    },
                     message_type="notification",
                     subtype_xmlid="mail.mt_note",
                 )
@@ -621,29 +934,28 @@ class TimesheetCompliance(models.Model):
         return True
 
     def _get_b2_department_action_url(self, department, target_date):
-        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
-        if not base_url:
-            return False
 
         employees = self.env["hr.employee"].search(
             [("department_id", "=", department.id)]
         )
         date_str = fields.Date.to_string(target_date)
-
-        domain = [("date", "=", date_str)]
         aal = self.env["account.analytic.line"]
+        d = [("date", "=", date_str)]
         if "employee_id" in aal._fields:
-            domain.append(("employee_id", "in", employees.ids))
+            d.append(("employee_id", "in", employees.ids))
         else:
-            domain.append(("user_id", "in", employees.mapped("user_id").ids))
-
-        domain_str = quote(json.dumps(domain), safe="")
-        base = base_url.rstrip("/")
-        path = (
-            f"{base}/web#model=account.analytic.line&view_type=list"
-            f"&domain={domain_str}"
+            d.append(("user_id", "in", employees.mapped("user_id").ids))
+        comp = (self[:1].company_id if self else False) or (
+            department.company_id or self.env.company
         )
-        return path
+        d += self._compliance_excluded_aal_domain_part(comp)
+        return self._moval_build_window_action_url(
+            "moval_timesheet_compliance.action_moval_my_timesheets_by_date",
+            "account.analytic.line",
+            "list",
+            d,
+            comp,
+        )
 
     def _get_b2_rows(self):
         rows = []
@@ -678,38 +990,43 @@ class TimesheetCompliance(models.Model):
 
     def _get_b2_employee_day_url(self):
         self.ensure_one()
-        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
-        if not base_url:
-            return False
-
-        date_str = fields.Date.to_string(self.date)
-        domain = [("date", "=", date_str)]
+        d = [("date", "=", fields.Date.to_string(self.date))]
         aal = self.env["account.analytic.line"]
         if "employee_id" in aal._fields:
-            domain.append(("employee_id", "=", self.employee_id.id))
+            d.append(("employee_id", "=", self.employee_id.id))
         else:
-            domain.append(("user_id", "=", self.user_id.id))
-
-        domain_str = quote(json.dumps(domain), safe="")
-        base = base_url.rstrip("/")
-        path = (
-            f"{base}/web#model=account.analytic.line&view_type=list"
-            f"&domain={domain_str}"
+            d.append(("user_id", "=", self.user_id.id))
+        d += self._compliance_excluded_aal_domain_part(
+            self.company_id or self.env.company
         )
-        return path
+        return self._moval_build_window_action_url(
+            "moval_timesheet_compliance.action_moval_my_timesheets_by_date",
+            "account.analytic.line",
+            "list",
+            d,
+            self.company_id,
+        )
 
     @api.model
     def _cron_send_b3_escalate_unresolved(self):
         today = fields.Date.context_today(self.env.user)
-        limit_date = today - timedelta(days=2)
+        now = fields.Datetime.now()
+        deadline_48h = now - timedelta(hours=48)
+        calendar_limit = today - timedelta(days=2)
 
         to_escalate = self.search(
             [
-                ("date", "<=", limit_date),
                 ("state", "in", ["warn", "issue"]),
                 ("escalated_at", "=", False),
                 ("department_id", "!=", False),
                 ("employee_id.x_timesheet_compliance_excluded", "=", False),
+                "|",
+                "&",
+                ("incident_open_since", "!=", False),
+                ("incident_open_since", "<=", deadline_48h),
+                "&",
+                ("incident_open_since", "=", False),
+                ("date", "<=", calendar_limit),
             ]
         )
         if not to_escalate:
@@ -722,10 +1039,11 @@ class TimesheetCompliance(models.Model):
         )
 
         for rec in to_escalate:
-            rec.write(
+            rec.with_context(skip_compliance_incident_open_since_sync=True).write(
                 {
                     "state": "escalated",
-                    "escalated_at": fields.Datetime.now(),
+                    "escalated_at": now,
+                    "incident_open_since": False,
                 }
             )
 
@@ -739,7 +1057,7 @@ class TimesheetCompliance(models.Model):
                 }
 
                 email_from = (
-                    self.env.company.email
+                    rec.company_id.email
                     or self.env.user.email
                     or "no-reply@example.com"
                 ).strip()
@@ -761,10 +1079,12 @@ class TimesheetCompliance(models.Model):
 
             rec.message_post(
                 body=_(
-                    "Incident escalated (B3) and notification sent to manager "
-                    "on %(date)s."
+                    "Incident escalated (B3). The department manager was "
+                    "notified at %(when)s."
                 )
-                % {"date": fields.Datetime.now().strftime("%d/%m/%Y %H:%M")},
+                % {
+                    "when": fields.Datetime.to_string(fields.Datetime.now()),
+                },
                 message_type="notification",
                 subtype_xmlid="mail.mt_note",
             )
@@ -776,31 +1096,48 @@ class TimesheetCompliance(models.Model):
 
     @api.model
     def action_open_daily_compliance(self):
-        """Open compliance list filtered by yesterday and today
-        (for 'Cumplimiento diario' menu)."""
+        """List view: yesterday and today (daily check)."""
         today = fields.Date.context_today(self.env.user)
         yesterday = today - timedelta(days=1)
         return self._get_compliance_list_action(
-            domain=[
+            [
                 ("date", ">=", yesterday),
                 ("date", "<=", today),
             ],
-            name=_("Daily Compliance"),
+            "Timesheet compliance: last 2 days",
         )
 
     @api.model
     def action_open_compliance_today(self):
-        """Open compliance list filtered to today only
-        (for 'Registros de cumplimiento' menu)."""
+        """List view: today only."""
         today = fields.Date.context_today(self.env.user)
         return self._get_compliance_list_action(
-            domain=[("date", "=", today)],
-            name=_("Compliance Records"),
+            [("date", "=", today)],
+            "Timesheet compliance: today",
         )
 
     @api.model
-    def _get_compliance_list_action(self, domain, name):
-        """Return window action for timesheet.compliance with given domain and name."""
+    def _moval_action_merge_context(self, action_read_dict, **extra_context):
+        """Merge extra keys into an ir.actions.act_window dict's context (dict or string)."""
+        if not action_read_dict:
+            return action_read_dict
+        ctx = action_read_dict.get("context")
+        if isinstance(ctx, str):
+            try:
+                out = ast.literal_eval(ctx) if ctx.strip() else {}
+            except (ValueError, SyntaxError, RecursionError):
+                out = {}
+        elif isinstance(ctx, dict):
+            out = dict(ctx)
+        else:
+            out = {}
+        out.update(extra_context)
+        action_read_dict["context"] = out
+        return action_read_dict
+
+    @api.model
+    def _get_compliance_list_action(self, domain, name, context_extra=None):
+        """Return a window action for timesheet.compliance (domain, English title, context)."""
         action = self.env.ref(
             "moval_timesheet_compliance.action_moval_timesheet_compliance_manager",
             raise_if_not_found=False,
@@ -810,10 +1147,12 @@ class TimesheetCompliance(models.Model):
         result = action.read()[0]
         result["domain"] = domain
         result["name"] = name
-        return result
+        if context_extra:
+            return self._moval_action_merge_context(result, **context_extra)
+        return self._moval_action_merge_context(result)
 
     def action_open_timesheets(self):
-        """Open timesheet lines (account.analytic.line) for this employee and date."""
+        """Open timesheet lines for this employee and date (server-side domain)."""
         self.ensure_one()
         aal = self.env["account.analytic.line"]
         domain = [("date", "=", self.date)]
@@ -821,23 +1160,27 @@ class TimesheetCompliance(models.Model):
             domain.append(("employee_id", "=", self.employee_id.id))
         else:
             domain.append(("user_id", "=", self.user_id.id))
+        domain += self._compliance_excluded_aal_domain_part(
+            self.company_id or self.env.company
+        )
         return {
             "type": "ir.actions.act_window",
-            "name": "Timesheets - %s - %s" % (self.employee_id.name, self.date),
+            "name": "Timesheet lines: %s - %s" % (self.employee_id.name, self.date),
             "res_model": "account.analytic.line",
             "view_mode": "tree,form",
             "domain": domain,
+            "target": "current",
             "context": {"default_date": self.date},
         }
 
     def action_open_attendances(self):
-        """Open attendance records (hr.attendance) for this employee and date."""
+        """Open attendances for this employee on the same calendar day."""
         self.ensure_one()
         start_dt = fields.Datetime.to_datetime(self.date)
         end_dt = fields.Datetime.to_datetime(self.date + timedelta(days=1))
         return {
             "type": "ir.actions.act_window",
-            "name": "Attendances - %s - %s" % (self.employee_id.name, self.date),
+            "name": "Attendances: %s - %s" % (self.employee_id.name, self.date),
             "res_model": "hr.attendance",
             "view_mode": "tree,form",
             "domain": [
@@ -845,6 +1188,7 @@ class TimesheetCompliance(models.Model):
                 ("check_in", ">=", start_dt),
                 ("check_in", "<", end_dt),
             ],
+            "target": "current",
             "context": {"default_employee_id": self.employee_id.id},
         }
 
@@ -878,6 +1222,7 @@ class TimesheetCompliance(models.Model):
                     ("department_id", "=", dept.id),
                     ("date", ">=", last_monday),
                     ("date", "<=", last_sunday),
+                    ("employee_id.x_timesheet_compliance_excluded", "=", False),
                 ]
             )
             if not recs:
@@ -931,7 +1276,7 @@ class TimesheetCompliance(models.Model):
             any_rec = recs[0]
             subject = self._sanitize_mail_header(
                 _(
-                    "Timesheet generic allocation - %(dept)s - "
+                    "Timesheet compliance: weekly generic allocation - %(dept)s - "
                     "%(date_from)s to %(date_to)s"
                 )
                 % {
@@ -942,7 +1287,9 @@ class TimesheetCompliance(models.Model):
             )
 
             email_from = self._sanitize_mail_header(
-                self.env.company.email or self.env.user.email or "no-reply@example.com"
+                any_rec.company_id.email
+                or self.env.user.email
+                or "no-reply@example.com"
             )
             email_to = self._sanitize_mail_header(manager_user.email)
 
@@ -958,32 +1305,22 @@ class TimesheetCompliance(models.Model):
             )
 
     def _get_compliance_pivot_url(self, dept, date_from, date_to):
-        action = self.env.ref(
-            "moval_timesheet_compliance.action_moval_timesheet_compliance_manager",
-            raise_if_not_found=False,
-        )
-        if not action:
+        if not dept:
             return False
-
-        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
-        if not base_url:
-            return False
-
-        ctx = {
-            "search_default_groupby_emp": 1,
-            "search_default_groupby_date": 0,
-        }
         domain = [
             ("department_id", "=", dept.id),
             ("date", ">=", fields.Date.to_string(date_from)),
             ("date", "<=", fields.Date.to_string(date_to)),
         ]
-        fragment = (
-            "#action=%s&model=timesheet.compliance&view_type=list&context=%s&domain=%s"
-            % (
-                action.id,
-                quote(json.dumps(ctx), safe=""),
-                quote(json.dumps(domain), safe=""),
-            )
+        ctx = {
+            "search_default_groupby_emp": 1,
+            "search_default_groupby_date": 0,
+        }
+        return self._moval_build_window_action_url(
+            "moval_timesheet_compliance.action_moval_timesheet_compliance_pivot",
+            "timesheet.compliance",
+            "pivot",
+            domain,
+            dept.company_id or self.env.company,
+            context=ctx,
         )
-        return "%s/web%s" % (base_url.rstrip("/"), fragment)

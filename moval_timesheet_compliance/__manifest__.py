@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl-3.0).
 {
     "name": "Timesheet Compliance Daily",
     "summary": (
-        "Daily compliance per employee: attendance vs timesheets, "
-        "telework and generic allocation quality."
+        "Daily timesheet compliance: attendance vs timesheets, telework, "
+        "and generic allocation quality."
     ),
-    "version": "16.0.1.0.0",
+    "version": "16.0.1.10.0",
     "category": "Human Resources",
     "license": "AGPL-3",
     "author": "Moval Agroingeniería",
     "website": "https://moval.es",
+    "development_status": "Production/Stable",
     "depends": [
+        "analytic",
         "hr",
         "hr_attendance",
         "hr_timesheet",
-        "project",
-        "mail",
-        "analytic",
         "hr_telework_tracking_site_capacity",
+        "mail",
+        "project",
     ],
     "data": [
         "security/security_res_groups.xml",
@@ -30,7 +32,7 @@
         "views/res_config_settings_views.xml",
         "views/timesheet_compliance_views.xml",
         "views/timesheet_compliance_actions.xml",
-        "views/timesheet_compliance_menus.xml",
         "views/account_analytic_line_actions.xml",
+        "views/timesheet_compliance_menus.xml",
     ],
 }

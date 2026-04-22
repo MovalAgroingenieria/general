@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 2026 Moval Agroingeniería
-     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl-3.0). -->
 <odoo>
         <record id="action_moval_timesheet_compliance_manager" model="ir.actions.act_window">
-            <field name="name">Daily Timesheet Compliance</field>
+            <field name="name">Timesheet compliance (records)</field>
             <field name="res_model">timesheet.compliance</field>
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="view_moval_timesheet_compliance_tree"/>
@@ -12,22 +12,23 @@
             <field name="domain">[]</field>
         </record>
         <record id="action_moval_timesheet_compliance_pivot" model="ir.actions.act_window">
-            <field name="name">Compliance Analysis</field>
+            <field name="name">Timesheet compliance (analysis)</field>
             <field name="res_model">timesheet.compliance</field>
             <field name="view_mode">pivot,graph,tree,form</field>
             <field name="view_id" ref="view_moval_timesheet_compliance_pivot"/>
             <field name="search_view_id" ref="view_moval_timesheet_compliance_search"/>
-            <field name="context">
-                {
-                "search_default_groupby_dept": 1,
-                "search_default_groupby_date": 0
-                }
-            </field>
+            <field name="context" eval="{'search_default_groupby_dept': 1, 'search_default_compliance_date': 1}"/>
             <field name="domain">[]</field>
             <field name="groups_id" eval="[(4, ref('moval_timesheet_compliance.group_timesheet_compliance_manager'))]"/>
         </record>
+        <record id="action_moval_compliance_today_list" model="ir.actions.server">
+            <field name="name">Today (list)</field>
+            <field name="model_id" ref="model_timesheet_compliance"/>
+            <field name="state">code</field>
+            <field name="code">action = model.action_open_compliance_today()</field>
+        </record>
         <record id="action_compliance_analysis_today" model="ir.actions.server">
-            <field name="name">Analysis: Today</field>
+            <field name="name">Today (analysis)</field>
             <field name="model_id" ref="model_timesheet_compliance"/>
             <field name="state">code</field>
             <field name="code">action = model.action_open_analysis_today()</field>
@@ -35,7 +36,7 @@
             <field name="binding_view_types">list,pivot,graph</field>
         </record>
         <record id="action_compliance_analysis_yesterday" model="ir.actions.server">
-            <field name="name">Analysis: Yesterday</field>
+            <field name="name">Yesterday (analysis)</field>
             <field name="model_id" ref="model_timesheet_compliance"/>
             <field name="state">code</field>
             <field name="code">action = model.action_open_analysis_yesterday()</field>
@@ -43,7 +44,7 @@
             <field name="binding_view_types">list,pivot,graph</field>
         </record>
         <record id="action_compliance_analysis_this_week" model="ir.actions.server">
-            <field name="name">Analysis: This week</field>
+            <field name="name">This week (analysis)</field>
             <field name="model_id" ref="model_timesheet_compliance"/>
             <field name="state">code</field>
             <field name="code">action = model.action_open_analysis_this_week()</field>
@@ -51,7 +52,7 @@
             <field name="binding_view_types">list,pivot,graph</field>
         </record>
         <record id="action_compliance_analysis_this_month" model="ir.actions.server">
-            <field name="name">Analysis: This month</field>
+            <field name="name">This month (analysis)</field>
             <field name="model_id" ref="model_timesheet_compliance"/>
             <field name="state">code</field>
             <field name="code">action = model.action_open_analysis_this_month()</field>
@@ -59,7 +60,7 @@
             <field name="binding_view_types">list,pivot,graph</field>
         </record>
         <record id="action_moval_timesheet_compliance_daily" model="ir.actions.server">
-            <field name="name">Daily Compliance (today)</field>
+            <field name="name">Daily (yesterday &amp; today)</field>
             <field name="model_id" ref="model_timesheet_compliance"/>
             <field name="state">code</field>
             <field name="code">action = model.action_open_daily_compliance()</field>

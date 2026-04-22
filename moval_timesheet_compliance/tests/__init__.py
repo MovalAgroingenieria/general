@@ -4,6 +4,8 @@ from . import (
     test_a2_generic_projects,
     test_a3_telework_day,
     test_a4_cron_compute_compliance,
+    test_a5_excluded_projects,
+    test_a6_recompute_on_source_changes,
     test_b1_email_daily,
     test_b2_email_template_render,
     test_b2_manager_daily_email,
@@ -12,4 +14,6 @@ from . import (
     test_f1_timer_watchdog,
     test_f2_timer_checkout_hook,
     test_links_domain_serialization,
+    test_qa_business_risk,
+    test_ux_action_contexts,
 )

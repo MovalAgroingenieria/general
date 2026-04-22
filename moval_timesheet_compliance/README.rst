@@ -2,6 +2,14 @@
    :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
    :alt: License: AGPL-3
 
+
+Bug tracking
+============
+
+Report issues through the maintainers of your deployment, or the authors listed under
+*Credits*.
+
+
 Timesheet Compliance (Daily)
 ============================
 
@@ -102,6 +110,42 @@ In **Settings → Timesheet Compliance** you can configure:
 
 These values are global per company and affect the daily computation and state
 evaluation.
+
+
+Automatic recompute (timesheets and attendances)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Changes to `account.analytic.line` and `hr.attendance` for a day automatically
+recompute the corresponding `timesheet.compliance` record for that **employee
+and local day** (one pass per day, de-duplicated). `justified` and `fixed` records
+follow the same protection as the daily recompute (justified/fixed and incident-open handling). Bulk imports can use context
+`skip_timesheet_compliance_recompute` to opt out for performance.
+
+
+
+Compliance-Excluded Projects
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Settings → Timesheet Compliance → Compliance-Excluded Projects** (Many2many at
+company level) lists projects whose timesheet **lines** are **ignored** for:
+
+* The **compliance timesheet total** (used for the attendance vs timesheet delta
+  and telework/empty rules), so internal *absence-like* or non-meaningful
+  projects do not create a false *match* with clocked time.
+* **Generic (quality) metrics** – an excluded project does not contribute
+  *generic* hours, even if it is also in **Generic Projects** (exclusion
+  **overrides** the generic set for this purpose; generic\_pct is still
+  *generic / compliance total*).
+* **Project and task table sections** in employee and manager style emails
+  (B1/B2 breakdowns) – the listed hours and rows match the same compliance
+  total logic.
+
+**Lines with no project** are never removed by this list: only a configured
+project (with an id in this list) is excluded from those metrics.
+
+After you change this list, run the daily **Timesheet Compliance: Compute** cron (or other
+recompute) so existing ``timesheet.compliance`` rows and downstream emails (E3) use
+the new policy.
 
 
 Excluded employees
@@ -346,6 +390,8 @@ The module includes automated tests covering:
 
 * Daily compliance computation
 * Generic project configuration impact
+* Compliance-excluded projects (delta, generic, mail breakdowns)
+* Recompute on timesheet/attendance edits (including past days)
 * Telework detection
 * Cron execution
 * Email notification rules (B1, B2)
@@ -360,6 +406,36 @@ Module structure
 * **One class per Python file** (models and tests).
 * **One XML file per model** (or per record type): views, actions, menus,
   security groups and rules, and data are split into separate files by model.
+
+
+ORM model name (``timesheet.compliance`` vs ``moval.timesheet.compliance``)
+---------------------------------------------------------------------------
+
+The database model is ``timesheet.compliance``, **not** ``moval.timesheet.compliance``,
+as might appear in a vendor-prefixed specification. This is intentional.
+
+**Why we keep** ``timesheet.compliance``:
+
+* **Upgrade safety** — The model ``_name`` (ORM technical name) is the key for
+  the physical PostgreSQL table (``timesheet_compliance``), ``ir.model``,
+  ``ir.model.data`` (e.g. ``model_timesheet_compliance``), access rights, record
+  rules, server actions, mail templates, crons, and any external code using
+  ``env['timesheet.compliance']``. Renaming the model would require a **pre**
+  migration (table rename, bulk updates in ``ir_*`` and mail, re-linking) on
+  every existing database. A plain code-only rename would create a **new** model
+  and table and **orphan** historical compliance rows.
+* **Scope of the namespace** — The addon is already namespaced at **module** and
+  **XML id** level (``moval_timesheet_compliance.*``). The main collision risk
+  in the App Store is another module defining the same ``_name``; that is a
+  separate packaging concern, not fixed silently by a breaking rename in place.
+* **Stable API** — Customizations, tests, and integrations can rely on
+  ``timesheet.compliance`` for the lifetime of the deployment.
+
+**When a vendor-prefixed model** (e.g. ``moval.timesheet.compliance``) is required,
+do it only with a **one-shot migration** (OpenUpgrade or project-specific
+``pre-migration``), coordinated downtime, and re-testing of all mail, security,
+and automation. That path is **not** applied in this module to avoid breaking
+production upgrades.
 
 
 Credits

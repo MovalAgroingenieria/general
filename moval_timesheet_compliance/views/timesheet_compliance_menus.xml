@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 2026 Moval Agroingeniería
-     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl-3.0). -->
 <odoo>
         <menuitem
                 id="menu_moval_timesheet_compliance_root"
-                name="Timesheet Compliance"
+                name="Timesheet compliance"
                 parent="hr.menu_hr_root"
                 sequence="80"
                 groups="moval_timesheet_compliance.group_timesheet_compliance_user,moval_timesheet_compliance.group_timesheet_compliance_manager"
         />
         <menuitem
                 id="menu_moval_my_timesheets_by_date"
-                name="My timesheets (by date)"
+                name="My timesheet lines"
                 parent="moval_timesheet_compliance.menu_moval_timesheet_compliance_root"
                 action="moval_timesheet_compliance.action_moval_my_timesheets_by_date"
                 sequence="10"
@@ -19,15 +19,23 @@
         />
         <menuitem
                 id="menu_moval_timesheet_compliance"
-                name="Daily Compliance"
+                name="Daily (yesterday &amp; today)"
                 parent="moval_timesheet_compliance.menu_moval_timesheet_compliance_root"
                 action="moval_timesheet_compliance.action_moval_timesheet_compliance_daily"
                 sequence="20"
                 groups="moval_timesheet_compliance.group_timesheet_compliance_user,moval_timesheet_compliance.group_timesheet_compliance_manager"
         />
         <menuitem
+                id="menu_moval_compliance_today_list"
+                name="Today (list)"
+                parent="moval_timesheet_compliance.menu_moval_timesheet_compliance_root"
+                action="moval_timesheet_compliance.action_moval_compliance_today_list"
+                sequence="25"
+                groups="moval_timesheet_compliance.group_timesheet_compliance_manager"
+        />
+        <menuitem
                 id="menu_moval_timesheet_compliance_pivot"
-                name="Compliance Analysis"
+                name="Analysis (pivot &amp; graph)"
                 parent="moval_timesheet_compliance.menu_moval_timesheet_compliance_root"
                 action="moval_timesheet_compliance.action_moval_timesheet_compliance_pivot"
                 sequence="30"
@@ -42,7 +50,7 @@
         />
         <menuitem
                 id="menu_compliance_analysis_today"
-                name="Today"
+                name="Today (analysis)"
                 parent="moval_timesheet_compliance.menu_compliance_analysis_period"
                 action="moval_timesheet_compliance.action_compliance_analysis_today"
                 sequence="1"
@@ -50,7 +58,7 @@
         />
         <menuitem
                 id="menu_compliance_analysis_yesterday"
-                name="Yesterday"
+                name="Yesterday (analysis)"
                 parent="moval_timesheet_compliance.menu_compliance_analysis_period"
                 action="moval_timesheet_compliance.action_compliance_analysis_yesterday"
                 sequence="2"
@@ -58,7 +66,7 @@
         />
         <menuitem
                 id="menu_compliance_analysis_this_week"
-                name="This week"
+                name="This week (analysis)"
                 parent="moval_timesheet_compliance.menu_compliance_analysis_period"
                 action="moval_timesheet_compliance.action_compliance_analysis_this_week"
                 sequence="3"
@@ -66,7 +74,7 @@
         />
         <menuitem
                 id="menu_compliance_analysis_this_month"
-                name="This month"
+                name="This month (analysis)"
                 parent="moval_timesheet_compliance.menu_compliance_analysis_period"
                 action="moval_timesheet_compliance.action_compliance_analysis_this_month"
                 sequence="4"
@@ -74,10 +82,10 @@
         />
         <menuitem
                 id="menu_moval_timesheet_compliance_manager"
-                name="Compliance Records"
+                name="All compliance records"
                 parent="moval_timesheet_compliance.menu_moval_timesheet_compliance_root"
                 action="moval_timesheet_compliance.action_moval_timesheet_compliance_manager"
                 groups="moval_timesheet_compliance.group_timesheet_compliance_manager"
-                sequence="30"
+                sequence="40"
         />
 </odoo>

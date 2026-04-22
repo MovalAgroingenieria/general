@@ -14,6 +14,10 @@ class ResConfigSettings(models.TransientModel):
         related="company_id.x_generic_project_ids",
         readonly=False,
     )
+    x_compliance_excluded_project_ids = fields.Many2many(
+        related="company_id.x_compliance_excluded_project_ids",
+        readonly=False,
+    )
     x_generic_warn_pct = fields.Float(
         related="company_id.x_generic_warn_pct",
         readonly=False,
