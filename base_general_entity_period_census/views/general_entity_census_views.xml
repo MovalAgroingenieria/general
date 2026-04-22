@@ -10,6 +10,13 @@
                 decoration-muted="state == 'locked'"
                 default_order="period_date desc"
             >
+                <button
+                    name="action_open_form"
+                    type="object"
+                    string="Open"
+                    icon="fa-external-link"
+                    class="btn-link"
+                />
                 <field name="period_name" />
                 <field name="primary_partner_id" readonly="id" />
                 <field name="period_date" readonly="line_count > 0" />
@@ -33,13 +40,6 @@
                     decoration-success="state == 'locked'"
                     decoration-info="state == 'draft'"
                     optional="show"
-                />
-                <button
-                    name="action_open_form"
-                    type="object"
-                    string="Open"
-                    icon="fa-external-link"
-                    class="btn-link"
                 />
             </list>
         </field>

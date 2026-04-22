@@ -6,10 +6,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-25 10:58+0000\n"
+"POT-Creation-Date: 2026-04-22 11:00+0000\n"
 "PO-Revision-Date: 2026-03-25 10:58+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -24,6 +25,20 @@ msgid ""
 msgstr ""
 "Un contacto no puede ser entidad primaria y miembro secundario "
 "simultáneamente."
+
+#. module: base_general_entity
+#. odoo-python
+#: code:addons/base_general_entity/models/res_partner.py:0
+msgid ""
+"A member with code %(code)s and type '%(type)s' already exists: %(name)s"
+msgstr ""
+"Ya existe un miembro con el código %(code)s y tipo '%(type)s': %(name)s"
+
+#. module: base_general_entity
+#. odoo-python
+#: code:addons/base_general_entity/models/res_partner.py:0
+msgid "A primary entity with code %(code)s already exists: %(name)s"
+msgstr "Ya existe una entidad primaria con el código %(code)s: %(name)s"
 
 #. module: base_general_entity
 #: model:ir.model.fields,field_description:base_general_entity.field_partner_entity_type_wizard__action_type
@@ -44,6 +59,12 @@ msgstr "Activo"
 #: model_terms:ir.ui.view,arch_db:base_general_entity.view_general_entity_member_form
 msgid "Additional notes..."
 msgstr "Notas adicionales..."
+
+#. module: base_general_entity
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_primary_entity_form
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_secondary_entity_form
+msgid "Address"
+msgstr "Dirección"
 
 #. module: base_general_entity
 #. odoo-python
@@ -84,6 +105,12 @@ msgid "Check if this contact is a secondary member"
 msgstr "Marcar si este contacto es un miembro secundario"
 
 #. module: base_general_entity
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_primary_entity_form
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_secondary_entity_form
+msgid "City"
+msgstr "Ciudad"
+
+#. module: base_general_entity
 #: model:ir.model.fields,help:base_general_entity.field_res_partner__member_type_id
 #: model:ir.model.fields,help:base_general_entity.field_res_users__member_type_id
 msgid "Classification type for secondary members"
@@ -110,7 +137,9 @@ msgid "Contact"
 msgstr "Contacto"
 
 #. module: base_general_entity
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_primary_entity_form
 #: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_primary_entity_search
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_secondary_entity_form
 #: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_secondary_entity_search
 msgid "Country"
 msgstr "País"
@@ -226,7 +255,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base_general_entity.field_general_entity_member_type__id
 #: model:ir.model.fields,field_description:base_general_entity.field_partner_entity_type_wizard__id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: base_general_entity
 #: model_terms:ir.ui.view,arch_db:base_general_entity.view_general_entity_member_search
@@ -459,6 +488,24 @@ msgid "Sequence"
 msgstr "Secuencia"
 
 #. module: base_general_entity
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_primary_entity_form
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_secondary_entity_form
+msgid "State"
+msgstr "Provincia"
+
+#. module: base_general_entity
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_primary_entity_form
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_secondary_entity_form
+msgid "Street 2..."
+msgstr "Calle 2..."
+
+#. module: base_general_entity
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_primary_entity_form
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_secondary_entity_form
+msgid "Street..."
+msgstr "Calle..."
+
+#. module: base_general_entity
 #: model:ir.ui.menu,name:base_general_entity.menu_general_entity_technical
 msgid "Technical"
 msgstr "Técnico"
@@ -513,3 +560,9 @@ msgstr "Desmarcar como miembro secundario"
 #: model:res.groups,name:base_general_entity.group_general_entity_user
 msgid "User"
 msgstr "Usuario"
+
+#. module: base_general_entity
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_primary_entity_form
+#: model_terms:ir.ui.view,arch_db:base_general_entity.view_partner_secondary_entity_form
+msgid "ZIP"
+msgstr "C.P."
