@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-03 13:09+0000\n"
-"PO-Revision-Date: 2025-04-03 13:09+0000\n"
+"POT-Creation-Date: 2026-04-23 14:49+0000\n"
+"PO-Revision-Date: 2026-04-23 14:49+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -18,23 +18,16 @@ msgstr ""
 #. module: eom_authdnie
 #: model:ir.ui.view,arch_db:eom_authdnie.identification_data_page
 msgid "<br/>\n"
+"                                        <span>Representado por </span>"
+msgstr "<br/>\n"
+"                                        <span>Representado por </span>"
+
+#. module: eom_authdnie
+#: model:ir.ui.view,arch_db:eom_authdnie.identification_data_page
+msgid "<br/>\n"
 "                                    <strong>Authority:</strong>"
 msgstr "<br/>\n"
 "                                    <strong>Autoridad:</strong>"
-
-#. module: eom_authdnie
-#: model:ir.ui.view,arch_db:eom_authdnie.identification_data_page
-msgid "<br/>\n"
-"                                    <strong>First Name:</strong>"
-msgstr "<br/>\n"
-"                                    <strong>Nombre:</strong>"
-
-#. module: eom_authdnie
-#: model:ir.ui.view,arch_db:eom_authdnie.identification_data_page
-msgid "<br/>\n"
-"                                    <strong>Last Name:</strong>"
-msgstr "<br/>\n"
-"                                    <strong>Apellidos:</strong>"
 
 #. module: eom_authdnie
 #: model:ir.ui.view,arch_db:eom_authdnie.view_partner_form
@@ -91,8 +84,7 @@ msgid "<strong>VAT:</strong>"
 msgstr "<strong>DNI:</strong>"
 
 #. module: eom_authdnie
-#: code:addons/eom_authdnie/models/res_partner.py:48
-#: code:addons/moval_addons/general/eom_authdnie/models/res_partner.py:48
+#: code:addons/eom_authdnie/models/res_partner.py:51
 #, python-format
 msgid "A partner can only have one digital register."
 msgstr "Un contacto sólo puede estar asociado a un certificado digital."
@@ -124,8 +116,7 @@ msgid "Access of a digital register"
 msgstr "Acceso de un certificado digital"
 
 #. module: eom_authdnie
-#: code:addons/eom_authdnie/models/eom_digitalregister.py:377
-#: code:addons/moval_addons/general/eom_authdnie/models/eom_digitalregister.py:377
+#: code:addons/eom_authdnie/models/eom_digitalregister.py:413
 #: model:ir.actions.act_window,name:eom_authdnie.eom_digitalregister_access_action
 #: model:ir.ui.menu,name:eom_authdnie.digitalregister_access_menu
 #: model:ir.ui.view,arch_db:eom_authdnie.eom_digitalregister_view_tree
@@ -193,8 +184,7 @@ msgid "Configure electronic office management"
 msgstr "Gestión de la configuración de la sede electrónica"
 
 #. module: eom_authdnie
-#: code:addons/eom_authdnie/models/res_partner.py:87
-#: code:addons/moval_addons/general/eom_authdnie/models/res_partner.py:87
+#: code:addons/eom_authdnie/models/res_partner.py:90
 #, python-format
 msgid "Contact"
 msgstr "Contacto"
@@ -218,7 +208,7 @@ msgstr "Creado el"
 #. module: eom_authdnie
 #: model:ir.ui.view,arch_db:eom_authdnie.wizard_set_vat_view_form
 msgid "Data of a VAT"
-msgstr "Datos de un DNI"
+msgstr "Datos VAT"
 
 #. module: eom_authdnie
 #: model:ir.model.fields,field_description:eom_authdnie.field_eom_digitalregister_access_detail
@@ -311,8 +301,6 @@ msgstr "El certificado digital ya existe."
 #. module: eom_authdnie
 #: model:ir.model.fields,field_description:eom_authdnie.field_eom_digitalregister_access_firstname
 #: model:ir.model.fields,field_description:eom_authdnie.field_eom_digitalregister_firstname
-#: model:ir.ui.view,arch_db:eom_authdnie.eom_digitalregister_access_view_tree
-#: model:ir.ui.view,arch_db:eom_authdnie.eom_digitalregister_view_tree
 msgid "First Name"
 msgstr "Nombre"
 
@@ -361,6 +349,12 @@ msgid "Image (small)"
 msgstr "Imagen (reducida)"
 
 #. module: eom_authdnie
+#: model:ir.model.fields,field_description:eom_authdnie.field_eom_digitalregister_is_company
+#: model:ir.ui.view,arch_db:eom_authdnie.eom_digitalregister_view_form
+msgid "Is Company"
+msgstr "Es compañía"
+
+#. module: eom_authdnie
 #: model:ir.ui.view,arch_db:eom_authdnie.eom_digitalregister_access_view_search
 msgid "Is a request: no"
 msgstr "Es una petición: no"
@@ -388,8 +382,6 @@ msgstr "Última modificación en"
 #. module: eom_authdnie
 #: model:ir.model.fields,field_description:eom_authdnie.field_eom_digitalregister_access_lastname
 #: model:ir.model.fields,field_description:eom_authdnie.field_eom_digitalregister_lastname
-#: model:ir.ui.view,arch_db:eom_authdnie.eom_digitalregister_access_view_tree
-#: model:ir.ui.view,arch_db:eom_authdnie.eom_digitalregister_view_tree
 msgid "Last Name"
 msgstr "Apellidos"
 
@@ -418,7 +410,7 @@ msgstr "Cerrar sesión"
 #. module: eom_authdnie
 #: model:res.groups,name:eom_authdnie.group_eom_manager
 msgid "Manager"
-msgstr "Mánager"
+msgstr "Responsable"
 
 #. module: eom_authdnie
 #: model:ir.ui.view,arch_db:eom_authdnie.eom_digitalregister_access_view_search
@@ -441,7 +433,9 @@ msgstr "Móvil"
 #. module: eom_authdnie
 #: model:ir.model.fields,field_description:eom_authdnie.field_eom_digitalregister_access_name
 #: model:ir.ui.view,arch_db:eom_authdnie.eom_digitalregister_access_view_search
+#: model:ir.ui.view,arch_db:eom_authdnie.eom_digitalregister_access_view_tree
 #: model:ir.ui.view,arch_db:eom_authdnie.eom_digitalregister_view_search
+#: model:ir.ui.view,arch_db:eom_authdnie.eom_digitalregister_view_tree
 msgid "Name"
 msgstr "Nombre"
 
@@ -461,7 +455,7 @@ msgstr "Número de accesos"
 #. module: eom_authdnie
 #: model:ir.model.fields,field_description:eom_authdnie.field_eom_digitalregister_number_of_requests
 msgid "Number of requests"
-msgstr "Número de peticiones"
+msgstr "Nº solicitudes"
 
 #. module: eom_authdnie
 #: model:ir.ui.menu,name:eom_authdnie.parameters_menu
@@ -469,11 +463,10 @@ msgid "Parameters"
 msgstr "Parámetros"
 
 #. module: eom_authdnie
-#: model:ir.model,name:eom_authdnie.model_res_partner
 #: model:ir.model.fields,field_description:eom_authdnie.field_eom_digitalregister_access_partner_id
 #: model:ir.model.fields,field_description:eom_authdnie.field_eom_digitalregister_partner_id
 msgid "Partner"
-msgstr "Contacto"
+msgstr "Socio"
 
 #. module: eom_authdnie
 #: model:ir.model,name:eom_authdnie.model_res_partner
@@ -503,8 +496,7 @@ msgid "REQUEST"
 msgstr "PETICIÓN"
 
 #. module: eom_authdnie
-#: code:addons/eom_authdnie/models/eom_digitalregister.py:408
-#: code:addons/moval_addons/general/eom_authdnie/models/eom_digitalregister.py:408
+#: code:addons/eom_authdnie/models/eom_digitalregister.py:445
 #: model:ir.actions.act_window,name:eom_authdnie.eom_digitalregister_access_with_userdata_action
 #: model:ir.ui.menu,name:eom_authdnie.digitalregister_access_with_userdata_menu
 #: model:ir.ui.view,arch_db:eom_authdnie.eom_digitalregister_view_tree
@@ -535,7 +527,7 @@ msgstr "Gracias, los datos indicados han sido registrados satisfactoriamente."
 #. module: eom_authdnie
 #: model:ir.model.fields,field_description:eom_authdnie.field_eom_digitalregister_access_event_time
 msgid "Time"
-msgstr "Instante"
+msgstr "Tiempo"
 
 #. module: eom_authdnie
 #: model:res.groups,name:eom_authdnie.group_eom_user
@@ -552,7 +544,7 @@ msgstr "Usuario"
 #: model:ir.ui.view,arch_db:eom_authdnie.eom_digitalregister_view_tree
 #: model:ir.ui.view,arch_db:eom_authdnie.wizard_set_vat_view_form
 msgid "VAT"
-msgstr "DNI"
+msgstr "NIF"
 
 #. module: eom_authdnie
 #: model:ir.model.fields,field_description:eom_authdnie.field_eom_digitalregister_access_icon_with_contact

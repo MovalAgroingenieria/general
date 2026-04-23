@@ -12,6 +12,40 @@ import base64
 
 class WebsiteEOffice(WebsiteEom):
 
+    def _get_name_parts(self, fullname):
+        firstname = ''
+        lastname = ''
+        if fullname:
+            if ',' in fullname:
+                parts = fullname.split(',', 1)
+                lastname = (parts[0] or '').strip()
+                firstname = (parts[1] or '').strip()
+            else:
+                lastname = fullname.strip()
+        return firstname, lastname
+
+    def _format_identif_header(self, lastname, firstname, dni,
+                               representative_lastname,
+                               representative_firstname,
+                               representative_dni):
+        primary_name = lastname
+        if firstname:
+            primary_name = '%s, %s' % (lastname, firstname)
+        header = '%s (%s)' % (primary_name, dni)
+        if representative_dni:
+            representative_name = representative_lastname
+            if representative_firstname:
+                representative_name = '%s, %s' % (
+                    representative_lastname,
+                    representative_firstname,
+                )
+            header = '%s - Representado por %s (%s)' % (
+                header,
+                representative_name,
+                representative_dni,
+            )
+        return header
+
     def get_user_info(self, kwargs):
         identif_token = ''
         model_digitalregister = request.env['eom.digitalregister'].sudo()
@@ -22,14 +56,29 @@ class WebsiteEOffice(WebsiteEom):
                 plain_text = model_digitalregister.decrypt_data(identif_token)
                 if plain_text:
                     (country, dni, firstname, lastname,
-                     authority) = model_digitalregister.\
+                     authority, represented_name,
+                     represented_vat) = model_digitalregister.\
                         get_items_of_decrypted_identif(plain_text)
-                    if all([country, dni, firstname, lastname, authority]):
-                        dni_full = country + dni
+                    if (country and dni and (firstname or lastname) and
+                       authority):
+                        representative_dni = country + dni
+                        representative_firstname = firstname
+                        representative_lastname = lastname
+                        dni_full = representative_dni
+                        if represented_vat:
+                            dni_full = represented_vat
+                            firstname = ''
+                            lastname = represented_name or representative_lastname
                         digitalregister = model_digitalregister.search(
                             [('name', '=', dni_full)], limit=1)
-                        identif_header = '%s, %s (%s)' % (
-                            lastname, firstname, dni_full)
+                        identif_header = self._format_identif_header(
+                            lastname,
+                            firstname,
+                            dni_full,
+                            representative_lastname,
+                            representative_firstname,
+                            representative_dni if represented_vat else '',
+                        )
                         user_info = {
                             'country': country,
                             'dni': dni_full,
@@ -221,70 +270,47 @@ class WebsiteEOffice(WebsiteEom):
     @http.route('/getdocument', type='http', auth='public', website=True,
                 csrf=False)
     def get_document_from_csv(self, **kwargs):
-        context = {}
-        user_info = self.get_user_info(kwargs)
-        if not user_info:
-            template = 'eom_authdnie.identification_error'
-        else:
-            identif_token = user_info['identif_token']
-            identif_header = user_info['identif_header']
-            digitalregister = user_info['digitalregister']
-            template = 'eom_eoffice.csv_code_form'
-            context = {
-                'identif_token': identif_token,
-                'identif_header': identif_header,
-                'digitalregister': digitalregister,
-            }
+        user_info = self.get_user_info(kwargs) or {}
+        template = 'eom_eoffice.csv_code_form'
+        context = {
+            'identif_token': user_info.get('identif_token', ''),
+            'identif_header': user_info.get('identif_header', ''),
+            'digitalregister': user_info.get('digitalregister', False),
+        }
         return request.render(template, context)
 
     @http.route('/document', type='http', auth='public', website=True,
                 csrf=False)
     def search_document(self, **kwargs):
-        context = {}
-        user_info = self.get_user_info(kwargs)
-        response = request.render('eom_authdnie.identification_error', {})
-        if not user_info:
-            template = 'eom_authdnie.identification_error'
-        else:
-            identif_token = user_info['identif_token']
-            identif_header = user_info['identif_header']
-            digitalregister = user_info['digitalregister']
+        user_info = self.get_user_info(kwargs) or {}
+        identif_token = user_info.get('identif_token', '')
+        identif_header = user_info.get('identif_header', '')
+        digitalregister = user_info.get('digitalregister', False)
+        response = request.render('eom_eoffice.csv_code_form', {
+            'identif_token': identif_token,
+            'identif_header': identif_header,
+            'digitalregister': digitalregister,
+            'error_message': _('CSV not found'),
+        })
+        csv_code = kwargs.get('csvcode', False)
+        if csv_code:
+            domain = [('csv_code', '=', csv_code)]
             if digitalregister:
-                csv_code = kwargs.get('csvcode', False)
-                communication = request.env[
-                    'eom.electronicfile.communication'].sudo().search([
-                        ('electronicfile_id.digitalregister_id', '=',
-                         digitalregister.id),
-                        ('csv_code', '=', csv_code),
-                    ], limit=1)
-                if communication:
-                    content = base64.b64decode(communication.document)
-                    pdf_httpheaders = [
-                        ('Content-Type', 'application/pdf'),
-                        ('Content-Length', len(content)),
-                        ('Content-Disposition',
-                         'attachment; filename="%s.pdf"' %
-                         communication.document_name)]
-                    response = request.make_response(
-                        content, headers=pdf_httpheaders)
-                else:
-                    template = 'eom_eoffice.csv_code_form'
-                    context = {
-                        'identif_token': identif_token,
-                        'identif_header': identif_header,
-                        'digitalregister': digitalregister,
-                        'error_message': _('CSV not found'),
-                    }
-            else:
-                template = 'eom_eoffice.csv_code_form'
-                context = {
-                    'identif_token': identif_token,
-                    'identif_header': identif_header,
-                    'digitalregister': digitalregister,
-                    'error_message': _('Digitalregister not found'),
-                }
-            if context:
-                response = request.render(template, context)
+                domain.insert(0, ('electronicfile_id.digitalregister_id', '=',
+                                  digitalregister.id))
+            communication = request.env[
+                'eom.electronicfile.communication'].sudo().search(
+                    domain, limit=1)
+            if communication:
+                content = base64.b64decode(communication.document)
+                pdf_httpheaders = [
+                    ('Content-Type', 'application/pdf'),
+                    ('Content-Length', len(content)),
+                    ('Content-Disposition',
+                     'attachment; filename="%s.pdf"' %
+                     communication.document_name)]
+                response = request.make_response(
+                    content, headers=pdf_httpheaders)
         return response
 
     @http.route('/setaddress', type='http', auth='public', website=True,

@@ -10,7 +10,17 @@
                             <div name="header">
                                 <strong><span style="margin-right:35px">Electronic Office</span></strong>
                                 <span style="margin-right:7px">🖳</span>
-                                <strong><span t-esc="identif_header"/></strong>
+                                <strong style="display: inline-block; vertical-align: top;">
+                                    <t t-if="' - Representado por ' in identif_header">
+                                        <span t-esc="identif_header.split(' - Representado por ')[0]"/>
+                                        <br/>
+                                        <span>Representado por </span>
+                                        <span t-esc="identif_header.split(' - Representado por ')[1]"/>
+                                    </t>
+                                    <t t-else="">
+                                        <span t-esc="identif_header"/>
+                                    </t>
+                                </strong>
                             </div>
                             <div>
                                 <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
@@ -24,10 +34,6 @@
                                     <hr/>
                                     <strong>VAT:</strong>
                                     <span t-esc="access.digitalregister_id.name"/><br/>
-                                    <strong>Last Name:</strong>
-                                    <span t-esc="access.digitalregister_id.lastname"/><br/>
-                                    <strong>First Name:</strong>
-                                    <span t-esc="access.digitalregister_id.firstname"/><br/>
                                     <strong>Authority:</strong>
                                     <span t-esc="access.digitalregister_id.authority"/><br/><br/>
                                     <t t-if="access.partner_id">

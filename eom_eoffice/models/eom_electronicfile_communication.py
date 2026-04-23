@@ -5,7 +5,6 @@
 import base64
 import random
 import string
-import logging
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from odoo import models, fields, api, modules, exceptions, tools, _
@@ -477,15 +476,12 @@ class EomElectronicfileCommunication(models.Model):
         return csv_code
 
     def _set_notification_as_rejected_cron(self):
-        _logger = logging.getLogger(self.__class__.__name__)
         expired_notifications = \
             self.env['eom.electronicfile.communication'].search(
                 [('expired_deadline', '=', True),
                  ('is_notification', '=', True)])
         if len(expired_notifications) > 0:
             for expired_notification in expired_notifications:
-                _logger.info('Setting notification %s as rejected'
-                             % (expired_notification.name))
                 expired_notification.state = '04_rejected'
                 expired_notification.rejection_time = datetime.strftime(
                     datetime.now(), '%Y-%m-%d %H:%M:%S')

@@ -43,6 +43,9 @@
                             <field name="name"
                                    string="VAT"
                                    readonly="True"/>
+                            <field name="is_company"
+                                   string="Is Company"
+                                   readonly="True"/>
                             <field name="authority"
                                    string="Authority"
                                    readonly="True"/>
@@ -88,10 +91,8 @@
                   default_order="lastname">
                 <field name="name"
                        string="VAT"/>
-                <field name="lastname"
-                       string="Last Name"/>
-                <field name="firstname"
-                       string="First Name"/>
+                <field name="fullname"
+                      string="Name"/>
                 <field name="last_event_time"
                        string="Last Access"/>
                 <field name="number_of_accesses"
@@ -228,7 +229,7 @@
                                 <field name="detail_text" nolabel="1"
                                        style="min-height:60px"
                                        readonly="True"/>
-                            </div>                            
+                            </div>
                         </group>
                     </group>
                     <group name="slave_data">
@@ -255,10 +256,9 @@
                        string="Access"/>
                 <field name="digitalregister_id"
                        string="VAT"/>
-                <field name="lastname"
-                       string="Last Name"/>
-                <field name="firstname"
-                       string="First Name"/>
+                  <field name="fullname_html"
+                      string="Name"
+                      widget="html"/>
                 <field name="icon_with_userdata"
                        string=""/>
                 <field name="icon_with_contact"
@@ -305,7 +305,7 @@
         <field name="arch" type="xml">
             <kanban class="o_res_partner_kanban" create="false">
                 <field name="color"/>
-                <field name="fullname_firstname"/>
+                <field name="fullname_html"/>
                 <field name="digitalregister_id"/>
                 <field name="icon_with_contact"/>
                 <field name="icon_with_userdata"/>
@@ -324,7 +324,7 @@
                                 </t>
                             </div>
                             <div class="oe_kanban_details">
-                                <strong class="oe_partner_heading"><field name="fullname_firstname"/></strong>
+                                <strong class="oe_partner_heading"><field name="fullname_html"/></strong>
                                 <ul>
                                     <li><span t-if="record.icon_with_contact.raw_value" style="margin-right:7px"><field name="icon_with_contact"/></span><field name="digitalregister_id"/></li>
                                     <li><span t-if="record.icon_with_userdata.raw_value" style="margin-right:7px"><field name="icon_with_userdata"/></span><field name="event_time"/></li>

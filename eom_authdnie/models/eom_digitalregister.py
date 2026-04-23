@@ -119,6 +119,11 @@ class EomDigitalregister(models.Model):
         related='partner_id.mobile',
     )
 
+    is_company = fields.Boolean(
+        string='Is Company',
+        compute='_compute_is_company',
+    )
+
     icon_with_contact = fields.Char(
         string='With contact (icon)',
         compute='_compute_icon_with_contact',
@@ -146,43 +151,48 @@ class EomDigitalregister(models.Model):
         for record in self:
             record.editable_notes = editable_notes
 
-    @api.depends('firstname', 'lastname')
+    @api.multi
+    def _compute_is_company(self):
+        for record in self:
+            record.is_company = bool(
+                record.partner_id and record.partner_id.is_company)
+
+    @api.depends('firstname', 'lastname', 'partner_id', 'partner_id.name',
+                 'partner_id.is_company')
     def _compute_fullname(self):
         for record in self:
-            fullname = ''
-            if record.lastname:
-                fullname = record.lastname
-                if record.firstname:
-                    fullname = fullname + ' ' + record.firstname
-            elif record.firstname:
-                fullname = record.firstname
-            record.fullname = fullname
+            if record.partner_id and record.partner_id.is_company:
+                record.fullname = record.partner_id.name or ''
+            elif record.lastname:
+                record.fullname = (record.lastname + ' ' +
+                                   (record.firstname or '')).strip()
+            else:
+                record.fullname = record.firstname or ''
 
     @api.multi
     def _compute_fullname_html(self):
         for record in self:
-            fullname_html = ''
-            if record.lastname:
+            if record.partner_id and record.partner_id.is_company:
+                record.fullname_html = record.partner_id.name or ''
+            elif record.lastname:
                 fullname_html = record.lastname
                 if record.firstname:
-                    fullname_html = fullname_html + '<br/>' + \
-                        record.firstname
-            elif record.firstname:
-                fullname_html = record.firstname
-            record.fullname_html = fullname_html
+                    fullname_html = fullname_html + '<br/>' + record.firstname
+                record.fullname_html = fullname_html
+            else:
+                record.fullname_html = record.firstname or ''
 
     @api.multi
     def _compute_fullname_firstname(self):
         for record in self:
-            fullname_firstname = ''
-            if record.firstname:
-                fullname_firstname = record.firstname
-                if record.lastname:
-                    fullname_firstname = fullname_firstname + ' ' + \
-                        record.lastname
-                elif record.lastname:
-                    fullname_firstname = record.lastname
-            record.fullname_firstname = fullname_firstname
+            if record.partner_id and record.partner_id.is_company:
+                record.fullname_firstname = record.partner_id.name or ''
+            elif record.firstname:
+                record.fullname_firstname = (
+                    record.firstname + ' ' +
+                    (record.lastname or '')).strip()
+            else:
+                record.fullname_firstname = record.lastname or ''
 
     @api.multi
     def _compute_last_event_time(self):
@@ -332,6 +342,8 @@ class EomDigitalregister(models.Model):
         firstname = ''
         lastname = ''
         authority = ''
+        represented_name = ''
+        represented_vat = ''
         item_list = decrypted_identif.split(':')
         if item_list and len(item_list) >= 5:
             country = item_list[0]
@@ -339,19 +351,25 @@ class EomDigitalregister(models.Model):
             firstname = item_list[3]
             lastname = item_list[2]
             authority = item_list[4]
-        return country, dni, firstname, lastname, authority
+            if len(item_list) >= 7:
+                represented_name = item_list[5]
+                represented_vat = item_list[6]
+        return (
+            country, dni, firstname, lastname, authority,
+            represented_name, represented_vat,
+        )
 
     @api.model
     def create_access(self, dni, firstname, lastname, authority):
-        if dni and firstname and lastname and authority:
+        if dni and (firstname or lastname) and authority:
             # First: if the record does not exist in the "eom.digitalregister"
             # model, it is mandatory to create it.
             digitalregister = self.search([('name', '=', dni)])
             if not digitalregister:
                 vals = {
                     'name': dni,
-                    'firstname': firstname,
-                    'lastname': lastname,
+                    'firstname': firstname or '',
+                    'lastname': lastname or '',
                     'authority': authority,
                     }
                 partner_id = None
@@ -639,45 +657,49 @@ class EomDigitalregisterAccess(models.Model):
             record.lastname = lastname
 
     @api.depends('digitalregister_id',
-                 'digitalregister_id.firstname', 'digitalregister_id.lastname')
+                 'digitalregister_id.firstname', 'digitalregister_id.lastname',
+                 'digitalregister_id.partner_id',
+                 'digitalregister_id.partner_id.name',
+                 'digitalregister_id.partner_id.is_company')
     def _compute_fullname(self):
         for record in self:
-            fullname = ''
-            if record.digitalregister_id:
-                if record.digitalregister_id.lastname:
-                    fullname = record.digitalregister_id.lastname
-                    if record.digitalregister_id.firstname:
-                        fullname = fullname + ' ' + \
-                            record.digitalregister_id.firstname
-                elif record.digitalregister_id.firstname:
-                    fullname = record.digitalregister_id.firstname
-            record.fullname = fullname
+            if not record.digitalregister_id:
+                record.fullname = ''
+                continue
+            dr = record.digitalregister_id
+            if dr.partner_id and dr.partner_id.is_company:
+                record.fullname = dr.partner_id.name or ''
+            elif dr.firstname:
+                record.fullname = (dr.firstname + ' ' +
+                                   (dr.lastname or '')).strip()
+            else:
+                record.fullname = dr.lastname or ''
 
     @api.multi
     def _compute_fullname_html(self):
         for record in self:
-            fullname_html = ''
-            if record.lastname:
-                fullname_html = record.lastname
-                if record.firstname:
-                    fullname_html = fullname_html + '<br/>' + \
-                        record.firstname
+            dr = record.digitalregister_id
+            if dr and dr.partner_id and dr.partner_id.is_company:
+                record.fullname_html = dr.partner_id.name or ''
             elif record.firstname:
-                fullname_html = record.firstname
-            record.fullname_html = fullname_html
+                record.fullname_html = (
+                    record.firstname + ' ' +
+                    (record.lastname or '')).strip()
+            else:
+                record.fullname_html = record.lastname or ''
 
     @api.multi
     def _compute_fullname_firstname(self):
         for record in self:
-            fullname_firstname = ''
-            if record.firstname:
-                fullname_firstname = record.firstname
-                if record.lastname:
-                    fullname_firstname = fullname_firstname + ' ' + \
-                        record.lastname
-                elif record.lastname:
-                    fullname_firstname = record.lastname
-            record.fullname_firstname = fullname_firstname
+            dr = record.digitalregister_id
+            if dr and dr.partner_id and dr.partner_id.is_company:
+                record.fullname_firstname = dr.partner_id.name or ''
+            elif record.firstname:
+                record.fullname_firstname = (
+                    record.firstname + ' ' +
+                    (record.lastname or '')).strip()
+            else:
+                record.fullname_firstname = record.lastname or ''
 
     @api.multi
     def _compute_image(self):

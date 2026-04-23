@@ -103,6 +103,42 @@
             <span t-field="o.communication_text"/>
         </div>
 
+        <t t-if="o.electronicfile_id.exposition">
+            <div name="exposition_title" style="margin-top:24px;; border-bottom: 1px solid black;">
+                <div><b>E X P O S I T I O N</b></div>
+            </div>
+            <div name="exposition_data" style="margin: 4 8 0 8;">
+                <span t-esc="o.electronicfile_id.exposition"/>
+            </div>
+        </t>
+
+        <t t-if="o.electronicfile_id.request">
+            <div name="request_title" style="margin-top:24px;; border-bottom: 1px solid black;">
+                <div><b>R E Q U E S T</b></div>
+            </div>
+            <div name="request_data" style="margin: 4 8 0 8;">
+                <span t-esc="o.electronicfile_id.request"/>
+            </div>
+        </t>
+
+        <t t-if="o.electronicfile_id.suggestion">
+            <div name="suggestion_title" style="margin-top:24px;; border-bottom: 1px solid black;">
+                <div><b>S U G G E S T I O N</b></div>
+            </div>
+            <div name="suggestion_data" style="margin: 4 8 0 8;">
+                <span t-esc="o.electronicfile_id.suggestion"/>
+            </div>
+        </t>
+
+        <t t-if="o.electronicfile_id.resolution">
+            <div name="resolution_title" style="margin-top:24px;; border-bottom: 1px solid black;">
+                <div><b>R E S O L U T I O N</b></div>
+            </div>
+            <div name="resolution_data" style="margin: 4 8 0 8;">
+                <span t-esc="o.electronicfile_id.resolution"/>
+            </div>
+        </t>
+
     </template>
 
 </odoo>

@@ -10,7 +10,16 @@
                             <div name="header">
                                 <strong><span style="margin-right:35px">Electronic Office</span></strong>
                                 <span style="margin-right:7px">🖳</span>
-                                <strong><span t-esc="identif_header"/></strong>
+                                <strong style="display: inline-block; vertical-align: top;">
+                                <t t-if="' - Representado por ' in identif_header">
+                                    <span t-esc="identif_header.split(' - Representado por ')[0]"/><br/>
+                                    <span>Representado por </span>
+                                    <span t-esc="identif_header.split(' - Representado por ')[1]"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-esc="identif_header"/>
+                                </t>
+                            </strong>
                                 <form id="electronic_office" role="form" style="display: inline; margin-left: 10px;" action="/eoffice" method="post">
                                     <input type="hidden" name="identif_token" t-att-value="identif_token"/>
                                     <input type="hidden" name="same_access" value="1"/>
@@ -77,7 +86,16 @@
                         <div name="header">
                             <strong><span style="margin-right:35px">Electronic Office</span></strong>
                             <span style="margin-right:7px">🖳</span>
-                            <strong><span t-esc="identif_header"/></strong>
+                            <strong style="display: inline-block; vertical-align: top;">
+                                <t t-if="' - Representado por ' in identif_header">
+                                    <span t-esc="identif_header.split(' - Representado por ')[0]"/><br/>
+                                    <span>Representado por </span>
+                                    <span t-esc="identif_header.split(' - Representado por ')[1]"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-esc="identif_header"/>
+                                </t>
+                            </strong>
                             <form id="electronic_files" role="form" style="display: inline; margin-left: 10px;" action="/efiles" method="post">
                                 <input type="hidden" name="identif_token" t-att-value="identif_token"/>
                                 <input type="hidden" name="same_access" value="1"/>
@@ -255,7 +273,16 @@
                             <div name="header">
                                 <strong><span style="margin-right:35px">Electronic Office</span></strong>
                                 <span style="margin-right:7px">🖳</span>
-                                <strong><span t-esc="identif_header"/></strong>
+                                <strong style="display: inline-block; vertical-align: top;">
+                                <t t-if="' - Representado por ' in identif_header">
+                                    <span t-esc="identif_header.split(' - Representado por ')[0]"/><br/>
+                                    <span>Representado por </span>
+                                    <span t-esc="identif_header.split(' - Representado por ')[1]"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-esc="identif_header"/>
+                                </t>
+                            </strong>
                                 <form id="electronic_file" role="form" style="display: inline; margin-left: 10px;" action="/efile" method="post">
                                     <input type="hidden" name="identif_token" t-att-value="identif_token"/>
                                     <input type="hidden" name="same_access" value="1"/>
@@ -323,7 +350,16 @@
                             <div name="header">
                                 <strong><span style="margin-right:35px">Electronic Office</span></strong>
                                 <span style="margin-right:7px">🖳</span>
-                                <strong><span t-esc="identif_header"/></strong>
+                                <strong style="display: inline-block; vertical-align: top;">
+                                <t t-if="' - Representado por ' in identif_header">
+                                    <span t-esc="identif_header.split(' - Representado por ')[0]"/><br/>
+                                    <span>Representado por </span>
+                                    <span t-esc="identif_header.split(' - Representado por ')[1]"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-esc="identif_header"/>
+                                </t>
+                            </strong>
                                 <form id="electronic_office" role="form" style="display: inline; margin-left: 10px;" action="/eoffice" method="post">
                                     <input type="hidden" name="identif_token" t-att-value="identif_token"/>
                                     <input type="hidden" name="same_access" value="1"/>
@@ -338,25 +374,20 @@
                         </div>
                         <hr/>
                         <div name="body" class="container">
-                            <t t-if="digitalregister">
-                                <span>To ensure the confidentiality and integrity of your data and files, you must enter the CSV code of the signed document you wish to access. Thank you very much.</span>
-                                <form class="oe_login_form" role="form" action="/document" method="post" autocomplete="off">
-                                    <input type="hidden" name="identif_token" t-att-value="identif_token"/>
-                                    <div class="form-group">
-                                        <label for="csvcode" class="control-label">CSV Code</label>
-                                        <input name="csvcode" t-att-value="(CSV)" id="csvcode" class="form-control" required="required"/>
-                                    </div>
-                                    <div class="clearfix oe_login_buttons">
-                                        <button type="submit" class="btn btn-primary pull-left">Accept</button>
-                                    </div>
-                                </form>
-                                <div name="error_text" class="text-center">
-                                    <span class="text-danger"><t t-esc="error_message"/></span>
+                            <span>To ensure the confidentiality and integrity of your data and files, you must enter the CSV code of the signed document you wish to access. Thank you very much.</span>
+                            <form class="oe_login_form" role="form" action="/document" method="post" autocomplete="off">
+                                <input type="hidden" name="identif_token" t-att-value="identif_token"/>
+                                <div class="form-group">
+                                    <label for="csvcode" class="control-label">CSV Code</label>
+                                    <input name="csvcode" t-att-value="(CSV)" id="csvcode" class="form-control" required="required"/>
                                 </div>
-                            </t>
-                            <t t-else="">
-                                <strong><span class="text-danger">Digital register not found.</span></strong>
-                            </t>
+                                <div class="clearfix oe_login_buttons">
+                                    <button type="submit" class="btn btn-primary pull-left">Accept</button>
+                                </div>
+                            </form>
+                            <div name="error_text" class="text-center">
+                                <span class="text-danger"><t t-esc="error_message"/></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -373,7 +404,16 @@
                             <div name="header">
                                 <strong><span style="margin-right:35px">Electronic Office</span></strong>
                                 <span style="margin-right:7px">🖳</span>
-                                <strong><span t-esc="identif_header"/></strong>
+                                <strong style="display: inline-block; vertical-align: top;">
+                                <t t-if="' - Representado por ' in identif_header">
+                                    <span t-esc="identif_header.split(' - Representado por ')[0]"/><br/>
+                                    <span>Representado por </span>
+                                    <span t-esc="identif_header.split(' - Representado por ')[1]"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-esc="identif_header"/>
+                                </t>
+                            </strong>
                                 <form id="electronic_office" role="form" style="display: inline; margin-left: 10px;" action="/eoffice" method="post">
                                     <input type="hidden" name="identif_token" t-att-value="identif_token"/>
                                     <input type="hidden" name="same_access" value="1"/>
@@ -446,7 +486,16 @@
                             <div name="header">
                                 <strong><span style="margin-right:35px">Electronic Office</span></strong>
                                 <span style="margin-right:7px">🖳</span>
-                                <strong><span t-esc="identif_header"/></strong>
+                                <strong style="display: inline-block; vertical-align: top;">
+                                <t t-if="' - Representado por ' in identif_header">
+                                    <span t-esc="identif_header.split(' - Representado por ')[0]"/><br/>
+                                    <span>Representado por </span>
+                                    <span t-esc="identif_header.split(' - Representado por ')[1]"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-esc="identif_header"/>
+                                </t>
+                            </strong>
                             </div>
                             <div>
                                 <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
@@ -483,7 +532,16 @@
                             <div name="header">
                                 <strong><span style="margin-right:35px">Electronic Office</span></strong>
                                 <span style="margin-right:7px">🖳</span>
-                                <strong><span t-esc="identif_header"/></strong>
+                                <strong style="display: inline-block; vertical-align: top;">
+                                <t t-if="' - Representado por ' in identif_header">
+                                    <span t-esc="identif_header.split(' - Representado por ')[0]"/><br/>
+                                    <span>Representado por </span>
+                                    <span t-esc="identif_header.split(' - Representado por ')[1]"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-esc="identif_header"/>
+                                </t>
+                            </strong>
                                 <form id="electronic_office" role="form" style="display: inline; margin-left: 10px;" action="/eoffice" method="post">
                                     <input type="hidden" name="identif_token" t-att-value="identif_token"/>
                                     <input type="hidden" name="same_access" value="1"/>
@@ -554,7 +612,16 @@
                             <div name="header">
                                 <strong><span style="margin-right:35px">Electronic Office</span></strong>
                                 <span style="margin-right:7px">🖳</span>
-                                <strong><span t-esc="identif_header"/></strong>
+                                <strong style="display: inline-block; vertical-align: top;">
+                                <t t-if="' - Representado por ' in identif_header">
+                                    <span t-esc="identif_header.split(' - Representado por ')[0]"/><br/>
+                                    <span>Representado por </span>
+                                    <span t-esc="identif_header.split(' - Representado por ')[1]"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-esc="identif_header"/>
+                                </t>
+                            </strong>
                                 <form id="electronic_office" role="form" style="display: inline; margin-left: 10px;" action="/eoffice" method="post">
                                     <input type="hidden" name="identif_token" t-att-value="identif_token"/>
                                     <input type="hidden" name="same_access" value="1"/>
@@ -622,7 +689,16 @@
                             <div name="header">
                                 <strong><span style="margin-right:35px">Electronic Office</span></strong>
                                 <span style="margin-right:7px">🖳</span>
-                                <strong><span t-esc="identif_header"/></strong>
+                                <strong style="display: inline-block; vertical-align: top;">
+                                <t t-if="' - Representado por ' in identif_header">
+                                    <span t-esc="identif_header.split(' - Representado por ')[0]"/><br/>
+                                    <span>Representado por </span>
+                                    <span t-esc="identif_header.split(' - Representado por ')[1]"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-esc="identif_header"/>
+                                </t>
+                            </strong>
                             </div>
                             <div>
                                 <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
@@ -668,7 +744,16 @@
                             <div name="header">
                                 <strong><span style="margin-right:35px">Electronic Office</span></strong>
                                 <span style="margin-right:7px">🖳</span>
-                                <strong><span t-esc="identif_header"/></strong>
+                                <strong>
+                                <t t-if="' - Representado por ' in identif_header">
+                                    <span t-esc="identif_header.split(' - Representado por ')[0]"/><br/>
+                                    <span>Representado por </span>
+                                    <span t-esc="identif_header.split(' - Representado por ')[1]"/>
+                                </t>
+                                <t t-else="">
+                                    <span t-esc="identif_header"/>
+                                </t>
+                            </strong>
                             </div>
                             <div>
                                 <a role="menuitem" href="/web/session/logout?redirect=/">Logout</a>
