@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Enable website form for cim.complaint -->
+        <record id="cim_complaints_channel.model_cim_complaint" model="ir.model">
+            <field name="website_form_access">True</field>
+        </record>
+        <function model="ir.model.fields" name="formbuilder_whitelist">
+            <value>cim.complaint</value>
+            <value eval="[
+                'complaint_type_id',
+                'issue',
+                'description',
+                'defendant_name',
+                'measures_taken',
+                'link_type_id',
+                'complaint_frequency',
+                'complaint_time',
+                'witness_name',
+                'complainant_name',
+                'complainant_email',
+                'complainant_vat',
+                'complainant_phone',
+                'document_01',
+                'document_01_name',
+                'document_02',
+                'document_02_name',
+                'document_03',
+                'document_03_name',
+                'document_04',
+                'document_04_name',
+                'document_05',
+                'document_05_name',
+                'document_06',
+                'document_06_name',
+            ]"/>
+        </function>
+
+        <!-- Enable website form for cim.complaint.communication -->
+        <record id="cim_complaints_channel.model_cim_complaint_communication" model="ir.model">
+            <field name="website_form_access">True</field>
+        </record>
+        <function model="ir.model.fields" name="formbuilder_whitelist">
+            <value>cim.complaint.communication</value>
+            <value eval="[
+                'decrypted_tracking_code',
+                'issue',
+                'description',
+                'document_01',
+                'document_01_name',
+                'document_02',
+                'document_02_name',
+                'document_03',
+                'document_03_name',
+                'document_04',
+                'document_04_name',
+                'document_05',
+                'document_05_name',
+                'document_06',
+                'document_06_name',
+            ]"/>
+        </function>
+
+    </data>
+</odoo>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+    <template id="new_communication_page" name="New Communication">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure oe_empty">
+                <section class="s_text_block">
+                    <div class="container">
+                        <h1 class="text-center" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: rgb(51, 51, 51);">Aportar nuevos datos<br/></h1>
+                        <h3 class="text-center text-muted" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">Añade información y pruebas a tu denuncia con su código de seguimiento</h3>
+                    </div>
+                </section>
+                <section class="container readable o_website_form_builder mb32">
+                    <form accept-charset="UTF-8" action="/website_form/" class="s_website_form col-md-12 mt32" data-model_name="cim.complaint.communication" data-force_action="" data-success_page="" enctype="multipart/form-data" method="post">
+                        <div class="o_website_form_fields">
+                            <div class="o_not_editable hidden o_default_snippet_text">This placeholder prevents its parent from disappearing when emptied</div>
+                            <div class="form-group form-field o_required form-field-char" data-model-field="true" data-optional="false">
+                                <label class="control-label" for="decrypted_tracking_code">
+                                    <span>Código de seguimiento</span>
+                                </label>
+                                <input class="form-control o_website_form_input" type="text" name="decrypted_tracking_code" required="required" maxlength="255"/>
+                            </div>
+                            <div class="form-group form-field o_required form-field-char" data-model-field="true" data-optional="false">
+                                <label class="control-label" for="issue">
+                                    <span>Asunto</span>
+                                </label>
+                                <input class="form-control o_website_form_input" type="text" name="issue" required="required" maxlength="75"/>
+                            </div>
+                            <div class="form-group form-field o_required form-field-text" data-model-field="true" data-optional="false">
+                                <label class="control-label" for="description">
+                                    <span>Datos de la comunicación</span>
+                                </label>
+                                <textarea class="form-control o_website_form_input" type="text" name="description" required="required"/>
+                            </div>
+                            <div class="form-group form-field form-field-binary" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_01"><span>Adjunto 1</span></label>
+                                <input type="file" class="o_website_form_input" name="document_01"/>
+                            </div>
+                            <div class="form-group form-field form-field-binary" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_02"><span>Adjunto 2</span></label>
+                                <input type="file" class="o_website_form_input" name="document_02"/>
+                            </div>
+                            <div class="form-group form-field form-field-binary" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_03"><span>Adjunto 3</span></label>
+                                <input type="file" class="o_website_form_input" name="document_03"/>
+                            </div>
+                            <div class="form-group form-field form-field-binary" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_04"><span>Adjunto 4</span></label>
+                                <input type="file" class="o_website_form_input" name="document_04"/>
+                            </div>
+                            <div class="form-group form-field form-field-binary" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_05"><span>Adjunto 5</span></label>
+                                <input type="file" class="o_website_form_input" name="document_05"/>
+                            </div>
+                            <div class="form-group form-field form-field-binary" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_06"><span>Adjunto 6</span></label>
+                                <input type="file" class="o_website_form_input" name="document_06"/>
+                            </div>
+                            <div class="form-group form-field form-field-char css_non_editable_mode_hidden" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_01_name"><span>Nombre del adjunto 1</span></label>
+                                <input class="form-control o_website_form_input" type="text" name="document_01_name" value="doc_1"/>
+                            </div>
+                            <div class="form-group form-field form-field-char css_non_editable_mode_hidden" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_02_name"><span>Nombre del adjunto 2</span></label>
+                                <input class="form-control o_website_form_input" type="text" name="document_02_name" value="doc_2"/>
+                            </div>
+                            <div class="form-group form-field form-field-char css_non_editable_mode_hidden" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_03_name"><span>Nombre del adjunto 3</span></label>
+                                <input class="form-control o_website_form_input" type="text" name="document_03_name" value="doc_3"/>
+                            </div>
+                            <div class="form-group form-field form-field-char css_non_editable_mode_hidden" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_04_name"><span>Nombre del adjunto 4</span></label>
+                                <input class="form-control o_website_form_input" type="text" name="document_04_name" value="doc_4"/>
+                            </div>
+                            <div class="form-group form-field form-field-char css_non_editable_mode_hidden" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_05_name"><span>Nombre del adjunto 5</span></label>
+                                <input class="form-control o_website_form_input" type="text" name="document_05_name" value="doc_5"/>
+                            </div>
+                            <div class="form-group form-field form-field-char css_non_editable_mode_hidden" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_06_name"><span>Nombre del adjunto 6</span></label>
+                                <input class="form-control o_website_form_input" type="text" name="document_06_name" value="doc_6"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-primary btn-lg o_website_form_send o_default_snippet_text">Enviar</button>
+                            <span id="o_website_form_result"/>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    </data>
+</odoo>

@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+    <template id="new_complaint_page" name="New Complaint">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure oe_empty">
+                <section class="s_text_block">
+                    <div class="container">
+                        <h1 class="text-center" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: rgb(51, 51, 51);">Nueva Denuncia<br/></h1>
+                        <h3 class="text-center text-muted" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">Introduzca los datos de la denuncia</h3>
+                    </div>
+                </section>
+                <section class="container readable o_website_form_builder mb32">
+                    <form accept-charset="UTF-8" action="/website_form/" class="s_website_form col-md-12 mt32" data-model_name="cim.complaint" data-force_action="" data-success_page="" enctype="multipart/form-data" method="post">
+                        <div class="o_website_form_fields">
+                            <div class="form-group form-field form-field-many2one" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="complaint_type_id">
+                                    <span>
+                                        <label class="control-label" for="complaint_type_id" style="font-size: 16.8px;">
+                                            <span style="font-size: 16.8px;">Por favor, elija el tipo de denuncia que mejor se ajuste a los hechos denunciados</span>
+                                        </label>
+                                        <span style="font-size: 16.8px; font-weight: 400;"/>
+                                    </span>
+                                </label>
+                                <select class="form-control o_website_form_input" name="complaint_type_id">
+                                    <option/>
+                                    <option value="1">Irregularidad contable o financiera</option>
+                                    <option value="2">Fraude contra la Hacienda Pública</option>
+                                    <option value="3">Incumplimiento de la normativa sobre riesgos laborales</option>
+                                    <option value="4">Corrupción</option>
+                                    <option value="5">Conflicto de intereses</option>
+                                    <option value="6">Atentado contra el medio ambiente o el bienestar animal</option>
+                                    <option value="7">Infracción contra la protección de datos</option>
+                                    <option value="8">Acoso laboral</option>
+                                    <option value="9">Otro tipo de denuncia</option>
+                                </select>
+                            </div>
+                            <div class="o_not_editable hidden o_default_snippet_text"> This placeholder prevents its parent from disappearing when emptied </div>
+                            <div class="form-group form-field o_required form-field-char" data-model-field="true" data-optional="false">
+                                <label class="control-label" for="issue">
+                                    <span><label class="control-label" for="issue" style="font-size: 16.8px;"><span style="font-size: 16.8px;">Resuma en una línea el asunto de la denuncia (obligatorio)</span></label>&#160;</span>
+                                </label>
+                                <input class="form-control o_website_form_input" type="text" name="issue" required="required" maxlength="75"/>
+                            </div>
+                            <div class="form-group form-field o_required form-field-text" data-model-field="true" data-optional="false">
+                                <label class="control-label" for="description">
+                                    <span>
+                                        <label class="control-label" for="description" style="font-size: 16.8px;"><span style="font-size: 16.8px;">Detalle ahora los hechos denunciados (obligatorio)&#160;</span>&#160;</label>
+                                        <span style="font-size: 16.8px; font-weight: 400;"/>
+                                    </span>
+                                </label>
+                                <textarea class="form-control o_website_form_input" type="text" name="description" required="required"/>
+                            </div>
+                            <div class="form-group form-field form-field-char" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="defendant_name">
+                                    <span>
+                                        <label class="control-label" for="defendant_name" style="font-size: 16.8px;">
+                                            <span style="font-size: 16.8px;">¿Quién es la persona o entidad denunciada?</span>
+                                        </label>
+                                        <span style="font-size: 16.8px; font-weight: 400;"/>
+                                    </span>
+                                </label>
+                                <input class="form-control o_website_form_input" type="text" name="defendant_name" maxlength="100"/>
+                            </div>
+                            <div class="form-group form-field form-field-text o_required" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="measures_taken">
+                                    <span>
+                                        <label class="control-label" for="measures_taken" style="font-size: 16.8px;"><span style="font-size: 16.8px;">Por favor, indique si ya ha puesto los hechos previamente en conocimiento de otras autoridades (por ejemplo, policiales, administrativas, judiciales...)&#160;</span>&#160;</label>
+                                        <span style="font-size: 16.8px; font-weight: 400;"/>
+                                    </span>
+                                </label>
+                                <textarea class="form-control o_website_form_input" type="text" name="measures_taken" required="required"/>
+                            </div>
+                            <div class="form-group form-field form-field-many2one" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="link_type_id">
+                                    <span>
+                                        <label class="control-label" for="link_type_id" style="font-size: 16.8px;">
+                                            <span style="font-size: 16.8px;">¿Qué vinculación tiene usted con la persona o entidad denunciada?</span>
+                                        </label>
+                                        <span style="font-size: 16.8px; font-weight: 400;"/>
+                                    </span>
+                                </label>
+                                <select class="form-control o_website_form_input" name="link_type_id">
+                                    <option/>
+                                    <option value="1">Empleado</option>
+                                    <option value="2">Ex-empleado</option>
+                                    <option value="3">Autónomo</option>
+                                    <option value="4">Proveedor</option>
+                                    <option value="5">Colaborador</option>
+                                    <option value="6">Ejecutivo</option>
+                                    <option value="7">Personal en prácticas</option>
+                                    <option value="8">Otro tipo de vinculación</option>
+                                </select>
+                            </div>
+                            <div class="form-group form-field form-field-selection" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="complaint_frequency">
+                                    <span>
+                                        <label class="control-label" for="complaint_frequency" style="font-size: 16.8px;">
+                                            <span style="font-size: 16.8px;">¿Con qué frecuencia han ocurrido o vienen ocurriendo los hechos denunciados?</span>
+                                        </label>
+                                        <span style="font-size: 16.8px; font-weight: 400;"/>
+                                    </span>
+                                </label>
+                                <select class="form-control o_website_form_input" name="complaint_frequency">
+                                    <option value="01_not_remembered">No se recuerda</option>
+                                    <option value="02_specific_day">Un día concreto</option>
+                                    <option value="03_continuously">Continuamente</option>
+                                </select>
+                            </div>
+                            <div class="form-group form-field form-field-datetime" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="complaint_time">
+                                    <span>
+                                        <label class="control-label" for="complaint_time" style="font-size: 16.8px;">
+                                            <span style="font-size: 16.8px;">Si conoce la fecha aproximada en la que ocurrieron los hechos, por favor indíquela</span>
+                                        </label>
+                                        <span style="font-size: 16.8px; font-weight: 400;"/>
+                                    </span>
+                                </label>
+                                <input class="form-control o_website_form_input o_website_form_datetime" type="text" name="complaint_time"/>
+                            </div>
+                            <div class="form-group form-field form-field-text" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="witness_name">
+                                    <span>
+                                        <label class="control-label" for="witness_name" style="font-size: 16.8px;">
+                                            <span style="font-size: 16.8px;">En su caso, escriba los nombres de los posibles testigos</span>
+                                        </label>
+                                        <span style="font-size: 16.8px; font-weight: 400;"/>
+                                    </span>
+                                </label>
+                                <textarea class="form-control o_website_form_input" type="text" name="witness_name"/>
+                            </div>
+                            <div class="form-group form-field form-field-char" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="complainant_name">
+                                    <span>
+                                        <label class="control-label" for="complainant_name" style="font-size: 16.8px;"><span style="font-size: 16.8px;">Si lo desea, puede identificarse escribiendo aquí su nombre y apellidos.&#160;</span>&#160;<span style="font-size: 16.8px;">Si no, la denuncia se tramitará de manera anónima. En ambos casos queda preservada su identidad</span></label>
+                                        <span style="font-size: 16.8px; font-weight: 400;"/>
+                                    </span>
+                                </label>
+                                <input class="form-control o_website_form_input" type="text" name="complainant_name"/>
+                            </div>
+                            <div class="form-group form-field form-field-char" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="complainant_email">
+                                    <span>
+                                        <span style="font-size: 16.8px;">Si lo desea, puede indicar su e-mail (esto agilizará las notificaciones). Si no, no será notificado y será usted quien tenga la obligación de revisar el seguimiento de su comunicación, introduciendo el código de seguimiento en el Canal.</span>
+                                        <span style="font-size: 16.8px; font-weight: 400;"/>
+                                        <br style="font-size: 16.8px; font-weight: 400;"/>
+                                    </span>
+                                </label>
+                                <input class="form-control o_website_form_input" type="text" name="complainant_email"/>
+                            </div>
+                            <div class="form-group form-field form-field-char" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="complainant_vat">
+                                    <span>
+                                        <label class="control-label" for="complainant_vat" style="font-size: 16.8px;">
+                                            <span style="font-size: 16.8px;">Si lo desea, indique aquí su DNI</span>
+                                        </label>
+                                        <span style="font-size: 16.8px; font-weight: 400;"/>
+                                    </span>
+                                </label>
+                                <input class="form-control o_website_form_input" type="text" name="complainant_vat"/>
+                            </div>
+                            <div class="form-group form-field form-field-char" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="complainant_phone">
+                                    <span>
+                                        <label class="control-label" for="complainant_phone" style="font-size: 16.8px;">
+                                            <span style="font-size: 16.8px;">Si lo desea, indique aquí su número de teléfono</span>
+                                        </label>
+                                        <span style="font-size: 16.8px; font-weight: 400;"/>
+                                    </span>
+                                </label>
+                                <input class="form-control o_website_form_input" type="text" name="complainant_phone"/>
+                            </div>
+                            <div class="form-group form-field form-field-binary" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_01"><span>Adjunto 1</span></label>
+                                <input type="file" class="o_website_form_input" name="document_01"/>
+                            </div>
+                            <div class="form-group form-field form-field-binary" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_02"><span>Adjunto 2</span></label>
+                                <input type="file" class="o_website_form_input" name="document_02"/>
+                            </div>
+                            <div class="form-group form-field form-field-binary" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_03"><span>Adjunto 3</span></label>
+                                <input type="file" class="o_website_form_input" name="document_03"/>
+                            </div>
+                            <div class="form-group form-field form-field-binary" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_04"><span>Adjunto 4</span></label>
+                                <input type="file" class="o_website_form_input" name="document_04"/>
+                            </div>
+                            <div class="form-group form-field form-field-binary" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_05"><span>Adjunto 5</span></label>
+                                <input type="file" class="o_website_form_input" name="document_05"/>
+                            </div>
+                            <div class="form-group form-field form-field-binary" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_06"><span>Adjunto 6</span></label>
+                                <input type="file" class="o_website_form_input" name="document_06"/>
+                            </div>
+                            <div class="form-group form-field form-field-char css_non_editable_mode_hidden" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_01_name"><span>Nombre del adjunto 1</span></label>
+                                <input class="form-control o_website_form_input" type="text" name="document_01_name" value="doc_1"/>
+                            </div>
+                            <div class="form-group form-field form-field-char css_non_editable_mode_hidden" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_02_name"><span>Nombre del adjunto 2</span></label>
+                                <input class="form-control o_website_form_input" type="text" name="document_02_name" value="doc_2"/>
+                            </div>
+                            <div class="form-group form-field form-field-char css_non_editable_mode_hidden" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_03_name"><span>Nombre del adjunto 3</span></label>
+                                <input class="form-control o_website_form_input" type="text" name="document_03_name" value="doc_3"/>
+                            </div>
+                            <div class="form-group form-field form-field-char css_non_editable_mode_hidden" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_04_name"><span>Nombre del adjunto 4</span></label>
+                                <input class="form-control o_website_form_input" type="text" name="document_04_name" value="doc_4"/>
+                            </div>
+                            <div class="form-group form-field form-field-char css_non_editable_mode_hidden" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_05_name"><span>Nombre del adjunto 5</span></label>
+                                <input class="form-control o_website_form_input" type="text" name="document_05_name" value="doc_5"/>
+                            </div>
+                            <div class="form-group form-field form-field-char css_non_editable_mode_hidden" data-model-field="true" data-optional="true">
+                                <label class="control-label" for="document_06_name"><span>Nombre del adjunto 6</span></label>
+                                <input class="form-control o_website_form_input" type="text" name="document_06_name" value="doc_6"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-primary btn-lg o_website_form_send o_default_snippet_text">Enviar</button>
+                            <span id="o_website_form_result"/>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    </data>
+</odoo>

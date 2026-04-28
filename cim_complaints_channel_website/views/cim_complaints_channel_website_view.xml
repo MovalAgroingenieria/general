@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="cim_complaints_channel_website_view_tree" model="ir.ui.view">
+        <field name="name">cim.complaints.channel.website.view.tree</field>
+        <field name="model">cim.complaints.channel.website</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="company_id"/>
+                <field name="responsible_vat"/>
+                <field name="responsible_phone"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="cim_complaints_channel_website_view_form" model="ir.ui.view">
+        <field name="name">cim.complaints.channel.website.view.form</field>
+        <field name="model">cim.complaints.channel.website</field>
+        <field name="arch" type="xml">
+            <form string="Complaints Channel Website">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="company_id"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Data from Company (CR)">
+                            <field name="responsible_name" readonly="1"/>
+                            <field name="responsible_vat" readonly="1"/>
+                            <field name="responsible_address" readonly="1"/>
+                            <field name="responsible_phone" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Legal Text (editable)">
+                        <field name="legal_body_html" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="cim_complaints_channel_website_action" model="ir.actions.act_window">
+        <field name="name">Website Legal Configuration</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">cim.complaints.channel.website</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+    </record>
+
+    <menuitem id="cim_complaints_channel_website_menu"
+              name="Website Legal Data"
+              parent="cim_complaints_channel.configuration_menu"
+              sequence="5"
+              action="cim_complaints_channel_website_action"
+              groups="cim_complaints_channel.group_cim_settings"/>
+
+</odoo>
