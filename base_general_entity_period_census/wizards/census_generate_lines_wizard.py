@@ -75,6 +75,7 @@ class CensusGenerateLinesWizard(models.TransientModel):
                 {
                     "census_id": census.id,
                     "member_partner_id": member.member_partner_id.id,
+                    "shares": member.default_shares or 0.0,
                 }
             )
             lines_created += 1

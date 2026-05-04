@@ -37,6 +37,17 @@ class GeneralEntityCensusAdditional(models.Model):
         related="census_line_id.member_partner_id",
         store=True,
     )
+    primary_partner_id = fields.Many2one(
+        comodel_name="res.partner",
+        related="census_line_id.primary_partner_id",
+        store=True,
+        index=True,
+    )
+    period_date = fields.Date(
+        related="census_line_id.period_date",
+        store=True,
+        index=True,
+    )
     qty = fields.Float(
         string="Quantity",
         digits="Product Unit of Measure",
