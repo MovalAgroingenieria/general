@@ -266,6 +266,17 @@
                     string="Active"
                     domain="[('active', '=', True)]"
                 />
+                <separator />
+                <filter
+                    name="filter_with_community"
+                    string="With Community"
+                    domain="[('primary_entity_ids', '!=', False)]"
+                />
+                <filter
+                    name="filter_without_community"
+                    string="Without Community"
+                    domain="[('primary_entity_ids', '=', False)]"
+                />
                 <group expand="0" name="group_by" string="Group By">
                     <filter
                         name="group_by_member_type"
