@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Add default_shares to member list view -->
+    <record id="view_general_entity_member_list_census" model="ir.ui.view">
+        <field name="name">general.entity.member.list.census</field>
+        <field name="model">general.entity.member</field>
+        <field
+            name="inherit_id"
+            ref="base_general_entity.view_general_entity_member_list"
+        />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='member_code_in_entity']" position="after">
+                <field name="default_shares" optional="show" />
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Add default_shares to member form view -->
+    <record id="view_general_entity_member_form_census" model="ir.ui.view">
+        <field name="name">general.entity.member.form.census</field>
+        <field name="model">general.entity.member</field>
+        <field
+            name="inherit_id"
+            ref="base_general_entity.view_general_entity_member_form"
+        />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='member_code_in_entity']" position="after">
+                <field name="default_shares" />
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -5,5 +5,6 @@ from . import (
     general_entity_census,
     general_entity_census_additional,
     general_entity_census_line,
+    general_entity_member,
     res_partner,
 )

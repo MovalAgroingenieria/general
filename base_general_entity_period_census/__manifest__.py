@@ -20,6 +20,7 @@
         "wizards/census_wizard_views.xml",
         "report/census_report.xml",
         "views/general_entity_census_views.xml",
+        "views/general_entity_member_views.xml",
         "views/res_partner_views.xml",
         "views/menu_views.xml",
     ],
