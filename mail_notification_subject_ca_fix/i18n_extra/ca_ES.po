@@ -1,0 +1,38 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * mail_notification_subject_ca_fix
+#
+# Translators:
+# Moval Agroingeniería, 2026
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-05 00:00+0000\n"
+"PO-Revision-Date: 2026-05-05 00:00+0000\n"
+"Last-Translator: Moval Agroingeniería <info@moval.es>\n"
+"Language-Team: Catalan\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ca_ES\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Fix: the Catalan translation shipped in the core mail module incorrectly
+# translates Python/Mako operators (or->o, and->i) inside a template
+# expression, breaking Mako rendering. The correct msgstr keeps the
+# expression unchanged (same as msgid).
+#. module: mail
+#: model:mail.template,subject:mail.mail_template_data_notification_email_default
+msgid ""
+"${object.subject or (object.record_name and 'Re: %s' % object.record_name) "
+"or (object.parent_id and object.parent_id.subject and 'Re: %s' % "
+"object.parent_id.subject) or (object.parent_id and "
+"object.parent_id.record_name and 'Re: %s' % "
+"object.parent_id.record_name)}"
+msgstr ""
+"${object.subject or (object.record_name and 'Re: %s' % object.record_name) "
+"or (object.parent_id and object.parent_id.subject and 'Re: %s' % "
+"object.parent_id.subject) or (object.parent_id and "
+"object.parent_id.record_name and 'Re: %s' % "
+"object.parent_id.record_name)}"
