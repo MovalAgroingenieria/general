@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html). -->
+<odoo>
+
+    <template id="footer_moval" name="Moval Footer"
+              inherit_id="website.layout">
+        <xpath expr="//div[@id='footer']" position="replace">
+            <div class="oe_structure" id="footer">
+                <section>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h4 class="mt16" style="font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; color: rgb(51, 51, 51);">
+                                    <font class="text-epsilon">Información al Regante</font>
+                                </h4>
+                                <h4 class="mt16" style="font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; color: rgb(51, 51, 51);"/>
+                                <h4 class="mt16"/>
+                                <p style="font-size: 14px;">
+                                    <a href="/">Inicio</a>
+                                </p>
+                                <p style="font-size: 14px;">
+                                    <font class="text-primary">
+                                        <a href="/web/login?redirect=/slides/zona-regantes-2">Zona de regantes</a>
+                                    </font>
+                                </p>
+                                <p style="font-size: 14px;">
+                                    <font class="text-primary">
+                                        <a href="/blog/1">Noticias</a>
+                                    </font>
+                                </p>
+                            </div>
+                            <div class="col-md-4">
+                                <h4 class="mt16" style="font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; color: rgb(51, 51, 51);">
+                                    <font class="text-epsilon">Canal de Denuncias</font>
+                                </h4>
+                                <h4 class="mt16" style="font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; color: rgb(51, 51, 51);"/>
+                                <h4 class="mt16"/>
+                                <p style="font-size: 14px;">
+                                    <font class="text-primary">
+                                        <a href="/page/complaints-channel">Acceso al Sistema de Información Interno&#160; «Canal de Denuncias» (Denunciar - aportar más información -&#160; seguimiento)&#160;</a>
+                                    </font>
+                                </p>
+                            </div>
+                            <div class="col-md-4">
+                                <h4 class="mt16" style="font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; color: rgb(51, 51, 51);">
+                                    <font class="text-epsilon"><t t-esc="res_company.name"/></font>
+                                </h4>
+                                <h4 class="mt16" style="font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; color: rgb(51, 51, 51);">
+                                    <span class="fa fa-1x fa-thumb-tack text-primary"/>&#160;
+                                    <font class="text-primary" style="font-size: 14px;">
+                                        <t t-esc="res_company.street"/><t t-if="res_company.street2">, <t t-esc="res_company.street2"/></t><t t-if="res_company.city">, <t t-esc="res_company.city"/></t><t t-if="res_company.state_id">, <t t-esc="res_company.state_id.name"/></t>
+                                    </font>
+                                </h4>
+                                <h4 class="mt16" style="font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; color: rgb(51, 51, 51);">
+                                    <span class="fa fa-1x fa-phone text-primary"/>&#160;
+                                    <font class="text-primary" style="font-size: 14px;">
+                                        <t t-esc="res_company.phone"/>
+                                    </font>
+                                </h4>
+                                <h4 class="mt16">
+                                    <font class="text-primary" style="color: rgb(51, 51, 51); font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 14px;">
+                                        <span class="fa fa-1x fa-envelope-o text-primary" style="font-size: 14px;"/>&#160;
+                                    </font>
+                                    <font color="#337ab7">
+                                        <span style="font-size: 14px; white-space: normal;">
+                                            <t t-esc="res_company.email"/>
+                                        </span>
+                                    </font>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </xpath>
+    </template>
+
+</odoo>

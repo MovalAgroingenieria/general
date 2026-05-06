@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html). -->
+<odoo>
+    <data noupdate="1">
+
+        <!-- Rename existing default menu entries. -->
+        <record id="website.menu_homepage" model="website.menu">
+            <field name="name">Inicio</field>
+            <field name="sequence" type="int">10</field>
+        </record>
+
+        <record id="website.menu_contactus" model="website.menu">
+            <field name="name">Contacto</field>
+            <field name="sequence" type="int">50</field>
+        </record>
+
+        <!-- New top-level entries with empty links. -->
+        <record id="menu_zona_regantes" model="website.menu">
+            <field name="name">Zona Regantes</field>
+            <field name="url">/web/login?redirect=/slides/zona-regantes-2</field>
+            <field name="parent_id" ref="website.main_menu"/>
+            <field name="sequence" type="int">20</field>
+            <field name="website_id" ref="website.default_website"/>
+        </record>
+
+        <record id="menu_sede_electronica" model="website.menu">
+            <field name="name">Sede Electrónica</field>
+            <field name="url">#/</field>
+            <field name="parent_id" ref="website.main_menu"/>
+            <field name="sequence" type="int">30</field>
+            <field name="website_id" ref="website.default_website"/>
+        </record>
+
+        <record id="menu_noticias" model="website.menu">
+            <field name="name">Noticias</field>
+            <field name="url">/blog/1</field>
+            <field name="parent_id" ref="website.main_menu"/>
+            <field name="sequence" type="int">40</field>
+            <field name="website_id" ref="website.default_website"/>
+        </record>
+
+    </data>
+</odoo>

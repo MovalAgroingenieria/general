@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html). -->
+<odoo>
+    <data noupdate="1">
+
+        <!--
+            Source template used by the post_init_hook to populate
+            ``website.homepage`` arch on first install. It is not meant to
+            be rendered as a page on its own; the hook copies its arch
+            into the website's homepage view.
+        -->
+        <template id="homepage_arch_source" name="Moval Homepage (source)">
+            <t t-call="website.layout">
+                <t t-set="pageName" t-value="'homepage'"/>
+                <div id="wrap" class="oe_structure oe_empty">
+                    <section class="s_text_block_image_fw oe_img_bg oe_custom_bg" style="background-image: url(/web/image/website.s_cover_default_image); background-position: 50% 100%">
+                        <div class="container">
+                            <div class="row">
+                                <div class="mt64 mb64 bg-black-25 col-md-7">
+                                    <h2 style="font-size:62px"><t t-esc="res_company.name"/></h2>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="jumbotron s_button mt16 bg-info">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <p class="mb0" style="background-color: rgb(217, 237, 247);">
+                                        <b>
+                                            <font class="text-epsilon">Acceso a los comuneros&#160;</font>
+                                        </b>
+                                    </p>
+                                    <p class="mb0" style="background-color: rgb(217, 237, 247);">
+                                        <font class="text-epsilon">Accede a toda la información de tu perfil de usuario de la comunidad</font>
+                                    </p>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="/web/login" class="pull-right mt8 btn btn-primary btn-lg">Acceso de usuarios <i class="fa fa-chevron-right"/></a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="jumbotron s_button mt16 mb16 bg-info">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <p class="mb0" style="background-color: rgb(217, 237, 247);">
+                                        <b>
+                                            <font class="text-epsilon">Sede electrónica&#160;</font>
+                                        </b>
+                                    </p>
+                                    <p class="mb0" style="background-color: rgb(217, 237, 247);">
+                                        <font class="text-epsilon">Acceso a todos los trámites a través de la sede electrónica.</font>
+                                    </p>
+                                    <p class="mb0" style="background-color: rgb(217, 237, 247);"><span class="fa fa-1x fa-warning" title="" style="font-size: 18px; color: rgb(255, 0, 0);"/>&#160;<font style="color: rgb(255, 0, 0); font-size: 18px;">&#160;Recuerde que para acceder a la sede electrónica es indispensable disponer de un certificado digital</font></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="#" class="pull-right mt8 btn btn-primary btn-lg">Sede electrónica <i class="fa fa-chevron-right"/></a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="jumbotron s_button bg-warning">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <p class="mb0">
+                                        <strong>Visor GIS</strong>
+                                    </p>
+                                    <p class="mb0">Consulta el visor de la comunidad y su información geográfica</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="https://gis.moval.es/crcanalesnava/visor/" class="pull-right mt8 btn btn-primary btn-lg">Visor GIS <i class="fa fa-chevron-right"/></a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </t>
+        </template>
+
+    </data>
+</odoo>
