@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="meteo_aggregation_view_tree" model="ir.ui.view">
+        <field name="name">meteo.aggregation tree (base_meteo)</field>
+        <field name="model">meteo.aggregation</field>
+        <field name="arch" type="xml">
+            <tree string="Aggregations">
+                <field name="sequence"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="python_method_name"/>
+                <field name="active" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="meteo_aggregation_view_form" model="ir.ui.view">
+        <field name="name">meteo.aggregation form (base_meteo)</field>
+        <field name="model">meteo.aggregation</field>
+        <field name="arch" type="xml">
+            <form string="Aggregation">
+                <sheet>
+                    <div name="buttons" class="oe_button_box">
+                        <button name="toggle_active"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-archive"
+                                confirm="Are you sure you want to toggle visibility?">
+                            <field name="active"
+                                   widget="boolean_button"
+                                   options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group>
+                            <field name="python_method_name" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="meteo_aggregation_action" model="ir.actions.act_window">
+        <field name="name">Aggregations</field>
+        <field name="res_model">meteo.aggregation</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

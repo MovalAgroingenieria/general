@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_meteo_raster_tree" model="ir.ui.view">
+        <field name="name">meteo.raster tree</field>
+        <field name="model">meteo.raster</field>
+        <field name="arch" type="xml">
+            <tree string="Rasters" colors="red:state=='failed';grey:state=='draft';orange:is_stale==True">
+                <field name="product_id"/>
+                <field name="valid_from"/>
+                <field name="state"/>
+                <field name="method"/>
+                <field name="n_stations_used"/>
+                <field name="grid_w"/>
+                <field name="compute_ms"/>
+                <field name="cog_size_kb"/>
+                <field name="is_stale" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_meteo_raster_form" model="ir.ui.view">
+        <field name="name">meteo.raster form</field>
+        <field name="model">meteo.raster</field>
+        <field name="arch" type="xml">
+            <form string="Raster">
+                <header>
+                    <button name="action_compute" string="Recompute"
+                            type="object" class="oe_highlight"
+                            attrs="{'invisible': [('state','=','done')]}"/>
+                    <button name="action_compute" string="Regenerate"
+                            type="object"
+                            attrs="{'invisible': [('state','!=','done')]}"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="valid_from"/>
+                            <field name="valid_to"/>
+                        </group>
+                        <group>
+                            <field name="method"/>
+                            <field name="n_stations_used"/>
+                            <field name="grid_w"/>
+                            <field name="grid_h"/>
+                            <field name="compute_ms"/>
+                            <field name="cog_size_kb"/>
+                            <field name="product_version_hash"/>
+                            <field name="is_stale"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="cog_attachment_id"/>
+                    </group>
+                    <notebook>
+                        <page string="Warnings">
+                            <field name="warnings_json" widget="text"/>
+                        </page>
+                        <page string="Parameters Used">
+                            <field name="parameters_json" widget="text"/>
+                        </page>
+                        <page string="Stations Snapshot">
+                            <field name="stations_json" widget="text"/>
+                        </page>
+                        <page string="Error"
+                              attrs="{'invisible': [('error_message','=',False)]}">
+                            <field name="error_message" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_meteo_raster_search" model="ir.ui.view">
+        <field name="name">meteo.raster search</field>
+        <field name="model">meteo.raster</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="state"/>
+                <filter string="Done" name="done"
+                        domain="[('state','=','done')]"/>
+                <filter string="Failed" name="failed"
+                        domain="[('state','=','failed')]"/>
+                <filter string="Stale" name="stale"
+                        domain="[('is_stale','=',True)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Product" name="grp_product"
+                            context="{'group_by':'product_id'}"/>
+                    <filter string="State" name="grp_state"
+                            context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_meteo_raster" model="ir.actions.act_window">
+        <field name="name">Rasters</field>
+        <field name="res_model">meteo.raster</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_meteo_raster_search"/>
+    </record>
+
+    <record id="server_action_meteo_raster_recompute" model="ir.actions.server">
+        <field name="name">Recompute Raster</field>
+        <field name="model_id" ref="model_meteo_raster"/>
+        <field name="state">code</field>
+        <field name="code">
+action = env['meteo.raster'].browse(context.get('active_ids', [])).action_compute()
+        </field>
+    </record>
+
+    <record id="ir_values_meteo_raster_recompute" model="ir.values">
+        <field name="name">Recompute Raster</field>
+        <field name="model">meteo.raster</field>
+        <field name="key">action</field>
+        <field name="key2">client_action_multi</field>
+        <field name="value" eval="'ir.actions.server,' + str(ref('server_action_meteo_raster_recompute'))"/>
+    </record>
+
+</odoo>

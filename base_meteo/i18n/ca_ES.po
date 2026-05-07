@@ -1,0 +1,1179 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* base_meteo
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-07 10:56+0000\n"
+"PO-Revision-Date: 2026-05-07 10:56+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_aggregation_active
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_active
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_active
+msgid "Active"
+msgstr "Actiu"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_aggregation
+#: model:ir.ui.view,arch_db:base_meteo.meteo_aggregation_view_form
+msgid "Aggregation"
+msgstr "Agregació"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_product.py:352
+#, python-format
+msgid "Aggregation \"%s\" is not compatible with variable \"%s\"."
+msgstr "L'agregació \"%s\" no és compatible amb la variable \"%s\"."
+
+#. module: base_meteo
+#: model:ir.actions.act_window,name:base_meteo.meteo_aggregation_action
+#: model:ir.ui.menu,name:base_meteo.menu_meteo_aggregations
+#: model:ir.ui.view,arch_db:base_meteo.meteo_aggregation_view_tree
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_variable_form
+msgid "Aggregations"
+msgstr "Agregacions"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_variable_compatible_aggregation_ids
+msgid "Aggregations allowed for products using this variable. If empty, all active aggregations are considered valid."
+msgstr "Agregacions permeses per als productes que usin aquesta variable. Si és buit, totes les agregacions actives es consideren vàlides."
+
+#. module: base_meteo
+#: model:meteo.variable,name:base_meteo.meteo_variable_temperature
+msgid "Air Temperature"
+msgstr "Temperatura de l'aire"
+
+#. module: base_meteo
+#: model:meteo.product,name:base_meteo.meteo_product_temperature_hourly
+msgid "Air Temperature (hourly)"
+msgstr "Temperatura de l'aire (horària)"
+
+#. module: base_meteo
+#: model:meteo.product,name:base_meteo.meteo_product_temperature_daily_avg
+msgid "Air Temperature daily avg"
+msgstr "Temperatura de l'aire mitjana diària"
+
+#. module: base_meteo
+#: model:meteo.product,name:base_meteo.meteo_product_temperature_daily_max
+msgid "Air Temperature daily max"
+msgstr "Temperatura de l'aire màxima diària"
+
+#. module: base_meteo
+#: model:meteo.product,name:base_meteo.meteo_product_temperature_daily_min
+msgid "Air Temperature daily min"
+msgstr "Temperatura de l'aire mínima diària"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Analyze Data Availability"
+msgstr "Analitzar disponibilitat de dades"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.meteo_aggregation_view_form
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_variable_form
+msgid "Are you sure you want to toggle visibility?"
+msgstr "Esteu segur que voleu modificar la visibilitat?"
+
+#. module: base_meteo
+#: model:meteo.aggregation,description:base_meteo.meteo_aggregation_avg
+msgid "Arithmetic mean over the time window."
+msgstr "Mitjana aritmètica en la finestra temporal."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_auto_resolution
+msgid "Automatic Resolution"
+msgstr "Resolució automàtica"
+
+#. module: base_meteo
+#: model:meteo.aggregation,name:base_meteo.meteo_aggregation_avg
+msgid "Average"
+msgstr "Mitjana"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Backfill Rasters"
+msgstr "Emplenament històric de ràsters"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_product.py:614
+#, python-format
+msgid "Backfill finished. Computed: %s, already up-to-date: %s, failed: %s."
+msgstr "Emplenament finalitzat. Calculats: %s, ja actualitzats: %s, fallits: %s."
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Bounding box of the raster, expressed in\n"
+"                                the units of the selected SRS (meters for\n"
+"                                EPSG:3857, degrees for EPSG:4326).\n"
+"                                Use \"Recompute from devices\" to derive it\n"
+"                                automatically from the location of the\n"
+"                                stations matching the variable."
+msgstr "Bounding box del ràster, expressat en\n"
+"                                les unitats del SRS seleccionat (metres per a\n"
+"                                EPSG:3857, graus per a EPSG:4326).\n"
+"                                Useu \"Recompute from devices\" per derivar-lo\n"
+"                                automàticament des de la ubicació de les\n"
+"                                estacions que coincideixin amb la variable."
+"                                the units of the selected SRS (meters for\n"
+"                                EPSG:3857, degrees for EPSG:4326).\n"
+"                                Use \"Recompute from devices\" to derive it\n"
+"                                automatically from the location of the\n"
+"                                stations matching the variable."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_cog_attachment_id
+msgid "COG File"
+msgstr "Fitxer COG"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_cog_size_kb
+msgid "COG Size (kB)"
+msgstr "Mida COG (kB)"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_variable.py:213
+#, python-format
+msgid "Cannot generate ramp: max_value (%s) must be greater than min_value (%s)."
+msgstr "No es pot generar la rampa: max_value (%s) ha de ser major que min_value (%s)."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_aggregation_code
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_code
+msgid "Code"
+msgstr "Codi"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_variable_form
+msgid "Color Ramp"
+msgstr "Rampa de color"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_color_ramp
+msgid "Color Ramp (JSON)"
+msgstr "Rampa de color (JSON)"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_color_ramp_preview
+msgid "Color Ramp Preview"
+msgstr "Previsualització de la rampa de color"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_compatible_aggregation_ids
+msgid "Compatible Aggregations"
+msgstr "Agregacions compatibles"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_compute_ms
+msgid "Compute Time (ms)"
+msgstr "Temps de càlcul (ms)"
+
+#. module: base_meteo
+#: model:ir.ui.menu,name:base_meteo.menu_meteo_config
+msgid "Configuration"
+msgstr "Configuració"
+
+#. module: base_meteo
+#: selection:meteo.raster,method:0
+msgid "Constant (1 station)"
+msgstr "Constant (1 estació)"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_aggregation_python_method_name
+msgid "Convention used by custom composite aggregations: _meteo_aggr_<code>."
+msgstr "Convenció usada per agregacions compostes personalitzades: _meteo_aggr_<code>."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_aggregation_create_uid
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_create_uid
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_create_uid
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_create_uid
+msgid "Created by"
+msgstr "Creat per"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_aggregation_create_date
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_create_date
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_create_date
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_create_date
+msgid "Created on"
+msgstr "Creat el"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Data Quality"
+msgstr "Qualitat de dades"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_default_p
+msgid "Default IDW Power"
+msgstr "Potència IDW per defecte"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_variable_default_p
+msgid "Default IDW exponent suggested for products using this variable."
+msgstr "Exponent IDW suggerit per als productes que usin aquesta variable."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_default_method
+msgid "Default Interpolation Method"
+msgstr "Mètode d'interpolació per defecte"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_variable_default_method
+msgid "Default interpolation method suggested when creating a product for this variable."
+msgstr "Mètode d'interpolació suggerit en crear un producte per a aquesta variable."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_aggregation_description
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_description
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Description"
+msgstr "Descripció"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Devices listed here are ignored when\n"
+"                                collecting readings for this product, even\n"
+"                                if their sensors match the variable type."
+msgstr "Els dispositius llistats aquí s'ignoren quan\n"
+"                                                es recopilen lectures per a aquest producte, encara que\n"
+"                                                els seus sensors coincideixin amb el tipus de variable."
+"                                collecting readings for this product, even\n"
+"                                if their sensors match the variable type."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_excluded_device_ids
+msgid "Devices listed here are ignored when collecting readings for this product, even if their sensors match the variable type."
+msgstr "Els dispositius llistats aquí s'ignoren en recopilar lectures per a aquest producte, encara que els seus sensors coincideixin amb el tipus de variable."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_aggregation_display_name
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_display_name
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_display_name
+msgid "Display Name"
+msgstr "Mostrar Nom"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_step_minutes
+msgid "Distance in minutes between two consecutive rasters (and the granularity of the time slider). Each raster aggregates the readings of the half-step centered on its timestamp. Use 1440 for daily."
+msgstr "Distància en minuts entre dos ràsters consecutius (i la granularitat del control lliscant temporal). Cada ràster agrega les lectures del semipas centrat en la seva marca de temps. Usar 1440 per a diari."
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_raster_search
+#: selection:meteo.raster,state:0
+msgid "Done"
+msgstr "Fet"
+
+#. module: base_meteo
+#: selection:meteo.raster,state:0
+msgid "Draft"
+msgstr "Esborrany"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_lapse_rate_c_per_km
+msgid "Environmental lapse rate used by the terrain-correction hook when DEM adjustments are enabled."
+msgstr "Gradient tèrmic ambiental usat pel mòdul de correcció de terreny quan els ajustos DEM estan actius."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_error_message
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_raster_form
+msgid "Error"
+msgstr "Error"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_excluded_device_ids
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Excluded Devices"
+msgstr "Dispositius exclosos"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Extent"
+msgstr "Extensió"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_raster_search
+#: selection:meteo.raster,state:0
+msgid "Failed"
+msgstr "Fallit"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_variable_form
+msgid "Generate Color Ramp"
+msgstr "Generar rampa de color"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Generate a fresh raster at the current                                      time for this product?"
+msgstr "Voleu generar un ràster nou en el moment actual per a aquest producte?"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Generate every missing raster in the                                      pre-render window? This may take a                                      while."
+msgstr "Voleu generar tots els ràsters que falten en la finestra de pre-renderitzat? Pot tardar."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_raster_ids
+msgid "Generated Rasters"
+msgstr "Ràsters generats"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_grid_h
+msgid "Grid Height (px)"
+msgstr "Alçada de la quadrícula (px)"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_grid_max
+msgid "Grid Max (px)"
+msgstr "Quadrícula màx. (px)"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_grid_min
+msgid "Grid Min (px)"
+msgstr "Quadrícula mín. (px)"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_grid_size
+msgid "Grid Size (px)"
+msgstr "Mida de la quadrícula (px)"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_grid_w
+msgid "Grid Width (px)"
+msgstr "Amplada de la quadrícula (px)"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_raster_search
+msgid "Group By"
+msgstr "Agrupar per"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_history_minutes
+msgid "History (min)"
+msgstr "Historial (min)"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_product.py:332
+#, python-format
+msgid "History (min) must be greater than zero."
+msgstr "L'historial (min) ha de ser major que zero."
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "History defines how far back rasters\n"
+"                                are generated and offered in the time\n"
+"                                slider. Step defines both the slider\n"
+"                                granularity and the aggregation window\n"
+"                                (each raster covers half a step before\n"
+"                                and after its timestamp).\n"
+"                                Retention purges old rasters from the\n"
+"                                database (0 = keep forever)."
+msgstr "L'historial defineix fins on enrere es generen ràsters\n"
+"                                                                i s'ofereixen al control lliscant temporal."
+"                                are generated and offered in the time\n"
+"                                slider. Step defines both the slider\n"
+"                                granularity and the aggregation window\n"
+"                                (each raster covers half a step before\n"
+"                                and after its timestamp).\n"
+"                                Retention purges old rasters from the\n"
+"                                database (0 = keep forever)."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_history_minutes
+msgid "How far back in time rasters are generated and offered in the time slider. Default 1440 = 24 h. Use 10080 for 7 days, 525600 for 1 year."
+msgstr "Fins on enrere en el temps es generen ràsters i s'ofereixen al control lliscant temporal. Per defecte 1440 = 24 h. Usar 10080 per a 7 dies, 525600 per a 1 any."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_timezone
+msgid "IANA timezone used for daily aggregations (e.g. Europe/Madrid, Europe/London). Readings are bucketed in local time so that \"daily\" means midnight-to-midnight in the community timezone, not UTC."
+msgstr "Zona horària IANA per a les agregacions diàries (p. ex. Europe/Madrid). Les lectures s'agrupen en hora local perquè \"diari\" signifiqui de mitjanit a mitjanit en la zona horària de la comunitat, no en UTC."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_aggregation_id
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_id
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_id
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_id
+msgid "ID"
+msgstr "ID"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+#: selection:meteo.variable,default_method:0
+msgid "IDW"
+msgstr "IDW"
+
+#. module: base_meteo
+#: selection:meteo.raster,method:0
+msgid "IDW (all stations)"
+msgstr "IDW (totes les estacions)"
+
+#. module: base_meteo
+#: selection:meteo.raster,method:0
+msgid "IDW (k-NN)"
+msgstr "IDW (k-NN)"
+
+#. module: base_meteo
+#: selection:meteo.variable,default_method:0
+msgid "IDW KNN"
+msgstr "IDW k-NN"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_idw_neighbors
+msgid "IDW Neighbors (k)"
+msgstr "Veïns IDW (k)"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_idw_power
+msgid "IDW Power"
+msgstr "Potència IDW"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_idw_neighbors
+msgid "If > 0, only the K nearest stations are used (KDTree). 0 = use all stations. Recommended for n_stations > 30."
+msgstr "Si > 0, només s'usen les K estacions més properes (KDTree). 0 = usar totes les estacions. Recomanat per a n_estacions > 30."
+
+#. module: base_meteo
+#: selection:meteo.variable,palette:0
+msgid "Inferno"
+msgstr "Inferno"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Interpolation"
+msgstr "Interpolació"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_product.py:309
+#, python-format
+msgid "Invalid extent: max coordinates must be greater than min coordinates."
+msgstr "Extensió no vàlida: les coordenades màximes han de ser majors que les mínimes."
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_product.py:317
+#, python-format
+msgid "Invalid grid bounds: grid_min must be >= 16 and grid_max >= grid_min."
+msgstr "Límits de quadrícula no vàlids: grid_min ha de ser >= 16 i grid_max >= grid_min."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_raster_parameters_json
+msgid "JSON dump of the actual parameters used for this run."
+msgstr "Bolcat JSON dels paràmetres reals usats en aquesta execució."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_raster_stations_json
+msgid "JSON list of the stations that contributed to this raster (name, lon, lat, value, measurement_time). Used by the viewer to render markers that exactly match the inputs of the interpolation, with no recomputation."
+msgstr "Llista JSON de les estacions que van contribuir a aquest ràster (nom, lon, lat, valor, measurement_time). Usada pel visor per representar marcadors que coincideixin exactament amb les entrades de la interpolació, sense recalcular."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_lapse_rate_c_per_km
+msgid "Lapse Rate (C/km)"
+msgstr "Gradient tèrmic (C/km)"
+
+#. module: base_meteo
+#: selection:meteo.product,terrain_correction:0
+msgid "Lapse-rate (DEM-ready)"
+msgstr "Gradient tèrmic (DEM preparat)"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_aggregation___last_update
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product___last_update
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster___last_update
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable___last_update
+msgid "Last Modified on"
+msgstr "Última modificació el "
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_aggregation_write_uid
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_write_uid
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_write_uid
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_write_uid
+msgid "Last Updated by"
+msgstr "Última actualització per"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_aggregation_write_date
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_write_date
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_write_date
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_write_date
+msgid "Last Updated on"
+msgstr "Darrera Actualització el"
+
+#. module: base_meteo
+#: model:meteo.aggregation,name:base_meteo.meteo_aggregation_last
+msgid "Last value"
+msgstr "Darrer valor"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_grid_min
+msgid "Lower bound for the auto-resolution heuristic."
+msgstr "Límit inferior per a l'heurística de resolució automàtica."
+
+#. module: base_meteo
+#: selection:meteo.variable,palette:0
+msgid "Magma"
+msgstr "Magma"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_grid_size
+msgid "Manual grid side in pixels (square raster). Ignored when Automatic Resolution is on."
+msgstr "Costat de la quadrícula manual en píxels (ràster quadrat). S'ignora quan la resolució automàtica està activa."
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_product.py:321
+#, python-format
+msgid "Manual grid size must be at least 16 px."
+msgstr "La mida manual de la quadrícula ha de ser d'almenys 16 px."
+
+#. module: base_meteo
+#: model:meteo.aggregation,name:base_meteo.meteo_aggregation_max
+msgid "Max"
+msgstr "Màx."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_max_value
+msgid "Max Physical Value"
+msgstr "Valor físic màxim"
+
+#. module: base_meteo
+#: model:meteo.aggregation,description:base_meteo.meteo_aggregation_max
+msgid "Maximum value over the time window."
+msgstr "Valor màxim en la finestra temporal."
+
+#. module: base_meteo
+#: model:ir.module.category,name:base_meteo.module_category_meteo
+#: model:ir.ui.menu,name:base_meteo.menu_meteo_root
+msgid "Meteo"
+msgstr "Meteo"
+
+#. module: base_meteo
+#: model:res.groups,name:base_meteo.group_meteo_manager
+msgid "Meteo / Manager"
+msgstr "Meteo / Gestor"
+
+#. module: base_meteo
+#: model:res.groups,name:base_meteo.group_meteo_user
+msgid "Meteo / User"
+msgstr "Meteo / Usuari"
+
+#. module: base_meteo
+#: model:ir.model,name:base_meteo.model_meteo_aggregation
+msgid "Meteorological Aggregation"
+msgstr "Agregació meteorològica"
+
+#. module: base_meteo
+#: model:ir.model,name:base_meteo.model_meteo_product
+msgid "Meteorological Product"
+msgstr "Producte meteorològic"
+
+#. module: base_meteo
+#: model:ir.model,name:base_meteo.model_meteo_raster
+msgid "Meteorological Raster"
+msgstr "Ràster meteorològic"
+
+#. module: base_meteo
+#: model:ir.model,name:base_meteo.model_meteo_variable
+msgid "Meteorological Variable"
+msgstr "Variable meteorològica"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_method
+msgid "Method"
+msgstr "Mètode"
+
+#. module: base_meteo
+#: model:meteo.aggregation,name:base_meteo.meteo_aggregation_min
+msgid "Min"
+msgstr "Mín."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_min_value
+msgid "Min Physical Value"
+msgstr "Valor físic mínim"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_min_stations
+msgid "Min Stations"
+msgstr "Estacions mínimes"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_product.py:338
+#, python-format
+msgid "Min Stations must be at least 1."
+msgstr "Les estacions mínimes han de ser almenys 1."
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Minimum number of stations with data\n"
+"                                required to build the raster."
+msgstr "Nombre mínim d'estacions amb dades\n"
+"                                               per generar un ràster. Per sota es cancel·la."
+"                                required to build the raster."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_min_stations
+msgid "Minimum number of stations with valid data needed to generate a raster. Below this, generation is aborted."
+msgstr "Nombre mínim d'estacions amb dades vàlides necessàries per generar un ràster. Per sota d'aquest valor es cancel·la la generació."
+
+#. module: base_meteo
+#: model:meteo.aggregation,description:base_meteo.meteo_aggregation_min
+msgid "Minimum value over the time window."
+msgstr "Valor mínim en la finestra temporal."
+
+#. module: base_meteo
+#: model:meteo.aggregation,description:base_meteo.meteo_aggregation_last
+msgid "Most recent value in the time window."
+msgstr "Valor més recent en la finestra temporal."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_aggregation_name
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_name
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_display_name
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_name
+msgid "Name"
+msgstr "Nom"
+
+#. module: base_meteo
+#: selection:meteo.variable,default_method:0
+msgid "Nearest"
+msgstr "Més proper"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_raster.py:316
+#, python-format
+msgid "New raster"
+msgstr "Nou ràster"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_variable.py:228
+#, python-format
+msgid "No color ramp defined yet. Pick a palette and click \"Generate Color Ramp\"."
+msgstr "No hi ha cap rampa de color definida. Seleccioneu una paleta i feu clic a \"Generar rampa de color\"."
+
+#. module: base_meteo
+#: selection:meteo.raster,method:0
+msgid "No data"
+msgstr "Sense dades"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_product.py:467
+#, python-format
+msgid "No georeferenced devices found for variable %s."
+msgstr "No s'han trobat dispositius georreferenciats per a la variable %s."
+
+#. module: base_meteo
+#: selection:meteo.product,terrain_correction:0
+msgid "None"
+msgstr "Cap"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_variable_palette_stops
+msgid "Number of colour stops to interpolate over [min, max] when generating the ramp. Typical: 5-11."
+msgstr "Nombre de parades de color a interpolar en [min, max] en generar la rampa. Valor típic: 5-11."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_retention_days
+msgid "Older rasters are purged by the retention cron. 0 = keep forever."
+msgstr "Els ràsters més antics s'eliminen pel cron de retenció. 0 = conservar sempre."
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_raster.py:510
+#, python-format
+msgid "Only %s stations available, %s required."
+msgstr "Només hi ha %s estacions disponibles, se'n requereixen %s."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_variable_color_ramp
+msgid "Optional JSON array of [stop_value, \"#rrggbb\"] tuples used by the front-end to render the legend. Example: [[0, \"#0000ff\"], [15, \"#00ff00\"], [30, \"#ff0000\"]]."
+msgstr "Array JSON opcional de tuples [valor_parada, \"#rrggbb\"] usat pel front-end per representar la llegenda. Exemple: [[0, \"#0000ff\"], [15, \"#00ff00\"], [30, \"#ff0000\"]]."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_aggregation_sequence
+msgid "Order of appearance in product aggregation selectors."
+msgstr "Ordre d'aparició als selectors d'agregació del producte."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_variable_max_value
+msgid "Output values are clamped to this maximum after interpolation."
+msgstr "Els valors de sortida es limiten a aquest màxim després de la interpolació."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_variable_min_value
+msgid "Output values are clamped to this minimum after interpolation."
+msgstr "Els valors de sortida es limiten a aquest mínim després de la interpolació."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_palette
+msgid "Palette"
+msgstr "Paleta"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_palette_stops
+msgid "Palette Stops"
+msgstr "Parades de paleta"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_parameters_json
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_raster_form
+msgid "Parameters Used"
+msgstr "Paràmetres utilitzats"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_variable_form
+msgid "Pick a QGIS-style palette and a number of stops, then click\n"
+"                                \"Generate Color Ramp\" to fill the JSON below from\n"
+"                                min/max values."
+msgstr "Seleccioneu una paleta estil QGIS i un nombre de parades, i feu clic a\n"
+"                                                                     \"Generar rampa de color\"."
+"                                \"Generate Color Ramp\" to fill the JSON below from\n"
+"                                min/max values."
+
+#. module: base_meteo
+#: selection:meteo.variable,palette:0
+msgid "Plasma"
+msgstr "Plasma"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_idw_power
+msgid "Power exponent of the Inverse Distance Weighting interpolator."
+msgstr "Exponent de potència de l'interpolador de ponderació inversa a la distància."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_terrain_correction
+msgid "Pre-interpolation correction strategy. \"None\" keeps station values untouched. \"Lapse-rate\" reserves the pipeline hook for DEM-driven temperature adjustments."
+msgstr "Estratègia de correcció prèvia a la interpolació. \"Cap\" manté els valors de les estacions sense modificar. \"Gradient tèrmic\" reserva el ganxo del processament per a ajustos de temperatura basats en DEM."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_is_prerendered
+msgid "Pre-render"
+msgstr "Pre-renderitzat"
+
+#. module: base_meteo
+#: model:meteo.variable,name:base_meteo.meteo_variable_precipitation
+msgid "Precipitation"
+msgstr "Precipitació"
+
+#. module: base_meteo
+#: model:meteo.product,name:base_meteo.meteo_product_precipitation_hourly
+msgid "Precipitation accumulated (1 h)"
+msgstr "Precipitació acumulada (1 h)"
+
+#. module: base_meteo
+#: model:meteo.product,name:base_meteo.meteo_product_precipitation_daily
+msgid "Precipitation accumulated (daily)"
+msgstr "Precipitació acumulada (diària)"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_product_id
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_raster_search
+msgid "Product"
+msgstr "Producte"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_product_version_hash
+msgid "Product Version Hash"
+msgstr "Hash de versió del producte"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Product name"
+msgstr "Nom del producte"
+
+#. module: base_meteo
+#: model:ir.actions.act_window,name:base_meteo.action_meteo_product
+#: model:ir.ui.menu,name:base_meteo.menu_meteo_products
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_tree
+msgid "Products"
+msgstr "Productes"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_aggregation_python_method_name
+msgid "Python Method"
+msgstr "Mètode Python"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_variable_palette
+msgid "QGIS-style palette used by the \"Generate Color Ramp\" button to build a fresh ramp from min/max."
+msgstr "Paleta estil QGIS usada pel botó \"Generar rampa de color\" per construir una nova rampa des de min/max."
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_raster_form
+msgid "Raster"
+msgstr "Ràster"
+
+#. module: base_meteo
+#: model:ir.actions.act_window,name:base_meteo.action_meteo_raster
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_raster_count
+#: model:ir.ui.menu,name:base_meteo.menu_meteo_rasters
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_raster_tree
+msgid "Rasters"
+msgstr "Ràsters"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_raster_form
+msgid "Recompute"
+msgstr "Recalcular"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Recompute Now"
+msgstr "Recalcular ara"
+
+#. module: base_meteo
+#: model:ir.actions.server,name:base_meteo.server_action_meteo_raster_recompute
+msgid "Recompute Raster"
+msgstr "Recalcular ràster"
+
+#. module: base_meteo
+#: model:ir.actions.server,name:base_meteo.server_action_meteo_product_recompute
+msgid "Recompute Rasters"
+msgstr "Recalcular ràsters"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_product.py:545
+#, python-format
+msgid "Recompute finished with errors:\n"
+"%s"
+msgstr "Recàlcul finalitzat amb errors:\n"
+"%s"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Recompute from devices"
+msgstr "Recalcular des de dispositius"
+
+#. module: base_meteo
+#: selection:meteo.variable,palette:0
+msgid "Red-Yellow-Blue (reversed)"
+msgstr "Vermell-Groc-Blau (invertit)"
+
+#. module: base_meteo
+#: selection:meteo.variable,palette:0
+msgid "Red-Yellow-Green"
+msgstr "Vermell-Groc-Verd"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_raster_form
+msgid "Regenerate"
+msgstr "Regenerar"
+
+#. module: base_meteo
+#: model:meteo.variable,name:base_meteo.meteo_variable_humidity
+msgid "Relative Humidity"
+msgstr "Humitat relativa"
+
+#. module: base_meteo
+#: model:meteo.product,name:base_meteo.meteo_product_humidity_hourly
+msgid "Relative Humidity (hourly)"
+msgstr "Humitat relativa (horària)"
+
+#. module: base_meteo
+#: model:meteo.product,name:base_meteo.meteo_product_humidity_daily_avg
+msgid "Relative Humidity daily avg"
+msgstr "Humitat relativa mitjana diària"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Resolution"
+msgstr "Resolució"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Resolution and IDW parameters control how\n"
+"                                the raster is computed from station\n"
+"                                readings. Leave automatic resolution on\n"
+"                                unless you need a fixed grid."
+msgstr "Els paràmetres de resolució i IDW controlen com\n"
+"                                                    es genera el ràster."
+"                                the raster is computed from station\n"
+"                                readings. Leave automatic resolution on\n"
+"                                unless you need a fixed grid."
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_variable_form
+msgid "Restrict which temporal aggregations can be\n"
+"                                used by products of this variable. If empty,\n"
+"                                every active aggregation is accepted."
+msgstr "Restringeix quines agregacions temporals es poden usar\n"
+"                                                        amb els productes d'aquesta variable."
+"                                used by products of this variable. If empty,\n"
+"                                every active aggregation is accepted."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_retention_days
+msgid "Retention (days)"
+msgstr "Retenció (dies)"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_product.py:335
+#, python-format
+msgid "Retention (days) cannot be negative."
+msgstr "La retenció (dies) no pot ser negativa."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_version_hash
+msgid "SHA-1 (truncated) of the structural fields of this product. Bumped on any change that affects raster output."
+msgstr "SHA-1 (truncat) dels camps estructurals d'aquest producte. S'actualitza davant qualsevol canvi que afecti la sortida del ràster."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_srs
+msgid "SRS"
+msgstr "SRS"
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Scheduling"
+msgstr "Planificació"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_sensor_type_ids
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_variable_form
+msgid "Sensor Types"
+msgstr "Tipus de sensor"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_variable_sensor_type_ids
+msgid "Sensor types that feed this variable. Readings whose sensor.type_id is in this set are aggregated for the product."
+msgstr "Tipus de sensor que alimenten aquesta variable. Les lectures el sensor.type_id de les quals estigui en aquest conjunt s'agreguen per al producte."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_aggregation_sequence
+msgid "Sequence"
+msgstr "Seqüència"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_product.py:439
+#, python-format
+msgid "Set a variable before recomputing the extent."
+msgstr "Establiu una variable abans de recalcular l'extensió."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_variable_code
+msgid "Short identifier (e.g. T, P, HR, ET0)."
+msgstr "Identificador curt (p. ex. T, P, HR, ET0)."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_raster_product_version_hash
+msgid "Snapshot of meteo.product.version_hash at compute time."
+msgstr "Instantània de meteo.product.version_hash en el moment del càlcul."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_srs
+msgid "Spatial Reference System the raster is generated in. Default EPSG:3857 (Web Mercator) is what Leaflet consumes natively, avoiding client-side reprojection."
+msgstr "Sistema de referència espacial en què es genera el ràster. Per defecte EPSG:3857 (Web Mercator), que Leaflet consumeix de forma nativa, evitant la reprojecció al client."
+
+#. module: base_meteo
+#: selection:meteo.variable,palette:0
+msgid "Spectral (reversed)"
+msgstr "Espectral (invertit)"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_aggregation_code
+msgid "Stable technical key used by the compute pipeline (e.g. avg, sum, min, max, last)."
+msgstr "Clau tècnica estable usada pel motor de càlcul (p. ex. avg, sum, min, max, last)."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_is_stale
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_raster_search
+msgid "Stale"
+msgstr "Desactualitzat"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_state
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_raster_search
+msgid "State"
+msgstr "Estat"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_stations_json
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_raster_form
+msgid "Stations Snapshot"
+msgstr "Instantània d'estacions"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_n_stations_used
+msgid "Stations Used"
+msgstr "Estacions utilitzades"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_product.py:420
+#, python-format
+msgid "Stations available: %s\n"
+"Recommended grid: %s x %s\n"
+"Recommended method: %s\n"
+"Params: %s"
+msgstr "Estacions disponibles: %s\n"
+"Recommended grid: %s x %s\n"
+"Recommended method: %s\n"
+"Params: %s"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_step_minutes
+msgid "Step (min)"
+msgstr "Pas (min)"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_product.py:329
+#, python-format
+msgid "Step (min) must be greater than zero."
+msgstr "El pas (min) ha de ser major que zero."
+
+#. module: base_meteo
+#: model:meteo.aggregation,name:base_meteo.meteo_aggregation_sum
+msgid "Sum"
+msgstr "Suma"
+
+#. module: base_meteo
+#: model:meteo.aggregation,description:base_meteo.meteo_aggregation_sum
+msgid "Sum over the time window."
+msgstr "Suma en la finestra temporal."
+
+#. module: base_meteo
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_product_form
+msgid "Terrain"
+msgstr "Terreny"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_terrain_correction
+msgid "Terrain Correction"
+msgstr "Correcció de terreny"
+
+#. module: base_meteo
+#: sql_constraint:meteo.aggregation:0
+msgid "The aggregation code must be unique."
+msgstr "El codi d'agregació ha de ser únic."
+
+#. module: base_meteo
+#: sql_constraint:meteo.variable:0
+msgid "The variable code must be unique."
+msgstr "El codi de variable ha de ser únic."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_timezone
+msgid "Timezone"
+msgstr "Zona horària"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_raster_is_stale
+msgid "True when the product version_hash has changed after this raster was generated."
+msgstr "Vertader quan el version_hash del producte ha canviat després que es va generar aquest ràster."
+
+#. module: base_meteo
+#: selection:meteo.variable,palette:0
+msgid "Turbo"
+msgstr "Turbo"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_variable_uom_id
+msgid "Unit of Measure"
+msgstr "Unitat de mesura"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_raster.py:623
+#, python-format
+msgid "Unknown interpolation method: %s"
+msgstr "Mètode d'interpolació desconegut: %s"
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_product.py:444
+#: code:addons/base_meteo/models/meteo_raster.py:58
+#, python-format
+msgid "Unsupported SRS %s. Use EPSG:NNNN."
+msgstr "SRS %s no admès. Useu EPSG:NNNN."
+
+#. module: base_meteo
+#: code:addons/base_meteo/models/meteo_raster.py:94
+#, python-format
+msgid "Unsupported aggregation method: %s"
+msgstr "Mètode d'agregació no admès: %s"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_grid_max
+msgid "Upper bound for the auto-resolution heuristic."
+msgstr "Límit superior per a l'heurística de resolució automàtica."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_valid_from
+msgid "Valid From"
+msgstr "Vàlid des de"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_valid_to
+msgid "Valid To"
+msgstr "Vàlid fins a"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_variable_id
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_variable_form
+msgid "Variable"
+msgstr "Variable"
+
+#. module: base_meteo
+#: model:ir.actions.act_window,name:base_meteo.action_meteo_variable
+#: model:ir.ui.menu,name:base_meteo.menu_meteo_variables
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_variable_tree
+msgid "Variables"
+msgstr "Variables"
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_version_hash
+msgid "Version Hash"
+msgstr "Hash de versió"
+
+#. module: base_meteo
+#: selection:meteo.variable,palette:0
+msgid "Viridis"
+msgstr "Viridis"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_variable_color_ramp_preview
+msgid "Visual preview of the stored color ramp: gradient bar with the stop values underneath. Re-renders on save after pressing \"Generate Color Ramp\"."
+msgstr "Previsualització visual de la rampa de color emmagatzemada: barra de gradient amb els valors de parada a sota. Es renderitza de nou en desar després de prémer \"Generar rampa de color\"."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_raster_warnings_json
+#: model:ir.ui.view,arch_db:base_meteo.view_meteo_raster_form
+msgid "Warnings"
+msgstr "Advertiments"
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_auto_resolution
+msgid "When enabled, grid size is derived from the average distance between contributing stations (Nyquist-like rule). When disabled, \"Grid Size\" is used."
+msgstr "Quan està activat, la mida de la quadrícula es deriva de la distància mitjana entre estacions contribuents (regla similar a Nyquist). Quan està desactivat, s'usa \"Mida de la quadrícula\"."
+
+#. module: base_meteo
+#: model:ir.model.fields,help:base_meteo.field_meteo_product_is_prerendered
+msgid "When enabled, the cron generates rasters for every step in [now - History, now] that is missing or outdated."
+msgstr "Quan està activat, el cron genera ràsters per a cada pas en [ara - Historial, ara] que falti o estigui desactualitzat."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_extent_xmax
+msgid "X max"
+msgstr "X màx."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_extent_xmin
+msgid "X min"
+msgstr "X mín."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_extent_ymax
+msgid "Y max"
+msgstr "Y màx."
+
+#. module: base_meteo
+#: model:ir.model.fields,field_description:base_meteo.field_meteo_product_extent_ymin
+msgid "Y min"
+msgstr "Y mín."
+

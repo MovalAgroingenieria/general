@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_meteo_product_tree" model="ir.ui.view">
+        <field name="name">meteo.product tree</field>
+        <field name="model">meteo.product</field>
+        <field name="arch" type="xml">
+            <tree string="Products">
+                <field name="name"/>
+                <field name="variable_id"/>
+                <field name="aggregation"/>
+                <field name="srs"/>
+                <field name="auto_resolution"/>
+                <field name="grid_size"/>
+                <field name="raster_count"/>
+                <field name="active" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_meteo_product_form" model="ir.ui.view">
+        <field name="name">meteo.product form</field>
+        <field name="model">meteo.product</field>
+        <field name="arch" type="xml">
+            <form string="Product">
+                <header>
+                    <button name="action_analyze_data"
+                            string="Analyze Data Availability"
+                            type="object" class="oe_highlight"/>
+                    <button name="action_recompute_rasters"
+                            string="Recompute Now"
+                            type="object"
+                            confirm="Generate a fresh raster at the current
+                                     time for this product?"/>
+                    <button name="action_backfill_rasters"
+                            string="Backfill Rasters"
+                            type="object"
+                            confirm="Generate every missing raster in the
+                                     pre-render window? This may take a
+                                     while."/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="buttons">
+                        <button name="toggle_active"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-archive"
+                                confirm="Are you sure you want to toggle visibility?">
+                            <field name="active"
+                                   widget="boolean_button"
+                                   options='{"terminology": "archive"}'/>
+                        </button>
+                        <button class="oe_stat_button" type="action"
+                                icon="fa-image" name="%(action_meteo_raster)d"
+                                context="{'search_default_product_id': active_id}">
+                            <field name="raster_count" widget="statinfo"
+                                   string="Rasters"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="Product name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="variable_id"/>
+                            <field name="aggregation"/>
+                        </group>
+                        <group>
+                            <field name="srs"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Extent">
+                            <p class="oe_grey">
+                                Bounding box of the raster, expressed in
+                                the units of the selected SRS (meters for
+                                EPSG:3857, degrees for EPSG:4326).
+                                Use "Recompute from devices" to derive it
+                                automatically from the location of the
+                                stations matching the variable.
+                            </p>
+                            <group>
+                                <button name="action_recompute_extent"
+                                        type="object"
+                                        string="Recompute from devices"
+                                        icon="fa-crosshairs"/>
+                            </group>
+                            <group>
+                                <group>
+                                    <field name="extent_xmin"/>
+                                    <field name="extent_ymin"/>
+                                </group>
+                                <group>
+                                    <field name="extent_xmax"/>
+                                    <field name="extent_ymax"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Interpolation">
+                            <p class="oe_grey">
+                                Resolution and IDW parameters control how
+                                the raster is computed from station
+                                readings. Leave automatic resolution on
+                                unless you need a fixed grid.
+                            </p>
+                            <group>
+                                <group string="Resolution">
+                                    <field name="auto_resolution"/>
+                                    <field name="grid_size"
+                                           attrs="{'invisible': [('auto_resolution','=',True)]}"/>
+                                    <field name="grid_min"
+                                           attrs="{'invisible': [('auto_resolution','=',False)]}"/>
+                                    <field name="grid_max"
+                                           attrs="{'invisible': [('auto_resolution','=',False)]}"/>
+                                </group>
+                                <group string="IDW">
+                                    <field name="idw_power"/>
+                                    <field name="idw_neighbors"/>
+                                </group>
+                                <group string="Terrain">
+                                    <field name="terrain_correction"/>
+                                    <field name="lapse_rate_c_per_km"
+                                           attrs="{'invisible': [('terrain_correction','!=','lapse_rate')]}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Data Quality">
+                            <p class="oe_grey">
+                                Minimum number of stations with data
+                                required to build the raster.
+                            </p>
+                            <group>
+                                <group>
+                                    <field name="min_stations"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Scheduling">
+                            <p class="oe_grey">
+                                History defines how far back rasters
+                                are generated and offered in the time
+                                slider. Step defines both the slider
+                                granularity and the aggregation window
+                                (each raster covers half a step before
+                                and after its timestamp).
+                                Retention purges old rasters from the
+                                database (0 = keep forever).
+                            </p>
+                            <group>
+                                <group>
+                                    <field name="is_prerendered"/>
+                                    <field name="step_minutes"/>
+                                    <field name="history_minutes"/>
+                                </group>
+                                <group>
+                                    <field name="retention_days"/>
+                                    <field name="timezone"/>
+                                    <field name="version_hash"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Excluded Devices">
+                            <p class="oe_grey">
+                                Devices listed here are ignored when
+                                collecting readings for this product, even
+                                if their sensors match the variable type.
+                            </p>
+                            <field name="excluded_device_ids">
+                                <tree>
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Description">
+                            <field name="description"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_meteo_product" model="ir.actions.act_window">
+        <field name="name">Products</field>
+        <field name="res_model">meteo.product</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="server_action_meteo_product_recompute" model="ir.actions.server">
+        <field name="name">Recompute Rasters</field>
+        <field name="model_id" ref="model_meteo_product"/>
+        <field name="state">code</field>
+        <field name="code">
+action = env['meteo.product'].browse(context.get('active_ids', [])).action_recompute_rasters()
+        </field>
+    </record>
+
+    <record id="ir_values_meteo_product_recompute" model="ir.values">
+        <field name="name">Recompute Rasters</field>
+        <field name="model">meteo.product</field>
+        <field name="key">action</field>
+        <field name="key2">client_action_multi</field>
+        <field name="value" eval="'ir.actions.server,' + str(ref('server_action_meteo_product_recompute'))"/>
+    </record>
+
+</odoo>

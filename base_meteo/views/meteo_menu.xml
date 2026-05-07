@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_meteo_root" name="Meteo"
+              sequence="-24"
+              groups="group_meteo_user"/>
+
+    <menuitem id="menu_meteo_products" name="Products"
+              parent="menu_meteo_root"
+              action="action_meteo_product"
+              sequence="10"/>
+
+    <menuitem id="menu_meteo_rasters" name="Rasters"
+              parent="menu_meteo_root"
+              action="action_meteo_raster"
+              sequence="20"/>
+
+    <menuitem id="menu_meteo_config" name="Configuration"
+              parent="menu_meteo_root"
+              sequence="90"
+              groups="group_meteo_manager"/>
+
+    <menuitem id="menu_meteo_variables" name="Variables"
+              parent="menu_meteo_config"
+              action="action_meteo_variable"
+              sequence="10"/>
+
+    <menuitem id="menu_meteo_aggregations" name="Aggregations"
+              parent="menu_meteo_config"
+              action="meteo_aggregation_action"
+              sequence="20"/>
+
+</odoo>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+        <record id="ir_cron_meteo_prerender" model="ir.cron">
+            <field name="name">Meteo: Pre-render scheduled rasters</field>
+            <field name="model">meteo.raster</field>
+            <field name="function">cron_prerender</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="False"/>
+            <field name="doall" eval="False"/>
+        </record>
+
+        <record id="ir_cron_meteo_regen_stale" model="ir.cron">
+            <field name="name">Meteo: Regenerate stale rasters</field>
+            <field name="model">meteo.raster</field>
+            <field name="function">cron_regen_stale</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="False"/>
+            <field name="doall" eval="False"/>
+        </record>
+
+        <record id="ir_cron_meteo_retention" model="ir.cron">
+            <field name="name">Meteo: Apply raster retention</field>
+            <field name="model">meteo.raster</field>
+            <field name="function">cron_apply_retention</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+            <field name="doall" eval="False"/>
+        </record>
+
+</odoo>

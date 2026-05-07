@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+        <record id="meteo_variable_temperature" model="meteo.variable">
+            <field name="name">Air Temperature</field>
+            <field name="code">T</field>
+            <field name="default_method">idw</field>
+            <field name="default_p">1.8</field>
+            <field name="min_value">-40.0</field>
+            <field name="max_value">60.0</field>
+            <field name="compatible_aggregation_ids"
+                   eval="[(6, 0, [
+                       ref('meteo_aggregation_avg'),
+                       ref('meteo_aggregation_min'),
+                       ref('meteo_aggregation_max'),
+                       ref('meteo_aggregation_last'),
+                   ])]"/>
+            <field name="color_ramp">[[-10, "#0000ff"], [0, "#00ffff"], [15, "#00ff00"], [25, "#ffff00"], [35, "#ff7f00"], [45, "#ff0000"]]</field>
+        </record>
+
+        <record id="meteo_variable_precipitation" model="meteo.variable">
+            <field name="name">Precipitation</field>
+            <field name="code">P</field>
+            <field name="default_method">idw</field>
+            <field name="default_p">2.5</field>
+            <field name="min_value">0.0</field>
+            <field name="max_value">500.0</field>
+            <field name="compatible_aggregation_ids"
+                   eval="[(6, 0, [
+                       ref('meteo_aggregation_sum'),
+                       ref('meteo_aggregation_max'),
+                   ])]"/>
+            <field name="color_ramp">[[0, "#ffffff"], [1, "#bdd7e7"], [5, "#6baed6"], [20, "#3182bd"], [50, "#08519c"]]</field>
+        </record>
+
+        <record id="meteo_variable_humidity" model="meteo.variable">
+            <field name="name">Relative Humidity</field>
+            <field name="code">HR</field>
+            <field name="default_method">idw</field>
+            <field name="default_p">1.8</field>
+            <field name="min_value">0.0</field>
+            <field name="max_value">100.0</field>
+            <field name="compatible_aggregation_ids"
+                   eval="[(6, 0, [
+                       ref('meteo_aggregation_avg'),
+                       ref('meteo_aggregation_min'),
+                       ref('meteo_aggregation_max'),
+                       ref('meteo_aggregation_last'),
+                   ])]"/>
+            <field name="color_ramp">[[0, "#ffffd9"], [50, "#7fcdbb"], [100, "#253494"]]</field>
+        </record>
+</odoo>

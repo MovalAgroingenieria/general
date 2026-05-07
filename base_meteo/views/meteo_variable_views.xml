@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_meteo_variable_tree" model="ir.ui.view">
+        <field name="name">meteo.variable tree</field>
+        <field name="model">meteo.variable</field>
+        <field name="arch" type="xml">
+            <tree string="Variables">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="uom_id"/>
+                <field name="default_method"/>
+                <field name="default_p"/>
+                <field name="min_value"/>
+                <field name="max_value"/>
+                <field name="active" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_meteo_variable_form" model="ir.ui.view">
+        <field name="name">meteo.variable form</field>
+        <field name="model">meteo.variable</field>
+        <field name="arch" type="xml">
+            <form string="Variable">
+                <sheet>
+                    <div class="oe_button_box" name="buttons">
+                        <button name="toggle_active"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-archive"
+                                confirm="Are you sure you want to toggle visibility?">
+                            <field name="active"
+                                   widget="boolean_button"
+                                   options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="uom_id"/>
+                            <field name="default_method"/>
+                            <field name="default_p"
+                                   attrs="{'invisible': [('default_method', 'not in', ['idw', 'idw_knn'])]}"/>
+                        </group>
+                        <group>
+                            <field name="min_value"/>
+                            <field name="max_value"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Sensor Types">
+                            <field name="sensor_type_ids"/>
+                        </page>
+                        <page string="Aggregations">
+                            <p class="oe_grey">
+                                Restrict which temporal aggregations can be
+                                used by products of this variable. If empty,
+                                every active aggregation is accepted.
+                            </p>
+                            <field name="compatible_aggregation_ids">
+                                <tree>
+                                    <field name="sequence"/>
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Color Ramp">
+                            <p class="oe_grey">
+                                Pick a QGIS-style palette and a number of stops, then click
+                                "Generate Color Ramp" to fill the JSON below from
+                                min/max values.
+                            </p>
+                            <group>
+                                <group>
+                                    <field name="palette"/>
+                                    <field name="palette_stops"/>
+                                </group>
+                                <group>
+                                    <button name="action_generate_color_ramp"
+                                            type="object"
+                                            string="Generate Color Ramp"
+                                            class="oe_highlight"/>
+                                </group>
+                            </group>
+                            <field name="color_ramp_preview" nolabel="1"/>
+                            <field name="color_ramp" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_meteo_variable" model="ir.actions.act_window">
+        <field name="name">Variables</field>
+        <field name="res_model">meteo.variable</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

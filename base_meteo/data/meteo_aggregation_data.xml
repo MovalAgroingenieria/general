@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="meteo_aggregation_avg" model="meteo.aggregation">
+        <field name="name">Average</field>
+        <field name="code">avg</field>
+        <field name="sequence">10</field>
+        <field name="description">Arithmetic mean over the time window.</field>
+    </record>
+
+    <record id="meteo_aggregation_sum" model="meteo.aggregation">
+        <field name="name">Sum</field>
+        <field name="code">sum</field>
+        <field name="sequence">20</field>
+        <field name="description">Sum over the time window.</field>
+    </record>
+
+    <record id="meteo_aggregation_min" model="meteo.aggregation">
+        <field name="name">Min</field>
+        <field name="code">min</field>
+        <field name="sequence">30</field>
+        <field name="description">Minimum value over the time window.</field>
+    </record>
+
+    <record id="meteo_aggregation_max" model="meteo.aggregation">
+        <field name="name">Max</field>
+        <field name="code">max</field>
+        <field name="sequence">40</field>
+        <field name="description">Maximum value over the time window.</field>
+    </record>
+
+    <record id="meteo_aggregation_last" model="meteo.aggregation">
+        <field name="name">Last value</field>
+        <field name="code">last</field>
+        <field name="sequence">50</field>
+        <field name="description">Most recent value in the time window.</field>
+    </record>
+
+</odoo>

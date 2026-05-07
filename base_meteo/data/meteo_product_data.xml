@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generic template products shipped with base_meteo.
+     All records use noupdate="1" so operators can adjust extent,
+     step_minutes, excluded devices, etc. without losing changes on
+     module upgrade.
+     The extent fields are left at 0 / unset — each deployment must
+     fill them in from the backend before enabling is_prerendered. -->
+<odoo noupdate="1">
+
+    <!-- Temperature -->
+
+    <record id="meteo_product_temperature_hourly" model="meteo.product">
+        <field name="name">Air Temperature (hourly)</field>
+        <field name="variable_id" ref="meteo_variable_temperature"/>
+        <field name="aggregation">avg</field>
+        <field name="step_minutes">60</field>
+        <field name="history_minutes">2880</field>
+        <field name="timezone">Europe/Madrid</field>
+        <field name="srs">EPSG:3857</field>
+        <field name="idw_power">1.8</field>
+        <field name="min_stations">2</field>
+        <field name="active" eval="False"/>
+    </record>
+
+    <record id="meteo_product_temperature_daily_avg" model="meteo.product">
+        <field name="name">Air Temperature daily avg</field>
+        <field name="variable_id" ref="meteo_variable_temperature"/>
+        <field name="aggregation">avg</field>
+        <field name="step_minutes">1440</field>
+        <field name="history_minutes">43200</field>
+        <field name="timezone">Europe/Madrid</field>
+        <field name="srs">EPSG:3857</field>
+        <field name="idw_power">1.8</field>
+        <field name="min_stations">2</field>
+        <field name="active" eval="False"/>
+    </record>
+
+    <record id="meteo_product_temperature_daily_min" model="meteo.product">
+        <field name="name">Air Temperature daily min</field>
+        <field name="variable_id" ref="meteo_variable_temperature"/>
+        <field name="aggregation">min</field>
+        <field name="step_minutes">1440</field>
+        <field name="history_minutes">43200</field>
+        <field name="timezone">Europe/Madrid</field>
+        <field name="srs">EPSG:3857</field>
+        <field name="idw_power">1.8</field>
+        <field name="min_stations">2</field>
+        <field name="active" eval="False"/>
+    </record>
+
+    <record id="meteo_product_temperature_daily_max" model="meteo.product">
+        <field name="name">Air Temperature daily max</field>
+        <field name="variable_id" ref="meteo_variable_temperature"/>
+        <field name="aggregation">max</field>
+        <field name="step_minutes">1440</field>
+        <field name="history_minutes">43200</field>
+        <field name="timezone">Europe/Madrid</field>
+        <field name="srs">EPSG:3857</field>
+        <field name="idw_power">1.8</field>
+        <field name="min_stations">2</field>
+        <field name="active" eval="False"/>
+    </record>
+
+    <!-- Precipitation -->
+
+    <record id="meteo_product_precipitation_hourly" model="meteo.product">
+        <field name="name">Precipitation accumulated (1 h)</field>
+        <field name="variable_id" ref="meteo_variable_precipitation"/>
+        <field name="aggregation">sum</field>
+        <field name="step_minutes">60</field>
+        <field name="history_minutes">2880</field>
+        <field name="timezone">Europe/Madrid</field>
+        <field name="srs">EPSG:3857</field>
+        <field name="idw_power">2.5</field>
+        <field name="min_stations">2</field>
+        <field name="active" eval="False"/>
+    </record>
+
+    <record id="meteo_product_precipitation_daily" model="meteo.product">
+        <field name="name">Precipitation accumulated (daily)</field>
+        <field name="variable_id" ref="meteo_variable_precipitation"/>
+        <field name="aggregation">sum</field>
+        <field name="step_minutes">1440</field>
+        <field name="history_minutes">43200</field>
+        <field name="timezone">Europe/Madrid</field>
+        <field name="srs">EPSG:3857</field>
+        <field name="idw_power">2.5</field>
+        <field name="min_stations">2</field>
+        <field name="active" eval="False"/>
+    </record>
+
+    <!-- Relative Humidity -->
+
+    <record id="meteo_product_humidity_hourly" model="meteo.product">
+        <field name="name">Relative Humidity (hourly)</field>
+        <field name="variable_id" ref="meteo_variable_humidity"/>
+        <field name="aggregation">avg</field>
+        <field name="step_minutes">60</field>
+        <field name="history_minutes">2880</field>
+        <field name="timezone">Europe/Madrid</field>
+        <field name="srs">EPSG:3857</field>
+        <field name="idw_power">1.8</field>
+        <field name="min_stations">2</field>
+        <field name="active" eval="False"/>
+    </record>
+
+    <record id="meteo_product_humidity_daily_avg" model="meteo.product">
+        <field name="name">Relative Humidity daily avg</field>
+        <field name="variable_id" ref="meteo_variable_humidity"/>
+        <field name="aggregation">avg</field>
+        <field name="step_minutes">1440</field>
+        <field name="history_minutes">43200</field>
+        <field name="timezone">Europe/Madrid</field>
+        <field name="srs">EPSG:3857</field>
+        <field name="idw_power">1.8</field>
+        <field name="min_stations">2</field>
+        <field name="active" eval="False"/>
+    </record>
+
+</odoo>
