@@ -185,7 +185,7 @@ class MeteoRaster(models.Model):
                     if isinstance(ts, datetime)
                     else (ts or None)),
             })
-            return out
+        return out
 
     display_name = fields.Char(
         string='Name',
