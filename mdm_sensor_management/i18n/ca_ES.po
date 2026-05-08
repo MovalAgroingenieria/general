@@ -6,14 +6,26 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-15 07:22+0000\n"
-"PO-Revision-Date: 2026-04-15 07:22+0000\n"
+"POT-Creation-Date: 2026-05-08 07:42+0000\n"
+"PO-Revision-Date: 2026-05-08 07:42+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_generate_random_readings.py:136
+#, python-format
+msgid "%d readings created."
+msgstr "%d lectures creades."
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_generate_random_readings.py:138
+#, python-format
+msgid "%d skipped (duplicates or errors)."
+msgstr "%d omeses (duplicades o errors)."
 
 #. module: mdm_sensor_management
 #: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:673
@@ -227,7 +239,7 @@ msgid "Cancel"
 msgstr "Cancel·la"
 
 #. module: mdm_sensor_management
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_id_16824
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_id_20156
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_device_view_search
 msgid "Category"
 msgstr "Categoria"
@@ -240,6 +252,7 @@ msgstr "El nom de la categoria ha de ser únic!"
 #. module: mdm_sensor_management
 #: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:729
 #: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:775
+#: model:ir.ui.view,arch_db:mdm_sensor_management.wizard_generate_random_readings_view_form
 #, python-format
 msgid "Close"
 msgstr "Tancar"
@@ -282,6 +295,7 @@ msgstr "Configuració"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_create_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_create_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_create_uid
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_create_uid
 msgid "Created by"
 msgstr "Creat per"
 
@@ -295,6 +309,7 @@ msgstr "Creat per"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_create_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_create_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_create_date
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_create_date
 msgid "Created on"
 msgstr "Creat el"
 
@@ -322,6 +337,7 @@ msgid "Date Field for Last Reading is required when Detect Negative Readings is 
 msgstr "El camp de data per a última lectura és obligatori quan la detecció de lectures negatives està habilitada"
 
 #. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.wizard_generate_random_readings_view_form
 #: selection:mdm.sensor.reading.transform.template,selection_mode:0
 #: selection:mdm.sensor.reading.transform.wizard,selection_mode:0
 msgid "Date Range"
@@ -444,6 +460,7 @@ msgstr "Dispositius"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_display_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_display_name
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_display_name
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_display_name
 msgid "Display Name"
 msgstr "Mostrar Nom"
 
@@ -468,6 +485,27 @@ msgstr "Domini per filtrar lectures (p. ex., [(\"sensor_type_id.name\", \"=\", \
 #: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_template_sensor_domain_filter
 msgid "Domain to filter sensors (e.g., [(\"sensor_type_id.name\", \"=\", \"Temperature\")])"
 msgstr "Domini per filtrar sensors (p. ex., [(\"sensor_type_id.name\", \"=\", \"Temperature\")])"
+
+#. module: mdm_sensor_management
+#: selection:mdm.wizard.generate.random.readings,state:0
+msgid "Done"
+msgstr "Fet"
+
+#. module: mdm_sensor_management
+#: selection:mdm.wizard.generate.random.readings,state:0
+msgid "Draft"
+msgstr "Esborrany"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_date_to
+msgid "End Date"
+msgstr "Data final"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_generate_random_readings.py:88
+#, python-format
+msgid "End Date must be later than Start Date."
+msgstr "La data de fi ha de ser posterior a la data d'inici."
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_to
@@ -551,6 +589,33 @@ msgid "From Date mode requires a From Date"
 msgstr "El mode Des de la data requereix una data des de"
 
 #. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.wizard_generate_random_readings_view_form
+msgid "Generate"
+msgstr "Generar"
+
+#. module: mdm_sensor_management
+#: model:ir.actions.act_window,name:mdm_sensor_management.wizard_generate_random_readings_action
+#: model:ir.ui.view,arch_db:mdm_sensor_management.wizard_generate_random_readings_view_form
+msgid "Generate Random Readings"
+msgstr "Generar lectures aleatòries"
+
+#. module: mdm_sensor_management
+#: model:ir.model,name:mdm_sensor_management.model_mdm_wizard_generate_random_readings
+msgid "Generate Random Sensor Readings"
+msgstr "Generar lectures aleatòries de sensor"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.wizard_generate_random_readings_view_form
+msgid "Generates random readings between a minimum and\n"
+"                            maximum value for each selected sensor, from the\n"
+"                            start date to the end date at the specified\n"
+"                            interval."
+msgstr "Genera lectures aleatòries entre un valor mínim i\n"
+"                            màxim per a cada sensor seleccionat, des de la\n"
+"                            data d'inici fins a la data de fi amb l'interval\n"
+"                            indicat."
+
+#. module: mdm_sensor_management
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_sensor_type_view_search
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_uom_view_search
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_search
@@ -563,10 +628,11 @@ msgstr "Agrupar per"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_id
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_id_15755
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_id_15767
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_id_18561
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_id_18573
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_id
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_id
 msgid "ID"
 msgstr "ID"
 
@@ -600,6 +666,17 @@ msgstr "Indica si aquesta plantilla va ser creada per la instal·lació del mòd
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_installation_date
 msgid "Installation Date"
 msgstr "Data d'instal·lació"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_interval_minutes
+msgid "Interval (minutes)"
+msgstr "Interval (minuts)"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_generate_random_readings.py:95
+#, python-format
+msgid "Interval must be at least 1 minute."
+msgstr "L'interval ha de ser com a mínim d'1 minut."
 
 #. module: mdm_sensor_management
 #: code:addons/mdm_sensor_management/models/sensor_reading_transform_template.py:177
@@ -662,8 +739,9 @@ msgstr "Mapeig JSON de camps del sensor a camps del model destí.\n"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom___last_update
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template___last_update
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard___last_update
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings___last_update
 msgid "Last Modified on"
-msgstr "Última modificació el "
+msgstr "Darrera modificació el"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_is_last_sensor_reading
@@ -688,8 +766,9 @@ msgstr "Última lectura: No"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_write_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_write_uid
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_write_uid
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_write_uid
 msgid "Last Updated by"
-msgstr "Última actualització per"
+msgstr "Darrera Actualització per"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_config_settings_write_date
@@ -701,13 +780,14 @@ msgstr "Última actualització per"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_write_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_write_date
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_write_date
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_write_date
 msgid "Last Updated on"
-msgstr "Última actualització el"
+msgstr "Darrera Actualització el"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_last_measurement
 msgid "Last measurement"
-msgstr "Última mesura"
+msgstr "Darrera mesurament"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_last_measurement_time
@@ -748,6 +828,17 @@ msgstr "Configuració MDM"
 #: model:res.groups,name:mdm_sensor_management.group_mdm_user
 msgid "MDM User"
 msgstr "Usuari MDM"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_value_max
+msgid "Max Value"
+msgstr "Valor màxim"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/wizards/wizard_generate_random_readings.py:102
+#, python-format
+msgid "Max Value must be greater than or equal to Min Value."
+msgstr "El valor màxim ha de ser major o igual al valor mínim."
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,help:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_retention_days
@@ -810,6 +901,11 @@ msgstr "Metres de columna d'aigua (pressió)"
 #: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_selection_mode
 msgid "Method to select which readings to transform"
 msgstr "Mètode per seleccionar quines lectures transformar"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_value_min
+msgid "Min Value"
+msgstr "Valor mínim"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_model
@@ -969,6 +1065,11 @@ msgid "Reference date for closest_reading mode"
 msgstr "Data de referència per al mode closest_reading"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_result_message
+msgid "Result"
+msgstr "Resultat"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_retention_days
 msgid "Retention (days)"
 msgstr "Retenció (dies)"
@@ -1061,9 +1162,11 @@ msgstr "Unitats de sensors"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_sensor_ids
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_sensor_ids
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_sensor_ids
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_sensor_ids
 #: model:ir.ui.menu,name:mdm_sensor_management.mdm_device_sensors_menu
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_device_view_form
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_sensor_type_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.wizard_generate_random_readings_view_form
 #, python-format
 msgid "Sensors"
 msgstr "Sensors"
@@ -1081,7 +1184,7 @@ msgstr "Sensorial"
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_serial_number
 msgid "Serial Number"
-msgstr "Nº sèrie"
+msgstr "Núm. de sèrie"
 
 #. module: mdm_sensor_management
 #: model:ir.actions.act_window,name:mdm_sensor_management.mdm_config_settings_action
@@ -1101,9 +1204,19 @@ msgid "Show Mapping Help"
 msgstr "Mostrar ajuda de mapeig"
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_date_from
+msgid "Start Date"
+msgstr "Data inicial"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,help:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_from
 msgid "Start date for date_range or from_date modes"
 msgstr "Data d'inici per als modes date_range o from_date"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_state
+msgid "State"
+msgstr "Estat"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_target_date_field_id
@@ -1297,6 +1410,11 @@ msgstr "Utilitzar tots els sensors"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_value
 msgid "Value"
 msgstr "Valor"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.wizard_generate_random_readings_view_form
+msgid "Value Range"
+msgstr "Value Range"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_volume_field

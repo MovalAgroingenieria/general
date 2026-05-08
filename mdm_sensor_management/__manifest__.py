@@ -29,6 +29,7 @@
         'views/measurement_device_sensor_views.xml',
         'views/sensor_reading_transform_template_views.xml',
         'wizards/wizard_sensor_reading_transform_views.xml',
+        'wizards/wizard_generate_random_readings_views.xml',
         'views/mdm_settings_views.xml',
         'views/mdm_menus.xml',
     ],
