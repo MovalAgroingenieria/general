@@ -7,6 +7,8 @@ from odoo import api, fields, models
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
+    _MISSING_ENTITY_CODE_SORT = 999999999
+
     census_ids = fields.One2many(
         comodel_name="general.entity.census",
         inverse_name="primary_partner_id",
@@ -86,3 +88,49 @@ class ResPartner(models.Model):
             "search_default_group_by_month": 1,
         }
         return action
+
+    @api.model
+    def format_entity_searchpanel_values(self, values):
+        """Format searchpanel values as "[code] name" and sort by code."""
+        if not values:
+            return values
+
+        partner_ids = [value.get("id") for value in values if value.get("id")]
+        partners = self.browse(partner_ids).exists()
+        partners_by_id = {partner.id: partner for partner in partners}
+        for value in values:
+            partner = partners_by_id.get(value.get("id"))
+            if not partner:
+                continue
+            code = partner.entity_global_code
+            if code is not False and code is not None:
+                value["display_name"] = "[{}] {}".format(code, partner.name or "")
+            else:
+                value["display_name"] = partner.name or ""
+
+        def sort_key(value):
+            partner = partners_by_id.get(value.get("id"))
+            if not partner:
+                return (
+                    1,
+                    self._MISSING_ENTITY_CODE_SORT,
+                    value.get("display_name") or "",
+                    value.get("id") or 0,
+                )
+            code = partner.entity_global_code
+            code_value = (
+                code
+                if code is not False and code is not None
+                else self._MISSING_ENTITY_CODE_SORT
+            )
+            return (0, code_value, partner.name or "", partner.id)
+
+        return sorted(values, key=sort_key)
+
+    @api.model
+    def format_entity_searchpanel_result(self, field_name, result):
+        """Apply entity formatting only for the primary partner searchpanel."""
+        if field_name != "primary_partner_id" or "values" not in result:
+            return result
+        result["values"] = self.format_entity_searchpanel_values(result["values"])
+        return result

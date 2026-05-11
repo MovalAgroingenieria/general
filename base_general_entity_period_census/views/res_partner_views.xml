@@ -64,4 +64,22 @@
             </xpath>
         </field>
     </record>
+
+    <!-- Add default shares to secondary member membership subview -->
+    <record id="view_partner_secondary_entity_form_census_membership" model="ir.ui.view">
+        <field name="name">res.partner.secondary.entity.form.census.membership</field>
+        <field name="model">res.partner</field>
+        <field
+            name="inherit_id"
+            ref="base_general_entity.view_partner_secondary_entity_form"
+        />
+        <field name="arch" type="xml">
+            <xpath
+                expr="//page[@name='primary_entities']//field[@name='member_code_in_entity']"
+                position="after"
+            >
+                <field name="default_shares" />
+            </xpath>
+        </field>
+    </record>
 </odoo>

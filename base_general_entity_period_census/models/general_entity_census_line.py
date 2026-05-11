@@ -81,6 +81,11 @@ class GeneralEntityCensusLine(models.Model):
         inverse_name="census_line_id",
         string="Additional Movements",
     )
+    has_additional_movements = fields.Boolean(
+        compute="_compute_has_additional_movements",
+        store=True,
+        help="Indicates whether this line has any additional movement records.",
+    )
     qty_additional = fields.Float(
         string="Additional Qty",
         digits="Product Unit of Measure",
@@ -134,6 +139,12 @@ class GeneralEntityCensusLine(models.Model):
         """Calculate total additional quantity from movements."""
         for line in self:
             line.qty_additional = sum(line.additional_ids.mapped("qty"))
+
+    @api.depends("additional_ids")
+    def _compute_has_additional_movements(self):
+        """Flag lines that have one or more additional movements."""
+        for line in self:
+            line.has_additional_movements = bool(line.additional_ids)
 
     @api.depends("shares", "census_id.distribution_amount_day", "census_id.period_days")
     def _compute_base_distributed_qty(self):
@@ -219,6 +230,15 @@ class GeneralEntityCensusLine(models.Model):
             },
             "target": "new",
         }
+
+    @api.model
+    def search_panel_select_range(self, field_name, **kwargs):
+        """Format entity labels and ordering in searchpanel sidebar."""
+        result = super().search_panel_select_range(field_name, **kwargs)
+        return self.env["res.partner"].format_entity_searchpanel_result(
+            field_name,
+            result,
+        )
 
     @api.ondelete(at_uninstall=False)
     def _check_can_delete(self):

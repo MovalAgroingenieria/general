@@ -233,6 +233,15 @@ class GeneralEntityCensus(models.Model):
             "target": "current",
         }
 
+    @api.model
+    def search_panel_select_range(self, field_name, **kwargs):
+        """Format entity labels and ordering in searchpanel sidebar."""
+        result = super().search_panel_select_range(field_name, **kwargs)
+        return self.env["res.partner"].format_entity_searchpanel_result(
+            field_name,
+            result,
+        )
+
     def action_lock(self):
         """Lock census to prevent modifications."""
         for census in self:
