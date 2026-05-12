@@ -11,6 +11,7 @@ import tempfile
 import time
 from datetime import datetime, timedelta
 import pytz
+from psycopg2 import IntegrityError
 
 import numpy as np
 from PIL import Image
@@ -42,6 +43,56 @@ class MeteoRaster(models.Model):
     _order = 'valid_from desc, id desc'
     _rec_name = 'display_name'
 
+    _sql_constraints = [
+        (
+            'meteo_raster_product_valid_from_uniq',
+            'unique(product_id, valid_from)',
+            'A raster already exists for this product and timestamp.',
+        ),
+    ]
+
+    @api.model
+    def _get_product_tz(self, product):
+        tz_name = (product.timezone or '').strip() or 'UTC'
+        if pytz is None:
+            return None
+        try:
+            return pytz.timezone(tz_name)
+        except Exception:
+            _logger.warning(
+                'meteo: unknown timezone %r for product %s, '
+                'falling back to UTC', tz_name, product.id)
+            return pytz.utc
+
+    @api.model
+    def _align_target_dt(self, product, target_dt):
+        """Align target_dt to the canonical slot start for product."""
+        step = max(int(product.step_minutes or 0), 1)
+        if step >= 1440 and pytz is not None:
+            tz = self._get_product_tz(product) or pytz.utc
+            local_dt = pytz.utc.localize(target_dt).astimezone(tz)
+            local_midnight = local_dt.replace(
+                hour=0, minute=0, second=0, microsecond=0)
+            return local_midnight.astimezone(pytz.utc).replace(tzinfo=None)
+        epoch = datetime(1970, 1, 1)
+        elapsed_seconds = int((target_dt - epoch).total_seconds())
+        step_seconds = step * 60
+        slot_seconds = (elapsed_seconds // step_seconds) * step_seconds
+        return epoch + timedelta(seconds=slot_seconds)
+
+    @api.model
+    def _slot_bounds(self, product, target_dt):
+        """Return (slot_start, slot_end_exclusive) for target_dt."""
+        slot_start = self._align_target_dt(product, target_dt)
+        step = max(int(product.step_minutes or 0), 1)
+        if step >= 1440 and pytz is not None:
+            tz = self._get_product_tz(product) or pytz.utc
+            local_start = pytz.utc.localize(slot_start).astimezone(tz)
+            local_end = local_start + timedelta(minutes=step)
+            slot_end = local_end.astimezone(pytz.utc).replace(tzinfo=None)
+            return slot_start, slot_end
+        return slot_start, slot_start + timedelta(minutes=step)
+
     @api.model
     def collect_stations(self, product, target_dt):
         """Return station dicts contributing to (product, target_dt).
@@ -57,34 +108,7 @@ class MeteoRaster(models.Model):
         except (ValueError, AttributeError):
             raise exceptions.UserError(_(
                 'Unsupported SRS %s. Use EPSG:NNNN.') % srs)
-        # The aggregation window is half the product step on each side, so
-        # consecutive rasters partition the timeline without overlap nor
-        # gaps. A reading at minute t belongs to the raster whose nominal
-        # timestamp is the closest multiple of `step_minutes`.
-        step = max(int(product.step_minutes or 0), 1)
-        half_step = max(step // 2, 1)
-        # For daily aggregations (step >= 1440 min) we honour the product
-        # timezone so that "daily" means midnight-to-midnight in the
-        # community's local time (e.g. CET/CEST for Spain), not UTC.  For
-        # sub-daily cadences UTC alignment is correct and avoids DST gaps.
-        tz_name = (product.timezone or '').strip() or 'UTC'
-        if step >= 1440 and pytz is not None:
-            try:
-                tz = pytz.timezone(tz_name)
-            except Exception:
-                _logger.warning(
-                    'meteo: unknown timezone %r for product %s, '
-                    'falling back to UTC', tz_name, product.id)
-                tz = pytz.utc
-            local_dt = pytz.utc.localize(target_dt).astimezone(tz)
-            local_lower = local_dt.replace(
-                hour=0, minute=0, second=0, microsecond=0)
-            local_upper = local_lower + timedelta(days=1)
-            t_lower = local_lower.astimezone(pytz.utc).replace(tzinfo=None)
-            t_to = local_upper.astimezone(pytz.utc).replace(tzinfo=None)
-        else:
-            t_lower = target_dt - timedelta(minutes=half_step)
-            t_to = target_dt + timedelta(minutes=half_step)
+        t_lower, t_to = self._slot_bounds(product, target_dt)
 
         sensor_type_ids = tuple(product.variable_id.sensor_type_ids.ids) \
             or (0,)
@@ -121,7 +145,8 @@ class MeteoRaster(models.Model):
                         ON r.sensor_id = s.id
                     WHERE s.device_id = d.id
                       AND s.type_id IN %s
-                      AND r.measurement_time BETWEEN %s AND %s
+                                            AND r.measurement_time >= %s
+                                            AND r.measurement_time < %s
                       AND r.active = true
                     ORDER BY r.measurement_time DESC
                     LIMIT 1
@@ -153,7 +178,8 @@ class MeteoRaster(models.Model):
                 JOIN mdm_measurement_device_sensor_reading r
                     ON r.sensor_id = s.id
                 WHERE s.type_id IN %%s
-                  AND r.measurement_time BETWEEN %%s AND %%s
+                                    AND r.measurement_time >= %%s
+                                    AND r.measurement_time < %%s
                   AND r.active = true
                   AND g.geom IS NOT NULL
                   AND d.id NOT IN %%s
@@ -365,25 +391,29 @@ class MeteoRaster(models.Model):
           - product_version_hash matches current product.version_hash
           - target_dt is within [valid_from, valid_to]
         """
-        if isinstance(target_dt, datetime):
-            target_str = fields.Datetime.to_string(target_dt)
-        else:
-            target_str = target_dt
+        target_dt = target_dt if isinstance(target_dt, datetime) else \
+            fields.Datetime.from_string(target_dt)
+        slot_start, slot_end = self._slot_bounds(product, target_dt)
+        target_str = fields.Datetime.to_string(slot_start)
         domain = [
             ('product_id', '=', product.id),
-            ('valid_from', '<=', target_str),
-            ('valid_to', '>=', target_str),
-            ('state', '=', 'done'),
-            ('product_version_hash', '=', product.version_hash),
+            ('valid_from', '=', target_str),
         ]
-        existing = self.search(domain, limit=1, order='valid_from desc')
-        if existing:
-            return existing
-        record = self.create({
-            'product_id': product.id,
-            'valid_from': target_str,
-            'valid_to': target_str,
-        })
+        record = self.search(domain, limit=1, order='id desc')
+        if not record:
+            valid_to = slot_end - timedelta(seconds=1)
+            try:
+                record = self.create({
+                    'product_id': product.id,
+                    'valid_from': target_str,
+                    'valid_to': fields.Datetime.to_string(valid_to),
+                })
+            except IntegrityError:
+                self.env.cr.rollback()
+                record = self.search(domain, limit=1, order='id desc')
+        if record.state == 'done' and \
+                record.product_version_hash == product.version_hash:
+            return record
         record._compute_one()
         return record
 
@@ -413,10 +443,7 @@ class MeteoRaster(models.Model):
                 break
             step = max(int(product.step_minutes or 0), 1)
             back = max(int(product.history_minutes or 0), step)
-            anchor_minute = (now.minute // step) * step \
-                if step < 60 else 0
-            anchor = now.replace(minute=anchor_minute,
-                                 second=0, microsecond=0)
+            anchor = self._align_target_dt(product, now)
             n_steps = back // step
             for i in range(n_steps + 1):
                 if budget <= 0:
@@ -426,8 +453,7 @@ class MeteoRaster(models.Model):
                 t_str = fields.Datetime.to_string(t)
                 existing = self.search([
                     ('product_id', '=', product.id),
-                    ('valid_from', '<=', t_str),
-                    ('valid_to', '>=', t_str),
+                    ('valid_from', '=', t_str),
                     ('state', '=', 'done'),
                     ('product_version_hash', '=', product.version_hash),
                 ], limit=1)

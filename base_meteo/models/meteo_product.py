@@ -574,10 +574,7 @@ class MeteoProduct(models.Model):
             step = max(int(product.step_minutes or 0), 1)
             back = max(int(product.history_minutes or 0), step)
             n_steps = min(back // step, max_steps)
-            anchor_minute = (now.minute // step) * step \
-                if step < 60 else 0
-            anchor = now.replace(minute=anchor_minute,
-                                 second=0, microsecond=0)
+            anchor = raster_model._align_target_dt(product, now)
             for i in range(n_steps + 1):
                 t = anchor - timedelta(minutes=step * i)
                 t_str = fields.Datetime.to_string(t)
@@ -585,8 +582,7 @@ class MeteoProduct(models.Model):
                 # without entering get_or_create (no savepoint cost).
                 existing = raster_model.search([
                     ('product_id', '=', product.id),
-                    ('valid_from', '<=', t_str),
-                    ('valid_to', '>=', t_str),
+                    ('valid_from', '=', t_str),
                     ('state', '=', 'done'),
                     ('product_version_hash', '=', product.version_hash),
                 ], limit=1)
