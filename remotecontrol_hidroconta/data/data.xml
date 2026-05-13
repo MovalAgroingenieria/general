@@ -51,7 +51,7 @@
       <li><code>POST /Demeter2/v2/search</code> → retrieves devices by type (counters, valves, hydrants, analogInputs, digitalInputs, digitalOutputs, iris, rtus).</li>
     </ul>
     Generates a JSON attachment with all information grouped by installation: <code>hidroconta_devices_YYYYMMDD_HHMMSS.json</code>.</li>
-  <li><strong>Build Sensor Plan</strong> → builds <code>bag["sensor_plan"]</code> with (element_id, subtype, subcode, start_date) for each configured sensor.</li>
+    <li><strong>Build Sensor Plan</strong> → builds <code>bag["sensor_plan"]</code> with (element_id, subtype, subcode, start_date, conversion_factor) for each configured sensor.</li>
   <li><strong>Get Readings</strong> → executes <code>POST /Demeter2/v2/history/data</code> for each sensor in the plan and updates readings in Odoo.</li>
 </ol>
 
@@ -71,20 +71,21 @@ Content-Type: application/json
 <h3>5) Odoo Configuration</h3>
 <h4>In Device (<code>mdm.measurement.device</code>) remotecontrol_params:</h4>
 <pre>{
-  "start_date": "2025-01-01"
+    "start_date": "2025-01-01"
 }</pre>
 <ul>
   <li><code>element_id</code>: Device identifier in Hidroconta API</li>
   <li><code>subtype</code>: Data type (4 for standard readings)</li>
   <li><code>subcode</code>: Data subtype (0 for default, varies by device type)</li>
   <li><code>start_date</code>: Initial date for historical data retrieval (YYYY-MM-DD)</li>
+  <li><code>conversion_factor</code>: Optional multiplier applied to each received reading value (default: 1.0 when missing)</li>
 </ul>
 
 <h4>In Sensor (<code>mdm.measurement.device.sensor</code>) remotecontrol_params:</h4>
 <pre>{
   "element_id": 22145,
   "subtype": 4,
-  "subcode": 0,
+  "subcode": 0
 }</pre>
 
 <h3>6) Endpoints Used</h3>
@@ -139,13 +140,13 @@ Content-Type: application/json
 <ul>
   <li>Key: <code>(sensor_id, measurement_time)</code> (updates if already exists).</li>
   <li>Timestamps from <code>historicDate</code> field are converted to <code>YYYY-MM-DD HH:MM:SS</code>.</li>
-  <li>The numeric value from <code>value</code> field is stored.</li>
+  <li>The numeric value from <code>value</code> field is multiplied by <code>conversion_factor</code> and stored.</li>
 </ul>
 
 <h3>10) Recommendations</h3>
 <ul>
   <li>Run <strong>Get Devices</strong> first to map all installations and devices before configuring sensors.</li>
-  <li>Verify that each sensor in Odoo has the proper <code>element_id</code>, <code>subtype</code>, and <code>subcode</code> defined.</li>
+  <li>Verify that each sensor in Odoo has the proper <code>element_id</code>, <code>subtype</code>, and <code>subcode</code> defined. <code>conversion_factor</code> is optional and defaults to <code>1.0</code> when missing.</li>
   <li>The <code>start_date</code> parameter determines the initial date for historical data retrieval.</li>
   <li>If a sensor already has readings, the system automatically starts from the last reading timestamp.</li>
   <li>The JSON attachment can be downloaded from the attachments list of the <code>remotecontrol</code> record.</li>
@@ -327,6 +328,13 @@ for sensor in sensors:
     subtype = sensor_cfg.get('subtype') or device_cfg.get('subtype')
     subcode = sensor_cfg.get('subcode') or device_cfg.get('subcode', 0)
     start_date = sensor_cfg.get('start_date') or device_cfg.get('start_date', '2025-01-01')
+    conversion_factor = sensor_cfg.get('conversion_factor')
+    if conversion_factor in (None, ''):
+        conversion_factor = 1.0
+    try:
+        conversion_factor = float(conversion_factor)
+    except Exception:
+        conversion_factor = 1.0
     if not element_id or subtype is None:
         continue
     plan_item = {
@@ -334,7 +342,8 @@ for sensor in sensors:
         'element_id': element_id,
         'subtype': subtype,
         'subcode': subcode,
-        'start_date': start_date
+        'start_date': start_date,
+        'conversion_factor': conversion_factor
     }
     sensor_plan.append(plan_item)
 bag['sensor_plan'] = sensor_plan
@@ -374,6 +383,11 @@ for plan_item in sensor_plan:
     subtype = plan_item['subtype']
     subcode = plan_item['subcode']
     start_date_str = plan_item.get('start_date', '2025-01-01')
+    conversion_factor = plan_item.get('conversion_factor', 1.0)
+    try:
+        conversion_factor = float(conversion_factor)
+    except Exception:
+        conversion_factor = 1.0
     sensor = Sensor.browse(odoo_sensor_id)
     if not sensor.exists():
         continue
@@ -409,6 +423,18 @@ for plan_item in sensor_plan:
             value = reading.get('value')
             if not historic_date or value is None:
                 continue
+            try:
+                converted_value = float(value) * conversion_factor
+            except Exception as e:
+                sensor_errors += 1
+                total_errors += 1
+                if len(readings_summary) < 5:
+                    readings_summary.append({
+                        'error': str(e),
+                        'ts': historic_date,
+                        'value': value
+                    })
+                continue
             date_time_parts = historic_date.split(' ')
             if len(date_time_parts) != 2:
                 continue
@@ -422,12 +448,16 @@ for plan_item in sensor_plan:
                 Remote.upsert(
                     'mdm.measurement.device.sensor.reading',
                     {'sensor_id': odoo_sensor_id, 'measurement_time': ts_formatted},
-                    {'value': value}
+                    {'value': converted_value}
                 )
                 sensor_upserts += 1
                 total_readings += 1
                 if len(readings_summary) < 5:
-                    readings_summary.append({'ts': ts_formatted, 'value': value})
+                    readings_summary.append({
+                        'ts': ts_formatted,
+                        'value': converted_value,
+                        'raw_value': value
+                    })
             except Exception as e:
                 sensor_errors += 1
                 total_errors += 1
@@ -437,6 +467,7 @@ for plan_item in sensor_plan:
             'sensor_id': odoo_sensor_id,
             'sensor_name': sensor.name,
             'element_id': element_id,
+            'conversion_factor': conversion_factor,
             'upserts': sensor_upserts,
             'errors': sensor_errors,
             'sample_readings': readings_summary

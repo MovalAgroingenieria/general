@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-23 09:28+0000\n"
-"PO-Revision-Date: 2025-12-23 09:28+0000\n"
+"POT-Creation-Date: 2026-05-13 07:09+0000\n"
+"PO-Revision-Date: 2026-05-13 07:09+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -102,6 +102,11 @@ msgstr "<code>analogInputs</code> → Sensors d'entrada analògica"
 
 #. module: remotecontrol_hidroconta
 #: model:remotecontrol,remotecontrol_help:remotecontrol_hidroconta.remotecontrol_hidroconta
+msgid "<code>conversion_factor</code>: Optional multiplier applied to each received reading value (default: 1.0 when missing)"
+msgstr "<code>conversion_factor</code>: Multiplicador opcional aplicat a cada valor de lectura rebut (per defecte: 1.0 si no està definit)"
+
+#. module: remotecontrol_hidroconta
+#: model:remotecontrol,remotecontrol_help:remotecontrol_hidroconta.remotecontrol_hidroconta
 msgid "<code>counters</code> → Water meters and consumption counters"
 msgstr "<code>counters</code> → Comptadors d'aigua i consum"
 
@@ -162,8 +167,8 @@ msgstr "<em>Login</em> → executa <code>POST /Demeter2/v2/login</code> amb usua
 
 #. module: remotecontrol_hidroconta
 #: model:remotecontrol,remotecontrol_help:remotecontrol_hidroconta.remotecontrol_hidroconta
-msgid "<strong>Build Sensor Plan</strong> → builds <code>bag[\"sensor_plan\"]</code> with (element_id, subtype, subcode, start_date) for each configured sensor."
-msgstr "<strong>Construir pla de sensors</strong> → construeix <code>bag[\"sensor_plan\"]</code> amb (element_id, subtype, subcode, start_date) per a cada sensor configurat."
+msgid "<strong>Build Sensor Plan</strong> → builds <code>bag[\"sensor_plan\"]</code> with (element_id, subtype, subcode, start_date, conversion_factor) for each configured sensor."
+msgstr "<strong>Construir pla de sensors</strong> → construeix <code>bag[\"sensor_plan\"]</code> amb (element_id, subtype, subcode, start_date, conversion_factor) per a cada sensor configurat."
 
 #. module: remotecontrol_hidroconta
 #: model:remotecontrol,remotecontrol_help:remotecontrol_hidroconta.remotecontrol_hidroconta
@@ -309,8 +314,8 @@ msgstr "Aquest mòdul inclou los siguientes procediments predefinits:"
 
 #. module: remotecontrol_hidroconta
 #: model:remotecontrol,remotecontrol_help:remotecontrol_hidroconta.remotecontrol_hidroconta
-msgid "The numeric value from <code>value</code> field is stored."
-msgstr "S'emmagatzema el valor numérico del camp <code>value</code>."
+msgid "The numeric value from <code>value</code> field is multiplied by <code>conversion_factor</code> and stored."
+msgstr "El valor numèric del camp <code>value</code> es multiplica per <code>conversion_factor</code> i s'emmagatzema."
 
 #. module: remotecontrol_hidroconta
 #: model:remotecontrol,remotecontrol_help:remotecontrol_hidroconta.remotecontrol_hidroconta
@@ -329,20 +334,29 @@ msgstr "Tipus: <code>REST</code> · URL base: <code>https://demeter2.hidroconta.
 
 #. module: remotecontrol_hidroconta
 #: model:remotecontrol,remotecontrol_help:remotecontrol_hidroconta.remotecontrol_hidroconta
-msgid "Verify that each sensor in Odoo has the proper <code>element_id</code>, <code>subtype</code>, and <code>subcode</code> defined."
-msgstr "Verifica que cada sensor a Odoo tingui definits correctamente <code>element_id</code>, <code>subtype</code> y <code>subcode</code>."
+msgid "Verify that each sensor in Odoo has the proper <code>element_id</code>, <code>subtype</code>, and <code>subcode</code> defined. <code>conversion_factor</code> is optional and defaults to <code>1.0</code> when missing."
+msgstr "Verifica que cada sensor a Odoo tingui definits correctament <code>element_id</code>, <code>subtype</code> i <code>subcode</code>. <code>conversion_factor</code> és opcional i per defecte usa <code>1.0</code> si no està definit."
+
+#. module: remotecontrol_hidroconta
+#: model:remotecontrol,remotecontrol_help:remotecontrol_hidroconta.remotecontrol_hidroconta
+msgid "{\n"
+"    \"start_date\": \"2025-01-01\"\n"
+"}"
+msgstr "{\n"
+"    \"start_date\": \"2025-01-01\"\n"
+"}"
 
 #. module: remotecontrol_hidroconta
 #: model:remotecontrol,remotecontrol_help:remotecontrol_hidroconta.remotecontrol_hidroconta
 msgid "{\n"
 "  \"element_id\": 22145,\n"
 "  \"subtype\": 4,\n"
-"  \"subcode\": 0,\n"
+"  \"subcode\": 0\n"
 "}"
 msgstr "{\n"
 "  \"element_id\": 22145,\n"
 "  \"subtype\": 4,\n"
-"  \"subcode\": 0,\n"
+"  \"subcode\": 0\n"
 "}"
 
 #. module: remotecontrol_hidroconta
@@ -398,19 +412,11 @@ msgstr "{\n"
 #. module: remotecontrol_hidroconta
 #: model:remotecontrol,remotecontrol_help:remotecontrol_hidroconta.remotecontrol_hidroconta
 msgid "{\n"
-"  \"start_date\": \"2025-01-01\"\n"
+"  \"username\": \"user@example.com\",\n"
+"  \"password\": \"********\"\n"
 "}"
 msgstr "{\n"
-"  \"start_date\": \"2025-01-01\"\n"
+"  \"username\": \"user@example.com\",\n"
+"  \"password\": \"********\"\n"
 "}"
 
-#. module: remotecontrol_hidroconta
-#: model:remotecontrol,remotecontrol_help:remotecontrol_hidroconta.remotecontrol_hidroconta
-msgid "{\n"
-"  \"username\": \"user@example.com\",\n"
-"  \"password\": \"********\"\n"
-"}"
-msgstr "{\n"
-"  \"username\": \"user@example.com\",\n"
-"  \"password\": \"********\"\n"
-"}"
