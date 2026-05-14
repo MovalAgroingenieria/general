@@ -240,6 +240,25 @@ class GeneralEntityCensusLine(models.Model):
             result,
         )
 
+    @api.onchange("member_partner_id")
+    def _onchange_member_partner_default_shares(self):
+        """Fill shares from the member's default_shares when selecting."""
+        for line in self:
+            if line.member_partner_id and line.census_id.primary_partner_id:
+                member = self.env["general.entity.member"].search(
+                    [
+                        (
+                            "primary_partner_id",
+                            "=",
+                            line.census_id.primary_partner_id.id,
+                        ),
+                        ("member_partner_id", "=", line.member_partner_id.id),
+                    ],
+                    limit=1,
+                )
+                if member and member.default_shares:
+                    line.shares = member.default_shares
+
     @api.ondelete(at_uninstall=False)
     def _check_can_delete(self):
         """Prevent deletion if the census is locked or line is validated."""
