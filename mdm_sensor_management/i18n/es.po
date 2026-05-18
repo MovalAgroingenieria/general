@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-08 07:44+0000\n"
-"PO-Revision-Date: 2026-05-08 07:44+0000\n"
+"POT-Creation-Date: 2026-05-18 10:30+0000\n"
+"PO-Revision-Date: 2026-05-18 10:30+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -80,6 +80,59 @@ msgstr "<strong>Acceder a campos relacionados:</strong> Use notación de punto <
 "                                            <br/><span style=\"color: #666;\">Ejemplo:</span> <code>\"location\": \"$sensor_id.location_id.name\"</code>"
 
 #. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_sensor_view_form
+msgid "<strong>Arithmetic formula help:</strong>\n"
+"                                Use <code>$</code> as placeholder for the raw value.\n"
+"                                <br/>\n"
+"                                <strong>Functions:</strong>\n"
+"                                <code>sqrt($)</code>,\n"
+"                                <code>pow($, 2)</code>,\n"
+"                                <code>log($)</code> (natural),\n"
+"                                <code>log10($)</code>,\n"
+"                                <code>exp($)</code>,\n"
+"                                <code>abs($)</code>,\n"
+"                                <code>round($)</code>,\n"
+"                                <code>ceil($)</code>,\n"
+"                                <code>floor($)</code>,\n"
+"                                <code>min($, 100)</code>,\n"
+"                                <code>max($, 0)</code>\n"
+"                                <br/>\n"
+"                                <strong>Operators:</strong>\n"
+"                                <code>+</code> <code>-</code> <code>*</code>\n"
+"                                <code>/</code> <code>**</code> (power)\n"
+"                                <br/>\n"
+"                                <strong>Examples:</strong>\n"
+"                                <code>$ * 0.001</code> |\n"
+"                                <code>sqrt($)</code> |\n"
+"                                <code>$ ** 2</code> |\n"
+"                                <code>log10($ + 1)</code>"
+msgstr "<strong>Ayuda de fórmula aritmética:</strong>\n"
+"                                Use <code>$</code> como marcador para el valor bruto.\n"
+"                                <br/>\n"
+"                                <strong>Funciones:</strong>\n"
+"                                <code>sqrt($)</code>,\n"
+"                                <code>pow($, 2)</code>,\n"
+"                                <code>log($)</code> (natural),\n"
+"                                <code>log10($)</code>,\n"
+"                                <code>exp($)</code>,\n"
+"                                <code>abs($)</code>,\n"
+"                                <code>round($)</code>,\n"
+"                                <code>ceil($)</code>,\n"
+"                                <code>floor($)</code>,\n"
+"                                <code>min($, 100)</code>,\n"
+"                                <code>max($, 0)</code>\n"
+"                                <br/>\n"
+"                                <strong>Operadores:</strong>\n"
+"                                <code>+</code> <code>-</code> <code>*</code>\n"
+"                                <code>/</code> <code>**</code> (potencia)\n"
+"                                <br/>\n"
+"                                <strong>Ejemplos:</strong>\n"
+"                                <code>$ * 0.001</code> |\n"
+"                                <code>sqrt($)</code> |\n"
+"                                <code>$ ** 2</code> |\n"
+"                                <code>log10($ + 1)</code>"
+
+#. module: mdm_sensor_management
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
 msgid "<strong>Available reading fields:</strong>"
@@ -92,6 +145,31 @@ msgid "<strong>Current datetime:</strong> Use <code>$now</code> to get current d
 "                                            <br/><span style=\"color: #666;\">Example:</span> <code>\"import_date\": \"$now\"</code>"
 msgstr "<strong>Fecha/hora actual:</strong> Use <code>$now</code> para obtener la fecha/hora actual\n"
 "                                            <br/><span style=\"color: #666;\">Ejemplo:</span> <code>\"import_date\": \"$now\"</code>"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_sensor_view_form
+msgid "<strong>Custom Python help:</strong>\n"
+"                                The raw value is available as <code>value</code>.\n"
+"                                Assign the result to <code>result</code>.\n"
+"                                <br/>\n"
+"                                <strong>Available:</strong>\n"
+"                                <code>math</code>, <code>sqrt</code>, <code>pow</code>,\n"
+"                                <code>log</code>, <code>log10</code>, <code>exp</code>,\n"
+"                                <code>abs</code>, <code>round</code>, <code>ceil</code>,\n"
+"                                <code>floor</code>, <code>min</code>, <code>max</code>\n"
+"                                <br/>\n"
+"                                <strong>Example:</strong>"
+msgstr "<strong>Ayuda de Python personalizado:</strong>\n"
+"                                El valor bruto está disponible como <code>value</code>.\n"
+"                                Asigne el resultado a <code>result</code>.\n"
+"                                <br/>\n"
+"                                <strong>Disponible:</strong>\n"
+"                                <code>math</code>, <code>sqrt</code>, <code>pow</code>,\n"
+"                                <code>log</code>, <code>log10</code>, <code>exp</code>,\n"
+"                                <code>abs</code>, <code>round</code>, <code>ceil</code>,\n"
+"                                <code>floor</code>, <code>min</code>, <code>max</code>\n"
+"                                <br/>\n"
+"                                <strong>Ejemplo:</strong>"
 
 #. module: mdm_sensor_management
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form
@@ -132,7 +210,7 @@ msgstr "<strong>Diferencia de volumen (solo lecturas negativas):</strong> Use <c
 "                                            <br/><span style=\"color: #666;\">Ejemplo:</span> <code>\"volume\": \"$volume_diff\"</code> (diferencia cuando el contador retrocede)"
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:95
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:188
 #, python-format
 msgid "A sensor with name '%s' already exists for device '%s'.\n"
 "Please use a different name or check for duplicates."
@@ -140,6 +218,12 @@ msgstr "Ya existe un sensor con nombre '%s' para el dispositivo '%s'.\n"
 "Por favor, use un nombre diferente o verifique duplicados."
 
 #. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_search
+msgid "Above maximum"
+msgstr "Por encima del máximo"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_active
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_active
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_active
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_active
@@ -200,6 +284,17 @@ msgid "Are you sure you want to archive/unarchive this sensor and all its readin
 msgstr "¿Está seguro de que desea archivar/desarchivar este sensor y todas sus lecturas?"
 
 #. module: mdm_sensor_management
+#: selection:mdm.measurement.device.sensor,measurement_transformation_type:0
+#: selection:mdm.measurement.device.sensor.reading,measurement_transformation_type:0
+msgid "Arithmetic Expression"
+msgstr "Expresión aritmética"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_measurement_transformation
+msgid "Arithmetic Transformation"
+msgstr "Transformación aritmética"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_attributes
 msgid "Attributes"
 msgstr "Atributos"
@@ -227,6 +322,11 @@ msgid "Automatically set date_from based on last record in target model"
 msgstr "Establecer automáticamente fecha_desde basándose en el último registro del modelo destino"
 
 #. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_search
+msgid "Below minimum"
+msgstr "Por debajo del mínimo"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_brand
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_device_view_search
 msgid "Brand"
@@ -239,7 +339,7 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 #. module: mdm_sensor_management
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_id_20156
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_category_id_13787
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_device_view_search
 msgid "Category"
 msgstr "Categoría"
@@ -317,6 +417,44 @@ msgstr "Creado el"
 #: model:mdm.measurement.device.sensor.uom,description:mdm_sensor_management.mdm_sensor_uom_m3
 msgid "Cubic meters"
 msgstr "Metros cúbicos"
+
+#. module: mdm_sensor_management
+#: selection:mdm.measurement.device.sensor,measurement_transformation_type:0
+#: selection:mdm.measurement.device.sensor.reading,measurement_transformation_type:0
+msgid "Custom Python"
+msgstr "Python personalizado"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_measurement_transformation_python
+msgid "Custom Python Transformation"
+msgstr "Transformación Python personalizada"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_measurement_device_sensor_measurement_transformation_python
+msgid "Custom Python code to transform the raw measurement value.\n"
+"The raw value is available as variable \"value\".\n"
+"The final transformed value must be assigned to \"result\".\n"
+"\n"
+"Available: math, sqrt, pow, log, log10, exp, abs, round, ceil, floor, min, max.\n"
+"\n"
+"Example:\n"
+"  pct = float(value)\n"
+"  result = pct * 100"
+msgstr "Código Python personalizado para transformar el valor de medición bruto.\n"
+"El valor bruto está disponible como variable \"value\".\n"
+"El valor transformado final debe asignarse a \"result\".\n"
+"\n"
+"Disponible: math, sqrt, pow, log, log10, exp, abs, round, ceil, floor, min, max.\n"
+"\n"
+"Ejemplo:\n"
+"  pct = float(value)\n"
+"  result = pct * 100"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor_reading.py:261
+#, python-format
+msgid "Custom Python transformation is empty."
+msgstr "La transformación Python personalizada está vacía."
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_measurement_date_madrid
@@ -518,6 +656,12 @@ msgid "Enter category description..."
 msgstr "Introduzca la descripción de la categoría..."
 
 #. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor_reading.py:299
+#, python-format
+msgid "Error applying transformation \"%s\" to value %s: %s"
+msgstr "Error al aplicar la transformación \"%s\" al valor %s: %s"
+
+#. module: mdm_sensor_management
 #: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:519
 #, python-format
 msgid "Error evaluating expression \"%s\": %s"
@@ -575,6 +719,20 @@ msgid "Filter to restrict which sensors are processed. Applied to all sensors or
 msgstr "Filtro para restringir qué sensores se procesan. Se aplica a todos los sensores o a los sensores seleccionados."
 
 #. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_measurement_transformation
+msgid "Formula that was applied to convert raw_value into value."
+msgstr "Fórmula que se aplicó para convertir raw_value en value."
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_measurement_device_sensor_measurement_transformation
+msgid "Formula to transform the raw measurement value before storing. Use $ as placeholder for the original raw value.\n"
+"Available functions: sqrt, pow, log, log10, exp, abs, round, ceil, floor, min, max.\n"
+"Examples: $ * 0.001 | sqrt($) | pow($, 2) | log10($)"
+msgstr "Fórmula para transformar el valor de medición bruto antes de guardar. Use $ como marcador para el valor bruto original.\n"
+"Funciones disponibles: sqrt, pow, log, log10, exp, abs, round, ceil, floor, min, max.\n"
+"Ejemplos: $ * 0.001 | sqrt($) | pow($, 2) | log10($)"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_date_from
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_from
 #: selection:mdm.sensor.reading.transform.template,selection_mode:0
@@ -628,8 +786,8 @@ msgstr "Agrupar por"
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_id
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_id_18561
-#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_id_18573
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_id_13831
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_id_13844
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_id
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_wizard_generate_random_readings_id
@@ -812,7 +970,7 @@ msgstr "Ubicación"
 #. module: mdm_sensor_management
 #: model:ir.model,name:mdm_sensor_management.model_mdm_config_settings
 msgid "MDM Configuration Settings"
-msgstr "Configuración MDM"
+msgstr "Configuración de MDM"
 
 #. module: mdm_sensor_management
 #: model:res.groups,name:mdm_sensor_management.group_mdm_manager
@@ -843,7 +1001,7 @@ msgstr "El valor máximo debe ser mayor o igual al valor mínimo."
 #. module: mdm_sensor_management
 #: model:ir.model.fields,help:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_retention_days
 msgid "Maximum number of days to keep readings linked to this device. Older readings should be cleaned up automatically by cron."
-msgstr "Número máximo de días para conservar las lecturas vinculadas a este dispositivo. Las lecturas más antiguas deben eliminarse automáticamente mediante cron"
+msgstr "Número máximo de días para conservar las lecturas vinculadas a este sensor . Las lecturas más antiguas deben eliminarse automáticamente mediante cron"
 
 #. module: mdm_sensor_management
 #: model:ir.model,name:mdm_sensor_management.model_mdm_measurement_device
@@ -994,12 +1152,27 @@ msgid "Normal records created"
 msgstr "Registros normales creados"
 
 #. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_search
+msgid "Not checked"
+msgstr "No comprobado"
+
+#. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_notes
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_notes
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_device_view_form
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_uom_view_form
 msgid "Notes"
 msgstr "Notas"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,help:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_raw_value
+msgid "Original value before applying the measurement transformation."
+msgstr "Valor original antes de aplicar la transformación de medición."
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_search
+msgid "Out of range"
+msgstr "Fuera de rango"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_photo
@@ -1016,6 +1189,16 @@ msgstr "Fotos"
 #, python-format
 msgid "Please select at least one sensor or check \"Use All Sensors\""
 msgstr "Por favor, seleccione al menos un sensor o marque \"Usar todos los sensores\""
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_sensor_view_form
+msgid "Range Validation"
+msgstr "Validación de rango"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_raw_value
+msgid "Raw Value"
+msgstr "Valor bruto"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_readonly
@@ -1118,7 +1301,7 @@ msgid "Sensor Reading Transform Template"
 msgstr "Plantilla de transformación de lecturas de sensor"
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:147
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:348
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_graph
 #, python-format
 msgid "Sensor Readings"
@@ -1155,7 +1338,7 @@ msgstr "Unidades de medida del sensor"
 
 #. module: mdm_sensor_management
 #: code:addons/mdm_sensor_management/models/measurement_device.py:102
-#: code:addons/mdm_sensor_management/models/measurement_device_sensor_type.py:63
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor_type.py:189
 #: model:ir.actions.act_window,name:mdm_sensor_management.mdm_sensor_action
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_ids
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_type_sensor_ids
@@ -1189,13 +1372,14 @@ msgstr "Nº de serie"
 #. module: mdm_sensor_management
 #: model:ir.actions.act_window,name:mdm_sensor_management.mdm_config_settings_action
 #: model:ir.ui.menu,name:mdm_sensor_management.mdm_config_settings_menu
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_sensor_view_form
 msgid "Settings"
 msgstr "Configuración"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_uom_short_name
 msgid "Short Name"
-msgstr "Abreviatura"
+msgstr "Nombre corto"
 
 #. module: mdm_sensor_management
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_show_mapping_help
@@ -1282,6 +1466,12 @@ msgid "Template Saved"
 msgstr "Plantilla guardada"
 
 #. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor_reading.py:286
+#, python-format
+msgid "The custom Python transformation must assign a value to \"result\"."
+msgstr "La transformación Python personalizada debe asignar un valor a \"result\"."
+
+#. module: mdm_sensor_management
 #: sql_constraint:mdm.measurement.device:0
 msgid "The identifier must be unique."
 msgstr "El identificador debe de ser único."
@@ -1310,7 +1500,7 @@ msgstr "La unidad de medida debe ser única."
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_template_date_to
 #: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_sensor_reading_transform_wizard_date_to
 msgid "To Date"
-msgstr "Hasta la Fecha"
+msgstr "Hasta la fecha"
 
 #. module: mdm_sensor_management
 #: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:648
@@ -1346,6 +1536,17 @@ msgid "Transform Templates"
 msgstr "Plantillas de transformación"
 
 #. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_reading_view_form
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_sensor_view_form
+msgid "Transformation"
+msgstr "Transformación"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_measurement_transformation
+msgid "Transformation Applied"
+msgstr "Transformación aplicada"
+
+#. module: mdm_sensor_management
 #: code:addons/mdm_sensor_management/wizards/wizard_sensor_reading_transform.py:685
 #, python-format
 msgid "Transformation Complete"
@@ -1368,6 +1569,16 @@ msgstr "Plantilla de transformación"
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_tree
 msgid "Transformation Templates"
 msgstr "Plantillas de transformación"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_measurement_transformation_type
+msgid "Transformation Type"
+msgstr "Tipo de transformación"
+
+#. module: mdm_sensor_management
+#: model:ir.model.fields,field_description:mdm_sensor_management.field_mdm_measurement_device_sensor_reading_measurement_transformation_type
+msgid "Transformation Type Applied"
+msgstr "Tipo de transformación aplicada"
 
 #. module: mdm_sensor_management
 #: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_sensor_view_search
@@ -1395,7 +1606,13 @@ msgid "Unit of Measure"
 msgstr "Unidad de medida"
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:140
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor_reading.py:290
+#, python-format
+msgid "Unknown transformation type: %s"
+msgstr "Tipo de transformación desconocido: %s"
+
+#. module: mdm_sensor_management
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor.py:341
 #, python-format
 msgid "Unsupported operator %s for searching on date"
 msgstr "Operador %s no soportado para búsqueda en fechas"
@@ -1435,7 +1652,7 @@ msgid "What you CANNOT do:"
 msgstr "Lo que NO puede hacer:"
 
 #. module: mdm_sensor_management
-#: code:addons/mdm_sensor_management/models/measurement_device_sensor_type.py:56
+#: code:addons/mdm_sensor_management/models/measurement_device_sensor_type.py:182
 #, python-format
 msgid "You cannot delete a read-only Sensor Type."
 msgstr "No puede eliminar un tipo de sensor de solo lectura."
@@ -1469,6 +1686,13 @@ msgstr "[('active', '=', True)]"
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_wizard_view_form
 msgid "flowmeter_id"
 msgstr "flowmeter_id"
+
+#. module: mdm_sensor_management
+#: model:ir.ui.view,arch_db:mdm_sensor_management.mdm_sensor_view_form
+msgid "pct = float(value)\n"
+"result = pct * 100"
+msgstr "pct = float(value)\n"
+"result = pct * 100"
 
 #. module: mdm_sensor_management
 #: model:ir.ui.view,arch_db:mdm_sensor_management.sensor_reading_transform_template_view_form

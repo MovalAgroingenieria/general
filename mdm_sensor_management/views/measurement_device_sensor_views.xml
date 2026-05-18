@@ -19,16 +19,99 @@
                                 string="Readings"/>
                     </div>
                     <group>
-                        <field name="name"/>
-                        <field name="description"/>
-                        <field name="device_id"/>
-                        <field name="type_id"/>
-                        <field name="reading_retention_days"/>
-                        <field name="uom_id" readonly="1"/>
-                        <field name="last_measurement" />
-                        <field name="last_measurement_time"/>
-                        <field name="last_measurement_value"/>
+                        <group>
+                            <field name="name"/>
+                            <field name="device_id"/>
+                            <field name="type_id"/>
+                            <field name="uom_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="last_measurement_time"/>
+                            <field name="last_measurement_value"/>
+                            <field name="description"/>
+                        </group>
                     </group>
+                    <notebook>
+                        <page string="Transformation" name="page_transformation">
+                            <group>
+                                <field name="measurement_transformation_type"/>
+                                <field name="measurement_transformation"
+                                       attrs="{'invisible': [('measurement_transformation_type', '!=', 'arithmetic')],
+                                                'required': [('measurement_transformation_type', '=', 'arithmetic')]}"/>
+                                <field name="measurement_transformation_python"
+                                       attrs="{'invisible': [('measurement_transformation_type', '!=', 'custom_python')],
+                                                'required': [('measurement_transformation_type', '=', 'custom_python')]}"
+                                       groups="base.group_system"/>
+                            </group>
+                            <div class="oe_edit_only alert alert-info" role="alert"
+                                 attrs="{'invisible': [('measurement_transformation_type', '!=', 'arithmetic')]}">
+                                <strong>Arithmetic formula help:</strong>
+                                Use <code>$</code> as placeholder for the raw value.
+                                <br/>
+                                <strong>Functions:</strong>
+                                <code>sqrt($)</code>,
+                                <code>pow($, 2)</code>,
+                                <code>log($)</code> (natural),
+                                <code>log10($)</code>,
+                                <code>exp($)</code>,
+                                <code>abs($)</code>,
+                                <code>round($)</code>,
+                                <code>ceil($)</code>,
+                                <code>floor($)</code>,
+                                <code>min($, 100)</code>,
+                                <code>max($, 0)</code>
+                                <br/>
+                                <strong>Operators:</strong>
+                                <code>+</code> <code>-</code> <code>*</code>
+                                <code>/</code> <code>**</code> (power)
+                                <br/>
+                                <strong>Examples:</strong>
+                                <code>$ * 0.001</code> |
+                                <code>sqrt($)</code> |
+                                <code>$ ** 2</code> |
+                                <code>log10($ + 1)</code>
+                            </div>
+                            <div class="oe_edit_only alert alert-info" role="alert"
+                                 attrs="{'invisible': [('measurement_transformation_type', '!=', 'custom_python')]}"
+                                 groups="base.group_system">
+                                <strong>Custom Python help:</strong>
+                                The raw value is available as <code>value</code>.
+                                Assign the result to <code>result</code>.
+                                <br/>
+                                <strong>Available:</strong>
+                                <code>math</code>, <code>sqrt</code>, <code>pow</code>,
+                                <code>log</code>, <code>log10</code>, <code>exp</code>,
+                                <code>abs</code>, <code>round</code>, <code>ceil</code>,
+                                <code>floor</code>, <code>min</code>, <code>max</code>
+                                <br/>
+                                <strong>Example:</strong>
+                                <pre>pct = float(value)
+result = pct * 100</pre>
+                            </div>
+                        </page>
+                        <page string="Range Validation" name="page_range_validation">
+                            <group>
+                                <group>
+                                    <field name="has_range_validation"/>
+                                    <field name="has_custom_range"/>
+                                    <field name="custom_min_value"
+                                           attrs="{'invisible': [('has_custom_range', '=', False)]}"/>
+                                    <field name="custom_max_value"
+                                           attrs="{'invisible': [('has_custom_range', '=', False)]}"/>
+                                </group>
+                                <group>
+                                    <field name="effective_has_validation" readonly="1"/>
+                                    <field name="effective_min_value" readonly="1"/>
+                                    <field name="effective_max_value" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Settings" name="page_settings">
+                            <group>
+                                <field name="reading_retention_days"/>
+                            </group>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

@@ -1,142 +1,188 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="mdm_reading_view_form" model="ir.ui.view">
-            <field name="name">Sensor Reading Form</field>
-            <field name="model">mdm.measurement.device.sensor.reading</field>
-            <field name="arch" type="xml">
-                <form>
-                    <sheet>
+        <field name="name">Sensor Reading Form</field>
+        <field name="model">mdm.measurement.device.sensor.reading</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <field name="id" invisible="1"/>
+                    <div class="oe_button_box" name="buttons">
+                        <button name="toggle_active" type="object"
+                                class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button"
+                                   options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+                    <group>
                         <group>
-                            <field name="id" invisible="1"/>
-                            <field name="sensor_id" attrs="{'readonly': [('id', '>', 0)]}"/>
-                            <field name="device_id"/>
-                            <field name="measurement_time" attrs="{'readonly': [('id', '>', 0)]}" />
-                            <field name="value"/>
+                            <field name="sensor_id"
+                                   attrs="{'readonly': [('id', '>', 0)]}"/>
+                            <field name="device_id" readonly="1"/>
+                            <field name="type_id" readonly="1"/>
                             <field name="uom_id" readonly="1"/>
-                            <field name="is_last_sensor_reading"/>
                         </group>
-                    </sheet>
-                </form>
-            </field>
-        </record>
+                        <group>
+                            <field name="measurement_time"
+                                   attrs="{'readonly': [('id', '>', 0)]}"/>
+                            <field name="value"/>
+                            <field name="raw_value" readonly="1"/>
+                            <field name="is_last_sensor_reading" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Transformation"
+                              name="page_transformation">
+                            <group>
+                                <field name="measurement_transformation_type"
+                                       readonly="1"/>
+                                <field name="measurement_transformation"
+                                       readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
 
-        <record id="mdm_reading_view_tree" model="ir.ui.view">
-            <field name="name">Sensor Reading Tree</field>
-            <field name="model">mdm.measurement.device.sensor.reading</field>
-            <field name="arch" type="xml">
-                <tree class="o_mdm_measurement_device_sensor_reading_tree">
-                    <field name="device_id"/>
-                    <field name="sensor_id"/>
-                    <field name="measurement_time"/>
-                    <field name="value"/>
-                    <field name="uom_id"/>
-                    <field name="is_last_sensor_reading"/>
-                </tree>
-            </field>
-        </record>
+    <record id="mdm_reading_view_tree" model="ir.ui.view">
+        <field name="name">Sensor Reading Tree</field>
+        <field name="model">mdm.measurement.device.sensor.reading</field>
+        <field name="arch" type="xml">
+            <tree class="o_mdm_measurement_device_sensor_reading_tree"
+                  decoration-warning="range_status == 'low'"
+                  decoration-danger="range_status == 'high'">
+                <field name="device_id"/>
+                <field name="sensor_id"/>
+                <field name="measurement_time"/>
+                <field name="value"/>
+                <field name="raw_value" invisible="1"/>
+                <field name="uom_id"/>
+                <field name="range_status" invisible="1"/>
+                <field name="is_last_sensor_reading"/>
+                <field name="active" invisible="1"/>
+            </tree>
+        </field>
+    </record>
 
-        <record id="mdm_reading_view_search" model="ir.ui.view">
-            <field name="name">Sensor Reading Search</field>
-            <field name="model">mdm.measurement.device.sensor.reading</field>
-            <field name="arch" type="xml">
-                <search>
-                    <field name="measurement_time"/>
-                    <field name="device_id"/>
-                    <field name="sensor_id"/>
-                    <field name="type_id"/>
-                    <filter string="Device" name="device_id" context="{'group_by':'device_id'}"/>
-                    <filter string="Sensor" name="sensor_id" context="{'group_by':'sensor_id'}"/>
-                    <filter string="Sensor Type" name="type_id" context="{'group_by':'type_id'}"/>
-                    <filter string="Last Reading" name="is_last_sensor_reading"
-                            domain="[('is_last_sensor_reading', '=', True)]"/>
-                    <filter string="Last Reading: No" name="is_last_sensor_reading_no"
-                            domain="[('is_last_sensor_reading','=',False)]"/>
-                    <separator/>
-                    <filter string="Day" name="group_by_day_madrid" context="{'group_by':'measurement_date_madrid:day'}"/>
-                    <separator/>
-                    <filter string="Archived" name="archived_readings"
-                            domain="[('active', '=', False)]"/>
-                </search>
-            </field>
-        </record>
+    <record id="mdm_reading_view_search" model="ir.ui.view">
+        <field name="name">Sensor Reading Search</field>
+        <field name="model">mdm.measurement.device.sensor.reading</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="measurement_time"/>
+                <field name="device_id"/>
+                <field name="sensor_id"/>
+                <field name="type_id"/>
+                <filter string="Device" name="device_id"
+                        context="{'group_by':'device_id'}"/>
+                <filter string="Sensor" name="sensor_id"
+                        context="{'group_by':'sensor_id'}"/>
+                <filter string="Sensor Type" name="type_id"
+                        context="{'group_by':'type_id'}"/>
+                <filter string="Last Reading" name="is_last_sensor_reading"
+                        domain="[('is_last_sensor_reading', '=', True)]"/>
+                <filter string="Last Reading: No"
+                        name="is_last_sensor_reading_no"
+                        domain="[('is_last_sensor_reading','=',False)]"/>
+                <separator/>
+                <filter string="Day" name="group_by_day_madrid"
+                        context="{'group_by':'measurement_date_madrid:day'}"/>
+                <separator/>
+                <filter string="Out of range" name="out_of_range"
+                        domain="[('is_out_of_range', '=', True)]"/>
+                <filter string="Above maximum" name="range_high"
+                        domain="[('range_status', '=', 'high')]"/>
+                <filter string="Below minimum" name="range_low"
+                        domain="[('range_status', '=', 'low')]"/>
+                <filter string="Not checked" name="range_unchecked"
+                        domain="[('range_status', '=', 'unchecked')]"/>
+                <separator/>
+                <filter string="Archived" name="archived_readings"
+                        domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
 
-        <record id="mdm_reading_view_pivot" model="ir.ui.view">
-            <field name="name">Sensor Reading Pivot</field>
-            <field name="model">mdm.measurement.device.sensor.reading</field>
-            <field name="arch" type="xml">
-                <pivot string="Sensor Readings Analysis">
-                    <field name="device_id" type="row"/>
-                    <field name="sensor_id" type="row"/>
-                    <field name="measurement_time" type="col" interval="month"/>
-                    <field name="value" type="measure" operator="avg"/>
-                </pivot>
-            </field>
-        </record>
+    <record id="mdm_reading_view_pivot" model="ir.ui.view">
+        <field name="name">Sensor Reading Pivot</field>
+        <field name="model">mdm.measurement.device.sensor.reading</field>
+        <field name="arch" type="xml">
+            <pivot string="Sensor Readings Analysis">
+                <field name="device_id" type="row"/>
+                <field name="sensor_id" type="row"/>
+                <field name="measurement_time" type="col" interval="month"/>
+                <field name="value" type="measure" operator="avg"/>
+            </pivot>
+        </field>
+    </record>
 
-        <record id="mdm_reading_view_graph" model="ir.ui.view">
-            <field name="name">Sensor Reading Graph</field>
-            <field name="model">mdm.measurement.device.sensor.reading</field>
-            <field name="arch" type="xml">
-                <graph string="Sensor Readings" type="line" stacked="False">
-                    <field name="sensor_id" type="row"/>
-                    <field name="measurement_time" type="col" interval="day"/>
-                    <field name="value" type="measure"/>
-                </graph>
-            </field>
-        </record>
+    <record id="mdm_reading_view_graph" model="ir.ui.view">
+        <field name="name">Sensor Reading Graph</field>
+        <field name="model">mdm.measurement.device.sensor.reading</field>
+        <field name="arch" type="xml">
+            <graph string="Sensor Readings" type="line" stacked="False">
+                <field name="sensor_id" type="row"/>
+                <field name="measurement_time" type="col" interval="day"/>
+                <field name="value" type="measure"/>
+            </graph>
+        </field>
+    </record>
 
-        <record id="mdm_sensor_reading_action" model="ir.actions.act_window">
-            <field name="name">Readings</field>
-            <field name="res_model">mdm.measurement.device.sensor.reading</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form,graph,pivot</field>
-            <field name="view_ids" eval="[
-                (5, 0),
-                (0, 0, {'view_mode': 'tree',  'view_id': ref('mdm_reading_view_tree')}),
-                (0, 0, {'view_mode': 'form',  'view_id': ref('mdm_reading_view_form')}),
-                (0, 0, {'view_mode': 'graph', 'view_id': ref('mdm_reading_view_graph')}),
-                (0, 0, {'view_mode': 'pivot', 'view_id': ref('mdm_reading_view_pivot')})
-            ]"/>
-            <field name="search_view_id" ref="mdm_reading_view_search"/>
-        </record>
+    <record id="mdm_sensor_reading_action" model="ir.actions.act_window">
+        <field name="name">Readings</field>
+        <field name="res_model">mdm.measurement.device.sensor.reading</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,graph,pivot</field>
+        <field name="view_ids" eval="[
+            (5, 0),
+            (0, 0, {'view_mode': 'tree',  'view_id': ref('mdm_reading_view_tree')}),
+            (0, 0, {'view_mode': 'form',  'view_id': ref('mdm_reading_view_form')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('mdm_reading_view_graph')}),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('mdm_reading_view_pivot')})
+        ]"/>
+        <field name="search_view_id" ref="mdm_reading_view_search"/>
+    </record>
 
-        <!-- Actions -->
-        <record id="mdm_archive_sensor_readings" model="ir.actions.server">
-            <field name="name">Archive</field>
-            <field name="model_id" ref="model_mdm_measurement_device_sensor_reading"/>
-            <field name="state">code</field>
-            <field name="code">
-                if context.get('active_ids'):
-                    active_ids = context.get('active_ids', [])
-                    action = env['mdm.measurement.device.sensor.reading'].browse(active_ids).archive_device_sensor_reading()
-            </field>
-        </record>
+    <record id="mdm_archive_sensor_readings" model="ir.actions.server">
+        <field name="name">Archive</field>
+        <field name="model_id" ref="model_mdm_measurement_device_sensor_reading"/>
+        <field name="state">code</field>
+        <field name="code">
+if context.get('active_ids'):
+    active_ids = context.get('active_ids', [])
+    action = env['mdm.measurement.device.sensor.reading'].browse(active_ids).archive_device_sensor_reading()
+        </field>
+    </record>
 
-        <record id="mdm_action_archive_sensor_readings" model="ir.values">
-            <field name="name">Archive</field>
-            <field name="model">mdm.measurement.device.sensor.reading</field>
-            <field name="key">action</field>
-            <field name="key2">client_action_multi</field>
-            <field name="value" eval="'ir.actions.server,' + str(ref('mdm_archive_sensor_readings'))"/>
-        </record>
+    <record id="mdm_action_archive_sensor_readings" model="ir.values">
+        <field name="name">Archive</field>
+        <field name="model">mdm.measurement.device.sensor.reading</field>
+        <field name="key">action</field>
+        <field name="key2">client_action_multi</field>
+        <field name="value"
+               eval="'ir.actions.server,' + str(ref('mdm_archive_sensor_readings'))"/>
+    </record>
 
-        <record id="mdm_unarchive_sensor_readings" model="ir.actions.server">
-            <field name="name">Unarchive</field>
-            <field name="model_id" ref="model_mdm_measurement_device_sensor_reading"/>
-            <field name="state">code</field>
-            <field name="code">
-                if context.get('active_ids'):
-                    active_ids = context.get('active_ids', [])
-                    readings = env['mdm.measurement.device.sensor.reading'].with_context(active_test=False).browse(active_ids)
-                    readings.write({'active': True})
-            </field>
-        </record>
+    <record id="mdm_unarchive_sensor_readings" model="ir.actions.server">
+        <field name="name">Unarchive</field>
+        <field name="model_id" ref="model_mdm_measurement_device_sensor_reading"/>
+        <field name="state">code</field>
+        <field name="code">
+if context.get('active_ids'):
+    active_ids = context.get('active_ids', [])
+    readings = env['mdm.measurement.device.sensor.reading'].with_context(active_test=False).browse(active_ids)
+    readings.write({'active': True})
+        </field>
+    </record>
 
-        <record id="mdm_action_unarchive_sensor_readings" model="ir.values">
-            <field name="name">Unarchive</field>
-            <field name="model">mdm.measurement.device.sensor.reading</field>
-            <field name="key">action</field>
-            <field name="key2">client_action_multi</field>
-            <field name="value" eval="'ir.actions.server,' + str(ref('mdm_unarchive_sensor_readings'))"/>
-        </record>
+    <record id="mdm_action_unarchive_sensor_readings" model="ir.values">
+        <field name="name">Unarchive</field>
+        <field name="model">mdm.measurement.device.sensor.reading</field>
+        <field name="key">action</field>
+        <field name="key2">client_action_multi</field>
+        <field name="value"
+               eval="'ir.actions.server,' + str(ref('mdm_unarchive_sensor_readings'))"/>
+    </record>
 </odoo>

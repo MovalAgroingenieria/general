@@ -2,9 +2,16 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import models, fields, api
+import logging
+import math
 from datetime import datetime, timedelta
 import pytz
+from simpleeval import simple_eval
+
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+from odoo.tools.safe_eval import safe_eval
+_logger = logging.getLogger(__name__)
 
 
 class MeasurementDeviceSensorReading(models.Model):
@@ -63,6 +70,53 @@ class MeasurementDeviceSensorReading(models.Model):
         readonly=True,
     )
 
+    raw_value = fields.Float(
+        string='Raw Value',
+        digits=(32, 4),
+        readonly=True,
+        help='Original value before applying the measurement transformation.',
+    )
+
+    measurement_transformation_type = fields.Selection(
+        selection=[
+            ('arithmetic', 'Arithmetic Expression'),
+            ('custom_python', 'Custom Python'),
+        ],
+        string='Transformation Type Applied',
+        readonly=True,
+    )
+
+    measurement_transformation = fields.Char(
+        string='Transformation Applied',
+        readonly=True,
+        help='Formula that was applied to convert raw_value into value.',
+    )
+
+    is_out_of_range = fields.Boolean(
+        string='Out of range',
+        store=True,
+        index=True,
+        compute='_compute_is_out_of_range',
+        help='True if the reading value falls outside the effective '
+             'min/max range defined for the sensor.',
+    )
+
+    range_status = fields.Selection(
+        string='Range status',
+        selection=[
+            ('normal', 'Normal'),
+            ('low', 'Below minimum'),
+            ('high', 'Above maximum'),
+            ('unchecked', 'Not checked'),
+        ],
+        store=True,
+        index=True,
+        compute='_compute_is_out_of_range',
+        help='Validity status of the reading with respect to the sensor '
+             'range: normal, below minimum, above maximum, or not checked '
+             '(when range validation is disabled for the sensor).',
+    )
+
     active = fields.Boolean(
         string='Active',
         default=True,
@@ -118,8 +172,132 @@ class MeasurementDeviceSensorReading(models.Model):
                 device_id = record.sensor_id.device_id
             record.device_id = device_id
 
+    @api.multi
+    @api.depends('value', 'sensor_id')
+    def _compute_is_out_of_range(self):
+        for record in self:
+            if not record.sensor_id.effective_has_validation:
+                record.range_status = 'unchecked'
+                record.is_out_of_range = False
+            elif record.value < record.sensor_id.effective_min_value:
+                record.range_status = 'low'
+                record.is_out_of_range = True
+            elif record.value > record.sensor_id.effective_max_value:
+                record.range_status = 'high'
+                record.is_out_of_range = True
+            else:
+                record.range_status = 'normal'
+                record.is_out_of_range = False
+
     def archive_device_sensor_reading(self):
         self.write({'active': False})
+
+    @api.model
+    def create(self, vals):
+        vals = self._apply_measurement_transformation(vals)
+        return super(MeasurementDeviceSensorReading, self).create(vals)
+
+    @api.multi
+    def write(self, vals):
+        if 'value' in vals and 'raw_value' not in vals:
+            for record in self:
+                record_vals = dict(vals)
+                record_vals = self._apply_measurement_transformation(
+                    record_vals,
+                    sensor=record.sensor_id)
+                super(MeasurementDeviceSensorReading, record).write(
+                    record_vals)
+            return True
+        return super(MeasurementDeviceSensorReading, self).write(vals)
+
+    @api.model
+    def _apply_measurement_transformation(self, vals, sensor=None):
+        if sensor is None:
+            sensor_id = vals.get('sensor_id')
+            if sensor_id:
+                sensor = self.env[
+                    'mdm.measurement.device.sensor'].browse(sensor_id)
+        if not sensor:
+            return vals
+        transformation_type = sensor.measurement_transformation_type or \
+            'arithmetic'
+        if transformation_type == 'arithmetic':
+            transformation = sensor.measurement_transformation or '$'
+        else:
+            transformation = sensor.measurement_transformation_python or ''
+        raw_value = vals.get('value', 0.0)
+        vals['raw_value'] = raw_value
+        vals['measurement_transformation_type'] = transformation_type
+        vals['measurement_transformation'] = transformation
+        vals['value'] = self._transform_value(
+            raw_value, transformation, transformation_type)
+        return vals
+
+    @api.model
+    def _transform_value(self, value, transformation,
+                         transformation_type='arithmetic'):
+        allowed_functions = {
+            'sqrt': math.sqrt,
+            'pow': pow,
+            'log': math.log,
+            'log10': math.log10,
+            'exp': math.exp,
+            'abs': abs,
+            'round': round,
+            'ceil': math.ceil,
+            'floor': math.floor,
+            'min': min,
+            'max': max,
+        }
+        try:
+            if transformation_type == 'arithmetic':
+                expression = transformation.replace('$', str(value))
+                result = simple_eval(
+                    expression, functions=allowed_functions)
+                return float(result)
+            if transformation_type == 'custom_python':
+                if not transformation or not transformation.strip():
+                    raise UserError(
+                        _('Custom Python transformation is empty.'))
+                localdict = {
+                    'value': float(value),
+                    'result': None,
+                    'math': math,
+                    'sqrt': math.sqrt,
+                    'pow': pow,
+                    'log': math.log,
+                    'log10': math.log10,
+                    'exp': math.exp,
+                    'abs': abs,
+                    'round': round,
+                    'ceil': math.ceil,
+                    'floor': math.floor,
+                    'min': min,
+                    'max': max,
+                }
+                safe_eval(
+                    transformation,
+                    localdict,
+                    mode='exec',
+                    nocopy=True,
+                )
+                if localdict.get('result') is None:
+                    raise UserError(
+                        _('The custom Python transformation must '
+                          'assign a value to "result".'))
+                return float(localdict['result'])
+            raise UserError(
+                _('Unknown transformation type: %s') %
+                transformation_type)
+        except UserError:
+            raise
+        except Exception as e:
+            _logger.warning(
+                'Transformation error: %s (type=%s, formula=%s, value=%s)',
+                e, transformation_type, transformation, value)
+            raise UserError(
+                _('Error applying transformation "%s" to value %s: %s') %
+                (transformation, value, e))
 
     @api.model
     def cron_cleanup_old_readings(self):

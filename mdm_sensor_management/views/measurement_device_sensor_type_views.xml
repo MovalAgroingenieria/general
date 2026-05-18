@@ -20,6 +20,11 @@
                     </group>
                     <group>
                         <field name="uom_id"/>
+                        <field name="has_range_validation"/>
+                        <field name="min_value"
+                               attrs="{'invisible': [('has_range_validation', '=', False)]}"/>
+                        <field name="max_value"
+                               attrs="{'invisible': [('has_range_validation', '=', False)]}"/>
                     </group>
                 </sheet>
             </form>
