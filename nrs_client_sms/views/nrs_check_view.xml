@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="nrs_check_action" model="ir.actions.server">
+        <field name="name">Check mobile (nrs)</field>
+        <field name="model_id" ref="model_nrs_check"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = env['nrs.check'].run_check_mobile()
+        </field>
+    </record>
+
+    <menuitem id="nrs_check_menu" name="Check mobile numbers"
+        parent="nrs_root_menu" action="nrs_check_action"
+        sequence="4"/>
+
+    <record id="nrs_check_view_tree" model="ir.ui.view">
+        <field name="name">nrs Check Tree</field>
+        <field name="model">nrs.check</field>
+        <field name="arch" type="xml">
+            <tree colors="green:phone_number_state=='ok';orange:phone_number_state=='not_set'; red:phone_number_state=='fail';">
+                <field name="partner_id"/>
+                <field name="phone_number"/>
+                <field name="phone_number_state"/>
+                <field name="phone_number_state_description"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="nrs_check_view_search" model="ir.ui.view">
+        <field name="name">nrs Check Search</field>
+        <field name="model">nrs.check</field>
+        <field name="arch" type="xml">
+            <search>
+                <group expand="0" string="Group By">
+                    <filter name="groupby_phone_number_state" string="State"
+                     context="{'group_by':'phone_number_state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+</odoo>

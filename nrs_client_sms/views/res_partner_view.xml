@@ -11,7 +11,7 @@
                     type="object"  attrs="{'invisible': [('num_sms_certified','=', 0)]}" help="SMS's that have been sent.">
                     <div class="o_form_field o_stat_info">
                         <span class="o_stat_value" style="display:inline;"><field name="num_sms_certified"/></span>
-                        <span class="o_stat_text" style="display:inline;"> Certified SMS's</span>
+                        <span class="o_stat_text" style="display:inline;"> NRS SMS's</span>
                     </div>
                 </button>
             </xpath>
@@ -19,7 +19,7 @@
                 <field name="show_icon_next_mobile_certified" invisible="1"/>
                 <button name="%(nrs_client_sms.action_nrs_wizard)d" class="fa fa-nrs-sms-write"
                     type="action" attrs="{'invisible': ['|', ('mobile','=', False), ('show_icon_next_mobile_certified','=', False)]}"
-                    help="Send certified SMS" groups="nrs_client_sms.group_send_nrs_sms"/>
+                    help="Send NRS SMS" groups="nrs_client_sms.group_send_nrs_sms"/>
             </xpath>
         </field>
     </record>
@@ -33,7 +33,7 @@
                 <field name="show_icon_on_partner_view_kanban_certified" invisible="1"/>
                 <button name="%(nrs_client_sms.action_nrs_wizard)d" class="fa fa-nrs-sms-write"
                     type="action" attrs="{'invisible': ['|', ('mobile','=', False), ('show_icon_on_partner_view_kanban_certified','=', False)]}"
-                    help="Send certified SMS" groups="nrs_client_sms.group_send_nrs_sms"/>
+                    help="Send NRS SMS" groups="nrs_client_sms.group_send_nrs_sms"/>
             </xpath>
         </field>
     </record>

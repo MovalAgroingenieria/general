@@ -8,9 +8,9 @@ NRS client SMS
 
 Description
 ===========
-Send certified SMS messages with legal validity by verified sender by Google (*)
-to one or several partners using 360NRS services and keep a record of the SMS
-sent and their certificates.
+Send normal or certified SMS messages with legal validity by verified sender by
+Google (*) to one or several partners using 360NRS services and keep a record of
+the SMS sent and their certificates.
 
 You can also send SMS from invoices. You can also create templates, partner or
 invoice, with jinja2 variables for bulk or individual sending.

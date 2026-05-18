@@ -61,14 +61,14 @@ class NRSConfiguration(models.TransientModel):
         string="Allow certify SMS",
         default=True,
         help="If checked, it is allowed to send certified SMS. They have an "
-            "additional cost.")
+             "additional cost.")
 
     allow_flash_sms = fields.Boolean(
         string="Allow flash SMS",
         default=False,
         help="If checked, it is allowed to send flash SMS. These SMS appear "
-            "directly on the device screen. Be careful, on some devices these "
-            "SMS cannot be saved.")
+             "directly on the device screen. Be careful, on some devices these"
+             " SMS cannot be saved.")
 
     @api.multi
     def set_default_values(self):
