@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_stock_picking_cmr_document_license_plate"
+              inherit_id="stock_picking_cmr_report.report_stock_picking_cmr_document">
+        <xpath expr="//span[@t-field='doc.cmr_tractor_license_plate']" position="replace">
+            <span t-field="doc.cmr_tractor_license_plate_id.name"/>
+        </xpath>
+        <xpath expr="//p[span[@t-field='doc.cmr_tractor_license_plate_id.name']]" position="attributes">
+            <attribute name="t-if">doc.cmr_tractor_license_plate_id</attribute>
+        </xpath>
+        <xpath expr="//span[@t-field='doc.cmr_semi_trailer_license_plate']" position="replace">
+            <span t-field="doc.cmr_semi_trailer_license_plate_id.name"/>
+        </xpath>
+        <xpath expr="//p[span[@t-field='doc.cmr_semi_trailer_license_plate_id.name']]" position="attributes">
+            <attribute name="t-if">doc.cmr_semi_trailer_license_plate_id</attribute>
+        </xpath>
+    </template>
+
+</odoo>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_picking_form_license_plate" model="ir.ui.view">
+        <field name="name">stock.picking.form.cmr.license.plate</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock_picking_cmr_report.view_picking_form"/>
+        <field name="arch" type="xml">
+            <field name="cmr_tractor_license_plate" position="replace">
+                <field name="cmr_tractor_license_plate_id"
+                       options="{'no_create_edit': False, 'no_quick_create': False}"/>
+            </field>
+            <field name="cmr_semi_trailer_license_plate" position="replace">
+                <field name="cmr_semi_trailer_license_plate_id"
+                       options="{'no_create_edit': False, 'no_quick_create': False}"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>
