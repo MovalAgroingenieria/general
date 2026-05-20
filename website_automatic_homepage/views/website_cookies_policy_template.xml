@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html). -->
+<odoo>
+
+    <template id="politica_cookies" name="Política de cookies" page="True">
+        <t t-call="website.layout">
+            <t t-set="pageName" t-value="'politica-cookies'"/>
+            <div id="wrap" class="oe_structure oe_empty">
+                <section class="s_text_block">
+                    <div class="container">
+                        <h2 class="text-center" style="box-sizing: border-box; font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-weight: 500; line-height: 1.1; color: rgb(51, 51, 51); margin-top: 20px; margin-bottom: 10px; font-size: 30px; text-align: center;">
+                            <b style="box-sizing: border-box; font-weight: bold;">Política de cookies</b>
+                        </h2>
+                        <h2 class="text-center" style="box-sizing: border-box; font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-weight: 500; line-height: 1.1; color: rgb(51, 51, 51); margin-top: 20px; margin-bottom: 10px; font-size: 30px; text-align: center;">
+                            <font style="box-sizing: border-box; font-size: 14px;">Lea atentamente nuestra política de cookies</font>
+                        </h2>
+
+                        <h2 class="text-center">
+                            <b style="font-size: 18px; text-align: start;">Identificación</b>
+                        </h2>
+                        <section class="s_text_block" style="text-align: start;">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-12 mb16 mt16">
+                                        <p style="font-size: 14px;">
+                                            Esta página web es propiedad de la
+                                            <strong><t t-esc="res_company.name"/></strong>
+                                            <t t-if="res_company.vat">, con CIF <strong><t t-esc="res_company.vat"/></strong></t>
+                                            <t t-if="res_company.street">
+                                                , con domicilio en
+                                                <strong>
+                                                    <t t-esc="res_company.street"/><t t-if="res_company.street2">, <t t-esc="res_company.street2"/></t><t t-if="res_company.city">, <t t-esc="res_company.city"/></t><t t-if="res_company.state_id">, <t t-esc="res_company.state_id.name"/></t><t t-if="res_company.country_id">, <t t-esc="res_company.country_id.name"/></t>
+                                                </strong>
+                                            </t>.
+                                        </p>
+                                        <p style="font-size: 14px;">En nuestra página web utilizamos cookies propias que nos permiten mejorar la experiencia del usuario y ofrecerle contenidos personalizados y adaptados a sus intereses. También utilizamos cookies de terceros que personalizan la publicidad de las páginas que visita con contenido de interés para nuestros usuarios.</p>
+                                        <p style="font-size: 14px;">En caso de que usted continúe en este sitio web con el navegador configurado para aceptar cookies, entendemos que usted acepta la instalación de cookies, tal como se detalla en la presente Política de Cookies.</p>
+                                        <p style="font-size: 14px;">En cualquier momento puede cambiar o retirar su consentimiento. Obtenga más información sobre quiénes somos, cómo puede comunicarse con nosotros y cómo procesamos los datos personales en nuestra Política de privacidad.</p>
+                                        <t t-if="res_company.website">
+                                            <p style="font-size: 14px;">
+                                                Su consentimiento se aplica a los siguientes dominios:
+                                                <strong>
+                                                    <a t-att-href="res_company.website" rel="noopener" class="decorated-link cursor-pointer">
+                                                        <t t-esc="res_company.website"/>
+                                                    </a>
+                                                </strong>
+                                            </p>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <h2 class="text-center">
+                            <b style="font-size: 18px; text-align: start;">Política de Cookies</b>
+                        </h2>
+                        <section class="s_text_block" style="font-size: 14px; text-align: start;">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-12 mb16 mt16">
+                                        <p>En cumplimiento de lo dispuesto en el artículo 22.2 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico, el Titular le informa que este sitio web utiliza cookies, así como sobre su política de recopilación y el tratamiento que realiza de las mismas.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <h2 class="text-center">
+                            <b style="font-size: 18px; text-align: start;">Qué son las cookies</b>
+                        </h2>
+                        <section class="s_text_block" style="font-size: 14px; text-align: start;">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-12 mb16 mt16">
+                                        <p>Una cookie es un archivo que se descarga en su ordenador al entrar en determinadas páginas web.</p>
+                                        <p>Las cookies permiten a una página web, entre otras cosas, almacenar y recuperar información sobre sus hábitos de navegación y dependiendo de la información que contenga y de la manera que utilice su equipo pueden utilizarse para identificarlo.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <h2 class="text-center">
+                            <b style="font-size: 18px; text-align: start;">Tipos de cookies utilizadas</b>
+                        </h2>
+                        <section class="s_text_block" style="font-size: 14px; text-align: start;">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-12 mb16 mt16">
+                                        <p>
+                                            El sitio web
+                                            <t t-if="res_company.website">
+                                                <strong>
+                                                    <a t-att-href="res_company.website" rel="noopener" target="_new" class="cursor-pointer decorated-link">
+                                                        <t t-esc="res_company.website"/>
+                                                    </a>
+                                                </strong>
+                                            </t>
+                                            utiliza los siguientes tipos de cookies:
+                                        </p>
+                                        <p>Cookies técnicas: son aquellas gestionadas por el sitio web que permiten a los usuarios registrados navegar por el área restringida y utilizar sus diferentes funciones. Algunas cookies son esenciales para el funcionamiento de la web.</p>
+                                        <p>Cookies de personalización: son aquellas que permiten a los usuarios acceder al servicio con algunas características de carácter general predefinidas según una serie de criterios establecidos por el usuario, como el idioma o el tipo de navegador a través del cual se conecta al sitio web.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <h2 class="text-center">
+                            <b style="font-size: 18px; text-align: start;">Desactivar las cookies</b>
+                        </h2>
+                        <section class="s_text_block" style="font-size: 14px; text-align: start;">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-12 mb16 mt16">
+                                        <p>Puede aceptar, bloquear o eliminar las cookies instaladas en su equipo mediante la configuración de las opciones del navegador.</p>
+                                        <p>En los siguientes enlaces encontrará instrucciones para habilitar o deshabilitar las cookies en los navegadores más comunes:</p>
+                                        <p>Firefox: <a rel="noopener" target="_new" class="decorated-link" href="http://support.mozilla.org/es/kb/habilitar-y-deshabilitar-cookies-que-los-sitios-we">http://support.mozilla.org/es/kb/habilitar-y-deshabilitar-cookies-que-los-sitios-we</a></p>
+                                        <p>Safari: <a rel="noopener" target="_new" class="decorated-link" href="http://support.apple.com/kb/HT1677?viewlocale=es_ES">http://support.apple.com/kb/HT1677?viewlocale=es_ES</a></p>
+                                        <p>Google Chrome: <a rel="noopener" target="_new" class="decorated-link" href="https://support.google.com/chrome/answer/95647?hl=es">https://support.google.com/chrome/answer/95647?hl=es</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <h2 class="text-center">
+                            <b style="font-size: 18px; text-align: start;">Aviso sobre eliminar cookies</b>
+                        </h2>
+                        <section class="s_text_block" style="font-size: 14px; text-align: start;">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-12 mb16 mt16">
+                                        <p>Puede eliminar y bloquear las cookies de este sitio web, pero parte del sitio no funcionará correctamente o su calidad puede verse afectada.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <h2 class="text-center">
+                            <b style="font-size: 18px; text-align: start;">Contacto</b>
+                        </h2>
+                        <section class="s_text_block" style="font-size: 14px; text-align: start;">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-12 mb16 mt16">
+                                        <p>
+                                            Puede contactar con la
+                                            <strong><t t-esc="res_company.name"/></strong>
+                                            para resolver cualquier duda o cuestión relacionada con la presente política de cookies
+                                            <t t-if="res_company.email">
+                                                enviando un correo electrónico a
+                                                <strong>
+                                                    <a t-att-href="'mailto:%s' % res_company.email" class="cursor-pointer decorated-link" rel="noopener">
+                                                        <t t-esc="res_company.email"/>
+                                                    </a>
+                                                </strong>
+                                            </t>
+                                            <t t-if="res_company.street">
+                                                o por escrito a la dirección
+                                                <strong>
+                                                    <t t-esc="res_company.street"/><t t-if="res_company.street2">, <t t-esc="res_company.street2"/></t><t t-if="res_company.city">, <t t-esc="res_company.city"/></t><t t-if="res_company.state_id">, <t t-esc="res_company.state_id.name"/></t><t t-if="res_company.country_id">, <t t-esc="res_company.country_id.name"/></t>
+                                                </strong>
+                                            </t>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+</odoo>

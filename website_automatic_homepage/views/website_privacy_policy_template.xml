@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html). -->
+<odoo>
+
+    <template id="politica_privacidad" name="Política de privacidad" page="True">
+        <t t-call="website.layout">
+            <t t-set="pageName" t-value="'politica-privacidad'"/>
+            <div id="wrap" class="oe_structure oe_empty">
+                <section class="s_text_block">
+                    <div class="container">
+                        <h1 class="text-center" style="box-sizing: border-box; font-size: 36px; margin: 20px 0px 10px; font-family: inherit; font-weight: 500; line-height: 1.1; color: inherit; text-align: center;">Política de privacidad</h1>
+
+                        <section class="s_text_block" style="font-size: 14px; text-align: start;">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-12 mb16 mt16">
+                                        <p>
+                                            <strong><t t-esc="res_company.name"/></strong>
+                                            (''nos, ''nosotros'', o ''nuestro'')
+                                            <t t-if="res_company.website">
+                                                opera
+                                                <a t-att-href="res_company.website" rel="noopener" class="decorated-link cursor-pointer">
+                                                    <t t-esc="res_company.website"/>
+                                                </a>
+                                            </t>
+                                            la ''página''. Esta página le informa de nuestra políticas en cuanto a la colección, uso y revelación de la Información personal que recibimos de los usuarios del Sitio.
+                                        </p>
+                                        <p><br/></p>
+                                        <p>Usamos su Información Personal solamente para proporcionar y mejorar el sitio. Al utilizar el Sitio, usted acepta la recopilación y uso de información de acuerdo con esta política.</p>
+                                        <p><br/></p>
+
+                                        <p><b>RESPONSABLE</b></p>
+                                        <p>
+                                            A efecto de lo previsto en el Reglamento General de Protección de Datos UE 2016/679, en adelante RGPD, y en la Ley Orgánica 3/2018 de Protección de Datos Personales y garantía de derechos digitales, en adelante LOPD-GDD, y sus normas de desarrollo,
+                                            <strong><t t-esc="res_company.name"/></strong>
+                                            informa a todos los usuarios y al público en general, que los datos de carácter personal recabados a través del formulario de contacto, registro de usuarios, o cualquier otro apartado de esta página, serán incluidos en un fichero cuyo responsable es esta misma
+                                            <strong><t t-esc="res_company.name"/></strong>
+                                            <t t-if="res_company.vat">, con NIF: <strong><t t-esc="res_company.vat"/></strong></t>
+                                            <t t-if="res_company.street">
+                                                y con domicilio social
+                                                <strong>
+                                                    <t t-esc="res_company.street"/><t t-if="res_company.street2">, <t t-esc="res_company.street2"/></t><t t-if="res_company.city">, <t t-esc="res_company.city"/></t><t t-if="res_company.state_id">, <t t-esc="res_company.state_id.name"/></t><t t-if="res_company.country_id">, <t t-esc="res_company.country_id.name"/></t>
+                                                </strong>
+                                            </t>.
+                                        </p>
+                                        <p><br/></p>
+
+                                        <p><b>FINALIDAD</b></p>
+                                        <p>La finalidad de la recogida de datos de carácter personal que pudiera realizarse se ciñe estrictamente a dar cumplimento al envío de la información que nos pueda ser solicitada o para ejercitar los derechos y obligaciones reconocidos legalmente, o de todas aquellas actividades y gestiones que pudieran derivarse de una relación comercial o de servicio que fuera solicitada por el propio titular de los datos o su representante, o bien de una relación legal derivada de la vertiente pública de las comunidades de regantes como corporaciones de derecho público.</p>
+                                        <p><b><br/></b></p>
+
+                                        <p><b>LEGITIMACIÓN DEL TRATAMIENTO</b></p>
+                                        <p>Mediante el envío de los formularios existentes en esta página web, el envío de un mensaje de correo electrónico u otras solicitudes de información recibidas en otras opciones que pudieran estar disponibles, el remitente presta su consentimiento al tratamiento automatizado de los datos incluidos en los mismos, siendo este consentimiento la base legítima en la que se sustente el tratamiento de sus datos personales, de acuerdo a la letra a) del artículo 6 del RGPD.</p>
+                                        <p><br/></p>
+                                        <p>Además, por la vertiente pública que tienen las comunidades de regantes como corporación de derecho público, la legitimidad y licitud del tratamiento de datos puede ser acogida también en base a la letra c del mismo artículo 6 del RGPD, tratamiento que es necesario para el cumplimiento de una misión realizada en interés público o en el ejercicio de poderes públicos conferidos al responsable del tratamiento.</p>
+                                        <p><br/></p>
+
+                                        <p><b>CATEGORÍAS DE DATOS</b></p>
+                                        <p>Los datos que pudieran ser recogidos en este portal web, siempre de forma voluntaria y expresa, son los estrictamente necesarios para la correcta identificación del remitente, tales como nombre o razón social, dirección, correo electrónico, teléfono, persona de contacto, dirección IP desde donde accede al registro o formulario, así como los datos mínimos necesarios para llevar a cabo las gestiones o servicios solicitados. En los formularios estandarizados que en nuestro portal web ponemos a su disposición para facilitar su comunicación de forma voluntaria, los campos marcados con asterisco son de obligada cumplimentación, por lo que en caso de no ser cumplimentados no podremos atender sus solicitudes.</p>
+                                        <p><br/></p>
+
+                                        <p><b>PLAZOS DE CONSERVACIÓN:</b></p>
+                                        <p>Los datos recabados se conservarán mientras dure la relación comercial o de prestación de servicios, o en base a las competencias legítimamente atribuidas a las comunidades de regantes como corporaciones de derecho público; o la estrictamente necesaria para el correcto desarrollo de una ''conversación'' de solicitud de información, entre el interesado y el responsable. El plazo de conservación podrá ser ampliada en base a las obligaciones legales que pudieran derivarse de dicha relación.</p>
+                                        <p><br/></p>
+
+                                        <p><b>COMUNICACIÓN DE DATOS:</b></p>
+                                        <p>Le informamos que sus datos nunca serán suministrados a terceros bajo ningún concepto, salvo en los casos que dicha cesión o comunicación sea imprescindible para prestarle los servicios solicitados, como es el caso de gestorías, asesorías, entidades financieras, aseguradores, de gestión de cobros, administraciones públicas competentes, o por los supuestos legalmente establecidos.</p>
+                                        <p><br/></p>
+
+                                        <p><b>MEDIDAS DE SEGURIDAD</b></p>
+                                        <p>
+                                            La
+                                            <strong><t t-esc="res_company.name"/></strong>
+                                            informa a todos los usuarios de que se han adoptado las medidas de seguridad técnicas y organizativas necesarias para garantizar la confidencialidad, integridad y disponibilidad de sus datos personales, dando cumplimento a lo dispuesto en el RGPD y LOPD-GDD.
+                                        </p>
+                                        <p><br/></p>
+
+                                        <p><b>AVISO DE COOKIES</b></p>
+                                        <p>
+                                            Este sitio web utiliza Cookies (pequeñas piezas de información que se almacenan en el navegador de su ordenador, tableta o Smartphone, cuando visita una página web), para facilitar y personalizar la navegación por las diferentes páginas web. Puede ver toda la información relacionada con este tema entrando en
+                                            <a href="/page/politica-cookies">Política de Cookies</a>.
+                                        </p>
+                                        <p><br/></p>
+
+                                        <p><b>DERECHOS DEL TITULAR DE LOS DATOS</b></p>
+                                        <p>
+                                            De acuerdo con la normativa aplicable en materia de protección de datos anteriormente mencionada, usted podrá ejercitar, en cualquier momento, sus DERECHOS DE ACCESO, RECTIFICACIÓN, SUPRESIÓN, LIMITACIÓN, PORTABILIDAD, OPOSICIÓN, Y A NO SER OBJETO DE DECISIONES AUTOMATIZADAS, así como cualquier otro derecho reconocido por dicha normativa, de forma GRATUITA, dirigiendo su solicitud directamente al responsable de tratamiento de datos
+                                            <t t-if="res_company.street">
+                                                a la dirección postal
+                                                <strong>
+                                                    <t t-esc="res_company.street"/><t t-if="res_company.street2">, <t t-esc="res_company.street2"/></t><t t-if="res_company.city">, <t t-esc="res_company.city"/></t><t t-if="res_company.zip"> <t t-esc="res_company.zip"/></t><t t-if="res_company.state_id">, <t t-esc="res_company.state_id.name"/></t><t t-if="res_company.country_id">, <t t-esc="res_company.country_id.name"/></t>
+                                                </strong>;
+                                            </t>
+                                            <t t-if="res_company.email">
+                                                o bien a través de correo electrónico a:
+                                                <a t-att-href="'mailto:%s' % res_company.email" class="cursor-pointer decorated-link" rel="noopener">
+                                                    <t t-esc="res_company.email"/>
+                                                </a>
+                                            </t>
+                                        </p>
+                                        <p>Estos derechos serán ejercidos por el interesado, sin otras limitaciones que las que prevea le legislación aplicable. Podrá, no obstante, actuar el representante legal del usuario interesado cuando éste se encuentre en situación de incapacidad o minoría de edad que le imposibilite el ejercicio personal de los mismos.</p>
+                                        <p>Las solicitudes serán atendidas dentro de los treinta días siguientes a su recepción. En el supuesto de que el Responsable de tratamiento considere que no procede acceder a lo solicitado por el afectado, se lo comunicará motivadamente dentro del mismo plazo señalado.</p>
+                                        <p>
+                                            En los casos en que, siendo procedente la supresión de los datos, no sea posible su extinción física, tanto por razones técnicas como por causa del soporte informático utilizado,
+                                            <strong><t t-esc="res_company.name"/></strong>,
+                                            como responsable del tratamiento de datos, procederá al bloqueo de los datos, con el fin de impedir su utilización, hasta su completa eliminación de los sistemas de información.
+                                        </p>
+                                        <p>
+                                            Usted tiene derecho a retirar el consentimiento prestado para el tratamiento de sus datos en cualquier momento. Para ejercitar este derecho bastará con que nos envíe un correo electrónico
+                                            <t t-if="res_company.email">
+                                                a
+                                                <a t-att-href="'mailto:%s' % res_company.email" class="cursor-pointer decorated-link" rel="noopener">
+                                                    <t t-esc="res_company.email"/>
+                                                </a>
+                                            </t>
+                                            indicando en el asunto ''Deseo retirar el consentimiento prestado para el tratamiento de mis datos''.
+                                        </p>
+                                        <p>Así mismo usted también tiene derecho a presentar una reclamación ante la autoridad de control competente, que en el caso de España es la Agencia Española de Protección de Datos, si viese vulnerados sus derechos legítimos.</p>
+                                        <p><br/></p>
+
+                                        <p><b>MENORES DE EDAD:</b></p>
+                                        <p>
+                                            El contenido reproducido en el portal web está dirigido a personas mayores de 14 años. Si una persona menor de la edad mencionada desea solicitar información, deberá ser siempre mediante el consentimiento expreso de sus padres o tutores legales, los cuales deberán contactar directamente con
+                                            <strong><t t-esc="res_company.name"/></strong>
+                                            por cualquiera de los medios puestos a su disposición, como formularios de contacto, teléfono, o correo electrónico, para garantizar mediante prueba fehaciente de la patria potestad, que consienten el tratamiento de datos del menor interesado.
+                                        </p>
+                                        <p><br/></p>
+
+                                        <p><b>CONTACTO</b></p>
+                                        <p>Si tiene alguna pregunta acerca de estos Términos, por favor contacte con nosotros.</p>
+                                        <t t-if="res_company.street"><p><t t-esc="res_company.street"/></p></t>
+                                        <t t-if="res_company.street2"><p><t t-esc="res_company.street2"/></p></t>
+                                        <p>
+                                            <t t-if="res_company.city"><t t-esc="res_company.city"/></t><t t-if="res_company.state_id">, <t t-esc="res_company.state_id.name"/></t><t t-if="res_company.zip"> <t t-esc="res_company.zip"/></t>
+                                        </p>
+                                        <t t-if="res_company.country_id"><p><t t-esc="res_company.country_id.name"/></p></t>
+                                        <t t-if="res_company.phone"><p>Número de teléfono: <t t-esc="res_company.phone"/></p></t>
+                                        <t t-if="res_company.email"><p>Dirección de correo electrónico: <t t-esc="res_company.email"/></p></t>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+</odoo>

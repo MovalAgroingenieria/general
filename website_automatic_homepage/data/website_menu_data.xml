@@ -41,4 +41,13 @@
         </record>
 
     </data>
+
+    <!-- Re-remove menus auto-created by optional dependencies on every
+         update of this module. They have noupdate=1 but get recreated
+         whenever those modules are reinstalled or updated. -->
+    <data>
+        <function model="website.menu"
+                  name="_moval_remove_default_optional_menus"/>
+    </data>
+
 </odoo>

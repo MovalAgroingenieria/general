@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2026 Moval Agroingeniería
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html). -->
+<odoo>
+
+    <template id="aviso_legal" name="Aviso Legal" page="True">
+        <t t-call="website.layout">
+            <t t-set="pageName" t-value="'aviso-legal'"/>
+            <div id="wrap" class="oe_structure oe_empty">
+                <section class="s_text_block">
+                    <div class="container">
+                        <h1 class="text-center" style="box-sizing: border-box; font-size: 36px; margin: 20px 0px 10px; font-family: inherit; font-weight: 500; line-height: 1.1; color: inherit; text-align: center;">Aviso Legal</h1>
+
+                        <section class="s_text_block mt0" style="text-align: start;">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-md-12 mb16 mt16">
+                                        <p style="text-align: justify; font-size: 14px;">
+                                            <b><t t-esc="res_company.name"/></b>, responsable del sitio web, en adelante RESPONSABLE, pone a disposición de los usuarios el presente documento, con el que pretende dar cumplimiento a las obligaciones dispuestas en la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSICE), BOE Nº 166, así como informar a todos los usuarios del sitio web respecto a cuáles son las condiciones de uso.
+                                        </p>
+                                        <p style="font-size: 14px; text-align: justify;">Toda persona que acceda a este sitio web asume el papel de usuario, comprometiéndose a la observancia y cumplimiento riguroso de las disposiciones aquí dispuestas, así como a cualquier otra disposición legal que fuera de aplicación.</p>
+                                        <p style="font-size: 14px; text-align: justify;">
+                                            <t t-esc="res_company.name"/> se reserva el derecho de modificar cualquier tipo de información que pudiera aparecer en el sitio web, sin que exista obligación de preavisar o poner en conocimiento de los usuarios dichas obligaciones, entendiéndose como suficiente con la publicación en el sitio web de <t t-esc="res_company.name"/>.
+                                        </p>
+
+                                        <ol style="font-size: 14px;">
+                                            <li>
+                                                <p style="text-align: justify;"><b>DATOS IDENTIFICATIVOS:</b></p>
+                                            </li>
+                                        </ol>
+                                        <p style="font-size: 14px; text-align: justify;">
+                                            Este portal, cuyo titular y responsable es la <t t-esc="res_company.name"/>, está constituido por este sitio web
+                                            <t t-if="res_company.website">
+                                                asociado al dominio:
+                                                <a t-att-href="res_company.website" rel="noopener" class="decorated-link">
+                                                    <t t-esc="res_company.website"/>
+                                                </a>
+                                            </t>.
+                                        </p>
+                                        <div style="font-size: 14px; text-align: justify;"><br/></div>
+                                        <div style="font-size: 14px; text-align: justify;">De acuerdo con el artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico pone a su disposición los siguientes datos:</div>
+                                        <t t-if="res_company.website">
+                                            <p style="font-size: 14px; text-align: justify;">
+                                                Nombre del dominio:
+                                                <a t-att-href="res_company.website" rel="noopener" class="decorated-link">
+                                                    <t t-esc="res_company.website"/>
+                                                </a>
+                                            </p>
+                                        </t>
+                                        <div style="text-align: justify;">
+                                            <b style="font-size: 14px;">Denominación social: </b>
+                                            <span style="font-size: 14px;"><b><t t-esc="res_company.name"/></b></span>
+                                        </div>
+                                        <div style="text-align: justify;">
+                                            <b style="font-size: 14px;">Nombre comercial: </b>
+                                            <span style="font-size: 14px;"><b><t t-esc="res_company.name"/></b></span>
+                                        </div>
+                                        <t t-if="res_company.street">
+                                            <div style="text-align: justify;">
+                                                <b style="font-size: 14px;">Domicilio social: </b>
+                                                <span style="font-size: 14px;">
+                                                    <b>
+                                                        <t t-esc="res_company.street"/><t t-if="res_company.street2">, <t t-esc="res_company.street2"/></t><t t-if="res_company.city">, <t t-esc="res_company.city"/></t><t t-if="res_company.state_id">, <t t-esc="res_company.state_id.name"/></t><t t-if="res_company.country_id">, <t t-esc="res_company.country_id.name"/></t>.
+                                                    </b>
+                                                </span>
+                                            </div>
+                                        </t>
+                                        <p style="font-size: 14px; text-align: justify;"><b>Datos de contacto:</b></p>
+                                        <t t-if="res_company.email">
+                                            <p style="font-size: 14px; text-align: justify;">
+                                                <b>Correo electrónico:
+                                                    <a t-att-href="'mailto:%s' % res_company.email" class="cursor-pointer decorated-link" rel="noopener">
+                                                        <t t-esc="res_company.email"/>
+                                                    </a>
+                                                </b>
+                                            </p>
+                                        </t>
+                                        <t t-if="res_company.phone">
+                                            <p style="text-align: justify;">
+                                                <b style="font-size: 14px;">Número de teléfono: </b>
+                                                <span style="font-size: 14px;"><b><t t-esc="res_company.phone"/></b></span>
+                                            </p>
+                                        </t>
+                                        <p style="font-size: 14px; text-align: justify;"><br/></p>
+
+                                        <ol start="2" style="font-size: 14px;">
+                                            <li>
+                                                <p style="text-align: justify;"><b>DERECHOS DE PROPIEDAD INTELECTUAL:</b></p>
+                                            </li>
+                                        </ol>
+                                        <p style="font-size: 14px; text-align: justify;">El sitio web, incluyendo a título enunciativo pero no limitativo su programación, edición, compilación y demás elementos necesarios para su funcionamiento, los diseños, logotipos, texto y/o gráficos, son propiedad del RESPONSABLE o, si es el caso, dispone de licencia o autorización expresa por parte de los autores. Todos los contenidos del sitio web se encuentran debidamente protegidos por la normativa de propiedad intelectual e industrial, así como inscritos en los registros públicos correspondientes.</p>
+                                        <p style="font-size: 14px; text-align: justify;">Independientemente de la finalidad para la que fueran destinados, la reproducción total o parcial, uso, explotación, distribución y comercialización, requiere en todo caso de la autorización escrita previa por parte del RESPONSABLE. Cualquier uso no autorizado previamente se considera un incumplimiento grave de los derechos de propiedad intelectual o industrial del autor.</p>
+                                        <p style="font-size: 14px; text-align: justify;">
+                                            Los diseños, logotipos, texto y/o gráficos ajenos al RESPONSABLE y que pudieran aparecer en el sitio web, pertenecen a sus respectivos propietarios, siendo ellos mismos responsables de cualquier posible controversia que pudiera suscitarse respecto a los mismos. El RESPONSABLE autoriza expresamente a que terceros puedan redirigir directamente a los contenidos concretos del sitio web, y en todo caso redirigir al sitio web principal de
+                                            <t t-if="res_company.website">
+                                                <a t-att-href="res_company.website" rel="noopener" class="decorated-link">
+                                                    <t t-esc="res_company.website"/>
+                                                </a>
+                                            </t>.
+                                        </p>
+                                        <p style="font-size: 14px; text-align: justify;">
+                                            El RESPONSABLE reconoce a favor de sus titulares los correspondientes derechos de propiedad intelectual e industrial, no implicando su sola mención o aparición en el sitio web la existencia de derechos o responsabilidad alguna sobre los mismos, como tampoco respaldo, patrocinio o recomendación por parte del mismo. Para realizar cualquier tipo de observación respecto a posibles incumplimientos de los derechos de propiedad intelectual o industrial, así como sobre cualquiera de los contenidos del sitio web, puede hacerlo
+                                            <t t-if="res_company.email">
+                                                a través del correo electrónico:
+                                                <a t-att-href="'mailto:%s' % res_company.email" class="cursor-pointer decorated-link" rel="noopener">
+                                                    <t t-esc="res_company.email"/>
+                                                </a>
+                                            </t>.
+                                        </p>
+                                        <p style="font-size: 14px; text-align: justify;"><br/></p>
+
+                                        <ol start="3" style="font-size: 14px;">
+                                            <li>
+                                                <p style="text-align: justify;"><b>EXENCIÓN DE RESPONSABILIDADES:</b></p>
+                                            </li>
+                                        </ol>
+                                        <p style="font-size: 14px; text-align: justify;">El RESPONSABLE se exime de cualquier tipo de responsabilidad derivada de la información publicada en su sitio web siempre que esta información haya sido manipulada o introducida por un tercero ajeno al mismo.</p>
+                                        <p style="font-size: 14px; text-align: justify;"><b>POLÍTICA DE ENLACES:</b></p>
+                                        <p style="font-size: 14px; text-align: justify;">Desde el sitio web, es posible que se redirija a contenidos de terceros sitios web. Dado que el RESPONSABLE no puede controlar siempre los contenidos introducidos por los terceros en sus respectivos sitios web, no asume ningún tipo de responsabilidad respecto a dichos contenidos. En todo caso, procederá a la retirada inmediata de cualquier contenido que pudiera contravenir la legislación nacional o internacional, la moral o el orden público, procediendo a la retirada inmediata de la redirección a dicho sitio web, poniendo en conocimiento de las autoridades competentes el contenido en cuestión.</p>
+                                        <p style="font-size: 14px; text-align: justify;">El RESPONSABLE no se hace cargo de la información y contenidos almacenados, a título enunciativo pero no limitativo, en foros, chats, generadores de blogs, comentarios, redes sociales o cualquier otro medio que permita a terceros publicar contenidos de forma independiente en la página web del RESPONSABLE. Sin embargo, y en cumplimiento de lo dispuesto en los artículos 11 y 16 de la LSSICE, se pone a disposición de todos los usuarios, autoridades y fuerzas de seguridad, colaborando de forma activa en la retirada o, en su caso, bloqueo de todos aquellos contenidos que puedan afectar o contravenir la legislación nacional o internacional, los derechos de terceros o la moral y el orden público. En caso de que el usuario considere que existe en el sitio web algún contenido que pudiera ser susceptible de esta clasificación, se ruega lo notifique de forma inmediata al administrador del sitio web.</p>
+                                        <p style="font-size: 14px; text-align: justify;">Este sitio web ha sido revisado y probado para que funcione correctamente. En principio, puede garantizarse el correcto funcionamiento los 365 días del año, 24 horas al día. Sin embargo, el RESPONSABLE no descarta la posibilidad de que existan ciertos errores de programación, o que acontezcan causas de fuerza mayor, catástrofes naturales, huelgas o circunstancias semejantes que hagan imposible el acceso a la página web.</p>
+                                        <p style="font-size: 14px; text-align: justify;">Los servidores del sitio web podrán detectar de manera automática la dirección IP y el nombre de dominio utilizados por el usuario. Una dirección IP es un número asignado automáticamente a un ordenador cuando este se conecta a Internet. Toda esta información es registrada en un fichero de actividad del servidor debidamente inscrito que permite el posterior procesamiento de los datos con el fin de obtener mediciones únicamente estadísticas que permitan conocer el número de impresiones de páginas, el número de visitas realizadas a los servidores web, el orden de visitas, el punto de acceso, etc.</p>
+                                        <p style="font-size: 14px; text-align: justify;"><br/></p>
+
+                                        <ol start="4" style="font-size: 14px;">
+                                            <li>
+                                                <p style="text-align: justify;"><b>LEY APLICABLE Y JURISDICCIÓN:</b></p>
+                                            </li>
+                                        </ol>
+                                        <p style="font-size: 14px; text-align: justify;">Para la resolución de todas las controversias o cuestiones relacionadas con el presente sitio web o de las actividades en él desarrolladas, será de aplicación la legislación española, a la que se someten expresamente las partes, siendo competentes para la resolución de todos los conflictos derivados o relacionados con su uso los Juzgados y Tribunales del domicilio de los usuarios afectados.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+</odoo>
