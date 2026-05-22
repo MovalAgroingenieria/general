@@ -1,0 +1,1340 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================ -->
+        <!-- REMOTE CONTROL: Hermisan                                    -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_hermisan" model="remotecontrol">
+            <field name="name">Hermisan</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://hermisan.es</field>
+            <field name="timeout">180</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">60.0</field>
+            <field name="max_retries">2</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "endpoints": {
+    "endpoint_1": {
+      "url": "",
+      "username": "",
+      "password": ""
+    }
+  },
+  "timezone": "Europe/Madrid"
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>Hermisan REST API · Odoo Integration</h2>
+
+<hr/>
+
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code>. Base URL: placeholder (real URLs are per-endpoint).</p>
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+  "endpoints": {
+    "endpoint_1": {
+      "url": "https://xxxxx.hermisan.es",
+      "username": "user",
+      "password": "pass"
+    },
+    "endpoint_2": {
+      "url": "https://yyyyy.hermisan.es",
+      "username": "user",
+      "password": "pass"
+    }
+  },
+  "timezone": "Europe/Madrid"
+}</pre>
+<ul>
+  <li><code>endpoints</code>: <strong>Required.</strong> Dictionary of endpoint keys to
+  connection details. Each Hermisan physical server (PLC/SCADA) is one endpoint.
+  A single installation may have multiple servers (e.g. one per pumping station group).</li>
+  <li><code>url</code>: Base URL of the Hermisan server (e.g. <code>https://crtorrecotillas.hermisan.es</code>).</li>
+  <li><code>username</code> / <code>password</code>: Basic Auth credentials.</li>
+  <li><code>timezone</code>: Default IANA timezone for timestamp conversion (default: <code>Europe/Madrid</code>).</li>
+
+</ul>
+
+<h3>2) Authentication</h3>
+<p>Hermisan uses <strong>HTTP Basic Auth</strong>. Credentials are sent with every request.
+<strong>WARNING:</strong> Hermisan has strict fail2ban rules. Avoid sending wrong credentials repeatedly.</p>
+
+<h3>3) Rate Limiting</h3>
+<p><strong>1 request per minute</strong> per endpoint. The system enforces this automatically.</p>
+
+<h3>4) API Endpoints</h3>
+<table border="1" cellpadding="4" cellspacing="0">
+  <tr><th>Method</th><th>Endpoint</th><th>Parameters</th><th>Description</th></tr>
+  <tr>
+    <td>GET</td><td>/API1/BOMBEOCHECK</td><td>—</td>
+    <td>Instantaneous data. Returns hierarchical JSON with current sensor values
+    for all zones, pumping stations and pumps.</td>
+  </tr>
+  <tr>
+    <td>GET</td><td>/API1/BOMBEOSTATS</td>
+    <td><code>from</code>, <code>to</code> (format: YYYY.MM.DD-HH:MM:SS)</td>
+    <td>Historical pumping cycles. Returns rows with per-cycle statistics including
+    water volume, power consumption, flow, pressure, and timestamps.</td>
+  </tr>
+</table>
+
+<h3>5) BOMBEOCHECK Response Structure</h3>
+<pre>{
+  "CAPTACIÓN RIO": {
+    "BOMBEO RIO": {
+      "Caudal impulsión": 0
+    }
+  },
+  "EMBALSE A": {
+    "Altura embalses": 1.8,
+    "BOMBEO A": {
+      "Presión impulsión": 0.1,
+      "Caudal impulsión": 0,
+      "BOMBA 1": {"Potencia Consumida": 0},
+      "BOMBA 2": {"Potencia Consumida": 0}
+    }
+  }
+}</pre>
+<p>Hierarchical: Zone → (zone-level sensors + Pumping Stations) → (station-level sensors + Pumps) → pump sensors.</p>
+
+<h3>6) BOMBEOSTATS Response Structure</h3>
+<pre>{
+  "ID": 0,
+  "rows": [
+    {
+      "_balsa": 3,
+      "Balsa": "EMBALSE B",
+      "Fecha": "18/03/2026 11:34",
+      "_pozo": 2,
+      "Pozo": "BOMBEO A",
+      "Marcha": "00:11:29",
+      "_timeStart": "1773830060525",
+      "_timeEnd": "1773830749525",
+      "Agua": 67,
+      "Altura embalses": 1.65,
+      "Potencia Consumida": 31.92,
+      "Caudal impulsión": 371.05,
+      "Presión impulsión": 10.5,
+      "_bombas": {
+        "BOMBA 1": {"Potencia Consumida": 15.09},
+        "BOMBA 2": {"Potencia Consumida": 8.30}
+      },
+      "Bombas": " / BOMBA 1 / BOMBA 2 / ..."
+    }
+  ]
+}</pre>
+<p><strong>Fields:</strong></p>
+<ul>
+  <li><code>_timeStart</code> / <code>_timeEnd</code>: Epoch milliseconds (pumping cycle boundaries).</li>
+  <li><code>Agua</code>: Total water volume in m³ for the cycle.</li>
+  <li><code>Potencia Consumida</code>: Total power in kW·h for the cycle.</li>
+  <li><code>Caudal impulsión</code>: Average flow in m³/h.</li>
+  <li><code>Presión impulsión</code>: Average pressure (bar or mca).</li>
+  <li><code>Altura embalses</code>: Reservoir level in mca (meters of water column).</li>
+  <li><code>Marcha</code>: Duration string HH:MM:SS.</li>
+  <li><code>_bombas</code>: Per-pump power breakdown.</li>
+</ul>
+
+<h3>7) Odoo Configuration</h3>
+<h4>Device (<code>mdm.measurement.device</code>) remotecontrol_params:</h4>
+<p>Each device represents a Hermisan <strong>pumping station</strong> (Pozo).</p>
+<pre>{
+  "endpoint_key": "endpoint_1",
+  "pozo_key": "BOMBEO A",
+  "zone_key": "EMBALSE A",
+  "pozo_id": 2,
+  "balsa_id": 3,
+  "start_date": "2026-01-01"
+}</pre>
+<ul>
+  <li><code>endpoint_key</code>: <strong>Required.</strong> Key in the remotecontrol endpoints dict.</li>
+  <li><code>pozo_key</code>: <strong>Required.</strong> Name of the pumping station as returned by the API.</li>
+  <li><code>zone_key</code>: Zone/reservoir name this station belongs to.</li>
+  <li><code>pozo_id</code>: Numeric _pozo id from BOMBEOSTATS.</li>
+  <li><code>balsa_id</code>: Numeric _balsa id from BOMBEOSTATS.</li>
+  <li><code>start_date</code>: Optional. Start date for first data retrieval (YYYY-MM-DD).</li>
+</ul>
+<h4>Sensor (<code>mdm.measurement.device.sensor</code>) remotecontrol_params:</h4>
+<p>Each sensor represents a measurable variable within a pumping station.</p>
+<pre>{
+  "variable": "Caudal impulsión"
+}</pre>
+<p>For per-pump sensors:</p>
+<pre>{
+  "variable": "Potencia Consumida",
+  "bomba": "BOMBA 1"
+}</pre>
+<ul>
+  <li><code>variable</code>: <strong>Required.</strong> Name of the variable as returned by the API.</li>
+  <li><code>bomba</code>: Optional. Pump name (for per-pump breakdown sensors).</li>
+</ul>
+
+<h3>8) Operational Flow</h3>
+<ol>
+  <li><strong>Catalog Sync</strong>:
+    Health check → Call BOMBEOCHECK on each endpoint → Auto-detect zones,
+    pumping stations, pumps → Auto-create mdm.measurement.device and
+    mdm.measurement.device.sensor records. Idempotent.</li>
+  <li><strong>Readings Import</strong>:
+    Health check → Build plan → Call BOMBEOSTATS per endpoint/date-range
+    → Upsert readings per sensor (using _timeStart as measurement_time).</li>
+</ol>
+
+<h3>9) Technical Notes</h3>
+<ul>
+  <li>Rate limit: <strong>1 request per minute per endpoint</strong>. Module enforces waits.
+  If a request is sent within &lt;1 min of the previous one, the API returns <code>false</code>.</li>
+  <li>Fail2ban active on servers: avoid rapid retries with wrong credentials.</li>
+  <li>Response time: first query for a given date range can take <strong>&gt;60 seconds</strong>
+  (server computes stats on-the-fly). Subsequent calls for cached ranges are faster.
+  Recommended timeout: <strong>180s</strong>.</li>
+  <li><code>_timeStart</code>/<code>_timeEnd</code> are epoch ms (local time, not UTC).</li>
+  <li>Not all variables appear in every row (depends on station sensors).</li>
+  <li>Idempotent readings via <code>upsert(sensor_id, measurement_time)</code>.</li>
+  <li>Multiple endpoints supported: one per physical Hermisan server/PLC.</li>
+  <li>Zone names with double brackets (<code>[[EMBALSE B]]</code>) are hidden in
+  Hermisan's main UI. Strip brackets when parsing.</li>
+  <li>BOMBEOCHECK variable names may differ from BOMBEOSTATS (e.g. "Potencia" vs
+  "Potencia Consumida"). Provisioning normalizes these automatically. Sensors store
+  the canonical BOMBEOSTATS name in their <code>variable</code> param.</li>
+</ul>
+]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Health Check                                         -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_hermisan_action_health" model="remotecontrol.action">
+            <field name="name">Hermisan: Health Check</field>
+            <field name="remote_id" ref="remotecontrol_hermisan"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# ── Hermisan Health Check ──────────────────────────────────────────────
+# Tests connectivity to all configured endpoints by calling BOMBEOCHECK.
+# Validates Basic Auth credentials.
+# ───────────────────────────────────────────────────────────────────────
+
+Remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+endpoints = cfg.get('endpoints') or {}
+if not endpoints:
+    raise Exception(
+        "No endpoints configured. Set 'endpoints' in connection_params.")
+
+default_tz = cfg.get('timezone', 'Europe/Madrid')
+results = {}
+
+for ep_key, ep_cfg in endpoints.items():
+    ep_url = (ep_cfg.get('url') or '').rstrip('/')
+    ep_user = ep_cfg.get('username', '')
+    ep_pass = ep_cfg.get('password', '')
+
+    if not ep_url:
+        raise Exception(
+            "Endpoint '%s': missing 'url' in connection_params." % ep_key)
+    if not ep_user or not ep_pass:
+        raise Exception(
+            "Endpoint '%s': missing 'username' or 'password'." % ep_key)
+
+    url = '%s/API1/BOMBEOCHECK' % ep_url
+    resp = request_retry(
+        'GET', url,
+        auth=(ep_user, ep_pass),
+        headers={'Accept': 'application/json'},
+        timeout=timeout,
+    )
+
+    if resp.status_code == 401:
+        raise Exception(
+            "Endpoint '%s': authentication failed (HTTP 401). "
+            "Check username/password. WARNING: repeated failures may "
+            "trigger fail2ban." % ep_key)
+
+    if resp.status_code >= 400:
+        raise Exception(
+            "Endpoint '%s': HTTP %s - %s" % (
+                ep_key, resp.status_code, (resp.text or '')[:500]))
+
+    try:
+        body = resp.json() if resp.text else {}
+    except Exception:
+        raise Exception(
+            "Endpoint '%s': invalid JSON response from BOMBEOCHECK" % ep_key)
+
+    # BOMBEOCHECK returns false/False when the endpoint is offline
+    if not body or not isinstance(body, dict):
+        results[ep_key] = {
+            'url': ep_url,
+            'zones': 0,
+            'stations': 0,
+            'status': 'offline',
+        }
+        continue
+
+    # Count zones and stations found
+    zones = 0
+    stations = 0
+    for zone_name, zone_data in body.items():
+        if isinstance(zone_data, dict):
+            zones += 1
+            for k, v in zone_data.items():
+                if isinstance(v, dict):
+                    stations += 1
+
+    results[ep_key] = {
+        'url': ep_url,
+        'zones': zones,
+        'stations': stations,
+        'status': 'OK',
+    }
+
+bag['endpoints'] = endpoints
+bag['health_results'] = results
+bag['timezone'] = default_tz
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Sync Catalog (discover structure via BOMBEOCHECK)    -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_hermisan_action_sync_catalog" model="remotecontrol.action">
+            <field name="name">Hermisan: Sync Catalog</field>
+            <field name="remote_id" ref="remotecontrol_hermisan"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">60.0</field>
+            <field name="max_retries">2</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# ── Hermisan Catalog Sync ──────────────────────────────────────────────
+# GET /API1/BOMBEOCHECK on each endpoint.
+# Parses the hierarchical JSON to discover:
+#   - Zones (Balsas / Captaciones)
+#   - Pumping Stations (Pozos) and their sensors
+#   - Pumps (Bombas) and their sensors
+# Produces an audit JSON attachment.
+# ───────────────────────────────────────────────────────────────────────
+import time as _time
+
+Remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+endpoints = bag.get('endpoints') or cfg.get('endpoints') or {}
+default_tz = bag.get('timezone') or cfg.get('timezone', 'Europe/Madrid')
+
+if not endpoints:
+    raise Exception("No endpoints available. Run Health Check first.")
+
+catalog = []
+total_zones = 0
+total_stations = 0
+total_pumps = 0
+total_variables = 0
+
+for ep_key, ep_cfg in endpoints.items():
+    ep_url = (ep_cfg.get('url') or '').rstrip('/')
+    ep_user = ep_cfg.get('username', '')
+    ep_pass = ep_cfg.get('password', '')
+
+    url = '%s/API1/BOMBEOCHECK' % ep_url
+    resp = request_retry(
+        'GET', url,
+        auth=(ep_user, ep_pass),
+        headers={'Accept': 'application/json'},
+        timeout=timeout,
+    )
+
+    if resp.status_code >= 400:
+        raise Exception(
+            "Endpoint '%s': BOMBEOCHECK failed HTTP %s - %s" % (
+                ep_key, resp.status_code, (resp.text or '')[:500]))
+
+    try:
+        body = resp.json() if resp.text else {}
+    except Exception:
+        raise Exception(
+            "Endpoint '%s': invalid JSON from BOMBEOCHECK" % ep_key)
+
+    # BOMBEOCHECK returns false/False when the endpoint is offline
+    if not body or not isinstance(body, dict):
+        continue
+
+    # Parse hierarchical structure
+    for zone_name, zone_data in body.items():
+        if not isinstance(zone_data, dict):
+            continue
+
+        total_zones += 1
+        zone_sensors = []
+        stations = []
+
+        for key, value in zone_data.items():
+            if isinstance(value, dict):
+                # This is a pumping station (Pozo)
+                total_stations += 1
+                station_sensors = []
+                pumps = []
+
+                for var_name, var_value in value.items():
+                    if isinstance(var_value, dict):
+                        # This is a pump (Bomba)
+                        total_pumps += 1
+                        pump_sensors = []
+                        for pvar_name, pvar_value in var_value.items():
+                            if not isinstance(pvar_value, dict):
+                                pump_sensors.append({
+                                    'variable': pvar_name,
+                                    'current_value': pvar_value,
+                                })
+                                total_variables += 1
+                        pumps.append({
+                            'name': var_name,
+                            'sensors': pump_sensors,
+                        })
+                    else:
+                        # Station-level sensor
+                        station_sensors.append({
+                            'variable': var_name,
+                            'current_value': var_value,
+                        })
+                        total_variables += 1
+
+                stations.append({
+                    'name': key,
+                    'sensors': station_sensors,
+                    'pumps': pumps,
+                })
+            else:
+                # Zone-level sensor (e.g. Altura embalses)
+                zone_sensors.append({
+                    'variable': key,
+                    'current_value': value,
+                })
+                total_variables += 1
+
+        catalog.append({
+            'endpoint_key': ep_key,
+            'zone_name': zone_name,
+            'zone_sensors': zone_sensors,
+            'stations': stations,
+        })
+
+    _time.sleep(60)
+
+# ── Create audit attachment ────────────────────────────────────────────
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'total_zones': total_zones,
+    'total_stations': total_stations,
+    'total_pumps': total_pumps,
+    'total_variables': total_variables,
+    'catalog': catalog,
+}
+
+json_str = json.dumps(audit, ensure_ascii=False, indent=2)
+encoded = base64.b64encode(json_str.encode('utf-8'))
+fname = 'hermisan_catalog_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_'))
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': encoded,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id,
+})
+
+Remote.message_post(
+    body=u'[Hermisan] Catalog sync: zones=%s stations=%s pumps=%s '
+         u'variables=%s' % (
+             total_zones, total_stations, total_pumps, total_variables),
+    attachment_ids=[att.id],
+)
+
+bag['catalog'] = catalog
+bag['catalog_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Provision Devices (auto-create devices + sensors)    -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_hermisan_action_provision_devices" model="remotecontrol.action">
+            <field name="name">Hermisan: Provision Devices</field>
+            <field name="remote_id" ref="remotecontrol_hermisan"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">False</field>
+            <field name="code"><![CDATA[
+# ── Hermisan: Provision Devices ────────────────────────────────────────
+# Auto-creates mdm.measurement.device and mdm.measurement.device.sensor
+# records from the catalog discovered via BOMBEOCHECK + BOMBEOSTATS.
+#
+# Strategy:
+#   1. BOMBEOCHECK (from catalog) → structure (zones, stations, pumps)
+#   2. BOMBEOSTATS (last 7 days) → real variable names per station/pump
+#   3. Create sensors using BOMBEOSTATS names (exact match for readings)
+#
+# Mapping:
+#   Hermisan Pumping Station (Pozo)  → one mdm.measurement.device
+#   Hermisan variable (per station)  → one mdm.measurement.device.sensor
+#   Hermisan variable (per pump)     → one mdm.measurement.device.sensor
+#
+# Idempotent: matches by (endpoint_key, pozo_key) for devices and
+# (device_id, variable, bomba) for sensors.
+# ───────────────────────────────────────────────────────────────────────
+import time as _time
+from datetime import datetime, timedelta
+
+Remote = self.remote_id
+catalog = bag.get('catalog') or []
+
+if not catalog:
+    raise Exception(
+        "No catalog in bag. Run Sync Catalog action first.")
+
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+endpoints = bag.get('endpoints') or cfg.get('endpoints') or {}
+
+Device = env['mdm.measurement.device']
+Sensor = env['mdm.measurement.device.sensor']
+SensorType = env['mdm.measurement.device.sensor.type']
+SensorUom = env['mdm.measurement.device.sensor.uom']
+
+remotecontrol_ref = env.ref(
+    'remotecontrol_hermisan.remotecontrol_hermisan')
+
+# ── Call BOMBEOSTATS on each endpoint to discover variable names ───────
+# This gives us the REAL names that will appear in readings import.
+today = datetime.strptime(fields.Date.today(), '%Y-%m-%d')
+from_dt = today - timedelta(days=7)
+from_str = from_dt.strftime('%Y.%m.%d-00:00:00')
+to_str = today.strftime('%Y.%m.%d-23:59:59')
+
+# Structure: {endpoint_key: {pozo_name: {station_vars: set, pumps: {bomba: set}}}}
+stats_vars = {}
+
+for ep_key, ep_cfg in endpoints.items():
+    ep_url = (ep_cfg.get('url') or '').rstrip('/')
+    ep_user = ep_cfg.get('username', '')
+    ep_pass = ep_cfg.get('password', '')
+    if not ep_url or not ep_user:
+        continue
+
+    url = '%s/API1/BOMBEOSTATS?from=%s&to=%s' % (
+        ep_url, from_str, to_str)
+
+    try:
+        resp = request_retry(
+            'GET', url,
+            auth=(ep_user, ep_pass),
+            headers={'Accept': 'application/json'},
+            timeout=timeout,
+        )
+    except Exception:
+        continue
+
+    if resp.status_code != 200:
+        continue
+
+    try:
+        body = resp.json() if resp.text else {}
+    except Exception:
+        continue
+
+    if body is False or body is None or not isinstance(body, dict):
+        continue
+
+    rows = body.get('rows', [])
+    ep_vars = {}
+
+    # Known non-variable fields to skip
+    SKIP_FIELDS = {
+        '_balsa', 'Balsa', 'Fecha', '_pozo', 'Pozo', 'Marcha',
+        '_timeStart', '_timeEnd', '_bombas', 'Bombas', 'ID',
+    }
+
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        pozo_name = row.get('Pozo', '')
+        if not pozo_name:
+            continue
+
+        if pozo_name not in ep_vars:
+            ep_vars[pozo_name] = {'station_vars': set(), 'pumps': {}}
+
+        # Station-level: any numeric field not in SKIP_FIELDS
+        for key, val in row.items():
+            if key in SKIP_FIELDS:
+                continue
+            if val is not None:
+                try:
+                    float(val)
+                    ep_vars[pozo_name]['station_vars'].add(key)
+                except (ValueError, TypeError):
+                    pass
+
+        # Pump-level
+        bombas = row.get('_bombas') or {}
+        if isinstance(bombas, dict):
+            for bomba_name, bomba_data in bombas.items():
+                if not isinstance(bomba_data, dict):
+                    continue
+                if bomba_name not in ep_vars[pozo_name]['pumps']:
+                    ep_vars[pozo_name]['pumps'][bomba_name] = set()
+                for bvar, bval in bomba_data.items():
+                    if bval is not None:
+                        try:
+                            float(bval)
+                            ep_vars[pozo_name]['pumps'][
+                                bomba_name].add(bvar)
+                        except (ValueError, TypeError):
+                            pass
+
+    stats_vars[ep_key] = ep_vars
+    _time.sleep(60)
+
+# ── UOM cache ──────────────────────────────────────────────────────────
+uom_cache = {}
+
+VARIABLE_UOMS = {
+    u'Caudal impulsión': u'm\u00b3/h',
+    u'Presión impulsión': u'bar',
+    u'Potencia Consumida': u'kW\u00b7h',
+    u'Altura embalses': u'mca',
+    u'Agua': u'm\u00b3',
+}
+
+def _get_uom(unit_name):
+    if not unit_name:
+        unit_name = u'-'
+    if unit_name in uom_cache:
+        return uom_cache[unit_name]
+    uom = SensorUom.search([('name', '=', unit_name)], limit=1)
+    if not uom:
+        uom = SensorUom.create({
+            'name': unit_name,
+            'abbreviation': unit_name,
+            'description': u'Auto-created from Hermisan',
+        })
+    uom_cache[unit_name] = uom
+    return uom
+
+# ── Sensor Type cache ──────────────────────────────────────────────────
+type_cache = {}
+
+def _get_sensor_type(var_name, uom):
+    full_name = u'%s (%s)' % (var_name, uom.name)
+    if full_name in type_cache:
+        return type_cache[full_name]
+    stype = SensorType.search([('name', '=', full_name)], limit=1)
+    if not stype:
+        stype = SensorType.create({
+            'name': full_name,
+            'description': u'Auto-created from Hermisan (%s)' % var_name,
+            'uom_id': uom.id,
+        })
+    type_cache[full_name] = stype
+    return stype
+
+# ── Existing devices map: (endpoint_key, pozo_key) → device ───────────
+existing_devices = {}
+all_devices = Device.search([
+    ('remotecontrol_id', '=', remotecontrol_ref.id),
+])
+for dev in all_devices:
+    try:
+        dev_cfg = json.loads(dev.remotecontrol_params or '{}')
+    except Exception:
+        dev_cfg = {}
+    dk = (dev_cfg.get('endpoint_key', ''), dev_cfg.get('pozo_key', ''))
+    if dk[0] and dk[1]:
+        existing_devices[dk] = dev
+
+# ── Existing sensors map: (device_id, variable, bomba) → sensor ───────
+existing_sensors = {}
+all_sensors = Sensor.search([
+    ('device_id.remotecontrol_id', '=', remotecontrol_ref.id),
+])
+for sen in all_sensors:
+    try:
+        sen_cfg = json.loads(sen.remotecontrol_params or '{}')
+    except Exception:
+        sen_cfg = {}
+    variable = sen_cfg.get('variable', '')
+    bomba = sen_cfg.get('bomba', '')
+    if variable:
+        existing_sensors[(sen.device_id.id, variable, bomba)] = sen
+
+total_devices_created = 0
+total_devices_existing = 0
+total_sensors_created = 0
+total_sensors_existing = 0
+device_details = []
+
+def _create_sensor_if_needed(device, var_name, bomba_name=''):
+    """Create a sensor for a device if it doesn't exist."""
+    global total_sensors_created, total_sensors_existing
+    sensor_key = (device.id, var_name, bomba_name)
+    if sensor_key in existing_sensors:
+        total_sensors_existing += 1
+        return
+
+    unit_name = VARIABLE_UOMS.get(var_name, u'-')
+    uom = _get_uom(unit_name)
+    stype = _get_sensor_type(var_name, uom)
+
+    sensor_name = var_name
+    if bomba_name:
+        sensor_name = u'%s - %s' % (var_name, bomba_name)
+
+    sensor_params = {'variable': var_name}
+    if bomba_name:
+        sensor_params['bomba'] = bomba_name
+
+    sensor = Sensor.create({
+        'name': sensor_name,
+        'device_id': device.id,
+        'type_id': stype.id,
+        'remotecontrol_params': json.dumps(
+            sensor_params, ensure_ascii=False),
+    })
+    existing_sensors[sensor_key] = sensor
+    total_sensors_created += 1
+
+for zone_data in catalog:
+    ep_key = zone_data.get('endpoint_key', '')
+    zone_name = zone_data.get('zone_name', '')
+    stations = zone_data.get('stations', [])
+
+    ep_stats = stats_vars.get(ep_key, {})
+
+    for station in stations:
+        pozo_key = station.get('name', '')
+        if not pozo_key:
+            continue
+
+        dev_lookup = (ep_key, pozo_key)
+        device = existing_devices.get(dev_lookup)
+
+        if device:
+            total_devices_existing += 1
+        else:
+            dev_name = u'%s - %s' % (zone_name, pozo_key)
+            dev_params = {
+                'endpoint_key': ep_key,
+                'pozo_key': pozo_key,
+                'zone_key': zone_name,
+            }
+            device = Device.create({
+                'name': dev_name,
+                'description': u'Hermisan station: %s (zone: %s, '
+                               u'endpoint: %s)' % (
+                                   pozo_key, zone_name, ep_key),
+                'remotecontrol_id': remotecontrol_ref.id,
+                'remotecontrol_params': json.dumps(
+                    dev_params, ensure_ascii=False),
+            })
+            existing_devices[dev_lookup] = device
+            total_devices_created += 1
+
+        sensors_before = total_sensors_created
+
+        # Use BOMBEOSTATS variable names (real names for readings)
+        pozo_stats = ep_stats.get(pozo_key, {})
+        station_vars = pozo_stats.get('station_vars', set())
+        pump_vars = pozo_stats.get('pumps', {})
+
+        # Station-level sensors from BOMBEOSTATS
+        for var_name in sorted(station_vars):
+            _create_sensor_if_needed(device, var_name)
+
+        # Pump-level sensors from BOMBEOSTATS
+        for bomba_name in sorted(pump_vars.keys()):
+            for var_name in sorted(pump_vars[bomba_name]):
+                _create_sensor_if_needed(device, var_name, bomba_name)
+
+        # Fallback: if BOMBEOSTATS had no data for this station,
+        # use BOMBEOCHECK structure (from catalog)
+        if not station_vars and not pump_vars:
+            for ss in station.get('sensors', []):
+                _create_sensor_if_needed(
+                    device, ss.get('variable', ''))
+            for pump in station.get('pumps', []):
+                pump_name = pump.get('name', '')
+                for ps in pump.get('sensors', []):
+                    _create_sensor_if_needed(
+                        device, ps.get('variable', ''), pump_name)
+
+        device_details.append({
+            'endpoint_key': ep_key,
+            'zone_name': zone_name,
+            'pozo_key': pozo_key,
+            'device_id': device.id,
+            'sensors_created': total_sensors_created - sensors_before,
+            'source': 'BOMBEOSTATS' if (station_vars or pump_vars)
+                      else 'BOMBEOCHECK',
+        })
+
+# ── Create audit attachment ────────────────────────────────────────────
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'total_devices_created': total_devices_created,
+    'total_devices_existing': total_devices_existing,
+    'total_sensors_created': total_sensors_created,
+    'total_sensors_existing': total_sensors_existing,
+    'devices': device_details,
+}
+
+b64 = base64.b64encode(
+    json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
+fname = 'hermisan_provision_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_'))
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id,
+})
+
+Remote.message_post(
+    body=u'[Hermisan] Provision: devices_created=%s devices_existing=%s '
+         u'sensors_created=%s sensors_existing=%s' % (
+             total_devices_created, total_devices_existing,
+             total_sensors_created, total_sensors_existing),
+    attachment_ids=[att.id],
+)
+
+bag['provision_audit'] = audit
+bag['provision_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Get Devices Plan (for readings import)               -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_hermisan_action_get_devices" model="remotecontrol.action">
+            <field name="name">Hermisan: Get Devices (Plan)</field>
+            <field name="remote_id" ref="remotecontrol_hermisan"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# ── Hermisan: Build Sensor Plan ────────────────────────────────────────
+# Reads mdm.measurement.device.sensor records linked to this
+# remotecontrol and builds the plan for BOMBEOSTATS calls.
+#
+# Groups sensors by endpoint for efficient API calls (one BOMBEOSTATS
+# call per endpoint returns all stations).
+# ───────────────────────────────────────────────────────────────────────
+
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+today_str = fields.Date.today()
+
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+endpoints = bag.get('endpoints') or cfg.get('endpoints') or {}
+default_tz = cfg.get('timezone', 'Europe/Madrid')
+bag['endpoints'] = endpoints
+
+condition = [
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id),
+]
+
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+
+sensors = Sensor.search(condition)
+
+# Build map of sensor_id -> most recent reading (single query)
+last_readings_map = {}
+if sensors:
+    sensor_ids = [s.id for s in sensors]
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for row in cr.fetchall():
+        last_readings_map[row[0]] = row[1]
+
+# Group sensors by endpoint
+# Structure: { endpoint_key: { sensors: [...], earliest_date: ... } }
+endpoints_plan = {}
+sensors_plan = []
+
+for sensor in sensors:
+    device = sensor.device_id
+
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+
+    ep_key = device_cfg.get('endpoint_key', '')
+    pozo_key = device_cfg.get('pozo_key', '')
+    variable = sensor_cfg.get('variable', '')
+    bomba = sensor_cfg.get('bomba', '')
+
+    if not ep_key or not pozo_key or not variable:
+        continue
+
+    # Determine start date
+    start_cfg = (sensor_cfg.get('start_date') or
+                 device_cfg.get('start_date'))
+    last_reading_time = last_readings_map.get(sensor.id)
+
+    if last_reading_time:
+        try:
+            initial_date = fields.Date.to_string(
+                fields.Datetime.from_string(last_reading_time))
+        except Exception:
+            initial_date = str(last_reading_time)[:10]
+    elif start_cfg:
+        initial_date = start_cfg[:10]
+    else:
+        year_str = today_str[:4]
+        initial_date = '%s-01-01' % year_str
+
+    if isinstance(initial_date, unicode):
+        initial_date = initial_date.encode('utf-8')
+
+    sensor_entry = {
+        'sensor_id': sensor.id,
+        'device_id': device.id,
+        'endpoint_key': ep_key,
+        'pozo_key': pozo_key,
+        'variable': variable,
+        'bomba': bomba,
+        'initial_date': initial_date,
+    }
+    sensors_plan.append(sensor_entry)
+
+    if ep_key not in endpoints_plan:
+        endpoints_plan[ep_key] = {
+            'sensors': [],
+            'earliest_date': initial_date,
+        }
+    endpoints_plan[ep_key]['sensors'].append(sensor_entry)
+    if initial_date < endpoints_plan[ep_key]['earliest_date']:
+        endpoints_plan[ep_key]['earliest_date'] = initial_date
+
+bag['sensors_plan'] = sensors_plan
+bag['endpoints_plan'] = endpoints_plan
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- ACTION: Get Readings (BOMBEOSTATS)                           -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_hermisan_action_get_readings" model="remotecontrol.action">
+            <field name="name">Hermisan: Get Readings</field>
+            <field name="remote_id" ref="remotecontrol_hermisan"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">60.0</field>
+            <field name="max_retries">2</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# ── Hermisan: Get Readings (BOMBEOSTATS) ───────────────────────────────
+# GET /API1/BOMBEOSTATS?from=YYYY.MM.DD-HH.MM.SS&to=YYYY.MM.DD-HH.MM.SS
+#
+# Each row is a pumping cycle. Sensors are matched by (pozo_key, variable,
+# bomba). measurement_time is derived from _timeStart (epoch ms).
+#
+# Rate limit: 1 request per minute per endpoint. Chunks by 30-day windows.
+# ───────────────────────────────────────────────────────────────────────
+import time as _time
+import calendar
+from datetime import datetime
+
+Remote = self.remote_id
+sensors_plan = bag.get('sensors_plan') or []
+endpoints_plan = bag.get('endpoints_plan') or {}
+
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+endpoints = bag.get('endpoints') or cfg.get('endpoints') or {}
+default_tz = cfg.get('timezone', 'Europe/Madrid')
+today_str = fields.Date.today()
+
+if not endpoints:
+    raise Exception("No endpoints configured.")
+
+# Build sensor lookup: (endpoint_key, pozo_key, variable, bomba) → info
+sensor_lookup = {}
+for s in sensors_plan:
+    key = (s['endpoint_key'], s['pozo_key'], s['variable'],
+           s.get('bomba', ''))
+    sensor_lookup[key] = {
+        'sensor_id': s['sensor_id'],
+        'device_id': s['device_id'],
+    }
+
+total_upserts = 0
+total_errors = 0
+total_api_calls = 0
+items = []
+
+MAX_DAYS_PER_CALL = 30
+
+for ep_key, ep_plan in endpoints_plan.items():
+    ep_cfg = endpoints.get(ep_key)
+    if not ep_cfg:
+        items.append({'endpoint': ep_key, 'error': 'Endpoint not found'})
+        total_errors += 1
+        continue
+
+    ep_url = (ep_cfg.get('url') or '').rstrip('/')
+    ep_user = ep_cfg.get('username', '')
+    ep_pass = ep_cfg.get('password', '')
+
+    if not ep_url or not ep_user:
+        items.append({'endpoint': ep_key, 'error': 'Missing URL or auth'})
+        total_errors += 1
+        continue
+
+    earliest = ep_plan.get('earliest_date', today_str)
+    start_dt = datetime.strptime(earliest[:10], '%Y-%m-%d')
+    end_dt = datetime.strptime(today_str[:10], '%Y-%m-%d')
+
+    # Build pozo_key lookup for this endpoint
+    ep_sensors = ep_plan.get('sensors', [])
+
+    chunk_start = start_dt
+    ep_upserts = 0
+    ep_errors = 0
+    ep_api_calls = 0
+
+    while chunk_start <= end_dt:
+        chunk_end = min(
+            chunk_start + timedelta(days=MAX_DAYS_PER_CALL), end_dt)
+
+        from_str = chunk_start.strftime('%Y.%m.%d-00:00:00')
+        to_str = chunk_end.strftime('%Y.%m.%d-23:59:59')
+
+        url = '%s/API1/BOMBEOSTATS?from=%s&to=%s' % (
+            ep_url, from_str, to_str)
+
+        try:
+            resp = request_retry(
+                'GET', url,
+                auth=(ep_user, ep_pass),
+                headers={'Accept': 'application/json'},
+                timeout=timeout,
+            )
+            ep_api_calls += 1
+
+            if resp.status_code >= 400:
+                items.append({
+                    'endpoint': ep_key,
+                    'status': resp.status_code,
+                    'error': (resp.text or '')[:400],
+                    'chunk': '%s to %s' % (from_str, to_str),
+                })
+                ep_errors += 1
+                chunk_start = chunk_end + timedelta(days=1)
+                _time.sleep(60)
+                continue
+
+            try:
+                body = resp.json() if resp.text else {}
+            except Exception:
+                items.append({
+                    'endpoint': ep_key,
+                    'error': 'Invalid JSON',
+                    'chunk': from_str,
+                })
+                ep_errors += 1
+                chunk_start = chunk_end + timedelta(days=1)
+                _time.sleep(60)
+                continue
+
+            rows = []
+            if body is False or body is None:
+                # Endpoint returned false - no data available
+                chunk_start = chunk_end + timedelta(days=1)
+                _time.sleep(60)
+                continue
+            if isinstance(body, dict):
+                rows = body.get('rows', [])
+
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+
+                pozo_name = row.get('Pozo', '')
+                if not pozo_name:
+                    continue
+
+                # Determine measurement_time from _timeStart
+                time_start_ms = row.get('_timeStart')
+                if not time_start_ms:
+                    # Fallback to Fecha field
+                    fecha = row.get('Fecha', '')
+                    if not fecha:
+                        continue
+                    try:
+                        naive_dt = datetime.strptime(
+                            fecha, '%d/%m/%Y %H:%M')
+                    except Exception:
+                        try:
+                            naive_dt = datetime.strptime(
+                                fecha, '%d/%m/%Y')
+                        except Exception:
+                            ep_errors += 1
+                            continue
+                    try:
+                        local_tz = pytz.timezone(default_tz)
+                        local_dt = local_tz.localize(
+                            naive_dt, is_dst=None)
+                        utc_dt = local_dt.astimezone(pytz.utc)
+                        mtime = utc_dt.strftime('%Y-%m-%d %H:%M:%S')
+                    except Exception:
+                        mtime = naive_dt.strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    ts_secs = int(time_start_ms) / 1000.0
+                    naive_dt = datetime.utcfromtimestamp(ts_secs)
+                    try:
+                        local_tz = pytz.timezone(default_tz)
+                        local_dt = local_tz.localize(
+                            naive_dt, is_dst=None)
+                        utc_dt = local_dt.astimezone(pytz.utc)
+                        mtime = utc_dt.strftime('%Y-%m-%d %H:%M:%S')
+                    except Exception:
+                        mtime = naive_dt.strftime('%Y-%m-%d %H:%M:%S')
+
+                # Upsert station-level variables
+                STATION_VARS = [
+                    'Agua', 'Potencia Consumida',
+                    u'Caudal impulsión', u'Presión impulsión',
+                    'Altura embalses',
+                ]
+                for var_name in STATION_VARS:
+                    val = row.get(var_name)
+                    if val is None:
+                        continue
+                    try:
+                        valf = float(val)
+                    except (ValueError, TypeError):
+                        continue
+
+                    lookup_key = (ep_key, pozo_name, var_name, '')
+                    sensor_info = sensor_lookup.get(lookup_key)
+                    if not sensor_info:
+                        continue
+
+                    Remote.upsert(
+                        'mdm.measurement.device.sensor.reading',
+                        {'sensor_id': sensor_info['sensor_id'],
+                         'measurement_time': mtime},
+                        {'value': valf,
+                         'device_id': sensor_info['device_id']},
+                    )
+                    ep_upserts += 1
+
+                # Upsert per-pump variables
+                bombas = row.get('_bombas') or {}
+                if isinstance(bombas, dict):
+                    for bomba_name, bomba_data in bombas.items():
+                        if not isinstance(bomba_data, dict):
+                            continue
+                        for bvar, bval in bomba_data.items():
+                            try:
+                                bvalf = float(bval)
+                            except (ValueError, TypeError):
+                                continue
+
+                            lookup_key = (
+                                ep_key, pozo_name, bvar, bomba_name)
+                            sensor_info = sensor_lookup.get(lookup_key)
+                            if not sensor_info:
+                                continue
+
+                            Remote.upsert(
+                                'mdm.measurement.device.sensor.reading',
+                                {'sensor_id': sensor_info['sensor_id'],
+                                 'measurement_time': mtime},
+                                {'value': bvalf,
+                                 'device_id': sensor_info[
+                                     'device_id']},
+                            )
+                            ep_upserts += 1
+
+        except Exception as e:
+            items.append({
+                'endpoint': ep_key,
+                'error': str(e),
+                'chunk': from_str if 'from_str' in dir() else '?',
+            })
+            ep_errors += 1
+
+        chunk_start = chunk_end + timedelta(days=1)
+        _time.sleep(60)
+
+    items.append({
+        'endpoint': ep_key,
+        'start': earliest,
+        'end': today_str,
+        'upserts': ep_upserts,
+        'errors': ep_errors,
+        'api_calls': ep_api_calls,
+    })
+    total_upserts += ep_upserts
+    total_errors += ep_errors
+    total_api_calls += ep_api_calls
+
+# ── Create audit attachment ────────────────────────────────────────────
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'end_date': today_str,
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'total_api_calls': total_api_calls,
+    'endpoints_processed': len(endpoints_plan),
+    'items': items,
+}
+
+b64 = base64.b64encode(
+    json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
+fname = 'hermisan_readings_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_'))
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id,
+})
+
+Remote.message_post(
+    body=u'[Hermisan] Readings: upserts=%s errors=%s api_calls=%s '
+         u'endpoints=%s' % (
+             total_upserts, total_errors, total_api_calls,
+             len(endpoints_plan)),
+    attachment_ids=[att.id],
+)
+
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- PROCEDURE: Catalog Sync                                      -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_hermisan_procedure_catalog" model="remotecontrol.procedure">
+            <field name="name">Hermisan: Catalog Sync</field>
+            <field name="remote_id" ref="remotecontrol_hermisan"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_hermisan_step_catalog_10_health" model="remotecontrol.step">
+            <field name="name">Health Check</field>
+            <field name="procedure_id" ref="remotecontrol_hermisan_procedure_catalog"/>
+            <field name="action_id" ref="remotecontrol_hermisan_action_health"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_hermisan_step_catalog_20_sync" model="remotecontrol.step">
+            <field name="name">Sync Catalog</field>
+            <field name="procedure_id" ref="remotecontrol_hermisan_procedure_catalog"/>
+            <field name="action_id" ref="remotecontrol_hermisan_action_sync_catalog"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_hermisan_step_catalog_30_provision" model="remotecontrol.step">
+            <field name="name">Provision Devices</field>
+            <field name="procedure_id" ref="remotecontrol_hermisan_procedure_catalog"/>
+            <field name="action_id" ref="remotecontrol_hermisan_action_provision_devices"/>
+            <field name="sequence">30</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- PROCEDURE: Import Readings                                   -->
+        <!-- ============================================================ -->
+        <record id="remotecontrol_hermisan_procedure_readings" model="remotecontrol.procedure">
+            <field name="name">Hermisan: Import Readings</field>
+            <field name="remote_id" ref="remotecontrol_hermisan"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="True"/>
+        </record>
+
+        <record id="remotecontrol_hermisan_step_readings_10_health" model="remotecontrol.step">
+            <field name="name">Health Check</field>
+            <field name="procedure_id" ref="remotecontrol_hermisan_procedure_readings"/>
+            <field name="action_id" ref="remotecontrol_hermisan_action_health"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_hermisan_step_readings_20_plan" model="remotecontrol.step">
+            <field name="name">Get Devices (Plan)</field>
+            <field name="procedure_id" ref="remotecontrol_hermisan_procedure_readings"/>
+            <field name="action_id" ref="remotecontrol_hermisan_action_get_devices"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_hermisan_step_readings_30_import" model="remotecontrol.step">
+            <field name="name">Get Readings</field>
+            <field name="procedure_id" ref="remotecontrol_hermisan_procedure_readings"/>
+            <field name="action_id" ref="remotecontrol_hermisan_action_get_readings"/>
+            <field name="sequence">30</field>
+        </record>
+
+    </data>
+</odoo>
