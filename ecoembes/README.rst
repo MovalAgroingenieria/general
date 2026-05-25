@@ -57,6 +57,6 @@ Maintainer
 
 This module is maintained by **Moval Agroingeniería S.L.**
 
-.. image:: https://services.moval.es/static/images/logo_moval_small.png
+.. image:: https://raw.githubusercontent.com/MovalAgroingenieria/public-assets/master/logos/logo_moval_small.png
    :alt: Moval Agroingeniería
    :target: https://moval.es
