@@ -309,3 +309,28 @@ Known Limitations
 * Raster generation is synchronous (no queue); for products with very
   large grids or many stations it may block the Odoo worker process for
   several seconds.
+
+Credits
+=======
+
+* Moval Agroingeniería S.L.
+
+Contributors
+------------
+
+* Alberto Hernández <ahernandez@moval.es>
+* Eduardo Iniesta <einiesta@moval.es>
+* Miguel Mora <mmora@moval.es>
+* Juanu Sandoval <jsandoval@moval.es>
+* Salvador Sánchez <ssanchez@moval.es>
+* Jorge Vera <jvera@moval.es>
+
+Maintainer
+----------
+
+.. image:: https://raw.githubusercontent.com/MovalAgroingenieria/public-assets/master/logos/logo_moval_small.png
+   :target: http://moval.es
+   :alt: Moval Agroingeniería
+
+This module is maintained by Moval Agroingeniería.
+
