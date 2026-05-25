@@ -16,7 +16,7 @@ creates two fields in the invoice:
 * External Collector Ref. (Text)
 
 These fields are completed when the payment file is generated. What allows to
-track and find the invoices sent to the external collector. 
+track and find the invoices sent to the external collector.
 
 
 Notes
@@ -43,7 +43,7 @@ Contributors
 Maintainer
 ----------
 
-.. image:: https://services.moval.es/static/images/logo_moval_small.png
+.. image:: https://raw.githubusercontent.com/MovalAgroingenieria/public-assets/master/logos/logo_moval_small.png
    :target: http://moval.es
    :alt: Moval Agroingeniería
 

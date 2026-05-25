@@ -12,9 +12,9 @@ Description
 This module add a new field 'variable fees' to credit control and other HTML
 field to explain the reason for these fees.
 
-The application of these variable fees can be configured by Bank Journal. Thus, 
-in the advanced configuration of a bank journal in the 'Miscellaneous' section 
-you can find the 'Apply variable fees (Credit control)' check-box to apply or 
+The application of these variable fees can be configured by Bank Journal. Thus,
+in the advanced configuration of a bank journal in the 'Miscellaneous' section
+you can find the 'Apply variable fees (Credit control)' check-box to apply or
 not the variable charges to the lines of this journal.
 
 Credits
@@ -35,7 +35,7 @@ Contributors
 Maintainer
 ----------
 
-.. image:: https://services.moval.es/static/images/logo_moval_small.png
+.. image:: https://raw.githubusercontent.com/MovalAgroingenieria/public-assets/master/logos/logo_moval_small.png
    :target: http://moval.es
    :alt: Moval Agroingeniería
 

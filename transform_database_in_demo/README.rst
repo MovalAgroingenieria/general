@@ -20,9 +20,9 @@ database.
    :widths: 60 10 60
    :header-rows: 0
 
-   * - 
-     - 
-     - 
+   * -
+     -
+     -
    * - Firstname Lastname Lastname2
      - -->
      - María Demo Lastname2
@@ -66,7 +66,7 @@ Contributors
 Maintainer
 ----------
 
-.. image:: https://services.moval.es/static/images/logo_moval_small.png
+.. image:: https://raw.githubusercontent.com/MovalAgroingenieria/public-assets/master/logos/logo_moval_small.png
    :target: http://moval.es
    :alt: Moval Agroingeniería
 

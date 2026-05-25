@@ -11,7 +11,7 @@ Using this module you can track files and create file relationships and categori
 Although they are not strictly necessary, it is advisable to install these modules:
 
 * app_dynamic_list: module to show/hide columns on the tree view
- 
+
 * web_tree_image: module to show images in tree views
 
 
@@ -45,7 +45,7 @@ Contributors
 Maintainer
 ----------
 
-.. image:: https://services.moval.es/static/images/logo_moval_small.png
+.. image:: https://raw.githubusercontent.com/MovalAgroingenieria/public-assets/master/logos/logo_moval_small.png
    :target: http://moval.es
    :alt: Moval Agroingeniería
 
