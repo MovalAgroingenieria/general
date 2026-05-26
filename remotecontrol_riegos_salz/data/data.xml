@@ -485,5 +485,186 @@ bag['audit_attachment_id'] = att.id
             <field name="sequence">20</field>
         </record>
 
+        <!-- ======================================================== -->
+        <!-- Import elements (consultaRemotas)                        -->
+        <!-- ======================================================== -->
+
+        <record id="remotecontrol_riegos_salz_action_import_elements" model="remotecontrol.action">
+            <field name="name">Riegos Salz: Import elements</field>
+            <field name="remote_id" ref="remotecontrol_riegos_salz"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import hashlib
+
+Remote = self.remote_id
+base_url = Remote.base_url
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}') or {}
+except Exception:
+    cfg = {}
+username = (cfg.get('username') or '').strip()
+password = (cfg.get('password') or '').strip()
+if not username or not password:
+    raise Exception(
+        "Missing credentials: please configure username/password "
+        "in connection_params"
+    )
+password_md5 = hashlib.md5(password.encode('utf-8')).hexdigest()
+url = base_url + '/apirest'
+headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+}
+payload = {
+    'comando': 'consultaRemotas',
+    'correo': username,
+    'contrasenya': password_md5,
+}
+resp = request_retry(
+    'POST', url, headers=headers, json=payload,
+    timeout=Remote.timeout,
+)
+code = resp.status_code
+if code >= 400:
+    raise Exception(
+        "HTTP %s from consultaRemotas: %s" % (code, (resp.text or '')[:500])
+    )
+data = resp.json() or {}
+cod_error = data.get('codError', -1)
+if cod_error != 0:
+    error_msg = data.get('error', '')
+    if isinstance(error_msg, list):
+        error_msg = '; '.join(error_msg)
+    raise Exception(
+        "API codError=%s: %s" % (cod_error, error_msg)
+    )
+remotas_raw = data.get('remotas', {}) or {}
+elements = []
+for remota_key, remota in remotas_raw.items():
+    id_remota = remota.get('id_remota')
+    descripcion_remota = remota.get('descripcion', '')
+    placas_raw = remota.get('placas', {}) or {}
+    placas = []
+    for placa_key, placa in placas_raw.items():
+        id_placa = placa.get('id_placa')
+        descripcion_placa = placa.get('descripcion', '')
+        numero_placa = placa.get('numero', '')
+        variables_raw = placa.get('placa_variables', {}) or {}
+        variables = []
+        for var_key, var in variables_raw.items():
+            variables.append({
+                'id_placavariable': var.get('id_placavariable'),
+                'descripcion': var.get('descripcion', ''),
+                'valor': var.get('valor', ''),
+                'unidades': var.get('unidades', ''),
+                'decimales': var.get('decimales', ''),
+                'magnitud': var.get('magnitud', ''),
+            })
+        acciones_raw = placa.get('placa_acciones', {}) or {}
+        acciones = []
+        for acc_key, acc in acciones_raw.items():
+            acciones.append({
+                'codigo': acc.get('codigo', ''),
+                'descripcion': acc.get('descripcion', ''),
+            })
+        placas.append({
+            'id_placa': id_placa,
+            'numero': numero_placa,
+            'descripcion': descripcion_placa,
+            'variables': variables,
+            'acciones': acciones,
+        })
+    elements.append({
+        'id_remota': id_remota,
+        'descripcion': descripcion_remota,
+        'placas': placas,
+    })
+# Build flat sensor config table for easy reference
+sensor_config_table = []
+for el in elements:
+    for placa in el.get('placas', []):
+        for var in placa.get('variables', []):
+            sensor_config_table.append({
+                'remota': el.get('descripcion', ''),
+                'id_remota': el.get('id_remota'),
+                'placa': placa.get('descripcion', ''),
+                'id_placa': placa.get('id_placa'),
+                'variable': var.get('descripcion', ''),
+                'id_placavariable': var.get('id_placavariable'),
+                'unidades': var.get('unidades', ''),
+                'magnitud': var.get('magnitud', ''),
+                'valor_actual': var.get('valor', ''),
+                'decimales': var.get('decimales', ''),
+                'odoo_device_params': json.dumps(
+                    {'start_date': fields.Date.today()},
+                    ensure_ascii=True,
+                ),
+                'odoo_sensor_params': json.dumps(
+                    {'id': var.get('id_placavariable')},
+                    ensure_ascii=True,
+                ),
+            })
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'total_remotas': len(elements),
+    'total_variables': len(sensor_config_table),
+    'elements': elements,
+    'sensor_config_table': sensor_config_table,
+}
+try:
+    audit_json = json.dumps(
+        audit, ensure_ascii=True, indent=2, default=str,
+    )
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+except Exception as json_error:
+    simple_audit = {
+        'executed_at': str(fields.Datetime.now()),
+        'error': str(json_error),
+    }
+    audit_json = json.dumps(simple_audit, ensure_ascii=True, indent=2)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+fname = 'riegosalz_elements_%s.json' % (
+    fields.Datetime.now()
+    .replace(':', '')
+    .replace('-', '')
+    .replace(' ', '_')
+)
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id,
+})
+Remote.message_post(
+    body=u"[RiegosSalz] consultaRemotas: %s remotas, %s variables"
+         % (len(elements), len(sensor_config_table)),
+    attachment_ids=[att.id],
+)
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_riegos_salz_procedure_import_elements" model="remotecontrol.procedure">
+            <field name="name">Riegos Salz: Import elements</field>
+            <field name="remote_id" ref="remotecontrol_riegos_salz"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="False"/>
+        </record>
+
+        <record id="remotecontrol_riegos_salz_step_import_elements" model="remotecontrol.step">
+            <field name="name">Import elements</field>
+            <field name="procedure_id" ref="remotecontrol_riegos_salz_procedure_import_elements"/>
+            <field name="action_id" ref="remotecontrol_riegos_salz_action_import_elements"/>
+            <field name="sequence">10</field>
+        </record>
+
     </data>
 </odoo>
