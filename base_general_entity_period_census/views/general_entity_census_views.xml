@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <list
                 editable="bottom"
-                decoration-muted="state == 'locked'"
+                decoration-info="state == 'locked'"
                 default_order="period_date desc"
             >
                 <button
@@ -56,7 +56,7 @@
                         name="%(action_census_generate_lines_wizard)d"
                         type="action"
                         string="Generate Lines"
-                        class="btn-secondary"
+                        class="btn-primary"
                         invisible="state == 'locked'"
                     />
                     <button

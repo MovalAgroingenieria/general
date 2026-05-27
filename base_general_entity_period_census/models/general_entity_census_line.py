@@ -146,19 +146,13 @@ class GeneralEntityCensusLine(models.Model):
         for line in self:
             line.has_additional_movements = bool(line.additional_ids)
 
-    @api.depends("shares", "census_id.distribution_amount_day", "census_id.period_days")
+    @api.depends("shares", "census_id.distribution_amount_period")
     def _compute_base_distributed_qty(self):
-        """Calculate base distribution: shares × amount_day × days."""
+        """Calculate base distribution: shares × amount_per_period."""
         for line in self:
-            if (
-                line.shares
-                and line.census_id.distribution_amount_day
-                and line.census_id.period_days
-            ):
+            if line.shares and line.census_id.distribution_amount_period:
                 line.base_distributed_qty = (
-                    line.shares
-                    * line.census_id.distribution_amount_day
-                    * line.census_id.period_days
+                    line.shares * line.census_id.distribution_amount_period
                 )
             else:
                 # Keep existing value if shares is 0 (might be direct entry)
@@ -179,16 +173,8 @@ class GeneralEntityCensusLine(models.Model):
             elif line.base_distributed_qty:
                 # Check if the value matches the calculated value
                 calculated = 0.0
-                if (
-                    line.shares
-                    and line.census_id.distribution_amount_day
-                    and line.census_id.period_days
-                ):
-                    calculated = (
-                        line.shares
-                        * line.census_id.distribution_amount_day
-                        * line.census_id.period_days
-                    )
+                if line.shares and line.census_id.distribution_amount_period:
+                    calculated = line.shares * line.census_id.distribution_amount_period
                 # If it doesn't match, user is setting directly, so set shares to 0
                 if abs(line.base_distributed_qty - calculated) > 0.001:
                     line.shares = 0.0
