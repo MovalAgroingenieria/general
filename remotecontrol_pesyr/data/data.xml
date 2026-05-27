@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="remotecontrol_pesyr" model="remotecontrol">
+            <field name="name">PESYR SQL</field>
+            <field name="remotecontrol_type">sql</field>
+            <field name="base_url">odbc://</field>
+            <field name="timeout">300</field>
+            <field name="verify_ssl">False</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="is_cesens">True</field>
+            <field name="connection_params"><![CDATA[
+            {
+                "driver": "",
+                "server": "",
+                "port": "",
+                "database": "",
+                "uid": "",
+                "pwd": ""
+            }]]></field>
+        </record>
+
+        <record id="remotecontrol_pesyr_action_get_token" model="remotecontrol.action">
+            <field name="name">PESYR: Build Device/Sensor Plan</field>
+            <field name="remote_id" ref="remotecontrol_pesyr"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import json
+
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+today_str = fields.Date.today()
+
+condition = [
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id),
+]
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+sensors = Sensor.search(condition)
+
+sensor_ids = [s.id for s in sensors]
+last_readings_map = {}
+if sensors:
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for sid, mtime in cr.fetchall():
+        last_readings_map[sid] = mtime
+
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+    try:
+        scfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        scfg = {}
+    try:
+        dcfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        dcfg = {}
+
+    id_inst = dcfg.get('device_id')
+    contador_id = scfg.get('sensor_id')
+
+    try:
+        id_inst = int(id_inst)
+    except Exception:
+        continue
+
+    try:
+        contador_id = int(contador_id)
+    except Exception:
+        continue
+
+    if 0 <= contador_id <= 5:
+        value_field = 'cont%s' % (contador_id + 1)
+    elif 1 <= contador_id <= 6:
+        value_field = 'cont%s' % contador_id
+    else:
+        continue
+
+    start_cfg = dcfg.get('start_date')
+    last_m = last_readings_map.get(sensor.id)
+    if last_m:
+        try:
+            initial_date = fields.Date.to_string(
+                fields.Datetime.from_string(last_m)
+            )
+        except Exception:
+            initial_date = str(last_m)[:10]
+    elif start_cfg:
+        initial_date = start_cfg[:10]
+    else:
+        year_str = today_str[:4]
+        initial_date = '%s-01-01' % year_str
+
+    plan.append({
+        'sensor_id': sensor.id,
+        'device_id': device.id,
+        'id_inst': id_inst,
+        'contador_id': contador_id,
+        'value_field': value_field,
+        'initial_date': initial_date,
+    })
+
+bag['sensors_plan'] = plan
+bag['plan_count'] = len(plan)
+]]></field>
+        </record>
+
+        <record id="remotecontrol_pesyr_action_get_devices" model="remotecontrol.action">
+            <field name="name">PESYR: Fetch and Parse Rows</field>
+            <field name="remote_id" ref="remotecontrol_pesyr"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import json
+import pyodbc
+
+Remote = self.remote_id
+plan = bag.get('sensors_plan') or []
+
+rows = []
+errors = []
+
+try:
+    cfg = json.loads(Remote.connection_params or '{}') or {}
+    driver = (cfg.get('driver') or '').strip()
+    server = cfg.get('server', '').strip()
+    port = cfg.get('port', '3306')
+    database = cfg.get('database', '').strip()
+    uid = cfg.get('uid', '').strip()
+    pwd = cfg.get('pwd', '').strip()
+
+    if not all([server, database, uid]):
+        raise Exception('Missing required connection parameters')
+
+    driver_candidates = []
+    if driver:
+        driver_candidates.append(driver)
+    driver_candidates.extend([
+        'MariaDB Unicode',
+        'MySQL ODBC 8.0 Unicode Driver',
+        'MySQL ODBC 8.0 ANSI Driver',
+    ])
+    seen = set()
+    normalized_candidates = []
+    for candidate in driver_candidates:
+        key = candidate.strip().lower()
+        if key and key not in seen:
+            seen.add(key)
+            normalized_candidates.append(candidate)
+
+    conn = None
+    last_error = False
+    selected_driver = False
+    for candidate in normalized_candidates:
+        try:
+            connection_string = (
+                'DRIVER={%s};'
+                'SERVER=%s;'
+                'PORT=%s;'
+                'DATABASE=%s;'
+                'UID=%s;'
+                'PWD=%s;'
+            ) % (candidate, server, port, database, uid, pwd)
+            conn = pyodbc.connect(connection_string)
+            selected_driver = candidate
+            break
+        except Exception as driver_exc:
+            last_error = str(driver_exc)
+
+    if not conn:
+        raise Exception(
+            'Cannot connect with available ODBC drivers. Tried: %s. Last '
+            'error: %s' % (', '.join(normalized_candidates), last_error)
+        )
+
+    cursor = conn.cursor()
+
+    for item in plan:
+        sensor_id = item['sensor_id']
+        device_id = item['device_id']
+        id_inst = item['id_inst']
+        value_col = item['value_field']
+        initial_date = item['initial_date']
+        table_name = 'iot_contadores_vista_moval'
+        time_col = 'fecha'
+        query = (
+            'SELECT id_inst, %s, %s '
+            'FROM %s '
+            'WHERE id_inst = ? AND %s >= ? '
+            'ORDER BY %s ASC'
+        ) % (time_col, value_col, table_name, time_col, time_col)
+
+        try:
+            cursor.execute(query, (id_inst, initial_date))
+            results = cursor.fetchall()
+            for row in results:
+                timestamp = row[1]
+                if hasattr(timestamp, 'strftime'):
+                    timestamp = timestamp.strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    timestamp = str(timestamp)
+                rows.append({
+                    'sensor_id': sensor_id,
+                    'device_id': device_id,
+                    'timestamp': timestamp,
+                    'value': row[2],
+                })
+        except Exception as exc:
+            errors.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'id_inst': id_inst,
+                'query': query,
+                'error': str(exc),
+            })
+
+    cursor.close()
+    conn.close()
+except Exception as ex:
+    errors.append({'fatal_error': str(ex)})
+
+bag['pesyr_rows'] = rows
+bag['pesyr_fetch_errors'] = errors
+bag['pesyr_driver'] = selected_driver
+Remote.message_post(
+    body='[PESYR] Fetch: %s rows, %s errors (driver=%s)' %
+         (len(rows), len(errors), selected_driver)
+)
+]]></field>
+        </record>
+
+        <record id="remotecontrol_pesyr_action_get_readings" model="remotecontrol.action">
+            <field name="name">PESYR: Upsert Readings</field>
+            <field name="remote_id" ref="remotecontrol_pesyr"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import pytz
+from datetime import datetime
+
+Remote = self.remote_id
+
+def parse_value(v):
+    if v is None:
+        return None
+    if isinstance(v, str):
+        v = v.strip().replace(',', '.')
+        if v.lower() == 'nan':
+            return None
+        try:
+            return float(v)
+        except Exception:
+            return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    return None
+
+rows = bag.get('pesyr_rows') or []
+total_processed = 0
+total_upserts = 0
+total_errors = 0
+
+for r in rows:
+    total_processed += 1
+    sensor_id = r.get('sensor_id')
+    device_id = r.get('device_id')
+    timestamp = r.get('timestamp')
+    value = parse_value(r.get('value'))
+
+    if not sensor_id or not device_id or not timestamp or value is None:
+        total_errors += 1
+        continue
+
+    try:
+        try:
+            date_time_read = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
+            date_time_read = pytz.timezone('Europe/Madrid').localize(date_time_read)
+            date_time_read = date_time_read.astimezone(pytz.timezone('UTC'))
+            ts_utc = date_time_read.strftime('%Y-%m-%d %H:%M:%S')
+        except Exception:
+            ts_utc = timestamp
+
+        Remote.upsert(
+            'mdm.measurement.device.sensor.reading',
+            {
+                'sensor_id': sensor_id,
+                'measurement_time': ts_utc,
+            },
+            {
+                'value': value,
+                'device_id': device_id,
+            }
+        )
+        total_upserts += 1
+    except Exception:
+        total_errors += 1
+
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+Remote.message_post(
+    body='[PESYR] Upsert: %s processed, %s upserts, %s errors' %
+         (total_processed, total_upserts, total_errors)
+)
+    ]]></field>
+        </record>
+
+
+        <record id="remotecontrol_pesyr_procedure" model="remotecontrol.procedure">
+            <field name="name">PESYR: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_pesyr"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="True"/>
+    </record>
+
+
+        <record id="remotecontrol_pesyr_step_10_token" model="remotecontrol.step">
+            <field name="name">Build Device/Sensor Plan</field>
+            <field name="procedure_id" ref="remotecontrol_pesyr_procedure"/>
+            <field name="action_id" ref="remotecontrol_pesyr_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_pesyr_step_20_devices" model="remotecontrol.step">
+            <field name="name">Fetch and Parse Rows</field>
+            <field name="procedure_id" ref="remotecontrol_pesyr_procedure"/>
+            <field name="action_id" ref="remotecontrol_pesyr_action_get_devices"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_pesyr_step_30_readings" model="remotecontrol.step">
+            <field name="name">Upsert Readings</field>
+            <field name="procedure_id" ref="remotecontrol_pesyr_procedure"/>
+            <field name="action_id" ref="remotecontrol_pesyr_action_get_readings"/>
+            <field name="sequence">30</field>
+        </record>
+    </data>
+</odoo>
