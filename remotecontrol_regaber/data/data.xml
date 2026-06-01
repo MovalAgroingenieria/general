@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_regaber" model="remotecontrol">
+            <field name="name">Regaber SKYplatform</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://api.skyplatform.matwatertech.com</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">False</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "username": "",
+    "password": "",
+    "project_id": null
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>Regaber SKYplatform API · Odoo Integration</h2>
+
+<hr/>
+
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code></p>
+<p>Base URL: <code>https://api.skyplatform.matwatertech.com</code></p>
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+  "username": "user@example.com",
+    "password": "********",
+    "project_id": 285428
+}</pre>
+<ul>
+  <li><em>Get Token</em> → performs <code>POST /Token</code> (form-urlencoded, grant_type=password) and stores <code>bag["access_token"]</code>.</li>
+  <li>Subsequent requests must include the header: <code>Authorization: Bearer &lt;access_token&gt;</code>.</li>
+  <li><strong>Token validity:</strong> 1 day (1 209 599 seconds). Not persisted; each execution requires a new login.</li>
+</ul>
+
+<h3>2) Element Tree</h3>
+<pre>
+Project (Type 1)
+└── ControlZone / Area (Type 2)
+    └── SKYreg Concentrator (Type 200)
+        └── SKYreg Hydrant (Type 221)
+            └── SKYreg WaterMeter (Type 207)
+SKYmeter NB-IoT (Type 3106)
+└── SKYmeterNBIoT WaterMeter (Type 3107)
+</pre>
+<p>Use <code>GET /TreeNode</code> to discover the full tree and obtain element IDs.</p>
+
+<h3>3) Counter Endpoints</h3>
+<table border="1" cellpadding="4" cellspacing="0">
+  <tr><th>Device Type</th><th>Endpoint</th></tr>
+  <tr><td>SKYreg WaterMeter</td><td><code>GET /SKYreg/WaterMeter/LastValue/?id={id}</code></td></tr>
+  <tr><td>SKYreg Hydrant (water meter)</td><td><code>GET /SKYreg/Hydrant/WaterMeter/LastValue/?id={id}</code></td></tr>
+  <tr><td>SKYmeter NB-IoT WaterMeter</td><td><code>GET /SKYmeterNBIoT/WaterMeter/LastValue/?id={id}</code></td></tr>
+</table>
+
+<h3>4) Response Format</h3>
+<h4>SKYreg / SKYreg Hydrant:</h4>
+<pre>{
+  "TreeNodeId": 178089,
+  "Type": 12,
+  "Units": "m³",
+  "LastValue": {
+    "Value": 66404.0,
+    "DateTime": "01/01/2024 08:00"
+  }
+}</pre>
+<h4>SKYmeter NB-IoT:</h4>
+<pre>{
+  "TreeNodeId": 934067,
+  "Units": "m³",
+  "LastValue": {
+    "Value": 288.0,
+    "DateTime": "01/01/2024 08:00"
+  }
+}</pre>
+<p><strong>DateTime format:</strong> <code>dd/MM/yyyy HH:mm</code> (European format).</p>
+
+<h3>5) Odoo Configuration (via wua_remotecontrol_rest_regaber)</h3>
+<p>In each <code>wua.waterconnection</code>:</p>
+<ul>
+  <li><strong>Regaber TreeNode ID</strong>: Integer ID from <code>GET /TreeNode</code>.</li>
+  <li><strong>Regaber Device Type</strong>: <code>skyreg</code>, <code>skyreg_hydrant</code>, or <code>skymeter_nbiot</code>.</li>
+    <li><strong>project_id</strong> in <code>connection_params</code> is optional but recommended. If set, discovery/import is limited to that project.</li>
+</ul>
+
+<h3>6) Available Procedures</h3>
+<ul>
+  <li><strong>Regaber: Get Tree Nodes</strong> — Downloads the full element tree and creates a JSON attachment.</li>
+  <li><strong>Regaber: Get Last Readings</strong> — Used internally by the WUA module to fetch the last counter value for each configured waterconnection.</li>
+</ul>
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Get Token -->
+        <record id="remotecontrol_regaber_action_get_token" model="remotecontrol.action">
+            <field name="name">Regaber: Get Token</field>
+            <field name="remote_id" ref="remotecontrol_regaber"/>
+            <field name="sequence">10</field>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# SKYplatform uses Bearer token authentication.
+# POST /Token with application/x-www-form-urlencoded, grant_type=password.
+remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+username = (cfg.get('username') or '').strip()
+password = (cfg.get('password') or '').strip()
+if not username or not password:
+    raise Exception(
+        "Missing Regaber credentials: set username/password "
+        "in connection_params.")
+url = (base_url or '').rstrip('/') + '/Token'
+token_data = {
+    'username': username,
+    'password': password,
+    'grant_type': 'password',
+}
+resp = request_retry(
+    'POST', url,
+    data=token_data,
+    headers={'Content-Type': 'application/x-www-form-urlencoded'},
+    timeout=timeout,
+)
+if resp.status_code >= 400:
+    raise Exception(
+        "Regaber token request failed: %s %s" % (
+            resp.status_code, resp.text))
+try:
+    j = resp.json()
+except Exception as e:
+    raise Exception("Failed to parse Regaber token response: %s" % str(e))
+access_token = j.get('access_token') or ''
+if not access_token:
+    raise Exception(
+        "Regaber login OK but no access_token in response: %s" % str(j))
+bag['access_token'] = access_token
+bag['token_type'] = j.get('token_type', 'bearer')
+bag['expires_in'] = j.get('expires_in')
+bag['token_username'] = j.get('userName', '')
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Get Tree Nodes (discovery) -->
+        <record id="remotecontrol_regaber_action_get_tree_nodes" model="remotecontrol.action">
+            <field name="name">Regaber: Get Tree Nodes</field>
+            <field name="remote_id" ref="remotecontrol_regaber"/>
+            <field name="sequence">20</field>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+access_token = bag.get('access_token')
+if not access_token:
+    raise Exception("Missing access_token in bag. Run 'Get Token' first.")
+Remote = self.remote_id
+headers = {
+    'Authorization': 'Bearer %s' % access_token,
+    'Accept': 'application/json',
+}
+url = (base_url or '').rstrip('/') + '/TreeNode'
+resp = request_retry('GET', url, headers=headers, timeout=timeout)
+if resp.status_code >= 400:
+    raise Exception(
+        "GET /TreeNode failed: %s %s" % (resp.status_code, resp.text))
+try:
+    tree_data = resp.json() or []
+except Exception as e:
+    raise Exception("Failed to parse /TreeNode response: %s" % str(e))
+
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+selected_project_id = cfg.get('project_id')
+if selected_project_id:
+    try:
+        selected_project_id = int(selected_project_id)
+    except (TypeError, ValueError):
+        raise Exception("Invalid project_id in connection_params. Must be integer.")
+
+# tree_data is a list of lists (one per project)
+flat_nodes = []
+selected_project_name = ''
+projects = []
+for project_group in tree_data:
+    if isinstance(project_group, list):
+        project_node = False
+        for node in project_group:
+            if isinstance(node, dict) and node.get('Type') == 1:
+                project_node = node
+                break
+        if project_node:
+            project_info = {
+                'id': project_node.get('Id'),
+                'name': project_node.get('Name') or '',
+            }
+            projects.append(project_info)
+            if selected_project_id and project_info['id'] == selected_project_id:
+                selected_project_name = project_info['name']
+        include_group = True
+        if selected_project_id and (
+                not project_node or project_node.get('Id') != selected_project_id):
+            include_group = False
+        if include_group:
+            flat_nodes.extend(project_group)
+    elif isinstance(project_group, dict):
+        if not selected_project_id:
+            flat_nodes.append(project_group)
+
+if selected_project_id and not selected_project_name:
+    raise Exception(
+        "Configured project_id %s not found in /TreeNode response." %
+        selected_project_id)
+
+summary = {
+    'executed_at': fields.Datetime.now(),
+    'total_nodes': len(flat_nodes),
+    'projects': len(tree_data) if isinstance(tree_data, list) else 0,
+    'available_projects': projects,
+    'selected_project_id': selected_project_id,
+    'selected_project_name': selected_project_name,
+    'nodes': flat_nodes,
+}
+json_str = json.dumps(summary, ensure_ascii=False, indent=2)
+encoded = base64.b64encode(json_str.encode('utf-8'))
+fname = 'regaber_tree_nodes_%s.json' % fields.Datetime.now().replace(
+    ':', '').replace('-', '').replace(' ', '_')
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': encoded,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id,
+})
+Remote.message_post(
+    body=u'[Regaber] Tree nodes fetched: %s nodes in %s projects%s' % (
+        len(flat_nodes),
+        summary['projects'],
+        selected_project_name and (' | project: %s' % selected_project_name) or ''
+    ),
+    attachment_ids=[att.id],
+)
+bag['tree_nodes'] = flat_nodes
+bag['tree_attachment_id'] = att.id
+bag['tree_attachment_name'] = fname
+bag['selected_project_id'] = selected_project_id
+bag['selected_project_name'] = selected_project_name
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Get Last Readings -->
+        <record id="remotecontrol_regaber_action_get_last_readings" model="remotecontrol.action">
+            <field name="name">Regaber: Get Last Readings</field>
+            <field name="remote_id" ref="remotecontrol_regaber"/>
+            <field name="sequence">30</field>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import time
+from datetime import datetime as _datetime
+access_token = bag.get('access_token')
+if not access_token:
+    raise Exception("Missing access_token in bag. Run 'Get Token' first.")
+Remote = self.remote_id
+headers = {
+    'Authorization': 'Bearer %s' % access_token,
+    'Accept': 'application/json',
+}
+api_base = (base_url or '').rstrip('/')
+# target_nodes: list of dicts with keys node_id, device_type
+# device_type values: 'skyreg', 'skyreg_hydrant', 'skymeter_nbiot'
+target_nodes = bag.get('target_nodes') or []
+last_readings = {}
+errors = []
+# Endpoint mapping per device type
+endpoint_map = {
+    'skyreg': '/SKYreg/WaterMeter/LastValue/',
+    'skyreg_hydrant': '/SKYreg/Hydrant/WaterMeter/LastValue/',
+    'skymeter_nbiot': '/SKYmeterNBIoT/WaterMeter/LastValue/',
+}
+for target in target_nodes:
+    if not isinstance(target, dict):
+        continue
+    node_id = target.get('node_id')
+    device_type = target.get('device_type') or 'skyreg'
+    if not node_id:
+        errors.append({'error': 'Missing node_id', 'target': str(target)})
+        continue
+    endpoint = endpoint_map.get(device_type)
+    if not endpoint:
+        errors.append({
+            'node_id': node_id,
+            'error': 'Unknown device_type: %s' % device_type,
+        })
+        continue
+    url = '%s%s?id=%s' % (api_base, endpoint, node_id)
+    try:
+        resp = request_retry('GET', url, headers=headers, timeout=timeout)
+        if resp.status_code >= 400:
+            errors.append({
+                'node_id': node_id,
+                'error': 'HTTP %s: %s' % (
+                    resp.status_code, (resp.text or '')[:300]),
+            })
+            continue
+        payload = resp.json() or {}
+        last_value_obj = payload.get('LastValue') or {}
+        value = last_value_obj.get('Value')
+        date_str = last_value_obj.get('DateTime') or ''
+        if value is None or value == '':
+            errors.append({'node_id': node_id, 'error': 'Missing Value in response'})
+            continue
+        if not date_str:
+            errors.append({'node_id': node_id, 'error': 'Missing DateTime in response'})
+            continue
+        # Convert date "dd/MM/yyyy HH:mm" → "yyyy-MM-dd HH:mm:ss"
+        try:
+            dt = _datetime.strptime(date_str.strip(), '%d/%m/%Y %H:%M')
+            date_iso = dt.strftime('%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            errors.append({
+                'node_id': node_id,
+                'error': 'Unrecognised DateTime format: %s' % date_str,
+            })
+            continue
+        try:
+            value_float = float(value)
+        except (TypeError, ValueError):
+            errors.append({
+                'node_id': node_id,
+                'error': 'Non-numeric value: %s' % str(value),
+            })
+            continue
+        last_readings[int(node_id)] = {
+            'value': value_float,
+            'date': date_iso,
+            'units': payload.get('Units', ''),
+            'device_type': device_type,
+        }
+    except Exception as e:
+        errors.append({'node_id': node_id, 'error': str(e)})
+    time.sleep(0.2)
+bag['last_readings'] = last_readings
+bag['last_readings_errors'] = errors
+bag['total_last_readings'] = len(last_readings)
+            ]]></field>
+        </record>
+
+        <!-- PROCEDURE: Get Tree Nodes (discovery) -->
+        <record id="remotecontrol_regaber_procedure_get_tree_nodes"
+                model="remotecontrol.procedure">
+            <field name="name">Regaber: Get Tree Nodes</field>
+            <field name="remote_id" ref="remotecontrol_regaber"/>
+            <field name="sequence">10</field>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_regaber_step_tree_10_token"
+                model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id"
+                   ref="remotecontrol_regaber_procedure_get_tree_nodes"/>
+            <field name="action_id"
+                   ref="remotecontrol_regaber_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_regaber_step_tree_20_nodes"
+                model="remotecontrol.step">
+            <field name="name">Get Tree Nodes</field>
+            <field name="procedure_id"
+                   ref="remotecontrol_regaber_procedure_get_tree_nodes"/>
+            <field name="action_id"
+                   ref="remotecontrol_regaber_action_get_tree_nodes"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <!-- PROCEDURE: Get Last Readings (for wua.reading) -->
+        <record id="remotecontrol_regaber_procedure_last_readings"
+                model="remotecontrol.procedure">
+            <field name="name">Regaber: Get Last Readings</field>
+            <field name="remote_id" ref="remotecontrol_regaber"/>
+            <field name="sequence">20</field>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_regaber_step_last_10_token"
+                model="remotecontrol.step">
+            <field name="name">Get Token</field>
+            <field name="procedure_id"
+                   ref="remotecontrol_regaber_procedure_last_readings"/>
+            <field name="action_id"
+                   ref="remotecontrol_regaber_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_regaber_step_last_20_readings"
+                model="remotecontrol.step">
+            <field name="name">Get Last Readings</field>
+            <field name="procedure_id"
+                   ref="remotecontrol_regaber_procedure_last_readings"/>
+            <field name="action_id"
+                   ref="remotecontrol_regaber_action_get_last_readings"/>
+            <field name="sequence">20</field>
+        </record>
+
+    </data>
+</odoo>
