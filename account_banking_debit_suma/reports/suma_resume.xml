@@ -76,7 +76,7 @@
                 </div>
             </div>
             <div>
-                <!-- Page numbers 
+                <!-- Page numbers
                 <div class="text-right">
                     <span class="page" style="font-size: 10px;"/>
                     <span style="font-size: 8px;">/</span>
@@ -120,8 +120,10 @@
                         <div style="border: 1px solid lightgrey; margin-top:18px;">
                             <div style="margin-left: 24px;">
                                 <strong>PERIODO IMPOSITIVO / AÑO:</strong>
-                                <!-- Get from date today -->
-                                <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y')"/>
+                                <!-- @INFO: Get from the charge exercise year so the
+                                     Delivery Document matches positions 235-238 of the
+                                     file (it must NOT depend on the print date). -->
+                                <span t-esc="doc.charge_year"/>
                             </div>
                         </div>
                         <div style="border: 1px solid lightgrey; margin-top:18px;">

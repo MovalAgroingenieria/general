@@ -619,7 +619,10 @@ class AccountPaymentOrder(models.Model):
         # fixed_number = (in the loop)
 
         # Reset variables
-        total_amount = 0.0
+        # @INFO: Accumulate cents (the exact value written to positions
+        #        162-171) instead of euros so the Delivery Document total
+        #        matches what SUMA reads from the file.
+        total_amount_cents = 0
         bank_lines = ""
         entry_num = 0
 
@@ -649,6 +652,8 @@ class AccountPaymentOrder(models.Model):
             #        Done in line write at the end of loop
             internal_ref = self.env['ir.sequence'].next_by_code(
                 'suma_seq_internal_ref')
+            # @INFO: Enforce exactly 15 chars to avoid record displacement
+            internal_ref = str(internal_ref).zfill(15)[:15]
 
             # Taxpayer type - Position [038-038] Length 1
             if line.partner_id.company_type == 'company':
@@ -719,7 +724,8 @@ class AccountPaymentOrder(models.Model):
                 # @INFO: l10n_es_partner_street_type dependence
                 if line.partner_id.street_type_id:
                     taxpayer_address_street_type = \
-                        line.partner_id.street_type_id.abbreviation
+                        (line.partner_id.street_type_id.abbreviation
+                         or "")[:2].ljust(2)
                 else:
                     taxpayer_address_street_type = "CL"
 
@@ -745,14 +751,13 @@ class AccountPaymentOrder(models.Model):
                 # Street number - Position [123-127] Length 5
                 # @INFO: partner_address_street_number dependence
                 if line.partner_id.street_num:
-                    # Get only numbers
+                    # Get only numbers, keep the last 5 digits and pad to
+                    # exactly 5 to avoid overflowing the field (displacement)
+                    street_num_digits = ''.join(
+                        [x for x in line.partner_id.street_num
+                         if x.isdigit()])
                     taxpayer_address_street_number = \
-                        filter(lambda x: x.isdigit(),
-                               line.partner_id.street_num)
-                    taxpayer_address_street_number = \
-                        str(taxpayer_address_street_number.encode(
-                            self.ENCODING_NAME,
-                            self.ENCODING_TYPE)).zfill(5)
+                        street_num_digits[-5:].zfill(5)
                 else:
                     taxpayer_address_street_number = str(" " * 5)
 
@@ -765,7 +770,7 @@ class AccountPaymentOrder(models.Model):
                 # County code - Position [135-137] Length 3
                 # @INFO: The last 3 zip numbers
                 if line.partner_id.zip:
-                    county_code = str(line.partner_id.zip[2:]).zfill(3)
+                    county_code = str(line.partner_id.zip[2:5]).zfill(3)
                     if not county_code.isdigit():
                         county_code = str(" " * 3)
                 else:
@@ -914,12 +919,15 @@ class AccountPaymentOrder(models.Model):
                           (entry_num_padded, taxpayer_address_type)))
 
             # Amount for receipt - Position [162-171] Length 10
-            # @INFO: in cents and padded up to 10
-            amount_cents = int(line.amount_currency * 100)
-            amount = str(amount_cents).zfill(10)
+            # @INFO: in cents and padded up to 10. Use round() to avoid float
+            #        truncation errors (e.g. 19.99 * 100 -> 1998.99 -> 1998).
+            amount_cents = int(round(line.amount_currency * 100))
+            amount = str(amount_cents).zfill(10)[:10]
 
             # Sum amount to total_amount (for resume doc)
-            total_amount += line.amount_currency
+            # @INFO: Accumulate the exact cents written to positions 162-171
+            #        so the Delivery Document total matches what SUMA reads.
+            total_amount_cents += amount_cents
 
             # Taxpayer VAT - Position [172-181] Length 10
             # @INFO: The two first chars are sliced
@@ -941,7 +949,7 @@ class AccountPaymentOrder(models.Model):
                               "for partner %s is not valid." %
                               (entry_num_padded, taxpayer_vat,
                                line.partner_id.name)))
-                taxpayer_vat = str(taxpayer_vat).ljust(10)
+                taxpayer_vat = str(taxpayer_vat)[:10].ljust(10)
             else:
                 if self.error_mode == 'permissive':
                     error_num += 1
@@ -965,14 +973,17 @@ class AccountPaymentOrder(models.Model):
             #        field in bank_line. Usually it's a simple number but if
             #        option group in payment mode is active it chains all names
             if value_format_type == "3":
+                # @INFO: Initialize to safe defaults so the field keeps its
+                #        exact length even if no payment line matches (avoids
+                #        stale values from previous iterations / displacement)
+                invoice = False
+                tax_object = str(" " * 40)
                 for l in line.payment_line_ids:
                     if line.name == l.bank_line_id.name:
-                        try:
-                            invoice = l.invoice_id
-                            tax_object_raw = invoice.number
-                            tax_object = tax_object_raw[:40].ljust(40)
-                        except not invoice:
-                            invoice = False
+                        invoice = l.invoice_id
+                        if invoice and invoice.number:
+                            tax_object = invoice.number[:40].ljust(40)
+                        else:
                             tax_object = str(" " * 40)
             else:
                 if self.error_mode == 'permissive':
@@ -1008,12 +1019,12 @@ class AccountPaymentOrder(models.Model):
                                                      line.partner_id.name)))
 
             # Fiscal year - Position [235-238] Length 4
-            for l in line.payment_line_ids:
-                if line.name == l.bank_line_id.name:
-                    invoice_date = \
-                        datetime.strptime(l.move_line_id.date,
-                                          '%Y-%m-%d').strftime("%d%m%Y")
-                    fiscal_year = invoice_date[4:]
+            # @INFO: Must be the budget/charge exercise year (charge_year) so
+            #        it stays consistent with the Delivery Document and the
+            #        declared periodicity. Deriving it per line from each
+            #        invoice move date produced mismatched years (e.g. 2025
+            #        instead of 2026) and broke automated validation.
+            fiscal_year = str(self.charge_year)[:4].zfill(4)
 
             # Periodicity - Position [239-239] Length 1
             periodicity = self.periodicity
@@ -1113,9 +1124,7 @@ class AccountPaymentOrder(models.Model):
             _log.info('BANK LINE FIELD Final period      (length %s [002]): %s'
                       % (str(len(final_period)).zfill(3), final_period))
             _log.info('BANK LINE FIELD Line detail 1     (length %s [075]): %s'
-                      % (str(len(line_detail_1)).zfill(3),
-                         line_detail_1.encode(self.ENCODING_NAME,
-                                              self.ENCODING_TYPE)))
+                      % (str(len(line_detail_1)).zfill(3), line_detail_1))
             _log.info('BANK LINE FIELD Line detail 2     (length %s [075]): %s'
                       % (str(len(line_detail_2)).zfill(3), line_detail_2))
             _log.info('BANK LINE FIELD Line detail 3     (length %s [075]): %s'
@@ -1154,7 +1163,9 @@ class AccountPaymentOrder(models.Model):
                 })
 
         # Set total amout for SUMA resume
-        self.suma_total_amount = total_amount
+        # @INFO: Derived from the exact cents written to the file so the
+        #        Delivery Document total equals the sum of positions 162-171.
+        self.suma_total_amount = total_amount_cents / 100.0
 
         # Fill error tab
         if self.error_mode == 'permissive':
@@ -1202,7 +1213,7 @@ class AccountPaymentOrder(models.Model):
             if line.name == l.bank_line_id.name:
                 try:
                     invoice = l.invoice_id
-                except not invoice:
+                except Exception:
                     invoice = False
         # Detail line 2
         if invoice:
