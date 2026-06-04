@@ -912,5 +912,99 @@ finally:
             <field name="sequence">10</field>
         </record>
 
+        <!-- Get Groups/Programs (irrigation schedules) from vw_GruposProgramas -->
+        <record id="remotecontrol_regacom_procedure_groups_programs" model="remotecontrol.procedure">
+            <field name="name">Regacom: Get Groups/Programs</field>
+            <field name="remote_id" ref="remotecontrol_regacom"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_regacom_action_get_groups_programs" model="remotecontrol.action">
+            <field name="name">Regacom: Get Groups/Programs</field>
+            <field name="remote_id" ref="remotecontrol_regacom"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Get all groups/programs (irrigation schedules) from vw_GruposProgramas.
+# Returns a flat list of dicts in bag['groups_programs'] plus a nested
+# lookup dict keyed by (PROG_nDirUM, PROG_nDirIRU, PROG_N_VALVULA).
+Remote = self.remote_id
+cursor = sql_connect()
+bag['_sql_cursor'] = cursor
+try:
+    query = """
+        SELECT
+            GPRUM_nId,
+            GPR_nDirUM,
+            GPR_N_GRUPO,
+            GPR_NOMBRE_GRUPO,
+            GPR_FECHA_INICIAL,
+            GPR_FECHA_FINAL,
+            GPR_DIAS,
+            GRP_HORA_INICIO,
+            GRP_HORA_FIN,
+            PROG_nDirIRU,
+            PROG_N_VALVULA,
+            CAST(PROG_CANTIDAD AS FLOAT) AS PROG_CANTIDAD,
+            PROG_ACTIVO,
+            PROG_EJECUTADO,
+            PROG_NUMERO,
+            CAST(PROG_AGUA_APLICADA AS FLOAT) AS PROG_AGUA_APLICADA,
+            PROG_nDirUM
+        FROM vw_GruposProgramas
+        ORDER BY PROG_nDirUM, PROG_nDirIRU, PROG_N_VALVULA, GPR_N_GRUPO
+    """
+    sql_execute(cursor, query, ())
+    rows = sql_fetchall(cursor)
+    groups_programs = []
+    groups_programs_by_key = {}
+    total = 0
+    for row in rows:
+        item = {
+            'GPRUM_nId': row[0],
+            'GPR_nDirUM': row[1],
+            'GPR_N_GRUPO': row[2],
+            'GPR_NOMBRE_GRUPO': (row[3] or u'').strip(),
+            'GPR_FECHA_INICIAL': str(row[4]) if row[4] is not None else None,
+            'GPR_FECHA_FINAL': str(row[5]) if row[5] is not None else None,
+            'GPR_DIAS': row[6],
+            'GRP_HORA_INICIO': str(row[7]) if row[7] is not None else None,
+            'GRP_HORA_FIN': str(row[8]) if row[8] is not None else None,
+            'PROG_nDirIRU': row[9],
+            'PROG_N_VALVULA': row[10],
+            'PROG_CANTIDAD': float(row[11]) if row[11] is not None else 0.0,
+            'PROG_ACTIVO': bool(row[12]),
+            'PROG_EJECUTADO': row[13],
+            'PROG_NUMERO': row[14],
+            'PROG_AGUA_APLICADA':
+                float(row[15]) if row[15] is not None else 0.0,
+            'PROG_nDirUM': row[16],
+        }
+        groups_programs.append(item)
+        key = '%s|%s|%s' % (
+            item['PROG_nDirUM'], item['PROG_nDirIRU'], item['PROG_N_VALVULA'])
+        groups_programs_by_key.setdefault(key, []).append(item)
+        total += 1
+    bag['groups_programs'] = groups_programs
+    bag['groups_programs_by_key'] = groups_programs_by_key
+    bag['total_groups_programs'] = total
+finally:
+    cursor = bag.get('_sql_cursor')
+    if cursor:
+        sql_close(cursor)
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_regacom_step_get_groups_programs" model="remotecontrol.step">
+            <field name="name">Get Groups/Programs</field>
+            <field name="procedure_id" ref="remotecontrol_regacom_procedure_groups_programs"/>
+            <field name="action_id" ref="remotecontrol_regacom_action_get_groups_programs"/>
+            <field name="sequence">10</field>
+        </record>
+
     </data>
 </odoo>
