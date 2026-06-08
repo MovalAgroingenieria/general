@@ -66,7 +66,7 @@ class AccountPaymentOrder(models.Model):
     def generated2uploaded(self):
         res = super(AccountPaymentOrder, self).generated2uploaded()
         for order in self:
-            if order.payment_mode_id.name == 'ext_collector':
+            if order.payment_method_id.code == 'ext_collector':
                 for bline in order.bank_line_ids:
                     if bline.ext_collector_sent:
                         for l in bline.payment_line_ids:
@@ -89,7 +89,7 @@ class AccountPaymentOrder(models.Model):
     @api.multi
     def action_done_cancel(self):
         for order in self:
-            if order.payment_mode_id.name == 'External_Collector':
+            if order.payment_method_id.code == 'ext_collector':
                 for bline in order.bank_line_ids:
                     for l in bline.payment_line_ids:
                         if bline.name == l.bank_line_id.name:
