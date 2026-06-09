@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-15 16:24+0000\n"
-"PO-Revision-Date: 2026-05-15 16:24+0000\n"
+"POT-Creation-Date: 2026-06-09 10:55+0000\n"
+"PO-Revision-Date: 2026-06-09 10:55+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,10 +16,10 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:533
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:509
 #, python-format
 msgid " [Certified] "
-msgstr " [Certified] "
+msgstr " [Certificat] "
 
 #. module: nrs_client_sms
 #: model:ir.ui.view,arch_db:nrs_client_sms.nrs_tracking_view_form
@@ -45,27 +45,34 @@ msgstr "<span class=\"fa fa-nrs-sms-registre\"/>\n"
 #. module: nrs_client_sms
 #: model:ir.ui.view,arch_db:nrs_client_sms.nrs_template_view_form
 msgid "<span class=\"fa fa-retweet fa-lg\"/>\n"
-"                                        <span style=\"margin-left:8px;\">Resolve </span>"
+"                                            <span style=\"margin-left:8px;\">Resolve </span>"
 msgstr "<span class=\"fa fa-retweet fa-lg\"/>\n"
-"                                        <span style=\"margin-left:8px;\">Resoldre </span>"
+"                                            <span style=\"margin-left:8px;\">Resoldre </span>"
 
 #. module: nrs_client_sms
+#: model:ir.ui.view,arch_db:nrs_client_sms.nrs_test_wizard_form
+msgid "<span class=\"fa fa-retweet fa-lg\"/>\n"
+"                                <span style=\"margin-left:8px;\">Check </span>"
+msgstr "<span class=\"fa fa-retweet fa-lg\"/>\n"
+"                                <span style=\"margin-left:8px;\">Comprovar </span>"
+
+#. module: nrs_client_sms
+#: model:ir.ui.view,arch_db:nrs_client_sms.nrs_view_account_invoice_form
 #: model:ir.ui.view,arch_db:nrs_client_sms.nrs_view_partner_form
-#: model:ir.ui.view,arch_db:nrs_client_sms.wausms_view_account_invoice_form
-msgid "<span class=\"o_stat_text\" style=\"display:inline;\"> NRS SMS's</span>"
-msgstr "<span class=\"o_stat_text\" style=\"display:inline;\"> NRS SMS's</span>"
+msgid "<span class=\"o_stat_text\" style=\"display:inline;\"> SMS (NRS)</span>"
+msgstr "<span class=\"o_stat_text\" style=\"display:inline;\"> SMS (NRS)</span>"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:223
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:250
 #, python-format
 msgid "Accepted"
 msgstr "Acceptat"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:225
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:292
 #, python-format
 msgid "Accepted - The message has been accepted for further processing."
-msgstr "Acceptat - El missatge ha estat acceptat per al seu processament posterior."
+msgstr "Acceptat - El missatge s'ha acceptat per a processaments addicionals."
 
 #. module: nrs_client_sms
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_configuration_allow_certify_sms
@@ -88,79 +95,79 @@ msgid "Allow flash sms"
 msgstr "Permetre SMS flash"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:228
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:251
 #, python-format
 msgid "Bad request"
 msgstr "Sol·licitud incorrecta"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:252
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:265
 #, python-format
 msgid "Bad request - Exceeded maximum parts allowed or incorrect number of parts."
-msgstr "Sol·licitud incorrecta - S'ha superat el nombre màxim de parts permeses o el nombre de parts és incorrecte."
+msgstr "Sol·licitud incorrecta - S'ha excedit el nombre màxim de parts o és incorrecte."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:257
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:268
 #, python-format
 msgid "Bad request - Invalid GUID."
-msgstr "Sol·licitud incorrecta - GUID no vàlid."
+msgstr "Sol·licitud incorrecta - GUID invàlid."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:255
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:267
 #, python-format
 msgid "Bad request - Invalid coding."
-msgstr "Sol·licitud incorrecta - Codificació no vàlida."
+msgstr "Sol·licitud incorrecta - codificació invàlida."
+
+#. module: nrs_client_sms
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:269
+#, python-format
+msgid "Bad request - Invalid scheduled date."
+msgstr "Sol·licitud incorrecta - Data programada incorrecta."
+
+#. module: nrs_client_sms
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:263
+#, python-format
+msgid "Bad request - No valid Datetime for send."
+msgstr "Sol·licitud incorrecta - Datetime invàlid per a l'enviament."
+
+#. module: nrs_client_sms
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:258
+#, python-format
+msgid "Bad request - No valid recipients."
+msgstr "Sol·licitud incorrecta - Recipients no vàlids."
+
+#. module: nrs_client_sms
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:264
+#, python-format
+msgid "Bad request - Notification URL incorrect."
+msgstr "Sol·licitud incorrecta - La URL per a la notificació és incorrecta."
+
+#. module: nrs_client_sms
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:261
+#, python-format
+msgid "Bad request - Sender missing."
+msgstr "Sol·licitud incorrecta - No hi ha remitent."
+
+#. module: nrs_client_sms
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:262
+#, python-format
+msgid "Bad request - Sender too long."
+msgstr "Sol·licitud incorrecta - El remitent és massa llarg."
+
+#. module: nrs_client_sms
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:259
+#, python-format
+msgid "Bad request - Text message missing."
+msgstr "Sol·licitud incorrecta - No hi ha text de l'missatge."
 
 #. module: nrs_client_sms
 #: code:addons/nrs_client_sms/wizards/nrs_wizard.py:260
 #, python-format
-msgid "Bad request - Invalid scheduled date."
-msgstr "Sol·licitud incorrecta - Data programada no vàlida."
-
-#. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:246
-#, python-format
-msgid "Bad request - No valid Datetime for send."
-msgstr "Sol·licitud incorrecta - No hi ha una data i hora vàlides per enviar."
-
-#. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:233
-#, python-format
-msgid "Bad request - No valid recipients."
-msgstr "Sol·licitud incorrecta - No hi ha destinataris vàlids."
-
-#. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:249
-#, python-format
-msgid "Bad request - Notification URL incorrect."
-msgstr "Sol·licitud incorrecta - URL de notificació incorrecta."
-
-#. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:241
-#, python-format
-msgid "Bad request - Sender missing."
-msgstr "Sol·licitud incorrecta - Remitent ausent."
-
-#. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:243
-#, python-format
-msgid "Bad request - Sender too long."
-msgstr "Sol·licitud incorrecta - Remitent massa llarg."
-
-#. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:236
-#, python-format
-msgid "Bad request - Text message missing."
-msgstr "Sol·licitud incorrecta - Missatge de text ausent."
-
-#. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:239
-#, python-format
 msgid "Bad request - Text message too long."
-msgstr "Sol·licitud incorrecta - Missatge de text massa llarg."
+msgstr "Sol·licitud incorrecta - El missatge és massa llarg."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:263
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:284
 #, python-format
 msgid "Bad request - Unknown error code."
 msgstr "Sol·licitud incorrecta - Codi d'error desconegut."
@@ -183,8 +190,7 @@ msgid "Certified"
 msgstr "Certificat"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:546
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:558
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:525
 #, python-format
 msgid "Certified: "
 msgstr "Certificat: "
@@ -210,9 +216,14 @@ msgid "Certify the SMS. It will apply to all selected items. It has an additiona
 msgstr "Certificar l'SMS. S'aplicarà a tots els elements seleccionats. Té un cost addicional."
 
 #. module: nrs_client_sms
+#: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_wizard_check_sms_message
+msgid "Check Message"
+msgstr "Comprovar missatge"
+
+#. module: nrs_client_sms
 #: model:ir.actions.server,name:nrs_client_sms.nrs_check_action
 msgid "Check mobile (nrs)"
-msgstr "Comprovar mòbil (nrs)"
+msgstr "Comprovar mòbil (NRS)"
 
 #. module: nrs_client_sms
 #: model:ir.model,name:nrs_client_sms.model_nrs_check
@@ -221,7 +232,9 @@ msgid "Check mobile numbers"
 msgstr "Comprovar mòbils"
 
 #. module: nrs_client_sms
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:323
 #: model:ir.ui.view,arch_db:nrs_client_sms.nrs_test_wizard_form
+#, python-format
 msgid "Compose SMS"
 msgstr "Redactar SMS"
 
@@ -246,10 +259,10 @@ msgid "Confirmation"
 msgstr "Confirmació"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:557
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:524
 #, python-format
 msgid "Confirmation: "
-msgstr "Confirmation: "
+msgstr "Confirmación: "
 
 #. module: nrs_client_sms
 #: model:ir.ui.view,arch_db:nrs_client_sms.nrs_tracking_view_search
@@ -319,8 +332,9 @@ msgid "Display Name"
 msgstr "Mostrar Nom"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:489
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:524
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:466
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:470
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:471
 #, python-format
 msgid "ERROR: no response"
 msgstr "ERROR: sense resposta"
@@ -338,21 +352,20 @@ msgid "Error getting certificate: {}"
 msgstr "Error obtenint el certificat: {}"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:186
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:214
 #, python-format
 msgid "Error in phone number, or is not a mobile, or is not Spanish or does not have the correct format."
-msgstr "Error en el número de telèfon, o no és un mòbil, o no és espanyol o no té el format correcte."
+msgstr "Error en el nombre de telèfon, o el nombre no és d'un mòbil, o no és espanyol o no té el format correcte."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:178
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:206
 #, python-format
 msgid "Error in phone number, there are characters that are not digits."
-msgstr "Error en el número de telèfon, hi ha caràcters que no són dígits."
+msgstr "Error en el nombre de telèfon, hi ha caràcters que no són dígits."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/models/nrs_template.py:89
-#: code:addons/nrs_client_sms/models/nrs_template.py:98
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:435
+#: code:addons/nrs_client_sms/models/nrs_template.py:149
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:439
 #, python-format
 msgid "Error resolving template: {}"
 msgstr "Error resolent la plantilla: {}"
@@ -394,6 +407,12 @@ msgid "From"
 msgstr "De"
 
 #. module: nrs_client_sms
+#: selection:nrs.template,sms_encoding:0
+#: selection:nrs.wizard,sms_encoding:0
+msgid "GSM 7"
+msgstr "GSM 7"
+
+#. module: nrs_client_sms
 #: model:ir.actions.server,name:nrs_client_sms.action_get_pdf_certificates
 msgid "Get PDF certificates"
 msgstr "Obtenir certificats PDF"
@@ -422,7 +441,7 @@ msgstr "Si està marcat permet enviar SMS certificats. Tenen un cost addicional.
 #. module: nrs_client_sms
 #: model:ir.model.fields,help:nrs_client_sms.field_nrs_configuration_allow_flash_sms
 msgid "If checked, it is allowed to send flash SMS. These SMS appear directly on the device screen. Be careful, on some devices these SMS cannot be saved."
-msgstr "Si està marcat permet enviar SMS Flash. Aquests SMS apareixen directament en la pantalla del dispositiu. Compte, en alguns dispositius no poden ser guardats."
+msgstr "Si està marcat permet enviar SMS Flash. Aquests SMS apareixen directament en la plantalla de el dispositiu. Compte, en alguns dispositius no poden ser guardats."
 
 #. module: nrs_client_sms
 #: model:ir.model.fields,help:nrs_client_sms.field_nrs_configuration_show_icon_on_partner_view_kanban_certified
@@ -435,28 +454,28 @@ msgid "If it is checked, it shows an icon next to the mobile to send SMS."
 msgstr "Si està marcat (i el camp mòbil no està buida), mostra una icona al costat de el mòbil per enviar SMS."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:290
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:254
 #, python-format
 msgid "Internal server error"
-msgstr "Error intern del servidor"
+msgstr "Error de servidor"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:299
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:280
 #, python-format
 msgid "Internal server error - Delete error."
-msgstr "Error intern del servidor - Error en eliminar."
+msgstr "Error de servidor - Error d'esborrat."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:302
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:287
 #, python-format
 msgid "Internal server error - Unknown error code."
-msgstr "Error intern del servidor - Codi d'error desconegut."
+msgstr "Error de servidor - Codi d'error desconegut."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:296
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:279
 #, python-format
 msgid "Internal server error - Update error."
-msgstr "Error intern del servidor - Error en actualitzar."
+msgstr "Error de servidor - Error d'actualització."
 
 #. module: nrs_client_sms
 #: model:ir.model,name:nrs_client_sms.model_account_invoice
@@ -537,13 +556,13 @@ msgstr "Última actualització per"
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_tracking_write_date
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_wizard_write_date
 msgid "Last Updated on"
-msgstr "Última actualització el"
+msgstr "Última actualització a"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:138
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:166
 #, python-format
 msgid "Link tracker is not installed."
-msgstr "Link tracker is not installed."
+msgstr "El mòdul Link Tracker no està instal·lat."
 
 #. module: nrs_client_sms
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_tracking_sms_message
@@ -598,34 +617,41 @@ msgid "Name"
 msgstr "Nom"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:531
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:514
 #, python-format
 msgid "No"
 msgstr "No"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/models/nrs_template.py:63
+#: code:addons/nrs_client_sms/models/nrs_template.py:106
 #, python-format
 msgid "No invoice found"
 msgstr "No s'ha trobat cap factura"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/models/nrs_template.py:73
+#: code:addons/nrs_client_sms/models/nrs_template.py:116
 #, python-format
 msgid "No partner found"
 msgstr "No s'ha trobat cap soci"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:144
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:172
 #, python-format
 msgid "No sender has been set."
 msgstr "No s'ha establert cap remitent."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:494
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:497
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:560
 #, python-format
 msgid "No subject"
-msgstr "No hi ha cap assumpte"
+msgstr "Sense assumpte"
+
+#. module: nrs_client_sms
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:498
+#, python-format
+msgid "Num "
+msgstr "Num "
 
 #. module: nrs_client_sms
 #: model:ir.ui.view,arch_db:nrs_client_sms.nrs_tracking_view_tree
@@ -633,22 +659,31 @@ msgid "Num."
 msgstr "Nº"
 
 #. module: nrs_client_sms
+#: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_template_number_of_characters
+#: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_wizard_number_of_characters
+msgid "Number of Characters"
+msgstr "Nº de caràcters"
+
+#. module: nrs_client_sms
 #: model:ir.model.fields,field_description:nrs_client_sms.field_account_invoice_num_sms_certified
+#: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_template_number_of_sms
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_tracking_number_of_sms
+#: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_wizard_number_of_sms
 #: model:ir.model.fields,field_description:nrs_client_sms.field_res_partner_num_sms_certified
 #: model:ir.model.fields,field_description:nrs_client_sms.field_res_users_num_sms_certified
 msgid "Number of SMS"
 msgstr "Nº de SMS"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:547
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:559
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:526
 #, python-format
 msgid "Number of SMS: "
 msgstr "Nº de SMS: "
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:455
+#: code:addons/nrs_client_sms/models/nrs_template.py:161
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:321
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:575
 #, python-format
 msgid "Number of characters must not exceed 1530"
 msgstr "El nombre de caràcters no ha de superar els 1530"
@@ -662,6 +697,11 @@ msgstr "OK"
 #: model:ir.ui.view,arch_db:nrs_client_sms.nrs_tracking_view_form
 msgid "Obtain the PDF certificate"
 msgstr "Obtenir certificat PDF"
+
+#. module: nrs_client_sms
+#: model:ir.model.fields,help:nrs_client_sms.field_nrs_wizard_sms_message
+msgid "One SMS for 160 chars in GSM or for 70 chars in UTF-16."
+msgstr "Un SMS per a 160 caràcters en GSM o per a 70 caràcters en UTF-16."
 
 #. module: nrs_client_sms
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_tracking_pdf_certificate
@@ -695,13 +735,13 @@ msgstr "Parcel·la"
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_tracking_partner_id
 #: selection:nrs.template,type:0
 msgid "Partner"
-msgstr "Empresa"
+msgstr "Soci"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:423
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:364
 #, python-format
 msgid "Partner %s does not have a mobile number"
-msgstr "El soci %s no té un número de mòbil"
+msgstr "El soci %s no té un número de telèfon mòbil"
 
 #. module: nrs_client_sms
 #: model:ir.ui.view,arch_db:nrs_client_sms.nrs_template_view_form
@@ -736,10 +776,10 @@ msgstr "Nom complet acotat (40 cs)"
 #. module: nrs_client_sms
 #: model:ir.model,name:nrs_client_sms.model_res_partner
 msgid "Partner of a WUA"
-msgstr "Soci d'un WUA"
+msgstr "Soci"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:556
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:522
 #, python-format
 msgid "Partner: "
 msgstr "Soci: "
@@ -750,28 +790,33 @@ msgid "Password"
 msgstr "Contrasenya"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:279
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:253
 #, python-format
 msgid "Payment required"
 msgstr "Pagament requerit"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:285
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:276
 #, python-format
 msgid "Payment required - Not enough credits."
-msgstr "Pagament requerit - Crèdits insuficients."
+msgstr "Pagament requerit - No té prou crèdit."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:288
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:286
 #, python-format
 msgid "Payment required - Unknown error code."
-msgstr "Pagament requerit - Codi d'error desconegut."
+msgstr "Pagament requerit - Codi de l'error desconegut."
 
 #. module: nrs_client_sms
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_check_phone_number
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_tracking_phone_number
 msgid "Phone number"
 msgstr "Nº mòbil"
+
+#. module: nrs_client_sms
+#: selection:nrs.template,type:0
+msgid "Quota"
+msgstr "Quota"
 
 #. module: nrs_client_sms
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_confirmation_response_code
@@ -792,11 +837,10 @@ msgid "Response to SMS sent"
 msgstr "Resposta a l'SMS enviat"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:548
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:560
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:527
 #, python-format
 msgid "Response: "
-msgstr "Response: "
+msgstr "Resposta: "
 
 #. module: nrs_client_sms
 #: code:addons/nrs_client_sms/models/account_invoice.py:31
@@ -816,17 +860,29 @@ msgid "SMS Confirmation"
 msgstr "Confirmació"
 
 #. module: nrs_client_sms
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:234
+#, python-format
+msgid "SMS Invoice PDF"
+msgstr "SMS Invoice PDF"
+
+#. module: nrs_client_sms
 #: model:ir.actions.act_window,name:nrs_client_sms.action_nrs_template_tree
 msgid "SMS Templates"
 msgstr "Plantillas SMS"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:585
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:593
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_tracking_sms_confirmation
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_tracking_sms_confirmation_info
 #, python-format
 msgid "SMS confirmation"
-msgstr "Confirmació"
+msgstr "Confirmació SMS"
+
+#. module: nrs_client_sms
+#: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_template_sms_encoding
+#: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_wizard_sms_encoding
+msgid "SMS encoding"
+msgstr "Codificació"
 
 #. module: nrs_client_sms
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_tracking_name
@@ -849,7 +905,7 @@ msgid "SMS message"
 msgstr "Missatge SMS"
 
 #. module: nrs_client_sms
-#: model:ir.ui.view,arch_db:nrs_client_sms.wausms_view_account_invoice_form
+#: model:ir.ui.view,arch_db:nrs_client_sms.nrs_view_account_invoice_form
 msgid "SMS sent related to this invoice"
 msgstr "SMS enviats relacionats amb aquesta factura"
 
@@ -880,8 +936,8 @@ msgstr "Desar"
 #: model:ir.actions.act_window,name:nrs_client_sms.action_nrs_wizard_invoice
 #: model:ir.ui.view,arch_db:nrs_client_sms.nrs_view_partner_form
 #: model:ir.ui.view,arch_db:nrs_client_sms.res_partner_kanban_view
-msgid "Send NRS SMS"
-msgstr "Send NRS SMS"
+msgid "Send SMS (NRS)"
+msgstr "Enviar SMS (NRS)"
 
 #. module: nrs_client_sms
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_wizard_send_invoice_link
@@ -903,7 +959,7 @@ msgstr "Remitent"
 #: code:addons/nrs_client_sms/models/nrs_config_settings.py:111
 #, python-format
 msgid "Sender size is limited to 15 numbers (ex. 34XXXXXXXXX) or 11 alphanumeric characters (ex. company xxx)"
-msgstr "La mida del remitent està limitada a 15 números (ex. 34XXXXXXXXX) o 11 caràcters alfanumèrics (ex. company xxx)"
+msgstr "La mida de l'emissor està limitat a 15 números (ex. 34XXXXXXXXX) o 11 caràcters alfanumèrics (ex. Company xxx)"
 
 #. module: nrs_client_sms
 #: model:ir.model.fields,help:nrs_client_sms.field_nrs_tracking_sender
@@ -911,8 +967,7 @@ msgid "Sender used"
 msgstr "Remitent utilitzat"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:544
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:554
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:518
 #, python-format
 msgid "Sender: "
 msgstr "Remitent: "
@@ -984,8 +1039,7 @@ msgid "Subject used"
 msgstr "Assumpte utilitzat"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:543
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:553
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:517
 #, python-format
 msgid "Subject: "
 msgstr "Assumpte: "
@@ -1008,10 +1062,8 @@ msgstr "Plantilla resolta"
 
 #. module: nrs_client_sms
 #: model:ir.model.fields,help:nrs_client_sms.field_nrs_template_template
-msgid "Template with jinja2 variables.\n"
-"Limit to 160 characters after resolve variables."
-msgstr "La plantilla amb variables jinja2.\n"
-"Limitada a 160 caràcters després de resoldre les variables."
+msgid "Template with jinja2 variables"
+msgstr "Template with jinja2 variables"
 
 #. module: nrs_client_sms
 #: model:ir.ui.menu,name:nrs_client_sms.nrs_template_menu
@@ -1023,12 +1075,12 @@ msgstr "Plantilles"
 #: model:ir.ui.view,arch_db:nrs_client_sms.nrs_template_view_form
 msgid "Templates use jinja2 variables: {{ object.attribute }}. The available objects are 'partner' for partner templates and\n"
 "                                'partner' and 'invoice' for invoice templates. The object 'datetime' is also available to regionally format dates.\n"
-"                                Limit to 160 characters after solving the variables.<br/>\n"
+"                                Limit to 160 (GSM 7) or 70 (UTF 16) characters per SMS after solving the variables.<br/>\n"
 "                                <br/>\n"
 "                                Commonly used expressions and variables:<br/>"
 msgstr "La plantilla fa servir variables jinja2: {{objecto.atributo}}. Els objectes disponibles són 'partner' (soci) per a les plantilles de soci i\n"
 "                                'partner' i 'invoice' (factura) per a les plantilles de factura. L'objecte 'datetime' també està disponible per donar format regional a les dates.\n"
-"                                La mida és de 160 caràcters després de resoldre les variables.<br/>\n"
+"                                Limitat a 160 (GSM 7) o 70 (UTF 16) caràcters per SMS després de resoldre les variables.<br/>\n"
 "                                <br/>\n"
 "                                Variables i expressions d'ús comú:<br/>"
 
@@ -1071,17 +1123,12 @@ msgstr "La URL utilitzada per connectar-se a l'servei NRS"
 #: code:addons/nrs_client_sms/models/nrs_tracking.py:144
 #, python-format
 msgid "The certificate is not ready yet."
-msgstr "El certificat encara no està llest."
+msgstr "El certificat no està llest encara."
 
 #. module: nrs_client_sms
 #: model:ir.ui.view,arch_db:nrs_client_sms.nrs_template_view_form
 msgid "The invoice number {{ invoice.number }} dated {{ invoice.date_invoice }} is about to expire."
 msgstr "La factura {{ invoice.number }} data el {{ invoice.date_invoice }} està a punt de vèncer."
-
-#. module: nrs_client_sms
-#: model:ir.model.fields,help:nrs_client_sms.field_nrs_wizard_sms_message
-msgid "The maximum size is 160 characters after resolving variables. Some special characters will not be displayed."
-msgstr "La mida màxima és de 160 després de resoldre les variables jinja2. Alguns caràcters especials no són mostrats."
 
 #. module: nrs_client_sms
 #: code:addons/nrs_client_sms/models/nrs_check.py:44
@@ -1090,10 +1137,10 @@ msgid "The mobile has not been set."
 msgstr "El mòbil no ha estat configurat."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:418
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:378
 #, python-format
 msgid "The phone number for testing has not been set."
-msgstr "El número de telèfon per a proves no s'ha establert."
+msgstr "No s'ha establert el número de mòbil per al test."
 
 #. module: nrs_client_sms
 #: model:ir.model.fields,help:nrs_client_sms.field_nrs_tracking_phone_number
@@ -1106,12 +1153,6 @@ msgid "The sender that will appear in all messages. Limit to 15 numbers (only nu
 msgstr "El remitent. Apareixerà en tots els missatges. Límit de 15 números (només números) o 11 caràcters alfanumèrics."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/models/nrs_template.py:103
-#, python-format
-msgid "The size of the SMS after solving the variables exceeds 160 characters. Try setting a fixed length for variables {{ object.attribute[:10] }}"
-msgstr "The size of the SMS after solving the variables exceeds 160 characters. Try setting a fixed length for variables {{ object.attribute[:10] }}"
-
-#. module: nrs_client_sms
 #: model:ir.model.fields,help:nrs_client_sms.field_nrs_template_template_resolved
 msgid "The template after resolve variables using random item."
 msgstr "La plantilla després de resoldre les variables fent servir un element aleatori."
@@ -1122,10 +1163,10 @@ msgid "The user who sent the SMS"
 msgstr "L'usuari que va enviar l'SMS"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:392
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:359
 #, python-format
 msgid "There are no items selected."
-msgstr "No hi ha cap element seleccionat."
+msgstr "No hi ha elements seleccionats."
 
 #. module: nrs_client_sms
 #: model:ir.ui.view,arch_db:nrs_client_sms.nrs_tracking_view_search
@@ -1135,8 +1176,7 @@ msgid "To"
 msgstr "Per"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:545
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:555
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:519
 #, python-format
 msgid "To: "
 msgstr "Per: "
@@ -1167,34 +1207,53 @@ msgid "Type of template"
 msgstr "Tipus de plantilla"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:265
+#: selection:nrs.template,sms_encoding:0
+#: selection:nrs.wizard,sms_encoding:0
+msgid "UTF 16"
+msgstr "UTF 16"
+
+#. module: nrs_client_sms
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:252
 #, python-format
 msgid "Unauthorized"
 msgstr "No autoritzat"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:274
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:273
 #, python-format
 msgid "Unauthorized - Not enough credits."
-msgstr "No autoritzat - Crèdits insuficients."
+msgstr "No autoritzat - No té prou crèdit."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:277
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:285
 #, python-format
 msgid "Unauthorized - Unknown error code."
 msgstr "No autoritzat - Codi d'error desconegut."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:271
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:272
 #, python-format
 msgid "Unauthorized - Username or password unknown."
-msgstr "No autoritzat - Nom d'usuari o contrasenya desconeguts."
+msgstr "No autoritzat - L'usuari o la contrasenya són incorrectes."
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:304
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:356
+#, python-format
+msgid "Unknown SMS mode: %s"
+msgstr "Mode de SMS desconegut: %s"
+
+#. module: nrs_client_sms
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:289
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:301
 #, python-format
 msgid "Unknown error"
 msgstr "Error desconegut"
+
+#. module: nrs_client_sms
+#: code:addons/nrs_client_sms/models/nrs_template.py:136
+#, python-format
+msgid "Unknown template type: %s"
+msgstr "Tipus de plantilla desconegut: %s"
 
 #. module: nrs_client_sms
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_configuration_service_user
@@ -1204,10 +1263,15 @@ msgid "User"
 msgstr "Usuari"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:156
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:184
 #, python-format
 msgid "User or password not set."
-msgstr "Usuari o contrasenya no establerts."
+msgstr "L'usuari o la contrasenya no han estat establerts."
+
+#. module: nrs_client_sms
+#: selection:nrs.template,type:0
+msgid "Waterconnection"
+msgstr "Waterconnection"
 
 #. module: nrs_client_sms
 #: model:ir.model.fields,field_description:nrs_client_sms.field_nrs_wizard_wizard_mode
@@ -1220,13 +1284,13 @@ msgid "Wizard to send SMS through NRS service"
 msgstr "Assistent per enviar missatges a través de l'servei NRS"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:534
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:514
 #, python-format
 msgid "Yes"
 msgstr "Sí"
 
 #. module: nrs_client_sms
-#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:437
+#: code:addons/nrs_client_sms/wizards/nrs_wizard.py:432
 #, python-format
 msgid "empty message"
 msgstr "missatge buit"
@@ -1290,4 +1354,3 @@ msgstr "{{ partner.phone or \"\" }} {{ partner.mobile or \"\" }} {{ partner.emai
 #: model:ir.ui.view,arch_db:nrs_client_sms.nrs_template_view_form
 msgid "{{ partner.vat }}"
 msgstr "{{ partner.vat }}"
-

@@ -4,7 +4,7 @@
 
 {
     "name": "NRS client SMS",
-    "summary": "Send certificated SMS",
+    "summary": "Send SMS through 360NRS service",
     "version": "10.0.1.1.0",
     "category": "Moval General Addons",
     "website": "http://www.moval.es",

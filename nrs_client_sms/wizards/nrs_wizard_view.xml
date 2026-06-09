@@ -12,24 +12,29 @@
                     <field name="allow_certify_sms" invisible="1"/>
                     <field name="allow_flash_sms" invisible="1"/>
                     <field name="wizard_mode" invisible="1"/>
-                    <group>
+                    <group attrs="{'invisible':[('is_test_wizard','=',True)]}">
                         <field name="template_id" style="width: 70%;" context="{'from_wizard': True}"
-                            attrs="{'invisible':[('is_test_wizard','=',True)]}"
                             options="{'no_quick_create':True}"/>
+                        <field name="subject" style="width: 70%;"/>
                     </group>
-                    <group>
-                        <group style="width: 54%;">
-                            <field name="subject"/>
-                        </group>
-                        <group style="width: 10%;">
+                    <group attrs="{'invisible':[('is_test_wizard','=',True)]}">
+                        <group name="options">
                             <field name="certify" attrs="{'invisible':[('allow_certify_sms', '=', False)]}"/>
                             <field name="sms_flash" attrs="{'invisible':[('allow_flash_sms', '=', False)]}"/>
                             <field name="send_invoice_link" attrs="{'invisible':[('wizard_mode', '!=', 'invoice')]}"/>
+                        </group>
+                        <group name="sms_rendering_data" attrs="{'invisible':[('check_sms_message','=',False)]}">
+                            <field name="number_of_characters"/>
+                            <field name="sms_encoding"/>
+                            <field name="number_of_sms"/>
                         </group>
                     </group>
                     <group>
                         <field name="sms_message" style="background-color: #F8F8F8; padding: 10px;
                             border-top-right-radius: 15px; border-top-left-radius: 15px; border-bottom-left-radius: 15px;"/>
+                        <field name="check_sms_message" style="background-color: #F8F8F8; padding: 10px;
+                            border-top-right-radius: 15px; border-top-left-radius: 15px; border-bottom-left-radius: 15px;"
+                            attrs="{'invisible':[('check_sms_message','=',False)]}"/>
                     </group>
                     <footer>
                         <button name="send_sms_action" type="object" class="oe_highlight">
@@ -39,6 +44,13 @@
                             </div>
                         </button>
                         <button string="Cancel" class="btn-default" special="cancel"/>
+                        <button name="action_resolve_sms" type="object" class="btn-default pull-right"
+                            attrs="{'invisible':[('is_test_wizard','=',True)]}">
+                            <div class="o_form_field">
+                                <span class="fa fa-retweet fa-lg"/>
+                                <span style="margin-left:8px;">Check </span>
+                            </div>
+                        </button>
                     </footer>
                 </form>
             </field>

@@ -10,30 +10,32 @@
                 <sheet>
                     <group name="template_data">
                         <field name="template_from_wizard" invisible="1"/>
-                        <group style="width: 60%;">
+                        <group name="basic_info">
                             <field name="name"/>
                             <field name="type"/>
                             <field name="subject"/>
                             <field name="template" placeholder="The invoice number {{ invoice.number }} dated {{ invoice.date_invoice }} is about to expire."/>
                         </group>
-                        <group style="width: 40%;">
-                           <div>
-                                <div>
+                        <group name="resolved_info">
+                            <group style="width: 70%;">
+                                <div colspan="4">
                                     <div style="background-color: #F8F8F8; margin-bottom: 2%; margin-right:2%; padding: 10px;
                                         border-top-right-radius: 15px; border-top-left-radius: 15px; border-bottom-left-radius: 15px;">
                                         <field name="template_resolved" nolabel="1"/>
                                     </div>
                                 </div>
-                                <button name="action_resolve_template" type="object" class="oe_highlight"
-                                    attrs="{'invisible':[('template_from_wizard','=',True)]}"
-                                    help="Try to resolve the template using a random item (partner or invoice).
-                                        Note that not all error are catch by the system.">
-                                    <div class="o_form_field">
-                                        <span class="fa fa-retweet fa-lg"/>
-                                        <span style="margin-left:8px;">Resolve </span>
-                                    </div>
-                                </button>
-                            </div>
+                                    <button name="action_resolve_template" type="object" class="oe_highlight" attrs="{'invisible':[('template_from_wizard','=',True)]}" help="Try to resolve the template using a random item (partner or invoice).                                         Note that not all error are catch by the system.">
+                                        <div class="o_form_field">
+                                            <span class="fa fa-retweet fa-lg"/>
+                                            <span style="margin-left:8px;">Resolve </span>
+                                        </div>
+                                    </button>
+                            </group>
+                            <group style="width: 30%;">
+                                <field name="number_of_characters"/>
+                                <field name="sms_encoding"/>
+                                <field name="number_of_sms"/>
+                            </group>
                         </group>
                     </group>
                     <group name="help" attrs="{'invisible':[('template_from_wizard','=',True)]}">
@@ -41,7 +43,7 @@
                             <div name="help_invoice" style="margin-top: 0px;" class="oe_edit_only">
                                 Templates use jinja2 variables: {{ object.attribute }}. The available objects are 'partner' for partner templates and
                                 'partner' and 'invoice' for invoice templates. The object 'datetime' is also available to regionally format dates.
-                                Limit to 160 characters after solving the variables.<br/>
+                                Limit to 160 (GSM 7) or 70 (UTF 16) characters per SMS after solving the variables.<br/>
                                 <br/>
                                 Commonly used expressions and variables:<br/>
                                 <table style="border-style: hidden; margin-left:8px;padding: 4px 0px;">
