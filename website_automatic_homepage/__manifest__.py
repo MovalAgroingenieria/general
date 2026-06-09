@@ -5,7 +5,7 @@
 {
     "name": "Website Automatic Homepage",
     "summary": "Sets a default homepage with the company name as title.",
-    "version": "10.0.1.0.1",
+    "version": "10.0.1.1.0",
     "category": "Website",
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",
@@ -13,7 +13,9 @@
     "depends": [
         "website",
         "website_blog",
+        "snippet_latest_posts",
         "website_slides",
+        "website_odoo_debranding",
         "cim_complaints_channel_website",
     ],
     "data": [

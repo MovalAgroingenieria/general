@@ -6,7 +6,7 @@ import logging
 
 from lxml import etree
 
-from odoo import api, SUPERUSER_ID
+from odoo import api, fields, SUPERUSER_ID
 
 _logger = logging.getLogger(__name__)
 
@@ -17,6 +17,25 @@ DEFAULT_HOMEPAGE_ARCH = """<t name="Homepage" t-name="website.homepage">
         <div id="wrap" class="oe_structure oe_empty"/>
     </t>
 </t>"""
+
+
+WELCOME_POST_TITLE = u"Bienvenidos a nuestra web"
+WELCOME_POST_MARKER = u"Bienvenidos a la web de la Comunidad de Regantes."
+REGANTES_CHANNEL_NAME = u"Zona Regantes"
+WELCOME_POST_CONTENT = u"""
+<section class="s_text_block">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 mt16 mb16">
+                <h3>Bienvenidos a la web de la Comunidad de Regantes.</h3>
+                <p>En este portal web podrás encontrar toda la información referente a nuestra Comunidad.</p>
+                <p>Pondremos a disposición de todos los usuarios la información de contacto con nuestra comunidad, noticias sobre nuestras actividades, normas de riego, e incluso una zona privada al que solo podrán tener acceso nuestros comuneros.</p>
+                <p><strong>¡Navega y descubre!</strong></p>
+            </div>
+        </div>
+    </div>
+</section>
+"""
 
 
 def _homepage_is_default(view):
@@ -48,7 +67,6 @@ def _materialize_company_name(arch, company_name):
     editable from the website builder.
     """
     root = etree.fromstring(arch.encode("utf-8"))
-    nsmap = {"t": "http://www.w3.org/1999/xhtml"}
     # Match by attribute, no namespaces are actually declared.
     for node in root.xpath("//t[@t-esc='res_company.name']"):
         parent = node.getparent()
@@ -63,6 +81,88 @@ def _materialize_company_name(arch, company_name):
             parent.text = (parent.text or "") + company_name + (node.tail or "")
         parent.remove(node)
     return etree.tostring(root, encoding="unicode")
+
+
+def _ensure_welcome_blog_post(env):
+    """Ensure a default welcome post exists and is visible in latest posts."""
+    Blog = env["blog.blog"].sudo()
+    Post = env["blog.post"].sudo()
+
+    blog = env.ref("website_blog.blog_blog_1", raise_if_not_found=False)
+    if not blog:
+        blog = Blog.search([], order="id", limit=1)
+    if not blog:
+        blog = Blog.create({"name": u"Noticias"})
+
+    existing = Post.search([
+        '|',
+        ('name', '=', WELCOME_POST_TITLE),
+        ('content', 'ilike', WELCOME_POST_MARKER),
+    ], limit=1)
+    if existing:
+        vals = {}
+        if existing.name == WELCOME_POST_TITLE or WELCOME_POST_MARKER in (existing.content or ""):
+            vals["content"] = WELCOME_POST_CONTENT
+        if existing.blog_id != blog:
+            vals["blog_id"] = blog.id
+        if not existing.website_published:
+            vals["website_published"] = True
+        if not existing.published_date:
+            vals["published_date"] = fields.Datetime.now()
+        if vals:
+            existing.write(vals)
+        _logger.info(
+            "Welcome post already exists (%s); updated if needed.",
+            existing.id,
+        )
+        return
+
+    post = Post.create({
+        "name": WELCOME_POST_TITLE,
+        "blog_id": blog.id,
+        "content": WELCOME_POST_CONTENT,
+        "website_published": True,
+        "published_date": fields.Datetime.now(),
+    })
+    _logger.info("Welcome post created automatically (id=%s).", post.id)
+
+
+def _ensure_website_name_sync(env):
+    """Sync website name with company name."""
+    company = env["res.users"].browse(SUPERUSER_ID).company_id
+    websites = env["website"].sudo().search([])
+    for website in websites:
+        if website.company_id == company and website.name != company.name:
+            website.sudo().write({"name": company.name})
+            _logger.info("Website name updated to '%s'.", company.name)
+
+
+def _ensure_regantes_channel_setup(env):
+    """Rename partner channel and disable featured slide policy."""
+    channel = env.ref("website_slides.channel_partial", raise_if_not_found=False)
+    if not channel:
+        channel = env["slide.channel"].sudo().search([
+            ("visibility", "=", "partial"),
+        ], order="id", limit=1)
+    if not channel:
+        channel = env["slide.channel"].sudo().search([
+            ("name", "ilike", "Partner"),
+        ], limit=1)
+    if not channel:
+        _logger.info("Slides partner channel not found; skipping setup.")
+        return
+
+    vals = {}
+    if channel.name != REGANTES_CHANNEL_NAME:
+        vals["name"] = REGANTES_CHANNEL_NAME
+    if channel.promote_strategy != "none":
+        vals["promote_strategy"] = "none"
+    if channel.custom_slide_id:
+        vals["custom_slide_id"] = False
+
+    if vals:
+        channel.sudo().write(vals)
+        _logger.info("Slides channel configured as '%s' with no featured slide.", REGANTES_CHANNEL_NAME)
 
 
 def post_init_hook(cr, registry):
@@ -89,13 +189,13 @@ def post_init_hook(cr, registry):
             "website.homepage already customized; "
             "skipping Moval homepage installation."
         )
-        return
-    company = env["res.company"].browse(
-        env["res.users"].browse(SUPERUSER_ID).company_id.id
-    )
-    arch = _materialize_company_name(source.arch, company.name or "")
-    homepage.sudo().write({"arch": arch})
-    _logger.info("Moval homepage installed in website.homepage view.")
+    else:
+        company = env["res.company"].browse(
+            env["res.users"].browse(SUPERUSER_ID).company_id.id
+        )
+        arch = _materialize_company_name(source.arch, company.name or "")
+        homepage.sudo().write({"arch": arch})
+        _logger.info("Moval homepage installed in website.homepage view.")
 
     # Remove auto-created top menu entries from optional dependencies
     # (Blog and Presentations) so the header keeps only our entries.
@@ -106,6 +206,10 @@ def post_init_hook(cr, registry):
         menu = env.ref(xmlid, raise_if_not_found=False)
         if menu:
             menu.sudo().unlink()
+
+    _ensure_website_name_sync(env)
+    _ensure_regantes_channel_setup(env)
+    _ensure_welcome_blog_post(env)
 
 
 def _homepage_matches_source(homepage, source, company_name):
