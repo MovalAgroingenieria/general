@@ -94,6 +94,23 @@ def _ensure_welcome_blog_post(env):
     if not blog:
         blog = Blog.create({"name": u"Noticias"})
 
+    # Set subtitle to "Descúbrenos" and clear About Us sidebar
+    if blog.subtitle != u"Descúbrenos":
+        blog.write({"subtitle": u"Descúbrenos"})
+    # Also update translation cache for subtitle
+    env.cr.execute(
+        """UPDATE ir_translation
+              SET value = %s
+            WHERE name = 'blog.blog,subtitle'
+              AND res_id = %s""",
+        (u"Descúbrenos", blog.id),
+    )
+    # Disable "About Us" right column widget
+    about_us_view = env.ref("website_blog.opt_blog_rc_about_us", raise_if_not_found=False)
+    if about_us_view and about_us_view.active:
+        about_us_view.sudo().write({"active": False})
+        _logger.info("Disabled About Us blog sidebar widget.")
+
     existing = Post.search([
         '|',
         ('name', '=', WELCOME_POST_TITLE),
@@ -163,6 +180,20 @@ def _ensure_regantes_channel_setup(env):
     if vals:
         channel.sudo().write(vals)
         _logger.info("Slides channel configured as '%s' with no featured slide.", REGANTES_CHANNEL_NAME)
+
+    # Force update all cached translations for the channel name so the
+    # website always shows "Zona Regantes" regardless of active language.
+    env.cr.execute(
+        """UPDATE ir_translation
+              SET value = %s, src = %s
+            WHERE name = 'slide.channel,name'
+              AND res_id = %s""",
+        (REGANTES_CHANNEL_NAME, REGANTES_CHANNEL_NAME, channel.id),
+    )
+    _logger.info(
+        "Updated %d ir_translation rows for channel id=%s.",
+        env.cr.rowcount, channel.id,
+    )
 
 
 def post_init_hook(cr, registry):
