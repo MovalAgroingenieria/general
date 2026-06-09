@@ -88,6 +88,8 @@ class GeneralEntityCensusAdditional(models.Model):
 
     def write(self, vals):
         """Prevent modification of additional movements in locked/validated states."""
+        if self.env.context.get("skip_census_protection"):
+            return super().write(vals)
         self._check_can_modify()  # pylint: disable=protected-access
         return super().write(vals)
 

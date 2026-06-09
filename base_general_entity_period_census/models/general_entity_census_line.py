@@ -266,6 +266,8 @@ class GeneralEntityCensusLine(models.Model):
 
     def write(self, vals):
         """Control editing based on line state."""
+        if self.env.context.get("skip_census_protection"):
+            return super().write(vals)
         # Fields allowed when validated or census locked
         allowed_fields_always = {"note", "state"}
 
