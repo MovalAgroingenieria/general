@@ -22,6 +22,7 @@ DEFAULT_HOMEPAGE_ARCH = """<t name="Homepage" t-name="website.homepage">
 WELCOME_POST_TITLE = u"Bienvenidos a nuestra web"
 WELCOME_POST_MARKER = u"Bienvenidos a la web de la Comunidad de Regantes."
 REGANTES_CHANNEL_NAME = u"Zona Regantes"
+LEGAL_FOOTER_KEEP_XMLID = "website_automatic_homepage.layout_footer_copyright_legal_links"
 WELCOME_POST_CONTENT = u"""
 <section class="s_text_block">
     <div class="container">
@@ -196,6 +197,69 @@ def _ensure_regantes_channel_setup(env):
     )
 
 
+def _disable_duplicated_legal_footer_blocks(env):
+    """Keep only our legal footer links block active.
+
+    Some databases may keep residual inherited footer views (from old
+    modules/customizations) that inject legal links a second time.
+    This safeguard deactivates those duplicates during install.
+    """
+    View = env["ir.ui.view"].sudo()
+
+    keep_view = env.ref(LEGAL_FOOTER_KEEP_XMLID, raise_if_not_found=False)
+    keep_id = keep_view.id if keep_view else False
+
+    parent_ids = []
+    for parent_xmlid in ("website.layout_footer_copyright", "website.footer_default"):
+        parent = env.ref(parent_xmlid, raise_if_not_found=False)
+        if parent:
+            parent_ids.append(parent.id)
+    if not parent_ids:
+        return
+
+    candidates = View.search([
+        ("active", "=", True),
+        ("inherit_id", "in", parent_ids),
+    ])
+
+    deactivated = 0
+    for view in candidates:
+        if keep_id and view.id == keep_id:
+            continue
+
+        haystack = u" ".join([
+            view.key or u"",
+            view.name or u"",
+            view.arch_db or u"",
+        ]).lower()
+
+        is_legal_block = any(token in haystack for token in (
+            u"aviso legal",
+            u"legal links",
+            u"legal notice",
+            u"política de privacidad",
+            u"politica de privacidad",
+            u"privacy policy",
+            u"política de cookies",
+            u"politica de cookies",
+            u"/page/aviso-legal",
+            u"/page/politica-privacidad",
+            u"/page/politica-cookies",
+        ))
+        if not is_legal_block:
+            continue
+
+        view.write({"active": False})
+        deactivated += 1
+
+    if deactivated:
+        _logger.info(
+            "Deactivated %d duplicated legal footer view(s); keeping %s.",
+            deactivated,
+            LEGAL_FOOTER_KEEP_XMLID,
+        )
+
+
 def post_init_hook(cr, registry):
     """Replace the default empty homepage with the Moval homepage.
 
@@ -238,6 +302,7 @@ def post_init_hook(cr, registry):
         if menu:
             menu.sudo().unlink()
 
+    _disable_duplicated_legal_footer_blocks(env)
     _ensure_website_name_sync(env)
     _ensure_regantes_channel_setup(env)
     _ensure_welcome_blog_post(env)
