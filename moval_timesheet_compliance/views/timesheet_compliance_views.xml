@@ -26,6 +26,8 @@
                     <field name="generic_hours" optional="hide"/>
                     <field name="email_sent_at" optional="hide" groups="moval_timesheet_compliance.group_timesheet_compliance_manager"/>
                     <field name="escalated_at" optional="hide" groups="moval_timesheet_compliance.group_timesheet_compliance_manager"/>
+                    <field name="resolved_at" optional="hide" groups="moval_timesheet_compliance.group_timesheet_compliance_manager"/>
+                    <field name="resolved_from_state" optional="hide" groups="moval_timesheet_compliance.group_timesheet_compliance_manager"/>
                 </list>
             </field>
         </record>
@@ -73,6 +75,8 @@
                                 <field name="email_sent_at" readonly="1"/>
                                 <field name="incident_open_since" readonly="1" groups="moval_timesheet_compliance.group_timesheet_compliance_manager"/>
                                 <field name="escalated_at" readonly="1"/>
+                                <field name="resolved_at" readonly="1" groups="moval_timesheet_compliance.group_timesheet_compliance_manager"/>
+                                <field name="resolved_from_state" readonly="1" groups="moval_timesheet_compliance.group_timesheet_compliance_manager"/>
                             </group>
                         </group>
 
@@ -126,7 +130,7 @@
                     <filter name="state_warn" string="State: Warning" domain="[('state', '=', 'warn')]"/>
                     <filter name="state_issue" string="State: Issue" domain="[('state', '=', 'issue')]"/>
                     <filter name="state_justified" string="State: Justified" domain="[('state', '=', 'justified')]"/>
-                    <filter name="state_fixed" string="State: Fixed" domain="[('state', '=', 'fixed')]"/>
+                    <filter name="state_fixed" string="Legacy fixed" domain="[('state', '=', 'fixed')]"/>
 
                     <group expand="0" string="Group by">
                         <filter name="groupby_date" string="Date (day)" context="{'group_by': 'date'}"/>

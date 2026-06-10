@@ -150,6 +150,38 @@ class TestComplianceExcludedProjects(TransactionCase):
         self.assertAlmostEqual(rec.attendance_hours, 8.0, places=2)
         self.assertEqual(rec.state, "issue", msg="delta 2h above warn threshold 0.5h")
 
+    def test_a5_archived_excluded_project_is_still_applied(self):
+        """Archived projects configured as excluded must still be honored in compliance."""
+        fixed_today = fields.Date.from_string("2099-02-03")
+        d = fixed_today - timedelta(days=1)
+        cleanup_employee_workday_for_tests(self.env, self.employee, d)
+
+        self.project_internal_absence.write({"active": False})
+        self.company.with_context(active_test=False).x_compliance_excluded_project_ids = [
+            (6, 0, [self.project_internal_absence.id])
+        ]
+
+        with skip_compliance_recompute_on(self.env) as e:
+            self._make_attendance(d, 8.0, env=e)
+            self._make_timesheet(d, 2.0, self.project_internal_absence, env=e)
+            self._make_timesheet(d, 6.0, self.project_normal, env=e)
+
+        with patch("odoo.fields.Date.context_today", return_value=fixed_today):
+            self.Compliance._cron_compute_compliance()
+
+        rec = self.Compliance.search(
+            [("employee_id", "=", self.employee.id), ("date", "=", d)], limit=1
+        )
+        self.assertTrue(rec)
+        self.assertAlmostEqual(
+            rec.timesheet_hours,
+            6.0,
+            places=2,
+            msg="archived excluded project must not count in total hours",
+        )
+        self.assertAlmostEqual(rec.attendance_hours, 8.0, places=2)
+        self.assertEqual(rec.state, "issue")
+
     def test_a5_generic_ignores_excluded_even_if_also_marked_generic(self):
         """Compliance-excluded generic projects do not add to generic quality hours."""
         fixed_today = fields.Date.from_string("2026-02-03")

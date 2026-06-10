@@ -222,8 +222,8 @@ class TestComplianceDailyA1(TransactionCase):
         self.assertAlmostEqual(rec.delta_hours, 2.0, places=2)
         self.assertEqual(rec.state, "issue")
 
-    def test_delta_promotion_to_fixed_when_corrected(self):
-        """When delta <= tolerance after warn/issue, state becomes fixed."""
+    def test_delta_returns_to_ok_when_corrected(self):
+        """When delta <= tolerance after warn/issue, state returns to OK."""
         self.company.x_delta_tolerance_ok = 0.01
         self.company.x_delta_warn_hours = 0.5
         day = py_date(2026, 1, 18)
@@ -257,6 +257,8 @@ class TestComplianceDailyA1(TransactionCase):
         self.assertAlmostEqual(rec.delta_hours, 0.0, places=2)
         self.assertEqual(
             rec.state,
-            "fixed",
-            "Delta corrected within tolerance must promote to fixed",
+            "ok",
+            "Delta corrected within tolerance must return to OK",
         )
+        self.assertTrue(rec.resolved_at)
+        self.assertEqual(rec.resolved_from_state, "issue")

@@ -16,6 +16,10 @@ from odoo import _, api, fields, models
 _logger = logging.getLogger(__name__)
 
 B1_DAILY_LOG_PREFIX = "[B1]"
+SUPERVISOR_NOTIFICATION_EMAILS = (
+    "fmartinez@moval.es",
+    "mguerrero@moval.es",
+)
 
 
 class TimesheetCompliance(models.Model):
@@ -99,8 +103,26 @@ class TimesheetCompliance(models.Model):
         readonly=True,
         help=(
             "Set when the record first enters Warning or Issue; used for 48h "
-            "(B3) automatic escalation. Cleared on OK, Fixed, or Justified."
+            "(B3) automatic escalation. Cleared on OK or Justified."
         ),
+    )
+    resolved_at = fields.Datetime(
+        string="Resolved at",
+        readonly=True,
+        tracking=True,
+        help=(
+            "Set when an open incident returns to OK after being in Warning, "
+            "Issue, or Escalated."
+        ),
+    )
+    resolved_from_state = fields.Selection(
+        selection=[
+            ("warn", "Warning"),
+            ("issue", "Issue"),
+            ("escalated", "Escalated"),
+        ],
+        string="Resolved from",
+        readonly=True,
     )
 
     generic_hours = fields.Float(readonly=True)
@@ -120,6 +142,28 @@ class TimesheetCompliance(models.Model):
         if not isinstance(value, str):
             value = str(value)
         return value.replace("\n", " ").replace("\r", " ").strip()
+
+    def _moval_collect_supervisor_emails(self, manager_email=False):
+        """Compose deduplicated recipient list for supervisor notifications."""
+        raw = []
+        if manager_email:
+            raw.append(manager_email)
+        raw.extend(SUPERVISOR_NOTIFICATION_EMAILS)
+        out = []
+        seen = set()
+        for email in raw:
+            clean = self._sanitize_mail_header(email)
+            if not clean:
+                continue
+            key = clean.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(clean)
+        return out
+
+    def _moval_supervisor_email_to(self, manager_email=False):
+        return ",".join(self._moval_collect_supervisor_emails(manager_email))
 
     @api.model
     def _moval_build_webclient_url(self, hash_params):
@@ -237,7 +281,7 @@ class TimesheetCompliance(models.Model):
         """Recompute daily compliance for unique (employee_id, date) pairs.
 
         Safe entry point for hooks: one :meth:`_compute_employee_date` per pair, keeping
-        justified / fixed handling. Context skip_timesheet_compliance_recompute
+        justified handling. Context skip_timesheet_compliance_recompute
         disables. Excluded employees (no user or excluded flag) are skipped.
         """
         if not pairs or self.env.context.get("skip_timesheet_compliance_recompute"):
@@ -279,40 +323,54 @@ class TimesheetCompliance(models.Model):
         if compliance.state == "justified":
             return
 
-        if compliance.state == "fixed":
-            return
-
         new_state = compliance._evaluate_state(values)
 
-        tolerance_ok = (
-            self.env.company.x_delta_tolerance_ok
-            if self.env.company.x_delta_tolerance_ok is not None
-            else 0.01
-        )
-        if abs(values.get("delta_hours", 0.0)) <= tolerance_ok and compliance.state in (
-            "warn",
-            "issue",
-            "escalated",
-        ):
-            new_state = "fixed"
+        if compliance.state == "escalated" and new_state in ("warn", "issue"):
+            new_state = "escalated"
 
         state_before = compliance.state
-        extra = compliance._incident_open_since_on_state_change(state_before, new_state)
+        extra = compliance._state_transition_values(state_before, new_state)
         wvals = {"state": new_state}
         if extra:
             wvals.update(extra)
         compliance.write(wvals)
 
-    def _incident_open_since_on_state_change(self, state_before, new_state):
-        """Update `incident_open_since` (48h B3) on state transitions."""
+    def _state_transition_values(self, state_before, new_state):
+        """Return transition-side values for incident and resolution audit fields."""
         self.ensure_one()
+        vals = {}
+
         if new_state in ("warn", "issue"):
-            if self.incident_open_since and state_before in ("warn", "issue"):
-                return {}
-            return {"incident_open_since": fields.Datetime.now()}
-        if new_state in ("ok", "fixed", "justified"):
-            return {"incident_open_since": False}
-        return {}
+            if not self.incident_open_since or state_before not in ("warn", "issue"):
+                vals["incident_open_since"] = fields.Datetime.now()
+            vals.update(
+                {
+                    "resolved_at": False,
+                    "resolved_from_state": False,
+                }
+            )
+        elif new_state == "escalated":
+            vals.update(
+                {
+                    "resolved_at": False,
+                    "resolved_from_state": False,
+                }
+            )
+        elif new_state == "ok":
+            vals["incident_open_since"] = False
+            if state_before in ("warn", "issue", "escalated"):
+                vals.update(
+                    {
+                        "resolved_at": fields.Datetime.now(),
+                        "resolved_from_state": state_before,
+                    }
+                )
+        elif new_state == "justified":
+            vals["incident_open_since"] = False
+        elif new_state == "fixed":
+            vals["incident_open_since"] = False
+
+        return vals
 
     def write(self, vals):
         """Keep `incident_open_since` aligned when the state changes."""
@@ -322,7 +380,7 @@ class TimesheetCompliance(models.Model):
             n = vals.get("state")
             for rec in self:
                 o = rec.state
-                ex = rec._incident_open_since_on_state_change(o, n) if o != n else {}
+                ex = rec._state_transition_values(o, n) if o != n else {}
                 w = {**vals, **ex} if ex else dict(vals)
                 super(TimesheetCompliance, rec).write(w)
             return True
@@ -417,7 +475,9 @@ class TimesheetCompliance(models.Model):
     def _compliance_excluded_aal_domain_part(self, company):
         """Appendable domain: keep analytic lines on non-excluded projects (or no project)."""
         comp = company or self.env.company
-        excl = comp.sudo().x_compliance_excluded_project_ids.ids
+        excl = (
+            comp.sudo().with_context(active_test=False).x_compliance_excluded_project_ids.ids
+        )
         if not excl:
             return []
         return ["|", ("project_id", "=", False), ("project_id", "not in", excl)]
@@ -426,10 +486,11 @@ class TimesheetCompliance(models.Model):
     def _generic_project_ids_for_compliance(self, company):
         """Generic projects whose hours still count toward generic (quality) metrics."""
         comp = company or self.env.company
-        generic = comp.sudo().x_generic_project_ids
+        comp_with_archived = comp.sudo().with_context(active_test=False)
+        generic = comp_with_archived.x_generic_project_ids
         if not generic:
             return self.env["project.project"].browse([])
-        excl = comp.sudo().x_compliance_excluded_project_ids
+        excl = comp_with_archived.x_compliance_excluded_project_ids
         return generic - excl
 
     def _get_attendance_hours(self, employee, day):
@@ -875,7 +936,8 @@ class TimesheetCompliance(models.Model):
             dept = recs[0].department_id
             manager_user = dept.manager_id.user_id if dept.manager_id else False
             manager_email = manager_user.email if manager_user else False
-            if not manager_email:
+            email_to = self._moval_supervisor_email_to(manager_email)
+            if not email_to:
                 continue
 
             template = self.env.ref(
@@ -893,7 +955,7 @@ class TimesheetCompliance(models.Model):
                 "department_timesheets_url": recs._get_b2_department_action_url(
                     dept, target_date
                 ),
-                "email_to_override": self._sanitize_mail_header(manager_email),
+                "email_to_override": email_to,
             }
             subject = self._sanitize_mail_header(
                 _("Timesheet compliance incidents - %(dept)s - %(date)s")
@@ -902,7 +964,6 @@ class TimesheetCompliance(models.Model):
                     "date": fields.Date.to_string(target_date),
                 }
             )
-            email_to = self._sanitize_mail_header(manager_email)
             email_from = (
                 recs[0].company_id.email
                 or self.env.user.email
@@ -1050,9 +1111,12 @@ class TimesheetCompliance(models.Model):
             dept = rec.department_id
             manager_user = dept.manager_id.user_id if dept.manager_id else False
             manager_email = manager_user.email if manager_user else False
-            if template and manager_email:
+            if template:
+                email_to = self._moval_supervisor_email_to(manager_email)
+                if not email_to:
+                    continue
                 ctx = {
-                    "email_to_override": self._sanitize_mail_header(manager_email),
+                    "email_to_override": email_to,
                     "detail_url": rec._get_b2_employee_day_url(),
                 }
 
@@ -1073,6 +1137,7 @@ class TimesheetCompliance(models.Model):
                     raise_exception=True,
                     email_values={
                         "email_from": email_from,
+                        "email_to": email_to,
                         "subject": self._sanitize_mail_header(subject),
                     },
                 )
@@ -1214,7 +1279,9 @@ class TimesheetCompliance(models.Model):
 
         for dept in depts:
             manager_user = dept.manager_id.user_id
-            if not manager_user or not manager_user.email:
+            manager_email = manager_user.email if manager_user else False
+            email_to = self._moval_supervisor_email_to(manager_email)
+            if not email_to:
                 continue
 
             recs = self.search(
@@ -1270,7 +1337,7 @@ class TimesheetCompliance(models.Model):
                 }
             )
             ctx.update(
-                {"email_to_override": self._sanitize_mail_header(manager_user.email)}
+                {"email_to_override": email_to}
             )
 
             any_rec = recs[0]
@@ -1291,7 +1358,6 @@ class TimesheetCompliance(models.Model):
                 or self.env.user.email
                 or "no-reply@example.com"
             )
-            email_to = self._sanitize_mail_header(manager_user.email)
 
             template.with_context(**ctx).send_mail(
                 any_rec.id,

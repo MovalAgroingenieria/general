@@ -66,7 +66,7 @@ def skip_compliance_recompute_on(env):
 
     Production hooks call :meth:`recompute_employee_date_pairs` on each line of
     timesheet/attendance; partial data yields warn/issue, then a final balanced
-    recompute is promoted to ``fixed`` (reconciled). Tests that need a single
+    recompute usually returns to ``ok``. Tests that need a single
     ``_compute_employee_date``/``compute_for_dates`` on a full day should create
     rows under this context, then run compliance explicitly.
     """

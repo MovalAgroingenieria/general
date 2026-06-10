@@ -10,6 +10,11 @@ from odoo import _, api, fields, models
 
 _logger = logging.getLogger(__name__)
 
+SUPERVISOR_NOTIFICATION_EMAILS = (
+    "fmartinez@moval.es",
+    "mguerrero@moval.es",
+)
+
 
 class TimesheetTimerWatchdog(models.AbstractModel):
     _name = "timesheet.timer.watchdog"
@@ -171,16 +176,32 @@ class TimesheetTimerWatchdog(models.AbstractModel):
         return f"{timer._name},{timer.id}"
 
     def _incident_ref_str(self, incident):
-        if not incident.timer_ref:
-            return ""
-        return self._timer_ref_str(incident.timer_ref)
+        # Read the raw stored value to avoid Reference ORM resolution returning
+        # False when the referenced record is archived or deleted.
+        self.env.cr.execute(
+            "SELECT timer_ref FROM timesheet_timer_incident WHERE id = %s",
+            (incident.id,),
+        )
+        row = self.env.cr.fetchone()
+        return (row[0] or "") if row else ""
 
     def _auto_resolve_inactive_incidents(self, active_refs, now):
         incident_model = self.env["timesheet.timer.incident"]
         open_incidents = incident_model.search([("is_resolved", "=", False)])
+        if not open_incidents:
+            return 0
+
+        # Read raw timer_ref strings in one query to avoid Reference field
+        # ORM resolution breaking when referenced records are archived/deleted.
+        self.env.cr.execute(
+            "SELECT id, timer_ref FROM timesheet_timer_incident"
+            " WHERE id IN %s AND is_resolved = false",
+            (tuple(open_incidents.ids),),
+        )
+        ref_by_id = {row[0]: (row[1] or "") for row in self.env.cr.fetchall()}
 
         to_resolve = open_incidents.filtered(
-            lambda i: self._incident_ref_str(i) not in active_refs
+            lambda i: ref_by_id.get(i.id, "") not in active_refs
         )
         if to_resolve:
             to_resolve.write({"is_resolved": True, "resolved_at": now})
@@ -452,8 +473,8 @@ class TimesheetTimerWatchdog(models.AbstractModel):
             ):
                 return False
 
-        manager_user = self._get_manager_user(employee)
-        if not manager_user:
+        manager_users = self._get_manager_users(employee)
+        if not manager_users:
             return False
 
         summary = _("Timer watchdog escalation: recurring incident")
@@ -468,18 +489,21 @@ class TimesheetTimerWatchdog(models.AbstractModel):
             "note": incident.note or "",
         }
 
-        self.env["mail.activity"].sudo().create(
-            {
-                "res_model_id": self.env["ir.model"]._get_id(  # noqa: W0212
-                    "timesheet.timer.incident"
-                ),
-                "res_id": incident.id,
-                "activity_type_id": self.env.ref("mail.mail_activity_data_todo").id,
-                "summary": summary,
-                "note": note,
-                "user_id": manager_user.id,
-            }
-        )
+        activity_vals = []
+        model_id = self.env["ir.model"]._get_id("timesheet.timer.incident")  # noqa: W0212
+        activity_type = self.env.ref("mail.mail_activity_data_todo").id
+        for manager_user in manager_users:
+            activity_vals.append(
+                {
+                    "res_model_id": model_id,
+                    "res_id": incident.id,
+                    "activity_type_id": activity_type,
+                    "summary": summary,
+                    "note": note,
+                    "user_id": manager_user.id,
+                }
+            )
+        self.env["mail.activity"].sudo().create(activity_vals)
 
         incident.write(
             {
@@ -494,13 +518,23 @@ class TimesheetTimerWatchdog(models.AbstractModel):
         )
         return True
 
-    def _get_manager_user(self, employee):
+    def _get_manager_users(self, employee):
+        users = self.env["res.users"].browse()
+
         dept = employee.department_id
         if dept and dept.manager_id and dept.manager_id.user_id:
-            return dept.manager_id.user_id
+            users |= dept.manager_id.user_id
+
+        extra_users = self.env["res.users"].search(
+            [("email", "in", list(SUPERVISOR_NOTIFICATION_EMAILS))]
+        )
+        users |= extra_users
+
+        if users:
+            return users
 
         hr_manager_group = self.env.ref("hr.group_hr_manager", raise_if_not_found=False)
         if hr_manager_group and hr_manager_group.users:
-            return hr_manager_group.users[0]
+            return hr_manager_group.users[:1]
 
-        return False
+        return users

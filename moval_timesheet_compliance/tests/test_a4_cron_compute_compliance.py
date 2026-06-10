@@ -184,7 +184,7 @@ class TestComplianceDailyA4(TransactionCase):
         self.assertEqual(rec.state, "justified", "Justified must never be overwritten")
         self.assertAlmostEqual(rec.delta_hours, 0.0, places=2)
 
-    def test_a4_does_not_reopen_fixed(self):
+    def test_a4_recomputes_fixed_to_current_state(self):
         fixed_today = fields.Date.from_string("2026-01-13")
         yesterday = fixed_today - timedelta(days=1)
 
@@ -204,7 +204,11 @@ class TestComplianceDailyA4(TransactionCase):
             self.Compliance._cron_compute_compliance()
 
         rec.invalidate_recordset()
-        self.assertEqual(rec.state, "fixed", "Fixed must not be reopened by cron")
+        self.assertEqual(
+            rec.state,
+            "issue",
+            "Fixed must be recalculated to current compliance state",
+        )
         self.assertAlmostEqual(rec.delta_hours, 2.0, places=2)
 
     def test_a4_excluded_employee_not_in_cron(self):
@@ -227,3 +231,52 @@ class TestComplianceDailyA4(TransactionCase):
             rec,
             "No compliance record must exist for excluded employee",
         )
+
+    def test_a4_escalated_remains_escalated_while_unresolved(self):
+        fixed_today = fields.Date.from_string("2026-01-14")
+        yesterday = fixed_today - timedelta(days=1)
+
+        rec = self.Compliance.create(
+            {
+                "employee_id": self.employee.id,
+                "date": yesterday,
+                "state": "escalated",
+                "escalated_at": fields.Datetime.now(),
+            }
+        )
+
+        # Force mismatch: attendance 8, timesheet 6 => delta 2 (issue-like)
+        self._make_attendance(yesterday, 8)
+        self._make_timesheet(yesterday, 6, self.project_normal)
+
+        with patch("odoo.fields.Date.context_today", return_value=fixed_today):
+            self.Compliance._cron_compute_compliance()
+
+        rec.invalidate_recordset()
+        self.assertEqual(rec.state, "escalated")
+        self.assertAlmostEqual(rec.delta_hours, 2.0, places=2)
+
+    def test_a4_escalated_returns_to_ok_when_resolved(self):
+        fixed_today = fields.Date.from_string("2026-01-15")
+        yesterday = fixed_today - timedelta(days=1)
+
+        rec = self.Compliance.create(
+            {
+                "employee_id": self.employee.id,
+                "date": yesterday,
+                "state": "escalated",
+                "escalated_at": fields.Datetime.now(),
+            }
+        )
+
+        # Balanced day: attendance 8, timesheet 8 => ok
+        self._make_attendance(yesterday, 8)
+        self._make_timesheet(yesterday, 8, self.project_normal)
+
+        with patch("odoo.fields.Date.context_today", return_value=fixed_today):
+            self.Compliance._cron_compute_compliance()
+
+        rec.invalidate_recordset()
+        self.assertEqual(rec.state, "ok")
+        self.assertTrue(rec.resolved_at)
+        self.assertEqual(rec.resolved_from_state, "escalated")

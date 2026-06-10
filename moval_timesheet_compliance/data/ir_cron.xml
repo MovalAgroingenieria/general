@@ -8,7 +8,7 @@
             <field name="name">Timesheet Compliance: Compute</field>
             <field name="model_id" ref="model_timesheet_compliance"/>
             <field name="state">code</field>
-            <field name="code">model._cron_compute_compliance()</field>
+            <field name="code">model.with_context(active_test=False)._cron_compute_compliance()</field>
             <field name="interval_number" eval="1"/>
             <field name="interval_type">days</field>
             <field name="numbercall" eval="-1"/>
@@ -23,7 +23,7 @@
             <field name="name">Timesheet Compliance: B1 Employee Daily Email</field>
             <field name="model_id" ref="model_timesheet_compliance"/>
             <field name="state">code</field>
-            <field name="code">model._cron_send_b1_employee_daily_emails()</field>
+            <field name="code">model.with_context(active_test=False)._cron_send_b1_employee_daily_emails()</field>
             <field name="interval_number" eval="1"/>
             <field name="interval_type">days</field>
             <field name="numbercall" eval="-1"/>
@@ -38,7 +38,7 @@
             <field name="name">Timesheet Compliance: B2 Manager Daily Email</field>
             <field name="model_id" ref="model_timesheet_compliance"/>
             <field name="state">code</field>
-            <field name="code">model._cron_send_b2_manager_daily_emails()</field>
+            <field name="code">model.with_context(active_test=False)._cron_send_b2_manager_daily_emails()</field>
             <field name="interval_number" eval="1"/>
             <field name="interval_type">days</field>
             <field name="numbercall" eval="-1"/>
@@ -53,7 +53,7 @@
             <field name="name">Timesheet Compliance: B3 Escalation</field>
             <field name="model_id" ref="model_timesheet_compliance"/>
             <field name="state">code</field>
-            <field name="code">model._cron_send_b3_escalate_unresolved()</field>
+            <field name="code">model.with_context(active_test=False)._cron_send_b3_escalate_unresolved()</field>
             <field name="interval_number" eval="1"/>
             <field name="interval_type">days</field>
             <field name="numbercall" eval="-1"/>
@@ -67,7 +67,7 @@
             <field name="name">Timesheet Compliance: E3 Weekly Generic Quality</field>
             <field name="model_id" ref="model_timesheet_compliance"/>
             <field name="state">code</field>
-            <field name="code">model._cron_send_e3_weekly_generic_quality()</field>
+            <field name="code">model.with_context(active_test=False)._cron_send_e3_weekly_generic_quality()</field>
             <field name="interval_number" eval="1"/>
             <field name="interval_type">days</field>
             <field name="numbercall" eval="-1"/>

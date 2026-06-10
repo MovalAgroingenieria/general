@@ -106,6 +106,16 @@ class TestComplianceDailyB3Escalation(TimesheetComplianceCase):
         self.assertEqual(rec.state, "escalated")
         self.assertTrue(rec.escalated_at)
         self.assertEqual(mocked_send.call_count, 1)
+        _args, kwargs = mocked_send.call_args
+        email_to = kwargs.get("email_values", {}).get("email_to") or ""
+        recipients = {e.strip() for e in email_to.split(",") if e.strip()}
+        self.assertIn(
+            self.manager_user.email,
+            recipients,
+            "B3 must include department manager in explicit email_to",
+        )
+        self.assertIn("fmartinez@moval.es", recipients)
+        self.assertIn("mguerrero@moval.es", recipients)
 
     def test_b3_is_idempotent_does_not_escalate_twice(self):
         rec = self._create_unresolved(state="issue")

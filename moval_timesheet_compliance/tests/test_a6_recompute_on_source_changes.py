@@ -128,7 +128,7 @@ class TestComplianceRecomputeOnSourceChanges(TransactionCase):
         self.assertAlmostEqual(comp.attendance_hours, 8.0, places=2)
         self.assertAlmostEqual(comp.delta_hours, 0.0, places=2)
 
-    def test_a6_correcting_issue_can_move_to_fixed(self):
+    def test_a6_correcting_issue_returns_to_ok(self):
         day = self._day(3)
         self._make_attendance(day, 6.0)
         self._make_line(day, 2.0, self.project)
@@ -149,10 +149,12 @@ class TestComplianceRecomputeOnSourceChanges(TransactionCase):
         comp.invalidate_recordset()
         self.assertEqual(
             comp.state,
-            "fixed",
-            "Resolved mismatch for open incident states becomes fixed",
+            "ok",
+            "Resolved mismatch for open incident states returns to OK",
         )
         self.assertAlmostEqual(comp.delta_hours, 0.0, places=2)
+        self.assertTrue(comp.resolved_at)
+        self.assertEqual(comp.resolved_from_state, "issue")
 
     def test_a6_past_date_recomputation(self):
         past = self._day(7)
