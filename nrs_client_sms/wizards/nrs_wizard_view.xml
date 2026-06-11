@@ -1,75 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
 
-        <!-- SMS wizard -->
-        <record model="ir.ui.view" id="nrs_test_wizard_form">
-            <field name="name">nrs.wizard.form</field>
-            <field name="model">nrs.wizard</field>
-            <field name="arch" type="xml">
-                <form string="Compose SMS">
-                    <field name="is_test_wizard" invisible="1"/>
-                    <field name="allow_certify_sms" invisible="1"/>
-                    <field name="allow_flash_sms" invisible="1"/>
-                    <field name="wizard_mode" invisible="1"/>
-                    <group attrs="{'invisible':[('is_test_wizard','=',True)]}">
-                        <field name="template_id" style="width: 70%;" context="{'from_wizard': True}"
-                            options="{'no_quick_create':True}"/>
-                        <field name="subject" style="width: 70%;"/>
+    <!-- SMS wizard -->
+    <record model="ir.ui.view" id="nrs_test_wizard_form">
+        <field name="name">nrs.wizard.form</field>
+        <field name="model">nrs.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Compose SMS">
+                <field name="is_test_wizard" invisible="1"/>
+                <field name="allow_certify_sms" invisible="1"/>
+                <field name="allow_flash_sms" invisible="1"/>
+                <field name="wizard_mode" invisible="1"/>
+                <group attrs="{'invisible':[('is_test_wizard','=',True)]}">
+                    <field name="template_id" style="width: 70%;" context="{'from_wizard': True}"
+                        options="{'no_quick_create':True}"/>
+                    <field name="subject" style="width: 70%;"/>
+                </group>
+                <group attrs="{'invisible':[('is_test_wizard','=',True)]}">
+                    <group name="options">
+                        <field name="certify" attrs="{'invisible':[('allow_certify_sms', '=', False)]}"/>
+                        <field name="sms_flash" attrs="{'invisible':[('allow_flash_sms', '=', False)]}"/>
+                        <field name="send_invoice_link" attrs="{'invisible':[('wizard_mode', '!=', 'invoice')]}"/>
                     </group>
-                    <group attrs="{'invisible':[('is_test_wizard','=',True)]}">
-                        <group name="options">
-                            <field name="certify" attrs="{'invisible':[('allow_certify_sms', '=', False)]}"/>
-                            <field name="sms_flash" attrs="{'invisible':[('allow_flash_sms', '=', False)]}"/>
-                            <field name="send_invoice_link" attrs="{'invisible':[('wizard_mode', '!=', 'invoice')]}"/>
-                        </group>
-                        <group name="sms_rendering_data" attrs="{'invisible':[('check_sms_message','=',False)]}">
-                            <field name="number_of_characters"/>
-                            <field name="sms_encoding"/>
-                            <field name="number_of_sms"/>
-                        </group>
+                    <group name="sms_rendering_data" attrs="{'invisible':[('check_sms_message','=',False)]}">
+                        <field name="number_of_characters"/>
+                        <field name="sms_encoding"/>
+                        <field name="number_of_sms"/>
                     </group>
-                    <group>
-                        <field name="sms_message" style="background-color: #F8F8F8; padding: 10px;
-                            border-top-right-radius: 15px; border-top-left-radius: 15px; border-bottom-left-radius: 15px;"/>
-                        <field name="check_sms_message" style="background-color: #F8F8F8; padding: 10px;
-                            border-top-right-radius: 15px; border-top-left-radius: 15px; border-bottom-left-radius: 15px;"
-                            attrs="{'invisible':[('check_sms_message','=',False)]}"/>
-                    </group>
-                    <footer>
-                        <button name="send_sms_action" type="object" class="oe_highlight">
-                            <div class="o_form_field">
-                                <span class="fa fa-nrs-sms-registre"/>
-                                <span style="margin-left:8px;">Send</span>
-                            </div>
-                        </button>
-                        <button string="Cancel" class="btn-default" special="cancel"/>
-                        <button name="action_resolve_sms" type="object" class="btn-default pull-right"
-                            attrs="{'invisible':[('is_test_wizard','=',True)]}">
-                            <div class="o_form_field">
-                                <span class="fa fa-retweet fa-lg"/>
-                                <span style="margin-left:8px;">Check </span>
-                            </div>
-                        </button>
-                    </footer>
-                </form>
-            </field>
-        </record>
+                </group>
+                <group>
+                    <field name="sms_message" style="background-color: #F8F8F8; padding: 10px;
+                        border-top-right-radius: 15px; border-top-left-radius: 15px; border-bottom-left-radius: 15px;"/>
+                    <field name="check_sms_message" style="background-color: #F8F8F8; padding: 10px;
+                        border-top-right-radius: 15px; border-top-left-radius: 15px; border-bottom-left-radius: 15px;"
+                        attrs="{'invisible':[('check_sms_message','=',False)]}"/>
+                </group>
+                <footer>
+                    <button name="send_sms_action" type="object" class="oe_highlight">
+                        <div class="o_form_field">
+                            <span class="fa fa-nrs-sms-registre"/>
+                            <span style="margin-left:8px;">Send</span>
+                        </div>
+                    </button>
+                    <button string="Cancel" class="btn-default" special="cancel"/>
+                    <button name="action_resolve_sms" type="object" class="btn-default pull-right"
+                        attrs="{'invisible':[('is_test_wizard','=',True)]}">
+                        <div class="o_form_field">
+                            <span class="fa fa-retweet fa-lg"/>
+                            <span style="margin-left:8px;">Check </span>
+                        </div>
+                    </button>
+                    <button name="action_schedule_sms" type="object" class="btn-default pull-right"
+                        attrs="{'invisible':[('is_test_wizard','=',True)]}">
+                        <div class="o_form_field">
+                            <span class="fa fa-clock-o fa-lg"/>
+                            <span style="margin-left:8px;">Schedule sending</span>
+                        </div>
+                    </button>
+                </footer>
+            </form>
+        </field>
+    </record>
 
-        <!-- Confirmation popup -->
-        <record model="ir.ui.view" id="nrs_confirmation_form">
-            <field name="name">nrs.confirmation.form</field>
-            <field name="model">nrs.confirmation</field>
-            <field name="arch" type="xml">
-                <form string="SMS Confirmation">
-                    <group name="nrs_sent_data">
-                        <field name="response_code"/>
-                        <field name="response_message" groups="base.group_no_one"/>
-                    </group>
-                    <footer position="replace"><div></div></footer>
-                </form>
-            </field>
-        </record>
+    <!-- Schedule SMS wizard -->
+    <record model="ir.ui.view" id="nrs_schedule_wizard_form">
+        <field name="name">nrs.schedule.wizard.form</field>
+        <field name="model">nrs.schedule.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Schedule SMS">
+                <field name="wizard_id" invisible="1"/>
+                <group>
+                    <field name="scheduled_date"/>
+                </group>
+                <footer>
+                    <button name="action_confirm_schedule" type="object" string="Schedule" class="oe_highlight"/>
+                    <button string="Cancel" class="btn-default" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
 
-    </data>
+    <!-- Confirmation popup -->
+    <record model="ir.ui.view" id="nrs_confirmation_form">
+        <field name="name">nrs.confirmation.form</field>
+        <field name="model">nrs.confirmation</field>
+        <field name="arch" type="xml">
+            <form string="SMS Confirmation">
+                <group name="nrs_sent_data">
+                    <field name="response_code"/>
+                    <field name="response_message" groups="base.group_no_one"/>
+                </group>
+                <footer position="replace"><div></div></footer>
+            </form>
+        </field>
+    </record>
+
 </odoo>

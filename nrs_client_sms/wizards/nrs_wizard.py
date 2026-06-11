@@ -2,8 +2,6 @@
 # 2021 Moval Agroingeniería
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError
 import base64
 import requests
 import json
@@ -12,9 +10,12 @@ import random
 import string
 from phonenumbers import carrier
 from phonenumbers.phonenumberutil import number_type
-from datetime import datetime
+from datetime import datetime, timedelta
 from jinja2 import Template, TemplateError
 from lxml import etree
+from odoo.tools.safe_eval import safe_eval
+from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
 
 
 class NRSConfirmation(models.Model):
@@ -151,6 +152,11 @@ class NRSWizard(models.Model):
         string="Check Message",
         readonly=True,
         default=False,
+    )
+
+    scheduled_active_ids = fields.Char(
+        string="Scheduled active ids",
+        readonly=True,
     )
 
     @api.onchange("template_id")
@@ -331,18 +337,22 @@ class NRSWizard(models.Model):
         }
 
     @api.model
+    def _get_template_type_domain(self):
+        mode = self._context.get("mode")
+        domain = ""
+        if mode == "partner":
+            domain = "[('type', '=', 'partner')]"
+        elif mode == "invoice":
+            domain = "[('type', '=', 'invoice')]"
+        return domain
+
+    @api.model
     def fields_view_get(self, view_id=None, view_type="form", toolbar=False,
                         submenu=False):
-        context = self._context
-        if context.get("mode") == "partner":
-            context_filter = "[('type', '=', 'partner')]"
-        elif context.get("mode") == "invoice":
-            context_filter = "[('type', '=', 'invoice')]"
-        else:
-            context_filter = ""
         res = super(NRSWizard, self).fields_view_get(
             view_id=view_id, view_type=view_type, toolbar=toolbar,
             submenu=submenu)
+        context_filter = self._get_template_type_domain()
         doc = etree.XML(res["arch"])
         for node in doc.xpath("//field[@name='template_id']"):
             node.set("domain", context_filter)
@@ -601,3 +611,93 @@ class NRSWizard(models.Model):
             },
             "target": "new",
         }
+
+    @api.multi
+    def action_schedule_sms(self, context):
+        self.ensure_one()
+        if not context.get("active_ids"):
+            raise ValidationError(_("There are no items selected."))
+        if not self.sms_message:
+            raise ValidationError(_("The message is empty."))
+        self.scheduled_active_ids = repr(context.get("active_ids"))
+        schedule_wizard = self.env["nrs.schedule.wizard"].create(
+            {"wizard_id": self.id})
+        return {
+            "name": _("Schedule SMS"),
+            "type": "ir.actions.act_window",
+            "res_model": "nrs.schedule.wizard",
+            "res_id": schedule_wizard.id,
+            "view_mode": "form",
+            "view_type": "form",
+            "target": "new",
+            "context": self._context,
+        }
+
+    @api.model
+    def _cleanup_scheduled_crons(self):
+        old_crons = self.env["ir.cron"].sudo().search([
+            ("model", "=", "nrs.wizard"),
+            ("function", "=", "_cron_send_scheduled_sms"),
+            ("active", "=", False)])
+        if old_crons:
+            old_crons.unlink()
+
+    @api.model
+    def _cron_send_scheduled_sms(self, wizard_id):
+        self._cleanup_scheduled_crons()
+        result = False
+        wizard = self.browse(wizard_id)
+        if wizard.exists():
+            active_ids = safe_eval(wizard.scheduled_active_ids or "[]")
+            if active_ids:
+                context = dict(self._context, active_ids=active_ids)
+                wizard.with_context(context).send_sms_action(context)
+                result = True
+        return result
+
+
+class NRSScheduleWizard(models.TransientModel):
+    _name = "nrs.schedule.wizard"
+    _description = "Schedule SMS sending"
+
+    def _default_scheduled_date(self):
+        scheduled_date = fields.Datetime.to_string(
+            datetime.now() + timedelta(hours=1))
+        return scheduled_date
+
+    wizard_id = fields.Many2one(
+        comodel_name="nrs.wizard",
+        string="SMS wizard",
+        required=True,
+        ondelete="cascade")
+
+    scheduled_date = fields.Datetime(
+        string="Scheduled date",
+        required=True,
+        default=_default_scheduled_date,
+        help="Date and time when the SMS will be sent.")
+
+    @api.multi
+    def action_confirm_schedule(self):
+        self.ensure_one()
+        now = fields.Datetime.from_string(fields.Datetime.now())
+        scheduled = fields.Datetime.from_string(self.scheduled_date)
+        if scheduled <= now:
+            raise ValidationError(
+                _("The scheduled date must be in the future."))
+        wizard = self.wizard_id
+        cron_name = \
+            _("Scheduled SMS") + " - " + (wizard.subject or _("No subject"))
+        self.env["ir.cron"].sudo().create({
+            "name": cron_name,
+            "model": "nrs.wizard",
+            "function": "_cron_send_scheduled_sms",
+            "args": "(%d,)" % wizard.id,
+            "interval_number": 1,
+            "interval_type": "minutes",
+            "numbercall": 1,
+            "nextcall": self.scheduled_date,
+            "doall": False,
+            "active": True,
+            "user_id": self._uid, })
+        return {"type": "ir.actions.act_window_close"}
