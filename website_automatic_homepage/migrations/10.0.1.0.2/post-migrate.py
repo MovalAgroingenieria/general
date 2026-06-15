@@ -10,20 +10,19 @@ _logger = logging.getLogger(__name__)
 
 
 def migrate(cr, version):
-    """Create the default welcome blog post on module update.
+    """Apply non-content setup tasks on module update.
 
-    Safe to run multiple times: creation is idempotent and will be skipped
-    when an equivalent post already exists.
+    The welcome blog post must be created only on install (post_init_hook),
+    never on update.
     """
     env = api.Environment(cr, SUPERUSER_ID, {})
 
     hooks = __import__(
         'odoo.addons.website_automatic_homepage.hooks',
-        fromlist=['_ensure_website_name_sync', '_ensure_regantes_channel_setup', '_ensure_welcome_blog_post']
+        fromlist=['_ensure_website_name_sync', '_ensure_regantes_channel_setup']
     )
     _ensure_website_name_sync = hooks._ensure_website_name_sync
     _ensure_regantes_channel_setup = hooks._ensure_regantes_channel_setup
-    _ensure_welcome_blog_post = hooks._ensure_welcome_blog_post
 
     try:
         _ensure_website_name_sync(env)
@@ -34,8 +33,3 @@ def migrate(cr, version):
         _ensure_regantes_channel_setup(env)
     except Exception:
         _logger.exception("Could not configure slides channel defaults.")
-
-    try:
-        _ensure_welcome_blog_post(env)
-    except Exception:
-        _logger.exception("Could not create default welcome blog post.")
