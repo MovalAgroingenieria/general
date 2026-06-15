@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="0">
+    <data noupdate="1">
 
         <record id="remotecontrol_pesyr" model="remotecontrol">
             <field name="name">PESYR SQL</field>
@@ -33,6 +33,9 @@
             <field name="readonly">True</field>
             <field name="code"><![CDATA[
 import json
+import logging
+
+_logger = logging.getLogger('remotecontrol_pesyr')
 
 Remote = self.remote_id
 Sensor = env['mdm.measurement.device.sensor']
@@ -45,6 +48,12 @@ condition = [
 if selected_device_ids:
     condition.append(('device_id', 'in', selected_device_ids))
 sensors = Sensor.search(condition)
+_logger.info(
+    '[PESYR] Plan build start: remote_id=%s selected_device_ids=%s sensors=%s',
+    Remote.id,
+    selected_device_ids,
+    len(sensors),
+)
 
 sensor_ids = [s.id for s in sensors]
 last_readings_map = {}
@@ -59,30 +68,71 @@ if sensors:
     )
     for sid, mtime in cr.fetchall():
         last_readings_map[sid] = mtime
+    _logger.info(
+        '[PESYR] Last readings fetched for %s sensors',
+        len(last_readings_map),
+    )
 
 plan = []
+plan_skipped_missing_device_id = 0
+plan_skipped_invalid_sensor_id = 0
+plan_skipped_sensor_id_out_of_range = 0
+plan_details = []
 for sensor in sensors:
     device = sensor.device_id
     try:
         scfg = json.loads(sensor.remotecontrol_params or '{}') or {}
     except Exception:
+        _logger.warning(
+            '[PESYR] Invalid sensor remotecontrol_params: sensor_id=%s',
+            sensor.id,
+        )
         scfg = {}
     try:
         dcfg = json.loads(device.remotecontrol_params or '{}') or {}
     except Exception:
+        _logger.warning(
+            '[PESYR] Invalid device remotecontrol_params: device_id=%s',
+            device.id,
+        )
         dcfg = {}
 
-    id_inst = dcfg.get('device_id')
-    contador_id = scfg.get('sensor_id')
-
-    try:
-        id_inst = int(id_inst)
-    except Exception:
+    descriptor = dcfg.get('device_id') or ''
+    if not descriptor:
+        plan_skipped_missing_device_id += 1
+        _logger.info(
+            '[PESYR] Sensor skipped (missing device_id): sensor_id=%s device_id=%s',
+            sensor.id,
+            device.id,
+        )
+        if len(plan_details) < 30:
+            plan_details.append({
+                'sensor_id': sensor.id,
+                'device_id': device.id,
+                'status': 'skipped',
+                'reason': 'missing_device_id',
+            })
         continue
+    contador_id = scfg.get('sensor_id')
 
     try:
         contador_id = int(contador_id)
     except Exception:
+        plan_skipped_invalid_sensor_id += 1
+        _logger.info(
+            '[PESYR] Sensor skipped (invalid sensor_id): sensor_id=%s device_id=%s value=%s',
+            sensor.id,
+            device.id,
+            contador_id,
+        )
+        if len(plan_details) < 30:
+            plan_details.append({
+                'sensor_id': sensor.id,
+                'device_id': device.id,
+                'status': 'skipped',
+                'reason': 'invalid_sensor_id',
+                'value': contador_id,
+            })
         continue
 
     if 0 <= contador_id <= 5:
@@ -90,6 +140,21 @@ for sensor in sensors:
     elif 1 <= contador_id <= 6:
         value_field = 'cont%s' % contador_id
     else:
+        plan_skipped_sensor_id_out_of_range += 1
+        _logger.info(
+            '[PESYR] Sensor skipped (sensor_id out of range): sensor_id=%s device_id=%s sensor_cfg_id=%s',
+            sensor.id,
+            device.id,
+            contador_id,
+        )
+        if len(plan_details) < 30:
+            plan_details.append({
+                'sensor_id': sensor.id,
+                'device_id': device.id,
+                'status': 'skipped',
+                'reason': 'sensor_id_out_of_range',
+                'sensor_cfg_id': contador_id,
+            })
         continue
 
     start_cfg = dcfg.get('start_date')
@@ -110,14 +175,50 @@ for sensor in sensors:
     plan.append({
         'sensor_id': sensor.id,
         'device_id': device.id,
-        'id_inst': id_inst,
+        'descriptor': descriptor,
         'contador_id': contador_id,
         'value_field': value_field,
         'initial_date': initial_date,
     })
+    if len(plan_details) < 30:
+        plan_details.append({
+            'sensor_id': sensor.id,
+            'device_id': device.id,
+            'descriptor': descriptor,
+            'contador_id': contador_id,
+            'value_field': value_field,
+            'initial_date': initial_date,
+            'status': 'planned',
+        })
 
 bag['sensors_plan'] = plan
 bag['plan_count'] = len(plan)
+bag['pesyr_plan_summary'] = {
+    'executed_at': fields.Datetime.now(),
+    'selected_device_ids': selected_device_ids,
+    'sensors_found': len(sensors),
+    'plan_count': len(plan),
+    'skipped_missing_device_id': plan_skipped_missing_device_id,
+    'skipped_invalid_sensor_id': plan_skipped_invalid_sensor_id,
+    'skipped_sensor_id_out_of_range': plan_skipped_sensor_id_out_of_range,
+}
+bag['pesyr_plan_details'] = plan_details
+try:
+    bag['pesyr_plan_json'] = json.dumps(plan, ensure_ascii=True, indent=2)
+except Exception as json_error:
+    bag['pesyr_plan_json_error'] = str(json_error)
+_logger.info(
+    '[PESYR] Plan build done: remote_id=%s plan_count=%s',
+    Remote.id,
+    len(plan),
+)
+Remote.message_post(
+    body='[PESYR] Plan: sensors=%s planned=%s skipped=%s' % (
+        len(sensors),
+        len(plan),
+        len(sensors) - len(plan),
+    )
+)
 ]]></field>
         </record>
 
@@ -131,13 +232,18 @@ bag['plan_count'] = len(plan)
             <field name="readonly">True</field>
             <field name="code"><![CDATA[
 import json
+import logging
 import pyodbc
+
+_logger = logging.getLogger('remotecontrol_pesyr')
 
 Remote = self.remote_id
 plan = bag.get('sensors_plan') or []
+_logger.info('[PESYR] Fetch start: remote_id=%s plan_items=%s', Remote.id, len(plan))
 
 rows = []
 errors = []
+selected_driver = False
 
 try:
     cfg = json.loads(Remote.connection_params or '{}') or {}
@@ -149,6 +255,12 @@ try:
     pwd = cfg.get('pwd', '').strip()
 
     if not all([server, database, uid]):
+        _logger.error(
+            '[PESYR] Missing connection params: server=%s database=%s uid=%s',
+            bool(server),
+            bool(database),
+            bool(uid),
+        )
         raise Exception('Missing required connection parameters')
 
     driver_candidates = []
@@ -180,11 +292,18 @@ try:
                 'UID=%s;'
                 'PWD=%s;'
             ) % (candidate, server, port, database, uid, pwd)
+            _logger.info('[PESYR] Trying ODBC driver: %s', candidate)
             conn = pyodbc.connect(connection_string)
             selected_driver = candidate
+            _logger.info('[PESYR] ODBC connection established with driver: %s', selected_driver)
             break
         except Exception as driver_exc:
             last_error = str(driver_exc)
+            _logger.warning(
+                '[PESYR] ODBC driver failed: %s error=%s',
+                candidate,
+                last_error,
+            )
 
     if not conn:
         raise Exception(
@@ -197,21 +316,34 @@ try:
     for item in plan:
         sensor_id = item['sensor_id']
         device_id = item['device_id']
-        id_inst = item['id_inst']
+        descriptor = item['descriptor']
         value_col = item['value_field']
         initial_date = item['initial_date']
+        _logger.info(
+            '[PESYR] Fetch sensor start: sensor_id=%s device_id=%s descriptor=%s from=%s field=%s',
+            sensor_id,
+            device_id,
+            descriptor,
+            initial_date,
+            value_col,
+        )
         table_name = 'iot_contadores_vista_moval'
         time_col = 'fecha'
         query = (
-            'SELECT id_inst, %s, %s '
+            'SELECT descriptor, %s, %s '
             'FROM %s '
-            'WHERE id_inst = ? AND %s >= ? '
+            'WHERE descriptor = ? AND %s >= ? '
             'ORDER BY %s ASC'
         ) % (time_col, value_col, table_name, time_col, time_col)
 
         try:
-            cursor.execute(query, (id_inst, initial_date))
+            cursor.execute(query, (descriptor, initial_date))
             results = cursor.fetchall()
+            _logger.info(
+                '[PESYR] Fetch sensor rows: sensor_id=%s rows=%s',
+                sensor_id,
+                len(results),
+            )
             for row in results:
                 timestamp = row[1]
                 if hasattr(timestamp, 'strftime'):
@@ -228,19 +360,49 @@ try:
             errors.append({
                 'sensor_id': sensor_id,
                 'device_id': device_id,
-                'id_inst': id_inst,
+                'descriptor': descriptor,
                 'query': query,
                 'error': str(exc),
             })
+            _logger.exception(
+                '[PESYR] Fetch sensor failed: sensor_id=%s device_id=%s descriptor=%s',
+                sensor_id,
+                device_id,
+                descriptor,
+            )
 
     cursor.close()
     conn.close()
+    _logger.info('[PESYR] ODBC connection closed')
 except Exception as ex:
     errors.append({'fatal_error': str(ex)})
+    _logger.exception('[PESYR] Fetch fatal error')
 
 bag['pesyr_rows'] = rows
 bag['pesyr_fetch_errors'] = errors
 bag['pesyr_driver'] = selected_driver
+bag['pesyr_fetch_summary'] = {
+    'executed_at': fields.Datetime.now(),
+    'plan_items': len(plan),
+    'rows': len(rows),
+    'errors': len(errors),
+    'driver': selected_driver,
+}
+bag['pesyr_fetch_details'] = errors[:50]
+try:
+    bag['pesyr_fetch_json'] = json.dumps({
+        'summary': bag['pesyr_fetch_summary'],
+        'sample_errors': errors[:50],
+    }, ensure_ascii=True, indent=2)
+except Exception as json_error:
+    bag['pesyr_fetch_json_error'] = str(json_error)
+_logger.info(
+    '[PESYR] Fetch done: remote_id=%s rows=%s errors=%s driver=%s',
+    Remote.id,
+    len(rows),
+    len(errors),
+    selected_driver,
+)
 Remote.message_post(
     body='[PESYR] Fetch: %s rows, %s errors (driver=%s)' %
          (len(rows), len(errors), selected_driver)
@@ -258,7 +420,12 @@ Remote.message_post(
             <field name="readonly">True</field>
             <field name="code"><![CDATA[
 import pytz
+import json
+import logging
+import base64
 from datetime import datetime
+
+_logger = logging.getLogger('remotecontrol_pesyr')
 
 Remote = self.remote_id
 
@@ -270,27 +437,85 @@ def parse_value(v):
         if v.lower() == 'nan':
             return None
         try:
-            return float(v)
+            number = float(v)
+            if number == 0.0:
+                return None
+            return number
         except Exception:
             return None
     if isinstance(v, (int, float)):
-        return float(v)
-    return None
+        number = float(v)
+        if number == 0.0:
+            return None
+        return number
+    try:
+        number = float(v)
+        if number == 0.0:
+            return None
+        return number
+    except Exception:
+        return None
 
 rows = bag.get('pesyr_rows') or []
 total_processed = 0
 total_upserts = 0
 total_errors = 0
+total_skipped_invalid_row = 0
+total_skipped_no_value = 0
+total_upsert_exceptions = 0
+total_timestamp_fallback = 0
+details = []
+_logger.info('[PESYR] Upsert start: remote_id=%s rows=%s', Remote.id, len(rows))
 
 for r in rows:
     total_processed += 1
     sensor_id = r.get('sensor_id')
     device_id = r.get('device_id')
     timestamp = r.get('timestamp')
-    value = parse_value(r.get('value'))
+    raw_value = r.get('value')
+    value = parse_value(raw_value)
 
-    if not sensor_id or not device_id or not timestamp or value is None:
-        total_errors += 1
+    if not sensor_id or not device_id or not timestamp:
+        total_skipped_invalid_row += 1
+        _logger.info(
+            '[PESYR] Upsert skipped invalid row: sensor_id=%s device_id=%s timestamp=%s value=%s',
+            sensor_id,
+            device_id,
+            timestamp,
+            value,
+        )
+        if len(details) < 50:
+            details.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'timestamp': timestamp,
+                'value': value,
+                'status': 'skipped',
+                'error': 'invalid_row',
+            })
+        continue
+
+    if value is None:
+        total_skipped_no_value += 1
+        raw_type = type(raw_value).__name__
+        _logger.info(
+            '[PESYR] Upsert skipped no numeric value: sensor_id=%s device_id=%s timestamp=%s raw_value=%s raw_type=%s',
+            sensor_id,
+            device_id,
+            timestamp,
+            raw_value,
+            raw_type,
+        )
+        if len(details) < 50:
+            details.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'timestamp': timestamp,
+                'value': raw_value,
+                'raw_type': raw_type,
+                'status': 'skipped',
+                'error': 'no_numeric_value',
+            })
         continue
 
     try:
@@ -301,6 +526,12 @@ for r in rows:
             ts_utc = date_time_read.strftime('%Y-%m-%d %H:%M:%S')
         except Exception:
             ts_utc = timestamp
+            total_timestamp_fallback += 1
+            _logger.warning(
+                '[PESYR] Upsert timestamp parse fallback: sensor_id=%s raw_timestamp=%s',
+                sensor_id,
+                timestamp,
+            )
 
         Remote.upsert(
             'mdm.measurement.device.sensor.reading',
@@ -314,14 +545,117 @@ for r in rows:
             }
         )
         total_upserts += 1
+        if len(details) < 50:
+            details.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'timestamp': timestamp,
+                'value': value,
+                'status': 'success',
+            })
     except Exception:
         total_errors += 1
+        total_upsert_exceptions += 1
+        _logger.exception(
+            '[PESYR] Upsert failed: sensor_id=%s device_id=%s ts=%s value=%s',
+            sensor_id,
+            device_id,
+            timestamp,
+            value,
+        )
+        if len(details) < 50:
+            details.append({
+                'sensor_id': sensor_id,
+                'device_id': device_id,
+                'timestamp': timestamp,
+                'value': value,
+                'status': 'error',
+                'error': 'upsert_exception',
+            })
 
 bag['upserts'] = total_upserts
 bag['errors'] = total_errors
+success_rate = '0.0%'
+if total_processed:
+    success_rate = '%.1f%%' % (float(total_upserts) / float(total_processed) * 100.0)
+bag['pesyr_upsert_summary'] = {
+    'executed_at': fields.Datetime.now(),
+    'total_rows_processed': total_processed,
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'total_skipped_invalid_row': total_skipped_invalid_row,
+    'total_skipped_no_value': total_skipped_no_value,
+    'total_upsert_exceptions': total_upsert_exceptions,
+    'total_timestamp_fallback': total_timestamp_fallback,
+    'success_rate': success_rate,
+}
+bag['pesyr_upsert_details'] = details
+try:
+    bag['pesyr_upsert_json'] = json.dumps({
+        'summary': bag['pesyr_upsert_summary'],
+        'details': details,
+    }, ensure_ascii=True, indent=2)
+except Exception as json_error:
+    bag['pesyr_upsert_json_error'] = str(json_error)
+_logger.info(
+    '[PESYR] Upsert done: remote_id=%s processed=%s upserts=%s errors=%s',
+    Remote.id,
+    total_processed,
+    total_upserts,
+    total_errors,
+)
+att_ids = []
+try:
+    upsert_payload = {
+        'plan': {
+            'summary': bag.get('pesyr_plan_summary') or {},
+            'details': bag.get('pesyr_plan_details') or [],
+            'plan': bag.get('sensors_plan') or [],
+        },
+        'fetch': {
+            'summary': bag.get('pesyr_fetch_summary') or {},
+            'sample_errors': bag.get('pesyr_fetch_errors') or [],
+            'sample_rows': (bag.get('pesyr_rows') or [])[:50],
+        },
+        'upsert': {
+            'summary': bag.get('pesyr_upsert_summary') or {},
+            'details': details,
+        },
+    }
+    upsert_payload_json = json.dumps(
+        upsert_payload,
+        ensure_ascii=True,
+        indent=2,
+        default=str,
+    )
+    now_tag = str(fields.Datetime.now() or '').replace('-', '')
+    now_tag = now_tag.replace(':', '').replace(' ', '_')
+    if not now_tag:
+        now_tag = 'now'
+    fname = 'pesyr_sync_summary_%s.json' % now_tag
+    att = env['ir.attachment'].create({
+        'name': fname,
+        'datas_fname': fname,
+        'datas': base64.b64encode(upsert_payload_json),
+        'mimetype': 'application/json',
+        'res_model': 'remotecontrol',
+        'res_id': Remote.id,
+    })
+    att_ids = [att.id]
+except Exception as att_error:
+    bag['pesyr_upsert_attachment_error'] = str(att_error)
 Remote.message_post(
-    body='[PESYR] Upsert: %s processed, %s upserts, %s errors' %
-         (total_processed, total_upserts, total_errors)
+    body='[PESYR] Upsert: %s processed, %s upserts, %s errors (invalid=%s, no_value=%s, exceptions=%s, success_rate=%s)' %
+         (
+             total_processed,
+             total_upserts,
+             total_errors,
+             total_skipped_invalid_row,
+             total_skipped_no_value,
+             total_upsert_exceptions,
+             success_rate,
+         ),
+    attachment_ids=att_ids,
 )
     ]]></field>
         </record>
