@@ -3,9 +3,8 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 {
-    "name": "RemoteControl: IkosTech",
-    "summary": "Remotecontrol IkosTech API (REST) with default actions and "
-               "procedures for historical data fetching",
+    "name": "RemoteControl: Soil Measure Generation",
+    "summary": "Remotecontrol with local synthetic soil moisture generation",
     "version": "10.0.1.0.0",
     "category": "Tools",
     "author": "Moval Agroingeniería",

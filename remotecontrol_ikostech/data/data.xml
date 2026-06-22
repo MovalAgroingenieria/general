@@ -3,815 +3,669 @@
     <data noupdate="1">
 
         <record id="remotecontrol_ikostech" model="remotecontrol">
-            <field name="name">IKOS Techs</field>
+            <field name="name">IkosTech</field>
             <field name="remotecontrol_type">rest</field>
-            <field name="base_url"></field>
+            <field name="base_url">https://api.ikostech.es/it</field>
             <field name="timeout">60</field>
             <field name="verify_ssl">True</field>
-            <field name="rate_limit_seconds">0.0</field>
-            <field name="max_retries">1</field>
+            <field name="rate_limit_seconds">1.1</field>
+            <field name="max_retries">2</field>
             <field name="backoff">1.5</field>
             <field name="readonly">True</field>
             <field name="connection_params"><![CDATA[
 {
-  "num_devices": 4
+  "api_key": ""
 }
             ]]></field>
             <field name="remotecontrol_help"><![CDATA[
-<h2>IKOS Techs · Odoo Integration Help</h2>
+<h2>IkosTech · Odoo Integration Help</h2>
+<p><strong>Official API:</strong> <code>https://api.ikostech.es/it</code></p>
 
 <hr/>
 
-<h3>1) Connection</h3>
-<p>This telecontrol <strong>does not connect to any API, endpoint, database, or external service</strong>.</p>
-<p>All readings are generated locally inside Odoo using a deterministic synthetic model designed for soil moisture probes.</p>
-
-<h3>2) Expected Setup in Odoo</h3>
-<ol>
-  <li>Configure <code>connection_params</code> on this remote control record (see section 3 below).</li>
-  <li>Run the procedure <code>IKOS Techs: Provision humidity probes</code> to auto-create all devices and sensors.</li>
-  <li>Alternatively, create devices manually, assign <strong>Remotecontrol = IKOS Techs</strong>, and add sensors named <code>Sensor 10</code>, <code>Sensor 20</code>, <code>Sensor 30</code>.</li>
-  <li>Use sensor type <code>Sensor de humedad</code> with unit <code>%</code>.</li>
-</ol>
-
-<h3>3) Remote Control Configuration (connection_params)</h3>
-<p>Edit the <strong>connection_params</strong> JSON on this record to control the provisioning behaviour:</p>
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code> · Base URL: <code>https://api.ikostech.es/it</code></p>
+<p>Auth: <code>X-API-Key</code> header</p>
+<p><strong>connection_params</strong> (JSON):</p>
 <pre>{
-  "num_devices": 4,
-  "device_prefix": "Sonda de humedad",
-  "location_prefix": "Sector",
-  "start_date": "2026-03-21",
-  "sensors": [
-    {"name": "Sensor 10", "depth_cm": 10},
-    {"name": "Sensor 20", "depth_cm": 20},
-    {"name": "Sensor 30", "depth_cm": 30}
-  ]
+  "api_key": "your_api_key_here"
 }</pre>
 <ul>
-  <li><code>num_devices</code>: number of probe devices to create (default: 4). Set to 50 for a large community.</li>
-  <li><code>device_prefix</code>: prefix for device names (default: <code>Sonda de humedad</code>). Devices will be named <em>prefix 1</em>, <em>prefix 2</em>, etc.</li>
-  <li><code>location_prefix</code>: prefix for the location field (default: <code>Sector</code>).</li>
-  <li><code>start_date</code>: initial date for synthetic readings. If omitted, defaults to 45 days before today.</li>
-  <li><code>sensors</code>: list of sensors to create per device. Each entry can be a plain string (<code>"Sensor 10"</code>) or an object with <code>name</code> and optional <code>depth_cm</code>. If omitted, creates Sensor 10 / 20 / 30.</li>
+  <li>API key is required for all endpoints.</li>
+  <li>Rate limit: <strong>1 request per second</strong> (strictly enforced).</li>
 </ul>
 
-<h3>4) Daily Procedure</h3>
-<p>The included daily procedure works in two steps:</p>
+<h3>2) Default Procedure</h3>
 <ol>
-  <li><strong>Get devices (plan)</strong> → finds IKOS sensors in Odoo and calculates the missing time range.</li>
-  <li><strong>Generate readings</strong> → creates realistic hourly soil moisture readings and upserts them into Odoo.</li>
+  <li><strong>Build devices plan</strong> → extract serial + sensor field mapping from device/sensor config.</li>
+  <li><strong>Fetch readings</strong> → call <code>/export/node/{serial}/data/json/{from}/{to}</code> per unique serial/field combo.</li>
+  <li><strong>Upsert readings</strong> → store in mdm.measurement.device.sensor.reading with UTC timestamps.</li>
 </ol>
 
-<h3>5) How Sensor Depth Is Detected</h3>
-<p>The depth is obtained in this order:</p>
+<h3>3) Device Configuration</h3>
+<p>In each <strong>Device</strong> (<code>mdm.measurement.device</code>) set <em>remotecontrol_params</em>:</p>
+<pre>{
+  "serial": "10329694",
+  "start_date": "2026-01-01"
+}</pre>
+
+<h3>4) Sensor Configuration</h3>
+<p>In each <strong>Sensor</strong> (<code>mdm.measurement.device.sensor</code>) set <em>remotecontrol_params</em>:</p>
+<pre>{
+  "field": "hsuelo"
+}</pre>
+<p>where <code>field</code> is one of the available IkosTech measurement fields:</p>
+<ul>
+  <li><code>hamb</code> - Ambient humidity (%)</li>
+  <li><code>tamb</code> - Ambient temperature (°C)</li>
+  <li><code>hsuelo</code> - Soil humidity (%)</li>
+  <li><code>tsuelo</code> - Soil temperature (°C)</li>
+  <li><code>conductividad</code> - Soil conductivity (mS/cm)</li>
+  <li><code>radiacion</code> - Solar radiation (W/m²)</li>
+  <li><code>radiacion_umol</code> - PAR radiation (μmol/m²/s)</li>
+  <li><code>radiacion_global</code> - Global solar radiation (W/m²)</li>
+  <li><code>dpv</code> - Vapor pressure deficit (kPa)</li>
+  <li><code>bateria</code> - Battery level (%)</li>
+  <li><code>calidad</code> - Signal quality (0-4)</li>
+</ul>
+
+<h3>5) Time Window & Date Chunking</h3>
+<ul>
+  <li><em>Build devices plan</em> computes <code>initial_date</code> per sensor: last stored reading date → else <code>device.start_date</code> → else Jan 1 of current year.</li>
+  <li><em>Fetch readings</em> splits long date ranges into 30-day chunks to prevent API 502/504 gateway timeouts.</li>
+  <li><em>Date format:</em> <code>YYYYMMDD</code> (e.g., 20260601)</li>
+  <li>Timestamps in response are treated as local time (UTC) and stored as such.</li>
+</ul>
+
+<h3>6) Endpoint Details</h3>
+
+<h4>GET /export/nodes</h4>
+<p>List all available devices/serials accessible to your API key.</p>
+<p><strong>Response:</strong> Array of device objects with <code>serial</code>, <code>alias</code>, <code>device</code>, <code>estado</code>, etc.</p>
+
+<h4>GET /export/node/{serial}/data/json/{from}/{to}</h4>
+<p>Fetch raw readings for a specific device within a date range.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+  <li><code>{serial}</code> - Device serial number</li>
+  <li><code>{from}</code> - Start date in YYYYMMDD format</li>
+  <li><code>{to}</code> - End date in YYYYMMDD format</li>
+</ul>
+<p><strong>Response:</strong> Array of reading objects with fields like <code>fecha</code>, <code>serial</code>, <code>hamb</code>, <code>tsuelo</code>, etc.</p>
+
+<h3>7) Rate Limiting</h3>
+<p>IkosTech strictly enforces <strong>1 request per second per API key</strong>.</p>
+<p>The system automatically adds a 1.1 second delay between requests.</p>
+<p>Large date ranges are split into 30-day chunks to balance speed vs. API limits.</p>
+
+<h3>8) Operational Flow</h3>
 <ol>
-  <li>From <code>sensor.remotecontrol_params.depth_cm</code></li>
-  <li>From the first number found in the sensor name (for example, <code>Sensor 10</code>)</li>
+  <li>Load devices + sensors with remotecontrol_params configured</li>
+  <li>For each sensor, determine date range: last_reading → today</li>
+  <li>Split date range into 30-day chunks</li>
+  <li>For each chunk, call API with 1.1 sec delay between requests</li>
+  <li>Parse response, extract the specific field value from each reading</li>
+  <li>Upsert readings into Odoo with UTC timestamp</li>
+  <li>Post audit JSON with per-sensor/per-chunk diagnostics</li>
 </ol>
 
-<h3>6) Optional Device Configuration</h3>
-<p>In each <strong>Device</strong> (<code>mdm.measurement.device</code>) you can optionally define:</p>
-<pre>{
-  "start_date": "2026-05-01",
-  "field_capacity": 36.5,
-  "wilting_point": 11.2,
-  "baseline_shift": 0.8,
-  "irrigation_bias": 0.04
-}</pre>
+<h3>9) Error Handling</h3>
 <ul>
-  <li><code>start_date</code>: initial local date for the first generated readings if no data exists yet.</li>
-  <li><code>field_capacity</code>: upper realistic limit after irrigation/rain events.</li>
-  <li><code>wilting_point</code>: lower realistic dry threshold.</li>
-  <li><code>baseline_shift</code>: shifts the general moisture level for that probe.</li>
-  <li><code>irrigation_bias</code>: adjusts the probability of synthetic irrigation events.</li>
+  <li><strong>Missing field in response:</strong> Logged as warning, reading skipped</li>
+  <li><strong>Invalid timestamp:</strong> Logged, reading skipped</li>
+  <li><strong>API timeout/error:</strong> Batch persists upserts before reporting, so no data is lost</li>
+  <li><strong>Rate limit:</strong> Automatic 1.1 sec delay prevents 429 errors</li>
 </ul>
 
-<h3>7) Optional Sensor Configuration</h3>
-<p>In each <strong>Sensor</strong> (<code>mdm.measurement.device.sensor</code>) you can optionally define:</p>
-<pre>{
-  "depth_cm": 10,
-  "start_date": "2026-05-01",
-  "dryness_bias": -0.4
-}</pre>
-<ul>
-  <li><code>depth_cm</code>: overrides the depth inferred from the name.</li>
-  <li><code>start_date</code>: overrides the device start date.</li>
-  <li><code>dryness_bias</code>: small per-sensor offset to make one depth slightly wetter or drier.</li>
-</ul>
-
-<h3>8) Synthetic Model</h3>
-<ul>
-  <li><strong>10 cm</strong>: most reactive sensor, strongest daily oscillation, dries faster.</li>
-  <li><strong>20 cm</strong>: intermediate response, smoother than 10 cm.</li>
-  <li><strong>30 cm</strong>: most stable sensor, delayed reaction and slower decay after irrigation.</li>
-  <li>The system simulates <strong>seasonality</strong>, <strong>daily evapotranspiration cycles</strong>, and <strong>synthetic irrigation / rain events</strong>.</li>
-  <li>The model is <strong>deterministic</strong>: if the same device, sensor, and timestamp are generated again, the value is reproduced consistently.</li>
-</ul>
-
-<h3>9) Scheduling</h3>
-<p>The daily procedure is preconfigured with a 1-day interval.</p>
-<p>To create the scheduled job, open the procedure <code>IKOS Techs: Daily Sync</code> and click <strong>Save Cron</strong>, exactly like the other telecontrol modules.</p>
-
-<h3>10) Output</h3>
-<p>Each execution creates an audit JSON attachment on the IKOS Techs remote control record with the generated ranges and counters.</p>
-
-<h3>11) Default Provisioning</h3>
-<p>The module includes a provisioning procedure driven by <code>connection_params</code> (see section 3). By default it creates:</p>
-<ul>
-  <li><strong>N devices</strong> (controlled by <code>num_devices</code>, default 4): <code>Sonda de humedad 1</code> … <code>Sonda de humedad N</code></li>
-  <li><strong>category_id = 1</strong> on every device (first available category as fallback)</li>
-  <li><strong>3 sensors per device</strong> (controlled by <code>sensors</code>): <code>Sensor 10</code>, <code>Sensor 20</code>, <code>Sensor 30</code></li>
-  <li><code>remotecontrol_params</code> with <code>start_date</code> so readings are generated from the first run</li>
-</ul>
-<p>The provisioning is idempotent: if a probe or sensor already exists, it is updated instead of duplicated.</p>
+<h3>10) Timezone Handling</h3>
+<p>IkosTech timestamps are provided as-is (assumed UTC).</p>
+<p>Odoo stores readings in UTC without conversion.</p>
 ]]></field>
         </record>
 
-        <record id="remotecontrol_ikostech_action_provision_devices" model="remotecontrol.action">
-            <field name="name">IKOS Techs: Provision humidity probes</field>
+        <!-- ACTION: Build Devices Plan -->
+        <record id="remotecontrol_ikostech_action_build_plan" model="remotecontrol.action">
+            <field name="name">IkosTech: Build devices plan</field>
             <field name="remote_id" ref="remotecontrol_ikostech"/>
             <field name="active">True</field>
             <field name="rate_limit_seconds">0.0</field>
-            <field name="max_retries">1</field>
-            <field name="backoff">1.5</field>
             <field name="readonly">True</field>
             <field name="code"><![CDATA[
+# Action A: build sensors plan
+# For each sensor with remotecontrol_params, extract serial + field name
 Remote = self.remote_id
-Device = env['mdm.measurement.device']
 Sensor = env['mdm.measurement.device.sensor']
-Category = env['mdm.measurement.device.category']
+today_str = fields.Date.today()
 
-# Read provisioning configuration from Remote.connection_params
-try:
-    remote_cfg = json.loads(Remote.connection_params or '{}') or {}
-except Exception:
-    remote_cfg = {}
-
-try:
-    num_devices = max(1, int(remote_cfg.get('num_devices', 4) or 4))
-except Exception:
-    num_devices = 4
-
-device_prefix = remote_cfg.get('device_prefix') or u'Sonda de humedad'
-location_prefix = remote_cfg.get('location_prefix') or u'Sector'
-
-# Sensors: supports ["Sensor 10"] or [{"name": "X", "depth_cm": 10}]
-sensors_raw = remote_cfg.get('sensors') or [
-    {'name': u'Sensor 10', 'depth_cm': 10},
-    {'name': u'Sensor 20', 'depth_cm': 20},
-    {'name': u'Sensor 30', 'depth_cm': 30},
+condition = [
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id)
 ]
-sensor_templates = []
-for s in sensors_raw:
-    if isinstance(s, dict):
-        sensor_templates.append(s)
-    else:
-        sensor_templates.append({'name': s})
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
 
-# Start date: from connection_params or default 45 days ago
-if remote_cfg.get('start_date'):
-    start_date = remote_cfg['start_date']
-else:
-    today_date = fields.Date.from_string(fields.Date.today())
-    start_date = fields.Date.to_string(today_date - timedelta(days=45))
+sensors = Sensor.search(condition)
 
-category = Category.browse(1)
-if not category or not category.exists():
-    category = Category.search([], limit=1)
-if not category:
-    raise Exception(
-        'No measurement device category was found. Create one before '
-        'running the provisioning procedure.')
+# Optimize: build map of last reading per sensor (single query)
+last_readings_map = {}
+if sensors:
+    sensor_ids = [s.id for s in sensors]
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for row in cr.fetchall():
+        last_readings_map[row[0]] = row[1]
 
-SensorType = env['mdm.measurement.device.sensor.type']
-all_types = SensorType.with_context(active_test=False, lang=False).search([])
-all_type_names = [(t.id, repr(t.name)) for t in all_types]
-sensor_type = False
-for t in all_types:
-    if t.name and u'humedad' in t.name.lower():
-        sensor_type = t
-        break
-if not sensor_type:
-    raise Exception(
-        u'Sensor type not found. Available types: %s' % all_type_names)
+plan = []
+for sensor in sensors:
+    device = sensor.device_id
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
 
-created_devices = 0
-updated_devices = 0
-created_sensors = 0
-updated_sensors = 0
-device_results = []
+    serial = (device_cfg.get('serial') or '').strip()
+    field = (sensor_cfg.get('field') or '').strip()
 
-for i in range(1, num_devices + 1):
-    device_name = u'%s %s' % (device_prefix, i)
-    location = u'%s %s' % (location_prefix, i)
-
-    device_params = {'start_date': start_date}
-    device_vals = {
-        'name': device_name,
-        'description': (
-            u'IKOS Techs synthetic humidity probe automatically provisioned '
-            u'for demo and telecontrol generation.'
-        ),
-        'location': location,
-        'brand': u'IKOS Techs',
-        'model': u'Synthetic Soil Moisture Probe',
-        'category_id': category.id,
-        'remotecontrol_id': Remote.id,
-        'remotecontrol_params': json.dumps(
-            device_params, ensure_ascii=False, indent=2),
-        'active': True,
-    }
-
-    device = Device.with_context(active_test=False).search([
-        ('name', '=', device_name),
-        ('remotecontrol_id', '=', Remote.id),
-    ], limit=1)
-    if device:
-        device.write(device_vals)
-        updated_devices += 1
-    else:
-        device = Device.create(device_vals)
-        created_devices += 1
-
-    sensor_names = []
-    for sensor_tpl in sensor_templates:
-        s_name = sensor_tpl.get('name') or u''
-        sensor_params = {'start_date': start_date}
-        if sensor_tpl.get('depth_cm'):
-            sensor_params['depth_cm'] = int(sensor_tpl['depth_cm'])
-
-        sensor_vals = {
-            'name': s_name,
-            'device_id': device.id,
-            'type_id': sensor_type.id,
-            'remotecontrol_params': json.dumps(
-                sensor_params, ensure_ascii=False, indent=2),
-            'active': True,
-        }
-        sensor = Sensor.with_context(active_test=False).search([
-            ('device_id', '=', device.id),
-            ('name', '=', s_name),
-        ], limit=1)
-        if sensor:
-            sensor.write(sensor_vals)
-            updated_sensors += 1
+    if serial and field:
+        # Determine initial date: last_reading → device.start_date → Jan 1
+        last_reading_time = last_readings_map.get(sensor.id)
+        if last_reading_time:
+            try:
+                initial_date = fields.Date.to_string(
+                    fields.Datetime.from_string(last_reading_time))
+            except Exception:
+                initial_date = str(last_reading_time)[:10]
         else:
-            Sensor.create(sensor_vals)
-            created_sensors += 1
-        sensor_names.append(s_name)
+            start_date = device_cfg.get('start_date')
+            if start_date:
+                initial_date = start_date[:10]
+            else:
+                year_str = today_str[:4]
+                initial_date = '%s-01-01' % year_str
 
-    device_results.append({
-        'device_name': device_name,
-        'location': location,
-        'category_id': category.id,
-        'start_date': start_date,
-        'sensor_names': sensor_names,
+        plan.append({
+            'sensor_id': sensor.id,
+            'device_id': device.id,
+            'serial': serial,
+            'field': field,
+            'initial_date': initial_date,
+        })
+
+bag['sensors_plan'] = plan
+bag['total_sensors'] = len(plan)
+result = 'Built plan for %d IkosTech sensors' % len(plan)
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Fetch Readings -->
+        <record id="remotecontrol_ikostech_action_fetch" model="remotecontrol.action">
+            <field name="name">IkosTech: Fetch readings</field>
+            <field name="remote_id" ref="remotecontrol_ikostech"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.1</field>
+            <field name="max_retries">2</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import time
+from datetime import datetime, timedelta
+
+def _date_chunks(start_str, end_str, max_days):
+    fmt = '%Y-%m-%d'
+    start = datetime.strptime(start_str, fmt).date()
+    end = datetime.strptime(end_str, fmt).date()
+    delta = timedelta(days=max_days)
+    td1 = timedelta(days=1)
+    cur = start
+    while cur <= end:
+        yield str(cur), str(min(cur + delta - td1, end))
+        cur = cur + delta
+
+MAX_DAYS_PER_CHUNK = 30
+
+sensors_plan = bag.get('sensors_plan') or []
+if not sensors_plan:
+    raise Exception('No sensors in plan (check Build Plan step)')
+
+cfg = {}
+try:
+    cfg = json.loads(self.remote_id.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+api_key = (cfg.get('api_key') or '').strip()
+if not api_key:
+    raise Exception('Missing api_key in connection_params')
+
+headers = {'X-API-Key': api_key}
+
+final_date = fields.Date.today()
+readings = []
+api_calls = []
+errors = []
+
+# Group sensors by serial to share API calls where possible
+by_serial = {}
+for item in sensors_plan:
+    serial = item['serial']
+    if serial not in by_serial:
+        by_serial[serial] = []
+    by_serial[serial].append(item)
+
+for serial, items in by_serial.items():
+    min_initial = min(e['initial_date'] for e in items)
+
+    for chunk_start, chunk_end in _date_chunks(min_initial, final_date, MAX_DAYS_PER_CHUNK):
+        # Convert YYYY-MM-DD to YYYYMMDD format for API
+        from_param = chunk_start.replace('-', '')
+        to_param = chunk_end.replace('-', '')
+
+        url = '%s/export/node/%s/data/json/%s/%s' % (
+            (base_url or '').rstrip('/'), serial, from_param, to_param)
+
+        resp = request_retry('GET', url, headers=headers, timeout=timeout)
+        api_calls.append({
+            'url': url,
+            'method': 'GET',
+            'status': resp.status_code,
+            'serial': serial,
+            'chunk': '%s to %s' % (chunk_start, chunk_end),
+        })
+
+        if resp.status_code >= 400:
+            errors.append('API error for serial %s: %s' % (serial, resp.status_code))
+            continue
+
+        try:
+            payload = resp.json()
+        except Exception as e:
+            errors.append('JSON parse error for serial %s: %s' % (serial, str(e)))
+            continue
+
+        if not isinstance(payload, list):
+            errors.append('Invalid response type for serial %s (expected array)' % serial)
+            continue
+
+        # payload is a flat array of readings
+        for reading in payload:
+            if not isinstance(reading, dict):
+                continue
+
+            ts_str = reading.get('fecha')
+            if not ts_str:
+                continue
+
+            # Process each sensor in items (all have same serial, different fields)
+            for item in items:
+                field = item['field']
+                value_raw = reading.get(field)
+
+                if value_raw is None:
+                    continue
+
+                try:
+                    value = float(value_raw)
+                except (ValueError, TypeError):
+                    continue
+
+                readings.append({
+                    'sensor_id': item['sensor_id'],
+                    'value': value,
+                    'timestamp': ts_str,
+                    'serial': serial,
+                    'field': field,
+                })
+
+        time.sleep(0.1)  # Small delay between chunks
+
+bag['readings'] = readings
+bag['total_readings'] = len(readings)
+bag['api_calls'] = api_calls
+if errors:
+    bag['fetch_errors'] = errors
+
+result = 'Fetched %d readings from IkosTech' % len(readings)
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Upsert Readings -->
+        <record id="remotecontrol_ikostech_action_upsert" model="remotecontrol.action">
+            <field name="name">IkosTech: Upsert readings</field>
+            <field name="remote_id" ref="remotecontrol_ikostech"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="readonly">False</field>
+            <field name="code"><![CDATA[
+Remote = self.remote_id
+readings = bag.get('readings') or []
+if not readings:
+    raise Exception('No readings to upsert')
+
+upsert_count = 0
+upsert_errors = []
+
+for reading in readings:
+    sensor_id = reading['sensor_id']
+    value = reading['value']
+    timestamp_str = reading['timestamp']
+
+    # Timestamp is already ISO format: "2026-06-12 17:15:38"
+    if not timestamp_str:
+        continue
+
+    try:
+        Remote.upsert('mdm.measurement.device.sensor.reading', {
+            'sensor_id': sensor_id,
+            'measurement_time': timestamp_str,
+        }, {
+            'value': value,
+            'remotecontrol_origin_id': Remote.id,
+        })
+        upsert_count += 1
+    except Exception as e:
+        upsert_errors.append(
+            'Upsert failed for sensor %d: %s' % (sensor_id, str(e)))
+
+bag['upsert_count'] = upsert_count
+if upsert_errors:
+    bag['upsert_errors'] = upsert_errors
+
+result = 'Upserted %d readings' % upsert_count
+            ]]></field>
+        </record>
+
+        <!-- PROCEDURE: Daily Sync -->
+        <record id="remotecontrol_ikostech_procedure" model="remotecontrol.procedure">
+            <field name="name">IkosTech: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_ikostech"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">True</field>
+            <field name="readonly">False</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="procedure_for_readings" eval="True"/>
+        </record>
+
+        <record id="remotecontrol_ikostech_step_plan" model="remotecontrol.step">
+            <field name="name">Build devices plan</field>
+            <field name="procedure_id" ref="remotecontrol_ikostech_procedure"/>
+            <field name="action_id" ref="remotecontrol_ikostech_action_build_plan"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_ikostech_step_fetch" model="remotecontrol.step">
+            <field name="name">Fetch readings</field>
+            <field name="procedure_id" ref="remotecontrol_ikostech_procedure"/>
+            <field name="action_id" ref="remotecontrol_ikostech_action_fetch"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_ikostech_step_upsert" model="remotecontrol.step">
+            <field name="name">Upsert readings</field>
+            <field name="procedure_id" ref="remotecontrol_ikostech_procedure"/>
+            <field name="action_id" ref="remotecontrol_ikostech_action_upsert"/>
+            <field name="sequence">30</field>
+        </record>
+
+        <!-- ======================================================== -->
+        <!-- Import elements (List devices & available fields)       -->
+        <!-- ======================================================== -->
+
+        <record id="remotecontrol_ikostech_action_import_elements" model="remotecontrol.action">
+            <field name="name">IkosTech: Import elements</field>
+            <field name="remote_id" ref="remotecontrol_ikostech"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.1</field>
+            <field name="max_retries">2</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import time
+from datetime import datetime, timedelta
+
+Remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+
+api_key = (cfg.get('api_key') or '').strip()
+if not api_key:
+    raise Exception('Missing api_key in connection_params')
+
+headers = {'X-API-Key': api_key}
+base = (base_url or '').rstrip('/')
+
+# Step 1: Get list of available devices
+url_nodes = base + '/export/nodes'
+resp_nodes = request_retry('GET', url_nodes, headers=headers, timeout=timeout)
+
+if resp_nodes.status_code >= 400:
+    raise Exception(
+        'Failed to fetch /export/nodes: %s %s' % (
+            resp_nodes.status_code, (resp_nodes.text or '')[:300]))
+
+try:
+    nodes = resp_nodes.json()
+except Exception as e:
+    raise Exception('Invalid JSON from /export/nodes: %s' % str(e))
+
+if not isinstance(nodes, list):
+    raise Exception('Expected array from /export/nodes')
+
+time.sleep(1.1)
+
+# Step 2: Query each device for real data to discover actual fields.
+# IkosTech expects dates in YYYYMMDD format in this endpoint.
+DISCOVERY_DAYS = 8
+today = datetime.utcnow()
+date_from_dt = today - timedelta(days=DISCOVERY_DAYS)
+date_from = date_from_dt.strftime('%Y-%m-%d')
+date_to = today.strftime('%Y-%m-%d')
+date_from_param = date_from_dt.strftime('%Y%m%d')
+date_to_param = today.strftime('%Y%m%d')
+
+# Metadata fields are useful in diagnostics, but should not create sensor
+# configuration suggestions.
+METADATA_FIELDS = {
+    'fecha', 'serial', 'f', 'fecha_local', 'id', 'device', 'imei', 'operador',
+}
+
+# Discover fields for each device
+device_fields_map = {}  # {serial: set(field_names)}
+all_available_fields = {}  # {field_name: count_found}
+device_data_diagnostics = []
+device_records_map = {}
+
+for node in nodes:
+    if not isinstance(node, dict):
+        continue
+
+    serial = str(node.get('serial', ''))
+    if not serial:
+        continue
+
+    device_fields_map[serial] = set()
+    device_records_map[serial] = 0
+
+    # Query device data to discover available fields
+    url_data = '%s/export/node/%s/data/json/%s/%s' % (
+        base, serial, date_from_param, date_to_param)
+    diagnostic = {
+        'serial': serial,
+        'alias': node.get('alias', ''),
+        'url': url_data,
+        'from': date_from_param,
+        'to': date_to_param,
+        'status_code': None,
+        'records': 0,
+        'sample_keys': [],
+        'fields_found': [],
+    }
+    try:
+        resp_data = request_retry('GET', url_data, headers=headers, timeout=timeout)
+        time.sleep(1.1)
+        diagnostic['status_code'] = resp_data.status_code
+
+        if resp_data.status_code < 400:
+            try:
+                data_array = resp_data.json()
+                if isinstance(data_array, dict):
+                    if isinstance(data_array.get('data'), list):
+                        data_array = data_array.get('data')
+                    elif isinstance(data_array.get('readings'), list):
+                        data_array = data_array.get('readings')
+                if isinstance(data_array, list):
+                    diagnostic['records'] = len(data_array)
+                    device_records_map[serial] = len(data_array)
+                    sample_keys = []
+                    for record in data_array:
+                        if not isinstance(record, dict):
+                            continue
+                        for key in record.keys():
+                            if key not in sample_keys:
+                                sample_keys.append(key)
+                            if key not in METADATA_FIELDS:
+                                device_fields_map[serial].add(key)
+                    for key in sorted(device_fields_map[serial]):
+                        all_available_fields[key] = all_available_fields.get(key, 0) + 1
+                    diagnostic['sample_keys'] = sample_keys[:60]
+                    diagnostic['fields_found'] = sorted(device_fields_map[serial])
+                else:
+                    diagnostic['error'] = 'Invalid response type: %s' % (
+                        type(data_array).__name__,)
+            except Exception as e:
+                diagnostic['error'] = 'JSON parse error: %s' % str(e)[:300]
+        else:
+            diagnostic['error'] = (resp_data.text or '')[:300]
+    except Exception as e:
+        diagnostic['error'] = 'Request error: %s' % str(e)[:300]
+    device_data_diagnostics.append(diagnostic)
+
+# Build elements and sensor config table for easy reference
+sensor_config_table = []
+elements = []
+
+for node in nodes:
+    if not isinstance(node, dict):
+        continue
+
+    serial = str(node.get('serial', ''))
+    alias = node.get('alias', '')
+    device = node.get('device', '')
+    estado = node.get('estado', '')
+
+    if not serial:
+        continue
+
+    elements.append({
+        'serial': serial,
+        'alias': alias,
+        'device': device,
+        'estado': estado,
+        'factivacion': node.get('factivacion', ''),
+        'factualizacion': node.get('factualizacion', ''),
+        'soilType': node.get('soilType', ''),
+        'data_records': device_records_map.get(serial, 0),
+        'available_fields': sorted(list(device_fields_map.get(serial, set()))),
     })
+
+    # For each field found in this device, create a sensor config suggestion
+    for field_name in sorted(device_fields_map.get(serial, set())):
+        sensor_config_table.append({
+            'serial': serial,
+            'alias': alias,
+            'field': field_name,
+            'odoo_device_params': json.dumps(
+                {
+                    'serial': serial,
+                    'start_date': fields.Date.today(),
+                },
+                ensure_ascii=True,
+            ),
+            'odoo_sensor_params': json.dumps(
+                {'field': field_name},
+                ensure_ascii=True,
+            ),
+        })
 
 audit = {
     'executed_at': fields.Datetime.now(),
-    'num_devices': num_devices,
-    'created_devices': created_devices,
-    'updated_devices': updated_devices,
-    'created_sensors': created_sensors,
-    'updated_sensors': updated_sensors,
-    'devices': device_results,
+    'total_devices': len(elements),
+    'total_unique_fields': len(all_available_fields),
+    'total_sensor_suggestions': len(sensor_config_table),
+    'query_range': '%s to %s' % (date_from, date_to),
+    'api_query_range': '%s to %s' % (date_from_param, date_to_param),
+    'devices': elements,
+    'all_available_fields': sorted(all_available_fields.keys()),
+    'data_diagnostics': device_data_diagnostics,
+    'sensor_config_suggestions': sensor_config_table,
 }
 
-audit_json = json.dumps(audit, ensure_ascii=False, indent=2)
-attachment = env['ir.attachment'].create({
-    'name': 'ikostech_provision_%s.json' % (
-        fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')),
-    'datas_fname': 'ikostech_provision.json',
-    'datas': base64.b64encode(audit_json.encode('utf-8')),
+try:
+    audit_json = json.dumps(
+        audit, ensure_ascii=True, indent=2, default=str,
+    )
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+except Exception as json_error:
+    simple_audit = {
+        'executed_at': str(fields.Datetime.now()),
+        'error': str(json_error),
+    }
+    audit_json = json.dumps(simple_audit, ensure_ascii=True, indent=2)
+    b64 = base64.b64encode(audit_json.encode('utf-8'))
+
+fname = 'ikostech_import_elements_%s.json' % (
+    fields.Datetime.now()
+    .replace(':', '')
+    .replace('-', '')
+    .replace(' ', '_')
+)
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
     'mimetype': 'application/json',
     'res_model': 'remotecontrol',
     'res_id': Remote.id,
 })
 
 Remote.message_post(
-    body=u'[IKOS Techs] Provision completed: %s devices (%s created, %s updated), %s sensors (%s created, %s updated)' % (
-        num_devices,
-        created_devices,
-        updated_devices,
-        created_sensors + updated_sensors,
-        created_sensors,
-        updated_sensors,
-    ),
-    attachment_ids=[attachment.id],
+    body=u"[IkosTech] Import elements: %d devices, %d total fields, %d sensor suggestions" % (
+        len(elements), len(all_available_fields), len(sensor_config_table)),
+    attachment_ids=[att.id],
 )
 
-bag['created_devices'] = created_devices
-bag['updated_devices'] = updated_devices
-bag['created_sensors'] = created_sensors
-bag['updated_sensors'] = updated_sensors
-bag['provision_attachment_id'] = attachment.id
+result = 'Imported %d devices with %d fields' % (
+    len(elements), len(all_available_fields))
             ]]></field>
         </record>
 
-        <record id="remotecontrol_ikostech_action_get_devices" model="remotecontrol.action">
-            <field name="name">IKOS Techs: Get devices (plan)</field>
+        <record id="remotecontrol_ikostech_procedure_import_elements" model="remotecontrol.procedure">
+            <field name="name">IkosTech: Import elements</field>
             <field name="remote_id" ref="remotecontrol_ikostech"/>
             <field name="active">True</field>
-            <field name="rate_limit_seconds">0.0</field>
-            <field name="max_retries">1</field>
-            <field name="backoff">1.5</field>
-            <field name="readonly">True</field>
-            <field name="code"><![CDATA[
-from datetime import datetime, timedelta
-import re
-
-Remote = self.remote_id
-Sensor = env['mdm.measurement.device.sensor']
-Reading = env['mdm.measurement.device.sensor.reading']
-madrid_tz = pytz.timezone('Europe/Madrid')
-now_utc = fields.Datetime.from_string(fields.Datetime.now())
-now_utc = now_utc.replace(minute=0, second=0, microsecond=0)
-
-
-def _json_loads(raw_value):
-    try:
-        return json.loads(raw_value or '{}') or {}
-    except Exception:
-        return {}
-
-
-def _parse_depth(sensor_record):
-    sensor_cfg = _json_loads(sensor_record.remotecontrol_params)
-    depth_cm = sensor_cfg.get('depth_cm') or sensor_cfg.get('depth') or 0
-    try:
-        depth_cm = int(depth_cm)
-    except Exception:
-        depth_cm = 0
-    if not depth_cm:
-        match = re.search(r'(\d+)', sensor_record.name or '')
-        if match:
-            depth_cm = int(match.group(1))
-    return depth_cm
-
-
-def _local_midnight_to_utc(date_str):
-    date_value = fields.Date.from_string(date_str)
-    local_dt = datetime(
-        date_value.year,
-        date_value.month,
-        date_value.day,
-        0,
-        0,
-        0,
-    )
-    localized = madrid_tz.localize(local_dt, is_dst=False)
-    return localized.astimezone(pytz.UTC).replace(tzinfo=None)
-
-
-def _get_initial_dt(sensor_record):
-    last_reading = Reading.search([
-        ('sensor_id', '=', sensor_record.id),
-        ('active', '=', True),
-    ], order='measurement_time desc', limit=1)
-    if last_reading and last_reading.measurement_time:
-        return fields.Datetime.from_string(
-            last_reading.measurement_time) + timedelta(hours=1)
-
-    sensor_cfg = _json_loads(sensor_record.remotecontrol_params)
-    device_cfg = _json_loads(sensor_record.device_id.remotecontrol_params)
-    start_date = (
-        sensor_cfg.get('start_date') or
-        device_cfg.get('start_date') or
-        ''
-    )
-    if not start_date:
-        current_date = fields.Date.from_string(fields.Date.today())
-        start_date = '%s-01-01' % current_date.year
-    return _local_midnight_to_utc(start_date)
-
-
-domain = [
-    ('active', '=', True),
-    ('device_id.active', '=', True),
-    ('device_id.remotecontrol_id', '=', Remote.id),
-]
-if selected_device_ids:
-    domain.append(('device_id', 'in', selected_device_ids))
-
-sensors = Sensor.search(domain, order='device_id, name')
-plan = []
-skipped = []
-
-for sensor in sensors:
-    depth_cm = _parse_depth(sensor)
-    if depth_cm <= 0:
-        skipped.append({
-            'sensor_id': sensor.id,
-            'sensor_name': sensor.name,
-            'device_name': sensor.device_id.name,
-            'reason': 'No depth found in remotecontrol_params or sensor name.',
-        })
-        continue
-
-    initial_dt = _get_initial_dt(sensor)
-    if initial_dt > now_utc:
-        continue
-
-    plan.append({
-        'device_id': sensor.device_id.id,
-        'device_name': sensor.device_id.name,
-        'sensor_id': sensor.id,
-        'sensor_name': sensor.name,
-        'depth_cm': depth_cm,
-        'start_dt': initial_dt.strftime('%Y-%m-%d %H:%M:%S'),
-        'end_dt': now_utc.strftime('%Y-%m-%d %H:%M:%S'),
-    })
-
-bag['sensors_plan'] = plan
-bag['skipped_sensors'] = skipped
-bag['planned_sensors'] = len(plan)
-bag['skipped_sensors_count'] = len(skipped)
-
-Remote.message_post(
-    body=u'[IKOS Techs] Plan generated: sensors=%s skipped=%s' % (
-        len(plan), len(skipped))
-)
-            ]]></field>
-        </record>
-
-        <record id="remotecontrol_ikostech_action_generate_readings" model="remotecontrol.action">
-            <field name="name">IKOS Techs: Generate readings</field>
-            <field name="remote_id" ref="remotecontrol_ikostech"/>
-            <field name="active">True</field>
-            <field name="rate_limit_seconds">0.0</field>
-            <field name="max_retries">1</field>
-            <field name="backoff">1.5</field>
-            <field name="readonly">True</field>
-            <field name="code"><![CDATA[
-from datetime import timedelta
-import hashlib
-import math
-
-Remote = self.remote_id
-Sensor = env['mdm.measurement.device.sensor']
-plan = bag.get('sensors_plan') or []
-
-if not plan:
-    bag['generated_readings'] = 0
-    Remote.message_post(
-        body=u'[IKOS Techs] No readings generated because the plan is empty.')
-else:
-    madrid_tz = pytz.timezone('Europe/Madrid')
-    total_upserts = 0
-    sensor_summaries = []
-    device_profiles = {}
-
-    def _to_unicode(value):
-        try:
-            return unicode(value)
-        except Exception:
-            try:
-                return str(value).decode('utf-8', 'replace')
-            except Exception:
-                return u''
-
-    def _json_loads(raw_value):
-        try:
-            return json.loads(raw_value or '{}') or {}
-        except Exception:
-            return {}
-
-    def _hash_float(parts, low=0.0, high=1.0):
-        seed = u'|'.join([_to_unicode(part) for part in parts])
-        digest = hashlib.md5(seed.encode('utf-8')).hexdigest()[:8]
-        ratio = int(digest, 16) / 4294967295.0
-        return low + ((high - low) * ratio)
-
-    def _cfg_float(config, key, default):
-        try:
-            return float(config.get(key, default))
-        except Exception:
-            return float(default)
-
-    def _season_factors(day_of_year):
-        summer = (
-            math.sin((2.0 * math.pi * (day_of_year - 172)) / 365.0) + 1.0
-        ) / 2.0
-        winter = 1.0 - summer
-        return summer, winter
-
-    def _depth_profile(depth_cm):
-        # dry_baseline_offset: cm above wilting_point when no event
-        # decay_hours: how fast moisture drops back to dry baseline
-        defaults = {
-            10: {
-                'dry_baseline_offset': 1.0,
-                'seasonal_sensitivity': 1.5,
-                'daily_amplitude': 0.50,
-                'event_delay': 0.5,
-                'rise_hours': 0.5,
-                'decay_hours': 4.0,
-                'event_factor': 1.00,
-            },
-            20: {
-                'dry_baseline_offset': 4.0,
-                'seasonal_sensitivity': 1.0,
-                'daily_amplitude': 0.20,
-                'event_delay': 2.0,
-                'rise_hours': 1.5,
-                'decay_hours': 14.0,
-                'event_factor': 0.85,
-            },
-            30: {
-                'dry_baseline_offset': 5.0,
-                'seasonal_sensitivity': 0.8,
-                'daily_amplitude': 0.12,
-                'event_delay': 3.0,
-                'rise_hours': 2.5,
-                'decay_hours': 22.0,
-                'event_factor': 0.72,
-            },
-            60: {
-                'dry_baseline_offset': 8.0,
-                'seasonal_sensitivity': 0.5,
-                'daily_amplitude': 0.06,
-                'event_delay': 6.0,
-                'rise_hours': 4.0,
-                'decay_hours': 42.0,
-                'event_factor': 0.58,
-            },
-            90: {
-                'dry_baseline_offset': 11.0,
-                'seasonal_sensitivity': 0.3,
-                'daily_amplitude': 0.03,
-                'event_delay': 10.0,
-                'rise_hours': 6.0,
-                'decay_hours': 72.0,
-                'event_factor': 0.45,
-            },
-        }
-        if depth_cm in defaults:
-            return defaults[depth_cm]
-        factor = max(0.0, min(1.0, (float(depth_cm) - 10.0) / 80.0))
-        return {
-            'dry_baseline_offset': 1.0 + factor * 10.0,
-            'seasonal_sensitivity': max(0.2, 1.5 - factor * 1.2),
-            'daily_amplitude': max(0.02, 0.5 - factor * 0.47),
-            'event_delay': 0.5 + factor * 9.5,
-            'rise_hours': 0.5 + factor * 5.5,
-            'decay_hours': 4.0 + factor * 68.0,
-            'event_factor': max(0.40, 1.0 - factor * 0.60),
-        }
-
-    def _get_device_profile(device_record):
-        if device_record.id in device_profiles:
-            return device_profiles[device_record.id]
-
-        config = _json_loads(device_record.remotecontrol_params)
-        profile = {
-            'field_capacity': _cfg_float(
-                config,
-                'field_capacity',
-                35.5 + _hash_float([device_record.id, 'field_capacity'], 0.0, 3.5),
-            ),
-            'wilting_point': _cfg_float(
-                config,
-                'wilting_point',
-                10.8 + _hash_float([device_record.id, 'wilting_point'], 0.0, 2.8),
-            ),
-            'baseline_shift': _cfg_float(
-                config,
-                'baseline_shift',
-                _hash_float([device_record.id, 'baseline_shift'], -1.4, 1.4),
-            ),
-            'irrigation_bias': _cfg_float(
-                config,
-                'irrigation_bias',
-                _hash_float([device_record.id, 'irrigation_bias'], -0.03, 0.08),
-            ),
-        }
-        if profile['wilting_point'] > (profile['field_capacity'] - 3.0):
-            profile['wilting_point'] = profile['field_capacity'] - 3.0
-        device_profiles[device_record.id] = profile
-        return profile
-
-    def _get_event(device_record, local_date):
-        profile = _get_device_profile(device_record)
-        date_key = local_date.strftime('%Y-%m-%d')
-        summer, winter = _season_factors(local_date.timetuple().tm_yday)
-        irrigation_prob = 0.10 + (summer * 0.18) + profile['irrigation_bias']
-        if irrigation_prob < 0.07:
-            irrigation_prob = 0.07
-        if irrigation_prob > 0.40:
-            irrigation_prob = 0.40
-        rain_prob = 0.02 + (winter * 0.10)
-
-        irrigation_draw = _hash_float([device_record.id, 'irrigation', date_key])
-        rain_draw = _hash_float([device_record.id, 'rain', date_key])
-
-        if irrigation_draw < irrigation_prob:
-            return {
-                'kind': 'irrigation',
-                'hour': int(round(
-                    _hash_float([device_record.id, date_key, 'irrigation_hour'], 4.0, 7.0))),
-                'magnitude': _hash_float(
-                    [device_record.id, date_key, 'irrigation_magnitude'], 14.0, 24.0),
-            }
-        if rain_draw < rain_prob:
-            return {
-                'kind': 'rain',
-                'hour': int(round(
-                    _hash_float([device_record.id, date_key, 'rain_hour'], 0.0, 6.0))),
-                'magnitude': _hash_float(
-                    [device_record.id, date_key, 'rain_magnitude'], 8.0, 14.0),
-            }
-        return False
-
-    def _compute_value(device_record, sensor_record, depth_cm, utc_dt):
-        local_dt = pytz.UTC.localize(utc_dt).astimezone(madrid_tz)
-        device_profile = _get_device_profile(device_record)
-        depth_profile = _depth_profile(depth_cm)
-        sensor_cfg = _json_loads(sensor_record.remotecontrol_params)
-        dryness_bias = _cfg_float(sensor_cfg, 'dryness_bias', 0.0)
-        summer, winter = _season_factors(local_dt.timetuple().tm_yday)
-
-        # Dry state baseline: where soil settles when no recent event
-        dry_baseline = (
-            device_profile['wilting_point'] +
-            depth_profile['dry_baseline_offset'] +
-            device_profile['baseline_shift'] +
-            _hash_float([device_record.id, depth_cm, 'baseline'], -0.8, 0.8) +
-            dryness_bias -
-            depth_profile['seasonal_sensitivity'] * summer
-        )
-        diurnal_cycle = -depth_profile['daily_amplitude'] * math.sin(
-            (2.0 * math.pi * (local_dt.hour - 6)) / 24.0)
-
-        value = dry_baseline + diurnal_cycle
-
-        for day_lag in range(0, 7):
-            event_date = local_dt.date() - timedelta(days=day_lag)
-            event = _get_event(device_record, event_date)
-            if not event:
-                continue
-
-            hours_since_event = (
-                (day_lag * 24.0) +
-                local_dt.hour +
-                (local_dt.minute / 60.0) -
-                event['hour']
-            )
-            if hours_since_event < 0.0:
-                continue
-
-            response_hours = hours_since_event - depth_profile['event_delay']
-            if response_hours < 0.0:
-                continue
-
-            rise_factor = 1.0 - math.exp(
-                -response_hours / depth_profile['rise_hours'])
-            decay_factor = math.exp(
-                -response_hours / depth_profile['decay_hours'])
-            event_contribution = (
-                event['magnitude'] *
-                depth_profile['event_factor'] *
-                rise_factor *
-                decay_factor
-            )
-            if event['kind'] == 'rain':
-                event_contribution *= 0.85 + (winter * 0.30)
-            value += event_contribution
-
-        value += _hash_float(
-            [sensor_record.id, utc_dt.strftime('%Y-%m-%d %H:%M:%S'), 'micro'],
-            -0.22,
-            0.22,
-        )
-
-        if value > device_profile['field_capacity']:
-            value = device_profile['field_capacity']
-        if value < device_profile['wilting_point']:
-            value = device_profile['wilting_point']
-        return round(value, 2), local_dt
-
-    for item in plan:
-        sensor = Sensor.browse(item.get('sensor_id'))
-        if not sensor or not sensor.exists() or not sensor.device_id:
-            continue
-
-        depth_cm = int(item.get('depth_cm') or 0)
-        start_dt = fields.Datetime.from_string(item.get('start_dt'))
-        end_dt = fields.Datetime.from_string(item.get('end_dt'))
-        if start_dt > end_dt:
-            continue
-
-        current_dt = start_dt
-        sensor_count = 0
-        first_value = False
-        last_value = False
-        first_local = False
-        last_local = False
-
-        while current_dt <= end_dt:
-            value, local_dt = _compute_value(
-                sensor.device_id, sensor, depth_cm, current_dt)
-
-            upsert(
-                'mdm.measurement.device.sensor.reading',
-                {
-                    'sensor_id': sensor.id,
-                    'measurement_time': current_dt.strftime('%Y-%m-%d %H:%M:%S'),
-                },
-                {
-                    'value': value,
-                }
-            )
-            total_upserts += 1
-            sensor_count += 1
-
-            if first_value is False:
-                first_value = value
-                first_local = local_dt.strftime('%Y-%m-%d %H:%M:%S')
-            last_value = value
-            last_local = local_dt.strftime('%Y-%m-%d %H:%M:%S')
-            current_dt += timedelta(hours=1)
-
-        sensor_summaries.append({
-            'device_name': sensor.device_id.name,
-            'sensor_name': sensor.name,
-            'depth_cm': depth_cm,
-            'generated_points': sensor_count,
-            'first_local_time': first_local,
-            'last_local_time': last_local,
-            'first_value': first_value,
-            'last_value': last_value,
-        })
-
-    audit = {
-        'executed_at': fields.Datetime.now(),
-        'planned_sensors': len(plan),
-        'generated_readings': total_upserts,
-        'skipped_sensors': bag.get('skipped_sensors') or [],
-        'sensor_summaries': sensor_summaries,
-    }
-
-    json_str = json.dumps(audit, ensure_ascii=False, indent=2)
-    encoded = base64.b64encode(json_str.encode('utf-8'))
-    fname = 'ikostech_generation_%s.json' % (
-        fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_'))
-    attachment = env['ir.attachment'].create({
-        'name': fname,
-        'datas_fname': fname,
-        'datas': encoded,
-        'mimetype': 'application/json',
-        'res_model': 'remotecontrol',
-        'res_id': Remote.id,
-    })
-
-    Remote.message_post(
-        body=u'[IKOS Techs] Generated synthetic readings: sensors=%s readings=%s' % (
-            len(plan), total_upserts),
-        attachment_ids=[attachment.id],
-    )
-    bag['generated_readings'] = total_upserts
-    bag['generation_attachment_id'] = attachment.id
-            ]]></field>
-        </record>
-
-        <record id="remotecontrol_ikostech_procedure" model="remotecontrol.procedure">
-            <field name="name">IKOS Techs: Daily Sync</field>
-            <field name="remote_id" ref="remotecontrol_ikostech"/>
-            <field name="active">True</field>
-            <field name="interval_number">1</field>
-            <field name="interval_type">days</field>
-            <field name="numbercall">-1</field>
-            <field name="readonly">True</field>
-            <field name="procedure_for_readings" eval="True"/>
-        </record>
-
-        <record id="remotecontrol_ikostech_procedure_provision_devices" model="remotecontrol.procedure">
-            <field name="name">IKOS Techs: Provision humidity probes</field>
-            <field name="remote_id" ref="remotecontrol_ikostech"/>
-            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
             <field name="readonly">True</field>
             <field name="procedure_for_readings" eval="False"/>
         </record>
 
-        <record id="remotecontrol_ikostech_step_10_provision_devices" model="remotecontrol.step">
-            <field name="name">Provision humidity probes</field>
-            <field name="procedure_id" ref="remotecontrol_ikostech_procedure_provision_devices"/>
-            <field name="action_id" ref="remotecontrol_ikostech_action_provision_devices"/>
+        <record id="remotecontrol_ikostech_step_import_elements" model="remotecontrol.step">
+            <field name="name">Import elements</field>
+            <field name="procedure_id" ref="remotecontrol_ikostech_procedure_import_elements"/>
+            <field name="action_id" ref="remotecontrol_ikostech_action_import_elements"/>
             <field name="sequence">10</field>
-        </record>
-
-        <record id="remotecontrol_ikostech_step_10_get_devices" model="remotecontrol.step">
-            <field name="name">Get devices (plan)</field>
-            <field name="procedure_id" ref="remotecontrol_ikostech_procedure"/>
-            <field name="action_id" ref="remotecontrol_ikostech_action_get_devices"/>
-            <field name="sequence">10</field>
-        </record>
-
-        <record id="remotecontrol_ikostech_step_20_generate_readings" model="remotecontrol.step">
-            <field name="name">Generate readings</field>
-            <field name="procedure_id" ref="remotecontrol_ikostech_procedure"/>
-            <field name="action_id" ref="remotecontrol_ikostech_action_generate_readings"/>
-            <field name="sequence">20</field>
         </record>
 
     </data>

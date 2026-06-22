@@ -1,0 +1,818 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_soilmeasure_generation" model="remotecontrol">
+            <field name="name">IKOS Techs</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url"></field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "num_devices": 4
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>IKOS Techs · Odoo Integration Help</h2>
+
+<hr/>
+
+<h3>1) Connection</h3>
+<p>This telecontrol <strong>does not connect to any API, endpoint, database, or external service</strong>.</p>
+<p>All readings are generated locally inside Odoo using a deterministic synthetic model designed for soil moisture probes.</p>
+
+<h3>2) Expected Setup in Odoo</h3>
+<ol>
+  <li>Configure <code>connection_params</code> on this remote control record (see section 3 below).</li>
+  <li>Run the procedure <code>IKOS Techs: Provision humidity probes</code> to auto-create all devices and sensors.</li>
+  <li>Alternatively, create devices manually, assign <strong>Remotecontrol = IKOS Techs</strong>, and add sensors named <code>Sensor 10</code>, <code>Sensor 20</code>, <code>Sensor 30</code>.</li>
+  <li>Use sensor type <code>Sensor de humedad</code> with unit <code>%</code>.</li>
+</ol>
+
+<h3>3) Remote Control Configuration (connection_params)</h3>
+<p>Edit the <strong>connection_params</strong> JSON on this record to control the provisioning behaviour:</p>
+<pre>{
+  "num_devices": 4,
+  "device_prefix": "Sonda de humedad",
+  "location_prefix": "Sector",
+  "start_date": "2026-03-21",
+  "sensors": [
+    {"name": "Sensor 10", "depth_cm": 10},
+    {"name": "Sensor 20", "depth_cm": 20},
+    {"name": "Sensor 30", "depth_cm": 30}
+  ]
+}</pre>
+<ul>
+  <li><code>num_devices</code>: number of probe devices to create (default: 4). Set to 50 for a large community.</li>
+  <li><code>device_prefix</code>: prefix for device names (default: <code>Sonda de humedad</code>). Devices will be named <em>prefix 1</em>, <em>prefix 2</em>, etc.</li>
+  <li><code>location_prefix</code>: prefix for the location field (default: <code>Sector</code>).</li>
+  <li><code>start_date</code>: initial date for synthetic readings. If omitted, defaults to 45 days before today.</li>
+  <li><code>sensors</code>: list of sensors to create per device. Each entry can be a plain string (<code>"Sensor 10"</code>) or an object with <code>name</code> and optional <code>depth_cm</code>. If omitted, creates Sensor 10 / 20 / 30.</li>
+</ul>
+
+<h3>4) Daily Procedure</h3>
+<p>The included daily procedure works in two steps:</p>
+<ol>
+  <li><strong>Get devices (plan)</strong> → finds IKOS sensors in Odoo and calculates the missing time range.</li>
+  <li><strong>Generate readings</strong> → creates realistic hourly soil moisture readings and upserts them into Odoo.</li>
+</ol>
+
+<h3>5) How Sensor Depth Is Detected</h3>
+<p>The depth is obtained in this order:</p>
+<ol>
+  <li>From <code>sensor.remotecontrol_params.depth_cm</code></li>
+  <li>From the first number found in the sensor name (for example, <code>Sensor 10</code>)</li>
+</ol>
+
+<h3>6) Optional Device Configuration</h3>
+<p>In each <strong>Device</strong> (<code>mdm.measurement.device</code>) you can optionally define:</p>
+<pre>{
+  "start_date": "2026-05-01",
+  "field_capacity": 36.5,
+  "wilting_point": 11.2,
+  "baseline_shift": 0.8,
+  "irrigation_bias": 0.04
+}</pre>
+<ul>
+  <li><code>start_date</code>: initial local date for the first generated readings if no data exists yet.</li>
+  <li><code>field_capacity</code>: upper realistic limit after irrigation/rain events.</li>
+  <li><code>wilting_point</code>: lower realistic dry threshold.</li>
+  <li><code>baseline_shift</code>: shifts the general moisture level for that probe.</li>
+  <li><code>irrigation_bias</code>: adjusts the probability of synthetic irrigation events.</li>
+</ul>
+
+<h3>7) Optional Sensor Configuration</h3>
+<p>In each <strong>Sensor</strong> (<code>mdm.measurement.device.sensor</code>) you can optionally define:</p>
+<pre>{
+  "depth_cm": 10,
+  "start_date": "2026-05-01",
+  "dryness_bias": -0.4
+}</pre>
+<ul>
+  <li><code>depth_cm</code>: overrides the depth inferred from the name.</li>
+  <li><code>start_date</code>: overrides the device start date.</li>
+  <li><code>dryness_bias</code>: small per-sensor offset to make one depth slightly wetter or drier.</li>
+</ul>
+
+<h3>8) Synthetic Model</h3>
+<ul>
+  <li><strong>10 cm</strong>: most reactive sensor, strongest daily oscillation, dries faster.</li>
+  <li><strong>20 cm</strong>: intermediate response, smoother than 10 cm.</li>
+  <li><strong>30 cm</strong>: most stable sensor, delayed reaction and slower decay after irrigation.</li>
+  <li>The system simulates <strong>seasonality</strong>, <strong>daily evapotranspiration cycles</strong>, and <strong>synthetic irrigation / rain events</strong>.</li>
+  <li>The model is <strong>deterministic</strong>: if the same device, sensor, and timestamp are generated again, the value is reproduced consistently.</li>
+</ul>
+
+<h3>9) Scheduling</h3>
+<p>The daily procedure is preconfigured with a 1-day interval.</p>
+<p>To create the scheduled job, open the procedure <code>IKOS Techs: Daily Sync</code> and click <strong>Save Cron</strong>, exactly like the other telecontrol modules.</p>
+
+<h3>10) Output</h3>
+<p>Each execution creates an audit JSON attachment on the IKOS Techs remote control record with the generated ranges and counters.</p>
+
+<h3>11) Default Provisioning</h3>
+<p>The module includes a provisioning procedure driven by <code>connection_params</code> (see section 3). By default it creates:</p>
+<ul>
+  <li><strong>N devices</strong> (controlled by <code>num_devices</code>, default 4): <code>Sonda de humedad 1</code> … <code>Sonda de humedad N</code></li>
+  <li><strong>category_id = 1</strong> on every device (first available category as fallback)</li>
+  <li><strong>3 sensors per device</strong> (controlled by <code>sensors</code>): <code>Sensor 10</code>, <code>Sensor 20</code>, <code>Sensor 30</code></li>
+  <li><code>remotecontrol_params</code> with <code>start_date</code> so readings are generated from the first run</li>
+</ul>
+<p>The provisioning is idempotent: if a probe or sensor already exists, it is updated instead of duplicated.</p>
+]]></field>
+        </record>
+
+        <record id="remotecontrol_soilmeasure_generation_action_provision_devices" model="remotecontrol.action">
+            <field name="name">IKOS Techs: Provision humidity probes</field>
+            <field name="remote_id" ref="remotecontrol_soilmeasure_generation"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+Remote = self.remote_id
+Device = env['mdm.measurement.device']
+Sensor = env['mdm.measurement.device.sensor']
+Category = env['mdm.measurement.device.category']
+
+# Read provisioning configuration from Remote.connection_params
+try:
+    remote_cfg = json.loads(Remote.connection_params or '{}') or {}
+except Exception:
+    remote_cfg = {}
+
+try:
+    num_devices = max(1, int(remote_cfg.get('num_devices', 4) or 4))
+except Exception:
+    num_devices = 4
+
+device_prefix = remote_cfg.get('device_prefix') or u'Sonda de humedad'
+location_prefix = remote_cfg.get('location_prefix') or u'Sector'
+
+# Sensors: supports ["Sensor 10"] or [{"name": "X", "depth_cm": 10}]
+sensors_raw = remote_cfg.get('sensors') or [
+    {'name': u'Sensor 10', 'depth_cm': 10},
+    {'name': u'Sensor 20', 'depth_cm': 20},
+    {'name': u'Sensor 30', 'depth_cm': 30},
+]
+sensor_templates = []
+for s in sensors_raw:
+    if isinstance(s, dict):
+        sensor_templates.append(s)
+    else:
+        sensor_templates.append({'name': s})
+
+# Start date: from connection_params or default 45 days ago
+if remote_cfg.get('start_date'):
+    start_date = remote_cfg['start_date']
+else:
+    today_date = fields.Date.from_string(fields.Date.today())
+    start_date = fields.Date.to_string(today_date - timedelta(days=45))
+
+category = Category.browse(1)
+if not category or not category.exists():
+    category = Category.search([], limit=1)
+if not category:
+    raise Exception(
+        'No measurement device category was found. Create one before '
+        'running the provisioning procedure.')
+
+SensorType = env['mdm.measurement.device.sensor.type']
+all_types = SensorType.with_context(active_test=False, lang=False).search([])
+all_type_names = [(t.id, repr(t.name)) for t in all_types]
+sensor_type = False
+for t in all_types:
+    if t.name and u'humedad' in t.name.lower():
+        sensor_type = t
+        break
+if not sensor_type:
+    raise Exception(
+        u'Sensor type not found. Available types: %s' % all_type_names)
+
+created_devices = 0
+updated_devices = 0
+created_sensors = 0
+updated_sensors = 0
+device_results = []
+
+for i in range(1, num_devices + 1):
+    device_name = u'%s %s' % (device_prefix, i)
+    location = u'%s %s' % (location_prefix, i)
+
+    device_params = {'start_date': start_date}
+    device_vals = {
+        'name': device_name,
+        'description': (
+            u'IKOS Techs synthetic humidity probe automatically provisioned '
+            u'for demo and telecontrol generation.'
+        ),
+        'location': location,
+        'brand': u'IKOS Techs',
+        'model': u'Synthetic Soil Moisture Probe',
+        'category_id': category.id,
+        'remotecontrol_id': Remote.id,
+        'remotecontrol_params': json.dumps(
+            device_params, ensure_ascii=False, indent=2),
+        'active': True,
+    }
+
+    device = Device.with_context(active_test=False).search([
+        ('name', '=', device_name),
+        ('remotecontrol_id', '=', Remote.id),
+    ], limit=1)
+    if device:
+        device.write(device_vals)
+        updated_devices += 1
+    else:
+        device = Device.create(device_vals)
+        created_devices += 1
+
+    sensor_names = []
+    for sensor_tpl in sensor_templates:
+        s_name = sensor_tpl.get('name') or u''
+        sensor_params = {'start_date': start_date}
+        if sensor_tpl.get('depth_cm'):
+            sensor_params['depth_cm'] = int(sensor_tpl['depth_cm'])
+
+        sensor_vals = {
+            'name': s_name,
+            'device_id': device.id,
+            'type_id': sensor_type.id,
+            'remotecontrol_params': json.dumps(
+                sensor_params, ensure_ascii=False, indent=2),
+            'active': True,
+        }
+        sensor = Sensor.with_context(active_test=False).search([
+            ('device_id', '=', device.id),
+            ('name', '=', s_name),
+        ], limit=1)
+        if sensor:
+            sensor.write(sensor_vals)
+            updated_sensors += 1
+        else:
+            Sensor.create(sensor_vals)
+            created_sensors += 1
+        sensor_names.append(s_name)
+
+    device_results.append({
+        'device_name': device_name,
+        'location': location,
+        'category_id': category.id,
+        'start_date': start_date,
+        'sensor_names': sensor_names,
+    })
+
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'num_devices': num_devices,
+    'created_devices': created_devices,
+    'updated_devices': updated_devices,
+    'created_sensors': created_sensors,
+    'updated_sensors': updated_sensors,
+    'devices': device_results,
+}
+
+audit_json = json.dumps(audit, ensure_ascii=False, indent=2)
+attachment = env['ir.attachment'].create({
+    'name': 'ikostech_provision_%s.json' % (
+        fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')),
+    'datas_fname': 'ikostech_provision.json',
+    'datas': base64.b64encode(audit_json.encode('utf-8')),
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id,
+})
+
+Remote.message_post(
+    body=u'[IKOS Techs] Provision completed: %s devices (%s created, %s updated), %s sensors (%s created, %s updated)' % (
+        num_devices,
+        created_devices,
+        updated_devices,
+        created_sensors + updated_sensors,
+        created_sensors,
+        updated_sensors,
+    ),
+    attachment_ids=[attachment.id],
+)
+
+bag['created_devices'] = created_devices
+bag['updated_devices'] = updated_devices
+bag['created_sensors'] = created_sensors
+bag['updated_sensors'] = updated_sensors
+bag['provision_attachment_id'] = attachment.id
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_soilmeasure_generation_action_get_devices" model="remotecontrol.action">
+            <field name="name">IKOS Techs: Get devices (plan)</field>
+            <field name="remote_id" ref="remotecontrol_soilmeasure_generation"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+from datetime import datetime, timedelta
+import re
+
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+madrid_tz = pytz.timezone('Europe/Madrid')
+now_utc = fields.Datetime.from_string(fields.Datetime.now())
+now_utc = now_utc.replace(minute=0, second=0, microsecond=0)
+
+
+def _json_loads(raw_value):
+    try:
+        return json.loads(raw_value or '{}') or {}
+    except Exception:
+        return {}
+
+
+def _parse_depth(sensor_record):
+    sensor_cfg = _json_loads(sensor_record.remotecontrol_params)
+    depth_cm = sensor_cfg.get('depth_cm') or sensor_cfg.get('depth') or 0
+    try:
+        depth_cm = int(depth_cm)
+    except Exception:
+        depth_cm = 0
+    if not depth_cm:
+        match = re.search(r'(\d+)', sensor_record.name or '')
+        if match:
+            depth_cm = int(match.group(1))
+    return depth_cm
+
+
+def _local_midnight_to_utc(date_str):
+    date_value = fields.Date.from_string(date_str)
+    local_dt = datetime(
+        date_value.year,
+        date_value.month,
+        date_value.day,
+        0,
+        0,
+        0,
+    )
+    localized = madrid_tz.localize(local_dt, is_dst=False)
+    return localized.astimezone(pytz.UTC).replace(tzinfo=None)
+
+
+def _get_initial_dt(sensor_record):
+    last_reading = Reading.search([
+        ('sensor_id', '=', sensor_record.id),
+        ('active', '=', True),
+    ], order='measurement_time desc', limit=1)
+    if last_reading and last_reading.measurement_time:
+        return fields.Datetime.from_string(
+            last_reading.measurement_time) + timedelta(hours=1)
+
+    sensor_cfg = _json_loads(sensor_record.remotecontrol_params)
+    device_cfg = _json_loads(sensor_record.device_id.remotecontrol_params)
+    start_date = (
+        sensor_cfg.get('start_date') or
+        device_cfg.get('start_date') or
+        ''
+    )
+    if not start_date:
+        current_date = fields.Date.from_string(fields.Date.today())
+        start_date = '%s-01-01' % current_date.year
+    return _local_midnight_to_utc(start_date)
+
+
+domain = [
+    ('active', '=', True),
+    ('device_id.active', '=', True),
+    ('device_id.remotecontrol_id', '=', Remote.id),
+]
+if selected_device_ids:
+    domain.append(('device_id', 'in', selected_device_ids))
+
+sensors = Sensor.search(domain, order='device_id, name')
+plan = []
+skipped = []
+
+for sensor in sensors:
+    depth_cm = _parse_depth(sensor)
+    if depth_cm <= 0:
+        skipped.append({
+            'sensor_id': sensor.id,
+            'sensor_name': sensor.name,
+            'device_name': sensor.device_id.name,
+            'reason': 'No depth found in remotecontrol_params or sensor name.',
+        })
+        continue
+
+    initial_dt = _get_initial_dt(sensor)
+    if initial_dt > now_utc:
+        continue
+
+    plan.append({
+        'device_id': sensor.device_id.id,
+        'device_name': sensor.device_id.name,
+        'sensor_id': sensor.id,
+        'sensor_name': sensor.name,
+        'depth_cm': depth_cm,
+        'start_dt': initial_dt.strftime('%Y-%m-%d %H:%M:%S'),
+        'end_dt': now_utc.strftime('%Y-%m-%d %H:%M:%S'),
+    })
+
+bag['sensors_plan'] = plan
+bag['skipped_sensors'] = skipped
+bag['planned_sensors'] = len(plan)
+bag['skipped_sensors_count'] = len(skipped)
+
+Remote.message_post(
+    body=u'[IKOS Techs] Plan generated: sensors=%s skipped=%s' % (
+        len(plan), len(skipped))
+)
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_soilmeasure_generation_action_generate_readings" model="remotecontrol.action">
+            <field name="name">IKOS Techs: Generate readings</field>
+            <field name="remote_id" ref="remotecontrol_soilmeasure_generation"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+from datetime import timedelta
+import hashlib
+import math
+
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+plan = bag.get('sensors_plan') or []
+
+if not plan:
+    bag['generated_readings'] = 0
+    Remote.message_post(
+        body=u'[IKOS Techs] No readings generated because the plan is empty.')
+else:
+    madrid_tz = pytz.timezone('Europe/Madrid')
+    total_upserts = 0
+    sensor_summaries = []
+    device_profiles = {}
+
+    def _to_unicode(value):
+        try:
+            return unicode(value)
+        except Exception:
+            try:
+                return str(value).decode('utf-8', 'replace')
+            except Exception:
+                return u''
+
+    def _json_loads(raw_value):
+        try:
+            return json.loads(raw_value or '{}') or {}
+        except Exception:
+            return {}
+
+    def _hash_float(parts, low=0.0, high=1.0):
+        seed = u'|'.join([_to_unicode(part) for part in parts])
+        digest = hashlib.md5(seed.encode('utf-8')).hexdigest()[:8]
+        ratio = int(digest, 16) / 4294967295.0
+        return low + ((high - low) * ratio)
+
+    def _cfg_float(config, key, default):
+        try:
+            return float(config.get(key, default))
+        except Exception:
+            return float(default)
+
+    def _season_factors(day_of_year):
+        summer = (
+            math.sin((2.0 * math.pi * (day_of_year - 172)) / 365.0) + 1.0
+        ) / 2.0
+        winter = 1.0 - summer
+        return summer, winter
+
+    def _depth_profile(depth_cm):
+        # dry_baseline_offset: cm above wilting_point when no event
+        # decay_hours: how fast moisture drops back to dry baseline
+        defaults = {
+            10: {
+                'dry_baseline_offset': 1.0,
+                'seasonal_sensitivity': 1.5,
+                'daily_amplitude': 0.50,
+                'event_delay': 0.5,
+                'rise_hours': 0.5,
+                'decay_hours': 4.0,
+                'event_factor': 1.00,
+            },
+            20: {
+                'dry_baseline_offset': 4.0,
+                'seasonal_sensitivity': 1.0,
+                'daily_amplitude': 0.20,
+                'event_delay': 2.0,
+                'rise_hours': 1.5,
+                'decay_hours': 14.0,
+                'event_factor': 0.85,
+            },
+            30: {
+                'dry_baseline_offset': 5.0,
+                'seasonal_sensitivity': 0.8,
+                'daily_amplitude': 0.12,
+                'event_delay': 3.0,
+                'rise_hours': 2.5,
+                'decay_hours': 22.0,
+                'event_factor': 0.72,
+            },
+            60: {
+                'dry_baseline_offset': 8.0,
+                'seasonal_sensitivity': 0.5,
+                'daily_amplitude': 0.06,
+                'event_delay': 6.0,
+                'rise_hours': 4.0,
+                'decay_hours': 42.0,
+                'event_factor': 0.58,
+            },
+            90: {
+                'dry_baseline_offset': 11.0,
+                'seasonal_sensitivity': 0.3,
+                'daily_amplitude': 0.03,
+                'event_delay': 10.0,
+                'rise_hours': 6.0,
+                'decay_hours': 72.0,
+                'event_factor': 0.45,
+            },
+        }
+        if depth_cm in defaults:
+            return defaults[depth_cm]
+        factor = max(0.0, min(1.0, (float(depth_cm) - 10.0) / 80.0))
+        return {
+            'dry_baseline_offset': 1.0 + factor * 10.0,
+            'seasonal_sensitivity': max(0.2, 1.5 - factor * 1.2),
+            'daily_amplitude': max(0.02, 0.5 - factor * 0.47),
+            'event_delay': 0.5 + factor * 9.5,
+            'rise_hours': 0.5 + factor * 5.5,
+            'decay_hours': 4.0 + factor * 68.0,
+            'event_factor': max(0.40, 1.0 - factor * 0.60),
+        }
+
+    def _get_device_profile(device_record):
+        if device_record.id in device_profiles:
+            return device_profiles[device_record.id]
+
+        config = _json_loads(device_record.remotecontrol_params)
+        profile = {
+            'field_capacity': _cfg_float(
+                config,
+                'field_capacity',
+                35.5 + _hash_float([device_record.id, 'field_capacity'], 0.0, 3.5),
+            ),
+            'wilting_point': _cfg_float(
+                config,
+                'wilting_point',
+                10.8 + _hash_float([device_record.id, 'wilting_point'], 0.0, 2.8),
+            ),
+            'baseline_shift': _cfg_float(
+                config,
+                'baseline_shift',
+                _hash_float([device_record.id, 'baseline_shift'], -1.4, 1.4),
+            ),
+            'irrigation_bias': _cfg_float(
+                config,
+                'irrigation_bias',
+                _hash_float([device_record.id, 'irrigation_bias'], -0.03, 0.08),
+            ),
+        }
+        if profile['wilting_point'] > (profile['field_capacity'] - 3.0):
+            profile['wilting_point'] = profile['field_capacity'] - 3.0
+        device_profiles[device_record.id] = profile
+        return profile
+
+    def _get_event(device_record, local_date):
+        profile = _get_device_profile(device_record)
+        date_key = local_date.strftime('%Y-%m-%d')
+        summer, winter = _season_factors(local_date.timetuple().tm_yday)
+        irrigation_prob = 0.10 + (summer * 0.18) + profile['irrigation_bias']
+        if irrigation_prob < 0.07:
+            irrigation_prob = 0.07
+        if irrigation_prob > 0.40:
+            irrigation_prob = 0.40
+        rain_prob = 0.02 + (winter * 0.10)
+
+        irrigation_draw = _hash_float([device_record.id, 'irrigation', date_key])
+        rain_draw = _hash_float([device_record.id, 'rain', date_key])
+
+        if irrigation_draw < irrigation_prob:
+            return {
+                'kind': 'irrigation',
+                'hour': int(round(
+                    _hash_float([device_record.id, date_key, 'irrigation_hour'], 4.0, 7.0))),
+                'magnitude': _hash_float(
+                    [device_record.id, date_key, 'irrigation_magnitude'], 14.0, 24.0),
+            }
+        if rain_draw < rain_prob:
+            return {
+                'kind': 'rain',
+                'hour': int(round(
+                    _hash_float([device_record.id, date_key, 'rain_hour'], 0.0, 6.0))),
+                'magnitude': _hash_float(
+                    [device_record.id, date_key, 'rain_magnitude'], 8.0, 14.0),
+            }
+        return False
+
+    def _compute_value(device_record, sensor_record, depth_cm, utc_dt):
+        local_dt = pytz.UTC.localize(utc_dt).astimezone(madrid_tz)
+        device_profile = _get_device_profile(device_record)
+        depth_profile = _depth_profile(depth_cm)
+        sensor_cfg = _json_loads(sensor_record.remotecontrol_params)
+        dryness_bias = _cfg_float(sensor_cfg, 'dryness_bias', 0.0)
+        summer, winter = _season_factors(local_dt.timetuple().tm_yday)
+
+        # Dry state baseline: where soil settles when no recent event
+        dry_baseline = (
+            device_profile['wilting_point'] +
+            depth_profile['dry_baseline_offset'] +
+            device_profile['baseline_shift'] +
+            _hash_float([device_record.id, depth_cm, 'baseline'], -0.8, 0.8) +
+            dryness_bias -
+            depth_profile['seasonal_sensitivity'] * summer
+        )
+        diurnal_cycle = -depth_profile['daily_amplitude'] * math.sin(
+            (2.0 * math.pi * (local_dt.hour - 6)) / 24.0)
+
+        value = dry_baseline + diurnal_cycle
+
+        for day_lag in range(0, 7):
+            event_date = local_dt.date() - timedelta(days=day_lag)
+            event = _get_event(device_record, event_date)
+            if not event:
+                continue
+
+            hours_since_event = (
+                (day_lag * 24.0) +
+                local_dt.hour +
+                (local_dt.minute / 60.0) -
+                event['hour']
+            )
+            if hours_since_event < 0.0:
+                continue
+
+            response_hours = hours_since_event - depth_profile['event_delay']
+            if response_hours < 0.0:
+                continue
+
+            rise_factor = 1.0 - math.exp(
+                -response_hours / depth_profile['rise_hours'])
+            decay_factor = math.exp(
+                -response_hours / depth_profile['decay_hours'])
+            event_contribution = (
+                event['magnitude'] *
+                depth_profile['event_factor'] *
+                rise_factor *
+                decay_factor
+            )
+            if event['kind'] == 'rain':
+                event_contribution *= 0.85 + (winter * 0.30)
+            value += event_contribution
+
+        value += _hash_float(
+            [sensor_record.id, utc_dt.strftime('%Y-%m-%d %H:%M:%S'), 'micro'],
+            -0.22,
+            0.22,
+        )
+
+        if value > device_profile['field_capacity']:
+            value = device_profile['field_capacity']
+        if value < device_profile['wilting_point']:
+            value = device_profile['wilting_point']
+        return round(value, 2), local_dt
+
+    for item in plan:
+        sensor = Sensor.browse(item.get('sensor_id'))
+        if not sensor or not sensor.exists() or not sensor.device_id:
+            continue
+
+        depth_cm = int(item.get('depth_cm') or 0)
+        start_dt = fields.Datetime.from_string(item.get('start_dt'))
+        end_dt = fields.Datetime.from_string(item.get('end_dt'))
+        if start_dt > end_dt:
+            continue
+
+        current_dt = start_dt
+        sensor_count = 0
+        first_value = False
+        last_value = False
+        first_local = False
+        last_local = False
+
+        while current_dt <= end_dt:
+            value, local_dt = _compute_value(
+                sensor.device_id, sensor, depth_cm, current_dt)
+
+            upsert(
+                'mdm.measurement.device.sensor.reading',
+                {
+                    'sensor_id': sensor.id,
+                    'measurement_time': current_dt.strftime('%Y-%m-%d %H:%M:%S'),
+                },
+                {
+                    'value': value,
+                }
+            )
+            total_upserts += 1
+            sensor_count += 1
+
+            if first_value is False:
+                first_value = value
+                first_local = local_dt.strftime('%Y-%m-%d %H:%M:%S')
+            last_value = value
+            last_local = local_dt.strftime('%Y-%m-%d %H:%M:%S')
+            current_dt += timedelta(hours=1)
+
+        sensor_summaries.append({
+            'device_name': sensor.device_id.name,
+            'sensor_name': sensor.name,
+            'depth_cm': depth_cm,
+            'generated_points': sensor_count,
+            'first_local_time': first_local,
+            'last_local_time': last_local,
+            'first_value': first_value,
+            'last_value': last_value,
+        })
+
+    audit = {
+        'executed_at': fields.Datetime.now(),
+        'planned_sensors': len(plan),
+        'generated_readings': total_upserts,
+        'skipped_sensors': bag.get('skipped_sensors') or [],
+        'sensor_summaries': sensor_summaries,
+    }
+
+    json_str = json.dumps(audit, ensure_ascii=False, indent=2)
+    encoded = base64.b64encode(json_str.encode('utf-8'))
+    fname = 'ikostech_generation_%s.json' % (
+        fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_'))
+    attachment = env['ir.attachment'].create({
+        'name': fname,
+        'datas_fname': fname,
+        'datas': encoded,
+        'mimetype': 'application/json',
+        'res_model': 'remotecontrol',
+        'res_id': Remote.id,
+    })
+
+    Remote.message_post(
+        body=u'[IKOS Techs] Generated synthetic readings: sensors=%s readings=%s' % (
+            len(plan), total_upserts),
+        attachment_ids=[attachment.id],
+    )
+    bag['generated_readings'] = total_upserts
+    bag['generation_attachment_id'] = attachment.id
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_soilmeasure_generation_procedure" model="remotecontrol.procedure">
+            <field name="name">IKOS Techs: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_soilmeasure_generation"/>
+            <field name="active">True</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="True"/>
+        </record>
+
+        <record id="remotecontrol_soilmeasure_generation_procedure_provision_devices" model="remotecontrol.procedure">
+            <field name="name">IKOS Techs: Provision humidity probes</field>
+            <field name="remote_id" ref="remotecontrol_soilmeasure_generation"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="False"/>
+        </record>
+
+        <record id="remotecontrol_soilmeasure_generation_step_10_provision_devices" model="remotecontrol.step">
+            <field name="name">Provision humidity probes</field>
+            <field name="procedure_id" ref="remotecontrol_soilmeasure_generation_procedure_provision_devices"/>
+            <field name="action_id" ref="remotecontrol_soilmeasure_generation_action_provision_devices"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_soilmeasure_generation_step_10_get_devices" model="remotecontrol.step">
+            <field name="name">Get devices (plan)</field>
+            <field name="procedure_id" ref="remotecontrol_soilmeasure_generation_procedure"/>
+            <field name="action_id" ref="remotecontrol_soilmeasure_generation_action_get_devices"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_soilmeasure_generation_step_20_generate_readings" model="remotecontrol.step">
+            <field name="name">Generate readings</field>
+            <field name="procedure_id" ref="remotecontrol_soilmeasure_generation_procedure"/>
+            <field name="action_id" ref="remotecontrol_soilmeasure_generation_action_generate_readings"/>
+            <field name="sequence">20</field>
+        </record>
+
+    </data>
+</odoo>
