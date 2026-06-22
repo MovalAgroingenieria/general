@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_saih_ebro" model="remotecontrol">
+            <field name="name">SAIH Ebro</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://www.saihebro.com</field>
+            <field name="timeout">30</field>
+            <field name="verify_ssl">False</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">2</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+    "api_key": "",
+    "default_start_date": ""
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>SAIH Ebro · OpenData API</h2>
+
+<hr/>
+
+<h3>1) Connection</h3>
+<p><strong>Type:</strong> REST</p>
+<p><strong>Base URL:</strong> https://www.saihebro.com</p>
+<p><strong>Verify SSL:</strong> False (certificate issue)</p>
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+    "api_key": "your_api_key_here",
+    "default_start_date": "2026-06-19T00:00:00"
+}</pre>
+
+<h3>2) Data Model</h3>
+<p>SAIH Ebro OpenData organizes readings by signal code:</p>
+<ul>
+    <li><strong>Signal:</strong> OpenData signal identifier (for example <code>E282TIHQCAL4</code>).</li>
+    <li><strong>Signal type:</strong> returned as <code>LS_TIPO_SENAL</code> in the signal list.</li>
+</ul>
+
+<h3>3) Endpoints</h3>
+<h4>3.1 List signals</h4>
+<pre>GET /api/opendata/getListaSenalesArbol</pre>
+
+<h4>3.2 Get signal readings</h4>
+<pre>GET /datos/apiopendata?senal=&lt;SENAL&gt;&amp;inicio=&lt;YYYY-MM-DDTHH:MM:SS&gt;&amp;apikey=&lt;API_KEY&gt;</pre>
+<p>The service returns only the 24 hours following the requested start date.</p>
+
+<h3>4) Response Format</h3>
+<h4>4.1 Signal list</h4>
+<pre>{
+    "id": "E282TIHQCAL4",
+    "parent": "#",
+    "text": "E282TIHQCAL4 - CAUDAL ORIGEN CANAL DE LODOSA",
+    "data": {
+        "LS_TIPO_SENAL": "QCAL"
+    }
+}</pre>
+
+<h4>4.2 Readings</h4>
+<pre>{
+    "info": "solo se muestran las 24 horas siguientes a la fecha de inicio solicitada, la fecha fin se ignora",
+    "senales": [
+        {
+            "senal": "E282TIHQCAL4",
+            "fecha": "2026-06-19 00:00:00",
+            "valor": 13.94,
+            "unidades": "m³/s",
+            "descripcion": "CAUDAL ORIGEN CANAL DE LODOSA",
+            "tendencia": "arriba"
+        }
+    ]
+}</pre>
+
+<h3>5) Field Mapping</h3>
+<ul>
+    <li><code>senal</code>: signal identifier used for sensor matching.</li>
+    <li><code>valor</code>: numeric value.</li>
+    <li><code>fecha</code>: local timestamp in <code>YYYY-MM-DD HH:MM:SS</code> format.</li>
+    <li><code>unidades</code>: unit of measurement, kept in the execution audit.</li>
+</ul>
+
+<h3>6) Configuration</h3>
+<p><strong>Sensor remotecontrol_params (JSON):</strong></p>
+<pre>{
+    "senal": "E282TIHQCAL4",
+    "start_date": "2026-06-19T00:00:00"
+}</pre>
+<p>The legacy keys <code>tag</code> and <code>signal</code> are also accepted as aliases for <code>senal</code>.</p>
+<p>An optional device-level <code>start_date</code> can also be used as fallback:</p>
+<pre>{
+    "start_date": "2026-06-19T00:00:00"
+}</pre>
+
+<h3>7) Operational Flow</h3>
+<ol>
+    <li><strong>List signals</strong>: query the signal tree and store it as a JSON attachment.</li>
+    <li><strong>Build sensors plan</strong>: extract <code>senal</code> from sensor configuration and compute the missing range.</li>
+    <li><strong>Fetch readings</strong>: query <code>/datos/apiopendata</code> in 24-hour chunks per signal.</li>
+    <li><strong>Upsert readings</strong>: store values in <code>mdm.measurement.device.sensor.reading</code> with UTC timestamp.</li>
+</ol>
+
+<h3>8) Timezone Handling</h3>
+<p>SAIH Ebro timestamps are in local time (Europe/Madrid).</p>
+<p>Odoo stores readings in UTC.</p>
+<p>Conversion is automatic during upsert.</p>
+]]></field>
+        </record>
+
+        <!-- ACTION: List Signals -->
+        <record id="remotecontrol_saih_ebro_action_list_signals" model="remotecontrol.action">
+            <field name="name">SAIH Ebro: List Signals</field>
+            <field name="remote_id" ref="remotecontrol_saih_ebro"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">2</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import base64
+import json
+
+Remote = self.remote_id
+endpoint = u'/api/opendata/getListaSenalesArbol'
+url = u'%s%s' % ((base_url or u'').rstrip(u'/'), endpoint)
+
+resp = request_retry(u'GET', url, timeout=timeout)
+if resp.status_code >= 400:
+    raise Exception(
+        u'Error fetching SAIH Ebro signals: %s %s' % (
+            resp.status_code, (resp.text or u'')[:500]))
+
+try:
+    payload = resp.json()
+except Exception as exc:
+    raise Exception(u'Invalid JSON from SAIH Ebro signals endpoint: %s' % exc)
+
+if not isinstance(payload, list):
+    raise Exception(
+        u'Invalid SAIH Ebro signals response: expected list, got %s' % (
+            type(payload).__name__,))
+
+signals = []
+type_counts = {}
+for item in payload:
+    if not isinstance(item, dict):
+        continue
+    signal_id = (item.get(u'id') or u'').strip()
+    if not signal_id:
+        continue
+    data = item.get(u'data') or {}
+    if not isinstance(data, dict):
+        data = {}
+    signal_type = (data.get(u'LS_TIPO_SENAL') or u'').strip()
+    type_counts[signal_type] = type_counts.get(signal_type, 0) + 1
+    signals.append({
+        u'id': signal_id,
+        u'senal': signal_id,
+        u'parent': item.get(u'parent') or u'',
+        u'text': item.get(u'text') or u'',
+        u'type': signal_type,
+        u'odoo_sensor_params': json.dumps(
+            {u'senal': signal_id}, ensure_ascii=False),
+    })
+
+signals = sorted(signals, key=lambda signal: signal[u'id'])
+audit = {
+    u'executed_at': fields.Datetime.now(),
+    u'endpoint': endpoint,
+    u'total_signals': len(signals),
+    u'type_counts': type_counts,
+    u'signals': signals,
+}
+json_str = json.dumps(audit, ensure_ascii=False, indent=2)
+encoded = base64.b64encode(json_str.encode(u'utf-8'))
+fname = u'saih_ebro_signals_%s.json' % (
+    fields.Datetime.now()
+    .replace(u':', u'')
+    .replace(u'-', u'')
+    .replace(u' ', u'_')
+)
+attachment = env[u'ir.attachment'].create({
+    u'name': fname,
+    u'datas_fname': fname,
+    u'datas': encoded,
+    u'mimetype': u'application/json',
+    u'res_model': u'remotecontrol',
+    u'res_id': Remote.id,
+})
+
+Remote.message_post(
+    body=u'[SAIH Ebro] Signals listed: %s' % len(signals),
+    attachment_ids=[attachment.id],
+)
+bag.clear()
+bag[u'total_signals'] = len(signals)
+bag[u'attachment_id'] = attachment.id
+bag[u'attachment_name'] = fname
+result = u'Listed %s SAIH Ebro signals' % len(signals)
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Build Sensors Plan -->
+        <record id="remotecontrol_saih_ebro_action_build_plan" model="remotecontrol.action">
+            <field name="name">SAIH Ebro: Build Sensors Plan</field>
+            <field name="remote_id" ref="remotecontrol_saih_ebro"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+from datetime import datetime, timedelta
+import json
+import pytz
+
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+madrid_tz = pytz.timezone('Europe/Madrid')
+now_local = datetime.now(madrid_tz).replace(tzinfo=None)
+
+
+def _json_loads(raw_value):
+    try:
+        return json.loads(raw_value or '{}') or {}
+    except Exception:
+        return {}
+
+
+def _parse_local_datetime(raw_value):
+    raw_value = (raw_value or '').strip()
+    if not raw_value:
+        return False
+    candidates = (
+        (raw_value[:19], '%Y-%m-%dT%H:%M:%S'),
+        (raw_value[:19], '%Y-%m-%d %H:%M:%S'),
+        (raw_value[:10], '%Y-%m-%d'),
+    )
+    for candidate, fmt in candidates:
+        try:
+            return datetime.strptime(candidate, fmt)
+        except Exception:
+            continue
+    return False
+
+
+def _utc_string_to_local_datetime(raw_value):
+    if not raw_value:
+        return False
+    utc_dt = fields.Datetime.from_string(raw_value)
+    return pytz.UTC.localize(utc_dt).astimezone(
+        madrid_tz).replace(tzinfo=None)
+
+
+remote_cfg = _json_loads(Remote.connection_params)
+default_start_dt = _parse_local_datetime(
+    remote_cfg.get('default_start_date') or remote_cfg.get('start_date'))
+if not default_start_dt:
+    default_start_dt = now_local.replace(
+        hour=0, minute=0, second=0, microsecond=0)
+
+domain = [
+    ('active', '=', True),
+    ('device_id.active', '=', True),
+    ('device_id.remotecontrol_id', '=', Remote.id),
+]
+if selected_device_ids:
+    domain.append(('device_id', 'in', selected_device_ids))
+
+sensors = Sensor.search(domain, order='device_id, name')
+sensors_plan = []
+skipped = []
+
+for sensor in sensors:
+    device = sensor.device_id
+    device_cfg = _json_loads(device.remotecontrol_params)
+    sensor_cfg = _json_loads(sensor.remotecontrol_params)
+    signal = (
+        sensor_cfg.get('senal') or
+        sensor_cfg.get('signal') or
+        sensor_cfg.get('tag') or
+        ''
+    ).strip()
+
+    if not signal:
+        skipped.append({
+            'sensor_id': sensor.id,
+            'sensor_name': sensor.name,
+            'device_id': device.id,
+            'device_name': device.name,
+            'reason': 'Missing senal in sensor remotecontrol_params.',
+        })
+        continue
+
+    last_reading = Reading.search([
+        ('sensor_id', '=', sensor.id),
+        ('active', '=', True),
+    ], order='measurement_time desc', limit=1)
+    if last_reading and last_reading.measurement_time:
+        start_dt = _utc_string_to_local_datetime(
+            last_reading.measurement_time) + timedelta(minutes=15)
+    else:
+        start_dt = _parse_local_datetime(
+            sensor_cfg.get('start_date') or
+            device_cfg.get('start_date')
+        ) or default_start_dt
+
+    if start_dt > now_local:
+        continue
+
+    sensors_plan.append({
+        'sensor_id': sensor.id,
+        'sensor_name': sensor.name,
+        'device_id': device.id,
+        'device_name': device.name,
+        'senal': signal,
+        'start_dt': start_dt.strftime('%Y-%m-%d %H:%M:%S'),
+        'end_dt': now_local.strftime('%Y-%m-%d %H:%M:%S'),
+    })
+
+bag['sensors_plan'] = sensors_plan
+bag['skipped_sensors'] = skipped
+bag['total_sensors'] = len(sensors_plan)
+bag['skipped_sensors_count'] = len(skipped)
+result = 'Built plan for %d SAIH Ebro sensors' % len(sensors_plan)
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Fetch Readings from API -->
+        <record id="remotecontrol_saih_ebro_action_fetch" model="remotecontrol.action">
+            <field name="name">SAIH Ebro: Fetch Readings</field>
+            <field name="remote_id" ref="remotecontrol_saih_ebro"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">2</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+from datetime import datetime
+from datetime import timedelta
+import json
+
+sensors_plan = bag.get('sensors_plan') or []
+if not sensors_plan:
+    raise Exception('No sensors in plan (check Build Plan step)')
+
+Remote = self.remote_id
+try:
+    remote_cfg = json.loads(Remote.connection_params or '{}') or {}
+except Exception:
+    remote_cfg = {}
+
+api_key = (remote_cfg.get('api_key') or '').strip()
+if not api_key:
+    raise Exception('Missing api_key in SAIH Ebro connection_params')
+
+
+def _parse_datetime(raw_value):
+    return datetime.strptime(raw_value, '%Y-%m-%d %H:%M:%S')
+
+
+def _parse_reading_datetime(raw_value):
+    if not raw_value:
+        return False
+    for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S'):
+        try:
+            return datetime.strptime(raw_value[:19], fmt)
+        except Exception:
+            continue
+    return False
+
+
+endpoint = '/datos/apiopendata'
+url = '%s%s' % ((base_url or '').rstrip('/'), endpoint)
+
+readings = []
+api_calls = []
+errors = []
+
+for item in sensors_plan:
+    signal = item['senal']
+    sensor_id = item['sensor_id']
+    start_dt = _parse_datetime(item['start_dt'])
+    end_dt = _parse_datetime(item['end_dt'])
+    current_dt = start_dt
+
+    while current_dt <= end_dt:
+        inicio = current_dt.strftime('%Y-%m-%dT%H:%M:%S')
+        params = {
+            'senal': signal,
+            'inicio': inicio,
+            'apikey': api_key,
+        }
+        resp = request_retry('GET', url, params=params, timeout=timeout)
+        api_calls.append({
+            'url': getattr(resp, 'url', url),
+            'method': 'GET',
+            'status': resp.status_code,
+            'senal': signal,
+            'inicio': inicio,
+        })
+
+        if resp.status_code >= 400:
+            errors.append(
+                'API error for signal %s at %s: %s' % (
+                    signal, inicio, resp.status_code))
+            current_dt += timedelta(hours=24)
+            continue
+
+        try:
+            payload = resp.json() or {}
+        except Exception as e:
+            errors.append(
+                'JSON parse error for signal %s at %s: %s' % (
+                    signal, inicio, str(e)))
+            current_dt += timedelta(hours=24)
+            continue
+
+        signal_readings = payload.get('senales') or []
+        if not isinstance(signal_readings, list):
+            errors.append(
+                'Invalid readings response for signal %s at %s' % (
+                    signal, inicio))
+            current_dt += timedelta(hours=24)
+            continue
+
+        for reading in signal_readings:
+            if not isinstance(reading, dict):
+                continue
+            if (reading.get('senal') or '').strip() != signal:
+                continue
+
+            timestamp_str = reading.get('fecha') or ''
+            reading_dt = _parse_reading_datetime(timestamp_str)
+            if not reading_dt:
+                errors.append(
+                    'Invalid timestamp for signal %s: %s' % (
+                        signal, timestamp_str))
+                continue
+            if reading_dt < start_dt or reading_dt > end_dt:
+                continue
+
+            value_raw = reading.get('valor')
+            if isinstance(value_raw, basestring):
+                value_raw = value_raw.replace(',', '.')
+            try:
+                value = float(value_raw)
+            except (ValueError, TypeError):
+                errors.append(
+                    'Invalid value for signal %s: %s' % (signal, value_raw))
+                continue
+
+            readings.append({
+                'sensor_id': sensor_id,
+                'value': value,
+                'timestamp': timestamp_str,
+                'senal': signal,
+                'unit': reading.get('unidades') or '',
+                'description': reading.get('descripcion') or '',
+                'trend': reading.get('tendencia') or '',
+            })
+
+        current_dt += timedelta(hours=24)
+
+bag['readings'] = readings
+bag['total_readings'] = len(readings)
+bag['api_calls'] = api_calls
+if errors:
+    bag['fetch_errors'] = errors
+
+result = 'Fetched %d readings from SAIH Ebro' % len(readings)
+            ]]></field>
+        </record>
+
+        <!-- ACTION: Upsert Readings -->
+        <record id="remotecontrol_saih_ebro_action_upsert" model="remotecontrol.action">
+            <field name="name">SAIH Ebro: Upsert Readings</field>
+            <field name="remote_id" ref="remotecontrol_saih_ebro"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="readonly">False</field>
+            <field name="code"><![CDATA[
+from datetime import datetime
+import pytz
+
+Remote = self.remote_id
+readings = bag.get('readings') or []
+europe_madrid = pytz.timezone('Europe/Madrid')
+upsert_count = 0
+upsert_errors = []
+
+if readings:
+    for reading in readings:
+        sensor_id = reading['sensor_id']
+        value = reading['value']
+        timestamp_str = reading['timestamp']
+
+        # Parse timestamp as Europe/Madrid, convert to UTC.
+        try:
+            naive_dt = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+            local_dt = europe_madrid.localize(naive_dt)
+            utc_dt = local_dt.astimezone(pytz.UTC)
+            measurement_time = utc_dt.strftime('%Y-%m-%d %H:%M:%S')
+        except Exception as e:
+            upsert_errors.append(
+                'Cannot parse timestamp %s for sensor %d: %s' % (
+                    timestamp_str, sensor_id, str(e)))
+            continue
+
+        try:
+            Remote.upsert('mdm.measurement.device.sensor.reading', {
+                'sensor_id': sensor_id,
+                'measurement_time': measurement_time,
+            }, {
+                'value': value,
+                'remotecontrol_origin_id': Remote.id,
+            })
+            upsert_count += 1
+        except Exception as e:
+            upsert_errors.append(
+                'Upsert failed for sensor %d: %s' % (sensor_id, str(e)))
+
+bag['upsert_count'] = upsert_count
+if upsert_errors:
+    bag['upsert_errors'] = upsert_errors
+
+result = 'Upserted %d readings' % upsert_count
+            ]]></field>
+        </record>
+
+        <!-- PROCEDURE: List Signals -->
+        <record id="remotecontrol_saih_ebro_procedure_list_signals" model="remotecontrol.procedure">
+            <field name="name">SAIH Ebro: List Signals</field>
+            <field name="remote_id" ref="remotecontrol_saih_ebro"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="False"/>
+        </record>
+
+        <record id="remotecontrol_saih_ebro_step_list_signals" model="remotecontrol.step">
+            <field name="name">List Signals</field>
+            <field name="procedure_id" ref="remotecontrol_saih_ebro_procedure_list_signals"/>
+            <field name="action_id" ref="remotecontrol_saih_ebro_action_list_signals"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <!-- PROCEDURE: Fetch and Store Readings -->
+        <record id="remotecontrol_saih_ebro_procedure_readings" model="remotecontrol.procedure">
+            <field name="name">SAIH Ebro: Fetch and Store Readings</field>
+            <field name="remote_id" ref="remotecontrol_saih_ebro"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">True</field>
+            <field name="readonly">False</field>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="procedure_for_readings" eval="True"/>
+        </record>
+
+        <record id="remotecontrol_saih_ebro_step_plan" model="remotecontrol.step">
+            <field name="name">Build Sensors Plan</field>
+            <field name="procedure_id" ref="remotecontrol_saih_ebro_procedure_readings"/>
+            <field name="action_id" ref="remotecontrol_saih_ebro_action_build_plan"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_saih_ebro_step_fetch" model="remotecontrol.step">
+            <field name="name">Fetch Readings</field>
+            <field name="procedure_id" ref="remotecontrol_saih_ebro_procedure_readings"/>
+            <field name="action_id" ref="remotecontrol_saih_ebro_action_fetch"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_saih_ebro_step_upsert" model="remotecontrol.step">
+            <field name="name">Upsert Readings</field>
+            <field name="procedure_id" ref="remotecontrol_saih_ebro_procedure_readings"/>
+            <field name="action_id" ref="remotecontrol_saih_ebro_action_upsert"/>
+            <field name="sequence">30</field>
+        </record>
+
+    </data>
+</odoo>
