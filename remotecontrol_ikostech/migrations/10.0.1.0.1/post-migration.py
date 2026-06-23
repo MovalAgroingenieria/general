@@ -1,136 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <data noupdate="1">
+# -*- coding: utf-8 -*-
+# 2026 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-        <record id="remotecontrol_ikostech" model="remotecontrol">
-            <field name="name">IkosTech</field>
-            <field name="remotecontrol_type">rest</field>
-            <field name="base_url">https://api.ikostech.es/it</field>
-            <field name="timeout">60</field>
-            <field name="verify_ssl">True</field>
-            <field name="rate_limit_seconds">1.1</field>
-            <field name="max_retries">2</field>
-            <field name="backoff">1.5</field>
-            <field name="readonly">True</field>
-            <field name="connection_params"><![CDATA[
-{
-  "api_key": ""
-}
-            ]]></field>
-            <field name="remotecontrol_help"><![CDATA[
-<h2>IkosTech · Odoo Integration Help</h2>
-<p><strong>Official API:</strong> <code>https://api.ikostech.es/it</code></p>
+from odoo import api, SUPERUSER_ID
 
-<hr/>
 
-<h3>1) Connection (Remote Control)</h3>
-<p>Type: <code>REST</code> · Base URL: <code>https://api.ikostech.es/it</code></p>
-<p>Auth: <code>X-API-Key</code> header</p>
-<p><strong>connection_params</strong> (JSON):</p>
-<pre>{
-  "api_key": "your_api_key_here"
-}</pre>
-<ul>
-  <li>API key is required for all endpoints.</li>
-  <li>Rate limit: <strong>1 request per second</strong> (strictly enforced).</li>
-</ul>
+def migrate(cr, version):
+    env = api.Environment(cr, SUPERUSER_ID, {})
 
-<h3>2) Default Procedure</h3>
-<ol>
-  <li><strong>Build devices plan</strong> → extract serial + sensor field mapping from device/sensor config.</li>
-  <li><strong>Fetch readings</strong> → call <code>/export/node/{serial}/data/json/{from}/{to}</code> per unique serial/field combo.</li>
-  <li><strong>Upsert readings</strong> → store in mdm.measurement.device.sensor.reading with UTC timestamps.</li>
-</ol>
+    MODULE = 'remotecontrol_ikostech'
 
-<h3>3) Device Configuration</h3>
-<p>In each <strong>Device</strong> (<code>mdm.measurement.device</code>) set <em>remotecontrol_params</em>:</p>
-<pre>{
-  "serial": "10329694",
-  "start_date": "2026-01-01"
-}</pre>
-
-<h3>4) Sensor Configuration</h3>
-<p>In each <strong>Sensor</strong> (<code>mdm.measurement.device.sensor</code>) set <em>remotecontrol_params</em>:</p>
-<pre>{
-  "field": "hsuelo"
-}</pre>
-<p>where <code>field</code> is one of the available IkosTech measurement fields:</p>
-<ul>
-  <li><code>hamb</code> - Ambient humidity (%)</li>
-  <li><code>tamb</code> - Ambient temperature (°C)</li>
-  <li><code>hsuelo</code> - Soil humidity (%)</li>
-  <li><code>tsuelo</code> - Soil temperature (°C)</li>
-  <li><code>conductividad</code> - Soil conductivity (mS/cm)</li>
-  <li><code>radiacion</code> - Solar radiation (W/m²)</li>
-  <li><code>radiacion_umol</code> - PAR radiation (μmol/m²/s)</li>
-  <li><code>radiacion_global</code> - Global solar radiation (W/m²)</li>
-  <li><code>dpv</code> - Vapor pressure deficit (kPa)</li>
-  <li><code>bateria</code> - Battery level (%)</li>
-  <li><code>calidad</code> - Signal quality (0-4)</li>
-</ul>
-
-<h3>5) Time Window & Date Chunking</h3>
-<ul>
-  <li><em>Build devices plan</em> computes <code>initial_date</code> per sensor: last stored reading date → else <code>device.start_date</code> → else Jan 1 of current year.</li>
-  <li><em>Fetch readings</em> splits long date ranges into 30-day chunks to prevent API 502/504 gateway timeouts.</li>
-  <li><em>Date format:</em> <code>YYYYMMDD</code> (e.g., 20260601)</li>
-  <li>Timestamps in response are treated as local time (UTC) and stored as such.</li>
-</ul>
-
-<h3>6) Endpoint Details</h3>
-
-<h4>GET /export/nodes</h4>
-<p>List all available devices/serials accessible to your API key.</p>
-<p><strong>Response:</strong> Array of device objects with <code>serial</code>, <code>alias</code>, <code>device</code>, <code>estado</code>, etc.</p>
-
-<h4>GET /export/node/{serial}/data/json/{from}/{to}</h4>
-<p>Fetch raw readings for a specific device within a date range.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-  <li><code>{serial}</code> - Device serial number</li>
-  <li><code>{from}</code> - Start date in YYYYMMDD format</li>
-  <li><code>{to}</code> - End date in YYYYMMDD format</li>
-</ul>
-<p><strong>Response:</strong> Array of reading objects with fields like <code>fecha</code>, <code>serial</code>, <code>hamb</code>, <code>tsuelo</code>, etc.</p>
-
-<h3>7) Rate Limiting</h3>
-<p>IkosTech strictly enforces <strong>1 request per second per API key</strong>.</p>
-<p>The system automatically adds a 1.1 second delay between requests.</p>
-<p>Large date ranges are split into 30-day chunks to balance speed vs. API limits.</p>
-
-<h3>8) Operational Flow</h3>
-<ol>
-  <li>Load devices + sensors with remotecontrol_params configured</li>
-  <li>For each sensor, determine date range: last_reading → today</li>
-  <li>Split date range into 30-day chunks</li>
-  <li>For each chunk, call API with 1.1 sec delay between requests</li>
-  <li>Parse response, extract the specific field value from each reading</li>
-  <li>Upsert readings into Odoo with UTC timestamp</li>
-  <li>Post audit JSON with per-sensor/per-chunk diagnostics</li>
-</ol>
-
-<h3>9) Error Handling</h3>
-<ul>
-  <li><strong>Missing field in response:</strong> Logged as warning, reading skipped</li>
-  <li><strong>Invalid timestamp:</strong> Logged, reading skipped</li>
-  <li><strong>API timeout/error:</strong> Batch persists upserts before reporting, so no data is lost</li>
-  <li><strong>Rate limit:</strong> Automatic 1.1 sec delay prevents 429 errors</li>
-</ul>
-
-<h3>10) Timezone Handling</h3>
-<p>IkosTech timestamps are provided as-is (assumed UTC).</p>
-<p>Odoo stores readings in UTC without conversion.</p>
-]]></field>
-        </record>
-
-        <!-- ACTION: Build Devices Plan -->
-        <record id="remotecontrol_ikostech_action_build_plan" model="remotecontrol.action">
-            <field name="name">IkosTech: Build devices plan</field>
-            <field name="remote_id" ref="remotecontrol_ikostech"/>
-            <field name="active">True</field>
-            <field name="rate_limit_seconds">0.0</field>
-            <field name="readonly">True</field>
-            <field name="code"><![CDATA[
+    # ── 1) Update action: Build devices plan ──────────────────────────
+    #    - Extract serial from device params and field from sensor params
+    #    - Use latest existing reading date as incremental start date
+    new_code_build_plan = """\
 # Action A: build sensors plan
 # For each sensor with remotecontrol_params, extract serial + field name
 Remote = self.remote_id
@@ -204,18 +87,14 @@ for sensor in sensors:
 bag['sensors_plan'] = plan
 bag['total_sensors'] = len(plan)
 result = 'Built plan for %d IkosTech sensors' % len(plan)
-            ]]></field>
-        </record>
+"""
 
-        <!-- ACTION: Fetch Readings -->
-        <record id="remotecontrol_ikostech_action_fetch" model="remotecontrol.action">
-            <field name="name">IkosTech: Fetch readings</field>
-            <field name="remote_id" ref="remotecontrol_ikostech"/>
-            <field name="active">True</field>
-            <field name="rate_limit_seconds">1.1</field>
-            <field name="max_retries">2</field>
-            <field name="readonly">True</field>
-            <field name="code"><![CDATA[
+    # ── 2) Update action: Fetch readings ──────────────────────────────
+    #    - Group sensors by serial so one API call feeds several sensors
+    #    - Retry 429 once with stronger backoff
+    #    - Respect IkosTech 1 request/second limit
+    #    - Deduplicate readings before upsert
+    new_code_fetch = """\
 import time
 from datetime import datetime, timedelta
 
@@ -351,17 +230,13 @@ if errors:
     bag['fetch_errors'] = errors
 
 result = 'Fetched %d readings from IkosTech' % len(readings)
-            ]]></field>
-        </record>
+"""
 
-        <!-- ACTION: Upsert Readings -->
-        <record id="remotecontrol_ikostech_action_upsert" model="remotecontrol.action">
-            <field name="name">IkosTech: Upsert readings</field>
-            <field name="remote_id" ref="remotecontrol_ikostech"/>
-            <field name="active">True</field>
-            <field name="rate_limit_seconds">0.0</field>
-            <field name="readonly">False</field>
-            <field name="code"><![CDATA[
+    # ── 3) Update action: Upsert readings ─────────────────────────────
+    #    - Normalize timestamps before searching/creating readings
+    #    - Search inactive rows too to avoid unique(name) collisions
+    #    - Fallback by computed name to detect ambiguous configurations
+    new_code_upsert = """\
 from datetime import datetime
 
 Remote = self.remote_id
@@ -466,55 +341,13 @@ if upsert_errors:
     bag['upsert_errors'] = upsert_errors
 
 result = 'Upserted %d readings' % upsert_count
-            ]]></field>
-        </record>
+"""
 
-        <!-- PROCEDURE: Daily Sync -->
-        <record id="remotecontrol_ikostech_procedure" model="remotecontrol.procedure">
-            <field name="name">IkosTech: Daily Sync</field>
-            <field name="remote_id" ref="remotecontrol_ikostech"/>
-            <field name="active">True</field>
-            <field name="schedule_cron">True</field>
-            <field name="readonly">False</field>
-            <field name="interval_number">1</field>
-            <field name="interval_type">days</field>
-            <field name="numbercall">-1</field>
-            <field name="procedure_for_readings" eval="True"/>
-        </record>
-
-        <record id="remotecontrol_ikostech_step_plan" model="remotecontrol.step">
-            <field name="name">Build devices plan</field>
-            <field name="procedure_id" ref="remotecontrol_ikostech_procedure"/>
-            <field name="action_id" ref="remotecontrol_ikostech_action_build_plan"/>
-            <field name="sequence">10</field>
-        </record>
-
-        <record id="remotecontrol_ikostech_step_fetch" model="remotecontrol.step">
-            <field name="name">Fetch readings</field>
-            <field name="procedure_id" ref="remotecontrol_ikostech_procedure"/>
-            <field name="action_id" ref="remotecontrol_ikostech_action_fetch"/>
-            <field name="sequence">20</field>
-        </record>
-
-        <record id="remotecontrol_ikostech_step_upsert" model="remotecontrol.step">
-            <field name="name">Upsert readings</field>
-            <field name="procedure_id" ref="remotecontrol_ikostech_procedure"/>
-            <field name="action_id" ref="remotecontrol_ikostech_action_upsert"/>
-            <field name="sequence">30</field>
-        </record>
-
-        <!-- ======================================================== -->
-        <!-- Import elements (List devices & available fields)       -->
-        <!-- ======================================================== -->
-
-        <record id="remotecontrol_ikostech_action_import_elements" model="remotecontrol.action">
-            <field name="name">IkosTech: Import elements</field>
-            <field name="remote_id" ref="remotecontrol_ikostech"/>
-            <field name="active">True</field>
-            <field name="rate_limit_seconds">1.1</field>
-            <field name="max_retries">2</field>
-            <field name="readonly">True</field>
-            <field name="code"><![CDATA[
+    # ── 4) Update action: Import elements ─────────────────────────────
+    #    - Discover devices from /export/nodes
+    #    - Discover real fields by querying each device data endpoint
+    #    - Attach JSON with Odoo device/sensor configuration suggestions
+    new_code_import_elements = """\
 import time
 from datetime import datetime, timedelta
 
@@ -735,24 +568,130 @@ Remote.message_post(
 
 result = 'Imported %d devices with %d fields' % (
     len(elements), len(all_available_fields))
-            ]]></field>
-        </record>
+"""
 
-        <record id="remotecontrol_ikostech_procedure_import_elements" model="remotecontrol.procedure">
-            <field name="name">IkosTech: Import elements</field>
-            <field name="remote_id" ref="remotecontrol_ikostech"/>
-            <field name="active">True</field>
-            <field name="schedule_cron">False</field>
-            <field name="readonly">True</field>
-            <field name="procedure_for_readings" eval="False"/>
-        </record>
+    # ── 5) Update remotecontrol_help ──────────────────────────────────
+    new_help = u"""\
+<h2>IkosTech · Odoo Integration Help</h2>
+<p><strong>Official API:</strong> <code>https://api.ikostech.es/it</code></p>
 
-        <record id="remotecontrol_ikostech_step_import_elements" model="remotecontrol.step">
-            <field name="name">Import elements</field>
-            <field name="procedure_id" ref="remotecontrol_ikostech_procedure_import_elements"/>
-            <field name="action_id" ref="remotecontrol_ikostech_action_import_elements"/>
-            <field name="sequence">10</field>
-        </record>
+<hr/>
 
-    </data>
-</odoo>
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code> · Base URL: <code>https://api.ikostech.es/it</code></p>
+<p>Auth: <code>X-API-Key</code> header</p>
+<pre>{
+  "api_key": "your_api_key_here"
+}</pre>
+
+<h3>2) Device Configuration</h3>
+<pre>{
+  "serial": "10329694",
+  "start_date": "2026-01-01"
+}</pre>
+
+<h3>3) Sensor Configuration</h3>
+<pre>{
+  "field": "hsuelo"
+}</pre>
+<p>Run <strong>IkosTech: Import elements</strong> to generate a JSON with devices and available sensor field suggestions.</p>
+
+<h3>4) Rate Limiting</h3>
+<p>IkosTech strictly enforces <strong>1 request per second per API key</strong>. The fetch and import actions apply a 1.1 second delay and retry HTTP 429 responses.</p>
+
+<h3>5) Changelog</h3>
+<ul>
+  <li><strong>1.0.1</strong> (2026-06-23)
+    <ul>
+      <li>Added real field discovery procedure using <code>/export/nodes</code> and device data endpoints.</li>
+      <li>Added 429 retry/backoff and explicit 1.1s API delay.</li>
+      <li>Improved upsert handling for inactive rows, duplicate payload rows, and computed-name collisions.</li>
+    </ul>
+  </li>
+</ul>
+"""
+
+    try:
+        action_plan = env.ref(
+            '%s.remotecontrol_ikostech_action_build_plan' % MODULE)
+        action_plan.write({
+            'code': new_code_build_plan,
+            'rate_limit_seconds': 0.0,
+            'readonly': True,
+        })
+    except Exception:
+        pass
+
+    try:
+        action_fetch = env.ref(
+            '%s.remotecontrol_ikostech_action_fetch' % MODULE)
+        action_fetch.write({
+            'code': new_code_fetch,
+            'rate_limit_seconds': 1.1,
+            'max_retries': 2,
+            'readonly': True,
+        })
+    except Exception:
+        pass
+
+    try:
+        action_upsert = env.ref(
+            '%s.remotecontrol_ikostech_action_upsert' % MODULE)
+        action_upsert.write({
+            'code': new_code_upsert,
+            'rate_limit_seconds': 0.0,
+            'readonly': False,
+        })
+    except Exception:
+        pass
+
+    try:
+        action_import = env.ref(
+            '%s.remotecontrol_ikostech_action_import_elements' % MODULE)
+        action_import.write({
+            'code': new_code_import_elements,
+            'rate_limit_seconds': 1.1,
+            'max_retries': 2,
+            'readonly': True,
+        })
+    except Exception:
+        pass
+
+    try:
+        remote = env.ref('%s.remotecontrol_ikostech' % MODULE)
+        remote.write({
+            'base_url': 'https://api.ikostech.es/it',
+            'timeout': 60,
+            'verify_ssl': True,
+            'rate_limit_seconds': 1.1,
+            'max_retries': 2,
+            'backoff': 1.5,
+            'readonly': True,
+            'remotecontrol_help': new_help,
+        })
+    except Exception:
+        pass
+
+    try:
+        procedure = env.ref('%s.remotecontrol_ikostech_procedure' % MODULE)
+        procedure.write({
+            'schedule_cron': True,
+            'readonly': False,
+            'interval_number': 1,
+            'interval_type': 'days',
+            'numbercall': -1,
+            'procedure_for_readings': True,
+        })
+    except Exception:
+        pass
+
+    try:
+        procedure_import = env.ref(
+            '%s.remotecontrol_ikostech_procedure_import_elements' % MODULE)
+        procedure_import.write({
+            'schedule_cron': False,
+            'readonly': True,
+            'procedure_for_readings': False,
+        })
+    except Exception:
+        pass

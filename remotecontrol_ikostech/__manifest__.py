@@ -6,7 +6,7 @@
     "name": "RemoteControl: IkosTech",
     "summary": "Remotecontrol IkosTech API (REST) with default actions and "
                "procedures for historical data fetching",
-    "version": "10.0.1.0.0",
+    "version": "10.0.1.0.1",
     "category": "Tools",
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",
