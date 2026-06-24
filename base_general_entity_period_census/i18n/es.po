@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-14 10:43+0000\n"
-"PO-Revision-Date: 2026-05-14 10:43+0000\n"
+"POT-Creation-Date: 2026-06-24 08:30+0000\n"
+"PO-Revision-Date: 2026-06-24 08:30+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -803,12 +803,12 @@ msgstr "No se encontraron líneas de censo"
 
 #. module: base_general_entity_period_census
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census__note
+#: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_additional__note
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_line__note
 msgid "Note"
-msgstr "Nota"
+msgstr "Notas"
 
 #. module: base_general_entity_period_census
-#: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_additional__note
 #: model_terms:ir.ui.view,arch_db:base_general_entity_period_census.report_census_document
 #: model_terms:ir.ui.view,arch_db:base_general_entity_period_census.view_general_entity_census_form
 msgid "Notes"
@@ -948,9 +948,11 @@ msgid "Please select at least one line to copy."
 msgstr "Por favor, seleccione al menos una línea para copiar."
 
 #. module: base_general_entity_period_census
-#: model:ir.model.fields,help:base_general_entity_period_census.field_general_entity_census_additional__qty
-msgid "Positive or negative quantity adjustment"
-msgstr "Ajuste de cantidad positivo o negativo"
+#: model:ir.model.fields,help:base_general_entity_period_census.field_general_entity_census_additional__shares
+msgid ""
+"Positive or negative shares adjustment (distribution basis). When set, qty "
+"is computed automatically."
+msgstr "Ajuste de cantidad positivas o negativas de acciones"
 
 #. module: base_general_entity_period_census
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_line__previous_line_id
@@ -990,8 +992,16 @@ msgstr "Producto a distribuir en base a participaciones"
 
 #. module: base_general_entity_period_census
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_additional__qty
-msgid "Quantity"
+msgid "Qty"
 msgstr "Cantidad"
+
+#. module: base_general_entity_period_census
+#: model:ir.model.fields,help:base_general_entity_period_census.field_general_entity_census_additional__qty
+msgid ""
+"Quantity adjustment. When shares is set, calculated as shares × census "
+"distribution amount per period. Can be set directly (shares will be reset to"
+" 0)."
+msgstr "Ajuste de cantidad positivo o negativo"
 
 #. module: base_general_entity_period_census
 #: model_terms:ir.ui.view,arch_db:base_general_entity_period_census.view_general_entity_census_line_search
@@ -1038,6 +1048,7 @@ msgid "Select which census lines to copy to the next period."
 msgstr "Seleccione qué líneas de censo copiar al siguiente período."
 
 #. module: base_general_entity_period_census
+#: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_additional__shares
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_line__shares
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_member__default_shares
 #: model_terms:ir.ui.view,arch_db:base_general_entity_period_census.report_census_document
@@ -1229,22 +1240,3 @@ msgstr "Historial de comunicación del sitio web"
 #: model:ir.model.fields.selection,name:base_general_entity_period_census.selection__general_entity_census__period_type__weekly
 msgid "Weekly"
 msgstr "Semanal"
-
-#. module: base_general_entity_period_census
-#: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_member__default_shares
-msgid "Shares"
-msgstr "Participaciones"
-
-#. module: base_general_entity_period_census
-#: model:ir.model.fields,help:base_general_entity_period_census.field_general_entity_member__default_shares
-msgid ""
-"Default shares value applied when generating census lines for this member "
-"from active members. Not used when copying from a previous period."
-msgstr ""
-"Valor de participaciones por defecto al generar líneas de censo para este "
-"miembro desde miembros activos. No se usa al copiar del período anterior."
-
-#. module: base_general_entity_period_census
-#: model:ir.model,name:base_general_entity_period_census.model_general_entity_member
-msgid "General Entity Member"
-msgstr "Miembro de entidad general"

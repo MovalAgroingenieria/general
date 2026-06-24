@@ -288,6 +288,59 @@ class GeneralEntityCensus(models.Model):
             return False
         return self.period_date + period_delta
 
+    def _prepare_copy_line_vals(self, line, copy_additional=True):
+        """Build line values for any census copy flow in base module."""
+        self.ensure_one()
+        vals = {
+            "member_partner_id": line.member_partner_id.id,
+            "shares": line.shares,
+            "note": line.note,
+            "previous_line_id": line.id,
+        }
+        if copy_additional and line.additional_ids:
+            vals["additional_ids"] = [
+                Command.create(
+                    {
+                        "qty": additional.qty,
+                        "note": additional.note,
+                    }
+                )
+                for additional in line.additional_ids
+            ]
+        return vals
+
+    def _prepare_copy_census_vals(
+        self,
+        target_period_date,
+        lines=None,
+        copy_additional=True,
+    ):
+        """Build census create values for any copy flow in base module."""
+        self.ensure_one()
+        lines_to_copy = lines if lines is not None else self.line_ids
+        line_cmds = [
+            Command.create(
+                self._prepare_copy_line_vals(
+                    line,
+                    copy_additional=copy_additional,
+                )
+            )
+            for line in lines_to_copy
+        ]
+        vals = {
+            "primary_partner_id": self.primary_partner_id.id,
+            "period_date": target_period_date,
+            "period_type": self.period_type,
+            "distribution_product_id": (
+                self.distribution_product_id.id
+                if self.distribution_product_id
+                else False
+            ),
+            "distribution_amount_day": self.distribution_amount_day,
+            "line_ids": line_cmds,
+        }
+        return vals
+
     def action_copy_to_next_period(self):
         """Copy this census to the next period, creating a new census."""
         self.ensure_one()
@@ -313,46 +366,7 @@ class GeneralEntityCensus(models.Model):
                 )
             )
 
-        # Prepare lines to copy
-        lines_to_create = []
-        for line in self.line_ids:
-            # Copy additional movements
-            additional_movements = []
-            for additional in line.additional_ids:
-                additional_movements.append(
-                    Command.create(
-                        {
-                            "qty": additional.qty,
-                            "note": additional.note,
-                        }
-                    )
-                )
-
-            lines_to_create.append(
-                Command.create(
-                    {
-                        "member_partner_id": line.member_partner_id.id,
-                        "shares": line.shares,
-                        "note": line.note,
-                        "previous_line_id": line.id,
-                        "additional_ids": additional_movements,
-                    }
-                )
-            )
-
-        # Create new census with custom period dates if applicable
-        new_census_vals = {
-            "primary_partner_id": self.primary_partner_id.id,
-            "period_date": next_date,
-            "period_type": self.period_type,
-            "distribution_product_id": (
-                self.distribution_product_id.id
-                if self.distribution_product_id
-                else False
-            ),
-            "distribution_amount_day": self.distribution_amount_day,
-            "line_ids": lines_to_create,
-        }
+        new_census_vals = self._prepare_copy_census_vals(next_date)
 
         # Handle custom period dates
         if self.period_type == "custom" and self.period_start_date:

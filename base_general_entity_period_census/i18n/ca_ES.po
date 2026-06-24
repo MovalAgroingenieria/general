@@ -6,14 +6,13 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-22 11:00+0000\n"
-"PO-Revision-Date: 2026-03-17 13:43+0000\n"
+"POT-Creation-Date: 2026-06-24 08:30+0000\n"
+"PO-Revision-Date: 2026-06-24 08:30+0000\n"
 "Last-Translator: \n"
-"Language-Team: Catalan\n"
-"Language: ca_ES\n"
+"Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
 #. module: base_general_entity_period_census
@@ -435,6 +434,13 @@ msgid "Daily"
 msgstr "Diari"
 
 #. module: base_general_entity_period_census
+#: model:ir.model.fields,help:base_general_entity_period_census.field_general_entity_member__default_shares
+msgid ""
+"Default shares value applied when generating census lines for this member "
+"from active members. Not used when copying from a previous period."
+msgstr ""
+
+#. module: base_general_entity_period_census
 #: model_terms:ir.ui.view,arch_db:base_general_entity_period_census.view_general_entity_census_additional_list
 msgid "Delete"
 msgstr "Eliminar"
@@ -537,6 +543,11 @@ msgid "Font awesome icon e.g. fa-tasks"
 msgstr "Icona de Font Awesome, p.ex. fa-tasks"
 
 #. module: base_general_entity_period_census
+#: model:ir.model,name:base_general_entity_period_census.model_general_entity_member
+msgid "General Entity Member"
+msgstr "Membre d'entitat general"
+
+#. module: base_general_entity_period_census
 #: model:ir.model,name:base_general_entity_period_census.model_general_entity_census
 msgid "General Entity Period Census"
 msgstr "Cens periòdic d'entitat general"
@@ -572,6 +583,11 @@ msgstr "Codi global del membre secundari"
 #: model_terms:ir.ui.view,arch_db:base_general_entity_period_census.view_general_entity_census_search
 msgid "Group By"
 msgstr "Agrupar per"
+
+#. module: base_general_entity_period_census
+#: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_line__has_additional_movements
+msgid "Has Additional Movements"
+msgstr ""
 
 #. module: base_general_entity_period_census
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census__has_message
@@ -623,6 +639,11 @@ msgid "Indicates if shares count has changed from previous period"
 msgstr ""
 "Indica si el nombre de participacions ha canviat respecte al període "
 "anterior"
+
+#. module: base_general_entity_period_census
+#: model:ir.model.fields,help:base_general_entity_period_census.field_general_entity_census_line__has_additional_movements
+msgid "Indicates whether this line has any additional movement records."
+msgstr ""
 
 #. module: base_general_entity_period_census
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census__message_is_follower
@@ -780,12 +801,12 @@ msgstr "No s'han trobat línies de cens"
 
 #. module: base_general_entity_period_census
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census__note
+#: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_additional__note
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_line__note
 msgid "Note"
-msgstr "Nota"
+msgstr "Notes"
 
 #. module: base_general_entity_period_census
-#: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_additional__note
 #: model_terms:ir.ui.view,arch_db:base_general_entity_period_census.report_census_document
 #: model_terms:ir.ui.view,arch_db:base_general_entity_period_census.view_general_entity_census_form
 msgid "Notes"
@@ -866,6 +887,7 @@ msgstr "Censos per període"
 
 #. module: base_general_entity_period_census
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census__period_date
+#: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_additional__period_date
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_line__period_date
 msgid "Period Date"
 msgstr "Data del període"
@@ -906,6 +928,7 @@ msgid "Period Type"
 msgstr "Tipus de període"
 
 #. module: base_general_entity_period_census
+#: model:ir.model.fields,help:base_general_entity_period_census.field_general_entity_census_additional__period_date
 #: model:ir.model.fields,help:base_general_entity_period_census.field_general_entity_census_line__period_date
 msgid "Period date from the census header, used for filtering and ordering"
 msgstr ""
@@ -923,9 +946,11 @@ msgid "Please select at least one line to copy."
 msgstr "Si us plau, seleccioneu almenys una línia per copiar."
 
 #. module: base_general_entity_period_census
-#: model:ir.model.fields,help:base_general_entity_period_census.field_general_entity_census_additional__qty
-msgid "Positive or negative quantity adjustment"
-msgstr "Ajust de quantitat positiu o negatiu"
+#: model:ir.model.fields,help:base_general_entity_period_census.field_general_entity_census_additional__shares
+msgid ""
+"Positive or negative shares adjustment (distribution basis). When set, qty "
+"is computed automatically."
+msgstr ""
 
 #. module: base_general_entity_period_census
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_line__previous_line_id
@@ -952,6 +977,7 @@ msgstr "Entitat primària"
 #. module: base_general_entity_period_census
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_census_generate_lines_wizard__primary_partner_id
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census__primary_partner_id
+#: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_additional__primary_partner_id
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_line__primary_partner_id
 msgid "Primary Partner"
 msgstr "Contacte primari"
@@ -964,8 +990,16 @@ msgstr "Producte a distribuir en base a participacions"
 
 #. module: base_general_entity_period_census
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_additional__qty
-msgid "Quantity"
+msgid "Qty"
 msgstr "Quantitat"
+
+#. module: base_general_entity_period_census
+#: model:ir.model.fields,help:base_general_entity_period_census.field_general_entity_census_additional__qty
+msgid ""
+"Quantity adjustment. When shares is set, calculated as shares × census "
+"distribution amount per period. Can be set directly (shares will be reset to"
+" 0)."
+msgstr "Ajust de quantitat positiu o negatiu"
 
 #. module: base_general_entity_period_census
 #: model_terms:ir.ui.view,arch_db:base_general_entity_period_census.view_general_entity_census_line_search
@@ -1012,7 +1046,9 @@ msgid "Select which census lines to copy to the next period."
 msgstr "Seleccioneu quines línies de cens copiar al següent període."
 
 #. module: base_general_entity_period_census
+#: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_additional__shares
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_line__shares
+#: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_member__default_shares
 #: model_terms:ir.ui.view,arch_db:base_general_entity_period_census.report_census_document
 msgid "Shares"
 msgstr "Participacions"

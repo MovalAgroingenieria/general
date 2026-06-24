@@ -3,6 +3,7 @@
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools import float_compare, float_is_zero
 
 
 class GeneralEntityCensusAdditional(models.Model):
@@ -49,17 +50,57 @@ class GeneralEntityCensusAdditional(models.Model):
         index=True,
     )
     qty = fields.Float(
-        string="Quantity",
+        digits="Product Unit of Measure",
+        compute="_compute_qty",
+        inverse="_inverse_qty",
+        store=True,
+        help="Quantity adjustment. When shares is set, calculated as "
+        "shares × census distribution amount per period. "
+        "Can be set directly (shares will be reset to 0).",
+    )
+    shares = fields.Float(
         digits="Product Unit of Measure",
         default=0.0,
-        help="Positive or negative quantity adjustment",
+        help="Positive or negative shares adjustment (distribution basis). "
+        "When set, qty is computed automatically.",
     )
-    note = fields.Text(string="Notes")
+    note = fields.Text()
     company_id = fields.Many2one(
         comodel_name="res.company",
         related="census_id.company_id",
         store=True,
     )
+
+    @api.depends("shares", "census_line_id.census_id.distribution_amount_period")
+    def _compute_qty(self):
+        """Calculate qty from shares × census distribution amount per period.
+
+        If shares is 0 the field keeps its current stored value, allowing
+        direct entry via the inverse.
+        """
+        for record in self:
+            aforo = record.census_line_id.census_id.distribution_amount_period
+            if record.shares and aforo:
+                record.qty = record.shares * aforo
+            elif not record.shares:
+                record.qty = record.qty or 0.0
+            else:
+                record.qty = 0.0
+
+    def _inverse_qty(self):
+        """When qty is set directly (different from shares-derived value),
+        reset shares to 0 to indicate direct-entry mode."""
+        for record in self:
+            if float_is_zero(record.qty, precision_digits=4):
+                continue
+            if not record.shares:
+                continue
+            aforo = record.census_line_id.census_id.distribution_amount_period
+            if not aforo:
+                continue
+            calculated = record.shares * aforo
+            if float_compare(record.qty, calculated, precision_digits=4) != 0:
+                record.shares = 0.0
 
     def _check_can_modify(self):
         """Check that additional movements can be modified."""

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-14 10:43+0000\n"
-"PO-Revision-Date: 2026-05-14 10:43+0000\n"
+"POT-Creation-Date: 2026-06-24 08:29+0000\n"
+"PO-Revision-Date: 2026-06-24 08:29+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -770,12 +770,12 @@ msgstr ""
 
 #. module: base_general_entity_period_census
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census__note
+#: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_additional__note
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_line__note
 msgid "Note"
 msgstr ""
 
 #. module: base_general_entity_period_census
-#: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_additional__note
 #: model_terms:ir.ui.view,arch_db:base_general_entity_period_census.report_census_document
 #: model_terms:ir.ui.view,arch_db:base_general_entity_period_census.view_general_entity_census_form
 msgid "Notes"
@@ -914,8 +914,10 @@ msgid "Please select at least one line to copy."
 msgstr ""
 
 #. module: base_general_entity_period_census
-#: model:ir.model.fields,help:base_general_entity_period_census.field_general_entity_census_additional__qty
-msgid "Positive or negative quantity adjustment"
+#: model:ir.model.fields,help:base_general_entity_period_census.field_general_entity_census_additional__shares
+msgid ""
+"Positive or negative shares adjustment (distribution basis). When set, qty "
+"is computed automatically."
 msgstr ""
 
 #. module: base_general_entity_period_census
@@ -956,7 +958,15 @@ msgstr ""
 
 #. module: base_general_entity_period_census
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_additional__qty
-msgid "Quantity"
+msgid "Qty"
+msgstr ""
+
+#. module: base_general_entity_period_census
+#: model:ir.model.fields,help:base_general_entity_period_census.field_general_entity_census_additional__qty
+msgid ""
+"Quantity adjustment. When shares is set, calculated as shares × census "
+"distribution amount per period. Can be set directly (shares will be reset to"
+" 0)."
 msgstr ""
 
 #. module: base_general_entity_period_census
@@ -1002,6 +1012,7 @@ msgid "Select which census lines to copy to the next period."
 msgstr ""
 
 #. module: base_general_entity_period_census
+#: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_additional__shares
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_census_line__shares
 #: model:ir.model.fields,field_description:base_general_entity_period_census.field_general_entity_member__default_shares
 #: model_terms:ir.ui.view,arch_db:base_general_entity_period_census.report_census_document

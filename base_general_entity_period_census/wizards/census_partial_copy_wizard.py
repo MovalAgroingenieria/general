@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 from dateutil.relativedelta import relativedelta
-from odoo import Command, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -83,42 +83,11 @@ class CensusPartialCopyWizard(models.TransientModel):
         if not self.line_ids:
             raise UserError(self.env._("Please select at least one line to copy."))
 
-        # Prepare lines to copy
-        lines_to_create = []
-        for line in self.line_ids:
-            line_vals = {
-                "member_partner_id": line.member_partner_id.id,
-                "shares": line.shares,
-                "note": line.note,
-                "previous_line_id": line.id,
-            }
-            if self.copy_additional:
-                additional_cmds = []
-                for addtnl in line.additional_ids:
-                    additional_cmds.append(
-                        Command.create(
-                            {
-                                "qty": addtnl.qty,
-                                "note": addtnl.note,
-                            }
-                        )
-                    )
-                line_vals["additional_ids"] = additional_cmds
-            lines_to_create.append(Command.create(line_vals))
-
-        # Build new census values
-        new_vals = {
-            "primary_partner_id": census.primary_partner_id.id,
-            "period_date": next_date,
-            "period_type": census.period_type,
-            "distribution_product_id": (
-                census.distribution_product_id.id
-                if census.distribution_product_id
-                else False
-            ),
-            "distribution_amount_day": census.distribution_amount_day,
-            "line_ids": lines_to_create,
-        }
+        new_vals = census._prepare_copy_census_vals(  # pylint: disable=protected-access
+            next_date,
+            lines=self.line_ids,
+            copy_additional=self.copy_additional,
+        )
 
         # Handle custom period dates
         if census.period_type == "custom" and census.period_start_date:
