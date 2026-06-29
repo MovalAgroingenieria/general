@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <data noupdate="1">
+
+        <record id="mdm_measurement_device_sensor_uom_avamet_celsius" model="mdm.measurement.device.sensor.uom">
+            <field name="name">AVAMET Celsius</field>
+            <field name="short_name">degC</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_uom_avamet_percent" model="mdm.measurement.device.sensor.uom">
+            <field name="name">AVAMET Percent</field>
+            <field name="short_name">%</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_uom_avamet_hpa" model="mdm.measurement.device.sensor.uom">
+            <field name="name">AVAMET hPa</field>
+            <field name="short_name">hPa</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_uom_avamet_kmh" model="mdm.measurement.device.sensor.uom">
+            <field name="name">AVAMET kmh</field>
+            <field name="short_name">km/h</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_uom_avamet_mm" model="mdm.measurement.device.sensor.uom">
+            <field name="name">AVAMET mm</field>
+            <field name="short_name">mm</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_uom_avamet_deg" model="mdm.measurement.device.sensor.uom">
+            <field name="name">AVAMET Degrees</field>
+            <field name="short_name">deg</field>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_type_avamet_temp_min" model="mdm.measurement.device.sensor.type">
+            <field name="name">AVAMET Temperature min</field>
+            <field name="uom_id" ref="mdm_measurement_device_sensor_uom_avamet_celsius"/>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_type_avamet_temp_avg" model="mdm.measurement.device.sensor.type">
+            <field name="name">AVAMET Temperature avg</field>
+            <field name="uom_id" ref="mdm_measurement_device_sensor_uom_avamet_celsius"/>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_type_avamet_temp_max" model="mdm.measurement.device.sensor.type">
+            <field name="name">AVAMET Temperature max</field>
+            <field name="uom_id" ref="mdm_measurement_device_sensor_uom_avamet_celsius"/>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_type_avamet_hum_min" model="mdm.measurement.device.sensor.type">
+            <field name="name">AVAMET Humidity min</field>
+            <field name="uom_id" ref="mdm_measurement_device_sensor_uom_avamet_percent"/>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_type_avamet_hum_avg" model="mdm.measurement.device.sensor.type">
+            <field name="name">AVAMET Humidity avg</field>
+            <field name="uom_id" ref="mdm_measurement_device_sensor_uom_avamet_percent"/>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_type_avamet_hum_max" model="mdm.measurement.device.sensor.type">
+            <field name="name">AVAMET Humidity max</field>
+            <field name="uom_id" ref="mdm_measurement_device_sensor_uom_avamet_percent"/>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_type_avamet_pres_min" model="mdm.measurement.device.sensor.type">
+            <field name="name">AVAMET Pressure min</field>
+            <field name="uom_id" ref="mdm_measurement_device_sensor_uom_avamet_hpa"/>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_type_avamet_pres_avg" model="mdm.measurement.device.sensor.type">
+            <field name="name">AVAMET Pressure avg</field>
+            <field name="uom_id" ref="mdm_measurement_device_sensor_uom_avamet_hpa"/>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_type_avamet_pres_max" model="mdm.measurement.device.sensor.type">
+            <field name="name">AVAMET Pressure max</field>
+            <field name="uom_id" ref="mdm_measurement_device_sensor_uom_avamet_hpa"/>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_type_avamet_wind_dir" model="mdm.measurement.device.sensor.type">
+            <field name="name">AVAMET Wind direction</field>
+            <field name="uom_id" ref="mdm_measurement_device_sensor_uom_avamet_deg"/>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_type_avamet_wind_avg" model="mdm.measurement.device.sensor.type">
+            <field name="name">AVAMET Wind avg</field>
+            <field name="uom_id" ref="mdm_measurement_device_sensor_uom_avamet_kmh"/>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_type_avamet_wind_gust" model="mdm.measurement.device.sensor.type">
+            <field name="name">AVAMET Wind gust</field>
+            <field name="uom_id" ref="mdm_measurement_device_sensor_uom_avamet_kmh"/>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="mdm_measurement_device_sensor_type_avamet_rain" model="mdm.measurement.device.sensor.type">
+            <field name="name">AVAMET Rain</field>
+            <field name="uom_id" ref="mdm_measurement_device_sensor_uom_avamet_mm"/>
+            <field name="readonly">True</field>
+        </record>
+
+        <record id="remotecontrol_avamet" model="remotecontrol">
+            <field name="name">Web AVAMET</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://api.weatherlink.com/v2</field>
+            <field name="timeout">30</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="is_avamet">True</field>
+            <field name="connection_params">{"api_key": "", "api_secret": ""}</field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>AVAMET WeatherLink · Odoo Integration</h2>
+
+<hr/>
+
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code></p>
+<p>Base URL: <code>https://api.weatherlink.com/v2</code></p>
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+    "api_key": "your_api_key",
+    "api_secret": "your_api_secret"
+}</pre>
+<ul>
+    <li>All requests include query param <code>api-key</code>.</li>
+    <li>All requests include header <code>x-api-secret</code>.</li>
+    <li>Retries with backoff are applied for timeout, connection errors, HTTP 429 and HTTP 5xx.</li>
+</ul>
+
+<h3>2) Device And Sensor Configuration</h3>
+<p>Use the button <strong>AVAMET Stations</strong> to load the available stations and discover the real variables returned by the API.</p>
+<p>The wizard creates one device per station and lets you select the discovered API fields as sensors.</p>
+<p>Each created device stores in <strong>remotecontrol_params</strong> a JSON like:</p>
+<pre>{
+    "station_id": "001D0A71B1CA",
+    "station_name": "BOVALAR",
+    "start_date": "2026-06-28"
+}</pre>
+<p>Each sensor stores in <strong>remotecontrol_params</strong> a JSON like:</p>
+<pre>{
+    "api_field": "rainfall_mm",
+    "start_date": "2026-06-28"
+}</pre>
+<ul>
+    <li><code>station_id</code>: WeatherLink station identifier used in API calls.</li>
+    <li><code>station_name</code>: descriptive station name.</li>
+    <li><code>start_date</code>: optional first date for the initial import.</li>
+    <li><code>api_field</code>: exact WeatherLink field stored in the sensor.</li>
+</ul>
+
+<h3>3) Available Procedure</h3>
+<p>The module includes the procedure <strong>AVAMET: Daily Sync</strong>.</p>
+<ol>
+    <li><strong>Get devices (plan)</strong> → builds <code>bag["sensors_plan"]</code> from configured Odoo devices and sensors.</li>
+    <li><strong>Get readings</strong> → calls WeatherLink historic endpoints and upserts readings in <code>mdm.measurement.device.sensor.reading</code>.</li>
+</ol>
+
+<h3>4) API Endpoints Used</h3>
+<ul>
+    <li><strong>GET /stations</strong> → loads the station catalog in the import wizard.</li>
+    <li><strong>GET /stations/&lt;station_id&gt;</strong> → retrieves station metadata during device creation.</li>
+    <li><strong>GET /historic/&lt;station_id&gt;</strong> → retrieves historical data for each configured magnitude.</li>
+</ul>
+
+<p>Historical requests are executed in 6-hour windows and aggregated into one daily value per sensor and day.</p>
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_avamet_action_get_devices" model="remotecontrol.action">
+            <field name="name">AVAMET: Get devices (plan)</field>
+            <field name="remote_id" ref="remotecontrol_avamet"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+plan = self.remote_id.avamet_get_sensor_plan(selected_device_ids)
+bag['sensors_plan'] = plan
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_avamet_action_get_readings" model="remotecontrol.action">
+            <field name="name">AVAMET: Get readings</field>
+            <field name="remote_id" ref="remotecontrol_avamet"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+plan = bag.get('sensors_plan') or []
+audit = self.remote_id.avamet_sync_sensor_plan(plan)
+bag['upserts'] = audit.get('total_upserts', 0)
+bag['errors'] = audit.get('total_errors', 0)
+bag['audit_attachment_id'] = audit.get('attachment_id')
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_avamet_procedure" model="remotecontrol.procedure">
+            <field name="name">AVAMET: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_avamet"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings">True</field>
+        </record>
+
+        <record id="remotecontrol_avamet_step_10_devices" model="remotecontrol.step">
+            <field name="name">Get devices (plan)</field>
+            <field name="procedure_id" ref="remotecontrol_avamet_procedure"/>
+            <field name="action_id" ref="remotecontrol_avamet_action_get_devices"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_avamet_step_20_readings" model="remotecontrol.step">
+            <field name="name">Get readings</field>
+            <field name="procedure_id" ref="remotecontrol_avamet_procedure"/>
+            <field name="action_id" ref="remotecontrol_avamet_action_get_readings"/>
+            <field name="sequence">20</field>
+        </record>
+
+    </data>
+
+</odoo>

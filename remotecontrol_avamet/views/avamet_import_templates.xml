@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="avamet_import_qweb" model="ir.ui.view">
+        <field name="name">avamet.import.qweb</field>
+        <field name="type">qweb</field>
+        <field name="arch" type="xml">
+            <t t-name="AvametImport">
+                <div class="o_avamet_import">
+
+                    <!-- ── Header bar ─────────────────────────────────── -->
+                    <div class="o_avamet_header">
+                        <div class="o_avamet_header_title">
+                            <h3>
+                                <i class="fa fa-cloud-download"/>
+                                AVAMET Import
+                                <small class="text-muted">
+                                    — <t t-esc="widget.remotecontrol_name"/>
+                                </small>
+                            </h3>
+                        </div>
+                        <div class="o_avamet_header_controls">
+                            <div class="form-inline o_avamet_config_row">
+                                <div class="form-group">
+                                    <label class="o_avamet_label">
+                                        Initial date
+                                    </label>
+                                    <input type="date"
+                                           class="form-control o_avamet_date_input"
+                                           t-att-value="widget.initial_date"/>
+                                </div>
+                                <button class="btn btn-primary o_avamet_btn_reload">
+                                    <i class="fa fa-refresh"/>
+                                    Load from AVAMET
+                                </button>
+                                <t t-if="widget.sensors.length">
+                                    <button class="btn btn-success o_avamet_btn_create"
+                                            t-att-disabled="widget._totalSelected() === 0 ? 'disabled' : ''">
+                                        <i class="fa fa-check"/>
+                                        Create devices and sensors
+                                        (<span class="o_avamet_create_count">
+                                            <t t-esc="widget._totalSelected()"/>
+                                        </span>)
+                                    </button>
+                                    <span class="o_avamet_creating_msg text-muted"
+                                          style="display:none">
+                                        <i class="fa fa-spinner fa-spin"/>
+                                        Creating...
+                                    </span>
+                                </t>
+                            </div>
+                            <div class="alert alert-danger o_avamet_error_msg"
+                                 style="display:none; margin-top:8px; margin-bottom:0"/>
+                        </div>
+                    </div>
+
+                    <!-- ── Loading spinner ────────────────────────────── -->
+                    <t t-if="widget.loading">
+                        <div class="o_avamet_loading">
+                            <i class="fa fa-spinner fa-spin fa-3x"/>
+                            <p>Loading stations from AVAMET API…</p>
+                        </div>
+                    </t>
+
+                    <!-- ── Status log (collapsible) ───────────────────── -->
+                    <t t-if="!widget.loading and widget.status">
+                        <details class="o_avamet_status_block">
+                            <summary>
+                                <i class="fa fa-info-circle"/> Import log
+                            </summary>
+                            <pre class="o_avamet_status_pre">
+                                <t t-esc="widget.status"/>
+                            </pre>
+                        </details>
+                    </t>
+
+                    <!-- ── Error from reload ──────────────────────────── -->
+                    <t t-if="!widget.loading and widget.error">
+                        <div class="alert alert-danger">
+                            <i class="fa fa-exclamation-triangle"/>
+                            <t t-esc="widget.error"/>
+                        </div>
+                    </t>
+
+                    <!-- ── Empty state ────────────────────────────────── -->
+                    <t t-if="!widget.loading and !widget.stations.length and !widget.error">
+                        <div class="o_avamet_empty">
+                            <i class="fa fa-cloud fa-4x"/>
+                            <p>
+                                Click <strong>Load from AVAMET</strong>
+                                to fetch available stations and sensors.
+                            </p>
+                        </div>
+                    </t>
+
+                    <!-- ── Sensor selection ───────────────────────────── -->
+                    <t t-if="!widget.loading and widget.stations.length">
+
+                        <!-- Global action bar -->
+                        <div class="o_avamet_global_bar">
+                            <strong class="o_avamet_global_count">
+                                <t t-esc="widget._totalSelected()"/>/<t t-esc="widget.sensors.length"/>
+                            </strong>
+                            <span class="text-muted"> sensors selected</span>
+                            <button class="btn btn-xs btn-default o_avamet_btn_sel_all">
+                                <i class="fa fa-check-square-o"/> Select all
+                            </button>
+                            <button class="btn btn-xs btn-default o_avamet_btn_desel_all">
+                                <i class="fa fa-square-o"/> Deselect all
+                            </button>
+                        </div>
+
+                        <!-- Station accordion -->
+                        <div class="o_avamet_stations">
+                            <t t-foreach="widget.stations" t-as="station">
+                                <div class="o_avamet_station">
+
+                                    <!-- Station header -->
+                                    <div class="o_avamet_station_header">
+                                        <span class="o_avamet_station_title"
+                                              t-att-data-station-id="station.id">
+                                            <i t-attf-class="fa o_avamet_toggle_icon #{widget.expanded[station.id] ? 'fa-chevron-down' : 'fa-chevron-right'}"/>
+                                            <strong><t t-esc="station.station_name"/></strong>
+                                            <small class="text-muted">
+                                                [<t t-esc="station.station_id"/>]
+                                            </small>
+                                        </span>
+                                        <span class="badge o_avamet_badge"
+                                              t-att-data-badge-for="station.id">
+                                            <t t-esc="widget._stationSelectedCount(station.id)"/>/<t t-esc="widget._stationSensors(station.id).length"/>
+                                        </span>
+                                        <div class="o_avamet_station_btns">
+                                            <button class="btn btn-xs btn-default o_avamet_btn_sel_station"
+                                                    t-att-data-station-id="station.id">
+                                                ✓ All
+                                            </button>
+                                            <button class="btn btn-xs btn-default o_avamet_btn_desel_station"
+                                                    t-att-data-station-id="station.id">
+                                                ✗ All
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sensor rows -->
+                                    <div class="o_avamet_station_body"
+                                         t-att-data-body-for="station.id"
+                                         t-att-style="widget.expanded[station.id] ? '' : 'display:none'">
+                                        <table class="table table-condensed o_avamet_sensor_table">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width:32px"/>
+                                                    <th>API field</th>
+                                                    <th>Sensor name</th>
+                                                    <th>Sample</th>
+                                                    <th>UOM</th>
+                                                    <th>Short</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="widget._stationSensors(station.id)" t-as="sensor">
+                                                    <tr t-attf-class="o_avamet_sensor_row #{widget.sensor_sel[sensor.id] ? '' : 'o_avamet_deselected'}">
+                                                        <td>
+                                                            <input type="checkbox"
+                                                                   class="o_avamet_sensor_chk"
+                                                                   t-att-data-sensor-id="sensor.id"
+                                                                   t-att-data-station-id="station.id"
+                                                                   t-att-checked="widget.sensor_sel[sensor.id] ? 'checked' : ''"/>
+                                                        </td>
+                                                        <td class="text-muted">
+                                                            <small><t t-esc="sensor.api_field"/></small>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"
+                                                                   class="form-control input-sm o_avamet_sensor_name_input"
+                                                                   t-att-data-sensor-id="sensor.id"
+                                                                   t-att-value="sensor.sensor_name"/>
+                                                        </td>
+                                                        <td class="text-muted">
+                                                            <small><t t-esc="sensor.sample_value"/></small>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"
+                                                                   class="form-control input-sm o_avamet_uom_name_input"
+                                                                   style="width:90px"
+                                                                   t-att-data-sensor-id="sensor.id"
+                                                                   t-att-value="sensor.uom_name"/>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"
+                                                                   class="form-control input-sm o_avamet_uom_short_input"
+                                                                   style="width:55px"
+                                                                   t-att-data-sensor-id="sensor.id"
+                                                                   t-att-value="sensor.uom_short_name"/>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+
+                </div>
+            </t>
+        </field>
+    </record>
+
+</odoo>

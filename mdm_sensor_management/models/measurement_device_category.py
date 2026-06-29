@@ -3,6 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 class MeasurementDeviceCategory(models.Model):
@@ -18,6 +19,14 @@ class MeasurementDeviceCategory(models.Model):
 
     description = fields.Text(
         string='Description',
+    )
+
+    readonly = fields.Boolean(
+        string='Read Only',
+        readonly=True,
+        default=False,
+        help='Indicates if this category was created by module '
+             'installation and should not be deleted',
     )
 
     device_ids = fields.One2many(
@@ -54,3 +63,18 @@ class MeasurementDeviceCategory(models.Model):
             'domain': [('category_id', '=', self.id)],
             'context': {'default_category_id': self.id},
         }
+
+    @api.multi
+    def unlink(self):
+        allow_unlink = (
+            self.env.context.get('force_unlink', False) or
+            self.env.context.get('uninstall_mode', False) or
+            self.env.context.get('module_uninstall', False)
+        )
+        if not allow_unlink:
+            for record in self:
+                if record.readonly:
+                    raise UserError(
+                        _('You cannot delete a read-only category.'),
+                    )
+        return super(MeasurementDeviceCategory, self).unlink()

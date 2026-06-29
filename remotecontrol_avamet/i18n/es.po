@@ -1,0 +1,972 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* remotecontrol_avamet
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-29 13:49+0000\n"
+"PO-Revision-Date: 2026-06-29 13:49+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: remotecontrol_avamet
+#: model:remotecontrol,remotecontrol_help:remotecontrol_avamet.remotecontrol_avamet
+msgid "<strong>GET /historic/&lt;station_id&gt;</strong><br>\n"
+"        Purpose: fetch historic points for each selected magnitude.<br>\n"
+"        Query params: <code>api-key</code>, <code>start-timestamp</code>, <code>end-timestamp</code>.<br>\n"
+"        Headers: <code>x-api-secret</code>.<br>\n"
+"        Notes: requests are chunked in 6h windows and aggregated to one daily value per sensor/day."
+msgstr "<strong>GET /historic/&lt;station_id&gt;</strong><br>\n"
+"        Propósito: obtener puntos históricos para cada magnitud seleccionada.<br>\n"
+"        Parámetros de consulta: <code>api-key</code>, <code>start-timestamp</code>, <code>end-timestamp</code>.<br>\n"
+"        Cabeceras: <code>x-api-secret</code>.<br>\n"
+"        Notas: las peticiones se trocean en ventanas de 6h y se agregan en un valor diario por sensor/día."
+
+#. module: remotecontrol_avamet
+#: model:remotecontrol,remotecontrol_help:remotecontrol_avamet.remotecontrol_avamet
+msgid "<strong>GET /stations/&lt;station_id&gt;</strong><br>\n"
+"        Purpose: fetch station metadata (municipality/province) during device creation.<br>\n"
+"        Query params: <code>api-key</code>.<br>\n"
+"        Headers: <code>x-api-secret</code>."
+msgstr "<strong>GET /stations/&lt;station_id&gt;</strong><br>\n"
+"        Propósito: obtener metadatos de la estación (municipio/provincia) durante la creación de dispositivos.<br>\n"
+"        Parámetros de consulta: <code>api-key</code>.<br>\n"
+"        Cabeceras: <code>x-api-secret</code>."
+
+#. module: remotecontrol_avamet
+#: model:remotecontrol,remotecontrol_help:remotecontrol_avamet.remotecontrol_avamet
+msgid "<strong>GET /stations</strong><br>\n"
+"        Purpose: load station catalog in wizard reload.<br>\n"
+"        Query params: <code>api-key</code>.<br>\n"
+"        Headers: <code>x-api-secret</code>."
+msgstr "<strong>GET /stations</strong><br>\n"
+"        Propósito: cargar el catálogo de estaciones en la recarga del asistente.<br>\n"
+"        Parámetros de consulta: <code>api-key</code>.<br>\n"
+"        Cabeceras: <code>x-api-secret</code>."
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:89
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_api_field
+#, python-format
+msgid "API field"
+msgstr "Campo API"
+
+#. module: remotecontrol_avamet
+#: model:mdm.measurement.device.sensor.type,name:remotecontrol_avamet.mdm_measurement_device_sensor_type_avamet_hum_avg
+msgid "AVAMET Humidity avg"
+msgstr "AVAMET Humedad media"
+
+#. module: remotecontrol_avamet
+#: model:mdm.measurement.device.sensor.type,name:remotecontrol_avamet.mdm_measurement_device_sensor_type_avamet_hum_max
+msgid "AVAMET Humidity max"
+msgstr "AVAMET Humedad máxima"
+
+#. module: remotecontrol_avamet
+#: model:mdm.measurement.device.sensor.type,name:remotecontrol_avamet.mdm_measurement_device_sensor_type_avamet_hum_min
+msgid "AVAMET Humidity min"
+msgstr "AVAMET Humedad mínima"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:171
+#: code:addons/remotecontrol_avamet/static/src/xml/avamet_import.xml:11
+#, python-format
+msgid "AVAMET Import"
+msgstr "Importación AVAMET"
+
+#. module: remotecontrol_avamet
+#: model:mdm.measurement.device.sensor.type,name:remotecontrol_avamet.mdm_measurement_device_sensor_type_avamet_pres_avg
+msgid "AVAMET Pressure avg"
+msgstr "AVAMET Presión media"
+
+#. module: remotecontrol_avamet
+#: model:mdm.measurement.device.sensor.type,name:remotecontrol_avamet.mdm_measurement_device_sensor_type_avamet_pres_max
+msgid "AVAMET Pressure max"
+msgstr "AVAMET Presión máxima"
+
+#. module: remotecontrol_avamet
+#: model:mdm.measurement.device.sensor.type,name:remotecontrol_avamet.mdm_measurement_device_sensor_type_avamet_pres_min
+msgid "AVAMET Pressure min"
+msgstr "AVAMET Presión mínima"
+
+#. module: remotecontrol_avamet
+#: model:mdm.measurement.device.sensor.type,name:remotecontrol_avamet.mdm_measurement_device_sensor_type_avamet_rain
+msgid "AVAMET Rain"
+msgstr "AVAMET Lluvia"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_view_form
+msgid "AVAMET Stations"
+msgstr "Estaciones AVAMET"
+
+#. module: remotecontrol_avamet
+#: model:mdm.measurement.device.sensor.type,name:remotecontrol_avamet.mdm_measurement_device_sensor_type_avamet_temp_avg
+msgid "AVAMET Temperature avg"
+msgstr "AVAMET Temperatura media"
+
+#. module: remotecontrol_avamet
+#: model:mdm.measurement.device.sensor.type,name:remotecontrol_avamet.mdm_measurement_device_sensor_type_avamet_temp_max
+msgid "AVAMET Temperature max"
+msgstr "AVAMET Temperatura máxima"
+
+#. module: remotecontrol_avamet
+#: model:mdm.measurement.device.sensor.type,name:remotecontrol_avamet.mdm_measurement_device_sensor_type_avamet_temp_min
+msgid "AVAMET Temperature min"
+msgstr "AVAMET Temperatura mínima"
+
+#. module: remotecontrol_avamet
+#: model:mdm.measurement.device.sensor.type,name:remotecontrol_avamet.mdm_measurement_device_sensor_type_avamet_wind_avg
+msgid "AVAMET Wind avg"
+msgstr "AVAMET Viento medio"
+
+#. module: remotecontrol_avamet
+#: model:mdm.measurement.device.sensor.type,name:remotecontrol_avamet.mdm_measurement_device_sensor_type_avamet_wind_dir
+msgid "AVAMET Wind direction"
+msgstr "AVAMET Dirección del viento"
+
+#. module: remotecontrol_avamet
+#: model:mdm.measurement.device.sensor.type,name:remotecontrol_avamet.mdm_measurement_device_sensor_type_avamet_wind_gust
+msgid "AVAMET Wind gust"
+msgstr "AVAMET Racha de viento"
+
+#. module: remotecontrol_avamet
+#: model:remotecontrol,remotecontrol_help:remotecontrol_avamet.remotecontrol_avamet
+msgid "AVAMET connector (WeatherLink v2)"
+msgstr "Conector AVAMET (WeatherLink v2)"
+
+#. module: remotecontrol_avamet
+#: model:ir.model,name:remotecontrol_avamet.model_remotecontrol_avamet_import_wizard
+msgid "AVAMET import wizard"
+msgstr "Asistente de importación AVAMET"
+
+#. module: remotecontrol_avamet
+#: model:ir.model,name:remotecontrol_avamet.model_remotecontrol_avamet_import_wizard_device_line
+msgid "AVAMET import wizard device line"
+msgstr "Línea de dispositivo del asistente AVAMET"
+
+#. module: remotecontrol_avamet
+#: model:ir.model,name:remotecontrol_avamet.model_remotecontrol_avamet_import_wizard_line
+msgid "AVAMET import wizard line"
+msgstr "Línea del asistente de importación AVAMET"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_line_view_tree
+msgid "AVAMET sensors"
+msgstr "Sensores AVAMET"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/wizard/avamet_import_wizard.py:106
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+#, python-format
+msgid "AVAMET station import"
+msgstr "Importación de estaciones AVAMET"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:376
+#, python-format
+msgid "Absolute Pressure"
+msgstr "Presión absoluta"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:82
+#, python-format
+msgid "All"
+msgstr "Todo"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+msgid "Are you sure you want to clear all loaded stations and sensors?"
+msgstr "¿Seguro que quieres limpiar todas las estaciones y sensores cargados?"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line_ids
+msgid "Available devices"
+msgstr "Dispositivos disponibles"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_ids
+msgid "Available sensors"
+msgstr "Sensores disponibles"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/wizard/avamet_import_wizard.py:295
+#, python-format
+msgid "Bad request: invalid historic range or station data."
+msgstr "Solicitud incorrecta: rango histórico o datos de estación no válidos."
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+msgid "Clear loaded data"
+msgstr "Limpiar datos cargados"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:86
+#, python-format
+msgid "Click \"Load from AVAMET\" to fetch available stations and sensors."
+msgstr "Haz clic en \"Cargar desde AVAMET\" para obtener las estaciones y sensores disponibles."
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+msgid "Close"
+msgstr "Cerrar"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:380
+#, python-format
+msgid "Cooling Degree Days"
+msgstr "Grados día de refrigeración"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:75
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+#, python-format
+msgid "Create devices and sensors"
+msgstr "Crear dispositivos y sensores"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_create_uid
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line_create_uid
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_create_date
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line_create_date
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:76
+#, python-format
+msgid "Creating..."
+msgstr "Creando..."
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,help:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_initial_date
+msgid "Default start date written in device/sensor parameters."
+msgstr "Fecha de inicio por defecto escrita en los parámetros de dispositivo/sensor."
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:81
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+#, python-format
+msgid "Deselect all"
+msgstr "Deseleccionar todo"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+msgid "Deselect all sensors"
+msgstr "Deseleccionar todos los sensores"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+msgid "Deselect all stations"
+msgstr "Deseleccionar todas las estaciones"
+
+#. module: remotecontrol_avamet
+#: model:ir.actions.server,name:remotecontrol_avamet.remotecontrol_avamet_set_selected_false
+msgid "Deselect sensors"
+msgstr "Deseleccionar sensores"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:83
+#, python-format
+msgid "Device already exists – will be updated"
+msgstr "El dispositivo ya existe: se actualizará"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_device_line_id
+msgid "Device line"
+msgstr "Línea de dispositivo"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:383
+#, python-format
+msgid "Dew Point"
+msgstr "Punto de rocío"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:381
+#, python-format
+msgid "Dew Point High"
+msgstr "Punto de rocío alto"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:384
+#, python-format
+msgid "Dew Point Low"
+msgstr "Punto de rocío bajo"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line_display_name
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_display_name
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_display_name
+msgid "Display Name"
+msgstr "Nombre a mostrar"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/wizard/avamet_import_wizard.py:322
+#, python-format
+msgid "Duplicated sensor name for station %s: %s"
+msgstr "Nombre de sensor duplicado para la estación %s: %s"
+
+#. module: remotecontrol_avamet
+#: model:remotecontrol,remotecontrol_help:remotecontrol_avamet.remotecontrol_avamet
+msgid "Each sensor stores one AVAMET magnitude in <strong>remotecontrol_params</strong> with key <code>magnitude</code>."
+msgstr "Cada sensor guarda una magnitud AVAMET en <strong>remotecontrol_params</strong> con la clave <code>magnitude</code>."
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+msgid "Edit sensor names and units before creating. Sensors are ordered by station name."
+msgstr "Edita nombres de sensor y unidades antes de crear. Los sensores se ordenan por nombre de estación."
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:385
+#, python-format
+msgid "Evapotranspiration"
+msgstr "Evapotranspiración"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/wizard/avamet_import_wizard.py:293
+#, python-format
+msgid "Forbidden: no permission to read historic data."
+msgstr "Prohibido: sin permisos para leer datos históricos."
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_line_view_search
+msgid "Group by UOM"
+msgstr "Agrupar por UdM"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_line_view_search
+msgid "Group by station"
+msgstr "Agrupar por estación"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:388
+#, python-format
+msgid "Heat Index"
+msgstr "Índice de calor"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:386
+#, python-format
+msgid "Heat Index High"
+msgstr "Índice de calor alto"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:389
+#, python-format
+msgid "Heating Degree Days"
+msgstr "Grados día de calefacción"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_line_view_search
+msgid "Humidity"
+msgstr "Humedad"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line_id
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_id
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_id
+msgid "ID"
+msgstr "ID"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:78
+#, python-format
+msgid "Import log"
+msgstr "Registro de importación"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:382
+#, python-format
+msgid "Indoor Dew Point"
+msgstr "Punto de rocío interior"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:387
+#, python-format
+msgid "Indoor Heat Index"
+msgstr "Índice de calor interior"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:392
+#, python-format
+msgid "Indoor Humidity"
+msgstr "Humedad interior"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:391
+#, python-format
+msgid "Indoor Humidity High"
+msgstr "Humedad interior alta"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:393
+#, python-format
+msgid "Indoor Humidity Low"
+msgstr "Humedad interior baja"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:408
+#, python-format
+msgid "Indoor Temperature"
+msgstr "Temperatura interior"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:407
+#, python-format
+msgid "Indoor Temperature High"
+msgstr "Temperatura interior alta"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:409
+#, python-format
+msgid "Indoor Temperature Low"
+msgstr "Temperatura interior baja"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:73
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_initial_date
+#, python-format
+msgid "Initial date"
+msgstr "Fecha inicial"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_is_avamet
+msgid "Is AVAMET"
+msgstr "Es AVAMET"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard___last_update
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line___last_update
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line___last_update
+msgid "Last Modified on"
+msgstr "Última modificación en"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line_write_uid
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_write_uid
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line_write_date
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_write_date
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:74
+#, python-format
+msgid "Load from AVAMET"
+msgstr "Cargar desde AVAMET"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:77
+#, python-format
+msgid "Loading stations from AVAMET API..."
+msgstr "Cargando estaciones desde la API de AVAMET..."
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,help:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_status_message
+msgid "Messages from the last reload operation."
+msgstr "Mensajes de la última operación de recarga."
+
+#. module: remotecontrol_avamet
+#: model:remotecontrol,remotecontrol_help:remotecontrol_avamet.remotecontrol_avamet
+msgid "Network behavior: retries with backoff are applied for timeout, connection errors, HTTP 429 and HTTP 5xx."
+msgstr "Comportamiento de red: se aplican reintentos con backoff para timeout, errores de conexión, HTTP 429 y HTTP 5xx."
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_not_selected_count
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_line_view_search
+msgid "Not selected"
+msgstr "No seleccionado"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/wizard/avamet_import_wizard.py:312
+#, python-format
+msgid "Please select at least one sensor."
+msgstr "Selecciona al menos un sensor."
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:377
+#, python-format
+msgid "Pressure High"
+msgstr "Presión alta"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:378
+#, python-format
+msgid "Pressure Low"
+msgstr "Presión baja"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:426
+#, python-format
+msgid "Prevailing Wind Direction"
+msgstr "Dirección predominante del viento"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_line_view_search
+msgid "Rain"
+msgstr "Lluvia"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:398
+#, python-format
+msgid "Rain Rate High"
+msgstr "Tasa de lluvia alta"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:397
+#, python-format
+msgid "Rain Rate High (in)"
+msgstr "Tasa de lluvia alta (in)"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:396
+#, python-format
+msgid "Rain Rate High (pulses)"
+msgstr "Tasa de lluvia alta (pulsos)"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:401
+#, python-format
+msgid "Rainfall"
+msgstr "Precipitación"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:400
+#, python-format
+msgid "Rainfall (in)"
+msgstr "Precipitación (in)"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:399
+#, python-format
+msgid "Rainfall (pulses)"
+msgstr "Precipitación (pulsos)"
+
+#. module: remotecontrol_avamet
+#: model:remotecontrol,remotecontrol_help:remotecontrol_avamet.remotecontrol_avamet
+msgid "Readings are imported from daily WeatherLink historic data and aggregated into one daily value."
+msgstr "Las lecturas se importan de datos históricos diarios de WeatherLink y se agregan en un valor diario."
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:394
+#, python-format
+msgid "Relative Humidity"
+msgstr "Humedad relativa"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:390
+#, python-format
+msgid "Relative Humidity High"
+msgstr "Humedad relativa alta"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:395
+#, python-format
+msgid "Relative Humidity Low"
+msgstr "Humedad relativa baja"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+msgid "Reload stations from AVAMET"
+msgstr "Recargar estaciones desde AVAMET"
+
+#. module: remotecontrol_avamet
+#: model:ir.model,name:remotecontrol_avamet.model_remotecontrol
+msgid "Remote Control Definition"
+msgstr "Definición de Telecontrol"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_remotecontrol_id
+msgid "Remotecontrol"
+msgstr "Telecontrol"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/wizard/avamet_import_wizard.py:184
+#, python-format
+msgid "Remotecontrol is required."
+msgstr "El telecontrol es obligatorio."
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+msgid "Remove"
+msgstr "Eliminar"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+msgid "Remove this station and all its sensors?"
+msgstr "¿Eliminar esta estación y todos sus sensores?"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:91
+#, python-format
+msgid "Sample"
+msgstr "Muestra"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_sample_value
+msgid "Sample value"
+msgstr "Valor de muestra"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:379
+#, python-format
+msgid "Sea Level Pressure"
+msgstr "Presión a nivel del mar"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_line_view_search
+msgid "Search sensors"
+msgstr "Buscar sensores"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line_selected
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_selected
+msgid "Select"
+msgstr "Seleccionar"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:80
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+#, python-format
+msgid "Select all"
+msgstr "Seleccionar todo"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+msgid "Select all sensors"
+msgstr "Seleccionar todos los sensores"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+msgid "Select all stations"
+msgstr "Seleccionar todas las estaciones"
+
+#. module: remotecontrol_avamet
+#: model:ir.actions.server,name:remotecontrol_avamet.remotecontrol_avamet_set_selected_true
+msgid "Select sensors"
+msgstr "Seleccionar sensores"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+msgid "Select which stations and sensors to import. Per-row buttons act on that station only."
+msgstr "Selecciona qué estaciones y sensores importar. Los botones de cada fila actúan solo sobre esa estación."
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_selected_count
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_line_view_search
+msgid "Selected"
+msgstr "Seleccionado"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/wizard/avamet_import_wizard.py:317
+#, python-format
+msgid "Selected lines require API field and sensor name."
+msgstr "Las líneas seleccionadas requieren campo API y nombre de sensor."
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line_sensor_selected
+msgid "Selected sensors"
+msgstr "Sensores seleccionados"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:85
+#, python-format
+msgid "Sensor already exists – will be updated"
+msgstr "El sensor ya existe: se actualizará"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:90
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_sensor_name
+#, python-format
+msgid "Sensor name"
+msgstr "Nombre del sensor"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line_sensor_line_ids
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line_sensor_total
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+msgid "Sensors"
+msgstr "Sensores"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:93
+#, python-format
+msgid "Short"
+msgstr "Corto"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:402
+#, python-format
+msgid "Solar Energy"
+msgstr "Energía solar"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:403
+#, python-format
+msgid "Solar Radiation Average"
+msgstr "Radiación solar media"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:404
+#, python-format
+msgid "Solar Radiation High"
+msgstr "Radiación solar alta"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line_station_name
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_station_name
+msgid "Station"
+msgstr "Estación"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line_station_id
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_station_id
+msgid "Station ID"
+msgstr "ID de estación"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/wizard/avamet_import_wizard.py:205
+#, python-format
+msgid "Station catalog fetch failed: %s"
+msgstr "Falló la obtención del catálogo de estaciones: %s"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_view_form
+msgid "Stations"
+msgstr "Estaciones"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_station_count
+msgid "Stations found"
+msgstr "Estaciones encontradas"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_status_message
+msgid "Status"
+msgstr "Estado"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:413
+#, python-format
+msgid "THSW Index"
+msgstr "Índice THSW"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:412
+#, python-format
+msgid "THSW Index High"
+msgstr "Índice THSW alto"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:414
+#, python-format
+msgid "THSW Index Low"
+msgstr "Índice THSW bajo"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:416
+#, python-format
+msgid "THW Index"
+msgstr "Índice THW"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:415
+#, python-format
+msgid "THW Index High"
+msgstr "Índice THW alto"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:417
+#, python-format
+msgid "THW Index Low"
+msgstr "Índice THW bajo"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:410
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_line_view_search
+#, python-format
+msgid "Temperature"
+msgstr "Temperatura"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:405
+#, python-format
+msgid "Temperature Average"
+msgstr "Temperatura media"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:406
+#, python-format
+msgid "Temperature High"
+msgstr "Temperatura alta"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:411
+#, python-format
+msgid "Temperature Low"
+msgstr "Temperatura baja"
+
+#. module: remotecontrol_avamet
+#: model:remotecontrol,remotecontrol_help:remotecontrol_avamet.remotecontrol_avamet
+msgid "This connector fetches weather station data from WeatherLink v2 JSON API."
+msgstr "Este conector obtiene datos de estaciones meteorológicas de la API JSON de WeatherLink v2."
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:92
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_uom_name
+#, python-format
+msgid "UOM"
+msgstr "UdM"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_uom_short_name
+msgid "UOM short"
+msgstr "UdM corta"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:418
+#, python-format
+msgid "UV Dose"
+msgstr "Dosis UV"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:419
+#, python-format
+msgid "UV Index Average"
+msgstr "Índice UV medio"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:420
+#, python-format
+msgid "UV Index High"
+msgstr "Índice UV alto"
+
+#. module: remotecontrol_avamet
+#: model:remotecontrol,remotecontrol_help:remotecontrol_avamet.remotecontrol_avamet
+msgid "Use the button <strong>AVAMET Stations</strong> to create devices and sensors from the configured stations list."
+msgstr "Usa el botón <strong>Estaciones AVAMET</strong> para crear dispositivos y sensores desde la lista de estaciones configurada."
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_variable_count
+msgid "Variables found"
+msgstr "Variables encontradas"
+
+#. module: remotecontrol_avamet
+#: model:remotecontrol,remotecontrol_help:remotecontrol_avamet.remotecontrol_avamet
+msgid "WeatherLink API calls used by this module"
+msgstr "Llamadas a la API de WeatherLink usadas por este módulo"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:422
+#, python-format
+msgid "Wet Bulb"
+msgstr "Bulbo húmedo"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:421
+#, python-format
+msgid "Wet Bulb High"
+msgstr "Bulbo húmedo alto"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:423
+#, python-format
+msgid "Wet Bulb Low"
+msgstr "Bulbo húmedo bajo"
+
+#. module: remotecontrol_avamet
+#: model:ir.ui.view,arch_db:remotecontrol_avamet.remotecontrol_avamet_import_wizard_line_view_search
+msgid "Wind"
+msgstr "Viento"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:424
+#, python-format
+msgid "Wind Chill"
+msgstr "Sensación térmica"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:425
+#, python-format
+msgid "Wind Chill Low"
+msgstr "Sensación térmica baja"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:430
+#, python-format
+msgid "Wind Direction at Max Speed"
+msgstr "Dirección del viento a velocidad máxima"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:427
+#, python-format
+msgid "Wind Run"
+msgstr "Recorrido del viento"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:428
+#, python-format
+msgid "Wind Speed Average"
+msgstr "Velocidad media del viento"
+
+#. module: remotecontrol_avamet
+#: code:addons/remotecontrol_avamet/models/remotecontrol.py:429
+#, python-format
+msgid "Wind Speed High"
+msgstr "Velocidad alta del viento"
+
+#. module: remotecontrol_avamet
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_device_line_wizard_id
+#: model:ir.model.fields,field_description:remotecontrol_avamet.field_remotecontrol_avamet_import_wizard_line_wizard_id
+msgid "Wizard"
+msgstr "Asistente"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:84
+#, python-format
+msgid "exists"
+msgstr "existe"
+
+#. module: remotecontrol_avamet
+#. openerp-web
+#: code:addons/remotecontrol_avamet/static/src/js/avamet_import.js:79
+#, python-format
+msgid "sensors selected"
+msgstr "sensores seleccionados"
+

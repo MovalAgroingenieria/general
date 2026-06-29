@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="remotecontrol_avamet_import_wizard_view_form" model="ir.ui.view">
+        <field name="name">remotecontrol.avamet.import.wizard form</field>
+        <field name="model">remotecontrol.avamet.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="AVAMET station import" create="false">
+                <header>
+                    <button name="action_create_devices"
+                            type="object"
+                            class="oe_highlight"
+                            string="Create devices and sensors"
+                            attrs="{'invisible': [('selected_count', '=', 0)]}"/>
+                    <button string="Close" class="btn-default" special="cancel"/>
+                </header>
+                <group>
+                    <group>
+                        <field name="remotecontrol_id" readonly="1"/>
+                        <field name="initial_date"/>
+                    </group>
+                    <group attrs="{'invisible': [('station_count', '=', 0)]}">
+                        <field name="station_count" readonly="1"/>
+                        <field name="variable_count" readonly="1"/>
+                        <field name="selected_count" readonly="1"/>
+                        <field name="not_selected_count" readonly="1"/>
+                    </group>
+                </group>
+                <group>
+                    <button name="action_reload_stations"
+                            type="object"
+                            class="oe_highlight"
+                            string="Reload stations from AVAMET"
+                            icon="fa-refresh"/>
+                    <button name="action_clear_data"
+                            type="object"
+                            string="Clear loaded data"
+                            icon="fa-trash"
+                            confirm="Are you sure you want to clear all loaded stations and sensors?"
+                            attrs="{'invisible': [('station_count', '=', 0)]}"/>
+                </group>
+                <div attrs="{'invisible': [('status_message', '=', False)]}">
+                    <field name="status_message" nolabel="1" readonly="1"/>
+                </div>
+                <div attrs="{'invisible': [('station_count', '=', 0)]}">
+                    <notebook>
+                        <page string="Stations">
+                            <p class="oe_grey">Select which stations and sensors to import. Per-row buttons act on that station only.</p>
+                            <group>
+                                <button name="action_select_all_devices"
+                                        type="object"
+                                        string="Select all stations"/>
+                                <button name="action_deselect_all_devices"
+                                        type="object"
+                                        string="Deselect all stations"/>
+                                <button name="action_select_all_lines"
+                                        type="object"
+                                        string="Select all sensors"/>
+                                <button name="action_deselect_all_lines"
+                                        type="object"
+                                        string="Deselect all sensors"/>
+                            </group>
+                            <field name="device_line_ids" nolabel="1">
+                                <tree string="Stations" editable="bottom">
+                                    <field name="selected"/>
+                                    <field name="station_name" readonly="1"/>
+                                    <field name="station_id" readonly="1"/>
+                                    <field name="sensor_selected" readonly="1"/>
+                                    <field name="sensor_total" readonly="1"/>
+                                    <button name="action_select_all_sensors"
+                                            type="object"
+                                            string="Select all"/>
+                                    <button name="action_deselect_all_sensors"
+                                            type="object"
+                                            string="Deselect all"/>
+                                    <button name="action_remove_device_line"
+                                            type="object"
+                                            string="Remove"
+                                            confirm="Remove this station and all its sensors?"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Sensors">
+                            <p class="oe_grey">Edit sensor names and units before creating. Sensors are ordered by station name.</p>
+                            <group>
+                                <button name="action_select_all_lines"
+                                        type="object"
+                                        string="Select all sensors"/>
+                                <button name="action_deselect_all_lines"
+                                        type="object"
+                                        string="Deselect all sensors"/>
+                            </group>
+                            <field name="line_ids" nolabel="1">
+                                <tree string="Sensors" editable="bottom">
+                                    <field name="selected"/>
+                                    <field name="station_name" readonly="1"/>
+                                    <field name="station_id" readonly="1"/>
+                                    <field name="api_field" readonly="1"/>
+                                    <field name="sensor_name"/>
+                                    <field name="sample_value" readonly="1"/>
+                                    <field name="uom_name"/>
+                                    <field name="uom_short_name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="remotecontrol_avamet_import_wizard_line_view_tree"
+            model="ir.ui.view">
+        <field name="name">remotecontrol.avamet.import.wizard.line tree</field>
+        <field name="model">remotecontrol.avamet.import.wizard.line</field>
+        <field name="arch" type="xml">
+            <tree string="AVAMET sensors" editable="bottom">
+                <field name="selected"/>
+                <field name="station_name" readonly="1"/>
+                <field name="station_id" readonly="1"/>
+                <field name="api_field" readonly="1"/>
+                <field name="sensor_name"/>
+                <field name="sample_value" readonly="1"/>
+                <field name="uom_name"/>
+                <field name="uom_short_name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="remotecontrol_avamet_import_wizard_line_view_search"
+            model="ir.ui.view">
+        <field name="name">remotecontrol.avamet.import.wizard.line search</field>
+        <field name="model">remotecontrol.avamet.import.wizard.line</field>
+        <field name="arch" type="xml">
+            <search string="Search sensors">
+                <field name="station_name"/>
+                <field name="station_id"/>
+                <field name="api_field"/>
+                <field name="sensor_name"/>
+                <field name="uom_name"/>
+                <filter name="selected"
+                        string="Selected"
+                        domain="[('selected', '=', True)]"/>
+                <filter name="not_selected"
+                        string="Not selected"
+                        domain="[('selected', '=', False)]"/>
+                <filter name="temperature"
+                    string="Temperature"
+                    domain="['|', ('api_field', 'ilike', 'temp_'),
+                         ('sensor_name', 'ilike', 'temp')]"/>
+                <filter name="humidity"
+                    string="Humidity"
+                    domain="['|', ('api_field', 'ilike', 'hum_'),
+                         ('sensor_name', 'ilike', 'hum')]"/>
+                <filter name="wind"
+                    string="Wind"
+                    domain="['|', ('api_field', 'ilike', 'wind_'),
+                         ('sensor_name', 'ilike', 'wind')]"/>
+                <filter name="rain"
+                    string="Rain"
+                    domain="['|', ('api_field', 'ilike', 'rain'),
+                         ('sensor_name', 'ilike', 'rain')]"/>
+                <filter name="group_by_station"
+                        string="Group by station"
+                        context="{'group_by': 'station_name'}"/>
+                <filter name="group_by_uom"
+                        string="Group by UOM"
+                        context="{'group_by': 'uom_name'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="remotecontrol_avamet_set_selected_true" model="ir.actions.server">
+        <field name="name">Select sensors</field>
+        <field name="model_id" ref="model_remotecontrol_avamet_import_wizard_line"/>
+        <field name="state">code</field>
+        <field name="code">
+            if context.get('active_ids'):
+                action = env['remotecontrol.avamet.import.wizard.line'].browse(context['active_ids']).set_selected(ref_value=True)
+        </field>
+    </record>
+
+    <record id="remotecontrol_avamet_action_set_selected_true" model="ir.values">
+        <field name="name">Select sensors</field>
+        <field name="model">remotecontrol.avamet.import.wizard.line</field>
+        <field name="key">action</field>
+        <field name="key2">client_action_multi</field>
+        <field name="value" eval="'ir.actions.server,' + str(ref('remotecontrol_avamet_set_selected_true'))"/>
+    </record>
+
+    <record id="remotecontrol_avamet_set_selected_false" model="ir.actions.server">
+        <field name="name">Deselect sensors</field>
+        <field name="model_id" ref="model_remotecontrol_avamet_import_wizard_line"/>
+        <field name="state">code</field>
+        <field name="code">
+            if context.get('active_ids'):
+                action = env['remotecontrol.avamet.import.wizard.line'].browse(context['active_ids']).set_selected(ref_value=False)
+        </field>
+    </record>
+
+    <record id="remotecontrol_avamet_action_set_selected_false" model="ir.values">
+        <field name="name">Deselect sensors</field>
+        <field name="model">remotecontrol.avamet.import.wizard.line</field>
+        <field name="key">action</field>
+        <field name="key2">client_action_multi</field>
+        <field name="value" eval="'ir.actions.server,' + str(ref('remotecontrol_avamet_set_selected_false'))"/>
+    </record>
+
+</odoo>
