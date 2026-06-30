@@ -44,6 +44,17 @@ class MeasurementDeviceCategory(models.Model):
         ('name_uniq', 'UNIQUE(name)', 'Category name must be unique!'),
     ]
 
+    @api.model
+    def create(self, vals):
+        if self.env.context.get('install_mode') and vals.get('name'):
+            existing = self.with_context(active_test=False).search(
+                [('name', '=', vals['name'])],
+                limit=1,
+            )
+            if existing:
+                return existing
+        return super(MeasurementDeviceCategory, self).create(vals)
+
     @api.depends('device_ids')
     def _compute_device_count(self):
         for category in self:
