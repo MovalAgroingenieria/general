@@ -8,6 +8,16 @@ from odoo import api, fields, models
 class CreditControlLine(models.Model):
     _inherit = "credit.control.line"
 
+    # Performance: index the foreign keys used to look up credit control
+    # lines. Without these, reading an invoice's credit_control_line_ids or
+    # the policy move-line matching does a full sequential scan of the table,
+    # which gets slower as it grows.
+    move_line_id = fields.Many2one(index=True)
+
+    invoice_id = fields.Many2one(index=True)
+
+    partner_id = fields.Many2one(index=True)
+
     invoice_date = fields.Date(
         string="Invoice date",
         compute="_compute_invoice_date",
