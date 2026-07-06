@@ -34,7 +34,7 @@ def migrate(cr, version):
             _logger.info(
                 'Found existing UoM "%s" (id: %s, readonly: %s). '
                 'Renaming to "%s"',
-                old_name, uom_id, is_readonly, new_name
+                old_name, uom_id, is_readonly, new_name,
             )
             # Update the name even if it's readonly
             cr.execute("""
