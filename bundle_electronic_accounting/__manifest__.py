@@ -13,6 +13,7 @@
     "depends": [
         "bundle_common_accounting",
         "l10n_es_aeat_sii_oca",
+        "l10n_es_aeat_sii_oca_extended",
         "l10n_es_facturae",
         "l10n_es_facturae_face",
         "l10n_es_verifactu_oca",
