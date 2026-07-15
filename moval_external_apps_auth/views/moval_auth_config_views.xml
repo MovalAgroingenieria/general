@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Config view: system-level auth settings (shown in Settings) -->
+    <record id="moval_auth_config_view" model="ir.ui.view">
+        <field name="name">moval.auth.config.settings.form</field>
+        <field name="model">moval.auth.config</field>
+        <field name="arch" type="xml">
+            <form string="Moval External Apps Auth" create="false" edit="true">
+                <sheet>
+                    <group string="Service Account (per Odoo instance)">
+                        <field name="moval_keycloak_token_url"/>
+                        <field name="moval_service_username"/>
+                        <field name="moval_service_password" password="True"/>
+                    </group>
+                    <group string="External PostgreSQL (optional)">
+                        <field name="moval_external_pg_host"/>
+                        <field name="moval_external_pg_port"/>
+                    </group>
+                    <footer>
+                        <button string="Save" type="object" name="set_default_values"
+                                class="btn-primary"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_moval_auth_config" model="ir.actions.act_window">
+        <field name="name">Moval External Apps Auth</field>
+        <field name="res_model">moval.auth.config</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+    </record>
+
+    <menuitem id="menu_moval_auth_config"
+              name="Auth Settings"
+              parent="menu_moval_auth_root"
+              action="action_moval_auth_config"
+              groups="base.group_system"
+              sequence="2"/>
+
+</odoo>

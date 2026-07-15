@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List view -->
+    <record id="moval_external_app_list" model="ir.ui.view">
+        <field name="name">moval.external.app.list</field>
+        <field name="model">moval.external.app</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="slug"/>
+                <field name="app_url"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form view -->
+    <record id="moval_external_app_form" model="ir.ui.view">
+        <field name="name">moval.external.app.form</field>
+        <field name="model">moval.external.app</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="slug"/>
+                        <field name="app_url"/>
+                        <field name="active"/>
+                    </group>
+                    <group string="Keycloak (per-app OIDC client)">
+                        <field name="keycloak_client_id"/>
+                        <field name="keycloak_client_secret" password="True"/>
+                    </group>
+                    <group string="App - Odoo channel">
+                        <field name="app_shared_secret" password="True"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_moval_external_app" model="ir.actions.act_window">
+        <field name="name">External Apps</field>
+        <field name="res_model">moval.external.app</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Root menu: Settings > Technical > Autenticación (admin-only) -->
+    <menuitem id="menu_moval_auth_root"
+              name="Autenticación"
+              parent="base.menu_custom"
+              groups="base.group_system"
+              sequence="50"/>
+
+    <!-- Menu under Settings > Autenticación -->
+    <menuitem id="menu_moval_external_apps"
+              name="External Apps"
+              parent="menu_moval_auth_root"
+              action="action_moval_external_app"
+              groups="base.group_system"
+              sequence="1"/>
+
+</odoo>
