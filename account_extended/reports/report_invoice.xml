@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report action -->
+    <record id="action_report_vendor_bill_receipt" model="ir.actions.report">
+        <field name="name">Vendor Bill / Receipt</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">account_extended.report_vendor_bill_receipt</field>
+        <field name="report_file">account_extended.report_vendor_bill_receipt</field>
+        <field name="print_report_name">(object._get_report_base_filename())</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Template -->
+    <template id="report_vendor_bill_receipt">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lang" t-value="o.partner_id.lang"/>
+                <t t-call="account_extended.report_vendor_bill_receipt_document" t-lang="lang"/>
+            </t>
+        </t>
+    </template>
+
+    <!-- Document template: inherits from the standard invoice document.
+         Addresses are swapped: the header shows the customer address and the
+         body block shows the company address. -->
+    <template id="report_vendor_bill_receipt_document" inherit_id="account.report_invoice_document" primary="True">
+        <xpath expr="//t[@t-set='forced_vat']" position="after">
+            <t t-set="swap_company_customer" t-value="True"/>
+        </xpath>
+        <xpath expr="//div[hasclass('row')][1]" position="after">
+            <t t-set="information_block"/>
+            <t t-set="address">
+                <address class="mb-0" t-field="o.company_id.partner_id"
+                         t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+                <div t-if="o.company_id.partner_id.vat" id="company_vat">
+                    <t t-if="o.company_id.account_fiscal_country_id.vat_label"
+                       t-out="o.company_id.account_fiscal_country_id.vat_label"/>
+                    <t t-else="">Tax ID</t>: <span t-field="o.company_id.partner_id.vat"/>
+                </div>
+            </t>
+        </xpath>
+    </template>
+
+</odoo>
