@@ -573,5 +573,53 @@
         </div>
     </template>
 
+    <!-- Address swap for reports that set the swap_company_customer flag -->
+    <template id="report_swap_customer_address">
+        <ul class="list-unstyled" name="customer_address_list" t-if="swap_company_customer and o">
+            <li>
+                <span t-field="o.partner_id"
+                      t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'/>
+            </li>
+            <li t-if="o.partner_id.vat">
+                <t t-out="o.partner_id.country_id.vat_label or 'Tax ID'">Tax ID</t>: <span t-field="o.partner_id.vat"/>
+            </li>
+        </ul>
+    </template>
+
+    <template id="external_layout_standard_swap" inherit_id="web.external_layout_standard">
+        <xpath expr="//ul[@name='company_address_list']" position="attributes">
+            <attribute name="t-if">not swap_company_customer</attribute>
+        </xpath>
+        <xpath expr="//ul[@name='company_address_list']" position="after">
+            <t t-call="base_report.report_swap_customer_address"/>
+        </xpath>
+    </template>
+
+    <template id="external_layout_striped_swap" inherit_id="web.external_layout_striped">
+        <xpath expr="//ul[@name='company_address_list']" position="attributes">
+            <attribute name="t-if">not swap_company_customer</attribute>
+        </xpath>
+        <xpath expr="//ul[@name='company_address_list']" position="after">
+            <t t-call="base_report.report_swap_customer_address"/>
+        </xpath>
+    </template>
+
+    <template id="external_layout_boxed_swap" inherit_id="web.external_layout_boxed">
+        <xpath expr="//ul[@name='company_address_list']" position="attributes">
+            <attribute name="t-if">not swap_company_customer</attribute>
+        </xpath>
+        <xpath expr="//ul[@name='company_address_list']" position="after">
+            <t t-call="base_report.report_swap_customer_address"/>
+        </xpath>
+    </template>
+
+    <template id="external_layout_bold_swap" inherit_id="web.external_layout_bold">
+        <xpath expr="//ul[@name='company_address_list']" position="attributes">
+            <attribute name="t-if">not swap_company_customer</attribute>
+        </xpath>
+        <xpath expr="//ul[@name='company_address_list']" position="after">
+            <t t-call="base_report.report_swap_customer_address"/>
+        </xpath>
+    </template>
 
 </odoo>
