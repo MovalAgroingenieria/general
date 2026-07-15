@@ -587,6 +587,9 @@
     </template>
 
     <template id="external_layout_standard_swap" inherit_id="web.external_layout_standard">
+        <xpath expr="//img[@t-if='company.logo']" position="attributes">
+            <attribute name="t-if">company.logo and not swap_company_customer</attribute>
+        </xpath>
         <xpath expr="//ul[@name='company_address_list']" position="attributes">
             <attribute name="t-if">not swap_company_customer</attribute>
         </xpath>
@@ -596,6 +599,9 @@
     </template>
 
     <template id="external_layout_striped_swap" inherit_id="web.external_layout_striped">
+        <xpath expr="//img[@t-if='company.logo']" position="attributes">
+            <attribute name="t-if">company.logo and not swap_company_customer</attribute>
+        </xpath>
         <xpath expr="//ul[@name='company_address_list']" position="attributes">
             <attribute name="t-if">not swap_company_customer</attribute>
         </xpath>
@@ -605,6 +611,9 @@
     </template>
 
     <template id="external_layout_boxed_swap" inherit_id="web.external_layout_boxed">
+        <xpath expr="//img[@t-if='company.logo']" position="attributes">
+            <attribute name="t-if">company.logo and not swap_company_customer</attribute>
+        </xpath>
         <xpath expr="//ul[@name='company_address_list']" position="attributes">
             <attribute name="t-if">not swap_company_customer</attribute>
         </xpath>
@@ -614,11 +623,33 @@
     </template>
 
     <template id="external_layout_bold_swap" inherit_id="web.external_layout_bold">
+        <xpath expr="//img[@t-if='company.logo']" position="attributes">
+            <attribute name="t-if">company.logo and not swap_company_customer</attribute>
+        </xpath>
         <xpath expr="//ul[@name='company_address_list']" position="attributes">
             <attribute name="t-if">not swap_company_customer</attribute>
         </xpath>
         <xpath expr="//ul[@name='company_address_list']" position="after">
             <t t-call="base_report.report_swap_customer_address"/>
+        </xpath>
+    </template>
+
+    <!-- Hide the company logo when swapping addresses (layouts without address swap) -->
+    <template id="external_layout_folder_swap" inherit_id="web.external_layout_folder">
+        <xpath expr="//img[@t-if='company.logo']" position="attributes">
+            <attribute name="t-if">company.logo and not swap_company_customer</attribute>
+        </xpath>
+    </template>
+
+    <template id="external_layout_wave_swap" inherit_id="web.external_layout_wave">
+        <xpath expr="//img[@t-if='company.logo']" position="attributes">
+            <attribute name="t-if">company.logo and not swap_company_customer</attribute>
+        </xpath>
+    </template>
+
+    <template id="external_layout_bubble_swap" inherit_id="web.external_layout_bubble">
+        <xpath expr="//img[@t-if='company.logo']" position="attributes">
+            <attribute name="t-if">company.logo and not swap_company_customer</attribute>
         </xpath>
     </template>
 
