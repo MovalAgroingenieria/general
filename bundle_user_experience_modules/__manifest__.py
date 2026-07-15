@@ -28,7 +28,7 @@
         "web_remember_tree_column_width",
         "web_responsive",
         "web_send_message_popup",
-        "web_sheet_full_width",
+        # "web_sheet_full_width", Deprecated after 16.0
         "web_tree_dynamic_colored_field",
         "web_widget_one2many_tree_line_duplicate",
         # "web_disable_export_group", # Install later all
