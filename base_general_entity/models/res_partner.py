@@ -43,6 +43,74 @@ class ResPartner(models.Model):
         for partner in self:
             partner.member_count = len(partner.member_ids)
 
+    def _next_entity_global_code(self, is_primary):
+        """Return the next global code for the given entity kind.
+
+        Primary entities and secondary members keep independent
+        consecutive sequences (highest value of their own kind + 1).
+        """
+        if is_primary:
+            query = (
+                "SELECT COALESCE(MAX(entity_global_code), 0) "
+                "FROM res_partner WHERE is_primary_entity = TRUE"
+            )
+        else:
+            query = (
+                "SELECT COALESCE(MAX(entity_global_code), 0) "
+                "FROM res_partner WHERE is_secondary_entity = TRUE"
+            )
+        self.env.cr.execute(query)
+        return (self.env.cr.fetchone()[0] or 0) + 1
+
+    @api.model
+    def default_get(self, fields_list):
+        """Preview the next global code in the form for new entities.
+
+        Only when creating a primary entity or a secondary member (detected
+        from the action context) and no code was provided yet. Each kind
+        uses its own consecutive sequence.
+        """
+        defaults = super().default_get(fields_list)
+        if "entity_global_code" in fields_list and not defaults.get(
+            "entity_global_code"
+        ):
+            context = self.env.context
+            is_primary = context.get("default_is_primary_entity")
+            is_secondary = context.get("default_is_secondary_entity")
+            if is_primary or is_secondary:
+                defaults["entity_global_code"] = self._next_entity_global_code(
+                    bool(is_primary)
+                )
+        return defaults
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Auto-assign a growing global code to new entities.
+
+        Primary entities and secondary members keep separate consecutive
+        sequences. Only applied when no code is provided (empty or 0);
+        existing/manual codes are always respected.
+        """
+        records = super().create(vals_list)
+        for is_primary in (True, False):
+            pending = records.filtered(
+                lambda partner, primary=is_primary: (
+                    (
+                        partner.is_primary_entity
+                        if primary
+                        else partner.is_secondary_entity
+                    )
+                    and not partner.entity_global_code
+                )
+            )
+            if not pending:
+                continue
+            next_code = self._next_entity_global_code(is_primary)
+            for partner in pending:
+                partner.entity_global_code = next_code
+                next_code += 1
+        return records
+
     @api.constrains("is_primary_entity", "is_secondary_entity")
     def _check_entity_types(self):
         """Optional: validate that a contact cannot be both."""
