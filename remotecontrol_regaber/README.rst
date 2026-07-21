@@ -17,6 +17,9 @@ Features
 * Last counter value retrieval for SKYreg water meters, SKYreg hydrant
   water meters, and SKYmeter NB-IoT water meters
 * Designed to feed ``wua.reading`` records via the WUA integration module
+* Alternatively, feeds generic ``mdm.measurement.device.sensor.reading``
+  records via ``mdm.measurement.device`` / ``mdm.measurement.device.sensor``
+  configuration (see below)
 
 Configuration
 =============
@@ -43,6 +46,33 @@ In each ``wua.waterconnection``, set the *Regaber TreeNode ID* to the
 meter element, and choose the *Regaber Device Type* matching the element
 type in SKYplatform.
 
+MDM Device/Sensor Configuration (via ``mdm_sensor_management_remotecontrol``)
+------------------------------------------------------------------------------
+
+As an alternative, a Regaber element can be linked to a generic
+``mdm.measurement.device`` / ``mdm.measurement.device.sensor`` pair so
+that readings are stored in ``mdm.measurement.device.sensor.reading``.
+
+In the device *Remotecontrol Parameters* (optional shared default):
+
+.. code-block:: json
+
+    {
+      "device_type": "skyreg"
+    }
+
+In the sensor *Remotecontrol Parameters* (required):
+
+.. code-block:: json
+
+    {
+      "node_id": 178089,
+      "device_type": "skyreg"
+    }
+
+``node_id`` is the Regaber TreeNode ID (``GET /TreeNode``). ``device_type``
+overrides the device default; falls back to ``skyreg`` if neither is set.
+
 Available Procedures
 ====================
 
@@ -51,6 +81,10 @@ Available Procedures
 * **Regaber: Get Last Readings** — Authenticates and fetches the latest
   counter value for each element in ``bag['target_nodes']``.  Used
   internally by the WUA reading import.
+* **Regaber: Daily Sync** — Authenticates, builds the sensor plan from
+  configured ``mdm.measurement.device.sensor`` records, and writes the
+  latest counter value of each into
+  ``mdm.measurement.device.sensor.reading``.
 
 API Reference
 =============

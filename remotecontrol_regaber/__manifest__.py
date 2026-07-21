@@ -13,6 +13,7 @@
     "license": "AGPL-3",
     "depends": [
         "base_remotecontrol",
+        "mdm_sensor_management_remotecontrol",
     ],
     "data": [
         "data/data.xml",
