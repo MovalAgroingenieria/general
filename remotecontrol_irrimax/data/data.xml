@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_irrimax" model="remotecontrol">
+            <field name="name">Irrimax</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://www.irrimaxlive.com/api</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "api_key": ""
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>Irrimax · Odoo Integration</h2>
+
+<hr/>
+
+<h3>1) Connection (Remote Control)</h3>
+<p>Type: <code>REST</code> · Base URL: <code>https://www.irrimaxlive.com/api</code></p>
+<p><strong>connection_params</strong> (JSON):</p>
+<pre>{
+  "api_key": "YOUR_IRRIMAX_API_KEY"
+}</pre>
+<p>Irrimax has no login/token step, the API key is sent as a query
+parameter on every request.</p>
+
+<h3>2) Endpoint Used</h3>
+<pre>GET /?cmd=getreadings&amp;key={api_key}&amp;name={sdb_name}&amp;from={YYYYMMDDHHMMSS}&amp;to={YYYYMMDDHHMMSS}</pre>
+<ul>
+  <li><code>name</code>: SDB file name (without path or ".sdb" extension),
+  usually matching the logger id programmed into the probe. This is the
+  Odoo device's <code>sdb_name</code>.</li>
+  <li><code>from</code> / <code>to</code>: optional, <code>YYYYMMDDHHMMSS</code>.
+  Omitted bounds retrieve from the beginning / up to the last reading.</li>
+</ul>
+<p>Response is a CSV file with one header row and one reading every 10
+minutes, e.g.:</p>
+<pre>Date Time,A1(10),S1(10),T1(10),A2(20),S2(20),T2(20),...
+2026/07/20 00:00:00,39.6324,2064.949,25.9167,43.51,2093.767,26.8587,...</pre>
+<p>Column families:</p>
+<ul>
+  <li><code>A#(depth)</code>: soil moisture at that depth (cm).</li>
+  <li><code>S#(depth)</code>: raw/scaled sensor signal at that depth.</li>
+  <li><code>T#(depth)</code>: soil temperature at that depth.</li>
+</ul>
+
+<h3>3) Odoo Configuration</h3>
+<h4>Device (<code>mdm.measurement.device</code>):</h4>
+<pre>{
+  "sdb_name": "HIDROC01",
+  "start_date": "2025-01-01" //optional
+}</pre>
+<ul>
+  <li><code>sdb_name</code>: SDB file name used as the <code>name</code>
+  request parameter. One device = one probe/logger (e.g. <code>HIDROC01</code>
+  .. <code>HIDROC20</code>).</li>
+  <li><code>start_date</code>: default start date if none of the device's
+  sensors has readings yet.</li>
+</ul>
+
+<h4>Sensor (<code>mdm.measurement.device.sensor</code>):</h4>
+<pre>{
+  "column": "A1(10)",
+  "start_date": "2025-01-01" //optional
+}</pre>
+<ul>
+  <li><code>column</code>: exact CSV header name for this sensor
+  (e.g. <code>A1(10)</code> for soil moisture at 10 cm, <code>A2(20)</code>
+  for 20 cm, <code>T3(30)</code> for temperature at 30 cm, ...). Each
+  reading row is matched against this column name so every depth is stored
+  in its own sensor, never mixed with another depth.</li>
+  <li><code>start_date</code>: overrides the device start date if provided.</li>
+</ul>
+
+<h3>4) Available Procedures</h3>
+<ul>
+  <li><strong>Irrimax: Daily Sync</strong> → builds the per-device sensor
+  plan (grouping sensors by <code>sdb_name</code>) and downloads/upserts
+  new readings for every mapped column.</li>
+</ul>
+
+<h3>5) Typical Workflow</h3>
+<ol>
+  <li><strong>Build Sensor Plan</strong> → groups the configured sensors by
+  device (<code>sdb_name</code>), and for each device computes the earliest
+  <code>from</code> date needed (oldest last-reading among its sensors, or
+  the configured <code>start_date</code>).</li>
+  <li><strong>Get Readings and Upsert</strong> → for each device in the
+  plan, calls <code>GET /?cmd=getreadings&amp;key=...&amp;name=...&amp;from=...&amp;to=...</code>
+  once, parses the returned CSV and, for every row, upserts one reading per
+  configured sensor by reading its exact column (e.g. sensor mapped to
+  <code>A1(10)</code> always reads the <code>A1(10)</code> column, sensor
+  mapped to <code>A2(20)</code> always reads <code>A2(20)</code>, etc.), so
+  each depth is stored in its corresponding sensor.</li>
+</ol>
+
+<h3>6) Odoo Storage</h3>
+<p>Readings are stored in <code>mdm.measurement.device.sensor.reading</code>,
+keyed by <code>(sensor_id, measurement_time)</code> (updates if already
+exists). CSV timestamps (<code>YYYY/MM/DD HH:MM:SS</code>) are converted to
+<code>YYYY-MM-DD HH:MM:SS</code>.</p>
+
+<h3>7) Generated Audit File</h3>
+<p>The JSON attachment <code>irrimax_readings_YYYYMMDD_HHMMSS.json</code>
+contains, per device: the requested URL, HTTP status, points found and the
+number of upserts/errors.</p>
+
+<h3>8) Recommendations</h3>
+<ul>
+  <li>Verify that each device has a correct <code>sdb_name</code> and each
+  sensor a correct <code>column</code> matching the CSV header exactly
+  (including the <code>(depth)</code> suffix).</li>
+  <li>Only sensors with a <code>column</code> value are read; sensors
+  without it are skipped.</li>
+</ul>
+]]></field>
+        </record>
+
+        <record id="remotecontrol_irrimax_action_build_sensor_plan" model="remotecontrol.action">
+            <field name="name">Irrimax: Build Sensor Plan</field>
+            <field name="remote_id" ref="remotecontrol_irrimax"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+Remote = self.remote_id
+DeviceModel = env['mdm.measurement.device']
+SensorModel = env['mdm.measurement.device.sensor']
+today_str = fields.Date.today()
+
+device_condition = [
+    ('remotecontrol_id', '=', Remote.id),
+    ('remotecontrol_params', '!=', False),
+]
+if selected_device_ids:
+    device_condition.append(('id', 'in', selected_device_ids))
+devices = DeviceModel.search(device_condition)
+
+sensors = SensorModel.search([
+    ('device_id', 'in', devices.ids),
+    ('remotecontrol_params', '!=', False),
+])
+# Optimize: build map of sensor_id -> most recent reading (single query)
+last_readings_map = {}
+if sensors:
+    sensor_ids = [s.id for s in sensors]
+    cr = env.cr
+    cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC',
+        (tuple(sensor_ids),)
+    )
+    for row in cr.fetchall():
+        last_readings_map[row[0]] = row[1]
+
+sensors_by_device = {}
+for sensor in sensors:
+    sensors_by_device.setdefault(sensor.device_id.id, []).append(sensor)
+
+plan = []
+for device in devices:
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+    sdb_name = (device_cfg.get('sdb_name') or '').strip()
+    if not sdb_name:
+        continue
+    device_sensors = sensors_by_device.get(device.id) or []
+    if not device_sensors:
+        continue
+    sensor_list = []
+    from_dates = []
+    for sensor in device_sensors:
+        try:
+            sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+        except Exception:
+            sensor_cfg = {}
+        column = (sensor_cfg.get('column') or '').strip()
+        if not column:
+            continue
+        last_reading_time = last_readings_map.get(sensor.id)
+        if last_reading_time:
+            sensor_from_date = str(last_reading_time)[:19]
+        else:
+            start_cfg = sensor_cfg.get('start_date') or device_cfg.get('start_date')
+            if start_cfg:
+                sensor_from_date = start_cfg
+            else:
+                year_str = today_str[:4]
+                sensor_from_date = '%s-01-01' % year_str
+        sensor_list.append({
+            'sensor_id': sensor.id,
+            'column': column,
+        })
+        from_dates.append(sensor_from_date)
+    if not sensor_list:
+        continue
+    plan.append({
+        'device_id': device.id,
+        'sdb_name': sdb_name,
+        'from_date': min(from_dates),
+        'sensors': sensor_list,
+    })
+bag['devices_plan'] = plan
+bag['devices_plan_count'] = len(plan)
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_irrimax_action_get_readings" model="remotecontrol.action">
+            <field name="name">Irrimax: Get readings</field>
+            <field name="remote_id" ref="remotecontrol_irrimax"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+import csv
+import time
+import StringIO
+from datetime import datetime
+
+Remote = self.remote_id
+cfg = {}
+try:
+    cfg = json.loads(Remote.connection_params or '{}')
+except Exception:
+    cfg = {}
+api_key = (cfg.get('api_key') or '').strip()
+if not api_key:
+    raise Exception("Missing Irrimax credentials: set api_key in connection_params.")
+
+plan = bag.get('devices_plan') or []
+if not plan:
+    raise Exception("No devices plan found in bag. Run 'Build Sensor Plan' first.")
+
+base_api = (base_url or '').rstrip('/')
+to_digits = ''.join(ch for ch in fields.Datetime.now() if ch.isdigit())
+to_param = to_digits[:14]
+
+total_upserts = 0
+total_errors = 0
+items = []
+
+for device_plan in plan:
+    device_id = device_plan['device_id']
+    sdb_name = device_plan['sdb_name']
+    sensor_configs = device_plan['sensors']
+    from_digits = ''.join(ch for ch in device_plan['from_date'] if ch.isdigit())
+    from_param = (from_digits + '000000')[:14] if len(from_digits) <= 8 else from_digits[:14]
+    url = '%s/?cmd=getreadings&key=%s&name=%s&from=%s&to=%s' % (
+        base_api, api_key, sdb_name, from_param, to_param
+    )
+    try:
+        resp = request_retry('GET', url, timeout=timeout)
+        if resp.status_code >= 400:
+            items.append({
+                'device_id': device_id,
+                'sdb_name': sdb_name,
+                'status': resp.status_code,
+                'error': (resp.text or '')[:400],
+                'url': url,
+            })
+            total_errors += 1
+            continue
+        csv_text = resp.text or ''
+        if isinstance(csv_text, unicode):
+            csv_text = csv_text.encode('utf-8')
+        rows = list(csv.reader(StringIO.StringIO(csv_text)))
+        if not rows:
+            items.append({
+                'device_id': device_id,
+                'sdb_name': sdb_name,
+                'status': 200,
+                'points_found': 0,
+                'upserts': 0,
+                'errors': 0,
+                'url': url,
+            })
+            continue
+        header = [col.strip() for col in rows[0]]
+        column_index = dict((col_name, idx) for idx, col_name in enumerate(header))
+        date_idx = column_index.get('Date Time')
+        if date_idx is None:
+            items.append({
+                'device_id': device_id,
+                'sdb_name': sdb_name,
+                'status': 200,
+                'error': "Missing 'Date Time' column in CSV response",
+                'url': url,
+            })
+            total_errors += 1
+            continue
+        upserts = 0
+        errs = 0
+        for row in rows[1:]:
+            if not row or len(row) <= date_idx:
+                continue
+            date_str = row[date_idx].strip()
+            if not date_str:
+                continue
+            try:
+                ts_dt = datetime.strptime(date_str, '%Y/%m/%d %H:%M:%S')
+                ts_str = ts_dt.strftime('%Y-%m-%d %H:%M:%S')
+            except Exception:
+                errs += 1
+                continue
+            for sensor_cfg in sensor_configs:
+                sensor_id = sensor_cfg['sensor_id']
+                column = sensor_cfg['column']
+                col_idx = column_index.get(column)
+                if col_idx is None or col_idx >= len(row):
+                    continue
+                raw_value = row[col_idx].strip()
+                if not raw_value:
+                    continue
+                try:
+                    value = float(raw_value)
+                except Exception:
+                    errs += 1
+                    continue
+                try:
+                    Remote.upsert(
+                        'mdm.measurement.device.sensor.reading',
+                        {'sensor_id': sensor_id, 'measurement_time': ts_str},
+                        {'value': value, 'device_id': device_id}
+                    )
+                    upserts += 1
+                except Exception:
+                    errs += 1
+        total_upserts += upserts
+        total_errors += errs
+        items.append({
+            'device_id': device_id,
+            'sdb_name': sdb_name,
+            'status': 200,
+            'points_found': len(rows) - 1,
+            'upserts': upserts,
+            'errors': errs,
+            'url': url,
+        })
+    except Exception as e:
+        items.append({
+            'device_id': device_id,
+            'sdb_name': sdb_name,
+            'status': -1,
+            'error': str(e),
+        })
+        total_errors += 1
+    time.sleep(1)
+
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'to_param': to_param,
+    'total_upserts': total_upserts,
+    'total_errors': total_errors,
+    'items': items,
+}
+b64 = base64.b64encode(json.dumps(audit, ensure_ascii=False, indent=2).encode('utf-8'))
+fname = 'irrimax_readings_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': b64,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+Remote.message_post(
+    body=u"[Irrimax] upserts=%s errors=%s" % (total_upserts, total_errors),
+    attachment_ids=[att.id]
+)
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_irrimax_procedure" model="remotecontrol.procedure">
+            <field name="name">Irrimax: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_irrimax"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="True"/>
+        </record>
+
+        <record id="remotecontrol_irrimax_step_10_plan" model="remotecontrol.step">
+            <field name="name">Build Sensor Plan</field>
+            <field name="procedure_id" ref="remotecontrol_irrimax_procedure"/>
+            <field name="action_id" ref="remotecontrol_irrimax_action_build_sensor_plan"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_irrimax_step_20_readings" model="remotecontrol.step">
+            <field name="name">Get readings</field>
+            <field name="procedure_id" ref="remotecontrol_irrimax_procedure"/>
+            <field name="action_id" ref="remotecontrol_irrimax_action_get_readings"/>
+            <field name="sequence">20</field>
+        </record>
+
+    </data>
+</odoo>
