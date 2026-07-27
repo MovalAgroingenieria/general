@@ -16,6 +16,10 @@ class VoteType(models.Model):
     _description = "Vote Type"
     _order = "name"
 
+    _sql_constraints = [
+        ("code_uniq", "UNIQUE(code)", "The code must be unique."),
+    ]
+
     name = fields.Char(required=True, translate=True)
     code = fields.Char(required=True, index=True)
     description = fields.Text(translate=True)
@@ -56,10 +60,6 @@ class VoteType(models.Model):
         store=False,
     )
 
-    _sql_constraints = [
-        ("code_uniq", "UNIQUE(code)", "The code must be unique."),
-    ]
-
     def _get_effective_formula(self):
         """Return the Jinja2 expression to evaluate."""
         self.ensure_one()
@@ -67,8 +67,8 @@ class VoteType(models.Model):
 
     @api.depends("partner_vote_ids")
     def _compute_partner_vote_count(self):
-        for rec in self:
-            rec.partner_vote_count = len(rec.partner_vote_ids)
+        for record in self:
+            record.partner_vote_count = len(record.partner_vote_ids)
 
     def evaluate_formula(self, partner):
         """Evaluate formula for one partner.
@@ -156,6 +156,7 @@ class VoteType(models.Model):
         partners = self._get_partners_to_compute()
         partner_vote_model = self.env["partner.vote"]
         if partners:
+            # oca-review: full stale cleanup for this vote type before recompute.
             stale_votes = partner_vote_model.search(
                 [
                     ("vote_type_id", "=", self.id),
@@ -163,6 +164,7 @@ class VoteType(models.Model):
                 ]
             )
         else:
+            # oca-review: empty domain means all vote lines for this type become stale.
             stale_votes = partner_vote_model.search([("vote_type_id", "=", self.id)])
         stale_votes.unlink()
         log_lines = []

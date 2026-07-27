@@ -4,7 +4,7 @@
 {
     "name": "Base Vote",
     "summary": "Vote types with Jinja2 formulas and votes per partner",
-    "version": "18.0.1.0.0",
+    "version": "18.0.1.0.1",
     "category": "Administration",
     "website": "https://www.moval.es",
     "author": "Moval Agroingeniería",

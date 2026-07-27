@@ -9,16 +9,22 @@ class PartnerVote(models.Model):
     _description = "Partner Vote"
     _order = "partner_id, vote_type_id"
 
+    _sql_constraints = [
+        (
+            "partner_vote_type_uniq",
+            "UNIQUE(partner_id, vote_type_id)",
+            "A partner can only have one vote record per vote type.",
+        ),
+    ]
+
     partner_id = fields.Many2one(
         "res.partner",
-        string="Partner",
         required=True,
         ondelete="cascade",
         index=True,
     )
     vote_type_id = fields.Many2one(
         "vote.type",
-        string="Vote type",
         required=True,
         ondelete="cascade",
         index=True,
@@ -34,14 +40,6 @@ class PartnerVote(models.Model):
     last_compute_date = fields.Datetime(string="Last computed", readonly=True)
     formula_detail = fields.Text(string="Formula detail", readonly=True)
 
-    _sql_constraints = [
-        (
-            "partner_vote_type_uniq",
-            "UNIQUE(partner_id, vote_type_id)",
-            "A partner can only have one vote record per vote type.",
-        ),
-    ]
-
     @api.depends(
         "vote_type_id",
         "vote_type_id.vote_value_type",
@@ -49,8 +47,8 @@ class PartnerVote(models.Model):
         "vote_count_float",
     )
     def _compute_vote_count_display(self):
-        for rec in self:
-            if rec.vote_type_id.vote_value_type == "integer":
-                rec.vote_count_display = float(rec.vote_count_integer)
+        for record in self:
+            if record.vote_type_id.vote_value_type == "integer":
+                record.vote_count_display = float(record.vote_count_integer)
             else:
-                rec.vote_count_display = rec.vote_count_float
+                record.vote_count_display = record.vote_count_float

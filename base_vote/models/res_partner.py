@@ -26,13 +26,11 @@ class ResPartner(models.Model):
         "partner_vote_ids.vote_type_id",
     )
     def _compute_total_votes_display(self):
-        for partner in self:
+        for record in self:
             total = 0.0
-            for pv in partner.partner_vote_ids.filtered(
-                lambda v: v.vote_type_id.active
-            ):
+            for pv in record.partner_vote_ids.filtered(lambda v: v.vote_type_id.active):
                 total += pv.vote_count_display
-            partner.total_votes_display = total
+            record.total_votes_display = total
 
     def action_recompute_my_votes(self):
         self.ensure_one()
