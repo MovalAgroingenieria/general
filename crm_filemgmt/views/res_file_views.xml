@@ -341,11 +341,11 @@
                                  style="max-width:30%; margin-left:2%; margin-top:2%;">
                                 <div class="o_kanban_image_fill_left o_kanban_image_full"
                                      role="img"
-                                     t-attf-style="background-image: url(#{kanban_image('res.file', 'image', record.id.raw_value)})">
+                                     t-attf-style="background-image: url(/web/image/res.file/#{record.id.raw_value}/image)">
                                     <img class="o_kanban_image_inner_pic"
                                          t-if="record.partner_id.raw_value"
                                          t-att-alt="record.partner_id.value"
-                                         t-att-src="kanban_image('res.partner', 'image_128', record.partner_id.raw_value)"/>
+                                         t-attf-src="/web/image/res.partner/#{record.partner_id.raw_value}/image_128"/>
                                 </div>
                             </div>
 

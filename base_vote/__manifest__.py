@@ -12,6 +12,7 @@
     "development_status": "Production/Stable",
     "depends": ["base", "web"],
     "data": [
+        "security/base_vote_groups.xml",
         "security/ir.model.access.csv",
         "data/ir_cron_data.xml",
         "views/vote_type_views.xml",

@@ -5,11 +5,25 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="total_votes_display" readonly="1"/>
+            </xpath>
             <xpath expr="//notebook" position="inside">
                 <page string="Votes" name="votes">
-                    <field name="total_votes_display" readonly="1"/>
-                    <button name="action_recompute_my_votes" string="Recompute my votes" type="object" class="btn-link"/>
-                    <field name="partner_vote_ids" readonly="1" nolabel="1" domain="[('vote_type_id.active','=',True)]"/>
+                        <button
+                        name="action_recompute_my_votes"
+                        string="Recompute my votes"
+                        type="object"
+                        class="btn-link oe_inline"
+                        icon="fa-refresh"
+                    />
+                    <field name="partner_vote_ids" readonly="1" nolabel="1" domain="[('vote_type_id.active','=',True)]">
+                        <list>
+                            <field name="vote_type_id"/>
+                            <field name="vote_count_display"/>
+                            <field name="last_compute_date" optional="hide"/>
+                        </list>
+                    </field>
                 </page>
             </xpath>
         </field>
