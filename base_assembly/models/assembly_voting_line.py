@@ -15,7 +15,6 @@ class AssemblyVotingLine(models.Model):
 
     voting_id = fields.Many2one(
         "assembly.voting",
-        string="Voting",
         required=True,
         ondelete="cascade",
         index=True,
@@ -38,7 +37,6 @@ class AssemblyVotingLine(models.Model):
     )
     attendee_id = fields.Many2one(
         "assembly.attendee",
-        string="Attendee",
         required=True,
         ondelete="cascade",
         index=True,
@@ -118,10 +116,10 @@ class AssemblyVotingLine(models.Model):
         "attendee_id.participant_partner_id",
     )
     def _compute_session_context_label(self):
-        for line in self:
-            att = line.attendee_id
+        for record in self:
+            att = record.attendee_id
             if not att:
-                line.session_context_label = ""
+                record.session_context_label = ""
                 continue
             parts = []
             if (
@@ -148,44 +146,44 @@ class AssemblyVotingLine(models.Model):
                 parts.append(self.env._("Receives delegated votes"))
             if att.call_register_has_outbound_delegation:
                 parts.append(self.env._("Votes delegated out"))
-            line.session_context_label = " · ".join(parts) if parts else ""
+            record.session_context_label = " · ".join(parts) if parts else ""
 
     @api.depends("vote_option", "votes_applied")
     def _compute_session_row_group_order(self):
-        for line in self:
+        for record in self:
             if (
                 float_compare(
-                    line.votes_applied,
+                    record.votes_applied,
                     0.0,
                     precision_digits=_VOTES_APPLIED_FLOAT_DIGITS,
                 )
                 <= 0
             ):
-                line.session_row_group_order = 3
-            elif line.vote_option == "unset":
-                line.session_row_group_order = 1
+                record.session_row_group_order = 3
+            elif record.vote_option == "unset":
+                record.session_row_group_order = 1
             else:
-                line.session_row_group_order = 2
+                record.session_row_group_order = 2
 
     @api.depends("vote_option", "votes_applied")
     def _compute_session_row_ui(self):
-        for line in self:
+        for record in self:
             if (
                 float_compare(
-                    line.votes_applied,
+                    record.votes_applied,
                     0.0,
                     precision_digits=_VOTES_APPLIED_FLOAT_DIGITS,
                 )
                 <= 0
             ):
-                line.session_control_state = "ineligible"
-                line.session_row_status_label = self.env._("Not eligible")
-            elif line.vote_option == "unset":
-                line.session_control_state = "pending"
-                line.session_row_status_label = self.env._("Pending")
+                record.session_control_state = "ineligible"
+                record.session_row_status_label = self.env._("Not eligible")
+            elif record.vote_option == "unset":
+                record.session_control_state = "pending"
+                record.session_row_status_label = self.env._("Pending")
             else:
-                line.session_control_state = "recorded"
-                line.session_row_status_label = self.env._("Recorded")
+                record.session_control_state = "recorded"
+                record.session_row_status_label = self.env._("Recorded")
 
     _sql_constraints = [
         (
@@ -215,7 +213,7 @@ class AssemblyVotingLine(models.Model):
 
     @api.model
     def _set_votes_applied_snapshot_on_create_vals(self, vals):
-        """Freeze ``votes_applied`` from ``assembly.attendee.vote`` at create time only."""
+        """Freeze ``votes_applied`` from the attendee vote at create time only."""
         voting = self.env["assembly.voting"].browse(vals["voting_id"])
         attendee = self.env["assembly.attendee"].browse(vals["attendee_id"])
         vote_type = voting.vote_type_id
@@ -249,11 +247,11 @@ class AssemblyVotingLine(models.Model):
     def write(self, vals):
         self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
         if "votes_applied" in vals:
-            for line in self:
+            for record in self:
                 if (
                     float_compare(
                         vals["votes_applied"],
-                        line.votes_applied,
+                        record.votes_applied,
                         precision_digits=_VOTES_APPLIED_FLOAT_DIGITS,
                     )
                     != 0
@@ -296,8 +294,8 @@ class AssemblyVotingLine(models.Model):
         return super().create(vals_list)
 
     def _session_require_open_voting(self):
-        for line in self:
-            if line.voting_id.voting_state != "open":
+        for record in self:
+            if record.voting_id.voting_state != "open":
                 raise UserError(
                     self.env._(
                         "Votes can only be changed while the voting session is open."
@@ -329,26 +327,26 @@ class AssemblyVotingLine(models.Model):
 
     @api.constrains("votes_applied")
     def _check_votes_applied_non_negative(self):
-        for line in self:
-            if line.votes_applied < 0:
+        for record in self:
+            if record.votes_applied < 0:
                 raise ValidationError(self.env._("Votes applied cannot be negative."))
 
     @api.constrains("voting_id")
     def _check_voting_open(self):
-        for line in self:
-            if line.voting_id.voting_state != "open":
+        for record in self:
+            if record.voting_id.voting_state != "open":
                 raise ValidationError(
                     self.env._(
-                        "A vote line can only be created when the voting is open."
+                        "A vote record can only be created when the voting is open."
                     )
                 )
 
     @api.constrains("attendee_id", "voting_id")
     def _check_attendee_same_assembly_as_voting(self):
-        for line in self:
-            if not line.attendee_id or not line.voting_id:
+        for record in self:
+            if not record.attendee_id or not record.voting_id:
                 continue
-            if line.attendee_id.assembly_id != line.voting_id.assembly_id:
+            if record.attendee_id.assembly_id != record.voting_id.assembly_id:
                 raise ValidationError(
                     self.env._(
                         "The attendee must belong to the same assembly as this voting."
@@ -357,8 +355,8 @@ class AssemblyVotingLine(models.Model):
 
     @api.constrains("attendee_id")
     def _check_attendee_not_absent_for_vote_line(self):
-        for line in self:
-            if line.attendee_id and line.attendee_id.attendee_state == "absent":
+        for record in self:
+            if record.attendee_id and record.attendee_id.attendee_state == "absent":
                 raise ValidationError(
                     self.env._(
                         "You cannot record a vote for an attendee marked absent."

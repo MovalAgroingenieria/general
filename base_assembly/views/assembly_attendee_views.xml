@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <record id="assembly_attendee_vote_view_tree" model="ir.ui.view">
         <field name="name">assembly.attendee.vote.tree</field>
@@ -88,7 +88,7 @@
     <record id="assembly_attendee_view_tree" model="ir.ui.view">
         <field name="name">assembly.attendee.tree</field>
         <field name="model">assembly.attendee</field>
-        <field name="priority">10</field>
+        <field name="priority" eval="10" />
         <field name="arch" type="xml">
             <list decoration-muted="attendee_state == 'registered'" decoration-success="attendee_state == 'confirmed'" decoration-danger="attendee_state == 'absent'">
                 <field name="assembly_id"/>
@@ -111,7 +111,7 @@
     <record id="assembly_attendee_view_search" model="ir.ui.view">
         <field name="name">assembly.attendee.search</field>
         <field name="model">assembly.attendee</field>
-        <field name="priority">10</field>
+        <field name="priority" eval="10" />
         <field name="arch" type="xml">
             <search string="Attendees">
                 <field name="partner_id"/>
@@ -135,7 +135,7 @@
     <record id="assembly_attendee_view_tree_call_register" model="ir.ui.view">
         <field name="name">assembly.attendee.list.call.register</field>
         <field name="model">assembly.attendee</field>
-        <field name="priority">90</field>
+        <field name="priority" eval="90" />
         <field name="arch" type="xml">
             <list string="Call register" default_order="assembly_id desc, partner_id" multi_edit="1" decoration-muted="attendee_state == 'registered'" decoration-success="attendee_state == 'confirmed'" decoration-danger="attendee_state == 'absent'">
                 <field name="company_id" optional="show" groups="base.group_multi_company"/>
@@ -164,7 +164,7 @@
         <field name="model">assembly.attendee</field>
         <field name="inherit_id" ref="base_assembly.assembly_attendee_view_form"/>
         <field name="mode">primary</field>
-        <field name="priority">90</field>
+        <field name="priority" eval="90" />
         <field name="arch" type="xml">
             <xpath expr="//group[@name='assembly_attendee_attendee_data']" position="after">
                 <group name="assembly_attendee_call_register" string="Call register" groups="base_assembly.assembly_group_manager">
@@ -184,7 +184,7 @@
         <field name="model">assembly.attendee</field>
         <field name="inherit_id" ref="base_assembly.assembly_attendee_view_search"/>
         <field name="mode">primary</field>
-        <field name="priority">90</field>
+        <field name="priority" eval="90" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='assembly_id']" position="after">
                 <field name="company_id"/>

@@ -33,7 +33,7 @@ CTX_ATTENDEE_ALLOW_REGISTRATION_STATE_WRITE = (
 
 
 class AssemblyAttendee(models.Model):
-    """Assembly member row; quorum uses presence state only, votes use ``partner_id``."""
+    """Assembly member row; quorum uses presence, votes use ``partner_id``."""
 
     _name = "assembly.attendee"
     _inherit = ["assembly.mixin.open.assembly"]
@@ -59,7 +59,6 @@ class AssemblyAttendee(models.Model):
 
     assembly_id = fields.Many2one(
         "assembly.assembly",
-        string="Assembly",
         required=True,
         ondelete="cascade",
         index=True,
@@ -108,8 +107,9 @@ class AssemblyAttendee(models.Model):
         default="present",
         index=True,
         help=(
-            "Whether participation is on-site or remote. Quorum and voting eligibility "
-            "follow attendance status (Listed / Attended / Did not attend), not this field."
+            "Whether participation is on-site or remote. Quorum and voting "
+            "eligibility follow attendance status (Listed / Attended / Did not "
+            "attend), not this field."
         ),
     )
     date_register = fields.Datetime(
@@ -125,11 +125,11 @@ class AssemblyAttendee(models.Model):
         string="Votes by type",
         help=(
             "Stored snapshot per assembly vote type (own / delegated in-out). "
-            "It is rebuilt when you generate attendees, change the assembly vote types, "
-            "Mark Present or Mark Absent, when delegations change, or via "
-            "“Recompute votes” "
-            "on the assembly. Contact “Votes per contact” (partner.vote) is the source "
-            "for own amounts; until a rebuild runs, lines here can be missing or stale."
+            "It is rebuilt when you generate attendees, change the assembly vote "
+            "types, Mark Present or Mark Absent, when delegations change, or via "
+            "“Recompute votes” on the assembly. Contact “Votes per contact” "
+            "(partner.vote) is the source for own amounts; until a rebuild runs, "
+            "lines here can be missing or stale."
         ),
     )
     attendee_state = fields.Selection(
@@ -152,11 +152,12 @@ class AssemblyAttendee(models.Model):
         required=True,
         index=True,
         help=(
-            "Listed — not finalized: the member is on the list only; attendance is not "
-            "finalized yet, so they are not counted as present for quorum or as a confirmed "
-            "delegate for vote transfer. "
-            "Attended (confirmed present): the member actually attended; counts for quorum "
-            "and voting, and a delegate in this state receives delegated votes. "
+            "Listed — not finalized: the member is on the list only; attendance "
+            "is not finalized yet, so they are not counted as present for quorum "
+            "or as a confirmed delegate for vote transfer. "
+            "Attended (confirmed present): the member actually attended; counts "
+            "for quorum and voting, and a delegate in this state receives "
+            "delegated votes. "
             "Did not attend: recorded as absent."
         ),
     )
@@ -182,10 +183,11 @@ class AssemblyAttendee(models.Model):
         string="Tracked attendance URL",
         compute="_compute_attendance_url",
         help=(
-            "Short URL from the link tracker to this member's attendance flow. Share it "
-            "or encode it in a QR; opens are counted. With a manager session, the "
-            "landing page opens first (append direct=1 on the target URL to skip to the "
-            "form). Configure landing/error QWeb under Settings → Assemblies."
+            "Short URL from the link tracker to this member's attendance flow. "
+            "Share it or encode it in a QR; opens are counted. With a manager "
+            "session, the landing page opens first (append direct=1 on the "
+            "target URL to skip to the form). Configure landing/error QWeb under "
+            "Settings → Assemblies."
         ),
     )
     partner_vat = fields.Char(
@@ -227,8 +229,8 @@ class AssemblyAttendee(models.Model):
 
     @api.depends("attendee_vote_ids")
     def _compute_count_attendee_votes(self):
-        for attendee in self:
-            attendee.count_attendee_votes = len(attendee.attendee_vote_ids)
+        for record in self:
+            record.count_attendee_votes = len(record.attendee_vote_ids)
 
     @api.depends(
         "partner_id",
@@ -237,27 +239,27 @@ class AssemblyAttendee(models.Model):
         "participant_partner_id.name",
     )
     def _compute_name(self):
-        for rec in self:
-            if not rec.partner_id:
-                rec.name = ""
+        for record in self:
+            if not record.partner_id:
+                record.name = ""
                 continue
-            member = rec.partner_id.display_name
+            member = record.partner_id.display_name
             if (
-                rec.participant_partner_id
-                and rec.participant_partner_id != rec.partner_id
+                record.participant_partner_id
+                and record.participant_partner_id != record.partner_id
             ):
-                rec.name = f"{member} / {rec.participant_partner_id.display_name}"
+                record.name = f"{member} / {record.participant_partner_id.display_name}"
             else:
-                rec.name = member
+                record.name = member
 
     @api.depends("attendance_link_tracker_id", "attendance_link_tracker_id.short_url")
     def _compute_attendance_url(self):
-        for rec in self:
-            lt = rec.attendance_link_tracker_id
-            rec.attendance_url = (lt.short_url or "") if lt else ""
+        for record in self:
+            lt = record.attendance_link_tracker_id
+            record.attendance_url = (lt.short_url or "") if lt else ""
 
     def _attendance_flow_target_url(self):
-        """Absolute URL for the documented attendance entry (query: assembly_id, participant_id)."""
+        """Absolute URL for the attendance entry of this attendee."""
         self.ensure_one()
         if not self.assembly_id or not self.partner_id:
             return ""
@@ -281,27 +283,27 @@ class AssemblyAttendee(models.Model):
         return "assembly.attendee:%s" % self.id
 
     def _sync_attendance_link_trackers(self):
-        """Bind ``link.tracker`` rows to :meth:`_attendance_flow_target_url` (GET /assembly/attendance).
+        """Bind ``link.tracker`` rows to the attendance flow target URL.
 
-        Reuses the tracker for this attendee by ``label`` so the ``/r/<code>`` path stays
-        stable when only ``web.base.url`` or query parameters change; updates stored
-        ``url`` / ``title`` on the tracker when needed.
+        Reuses the tracker for this attendee by ``label`` so the ``/r/<code>``
+        path stays stable when only ``web.base.url`` or query parameters change;
+        updates stored ``url`` / ``title`` on the tracker when needed.
         """
         link_tracker = self.env["link.tracker"].sudo()
-        for rec in self:
-            if not rec.id or not rec.assembly_id or not rec.partner_id:
+        for record in self:
+            if not record.id or not record.assembly_id or not record.partner_id:
                 continue
-            if not rec.assembly_id.include_qr_code:
-                if rec.attendance_link_tracker_id:
-                    rec.with_context(
+            if not record.assembly_id.include_qr_code:
+                if record.attendance_link_tracker_id:
+                    record.with_context(
                         assembly_attendee_skip_link_tracker_resync=True
                     ).sudo().write({"attendance_link_tracker_id": False})
                 continue
-            target = rec._attendance_flow_target_url()
+            target = record._attendance_flow_target_url()
             if not target:
                 continue
-            label = rec._attendance_link_tracker_label()
-            title = self.env._("Assembly attendance — %s", rec.display_name)
+            label = record._attendance_link_tracker_label()
+            title = self.env._("Assembly attendance — %s", record.display_name)
             existing = link_tracker.search([("label", "=", label)], order="id", limit=1)
             if existing:
                 patch = {}
@@ -311,8 +313,8 @@ class AssemblyAttendee(models.Model):
                     patch["title"] = title
                 if patch:
                     existing.write(patch)
-                if rec.attendance_link_tracker_id != existing:
-                    rec.with_context(
+                if record.attendance_link_tracker_id != existing:
+                    record.with_context(
                         assembly_attendee_skip_link_tracker_resync=True
                     ).sudo().write({"attendance_link_tracker_id": existing.id})
                 continue
@@ -320,8 +322,8 @@ class AssemblyAttendee(models.Model):
                 [{"url": target, "title": title, "label": label}]
             )
             tracker = trackers[0] if trackers else False
-            if tracker and rec.attendance_link_tracker_id != tracker:
-                rec.with_context(
+            if tracker and record.attendance_link_tracker_id != tracker:
+                record.with_context(
                     assembly_attendee_skip_link_tracker_resync=True
                 ).sudo().write({"attendance_link_tracker_id": tracker.id})
 
@@ -338,9 +340,9 @@ class AssemblyAttendee(models.Model):
 
     @api.depends("attendee_vote_ids", "attendee_vote_ids.attendee_vote_total")
     def _compute_total_votes(self):
-        for attendee in self:
-            attendee.total_votes = sum(
-                attendee.attendee_vote_ids.mapped("attendee_vote_total")
+        for record in self:
+            record.total_votes = sum(
+                record.attendee_vote_ids.mapped("attendee_vote_total")
             )
 
     @api.depends(
@@ -353,14 +355,14 @@ class AssemblyAttendee(models.Model):
         "assembly_id.representation_ids.agent_partner_id",
     )
     def _compute_call_register_context(self):
-        for rec in self:
-            asm = rec.assembly_id
-            mem = rec.partner_id
+        for record in self:
+            asm = record.assembly_id
+            mem = record.partner_id
             if not asm or not mem:
-                rec.call_register_has_outbound_delegation = False
-                rec.call_register_has_inbound_delegation = False
-                rec.call_register_has_representation = False
-                rec.call_register_representation_agent = ""
+                record.call_register_has_outbound_delegation = False
+                record.call_register_has_inbound_delegation = False
+                record.call_register_has_representation = False
+                record.call_register_representation_agent = ""
                 continue
             outbound = False
             inbound = False
@@ -379,16 +381,16 @@ class AssemblyAttendee(models.Model):
                     rep.agent_partner_id.display_name if rep.agent_partner_id else ""
                 )
                 break
-            rec.call_register_has_outbound_delegation = outbound
-            rec.call_register_has_inbound_delegation = inbound
-            rec.call_register_has_representation = has_rep
-            rec.call_register_representation_agent = agent_label
+            record.call_register_has_outbound_delegation = outbound
+            record.call_register_has_inbound_delegation = inbound
+            record.call_register_has_representation = has_rep
+            record.call_register_representation_agent = agent_label
 
     @api.depends("assembly_id.include_qr_code", "attendance_link_tracker_id")
     def _compute_call_register_link_ready(self):
-        for rec in self:
-            rec.call_register_link_ready = bool(
-                rec.assembly_id.include_qr_code and rec.attendance_link_tracker_id
+        for record in self:
+            record.call_register_link_ready = bool(
+                record.assembly_id.include_qr_code and record.attendance_link_tracker_id
             )
 
     @api.model
@@ -457,8 +459,10 @@ class AssemblyAttendee(models.Model):
             "assembly.attendee.vote",
             self.env._("Votes by type"),
             "list",
-            domain=[("attendee_id", "=", self.id)],
-            context={"default_attendee_id": self.id},
+            extra={
+                "domain": [("attendee_id", "=", self.id)],
+                "context": {"default_attendee_id": self.id},
+            },
         )
 
     def action_print_ballot(self):
@@ -642,7 +646,7 @@ class AssemblyAttendee(models.Model):
             self._raise_disallowed_attendee_state_transition(old_state, new_state)
 
     def _transition_attendee_registration_state(self, new_state, extra_vals=None):
-        """Persist ``attendee_state`` via the internal write context (see :meth:`write`)."""
+        """Persist ``attendee_state`` via the internal write context."""
         self.ensure_one()
         vals = dict(extra_vals or ())
         vals["attendee_state"] = new_state
@@ -678,11 +682,15 @@ class AssemblyAttendee(models.Model):
         if "attendance_notes" in vals:
             note = vals.get("attendance_notes")
             if note not in (None, False, "") and str(note).strip():
-                for rec in self:
-                    if rec.assembly_id and not rec.assembly_id.allow_attendance_notes:
+                for record in self:
+                    if (
+                        record.assembly_id
+                        and not record.assembly_id.allow_attendance_notes
+                    ):
                         raise UserError(
                             self.env._(
-                                "Attendance annotations are not allowed for this assembly."
+                                "Attendance annotations are not allowed for "
+                                "this assembly."
                             )
                         )
         if "attendee_state" in vals:
@@ -694,31 +702,33 @@ class AssemblyAttendee(models.Model):
                         state=repr(new_state),
                     )
                 )
-            for rec in self:
-                rec._validate_attendee_state_transition(rec.attendee_state, new_state)
+            for record in self:
+                record._validate_attendee_state_transition(
+                    record.attendee_state, new_state
+                )
         return vals
 
     def _write_would_change_assembly_or_partner(self, vals):
-        """True if ``vals`` would change ``assembly_id`` or ``partner_id`` on any row."""
+        """True if ``vals`` would change ``assembly_id`` or ``partner_id``."""
         if "assembly_id" not in vals and "partner_id" not in vals:
             return False
-        for rec in self:
+        for record in self:
             if "assembly_id" in vals:
                 new_aid = vals["assembly_id"]
                 if isinstance(new_aid, models.BaseModel):
                     new_aid = new_aid.id if new_aid else False
-                if rec.assembly_id.id != new_aid:
+                if record.assembly_id.id != new_aid:
                     return True
             if "partner_id" in vals:
                 new_pid = vals["partner_id"]
                 if isinstance(new_pid, models.BaseModel):
                     new_pid = new_pid.id if new_pid else False
-                if rec.partner_id.id != new_pid:
+                if record.partner_id.id != new_pid:
                     return True
         return False
 
     def _write_would_change_registration_state(self, vals):
-        """True if ``attendee_state`` in ``vals`` differs from stored state on any row."""
+        """True if ``attendee_state`` in ``vals`` differs from stored state."""
         if "attendee_state" not in vals:
             return False
         new_state = vals["attendee_state"]
@@ -727,8 +737,9 @@ class AssemblyAttendee(models.Model):
     def write(self, vals):
         """Persist fields; **does not** recompute vote lines.
 
-        Vote snapshots are updated only from :meth:`recompute_votes` (``action_confirm``,
-        ``action_mark_absent``, ``assembly.delegation`` create/write hook).
+        Vote snapshots are updated only from :meth:`recompute_votes`
+        (``action_confirm``, ``action_mark_absent``, ``assembly.delegation``
+        create/write hook).
 
         * ``assembly_id`` / ``partner_id`` cannot be changed on saved rows unless
           context ``assembly_attendee_allow_identity_write`` is set (import/rare).
@@ -756,7 +767,8 @@ class AssemblyAttendee(models.Model):
                         self.env._(
                             "Attendance status cannot be changed with a generic save. "
                             'Use "Mark Present" or "Mark Absent" on the '
-                            "attendee (or the same server actions / API those buttons call)."
+                            "attendee (or the same server actions / API those "
+                            "buttons call)."
                         )
                     )
         res = super().write(vals)
@@ -786,10 +798,10 @@ class AssemblyAttendee(models.Model):
     def _validate_can_confirm(self):
         """Gate for :meth:`action_confirm` (and internal confirm path).
 
-        * ``assembly_id.attendance_require_partner_vat_confirm``: non-empty TIN; optional
-          ``attendance_partner_vat_format_strict`` (from type defaults).
-        * ``assembly.assembly_type_id.require_vat``: same TIN rule with type-scoped message
-          when the assembly flag above is off.
+        * ``assembly_id.attendance_require_partner_vat_confirm``: non-empty TIN;
+          optional ``attendance_partner_vat_format_strict`` (from type defaults).
+        * ``assembly.assembly_type_id.require_vat``: same TIN rule with a
+          type-scoped message when the assembly flag above is off.
         """
         self._ensure_assembly_and_partner_for_action(
             no_assembly_msg=self.env._(
@@ -812,8 +824,8 @@ class AssemblyAttendee(models.Model):
                     )
                 )
             if asm.attendance_partner_vat_format_strict:
-                Attendee = self.env["assembly.attendee"]
-                if not Attendee._partner_vat_passes_light_format_check(raw):
+                attendee_model = self.env["assembly.attendee"]
+                if not attendee_model._partner_vat_passes_light_format_check(raw):
                     raise ValidationError(
                         self.env._(
                             "The member's tax identification number (TIN/VAT) does not "
@@ -830,8 +842,8 @@ class AssemblyAttendee(models.Model):
                     )
                 )
             if asm.attendance_partner_vat_format_strict:
-                Attendee = self.env["assembly.attendee"]
-                if not Attendee._partner_vat_passes_light_format_check(raw):
+                attendee_model = self.env["assembly.attendee"]
+                if not attendee_model._partner_vat_passes_light_format_check(raw):
                     raise ValidationError(
                         self.env._(
                             "The member's tax identification number (TIN/VAT) does "
@@ -876,15 +888,15 @@ class AssemblyAttendee(models.Model):
         Delegate/delegator **effectiveness** (confirmed delegate attendee, chain rules,
         etc.) is applied in :meth:`assembly.delegation._get_effective_delegations`.
         """
-        Delegation = self.env["assembly.delegation"]
+        delegation_model = self.env["assembly.delegation"]
         aids = [int(x) for x in assembly_ids if x]
         if not aids:
             return {}
-        delegations = Delegation.search([("assembly_id", "in", list(set(aids)))])
+        delegations = delegation_model.search([("assembly_id", "in", list(set(aids)))])
         buckets = defaultdict(list)
         for d in delegations:
             buckets[d.assembly_id.id].append(d.id)
-        return {aid: Delegation.browse(ids) for aid, ids in buckets.items()}
+        return {aid: delegation_model.browse(ids) for aid, ids in buckets.items()}
 
     def _get_effective_delegations(
         self,
@@ -896,20 +908,21 @@ class AssemblyAttendee(models.Model):
     ):
         """Delegations that affect **vote** math for this member (wrapper).
 
-        Implements the same contract as :meth:`assembly.delegation._get_effective_delegations`
-        for ``(assembly_id, partner_id)`` of this row. Quorum presence uses
+        Implements the same contract as
+        ``assembly.delegation._get_effective_delegations`` for
+        ``(assembly_id, partner_id)`` of this row. Quorum presence uses
         :meth:`~assembly.delegation._get_effective_delegations` with ``delegations=``
         on the assembly's delegation rows (partner layer only).
         """
         self.ensure_one()
-        Delegation = self.env["assembly.delegation"]
+        delegation_model = self.env["assembly.delegation"]
         if (
             not self.assembly_id
             or not self.partner_id
             or role not in ("delegator", "delegate")
         ):
-            return Delegation.browse()
-        return Delegation._get_effective_delegations(
+            return delegation_model.browse()
+        return delegation_model._get_effective_delegations(
             self.assembly_id.id,
             self.partner_id.id,
             role,
@@ -969,23 +982,25 @@ class AssemblyAttendee(models.Model):
         delegations_by_assembly = self._delegations_for_assemblies(
             self.mapped("assembly_id").ids
         )
-        Delegation = self.env["assembly.delegation"]
-        Attendee = self.env["assembly.attendee"]
-        for rec in self:
-            if rec.attendee_state == "confirmed":
+        delegation_model = self.env["assembly.delegation"]
+        attendee_model = self.env["assembly.attendee"]
+        for record in self:
+            if record.attendee_state == "confirmed":
                 continue
-            pool = delegations_by_assembly.get(rec.assembly_id.id, Delegation.browse())
-            inbound, msg = rec._confirm_attendee_and_gather_delegation_effects(pool)
-            confirmed_in_action |= rec
+            pool = delegations_by_assembly.get(
+                record.assembly_id.id, delegation_model.browse()
+            )
+            inbound, msg = record._confirm_attendee_and_gather_delegation_effects(pool)
+            confirmed_in_action |= record
             delegators_to_recompute |= inbound
-            outbound = rec._get_effective_delegations(
+            outbound = record._get_effective_delegations(
                 "delegator",
                 confirmed_delegations_pool=pool,
             )
             if outbound:
                 delegates_outbound_touch |= (
-                    Attendee._search_attendees_by_assembly_partners(
-                        rec.assembly_id.id,
+                    attendee_model._search_attendees_by_assembly_partners(
+                        record.assembly_id.id,
                         outbound.mapped("delegate_partner_id").ids,
                     )
                 )
@@ -1037,8 +1052,8 @@ class AssemblyAttendee(models.Model):
 
     def _attendees_affected_by_delegations_when_leaving_confirmed(self):
         self.ensure_one()
-        Attendee = self.env["assembly.attendee"]
-        affected = Attendee.browse()
+        attendee_model = self.env["assembly.attendee"]
+        affected = attendee_model.browse()
         aid = self.assembly_id.id
         delegations_in = self._get_effective_delegations(
             "delegate",
@@ -1046,7 +1061,7 @@ class AssemblyAttendee(models.Model):
             apply_delegate_attendee_effect=False,
         )
         if delegations_in:
-            affected |= Attendee._search_attendees_by_assembly_partners(
+            affected |= attendee_model._search_attendees_by_assembly_partners(
                 aid,
                 delegations_in.mapped("partner_id").ids,
             )
@@ -1056,7 +1071,7 @@ class AssemblyAttendee(models.Model):
             apply_delegate_attendee_effect=False,
         )
         if delegations_out:
-            affected |= Attendee._search_attendees_by_assembly_partners(
+            affected |= attendee_model._search_attendees_by_assembly_partners(
                 aid,
                 delegations_out.mapped("delegate_partner_id").ids,
             )
@@ -1064,11 +1079,11 @@ class AssemblyAttendee(models.Model):
 
     def action_mark_absent(self):
         attendees_to_recompute = self.env["assembly.attendee"]
-        for rec in self:
-            if rec.attendee_state == "absent":
+        for record in self:
+            if record.attendee_state == "absent":
                 continue
             attendees_to_recompute |= (
-                rec._mark_attendee_absent_and_collect_recompute_targets()
+                record._mark_attendee_absent_and_collect_recompute_targets()
             )
         if attendees_to_recompute:
             self.env["assembly.attendee"].recompute_votes(attendees_to_recompute)
@@ -1138,7 +1153,8 @@ class AssemblyAttendee(models.Model):
 
         * :meth:`action_confirm`, :meth:`action_mark_absent`
         * ``assembly.delegation`` ``create`` / ``write`` (post-persist hook)
-        * :meth:`~assembly.assembly.action_generate_attendees` (all attendees on that assembly)
+        * :meth:`~assembly.assembly.action_generate_attendees` (all attendees
+          on that assembly)
         * ``assembly.assembly.write`` when ``vote_type_ids`` is updated
 
         Raises ``UserError`` if any related assembly is ``closed`` (same rule as
@@ -1166,7 +1182,7 @@ class AssemblyAttendee(models.Model):
             return
         assemblies = attendees.mapped("assembly_id").exists()
         assemblies._assembly_ensure_not_closed_for_related_changes()
-        Attendee = self.env["assembly.attendee"]
+        attendee_model = self.env["assembly.attendee"]
         by_assembly = defaultdict(list)
         for attendee in attendees:
             if not attendee.assembly_id:
@@ -1174,7 +1190,7 @@ class AssemblyAttendee(models.Model):
             by_assembly[attendee.assembly_id.id].append(attendee.id)
         for aid in sorted(by_assembly):
             unique_ids = sorted(set(by_assembly[aid]))
-            Attendee.browse(unique_ids)._recompute_votes_for_recordset()
+            attendee_model.browse(unique_ids)._recompute_votes_for_recordset()
 
     def recompute_attendee_vote_lines(self):
         """Backward-compatible alias for :meth:`recompute_votes` on this recordset."""
@@ -1184,8 +1200,8 @@ class AssemblyAttendee(models.Model):
     def _calculate_base_votes(self, partner, vote_types):
         if not partner or not vote_types:
             return {}
-        PartnerVote = self.env["partner.vote"]
-        pvs = PartnerVote.search(
+        partner_vote_model = self.env["partner.vote"]
+        pvs = partner_vote_model.search(
             [
                 ("partner_id", "=", partner.id),
                 ("vote_type_id", "in", vote_types.ids),
@@ -1201,16 +1217,17 @@ class AssemblyAttendee(models.Model):
 
     @api.model
     def _delegation_applies_to_vote_type(self, delegation, vote_type):
-        """Whether ``vote_type`` is in this delegation's expanded coverage (vote math only)."""
+        """Whether ``vote_type`` is in this delegation's coverage (vote math)."""
         return delegation.delegation_covers_vote_type(vote_type)
 
     @api.model
     def _apply_delegated_out(self, effective_out, vote_type, base_own_votes):
         """Amount delegated **out**: only this partner's ``partner.vote`` for the type.
 
-        ``base_own_votes`` must come from :meth:`_calculate_base_votes` (never totals
-        nor ``delegated_in``). Vote chaining is also blocked on delegations
-        (ORM validation and ``assembly.delegation._exclude_outbound_vote_chain_overlap``).
+        ``base_own_votes`` must come from :meth:`_calculate_base_votes` (never
+        totals nor ``delegated_in``). Vote chaining is also blocked on
+        delegations (ORM validation and
+        ``assembly.delegation._exclude_outbound_vote_chain_overlap``).
         """
         if not effective_out:
             return 0.0
@@ -1260,40 +1277,43 @@ class AssemblyAttendee(models.Model):
         """
         total = 0.0
         vt_id = vote_type.id
-        PartnerVote = self.env["partner.vote"]
         delegations = delegations.sorted("id")
-        missing_fetch = []
+        missing_pids = []
         for delegation in delegations:
             pid = delegation.partner_id.id
             inner = pv_by_partner_and_type.get(pid)
             if inner and vt_id in inner:
                 total += inner[vt_id]
             else:
-                missing_fetch.append((delegation, pid))
-        if missing_fetch:
-            pids = list({pid for __, pid in missing_fetch})
-            pvs = PartnerVote.search(
-                [
-                    ("partner_id", "in", pids),
-                    ("vote_type_id", "=", vt_id),
-                ],
-                order="id",
-            )
-            by_pid = {}
-            for pv in pvs:
-                opid = pv.partner_id.id
-                if opid not in by_pid:
-                    by_pid[opid] = pv.vote_count_display
-            for __, pid in missing_fetch:
-                total += by_pid.get(pid, 0.0)
+                missing_pids.append(pid)
+        if missing_pids:
+            total += self._sum_missing_partner_votes(missing_pids, vt_id)
         return total
+
+    @api.model
+    def _sum_missing_partner_votes(self, partner_ids, vt_id):
+        """Fallback ``partner.vote`` sum for pairs absent from the prefetch map."""
+        partner_vote_model = self.env["partner.vote"]
+        pvs = partner_vote_model.search(
+            [
+                ("partner_id", "in", list(set(partner_ids))),
+                ("vote_type_id", "=", vt_id),
+            ],
+            order="id",
+        )
+        by_pid = {}
+        for pv in pvs:
+            opid = pv.partner_id.id
+            if opid not in by_pid:
+                by_pid[opid] = pv.vote_count_display
+        return sum(by_pid.get(pid, 0.0) for pid in partner_ids)
 
     @api.model
     def _sum_delegators_own_votes_from_search(self, delegations, vote_type):
         """Sum ``partner.vote`` for each delegator partner (own votes only)."""
         partner_ids = delegations.mapped("partner_id").ids
-        PartnerVote = self.env["partner.vote"]
-        pvs = PartnerVote.search(
+        partner_vote_model = self.env["partner.vote"]
+        pvs = partner_vote_model.search(
             [
                 ("partner_id", "in", partner_ids),
                 ("vote_type_id", "=", vote_type.id),
@@ -1336,14 +1356,14 @@ class AssemblyAttendee(models.Model):
 
     def _prefetch_and_dedupe_attendee_vote_lines(self, attendee_ids, vote_type_ids):
         """Load existing vote lines for the batch and collapse duplicates into a map."""
-        AttendeeVote = self.env["assembly.attendee.vote"]
+        attendee_vote_model = self.env["assembly.attendee.vote"]
         line_by_pair = {}
         aids = [int(x) for x in attendee_ids if x]
         vtids = [int(x) for x in vote_type_ids if x]
         if not aids or not vtids:
             return line_by_pair
-        AttendeeVote.flush_model()
-        prefetched = AttendeeVote.sudo().search(
+        attendee_vote_model.flush_model()
+        prefetched = attendee_vote_model.sudo().search(
             [
                 ("attendee_id", "in", aids),
                 ("vote_type_id", "in", vtids),
@@ -1370,16 +1390,16 @@ class AssemblyAttendee(models.Model):
             cached = line_by_pair.get(key)
             if cached and cached.exists():
                 return cached
-        AttendeeVote = self.env["assembly.attendee.vote"]
-        AttendeeVote.flush_model()
+        attendee_vote_model = self.env["assembly.attendee.vote"]
+        attendee_vote_model.flush_model()
         domain = [
             ("attendee_id", "=", self.id),
             ("vote_type_id", "=", vote_type.id),
         ]
-        found = AttendeeVote.sudo().search(domain, order="id")
+        found = attendee_vote_model.sudo().search(domain, order="id")
         if len(found) > 1:
             self.env["assembly.attendee"]._collapse_duplicate_attendee_vote_lines(found)
-            found = AttendeeVote.sudo().search(domain, order="id")
+            found = attendee_vote_model.sudo().search(domain, order="id")
         existing = found[:1]
         if line_by_pair is not None:
             if existing:
@@ -1389,20 +1409,29 @@ class AssemblyAttendee(models.Model):
         return existing
 
     def _ensure_non_negative_vote_components(
-        self, attendee, vote_type, own_votes, delegated_out_votes, delegated_in_votes
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
+        self,
+        attendee,
+        vote_type,
+        own_votes,
+        delegated_out_votes,
+        delegated_in_votes,
     ):
         checks = (
             (
                 own_votes < 0.0,
-                "Own votes cannot be negative (attendee %(attendee)s, type %(vtype)s).",
+                "Own votes cannot be negative "
+                "(attendee %(attendee)s, type %(vtype)s).",
             ),
             (
                 delegated_out_votes < 0.0,
-                "Delegated out votes cannot be negative (attendee %(attendee)s, type %(vtype)s).",
+                "Delegated out votes cannot be negative "
+                "(attendee %(attendee)s, type %(vtype)s).",
             ),
             (
                 delegated_in_votes < 0.0,
-                "Delegated in votes cannot be negative (attendee %(attendee)s, type %(vtype)s).",
+                "Delegated in votes cannot be negative "
+                "(attendee %(attendee)s, type %(vtype)s).",
             ),
         )
         for bad, msg in checks:
@@ -1415,7 +1444,7 @@ class AssemblyAttendee(models.Model):
                     )
                 )
 
-    def _persist_attendee_vote_line(
+    def _persist_attendee_vote_line(  # pylint: disable=too-many-arguments
         self,
         vote_type,
         own_votes,
@@ -1424,10 +1453,11 @@ class AssemblyAttendee(models.Model):
         *,
         line_by_pair=None,
     ):
-        """Persist one snapshot row: **update** if present else **create** (idempotent).
+        """Persist one snapshot row: **update** if present else **create**.
 
         Uniqueness: SQL ``UNIQUE(attendee_id, vote_type_id)`` and
-        :meth:`_fetch_unique_vote_line_for_type` / :meth:`_collapse_duplicate_attendee_vote_lines`.
+        :meth:`_fetch_unique_vote_line_for_type` /
+        :meth:`_collapse_duplicate_attendee_vote_lines`.
         Repeated recomputation only updates the same logical row via ``write``.
         ``IntegrityError`` (concurrent insert) → fetch, collapse, ``write``.
         """
@@ -1439,7 +1469,7 @@ class AssemblyAttendee(models.Model):
             delegated_out_votes,
             delegated_in_votes,
         )
-        AttendeeVote = self.env["assembly.attendee.vote"]
+        attendee_vote_model = self.env["assembly.attendee.vote"]
         vals = {
             "own_votes": own_votes,
             "delegated_out_votes": delegated_out_votes,
@@ -1456,7 +1486,7 @@ class AssemblyAttendee(models.Model):
             return
         with self.env.cr.savepoint():
             try:
-                created = AttendeeVote.sudo().create(
+                created = attendee_vote_model.sudo().create(
                     {
                         "attendee_id": self.id,
                         "vote_type_id": vote_type.id,
@@ -1485,10 +1515,10 @@ class AssemblyAttendee(models.Model):
     def _prefetch_delegator_partner_votes_map(self, effective_in, vote_types):
         if not effective_in:
             return None
-        PartnerVote = self.env["partner.vote"]
+        partner_vote_model = self.env["partner.vote"]
         delegator_pids = effective_in.mapped("partner_id").ids
         pv_by_partner_and_type = defaultdict(dict)
-        for pv in PartnerVote.search(
+        for pv in partner_vote_model.search(
             [
                 ("partner_id", "in", delegator_pids),
                 ("vote_type_id", "in", vote_types.ids),
@@ -1501,6 +1531,7 @@ class AssemblyAttendee(models.Model):
         return pv_by_partner_and_type
 
     def _build_vote_line_rows_for_attendee_snapshot(
+        # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         vote_types,
         own_by_type,
@@ -1509,11 +1540,12 @@ class AssemblyAttendee(models.Model):
         effective_in,
         pv_by_partner_and_type,
     ):
-        """Build component dicts; ``vote_types`` must already be in deterministic order.
+        """Build component dicts; ``vote_types`` must be in deterministic order.
 
-        No chaining: ``delegated_out_votes`` uses only ``own_by_type`` (``partner.vote``).
-        ``delegated_in_votes`` sums each inbound delegator's ``partner.vote`` for the
-        type (see :meth:`_apply_delegated_in`), never stored inbound of intermediaries.
+        No chaining: ``delegated_out_votes`` uses only ``own_by_type``.
+        ``delegated_in_votes`` sums each inbound delegator's ``partner.vote``
+        for the type (see :meth:`_apply_delegated_in`), never stored inbound of
+        intermediaries.
         """
         rows = {}
         for vote_type in vote_types:
@@ -1561,12 +1593,12 @@ class AssemblyAttendee(models.Model):
             return {"clear_lines": True}
         own_by_type = self._calculate_base_votes(self.partner_id, vote_types)
         confirmed = self.attendee_state == "confirmed"
-        Delegation = self.env["assembly.delegation"]
+        delegation_model = self.env["assembly.delegation"]
         if confirmed:
             effective_out = self._get_effective_delegations("delegator").sorted("id")
             effective_in = self._get_effective_delegations("delegate").sorted("id")
         else:
-            effective_out = effective_in = Delegation.browse()
+            effective_out = effective_in = delegation_model.browse()
         pv_map = None
         if confirmed and effective_in:
             pv_map = self._prefetch_delegator_partner_votes_map(
@@ -1584,7 +1616,7 @@ class AssemblyAttendee(models.Model):
         }
 
     def _compute_vote_components(self, inputs):
-        """Phase 2: snapshot dict ``vote_type.id → {own, delegated_out, delegated_in}``."""
+        """Phase 2: snapshot dict ``vote_type.id → components`` per type."""
         return self._build_vote_line_rows_for_attendee_snapshot(
             inputs["vote_types"],
             inputs["own_by_type"],
@@ -1614,14 +1646,16 @@ class AssemblyAttendee(models.Model):
         stored vote magnitudes.
         """
         self.ensure_one()
-        AttendeeVote = self.env["assembly.attendee.vote"]
-        AttendeeVote.flush_model()
-        existing_lines = AttendeeVote.sudo().search([("attendee_id", "=", self.id)])
+        attendee_vote_model = self.env["assembly.attendee.vote"]
+        attendee_vote_model.flush_model()
+        existing_lines = attendee_vote_model.sudo().search(
+            [("attendee_id", "=", self.id)]
+        )
         existing_types = existing_lines.mapped("vote_type_id")
         obsolete = existing_types - current_vote_types
         if not obsolete:
             return
-        AttendeeVote.sudo().search(
+        attendee_vote_model.sudo().search(
             [
                 ("attendee_id", "=", self.id),
                 ("vote_type_id", "in", obsolete.ids),
@@ -1629,15 +1663,15 @@ class AssemblyAttendee(models.Model):
         ).unlink()
 
     def _recompute_votes_core(self, line_by_pair):
-        """Full snapshot recompute: inputs from domain data only; ``line_by_pair`` is write-target map."""
+        """Full snapshot recompute; ``line_by_pair`` is the write map."""
         self.ensure_one()
         inputs = self._get_vote_recompute_inputs()
         if inputs is None:
             return
         if inputs.get("clear_lines"):
-            AttendeeVote = self.env["assembly.attendee.vote"]
-            AttendeeVote.flush_model()
-            AttendeeVote.sudo().search([("attendee_id", "=", self.id)]).unlink()
+            attendee_vote_model = self.env["assembly.attendee.vote"]
+            attendee_vote_model.flush_model()
+            attendee_vote_model.sudo().search([("attendee_id", "=", self.id)]).unlink()
             return
         rows = self._compute_vote_components(inputs)
         vote_types = inputs["vote_types"]

@@ -45,8 +45,9 @@ _ASSEMBLY_STATES_ALLOW_GENERATE_ATTENDEES = frozenset(("draft", "announced", "op
 # assembly row still reads ``closed`` (e.g. cancel → close open votings).
 CTX_ASSEMBLY_INTERNAL_TRANSITION = "assembly_internal_transition"
 
-# Set only by :meth:`AssemblyAssembly.action_reopen_from_closed` so ``closed → in_session``
-# is not writable from RPC without audit (chatter) and ACL.
+# Set only by :meth:`AssemblyAssembly.action_reopen_from_closed` so the
+# ``closed → in_session`` edge is not writable from RPC without audit
+# (chatter) and ACL.
 CTX_ASSEMBLY_REOPEN_FROM_CLOSED = "assembly_reopen_from_closed"
 
 
@@ -92,7 +93,9 @@ _MAIL_SUFFIX_TO_COMPANY_FIELD = {
     "delegation_document": "assembly_default_delegation_document_mail_template_id",
     "delegation_footer": "assembly_default_delegation_footer_mail_template_id",
     "ballot_intro": "assembly_default_ballot_intro_mail_template_id",
-    "ballot_nominative_intro": "assembly_default_ballot_nominative_intro_mail_template_id",
+    "ballot_nominative_intro": (
+        "assembly_default_ballot_nominative_intro_mail_template_id"
+    ),
 }
 
 _AF_SUFFIX_TO_COMPANY_VIEW_FIELD = {
@@ -142,7 +145,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     assembly_id = fields.Many2one(
         "assembly.assembly",
-        string="Assembly",
         compute="_compute_report_filename_compat_fields",
         store=False,
     )
@@ -161,16 +163,15 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         "company_id.partner_id",
     )
     def _compute_report_filename_compat_fields(self):
-        for rec in self:
-            rec.assembly_id = rec
-            if rec.president_id and rec.president_id.partner_id:
-                rec.partner_id = rec.president_id.partner_id
+        for record in self:
+            record.assembly_id = record
+            if record.president_id and record.president_id.partner_id:
+                record.partner_id = record.president_id.partner_id
             else:
-                rec.partner_id = rec.company_id.partner_id
+                record.partner_id = record.company_id.partner_id
 
     company_id = fields.Many2one(
         "res.company",
-        string="Company",
         required=True,
         default=lambda self: self.env.company,
         index=True,
@@ -214,15 +215,13 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     state_id = fields.Many2one(
         "res.country.state", string="State/Province", ondelete="restrict"
     )
-    country_id = fields.Many2one("res.country", string="Country", ondelete="restrict")
+    country_id = fields.Many2one("res.country", ondelete="restrict")
     president_id = fields.Many2one(
         "res.users",
-        string="President",
         ondelete="set null",
     )
     secretary_id = fields.Many2one(
         "res.users",
-        string="Secretary",
         ondelete="set null",
     )
     description = fields.Html(string="Convocation text")
@@ -317,8 +316,9 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         string="Require TIN to mark attended",
         default=False,
         help=(
-            "When set, recording a member as attended (confirmed present) is blocked if "
-            "the member has no TIN (VAT) or it is the exempt placeholder (/)."
+            "When set, recording a member as attended (confirmed present) is "
+            "blocked if the member has no TIN (VAT) or it is the exempt "
+            "placeholder (/)."
         ),
     )
     attendance_partner_vat_format_strict = fields.Boolean(
@@ -332,7 +332,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     allow_attendance_notes = fields.Boolean(
         string="Allow attendance annotations",
         default=True,
-        help="If disabled, attendance notes are hidden and cannot be set on registrations.",
+        help=(
+            "If disabled, attendance notes are hidden and cannot be set on "
+            "registrations."
+        ),
     )
     include_qr_code = fields.Boolean(
         string="Tracked attendance links & QR",
@@ -357,7 +360,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     agenda_ids = fields.One2many(
         "assembly.agenda",
         "assembly_id",
-        string="Agenda",
         copy=True,
     )
     attendee_ids = fields.One2many(
@@ -459,32 +461,32 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     @api.depends("date_first_call")
     def _compute_kanban_call_datetime_parts(self):
-        for rec in self:
-            if not rec.date_first_call:
-                rec.kanban_call_day = ""
-                rec.kanban_call_month_year = ""
-                rec.kanban_call_time = ""
+        for record in self:
+            if not record.date_first_call:
+                record.kanban_call_day = ""
+                record.kanban_call_month_year = ""
+                record.kanban_call_time = ""
                 continue
-            d = rec.date_first_call
-            env = rec.env
-            rec.kanban_call_day = format_datetime(env, d, dt_format="d")
+            d = record.date_first_call
+            env = record.env
+            record.kanban_call_day = format_datetime(env, d, dt_format="d")
             month_year = format_datetime(env, d, dt_format="MMM y")
-            rec.kanban_call_month_year = month_year.replace(" ", ". ").upper()
-            rec.kanban_call_time = format_datetime(env, d, dt_format="HH:mm")
+            record.kanban_call_month_year = month_year.replace(" ", ". ").upper()
+            record.kanban_call_time = format_datetime(env, d, dt_format="HH:mm")
 
     @api.depends("city", "city_id", "state_id")
     def _compute_kanban_location_label(self):
-        for rec in self:
-            city_name = (rec.city_id.name if rec.city_id else rec.city) or ""
-            state_name = rec.state_id.name if rec.state_id else ""
+        for record in self:
+            city_name = (record.city_id.name if record.city_id else record.city) or ""
+            state_name = record.state_id.name if record.state_id else ""
             if city_name and state_name:
-                rec.kanban_location_label = "%s (%s)" % (city_name, state_name)
+                record.kanban_location_label = "%s (%s)" % (city_name, state_name)
             elif city_name:
-                rec.kanban_location_label = city_name
+                record.kanban_location_label = city_name
             elif state_name:
-                rec.kanban_location_label = state_name
+                record.kanban_location_label = state_name
             else:
-                rec.kanban_location_label = ""
+                record.kanban_location_label = ""
 
     @api.depends(
         "agenda_ids",
@@ -493,23 +495,21 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         "agenda_ids.voting_ids",
     )
     def _compute_counts(self):
-        for assembly in self:
-            assembly.count_agenda_items = len(assembly.agenda_ids)
-            assembly.count_delegations = len(assembly.delegation_ids)
-            assembly.count_representations = len(assembly.representation_ids)
-            assembly.voting_sessions_count = len(
-                assembly.agenda_ids.mapped("voting_ids")
-            )
+        for record in self:
+            record.count_agenda_items = len(record.agenda_ids)
+            record.count_delegations = len(record.delegation_ids)
+            record.count_representations = len(record.representation_ids)
+            record.voting_sessions_count = len(record.agenda_ids.mapped("voting_ids"))
 
     @api.depends("message_ids")
     def _compute_mail_trace_counters(self):
         mail_mail = self.env["mail.mail"]
-        for rec in self:
-            rec.assembly_communication_message_count = len(rec.message_ids)
-            rec.mail_outbound_email_count = mail_mail.search_count(
+        for record in self:
+            record.assembly_communication_message_count = len(record.message_ids)
+            record.mail_outbound_email_count = mail_mail.search_count(
                 [
                     ("model", "=", "assembly.assembly"),
-                    ("res_id", "=", rec.id),
+                    ("res_id", "=", record.id),
                 ]
             )
 
@@ -519,12 +519,12 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         "attendee_ids.attendance_link_tracker_id",
     )
     def _compute_attendee_tracked_link_count(self):
-        for rec in self:
-            if not rec.include_qr_code:
-                rec.attendee_tracked_link_count = 0
+        for record in self:
+            if not record.include_qr_code:
+                record.attendee_tracked_link_count = 0
             else:
-                rec.attendee_tracked_link_count = len(
-                    rec.attendee_ids.filtered("attendance_link_tracker_id")
+                record.attendee_tracked_link_count = len(
+                    record.attendee_ids.filtered("attendance_link_tracker_id")
                 )
 
     @api.depends(
@@ -538,25 +538,26 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         "agenda_ids.voting_ids.result_ids.result_percentage",
     )
     def _compute_kanban_vote_digest(self):
-        for asm in self:
-            votings = asm.agenda_ids.mapped("voting_ids")
-            asm.kanban_open_votings_count = len(
+        for record in self:
+            votings = record.agenda_ids.mapped("voting_ids")
+            record.kanban_open_votings_count = len(
                 votings.filtered(lambda v: v.voting_state == "open")
             )
             closed_v = votings.filtered(lambda v: v.voting_state == "closed")
-            asm.kanban_closed_votings_count = len(closed_v)
+            record.kanban_closed_votings_count = len(closed_v)
             if closed_v:
-                asm.kanban_avg_participation = sum(
+                record.kanban_avg_participation = sum(
                     closed_v.mapped("participation_percentage")
                 ) / len(closed_v)
             else:
-                asm.kanban_avg_participation = 0.0
+                record.kanban_avg_participation = 0.0
             summary = ""
             voting_result = self.env["assembly.voting.result"]
             opt_labels = dict(
                 voting_result._fields["vote_option"]._description_selection(self.env)
             )
-            # ``date_close`` can be False; sorting by field name mixes bool with datetime.
+            # ``date_close`` can be False; sorting by field name mixes bool
+            # with datetime.
             epoch_close = fields.Datetime.from_string("1970-01-01 00:00:00")
             for voting in closed_v.sorted(
                 key=lambda v, ep=epoch_close: v.date_close or ep,
@@ -572,7 +573,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                 label = opt_labels.get(best.vote_option, best.vote_option)
                 summary = "%s: %.1f%%" % (label, best.result_percentage or 0.0)
                 break
-            asm.kanban_results_summary = summary
+            record.kanban_results_summary = summary
 
     @api.depends(
         "partner_domain",
@@ -599,26 +600,26 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         # by a quorum-effective delegation. Does not depend on ``partner.vote``,
         # ``assembly.attendee.vote``, vote types, or any vote totals (@api.depends
         # above must stay free of those models).
-        for assembly in self:
-            if assembly.assembly_state == "cancelled":
-                possible = assembly._get_possible_attendees_count()
+        for record in self:
+            if record.assembly_state == "cancelled":
+                possible = record._get_possible_attendees_count()
                 present_partner_ids = frozenset()
             else:
-                convocable = assembly._present_quorum_convocable_partner_ids()
+                convocable = record._present_quorum_convocable_partner_ids()
                 possible = len(convocable)
-                present_partner_ids = assembly._get_present_partner_ids(
+                present_partner_ids = record._get_present_partner_ids(
                     convocable_partner_ids=convocable
                 )
             present = len(present_partner_ids)
-            assembly.total_possible_attendees = possible
-            assembly.total_present_attendees = present
-            if assembly.assembly_state == "cancelled" or possible <= 0:
-                assembly.quorum_percentage = 0.0
-                assembly.quorum_reached = False
+            record.total_possible_attendees = possible
+            record.total_present_attendees = present
+            if record.assembly_state == "cancelled" or possible <= 0:
+                record.quorum_percentage = 0.0
+                record.quorum_reached = False
             else:
                 pct = _quorum_present_percentage(present, possible)
-                assembly.quorum_percentage = pct
-                assembly.quorum_reached = assembly._is_quorum_reached(
+                record.quorum_percentage = pct
+                record.quorum_reached = record._is_quorum_reached(
                     present_partner_ids, possible, quorum_percentage=pct
                 )
 
@@ -657,8 +658,8 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         "date_end",
     )
     def _check_assembly_date_coherence(self):
-        for rec in self:
-            msgs = rec._assembly_date_coherence_issue_messages()
+        for record in self:
+            msgs = record._assembly_date_coherence_issue_messages()
             if msgs:
                 raise ValidationError("\n".join(msgs))
 
@@ -762,7 +763,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     @api.model
     def _assembly_create_field_default(self, field_name):
-        """Default value for ``field_name`` on a new assembly (for create inherit checks)."""
+        """Default value for ``field_name`` on a new assembly."""
         field = self._fields[field_name]
         default = field.default
         if default is None:
@@ -773,10 +774,12 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     @api.model
     def _create_vals_matches_assembly_field_default(self, field_name, vals):
+        # pylint: disable=too-many-return-statements
         """Whether ``vals[field_name]`` is absent or still the model field default.
 
         Web create often sends all columns with model defaults; then
-        :meth:`_apply_assembly_type_to_create_vals` must still copy the type (AF §2.2).
+        :meth:`_apply_assembly_type_to_create_vals` must still copy the type
+        (AF §2.2).
         """
         if field_name not in vals:
             return True
@@ -862,12 +865,13 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         return not vals.get(field_name)
 
     @api.model
-    def _apply_assembly_type_to_create_vals(self, vals, atype):  # noqa: C901
+    def _apply_assembly_type_to_create_vals(self, vals, atype):
         """Copy template fields from ``assembly.type`` into create ``vals`` (AF §2.2).
 
-        Fills gaps when keys are missing **or** still equal model defaults / empty,
-        so browser creates (with ``default_*`` sent for every column) inherit quorum,
-        ``vote_type_ids`` and ``partner_domain`` like :meth:`_onchange_assembly_type_id`.
+        Fills gaps when keys are missing **or** still equal model defaults /
+        empty, so browser creates (with ``default_*`` sent for every column)
+        inherit quorum, ``vote_type_ids`` and ``partner_domain`` like
+        :meth:`_onchange_assembly_type_id`.
         """
         if not atype.exists():
             return
@@ -887,6 +891,16 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             vals["quorum_second_call_value"] = atype.default_quorum_second_call_value
         if self._create_vals_partner_domain_unspecified_or_model_default(vals):
             vals["partner_domain"] = atype.partner_domain or "[]"
+        self._apply_type_address_defaults(vals, atype)
+        self._apply_type_attendance_defaults(vals, atype)
+        if atype.company_id and self._create_vals_company_matches_default_or_empty(
+            vals
+        ):
+            vals["company_id"] = atype.company_id.id
+
+    @api.model
+    def _apply_type_address_defaults(self, vals, atype):
+        """Copy address/officer defaults from the assembly type when unset."""
         if self._create_vals_char_address_unset(vals, "street"):
             vals["street"] = atype.default_street
         if self._create_vals_many2one_unset(vals, "city_id") and atype.default_city_id:
@@ -913,6 +927,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             vals["secretary_id"] = (
                 atype.default_secretary_id.id if atype.default_secretary_id else False
             )
+
+    @api.model
+    def _apply_type_attendance_defaults(self, vals, atype):
+        """Copy attendance/TIN defaults from the assembly type when at default."""
         if self._create_vals_matches_assembly_field_default(
             "attendance_require_partner_vat_confirm", vals
         ):
@@ -931,10 +949,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             vals["allow_attendance_notes"] = atype.default_allow_attendance_notes
         if self._create_vals_matches_assembly_field_default("include_qr_code", vals):
             vals["include_qr_code"] = atype.default_include_qr_code
-        if atype.company_id and self._create_vals_company_matches_default_or_empty(
-            vals
-        ):
-            vals["company_id"] = atype.company_id.id
 
     @api.model
     def _create_vals_company_matches_default_or_empty(self, vals):
@@ -1109,14 +1123,14 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             return
         new_state = vals["assembly_state"]
         old_states_by_id = {rec.id: rec.assembly_state for rec in self}
-        for rec in self:
-            rec._validate_state_transition(old_states_by_id[rec.id], new_state)
-        for rec in self:
-            old_state = old_states_by_id[rec.id]
+        for record in self:
+            record._validate_state_transition(old_states_by_id[record.id], new_state)
+        for record in self:
+            old_state = old_states_by_id[record.id]
             if old_state == new_state:
                 continue
-            rec._check_transition_prerequisites(old_state, new_state)
-            rec._prepare_state_transition_before_write(old_state, new_state)
+            record._check_transition_prerequisites(old_state, new_state)
+            record._prepare_state_transition_before_write(old_state, new_state)
 
     def _transition_assembly_state_via_write(self, new_state, extra_vals=None):
         self.ensure_one()
@@ -1125,7 +1139,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         return self.write(vals)
 
     def _transition_assembly_state(self, new_state, extra_vals=None):
-        """Used by public lifecycle actions; same as :meth:`_transition_assembly_state_via_write`."""
+        """Public lifecycle wrapper for ``_transition_assembly_state_via_write``."""
         return self._transition_assembly_state_via_write(new_state, extra_vals)
 
     def _assembly_closed_write_allowed_vals(self, vals):
@@ -1160,10 +1174,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         self.env["assembly.assembly"]._assembly_raise_if_closed(self)
 
     def unlink(self):
-        for rec in self:
+        for record in self:
             if (
-                rec.assembly_state == "closed"
-                and not rec.company_id.assembly_allow_edit_closed_assembly
+                record.assembly_state == "closed"
+                and not record.company_id.assembly_allow_edit_closed_assembly
             ):
                 raise UserError(  # pylint: disable=no-raise-unlink
                     self.env._("This assembly is closed and cannot be modified.")
@@ -1188,9 +1202,9 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             if attendees:
                 self.env["assembly.attendee"].recompute_votes(attendees)
         if "include_qr_code" in vals:
-            for asm in self:
-                if asm.attendee_ids:
-                    asm.attendee_ids._sync_attendance_link_trackers()
+            for record in self:
+                if record.attendee_ids:
+                    record.attendee_ids._sync_attendance_link_trackers()
         return res
 
     def _get_active_quorum_rule(self):
@@ -1206,7 +1220,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     # --- Quorum presence (people only): implementation of _get_present_partner_ids ---
 
     def _present_quorum_convocable_partner_ids(self):
-        """Partners in the assembly convocation domain (same pool as *possible* count)."""
+        """Partners in the convocation domain (same pool as *possible* count)."""
         self.ensure_one()
         return frozenset(self.env["res.partner"].search(self._get_partner_domain()).ids)
 
@@ -1233,15 +1247,15 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         confirmed = frozenset(confirmed_partner_ids)
         convocable = frozenset(convocable_partner_ids)
         extra = set()
-        Delegation = self.env["assembly.delegation"]
-        delegations_eff = Delegation._get_effective_delegations(
+        delegation_model = self.env["assembly.delegation"]
+        delegations_eff = delegation_model._get_effective_delegations(
             delegations=self.delegation_ids
         )
         delegator_pids = {d.partner_id.id for d in delegations_eff if d.partner_id}
         absent_delegator_pids = frozenset()
         if delegator_pids:
-            Attendee = self.env["assembly.attendee"]
-            att_lines = Attendee._search_attendees_for_assembly(
+            attendee_model = self.env["assembly.attendee"]
+            att_lines = attendee_model._search_attendees_for_assembly(
                 self.id, partner_ids=list(delegator_pids)
             )
             absent_delegator_pids = frozenset(
@@ -1310,7 +1324,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         return len(self._get_present_partner_ids())
 
     def _count_present_attendees(self):
-        """Same as :meth:`_get_quorum_present_people_count` (explicit name for call sites)."""
+        """Alias of ``_get_quorum_present_people_count`` for explicit call sites."""
         return self._get_quorum_present_people_count()
 
     def _is_quorum_reached(self, present_partner_ids, possible, quorum_percentage=None):
@@ -1365,8 +1379,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             res_model,
             title,
             "list,form",
-            domain=[("assembly_id", "=", self.id)],
-            context={"default_assembly_id": self.id},
+            extra={
+                "domain": [("assembly_id", "=", self.id)],
+                "context": {"default_assembly_id": self.id},
+            },
         )
 
     def action_announce(self):
@@ -1387,7 +1403,8 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         if self.assembly_state != "in_session":
             raise UserError(
                 self.env._(
-                    "The live voting screen is only available while the assembly is in session."
+                    "The live voting screen is only available while the "
+                    "assembly is in session."
                 )
             )
         agendas = self.agenda_ids.sorted(lambda a: (a.sequence, a.id))
@@ -1411,7 +1428,8 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                 return agenda.action_open_live_voting_screen()
         raise UserError(
             self.env._(
-                "No agenda item is ready for live voting. Open an item from the agenda list."
+                "No agenda item is ready for live voting. Open an item from "
+                "the agenda list."
             )
         )
 
@@ -1483,7 +1501,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             self.env["assembly.attendee"].recompute_votes(self.attendee_ids)
 
     def action_recompute_attendee_votes(self):
-        """AF §6: Recompute stored vote lines for all attendees from base_vote and delegations."""
+        """AF §6: Recompute stored vote lines for all attendees."""
         self.ensure_one()
         self.env["assembly.assembly"]._assembly_raise_if_closed(self)
         if not self.attendee_ids:
@@ -1492,7 +1510,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         return True
 
     def _get_manual_yes_no_possible_vote_units(self):
-        """Vote units held by confirmed attendees for this assembly's configured vote types.
+        """Vote units held by confirmed attendees for the configured types.
 
         Sum of stored ``assembly.attendee.vote`` ``attendee_vote_total`` for
         ``attendee_state=confirmed`` and ``vote_type_id in assembly.vote_type_ids``.
@@ -1500,15 +1518,15 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         universe cannot be computed (no confirmed attendees or no vote types).
         """
         self.ensure_one()
-        Attendee = self.env["assembly.attendee"]
-        AttendeeVote = self.env["assembly.attendee.vote"]
-        attendees = Attendee._search_attendees_for_assembly(
+        attendee_model = self.env["assembly.attendee"]
+        attendee_vote_model = self.env["assembly.attendee.vote"]
+        attendees = attendee_model._search_attendees_for_assembly(
             self.id, attendee_state="confirmed"
         )
         vt_ids = self.vote_type_ids.ids
         if not attendees or not vt_ids:
             return 0.0
-        lines = AttendeeVote.search(
+        lines = attendee_vote_model.search(
             [
                 ("attendee_id", "in", attendees.ids),
                 ("vote_type_id", "in", vt_ids),
@@ -1547,7 +1565,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     @api.model
     def _assembly_sanitize_mail_qweb_body_html(self, html):
-        """Fix broken QWeb in stored mail bodies (e.g. ``object`` renamed to ``objeto``)."""
+        """Fix broken QWeb in stored mail bodies (renamed variables)."""
         if not html:
             return ""
         s = html_unescape(str(html))
@@ -1566,7 +1584,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         return s
 
     def _render_mail_template_body_html(self, template, res_id):
-        """Render ``mail.template`` ``body_html`` using QWeb (with QWeb variable fixup)."""
+        """Render ``mail.template`` ``body_html`` using QWeb (with fixup)."""
         if not template:
             return ""
         body = self._assembly_sanitize_mail_qweb_body_html(
@@ -1589,7 +1607,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         return str(html) if html is not None else ""
 
     def _render_assembly_af_qweb_fallback(self, default_xmlid_suffix):
-        """Render bundled AF QWeb ``ir.ui.view`` templates when mail templates are empty."""
+        """Render bundled AF QWeb views when mail templates are empty."""
         self.ensure_one()
         company_view = self._assembly_company_af_fallback_view(default_xmlid_suffix)
         xmlid = _AF_QWEB_FALLBACK_XMLIDS.get(default_xmlid_suffix)
@@ -1629,7 +1647,8 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             "call date to show when and where."
         )
         return Markup(
-            '<aside class="o_assembly_publication_hint text-muted" role="note"><p>%s</p></aside>'
+            '<aside class="o_assembly_publication_hint text-muted" '
+            'role="note"><p>%s</p></aside>'
         ) % escape(msg)
 
     def _render_assembly_mail_template_chain_detail(
@@ -1639,10 +1658,11 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         *,
         raw_html_fallback=None,
     ):
-        """Like :meth:`_render_assembly_mail_template_chain` but returns ``{html, source}``.
+        """Like ``_render_assembly_mail_template_chain`` but returns a dict.
 
-        *source* is ``mail`` (template body), ``description`` (raw HTML fallback, typically
-        assembly description), ``qweb`` (bundled/company AF QWeb view), or ``minimal``.
+        *source* is ``mail`` (template body), ``description`` (raw HTML
+        fallback, typically assembly description), ``qweb`` (bundled/company AF
+        QWeb view), or ``minimal``.
         """
         self.ensure_one()
         company_tmpl = self._assembly_company_default_mail_template(
@@ -1679,7 +1699,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         *,
         raw_html_fallback=None,
     ):
-        """Render document HTML: ``mail.template`` (QWeb) → optional raw HTML → QWeb view → title.
+        """Render document HTML via mail template, raw HTML, QWeb, then title.
 
         Uses ``mail.template._render_field`` (standard Odoo path for template bodies).
         Always returns non-empty ``Markup`` when the assembly has a name or id.
@@ -1712,13 +1732,13 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         return self._assembly_markup_from_render_result(html), source
 
     def get_rendered_publication(self):
-        """Convocation HTML: ``mail.template._render_field`` (QWeb) → description → QWeb fallback → title."""
+        """Convocation HTML via mail template, description, QWeb, then title."""
         self.ensure_one()
         html, _src = self._get_rendered_publication_parts()
         return html
 
     def get_rendered_publication_text(self):
-        """String form of :meth:`get_rendered_publication` (for mail composer / plain consumers)."""
+        """String form of :meth:`get_rendered_publication`."""
         self.ensure_one()
         return str(self.get_rendered_publication())
 
@@ -1767,7 +1787,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         )
 
     def get_rendered_delegation(self):
-        """Delegation HTML: document + footer, each rendered like :meth:`get_rendered_publication` (QWeb chain)."""
+        """Delegation HTML: document + footer via the QWeb render chain."""
         self.ensure_one()
         body, _bs = self._get_rendered_delegation_document_parts()
         foot, _fs = self._get_rendered_delegation_footer_parts()
@@ -1821,7 +1841,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         return self.env._("Using default template")
 
     def _assembly_render_mail_subject(self, template, fallback_subject, *, lang=None):
-        """Render ``mail.template`` ``subject`` for this assembly, or use *fallback_subject*."""
+        """Render the mail template ``subject``, or use *fallback_subject*."""
         self.ensure_one()
         if template:
             render_kw = {"compute_lang": False}
@@ -1928,8 +1948,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             "assembly.agenda",
             self.env._("Agenda items"),
             "list,kanban,graph,pivot,form",
-            domain=[("assembly_id", "=", self.id)],
-            context={"default_assembly_id": self.id},
+            extra={
+                "domain": [("assembly_id", "=", self.id)],
+                "context": {"default_assembly_id": self.id},
+            },
         )
 
     def action_open_votings(self):
@@ -1940,7 +1962,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             "assembly.voting",
             self.env._("Votings"),
             "list,kanban,graph,pivot,form",
-            domain=[("assembly_id", "=", self.id)],
+            extra={"domain": [("assembly_id", "=", self.id)]},
         )
 
     def action_open_delegations(self):
@@ -1970,6 +1992,8 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             "assembly.attendee",
             self.env._("Attendees (tracked links & QR)"),
             "list,form",
-            domain=[("assembly_id", "=", self.id)],
-            context=ctx,
+            extra={
+                "domain": [("assembly_id", "=", self.id)],
+                "context": ctx,
+            },
         )

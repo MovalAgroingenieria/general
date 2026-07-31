@@ -22,8 +22,8 @@ class AssemblyAssemblyHeaderActionsWizard(models.TransientModel):
 
     @api.depends("assembly_id", "assembly_id.attendee_ids")
     def _compute_has_attendees(self):
-        for wiz in self:
-            wiz.has_attendees = bool(wiz.assembly_id.attendee_ids)
+        for record in self:
+            record.has_attendees = bool(record.assembly_id.attendee_ids)
 
     def action_wizard_generate_attendees(self):
         self.ensure_one()

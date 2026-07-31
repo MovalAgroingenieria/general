@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo noupdate="1">
+    <record id="module_category_assembly" model="ir.module.category">
+        <field name="name">Assembly</field>
+        <field name="description">Assembly Management</field>
+        <field name="sequence" eval="50" />
+    </record>
+
+    <record id="assembly_group_user" model="res.groups">
+        <field name="name">Assembly User</field>
+        <field name="category_id" ref="module_category_assembly"/>
+        <field name="comment">Read-only on assemblies, agenda, delegations, votings, results. Read/write/create attendees (no unlink); record rules limit attendee rows to the user&apos;s own partner, so bulk or third-party lines are blocked at rule level. May create own voting lines (cast vote); no write/unlink on those lines. Not implied by Assembly Manager; assign groups separately.</field>
+    </record>
+    <record id="assembly_group_manager" model="res.groups">
+        <field name="name">Assembly Manager</field>
+        <field name="category_id" ref="module_category_assembly"/>
+        <field name="comment">Full CRUD on assembly models (ACL). Implied by Settings / Administration (base.group_system). Does not imply Assembly User; if both groups are assigned, permissive manager ir.rule ORs with user rules so back-office rows stay visible.</field>
+    </record>
+
+    <!-- Settings / Administration users get Assembly Manager  -->
+    <record id="base.group_system" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('assembly_group_manager'))]"/>
+    </record>
+</odoo>

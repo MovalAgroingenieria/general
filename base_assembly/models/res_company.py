@@ -61,7 +61,7 @@ class ResCompany(models.Model):
     assembly_default_use_qr = fields.Boolean(
         string="Default tracked attendance links & QR",
         default=True,
-        help="Default for Include QR / tracked links on new assemblies in this company.",
+        help="Default Include QR / tracked links for new company assemblies.",
     )
     assembly_allow_edit_closed_assembly = fields.Boolean(
         string="Allow editing closed assemblies",
@@ -74,7 +74,7 @@ class ResCompany(models.Model):
         domain="[('code', '=', 'assembly.assembly'), '|', "
         "('company_id', '=', False), ('company_id', '=', id)]",
         help="Sequence used to generate assembly reference codes. "
-        "If empty, the system falls back to any sequence with code “assembly.assembly”.",
+        "If empty, any sequence with code “assembly.assembly” is used.",
     )
     assembly_default_publication_mail_template_id = fields.Many2one(
         "mail.template",
@@ -142,20 +142,21 @@ class ResCompany(models.Model):
         "ir.ui.view",
         string="Attendance deep-link error page (QWeb)",
         domain="[('type', '=', 'qweb')]",
-        help="HTML error page for attendance deep links (invalid access, wrong state, etc.).",
+        help="HTML error page for attendance deep links (invalid access, "
+        "wrong state, etc.).",
     )
 
     def _assembly_ensure_default_template_configuration(self):
-        for company in self:
+        for record in self:
             updates = {}
             for field_name, xmlid in _ASSEMBLY_COMPANY_DEFAULT_CONFIG_REFS:
-                if getattr(company, field_name):
+                if getattr(record, field_name):
                     continue
-                rec = company.env.ref(xmlid, raise_if_not_found=False)
+                rec = record.env.ref(xmlid, raise_if_not_found=False)
                 if rec:
                     updates[field_name] = rec.id
             if updates:
-                company.write(updates)
+                record.write(updates)
 
     def _assembly_sequence_create_values_from_template(self, template):
         self.ensure_one()
@@ -177,33 +178,33 @@ class ResCompany(models.Model):
             "base_assembly.seq_assembly_assembly",
             raise_if_not_found=False,
         )
-        for company in self:
-            if company.assembly_sequence_id:
+        for record in self:
+            if record.assembly_sequence_id:
                 continue
             existing = ir_sequence.search(
                 [
                     ("code", "=", "assembly.assembly"),
-                    ("company_id", "=", company.id),
+                    ("company_id", "=", record.id),
                 ],
                 limit=1,
             )
             if existing:
-                company.assembly_sequence_id = existing
+                record.assembly_sequence_id = existing
                 continue
             if template:
-                vals = company._assembly_sequence_create_values_from_template(template)
+                vals = record._assembly_sequence_create_values_from_template(template)
             else:
                 vals = {
-                    "name": "Assembly reference — %s" % company.name,
+                    "name": "Assembly reference — %s" % record.name,
                     "code": "assembly.assembly",
                     "prefix": "ASM/%(year)s/",
                     "padding": 4,
                     "number_next": 1,
                     "number_increment": 1,
-                    "company_id": company.id,
+                    "company_id": record.id,
                 }
             seq = ir_sequence.create(vals)
-            company.assembly_sequence_id = seq
+            record.assembly_sequence_id = seq
 
     @api.model_create_multi
     def create(self, vals_list):

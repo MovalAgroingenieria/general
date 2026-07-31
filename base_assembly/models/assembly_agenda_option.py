@@ -46,8 +46,8 @@ class AssemblyAgendaOption(models.Model):
 
     @api.constrains("manual_vote_count")
     def _check_manual_vote_count_nonnegative(self):
-        for rec in self:
-            if rec.manual_vote_count < 0:
+        for record in self:
+            if record.manual_vote_count < 0:
                 raise ValidationError(
                     self.env._("Votes per option cannot be negative.")
                 )
@@ -93,8 +93,8 @@ class AssemblyAgendaOption(models.Model):
     @api.constrains("agenda_id")
     def _check_agenda_allows_ballot_options(self):
         """Keep in sync with ``assembly.agenda`` option/mode coherence (O2M inverse)."""
-        for rec in self:
-            if rec.agenda_id.agenda_vote_mode != _AGENDA_VOTE_MODE_MANUAL_MULTI:
+        for record in self:
+            if record.agenda_id.agenda_vote_mode != _AGENDA_VOTE_MODE_MANUAL_MULTI:
                 raise ValidationError(
                     self.env._(
                         "Ballot options are only allowed in manual multi-option mode."

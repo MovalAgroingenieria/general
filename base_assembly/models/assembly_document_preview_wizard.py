@@ -32,7 +32,6 @@ class AssemblyDocumentPreviewWizard(
 
     assembly_id = fields.Many2one(
         "assembly.assembly",
-        string="Assembly",
         required=True,
         readonly=True,
         ondelete="cascade",
@@ -75,12 +74,12 @@ class AssemblyDocumentPreviewWizard(
 
     @api.depends("document_category")
     def _compute_document_type_whitelist(self):
-        for rec in self:
-            cat = rec.document_category or "convocation"
+        for record in self:
+            cat = record.document_category or "convocation"
             keys = _PREVIEW_TYPES_BY_CATEGORY.get(
                 cat, _PREVIEW_TYPES_BY_CATEGORY["convocation"]
             )
-            rec.document_type_whitelist = list(keys)
+            record.document_type_whitelist = list(keys)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -129,8 +128,8 @@ class AssemblyDocumentPreviewWizard(
         if any(
             k in vals for k in ("document_type", "assembly_id", "document_category")
         ):
-            for rec in self:
-                rec.write(rec._preview_payload_write_values())
+            for record in self:
+                record.write(record._preview_payload_write_values())
         return res
 
     def _format_preview_datetime(self, value):
@@ -179,11 +178,8 @@ class AssemblyDocumentPreviewWizard(
         kind = asm._preview_template_kind_from_sources(src)
         return str(inner), kind
 
-    def _wrap_preview_sheet(self, inner_html, label_text, template_kind):
-        self.ensure_one()
-        asm = self.assembly_id
-        if not asm:
-            return inner_html or ""
+    def _preview_location_line(self, asm):
+        """Compose the venue line from location plus city for the preview."""
         loc = (asm.location or "").strip()
         city = ""
         if asm.city_id:
@@ -197,17 +193,28 @@ class AssemblyDocumentPreviewWizard(
                 if location_line
                 else city
             )
-        location_line = location_line or "—"
+        return location_line or "—"
+
+    def _preview_call_note(self, asm):
+        """Return the scheduling note for the preview header."""
+        if asm.date_first_call and asm.date_second_call:
+            return self.env._("First and second call scheduled.")
+        if asm.date_first_call:
+            return self.env._("First call scheduled.")
+        if asm.date_second_call:
+            return self.env._("Second call scheduled.")
+        return ""
+
+    def _wrap_preview_sheet(self, inner_html, label_text, template_kind):
+        self.ensure_one()
+        asm = self.assembly_id
+        if not asm:
+            return inner_html or ""
+        location_line = self._preview_location_line(asm)
         first = self._format_preview_datetime(asm.date_first_call)
         second = self._format_preview_datetime(asm.date_second_call)
         session = self._format_preview_datetime(asm.date_start)
-        call_note = ""
-        if asm.date_first_call and asm.date_second_call:
-            call_note = self.env._("First and second call scheduled.")
-        elif asm.date_first_call:
-            call_note = self.env._("First call scheduled.")
-        elif asm.date_second_call:
-            call_note = self.env._("Second call scheduled.")
+        call_note = self._preview_call_note(asm)
         badge_class = (
             "text-bg-primary" if template_kind == "custom" else "text-bg-secondary"
         )
@@ -220,10 +227,13 @@ class AssemblyDocumentPreviewWizard(
         )
         out = (
             Markup(
-                '<div class="o_assembly_preview_frame border rounded-3 bg-100 p-3 mb-2">'
+                '<div class="o_assembly_preview_frame '
+                'border rounded-3 bg-100 p-3 mb-2">'
             )
             + Markup(
-                '<header class="o_assembly_preview_header d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3 pb-3 border-bottom">'
+                '<header class="o_assembly_preview_header d-flex flex-wrap '
+                "justify-content-between align-items-start gap-2 mb-3 pb-3 "
+                'border-bottom">'
                 '<div class="flex-grow-1">'
                 '<h4 class="mb-2 fw-bold">%s</h4>'
                 '<div class="text-muted small">'
@@ -255,18 +265,22 @@ class AssemblyDocumentPreviewWizard(
                 escape(label_text),
             )
             + Markup(
-                '<section class="o_assembly_preview_body border rounded-2 bg-white p-4 shadow-sm mb-3 mx-auto" style="max-width: 52rem;">'
+                '<section class="o_assembly_preview_body border rounded-2 '
+                'bg-white p-4 shadow-sm mb-3 mx-auto" '
+                'style="max-width: 52rem;">'
             )
             + inner_markup
             + Markup("</section>")
             + Markup(
-                '<footer class="o_assembly_preview_footer text-muted small text-center border-top pt-2">%s</footer>'
+                '<footer class="o_assembly_preview_footer text-muted small '
+                'text-center border-top pt-2">%s</footer>'
                 "</div>"
             )
             % escape(
                 self.env._(
-                    "Preview only — not a signed or filed document. Configure mail "
-                    "templates under company or assembly settings for production output."
+                    "Preview only — not a signed or filed document. "
+                    "Configure mail templates under company or assembly settings "
+                    "for production output."
                 )
             )
         )

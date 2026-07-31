@@ -7,6 +7,10 @@ from markupsafe import Markup
 from odoo import api, models
 from odoo.exceptions import UserError
 
+_NOMINATIVE_BALLOT_REPORT = (
+    "base_assembly.assembly_attendee_action_report_voting_ballot_nominative"
+)
+
 
 class AssemblyMailCommunication(models.AbstractModel):
     _name = "assembly.mail.communication"
@@ -31,11 +35,11 @@ class AssemblyMailCommunication(models.AbstractModel):
     def _resolve_recipient_partners(
         self, assembly, *, recipient_mode, audience, single_partner
     ):
-        Attendee = self.env["assembly.attendee"]
+        attendee_model = self.env["assembly.attendee"]
         if recipient_mode == "single":
             if not single_partner or not single_partner.exists():
                 return self.env["res.partner"]
-            if not Attendee.search_count(
+            if not attendee_model.search_count(
                 [
                     ("assembly_id", "=", assembly.id),
                     ("partner_id", "=", single_partner.id),
@@ -44,7 +48,7 @@ class AssemblyMailCommunication(models.AbstractModel):
             ):
                 return self.env["res.partner"]
             return single_partner
-        attendees = Attendee.search(
+        attendees = attendee_model.search(
             self._attendee_domain_for_audience(assembly, audience)
         )
         partners = attendees.mapped("partner_id")
@@ -146,7 +150,7 @@ class AssemblyMailCommunication(models.AbstractModel):
             )
             if attendees_all:
                 pdf_bytes = self._render_report_pdf(
-                    "base_assembly.assembly_attendee_action_report_voting_ballot_nominative",
+                    _NOMINATIVE_BALLOT_REPORT,
                     attendees_all.ids,
                     lang=lang,
                 )
@@ -167,7 +171,7 @@ class AssemblyMailCommunication(models.AbstractModel):
             )
             if attendee:
                 pdf_bytes = self._render_report_pdf(
-                    "base_assembly.assembly_attendee_action_report_voting_ballot_nominative",
+                    _NOMINATIVE_BALLOT_REPORT,
                     [attendee.id],
                     lang=lang,
                 )
@@ -197,7 +201,7 @@ class AssemblyMailCommunication(models.AbstractModel):
 
     @api.model
     def send_to_partners(self, assembly, partners, *, primary_kind, attachment_options):
-        """Send one email per partner; return ``(sent_count, skipped_no_email, errors)``."""
+        """Send one email per partner; return ``(sent, skipped_no_email, errors)``."""
         assembly.ensure_one()
         session_cids = self.env.companies.ids
         ac = assembly.company_id
@@ -210,41 +214,53 @@ class AssemblyMailCommunication(models.AbstractModel):
                 )
             )
         assembly._assembly_ensure_not_closed_for_related_changes()
-        mail_composer_model = self.env["mail.compose.message"].with_context(
-            assembly_use_rendered_mail_body=True,
-            mail_create_nosubscribe=True,
-        )
         sent = 0
         skipped = 0
         errors = []
         attach_opts = attachment_options or {}
         for partner in partners:
-            if not partner.email:
-                skipped += 1
-                continue
-            lang = self._partner_mail_lang(partner)
-            body_base = self._render_primary_body_html(
-                assembly, primary_kind, lang=lang
+            result = self._send_one_partner_email(
+                assembly, partner, primary_kind, attach_opts
             )
-            subject = self._subject_for_kind(assembly, primary_kind, lang=lang)
-            att_ids = self.build_attachment_ids_for_partner(
-                assembly, partner, attach_opts, lang=lang
-            )
-            try:
-                composer = mail_composer_model.create(
-                    {
-                        "model": "assembly.assembly",
-                        "res_ids": str([assembly.id]),
-                        "composition_mode": "comment",
-                        "partner_ids": [(6, 0, [partner.id])],
-                        "subject": subject,
-                        "body": body_base,
-                        "attachment_ids": [(6, 0, att_ids)],
-                    }
-                )
-                composer._action_send_mail()
+            if result == "sent":
                 sent += 1
-            except Exception as exc:  # pylint: disable=broad-exception-caught
-                errors.append((partner.id, str(exc)))
+            elif result == "skipped":
+                skipped += 1
+            else:
+                errors.append(result[1])
                 skipped += 1
         return sent, skipped, errors
+
+    def _send_one_partner_email(self, assembly, partner, primary_kind, attach_opts):
+        """Send one email to ``partner``.
+
+        Return ``"sent"``, ``"skipped"`` or ``("error", (partner_id, message))``.
+        """
+        if not partner.email:
+            return "skipped"
+        lang = self._partner_mail_lang(partner)
+        body_base = self._render_primary_body_html(assembly, primary_kind, lang=lang)
+        subject = self._subject_for_kind(assembly, primary_kind, lang=lang)
+        att_ids = self.build_attachment_ids_for_partner(
+            assembly, partner, attach_opts, lang=lang
+        )
+        composer_model = self.env["mail.compose.message"].with_context(
+            assembly_use_rendered_mail_body=True,
+            mail_create_nosubscribe=True,
+        )
+        try:
+            composer = composer_model.create(
+                {
+                    "model": "assembly.assembly",
+                    "res_ids": str([assembly.id]),
+                    "composition_mode": "comment",
+                    "partner_ids": [(6, 0, [partner.id])],
+                    "subject": subject,
+                    "body": body_base,
+                    "attachment_ids": [(6, 0, att_ids)],
+                }
+            )
+            composer._action_send_mail()
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            return ("error", (partner.id, str(exc)))
+        return "sent"

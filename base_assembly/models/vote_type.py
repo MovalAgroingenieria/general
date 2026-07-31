@@ -10,7 +10,7 @@ class VoteType(models.Model):
 
     @api.model
     def _assembly_vote_type_ids_used_in_domain(self, vote_type_ids):
-        """Return ``vote.type`` ids (subset of ``vote_type_ids``) linked to assembly data."""
+        """Return ``vote.type`` ids (subset) linked to any assembly data."""
         vt_set = frozenset(int(x) for x in vote_type_ids if x)
         if not vt_set:
             return frozenset()

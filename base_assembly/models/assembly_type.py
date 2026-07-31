@@ -11,7 +11,6 @@ class AssemblyType(models.Model):
 
     company_id = fields.Many2one(
         "res.company",
-        string="Company",
         required=True,
         default=lambda self: self.env.company,
         index=True,
@@ -55,7 +54,8 @@ class AssemblyType(models.Model):
         "res.city",
         string="Default city (directory)",
         ondelete="set null",
-        domain="[('country_id', '=?', default_country_id), ('state_id', '=?', default_state_id)]",
+        domain="[('country_id', '=?', default_country_id), "
+        "('state_id', '=?', default_state_id)]",
     )
     default_zip = fields.Char(string="Default zip")
     default_state_id = fields.Many2one(
@@ -100,9 +100,9 @@ class AssemblyType(models.Model):
         string="Require VAT to mark attended",
         default=False,
         help=(
-            "If enabled, recording an assembly attendee as attended is blocked when the "
-            "member has no tax identification number (VAT/TIN) or only the exempt "
-            "placeholder."
+            "If enabled, recording an assembly attendee as attended is blocked "
+            "when the member has no tax identification number (VAT/TIN) or only "
+            "the exempt placeholder."
         ),
     )
     default_allow_attendance_notes = fields.Boolean(

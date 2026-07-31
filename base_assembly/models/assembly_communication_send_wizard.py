@@ -13,7 +13,6 @@ class AssemblyCommunicationSendWizard(
 
     assembly_id = fields.Many2one(
         "assembly.assembly",
-        string="Assembly",
         required=True,
         ondelete="cascade",
         check_company=True,
@@ -46,7 +45,10 @@ class AssemblyCommunicationSendWizard(
         string="Audience",
         default="all",
         required=True,
-        help="Only used when sending to each matching attendee. Partners without an email are skipped.",
+        help=(
+            "Only used when sending to each matching attendee. Partners "
+            "without an email are skipped."
+        ),
     )
     partner_id = fields.Many2one(
         "res.partner",
@@ -73,17 +75,27 @@ class AssemblyCommunicationSendWizard(
     attach_generic_ballot_pdf = fields.Boolean(
         string="Ballot PDF (merged, all attendees)",
         default=False,
-        help="Single PDF with every member ballot in sequence. Same attachment on each email when enabled; use together with nominative only if you intend both.",
+        help=(
+            "Single PDF with every member ballot in sequence. Same attachment "
+            "on each email when enabled; use together with nominative only if "
+            "you intend both."
+        ),
     )
     attach_nominative_ballot_pdf = fields.Boolean(
         string="Nominative ballot PDF",
         default=False,
-        help="Personalized member ballot for this recipient only (requires an attendee row for that partner).",
+        help=(
+            "Personalized member ballot for this recipient only (requires an "
+            "attendee row for that partner)."
+        ),
     )
     attach_delegation_pdf = fields.Boolean(
         string="Delegation PDF",
         default=False,
-        help="Vote delegation register for the assembly (same file for every recipient).",
+        help=(
+            "Vote delegation register for the assembly (same file for every "
+            "recipient)."
+        ),
     )
 
     @api.model
@@ -113,13 +125,15 @@ class AssemblyCommunicationSendWizard(
 
     @api.depends("assembly_id")
     def _compute_allowed_partner_ids(self):
-        Attendee = self.env["assembly.attendee"]
-        for wiz in self:
-            if not wiz.assembly_id:
-                wiz.allowed_partner_ids = False
+        attendee_model = self.env["assembly.attendee"]
+        for record in self:
+            if not record.assembly_id:
+                record.allowed_partner_ids = False
                 continue
-            attendees = Attendee.search([("assembly_id", "=", wiz.assembly_id.id)])
-            wiz.allowed_partner_ids = attendees.mapped("partner_id")
+            attendees = attendee_model.search(
+                [("assembly_id", "=", record.assembly_id.id)]
+            )
+            record.allowed_partner_ids = attendees.mapped("partner_id")
 
     @api.depends(
         "assembly_id",
@@ -129,19 +143,19 @@ class AssemblyCommunicationSendWizard(
     )
     def _compute_email_recipient_preview(self):
         svc = self.env["assembly.mail.communication"]
-        Attendee = self.env["assembly.attendee"]
-        for wiz in self:
-            asm = wiz.assembly_id
+        attendee_model = self.env["assembly.attendee"]
+        for record in self:
+            asm = record.assembly_id
             if not asm:
-                wiz.email_recipient_count = 0
-                wiz.email_recipient_hint = ""
+                record.email_recipient_count = 0
+                record.email_recipient_hint = ""
                 continue
-            if wiz.recipient_mode == "single":
-                p = wiz.partner_id
+            if record.recipient_mode == "single":
+                p = record.partner_id
                 if (
                     p
                     and (p.email or "").strip()
-                    and Attendee.search_count(
+                    and attendee_model.search_count(
                         [
                             ("assembly_id", "=", asm.id),
                             ("partner_id", "=", p.id),
@@ -149,27 +163,28 @@ class AssemblyCommunicationSendWizard(
                         limit=1,
                     )
                 ):
-                    wiz.email_recipient_count = 1
-                    wiz.email_recipient_hint = wiz.env._(
+                    record.email_recipient_count = 1
+                    record.email_recipient_hint = record.env._(
                         "One email to %(email)s.",
                         email=p.email,
                     )
                 else:
-                    wiz.email_recipient_count = 0
-                    wiz.email_recipient_hint = wiz.env._(
+                    record.email_recipient_count = 0
+                    record.email_recipient_hint = record.env._(
                         "Choose an attendee with an email address."
                     )
             else:
                 partners = svc._resolve_recipient_partners(
                     asm,
                     recipient_mode="all",
-                    audience=wiz.recipient_audience,
+                    audience=record.recipient_audience,
                     single_partner=False,
                 )
                 n = len(partners)
-                wiz.email_recipient_count = n
-                wiz.email_recipient_hint = wiz.env._(
-                    "%(count)d recipient(s): one separate email each; nominative attachments match the addressee.",
+                record.email_recipient_count = n
+                record.email_recipient_hint = record.env._(
+                    "%(count)d recipient(s): one separate email each; "
+                    "nominative attachments match the addressee.",
                     count=n,
                 )
 
@@ -234,7 +249,8 @@ class AssemblyCommunicationSendWizard(
         if not partners:
             raise UserError(
                 self.env._(
-                    "No recipients with an email address were found for the selected options."
+                    "No recipients with an email address were found for the "
+                    "selected options."
                 )
             )
         if self.recipient_mode == "single" and len(partners) != 1:

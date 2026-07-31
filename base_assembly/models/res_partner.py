@@ -45,9 +45,9 @@ class ResPartner(models.Model):
 
     @api.depends("assembly_attendee_ids", "assembly_delegation_ids")
     def _compute_assembly_counts(self):
-        for partner in self:
-            partner.count_assembly_attendees = len(partner.assembly_attendee_ids)
-            partner.count_assembly_delegations = len(partner.assembly_delegation_ids)
+        for record in self:
+            record.count_assembly_attendees = len(record.assembly_attendee_ids)
+            record.count_assembly_delegations = len(record.assembly_delegation_ids)
 
     def action_open_assembly_attendees(self):
         domain = expression.AND(
@@ -60,8 +60,10 @@ class ResPartner(models.Model):
             "assembly.attendee",
             self.env._("Assembly attendances"),
             "list,form",
-            domain=domain,
-            context={"default_partner_id": self.id},
+            extra={
+                "domain": domain,
+                "context": {"default_partner_id": self.id},
+            },
         )
 
     def action_open_assembly_delegations(self):
@@ -75,6 +77,8 @@ class ResPartner(models.Model):
             "assembly.delegation",
             self.env._("Delegations (as delegator)"),
             "list,form",
-            domain=domain,
-            context={"default_partner_id": self.id},
+            extra={
+                "domain": domain,
+                "context": {"default_partner_id": self.id},
+            },
         )

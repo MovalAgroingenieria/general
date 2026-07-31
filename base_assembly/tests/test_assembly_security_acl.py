@@ -89,7 +89,7 @@ class TestAssemblySecurityACL(  # pylint: disable=too-many-public-methods
         self._create_assembly_with_agenda()  # pylint: disable=protected-access
         env = self.env(user=self.user_no_assembly)
         with self.assertRaises(AccessError):
-            env["assembly.assembly"].search([])
+            env["assembly.assembly"].search([("id", "!=", 0)])
 
     def test_user_without_assembly_group_cannot_read_attendee(self):
         assembly, _ = (

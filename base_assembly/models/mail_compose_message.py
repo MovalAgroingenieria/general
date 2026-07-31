@@ -1,11 +1,11 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-"""Allow ``mail.compose.message`` to open with a pre-filled body from assembly AF render.
+"""Open ``mail.compose.message`` with a pre-filled body from assembly AF render.
 
-Standard :meth:`~odoo.addons.mail.wizard.mail_compose_message.MailComposer._compute_body`
-clears ``body`` when no template is selected; assembly actions pass rendered HTML via
-``default_body`` and context flag ``assembly_use_rendered_mail_body``.
+The standard ``MailComposer._compute_body`` clears ``body`` when no template is
+selected; assembly actions pass rendered HTML via ``default_body`` and the context
+flag ``assembly_use_rendered_mail_body``.
 """
 
 from odoo import api, models

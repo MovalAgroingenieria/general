@@ -17,7 +17,6 @@ class AssemblyBallotPrintWizard(
 
     assembly_id = fields.Many2one(
         "assembly.assembly",
-        string="Assembly",
         required=True,
         ondelete="cascade",
         check_company=True,
@@ -25,17 +24,27 @@ class AssemblyBallotPrintWizard(
     only_present = fields.Boolean(
         string="Present attendees only",
         default=True,
-        help="When enabled, only attendees in Attended (confirmed present) are included. Turn off to include the full list.",
+        help=(
+            "When enabled, only attendees in Attended (confirmed present) are "
+            "included. Turn off to include the full list."
+        ),
     )
     merge_single_pdf = fields.Boolean(
         string="Merge into one PDF",
         default=True,
-        help="Single PDF with one member ballot per page (nominative intro). If disabled, download a ZIP with one PDF per attendee.",
+        help=(
+            "Single PDF with one member ballot per page (nominative intro). "
+            "If disabled, download a ZIP with one PDF per attendee."
+        ),
     )
     use_generic_intro_template = fields.Boolean(
         string="Generic intro template (optional)",
         default=False,
-        help="Use the assembly-level generic ballot introduction instead of the nominative per-member intro. For special cases only; default member flow uses the attendee-based nominative ballot.",
+        help=(
+            "Use the assembly-level generic ballot introduction instead of the "
+            "nominative per-member intro. For special cases only; default member "
+            "flow uses the attendee-based nominative ballot."
+        ),
     )
 
     def action_print_ballots(self):
@@ -49,14 +58,18 @@ class AssemblyBallotPrintWizard(
             raise UserError(
                 self.env._("No attendees match the selected options."),
             )
-        report_xmlid = (
-            "base_assembly.assembly_attendee_action_report_voting_ballot"
+        suffix = (
+            "assembly_attendee_action_report_voting_ballot"
             if self.use_generic_intro_template
-            else "base_assembly.assembly_attendee_action_report_voting_ballot_nominative"
+            else "assembly_attendee_action_report_voting_ballot_nominative"
         )
-        report = self.env.ref(report_xmlid, raise_if_not_found=True)
+        report = self.env.ref("base_assembly.%s" % suffix, raise_if_not_found=True)
         if self.merge_single_pdf:
             return report.report_action(attendees.ids)
+        return self._build_ballots_zip_action(attendees, report)
+
+    def _build_ballots_zip_action(self, attendees, report):
+        """Render one ballot PDF per attendee into a ZIP download action."""
         ir_report = self.env["ir.actions.report"]
         zbuff = io.BytesIO()
         asm = self.assembly_id

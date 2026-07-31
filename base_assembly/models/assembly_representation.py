@@ -31,7 +31,6 @@ class AssemblyRepresentation(models.Model):
 
     assembly_id = fields.Many2one(
         "assembly.assembly",
-        string="Assembly",
         required=True,
         ondelete="cascade",
         index=True,
@@ -68,7 +67,7 @@ class AssemblyRepresentation(models.Model):
         (
             "assembly_representation_assembly_owner_uniq",
             "UNIQUE(owner_partner_id, assembly_id)",
-            "Each represented member may have only one representation record per assembly.",
+            "Each represented member may have only one representation per assembly.",
         ),
     ]
 

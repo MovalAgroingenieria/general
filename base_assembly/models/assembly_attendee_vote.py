@@ -14,7 +14,6 @@ class AssemblyAttendeeVote(models.Model):
 
     attendee_id = fields.Many2one(
         "assembly.attendee",
-        string="Attendee",
         required=True,
         ondelete="cascade",
         index=True,
@@ -73,15 +72,15 @@ class AssemblyAttendeeVote(models.Model):
 
     @api.constrains("attendee_id", "vote_type_id")
     def _check_unique_vote_type_per_attendee(self):
-        for rec in self:
-            if not rec.attendee_id or not rec.vote_type_id:
+        for record in self:
+            if not record.attendee_id or not record.vote_type_id:
                 continue
             domain = [
-                ("attendee_id", "=", rec.attendee_id.id),
-                ("vote_type_id", "=", rec.vote_type_id.id),
+                ("attendee_id", "=", record.attendee_id.id),
+                ("vote_type_id", "=", record.vote_type_id.id),
             ]
-            if rec.id:
-                domain.append(("id", "!=", rec.id))
+            if record.id:
+                domain.append(("id", "!=", record.id))
             if self.search(domain, limit=1):
                 raise ValidationError(
                     self.env._(
@@ -91,36 +90,38 @@ class AssemblyAttendeeVote(models.Model):
 
     @api.constrains("own_votes", "delegated_out_votes", "delegated_in_votes")
     def _check_votes_non_negative(self):
-        for rec in self:
-            if rec.own_votes < 0:
+        for record in self:
+            if record.own_votes < 0:
                 raise ValidationError(
                     self.env._(
                         "Own votes cannot be negative. Current value: %(value)s",
-                        value=rec.own_votes,
+                        value=record.own_votes,
                     )
                 )
-            if rec.delegated_out_votes < 0:
+            if record.delegated_out_votes < 0:
                 raise ValidationError(
                     self.env._(
                         "Delegated out votes cannot be negative. "
                         "Current value: %(value)s",
-                        value=rec.delegated_out_votes,
+                        value=record.delegated_out_votes,
                     )
                 )
-            if rec.delegated_in_votes < 0:
+            if record.delegated_in_votes < 0:
                 raise ValidationError(
                     self.env._(
                         "Delegated in votes cannot be negative. "
                         "Current value: %(value)s",
-                        value=rec.delegated_in_votes,
+                        value=record.delegated_in_votes,
                     )
                 )
 
     @api.depends("own_votes", "delegated_out_votes", "delegated_in_votes")
     def _compute_attendee_vote_total(self):
-        for rec in self:
-            rec.attendee_vote_total = (
-                rec.own_votes + rec.delegated_in_votes - rec.delegated_out_votes
+        for record in self:
+            record.attendee_vote_total = (
+                record.own_votes
+                + record.delegated_in_votes
+                - record.delegated_out_votes
             )
 
     @api.model_create_multi

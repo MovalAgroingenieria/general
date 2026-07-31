@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <template id="assembly_attendance_landing_page" name="Assembly attendance QR landing">
         <html lang="en">
             <head>
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-                <title t-esc="page_title"/>
+                <title t-out="page_title"/>
                 <style type="text/css">
                     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; max-width: 40rem; line-height: 1.45; color: #1f1f1f; }
                     h1 { font-size: 1.35rem; margin-bottom: 1rem; }
@@ -19,19 +19,19 @@
                 </style>
             </head>
             <body>
-                <h1 t-esc="heading"/>
+                <h1 t-out="heading"/>
                 <dl>
-                    <dt t-esc="label_assembly"/>
-                    <dd t-esc="assembly_name"/>
-                    <dt t-esc="label_member"/>
-                    <dd t-esc="participant_name"/>
-                    <dt t-esc="label_state"/>
-                    <dd t-esc="assembly_state_label"/>
+                    <dt t-out="label_assembly"/>
+                    <dd t-out="assembly_name"/>
+                    <dt t-out="label_member"/>
+                    <dd t-out="participant_name"/>
+                    <dt t-out="label_state"/>
+                    <dd t-out="assembly_state_label"/>
                 </dl>
                 <div class="actions">
-                    <a t-att-href="open_form_url" class="btn" t-esc="open_form_label"/>
+                    <a t-att-href="open_form_url" class="btn" t-out="open_form_label"/>
                 </div>
-                <p class="hint" t-esc="hint_direct"/>
+                <p class="hint" t-out="hint_direct"/>
             </body>
         </html>
     </template>
@@ -40,7 +40,7 @@
             <head>
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-                <title t-esc="page_title"/>
+                <title t-out="page_title"/>
                 <style type="text/css">
                     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; max-width: 36rem; line-height: 1.45; color: #1f1f1f; }
                     h1 { font-size: 1.2rem; color: #8b2942; }
@@ -48,8 +48,8 @@
                 </style>
             </head>
             <body>
-                <h1 t-esc="error_title"/>
-                <p t-esc="error_message"/>
+                <h1 t-out="error_title"/>
+                <p t-out="error_message"/>
             </body>
         </html>
     </template>

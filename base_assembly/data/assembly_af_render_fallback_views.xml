@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
+<?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <template id="assembly_af_publication_qweb" name="AF: publication (QWeb fallback)">
         <div class="o_assembly_publication o_assembly_af_doc_body">
@@ -16,15 +15,15 @@
                     <ul class="list-unstyled small mb-0">
                         <li t-if="object.date_first_call" class="mb-1">
                             <strong>First call: </strong>
-                            <span t-field="object.date_first_call" t-options="{&quot;widget&quot;: &quot;datetime&quot;}"/>
+                            <span t-field="object.date_first_call" t-options="{'widget': 'datetime'}"/>
                         </li>
                         <li t-if="object.date_second_call" class="mb-1">
                             <strong>Second call: </strong>
-                            <span t-field="object.date_second_call" t-options="{&quot;widget&quot;: &quot;datetime&quot;}"/>
+                            <span t-field="object.date_second_call" t-options="{'widget': 'datetime'}"/>
                         </li>
                         <li t-if="object.date_start" class="mb-1">
                             <strong>Session start: </strong>
-                            <span t-field="object.date_start" t-options="{&quot;widget&quot;: &quot;datetime&quot;}"/>
+                            <span t-field="object.date_start" t-options="{'widget': 'datetime'}"/>
                         </li>
                         <li class="mb-1">
                             <strong>Location: </strong>

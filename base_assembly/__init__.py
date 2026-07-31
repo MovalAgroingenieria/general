@@ -5,7 +5,7 @@ from . import controllers, models, wizards
 
 
 def post_init_hook(env):
-    companies = env["res.company"].search([])
+    companies = env["res.company"].search([("id", "!=", 0)])
     companies._assembly_ensure_numbering_sequence()
     companies._assembly_ensure_default_template_configuration()
     env["assembly.delegation"]._assembly_cleanup_delegation_state_in_views()

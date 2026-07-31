@@ -100,7 +100,7 @@ def _attendance_domain_scoped_to_session_companies(base_domain, env):
 
 
 def _parse_assembly_and_participant_ids(assembly_id, participant_id):
-    """Return ``(assembly_id, participant_id)`` as positive ints, or ``None`` if invalid."""
+    """Return IDs as positive ints, or ``None`` when the input is invalid."""
     if assembly_id is None or participant_id is None:
         return None
     str_a, str_p = str(assembly_id).strip(), str(participant_id).strip()
@@ -125,38 +125,17 @@ class AttendanceController(http.Controller):
         csrf=False,
     )
     def open_attendance(self, assembly_id=None, participant_id=None):
-        """Deep link for managers: ``participant_id`` is ``assembly.attendee.partner_id``."""
+        """Manager deep link; ``participant_id`` is the attendee's partner id."""
         env = request.env
-        params = request.params or {}
-        direct = _wants_direct_redirect(params)
+        direct = _wants_direct_redirect(request.params or {})
 
         parsed = _parse_assembly_and_participant_ids(assembly_id, participant_id)
         if parsed is None:
-            msg = env._(
-                "Missing or invalid assembly_id or participant_id. "
-                "Both must be positive integers."
-            )
-            title = env._("Invalid link")
-            if direct:
-                return _attendance_error_plain(400, msg)
-            return _attendance_error_html(400, env, title, msg)
-
+            return self._attendance_invalid_ids_response(env, direct)
         aid, participant_id_int = parsed
 
         if not env.user.has_group(_MANAGER_GROUP_XMLID):
-            msg = env._(
-                "You must belong to the Assembly manager group to open this link."
-            )
-            title = env._("Access denied")
-            if direct:
-                return _attendance_error_plain(403, msg)
-            return _attendance_error_html(403, env, title, msg)
-
-        msg_assembly_not_open = env._(
-            "This link is only valid while the assembly is open for registration "
-            "or in session."
-        )
-        title_state = env._("Assembly not available")
+            return self._attendance_access_denied_response(env, direct)
 
         attendee = env["assembly.attendee"].search(
             _attendance_domain_scoped_to_session_companies(
@@ -169,86 +148,107 @@ class AttendanceController(http.Controller):
             limit=1,
         )
         if attendee:
-            asm = attendee.assembly_id
-            if asm.assembly_state not in _ALLOWED_ASSEMBLY_STATES:
-                if direct:
-                    return _attendance_error_plain(403, msg_assembly_not_open)
-                return _attendance_error_html(
-                    403,
-                    env,
-                    title_state,
-                    msg_assembly_not_open,
-                    company=asm.company_id,
-                )
-            form_hash = (
-                "/web#model=assembly.attendee&id=%s&view_type=form" % attendee.id
-            )
-            if direct:
-                return request.redirect(form_hash)
-            partner = attendee.partner_id
-            landing_ref = _attendance_resolve_qweb_template_ref(
-                env,
-                asm.company_id,
-                "assembly_attendance_landing_qweb_id",
-                _DEFAULT_TEMPLATE_LANDING_XMLID,
-            )
-            body = (
-                env["ir.ui.view"]
-                .sudo()
-                ._render_template(
-                    landing_ref,
-                    {
-                        "page_title": env._("Attendance — %s", asm.display_name),
-                        "heading": env._("Attendance check-in"),
-                        "label_assembly": env._("Assembly"),
-                        "assembly_name": asm.display_name,
-                        "label_member": env._("Member"),
-                        "participant_name": partner.display_name if partner else "",
-                        "label_state": env._("Assembly status"),
-                        "assembly_state_label": _assembly_state_label(env, asm),
-                        "open_form_url": form_hash,
-                        "open_form_label": env._("Open attendee registration"),
-                        "hint_direct": env._(
-                            'Tip: append the query parameter "direct=1" for an immediate '
-                            "redirect without this page (e.g. for bookmarks or automation)."
-                        ),
-                    },
-                )
-            )
-            return request.make_response(
-                body,
-                status=200,
-                headers=[
-                    ("Content-Type", "text/html; charset=utf-8"),
-                    ("X-Content-Type-Options", "nosniff"),
-                    ("Cache-Control", "no-store, private"),
-                ],
-            )
+            return self._attendance_attendee_response(env, attendee, direct)
+        return self._attendance_no_attendee_response(env, aid, direct)
 
+    def _attendance_invalid_ids_response(self, env, direct):
+        msg = env._(
+            "Missing or invalid assembly_id or participant_id. "
+            "Both must be positive integers."
+        )
+        if direct:
+            return _attendance_error_plain(400, msg)
+        return _attendance_error_html(400, env, env._("Invalid link"), msg)
+
+    def _attendance_access_denied_response(self, env, direct):
+        msg = env._("You must belong to the Assembly manager group to open this link.")
+        if direct:
+            return _attendance_error_plain(403, msg)
+        return _attendance_error_html(403, env, env._("Access denied"), msg)
+
+    def _attendance_state_error_response(self, env, asm, direct):
+        msg = env._(
+            "This link is only valid while the assembly is open for registration "
+            "or in session."
+        )
+        if direct:
+            return _attendance_error_plain(403, msg)
+        return _attendance_error_html(
+            403,
+            env,
+            env._("Assembly not available"),
+            msg,
+            company=asm.company_id,
+        )
+
+    def _attendance_attendee_response(self, env, attendee, direct):
+        asm = attendee.assembly_id
+        if asm.assembly_state not in _ALLOWED_ASSEMBLY_STATES:
+            return self._attendance_state_error_response(env, asm, direct)
+        form_hash = "/web#model=assembly.attendee&id=%s&view_type=form" % attendee.id
+        if direct:
+            return request.redirect(form_hash)
+        return self._attendance_render_landing(env, attendee, asm, form_hash)
+
+    def _attendance_render_landing(self, env, attendee, asm, form_hash):
+        partner = attendee.partner_id
+        landing_ref = _attendance_resolve_qweb_template_ref(
+            env,
+            asm.company_id,
+            "assembly_attendance_landing_qweb_id",
+            _DEFAULT_TEMPLATE_LANDING_XMLID,
+        )
+        body = (
+            env["ir.ui.view"]
+            .sudo()
+            ._render_template(
+                landing_ref,
+                {
+                    "page_title": env._("Attendance — %s", asm.display_name),
+                    "heading": env._("Attendance check-in"),
+                    "label_assembly": env._("Assembly"),
+                    "assembly_name": asm.display_name,
+                    "label_member": env._("Member"),
+                    "participant_name": partner.display_name if partner else "",
+                    "label_state": env._("Assembly status"),
+                    "assembly_state_label": _assembly_state_label(env, asm),
+                    "open_form_url": form_hash,
+                    "open_form_label": env._("Open attendee registration"),
+                    "hint_direct": env._(
+                        "Tip: append the query parameter ``direct=1`` "
+                        "for an immediate redirect without this page "
+                        "(e.g. for bookmarks or automation)."
+                    ),
+                },
+            )
+        )
+        return request.make_response(
+            body,
+            status=200,
+            headers=[
+                ("Content-Type", "text/html; charset=utf-8"),
+                ("X-Content-Type-Options", "nosniff"),
+                ("Cache-Control", "no-store, private"),
+            ],
+        )
+
+    def _attendance_no_attendee_response(self, env, aid, direct):
         assembly = env["assembly.assembly"].search(
             _attendance_domain_scoped_to_session_companies([("id", "=", aid)], env),
             limit=1,
         )
         if not assembly:
             msg = env._("Assembly not found.")
-            title = env._("Not found")
             if direct:
                 return _attendance_error_plain(404, msg)
-            return _attendance_error_html(404, env, title, msg)
+            return _attendance_error_html(404, env, env._("Not found"), msg)
         if assembly.assembly_state not in _ALLOWED_ASSEMBLY_STATES:
-            if direct:
-                return _attendance_error_plain(403, msg_assembly_not_open)
-            return _attendance_error_html(
-                403,
-                env,
-                title_state,
-                msg_assembly_not_open,
-                company=assembly.company_id,
-            )
+            return self._attendance_state_error_response(env, assembly, direct)
         msg = env._(
             "No attendee is registered for this assembly with the given participant."
         )
-        title = env._("Not found")
         if direct:
             return _attendance_error_plain(404, msg)
-        return _attendance_error_html(404, env, title, msg, company=assembly.company_id)
+        return _attendance_error_html(
+            404, env, env._("Not found"), msg, company=assembly.company_id
+        )

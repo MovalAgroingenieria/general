@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
+<?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <template id="report_assembly_attendee_voting_ballot">
         <t t-call="web.html_container">
@@ -92,7 +91,7 @@
             <t t-foreach="vote_items" t-as="item">
                 <div class="mb-3 pb-2 border-bottom o_assembly_ballot_item">
                     <div class="fw-semibold">
-                        <span t-esc="item.sequence"/>. <span t-field="item.name"/>
+                        <span t-out="item.sequence"/>. <span t-field="item.name"/>
                         <span class="text-muted fw-normal small"> — <span t-field="item.agenda_vote_mode"/></span>
                         <t t-if="item.vote_type_id and item.agenda_vote_mode == 'weighted'"> (<span t-field="item.vote_type_id.name"/>)</t>
                     </div>

@@ -26,7 +26,6 @@ class AssemblyAgenda(models.Model):
 
     assembly_id = fields.Many2one(
         "assembly.assembly",
-        string="Assembly",
         required=True,
         ondelete="cascade",
         index=True,
@@ -34,7 +33,6 @@ class AssemblyAgenda(models.Model):
     )
     company_id = fields.Many2one(
         "res.company",
-        string="Company",
         related="assembly_id.company_id",
         store=True,
         readonly=True,
@@ -66,9 +64,11 @@ class AssemblyAgenda(models.Model):
         index=True,
         help=(
             "Weighted vote: each eligible attendee casts their own votes using the "
-            "selected vote type; the system stores individual voting lines (roll-call). "
+            "selected vote type; the system stores individual voting lines "
+            "(roll-call). "
             "Manual modes: enter only aggregate totals (yes/no/abstain/blank or per "
-            "ballot option counts); no per-attendee vote lines are created for this item. "
+            "ballot option counts); no per-attendee vote lines are created "
+            "for this item. "
             "No vote: discussion or information only."
         ),
     )
@@ -82,7 +82,6 @@ class AssemblyAgenda(models.Model):
     )
     vote_type_id = fields.Many2one(
         "vote.type",
-        string="Vote type",
         ondelete="restrict",
         domain=(
             "[('active', '=', True), ('id', 'in', assembly_allowed_vote_type_ids)]"
@@ -137,10 +136,12 @@ class AssemblyAgenda(models.Model):
     manual_total_expected = fields.Float(
         string="Expected total votes",
         help=(
-            "Reference total for validation. In manual vote (simple count), when non-zero, "
-            "the sum of yes, no, abstention, and blank must match this value; when zero, "
+            "Reference total for validation. In manual vote (simple count), "
+            "when non-zero, the sum of yes, no, abstention, and blank must "
+            "match this value; when zero, "
             "rules still use attendee vote units when they can be computed. "
-            "In manual vote (multi-option), the sum of option counts is checked the same way. "
+            "In manual vote (multi-option), the sum of option counts is "
+            "checked the same way. "
             "This mode records final counts only, not how each member voted."
         ),
     )
@@ -183,7 +184,8 @@ class AssemblyAgenda(models.Model):
         string="Entered total votes",
         compute="_compute_session_manual_totals",
         help=(
-            "Sum of yes, no, abstention, and blank (simple count) or sum of option votes "
+            "Sum of yes, no, abstention, and blank (simple count) "
+            "or sum of option votes "
             "(multi-option)."
         ),
     )
@@ -191,7 +193,8 @@ class AssemblyAgenda(models.Model):
         string="Expected total votes (reference)",
         compute="_compute_session_manual_totals",
         help=(
-            "Expected total from the field above when set; otherwise the total vote units "
+            "Expected total from the field above when set; otherwise "
+            "the total vote units "
             "from confirmed attendees when the system can compute them."
         ),
     )
@@ -215,8 +218,8 @@ class AssemblyAgenda(models.Model):
 
     @api.depends("voting_ids")
     def _compute_count_votings(self):
-        for line in self:
-            line.count_votings = len(line.voting_ids)
+        for record in self:
+            record.count_votings = len(record.voting_ids)
 
     @api.depends(
         "agenda_vote_mode",
@@ -224,14 +227,14 @@ class AssemblyAgenda(models.Model):
         "option_ids.manual_vote_count",
     )
     def _compute_manual_multi_ux_metrics(self):
-        for rec in self:
-            rec.manual_multi_options_count = len(rec.option_ids)
-            if rec.agenda_vote_mode == _AGENDA_VOTE_MODE_MANUAL_MULTI:
-                rec.manual_multi_votes_sum = sum(
-                    rec.option_ids.mapped("manual_vote_count")
+        for record in self:
+            record.manual_multi_options_count = len(record.option_ids)
+            if record.agenda_vote_mode == _AGENDA_VOTE_MODE_MANUAL_MULTI:
+                record.manual_multi_votes_sum = sum(
+                    record.option_ids.mapped("manual_vote_count")
                 )
             else:
-                rec.manual_multi_votes_sum = 0
+                record.manual_multi_votes_sum = 0
 
     @api.depends(
         "agenda_vote_mode",
@@ -244,32 +247,32 @@ class AssemblyAgenda(models.Model):
         "assembly_id",
     )
     def _compute_session_manual_totals(self):
-        for rec in self:
-            if rec.agenda_vote_mode == _AGENDA_VOTE_MODE_MANUAL_YES_NO:
-                entered = float(sum(getattr(rec, f) for f in _MANUAL_COUNT_FIELDS))
-            elif rec.agenda_vote_mode == _AGENDA_VOTE_MODE_MANUAL_MULTI:
-                entered = float(sum(rec.option_ids.mapped("manual_vote_count")))
+        for record in self:
+            if record.agenda_vote_mode == _AGENDA_VOTE_MODE_MANUAL_YES_NO:
+                entered = float(sum(getattr(record, f) for f in _MANUAL_COUNT_FIELDS))
+            elif record.agenda_vote_mode == _AGENDA_VOTE_MODE_MANUAL_MULTI:
+                entered = float(sum(record.option_ids.mapped("manual_vote_count")))
             else:
-                rec.session_manual_entered_total = 0.0
-                rec.session_manual_expected_display = 0.0
-                rec.session_manual_delta = 0.0
-                rec.session_manual_has_variance = False
+                record.session_manual_entered_total = 0.0
+                record.session_manual_expected_display = 0.0
+                record.session_manual_delta = 0.0
+                record.session_manual_has_variance = False
                 continue
             possible = (
-                float(rec.assembly_id._get_manual_yes_no_possible_vote_units())
-                if rec.assembly_id
+                float(record.assembly_id._get_manual_yes_no_possible_vote_units())
+                if record.assembly_id
                 else 0.0
             )
-            expected = float(rec.manual_total_expected or 0.0)
+            expected = float(record.manual_total_expected or 0.0)
             if float_is_zero(expected, precision_digits=6):
                 exp_display = possible
             else:
                 exp_display = expected
-            rec.session_manual_entered_total = entered
-            rec.session_manual_expected_display = exp_display
-            rec.session_manual_delta = entered - exp_display
-            rec.session_manual_has_variance = not float_is_zero(
-                rec.session_manual_delta,
+            record.session_manual_entered_total = entered
+            record.session_manual_expected_display = exp_display
+            record.session_manual_delta = entered - exp_display
+            record.session_manual_has_variance = not float_is_zero(
+                record.session_manual_delta,
                 precision_digits=6,
             )
 
@@ -283,7 +286,7 @@ class AssemblyAgenda(models.Model):
 
     @api.model
     def _sync_requires_vote_from_mode_vals(self, vals):
-        """Align ``requires_vote``, ``vote_type_id``, and manual-only fields when mode changes."""
+        """Align fields when vote mode changes."""
         vals = dict(vals)
         if "agenda_vote_mode" not in vals:
             return vals
@@ -305,14 +308,17 @@ class AssemblyAgenda(models.Model):
 
     @api.constrains("agenda_vote_mode", "manual_total_expected")
     def _check_manual_total_expected_only_in_manual_modes(self):
-        """``manual_total_expected`` is meaningful only for manual yes/no and manual multi."""
-        for rec in self:
-            if rec.agenda_vote_mode in (
+        """Allow ``manual_total_expected`` only in manual modes."""
+        for record in self:
+            if record.agenda_vote_mode in (
                 _AGENDA_VOTE_MODE_MANUAL_YES_NO,
                 _AGENDA_VOTE_MODE_MANUAL_MULTI,
             ):
                 continue
-            if not float_is_zero(rec.manual_total_expected or 0.0, precision_digits=6):
+            if not float_is_zero(
+                record.manual_total_expected or 0.0,
+                precision_digits=6,
+            ):
                 raise ValidationError(
                     self.env._(
                         "Expected total votes applies only in manual vote "
@@ -322,36 +328,42 @@ class AssemblyAgenda(models.Model):
 
     @api.constrains("agenda_vote_mode", "requires_vote")
     def _check_requires_vote_matches_mode(self):
-        for rec in self:
+        for record in self:
             if (
-                rec.agenda_vote_mode == _AGENDA_VOTE_MODE_WEIGHTED
-                and not rec.requires_vote
+                record.agenda_vote_mode == _AGENDA_VOTE_MODE_WEIGHTED
+                and not record.requires_vote
             ):
                 raise ValidationError(
                     self.env._(
                         "Weighted vote mode requires “Requires vote” to be enabled."
                     )
                 )
-            if rec.agenda_vote_mode != _AGENDA_VOTE_MODE_WEIGHTED and rec.requires_vote:
+            if (
+                record.agenda_vote_mode != _AGENDA_VOTE_MODE_WEIGHTED
+                and record.requires_vote
+            ):
                 raise ValidationError(
                     self.env._("“Requires vote” is only used in weighted vote mode.")
                 )
 
     @api.constrains("agenda_vote_mode", "vote_type_id")
     def _check_vote_type_only_in_weighted_mode(self):
-        for rec in self:
-            if rec.agenda_vote_mode != _AGENDA_VOTE_MODE_WEIGHTED and rec.vote_type_id:
+        for record in self:
+            if (
+                record.agenda_vote_mode != _AGENDA_VOTE_MODE_WEIGHTED
+                and record.vote_type_id
+            ):
                 raise ValidationError(
                     self.env._("Vote type is only allowed in weighted vote mode.")
                 )
 
     @api.constrains("agenda_vote_mode", "requires_vote", "vote_type_id")
     def _check_vote_type_required_in_weighted_mode(self):
-        for rec in self:
+        for record in self:
             if (
-                rec.agenda_vote_mode == _AGENDA_VOTE_MODE_WEIGHTED
-                and rec.requires_vote
-                and not rec.vote_type_id
+                record.agenda_vote_mode == _AGENDA_VOTE_MODE_WEIGHTED
+                and record.requires_vote
+                and not record.vote_type_id
             ):
                 raise ValidationError(
                     self.env._("A vote type is required in weighted vote mode.")
@@ -359,25 +371,25 @@ class AssemblyAgenda(models.Model):
 
     @api.constrains("vote_type_id", "assembly_id")
     def _check_vote_type_in_assembly(self):
-        for line in self:
-            if not line.vote_type_id or not line.assembly_id:
+        for record in self:
+            if not record.vote_type_id or not record.assembly_id:
                 continue
-            assembly_vote_types = line.assembly_id.vote_type_ids
+            assembly_vote_types = record.assembly_id.vote_type_ids
             if not assembly_vote_types:
                 raise ValidationError(
                     self.env._(
                         "Vote type '%(vote_type)s' cannot be used because the assembly "
                         "has no vote types configured.",
-                        vote_type=line.vote_type_id.name,
+                        vote_type=record.vote_type_id.name,
                     )
                 )
-            if line.vote_type_id not in assembly_vote_types:
+            if record.vote_type_id not in assembly_vote_types:
                 raise ValidationError(
                     self.env._(
                         "Vote type '%(vote_type)s' must be one of "
                         "the assembly's vote types. "
                         "Available types: %(available)s",
-                        vote_type=line.vote_type_id.name,
+                        vote_type=record.vote_type_id.name,
                         available=", ".join(assembly_vote_types.mapped("name")),
                     )
                 )
@@ -385,10 +397,10 @@ class AssemblyAgenda(models.Model):
     @api.constrains("agenda_vote_mode", "option_ids")
     def _check_option_ids_coherence_with_vote_mode(self):
         """Options exist iff mode is ``manual_multi`` (one constraint, two rules)."""
-        for rec in self:
+        for record in self:
             if (
-                rec.agenda_vote_mode != _AGENDA_VOTE_MODE_MANUAL_MULTI
-                and rec.option_ids
+                record.agenda_vote_mode != _AGENDA_VOTE_MODE_MANUAL_MULTI
+                and record.option_ids
             ):
                 raise ValidationError(
                     self.env._(
@@ -396,8 +408,8 @@ class AssemblyAgenda(models.Model):
                     )
                 )
             if (
-                rec.agenda_vote_mode == _AGENDA_VOTE_MODE_MANUAL_MULTI
-                and not rec.option_ids
+                record.agenda_vote_mode == _AGENDA_VOTE_MODE_MANUAL_MULTI
+                and not record.option_ids
             ):
                 raise ValidationError(
                     self.env._(
@@ -413,16 +425,19 @@ class AssemblyAgenda(models.Model):
         "manual_count_blank",
     )
     def _check_manual_yes_no_counters_scope(self):
-        for rec in self:
-            total_manual = sum(getattr(rec, f) for f in _MANUAL_COUNT_FIELDS)
-            if rec.agenda_vote_mode == _AGENDA_VOTE_MODE_MANUAL_MULTI and total_manual:
+        for record in self:
+            total_manual = sum(getattr(record, f) for f in _MANUAL_COUNT_FIELDS)
+            if (
+                record.agenda_vote_mode == _AGENDA_VOTE_MODE_MANUAL_MULTI
+                and total_manual
+            ):
                 raise ValidationError(
                     self.env._(
                         "Yes/no/abstain/blank counts are not used in "
                         "manual multi-option mode; use ballot options instead."
                     )
                 )
-            if rec.agenda_vote_mode in (
+            if record.agenda_vote_mode in (
                 _AGENDA_VOTE_MODE_NO_VOTE,
                 _AGENDA_VOTE_MODE_WEIGHTED,
             ):
@@ -434,7 +449,7 @@ class AssemblyAgenda(models.Model):
                         )
                     )
             for f in _MANUAL_COUNT_FIELDS:
-                if getattr(rec, f) < 0:
+                if getattr(record, f) < 0:
                     raise ValidationError(
                         self.env._("Manual vote counts cannot be negative.")
                     )
@@ -449,13 +464,13 @@ class AssemblyAgenda(models.Model):
         "option_ids",
     )
     def _check_manual_expected_total_sum(self):
-        for rec in self:
-            if rec.agenda_vote_mode not in (
+        for record in self:
+            if record.agenda_vote_mode not in (
                 _AGENDA_VOTE_MODE_MANUAL_YES_NO,
                 _AGENDA_VOTE_MODE_MANUAL_MULTI,
             ):
                 continue
-            rec._validate_manual_expected_total_for_mode()
+            record._validate_manual_expected_total_for_mode()
 
     def _validate_manual_expected_total_for_mode(self):
         self.ensure_one()
@@ -492,7 +507,8 @@ class AssemblyAgenda(models.Model):
             ):
                 raise ValidationError(
                     self.env._(
-                        "Manual counts sum to %(actual)s but expected total is %(expected)s.",
+                        "Manual counts sum to %(actual)s but "
+                        "expected total is %(expected)s.",
                         actual=actual,
                         expected=self.manual_total_expected,
                     )
@@ -506,7 +522,8 @@ class AssemblyAgenda(models.Model):
                 raise ValidationError(
                     self.env._(
                         "Manual vote counts sum to %(actual)s but confirmed attendees "
-                        "account for %(possible)s votes for this assembly's vote types.",
+                        "account for %(possible)s votes for this assembly's "
+                        "vote types.",
                         actual=actual,
                         possible=possible,
                     )
@@ -526,7 +543,8 @@ class AssemblyAgenda(models.Model):
         if float_compare(actual, self.manual_total_expected, precision_digits=6) != 0:
             raise ValidationError(
                 self.env._(
-                    "Manual counts sum to %(actual)s but expected total is %(expected)s.",
+                    "Manual counts sum to %(actual)s but "
+                    "expected total is %(expected)s.",
                     actual=actual,
                     expected=self.manual_total_expected,
                 )
@@ -536,13 +554,13 @@ class AssemblyAgenda(models.Model):
         self._check_vote_type_required_in_weighted_mode()
         self._check_vote_type_in_assembly()
 
-    def _validate_agenda_write_vals(self, vals):
+    def _validate_agenda_write_vote_type_immutable(self, vals):
         if "vote_type_id" in vals:
-            for line in self:
-                if not line.voting_ids:
+            for record in self:
+                if not record.voting_ids:
                     continue
                 new_id = vals["vote_type_id"]
-                current_id = line.vote_type_id.id if line.vote_type_id else False
+                current_id = record.vote_type_id.id if record.vote_type_id else False
                 if new_id != current_id:
                     raise ValidationError(
                         self.env._(
@@ -551,21 +569,26 @@ class AssemblyAgenda(models.Model):
                             "the vote type becomes immutable."
                         )
                     )
+
+    def _validate_agenda_write_vote_mode_change(self, vals):
         if "agenda_vote_mode" in vals:
-            for line in self:
+            for record in self:
                 if (
-                    line.voting_ids
-                    and vals["agenda_vote_mode"] != line.agenda_vote_mode
+                    record.voting_ids
+                    and vals["agenda_vote_mode"] != record.agenda_vote_mode
                 ):
                     raise ValidationError(
                         self.env._(
-                            "Cannot change vote mode while weighted vote sessions exist "
+                            "Cannot change vote mode while weighted vote "
+                            "sessions exist "
                             "for this agenda item."
                         )
                     )
+
+    def _validate_agenda_write_requires_vote(self, vals):
         if "requires_vote" in vals and vals["requires_vote"]:
-            for line in self:
-                effective_mode = vals.get("agenda_vote_mode", line.agenda_vote_mode)
+            for record in self:
+                effective_mode = vals.get("agenda_vote_mode", record.agenda_vote_mode)
                 if effective_mode != _AGENDA_VOTE_MODE_WEIGHTED:
                     raise ValidationError(
                         self.env._(
@@ -574,7 +597,7 @@ class AssemblyAgenda(models.Model):
                     )
                 vote_type_id = vals.get(
                     "vote_type_id",
-                    line.vote_type_id.id if line.vote_type_id else False,
+                    record.vote_type_id.id if record.vote_type_id else False,
                 )
                 if not vote_type_id:
                     raise ValidationError(
@@ -583,11 +606,13 @@ class AssemblyAgenda(models.Model):
                             "in weighted mode."
                         )
                     )
+
+    def _validate_agenda_write_vote_type_clear(self, vals):
         if "vote_type_id" in vals and not vals["vote_type_id"]:
-            for line in self:
-                effective_mode = vals.get("agenda_vote_mode", line.agenda_vote_mode)
+            for record in self:
+                effective_mode = vals.get("agenda_vote_mode", record.agenda_vote_mode)
                 if effective_mode == _AGENDA_VOTE_MODE_WEIGHTED and (
-                    vals.get("requires_vote", line.requires_vote)
+                    vals.get("requires_vote", record.requires_vote)
                 ):
                     raise ValidationError(
                         self.env._(
@@ -595,6 +620,12 @@ class AssemblyAgenda(models.Model):
                             "requires vote is enabled."
                         )
                     )
+
+    def _validate_agenda_write_vals(self, vals):
+        self._validate_agenda_write_vote_type_immutable(vals)
+        self._validate_agenda_write_vote_mode_change(vals)
+        self._validate_agenda_write_requires_vote(vals)
+        self._validate_agenda_write_vote_type_clear(vals)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -649,8 +680,8 @@ class AssemblyAgenda(models.Model):
 
     def action_finalize_manual(self):
         """Close a manual-mode agenda item (sets state to voted)."""
-        for rec in self:
-            if rec.agenda_vote_mode not in (
+        for record in self:
+            if record.agenda_vote_mode not in (
                 _AGENDA_VOTE_MODE_MANUAL_YES_NO,
                 _AGENDA_VOTE_MODE_MANUAL_MULTI,
             ):
@@ -660,19 +691,19 @@ class AssemblyAgenda(models.Model):
                         "(simple count) or manual vote (multi-option) modes."
                     )
                 )
-            if rec.agenda_state not in ("pending", "in_progress"):
+            if record.agenda_state not in ("pending", "in_progress"):
                 raise UserError(
                     self.env._("Only pending or in-progress items can be finalized.")
                 )
-            if rec.voting_ids.filtered(lambda v: v.voting_state == "open"):
+            if record.voting_ids.filtered(lambda v: v.voting_state == "open"):
                 raise UserError(
                     self.env._(
                         "Close or cancel open weighted vote sessions before finalizing "
                         "a manual-mode item."
                     )
                 )
-            rec._validate_manual_finalize()
-            rec.write({"agenda_state": "voted"})
+            record._validate_manual_finalize()
+            record.write({"agenda_state": "voted"})
 
     def action_start_voting(self):
         self.ensure_one()
@@ -725,16 +756,65 @@ class AssemblyAgenda(models.Model):
         self.write({"agenda_state": "skipped"})
 
     def action_session_safe_skip(self):
-        for rec in self:
-            open_v = rec.voting_ids.filtered(lambda v: v.voting_state == "open")
+        for record in self:
+            open_v = record.voting_ids.filtered(lambda v: v.voting_state == "open")
             if open_v:
                 open_v.action_cancel()
-            rec.action_skip()
+            record.action_skip()
 
     def action_session_manual_skip_and_next(self):
         self.ensure_one()
         self.action_session_safe_skip()
         return self.action_session_navigate_live_voting(1)
+
+    def _action_open_live_voting_screen_weighted(self):
+        self.ensure_one()
+        open_v = self.voting_ids.filtered(lambda v: v.voting_state == "open")[:1]
+        if open_v:
+            open_v._ensure_roll_call_lines()
+            return open_v.action_open_session_control()
+
+        _epoch = fields.Datetime.from_string("1970-01-01 00:00:00")
+        closed_v = self.voting_ids.filtered(
+            lambda v: v.voting_state == "closed"
+        ).sorted(key=lambda v: v.date_close or _epoch, reverse=True)[:1]
+        if closed_v and self.agenda_state == "voted":
+            return closed_v.action_open_session_control()
+        if self.agenda_state not in ("pending", "in_progress"):
+            raise UserError(self.env._("This agenda item is not open for live voting."))
+
+        self.action_start_voting()
+        open_v = self.voting_ids.filtered(lambda v: v.voting_state == "open")[:1]
+        if not open_v:
+            raise UserError(
+                self.env._("Could not start a voting session for this item.")
+            )
+        open_v._ensure_roll_call_lines()
+        return open_v.action_open_session_control()
+
+    def _action_open_live_voting_screen_manual(self):
+        self.ensure_one()
+        if self.agenda_state not in ("pending", "in_progress", "voted"):
+            raise UserError(
+                self.env._("This agenda item is not available for manual entry.")
+            )
+
+        view = self.env.ref(
+            "base_assembly.assembly_agenda_view_form_session_manual",
+            raise_if_not_found=False,
+        )
+        action = {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Manual vote (session)"),
+            "res_model": "assembly.agenda",
+            "res_id": self.id,
+            "view_mode": "form",
+            "target": "current",
+            "context": dict(self.env.context, form_view_initial_mode="edit"),
+        }
+        if view:
+            action["views"] = [(view.id, "form")]
+        return action
 
     def action_open_live_voting_screen(self):
         self.ensure_one()
@@ -743,52 +823,12 @@ class AssemblyAgenda(models.Model):
         if self.agenda_state == "skipped":
             raise UserError(self.env._("This agenda item was skipped."))
         if self.agenda_vote_mode == _AGENDA_VOTE_MODE_WEIGHTED:
-            open_v = self.voting_ids.filtered(lambda v: v.voting_state == "open")[:1]
-            if open_v:
-                open_v._ensure_roll_call_lines()
-                return open_v.action_open_session_control()
-            _epoch = fields.Datetime.from_string("1970-01-01 00:00:00")
-            closed_v = self.voting_ids.filtered(
-                lambda v: v.voting_state == "closed"
-            ).sorted(key=lambda v: v.date_close or _epoch, reverse=True)[:1]
-            if closed_v and self.agenda_state == "voted":
-                return closed_v.action_open_session_control()
-            if self.agenda_state not in ("pending", "in_progress"):
-                raise UserError(
-                    self.env._("This agenda item is not open for live voting.")
-                )
-            self.action_start_voting()
-            open_v = self.voting_ids.filtered(lambda v: v.voting_state == "open")[:1]
-            if not open_v:
-                raise UserError(
-                    self.env._("Could not start a voting session for this item.")
-                )
-            open_v._ensure_roll_call_lines()
-            return open_v.action_open_session_control()
+            return self._action_open_live_voting_screen_weighted()
         if self.agenda_vote_mode in (
             _AGENDA_VOTE_MODE_MANUAL_YES_NO,
             _AGENDA_VOTE_MODE_MANUAL_MULTI,
         ):
-            if self.agenda_state not in ("pending", "in_progress", "voted"):
-                raise UserError(
-                    self.env._("This agenda item is not available for manual entry.")
-                )
-            view = self.env.ref(
-                "base_assembly.assembly_agenda_view_form_session_manual",
-                raise_if_not_found=False,
-            )
-            action = {
-                "type": "ir.actions.act_window",
-                "name": self.env._("Manual vote (session)"),
-                "res_model": "assembly.agenda",
-                "res_id": self.id,
-                "view_mode": "form",
-                "target": "current",
-                "context": dict(self.env.context, form_view_initial_mode="edit"),
-            }
-            if view:
-                action["views"] = [(view.id, "form")]
-            return action
+            return self._action_open_live_voting_screen_manual()
         raise UserError(self.env._("Unsupported vote mode for the live screen."))
 
     def action_session_manual_prev(self):
@@ -851,6 +891,8 @@ class AssemblyAgenda(models.Model):
             "assembly.voting",
             self.env._("Votings"),
             "list,kanban,graph,pivot,form",
-            domain=[("agenda_id", "=", self.id)],
-            context={"default_agenda_id": self.id},
+            extra={
+                "domain": [("agenda_id", "=", self.id)],
+                "context": {"default_agenda_id": self.id},
+            },
         )

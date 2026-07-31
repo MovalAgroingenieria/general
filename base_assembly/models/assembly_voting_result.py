@@ -18,7 +18,6 @@ class AssemblyVotingResult(models.Model):
 
     voting_id = fields.Many2one(
         "assembly.voting",
-        string="Voting",
         required=True,
         ondelete="cascade",
         index=True,

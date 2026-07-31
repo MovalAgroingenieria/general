@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- 2026 Moval Agroingeniería | AGPL-3.0 or later -->
+<?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <!-- Template: full attendees list -->
     <template id="report_assembly_attendance">
@@ -75,7 +74,7 @@
                                 <td><span t-field="att.attendee_state"/></td>
                                 <td class="text-end">
                                     <t t-set="total" t-value="sum(att.attendee_vote_ids.mapped('attendee_vote_total'))"/>
-                                    <span t-esc="total"/>
+                                    <span t-out="total"/>
                                 </td>
                                 <td>
                                     <t t-call="base_assembly.report_assembly_attendee_delegations_received_cell"/>
@@ -134,7 +133,7 @@
                                 <td><span t-field="att.date_register" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/></td>
                                 <td class="text-end">
                                     <t t-set="total" t-value="sum(att.attendee_vote_ids.mapped('attendee_vote_total'))"/>
-                                    <span t-esc="total"/>
+                                    <span t-out="total"/>
                                 </td>
                                 <td>
                                     <t t-call="base_assembly.report_assembly_attendee_delegations_received_cell"/>
@@ -198,7 +197,7 @@
                                 <td><span t-field="att.attendee_state"/></td>
                                 <td class="text-end">
                                     <t t-set="total" t-value="sum(att.attendee_vote_ids.mapped('attendee_vote_total'))"/>
-                                    <span t-esc="total"/>
+                                    <span t-out="total"/>
                                 </td>
                                 <td>
                                     <t t-call="base_assembly.report_assembly_attendee_delegations_received_cell"/>
@@ -258,7 +257,7 @@
                                 <td><span t-field="att.date_register" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/></td>
                                 <td class="text-end">
                                     <t t-set="total" t-value="sum(att.attendee_vote_ids.mapped('attendee_vote_total'))"/>
-                                    <span t-esc="total"/>
+                                    <span t-out="total"/>
                                 </td>
                                 <td>
                                     <t t-call="base_assembly.report_assembly_attendee_delegations_received_cell"/>
@@ -322,7 +321,7 @@
                                 <td><span t-field="att.date_register" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/></td>
                                 <td class="text-end">
                                     <t t-set="total" t-value="sum(att.attendee_vote_ids.mapped('attendee_vote_total'))"/>
-                                    <span t-esc="total"/>
+                                    <span t-out="total"/>
                                 </td>
                                 <td>
                                     <t t-call="base_assembly.report_assembly_attendee_delegations_received_cell"/>

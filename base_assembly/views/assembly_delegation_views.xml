@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <record id="assembly_delegation_view_tree" model="ir.ui.view">
         <field name="name">assembly.delegation.tree</field>
         <field name="model">assembly.delegation</field>
-        <field name="priority">10</field>
+        <field name="priority" eval="10" />
         <field name="arch" type="xml">
             <list editable="bottom" default_order="partner_id" decoration-success="delegation_vote_transfer_state == 'active'" decoration-warning="delegation_vote_transfer_state == 'waiting_delegate'">
                 <field name="assembly_id"/>
@@ -62,7 +62,7 @@
     <record id="assembly_delegation_view_search" model="ir.ui.view">
         <field name="name">assembly.delegation.search</field>
         <field name="model">assembly.delegation</field>
-        <field name="priority">10</field>
+        <field name="priority" eval="10" />
         <field name="arch" type="xml">
             <search string="Delegations">
                 <field name="partner_id" string="Delegator"/>
@@ -78,7 +78,7 @@
     <record id="assembly_delegation_view_tree_manager" model="ir.ui.view">
         <field name="name">assembly.delegation.list.manager</field>
         <field name="model">assembly.delegation</field>
-        <field name="priority">90</field>
+        <field name="priority" eval="90" />
         <field name="arch" type="xml">
             <list string="Delegations" default_order="assembly_id desc, id desc" multi_edit="1" decoration-success="delegation_vote_transfer_state == 'active'" decoration-warning="delegation_vote_transfer_state == 'waiting_delegate'">
                 <field name="company_id" optional="show" groups="base.group_multi_company"/>
@@ -97,7 +97,7 @@
         <field name="model">assembly.delegation</field>
         <field name="inherit_id" ref="base_assembly.assembly_delegation_view_form"/>
         <field name="mode">primary</field>
-        <field name="priority">90</field>
+        <field name="priority" eval="90" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='assembly_id']" position="after">
                 <field name="company_id" readonly="1" groups="base.group_multi_company"/>
@@ -110,7 +110,7 @@
         <field name="model">assembly.delegation</field>
         <field name="inherit_id" ref="base_assembly.assembly_delegation_view_search"/>
         <field name="mode">primary</field>
-        <field name="priority">90</field>
+        <field name="priority" eval="90" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='assembly_id']" position="after">
                 <field name="company_id"/>
