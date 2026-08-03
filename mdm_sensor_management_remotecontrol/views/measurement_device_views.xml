@@ -48,6 +48,17 @@
         </field>
     </record>
 
+    <record id="mdm_device_view_search" model="ir.ui.view">
+        <field name="name">Measurement Device Search</field>
+        <field name="model">mdm.measurement.device</field>
+        <field name="inherit_id" ref="mdm_sensor_management.mdm_device_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='model']" position="after">
+                <filter string="Telecontrol" name="telecontrol" context="{'group_by':'remotecontrol_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
     <record id="action_mdm_device_run_readings_multi" model="ir.actions.server">
         <field name="name">Get readings</field>
         <field name="model_id" ref="mdm_sensor_management.model_mdm_measurement_device"/>
