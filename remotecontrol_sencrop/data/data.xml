@@ -148,6 +148,10 @@
 <ol>
   <li><strong>Get Devices Plan</strong> (sequence 10)</li>
   <li><strong>Get Readings Data</strong> (sequence 20)</li>
+    <li><strong>Calculate Computed Sensors</strong>: a separate procedure
+    recomputes every sensor with Transformation Type "Multiple Sensors" whose
+    device is linked to this Remote Control, using the latest active
+    measurement value of each configured dependency sensor.</li>
 </ol>
 
 <hr/>
@@ -504,6 +508,34 @@ bag['audit_attachment_id'] = att.id
     ]]></field>
         </record>
 
+        <record id="remotecontrol_sencrop_action_compute_multi_sensor" model="remotecontrol.action">
+            <field name="name">SENCROP: Calculate Computed Sensors</field>
+            <field name="remote_id" ref="remotecontrol_sencrop"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+Remote = self.remote_id
+result = Remote.compute_device_multi_sensor_readings()
+
+bag['computed_sensors_computed'] = result.get('computed')
+bag['computed_sensors_errors'] = result.get('errors')
+bag['computed_sensors_error_details'] = result.get('error_details')
+
+body = u"[Computed Sensors] computed=%s errors=%s" % (
+    result.get('computed'), result.get('errors'))
+error_details = result.get('error_details') or []
+if error_details:
+    body += u"<br/><ul>"
+    for error_detail in error_details:
+        body += u"<li>%s: %s</li>" % (
+            error_detail.get('sensor_name'), error_detail.get('message'))
+    body += u"</ul>"
+Remote.message_post(body=body)
+]]></field>
+        </record>
+
         <record id="remotecontrol_sencrop_procedure" model="remotecontrol.procedure">
             <field name="name">SENCROP: Daily Sync</field>
             <field name="remote_id" ref="remotecontrol_sencrop"/>
@@ -511,9 +543,15 @@ bag['audit_attachment_id'] = att.id
             <field name="schedule_cron">False</field>
             <field name="readonly">True</field>
             <field name="procedure_for_readings" eval="True"/>
-    </record>
+        </record>
 
-
+        <record id="remotecontrol_sencrop_procedure_compute_multi_sensor" model="remotecontrol.procedure">
+            <field name="name">SENCROP: Calculate Computed Sensors</field>
+            <field name="remote_id" ref="remotecontrol_sencrop"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
         <record id="remotecontrol_sencrop_step_10_token" model="remotecontrol.step">
             <field name="name">Get Token</field>
             <field name="procedure_id" ref="remotecontrol_sencrop_procedure"/>
@@ -534,5 +572,13 @@ bag['audit_attachment_id'] = att.id
             <field name="action_id" ref="remotecontrol_sencrop_action_get_readings"/>
             <field name="sequence">30</field>
         </record>
+
+        <record id="remotecontrol_sencrop_step_10_compute_multi_sensor" model="remotecontrol.step">
+            <field name="name">Calculate Computed Sensors</field>
+            <field name="procedure_id" ref="remotecontrol_sencrop_procedure_compute_multi_sensor"/>
+            <field name="action_id" ref="remotecontrol_sencrop_action_compute_multi_sensor"/>
+            <field name="sequence">10</field>
+        </record>
+
     </data>
 </odoo>

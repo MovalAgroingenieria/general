@@ -81,6 +81,7 @@ class MeasurementDeviceSensorReading(models.Model):
         selection=[
             ('arithmetic', 'Arithmetic Expression'),
             ('custom_python', 'Custom Python'),
+            ('multi_sensor', 'Multiple Sensors (Custom Python)'),
         ],
         string='Transformation Type Applied',
         readonly=True,
@@ -221,6 +222,12 @@ class MeasurementDeviceSensorReading(models.Model):
             return vals
         transformation_type = sensor.measurement_transformation_type or \
             'arithmetic'
+        if transformation_type == 'multi_sensor':
+            vals.setdefault('raw_value', vals.get('value', 0.0))
+            vals['measurement_transformation_type'] = transformation_type
+            vals['measurement_transformation'] = (
+                sensor.measurement_transformation_python or '')
+            return vals
         if transformation_type == 'arithmetic':
             transformation = sensor.measurement_transformation or '$'
         else:

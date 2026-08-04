@@ -38,6 +38,16 @@ class RemoteControl(models.Model):
             }
             return act_window
 
+    def compute_device_multi_sensor_readings(self):
+        self.ensure_one()
+        computed_sensors = self.env[
+            'mdm.measurement.device.sensor'].search([
+                ('measurement_transformation_type', '=', 'multi_sensor'),
+                ('device_id.remotecontrol_id', '=', self.id),
+            ])
+        result = computed_sensors.compute_multi_sensor_readings()
+        return result
+
 
 class RemoteControlAction(models.Model):
     _inherit = 'remotecontrol.action'

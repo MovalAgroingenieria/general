@@ -39,10 +39,20 @@
                                        attrs="{'invisible': [('measurement_transformation_type', '!=', 'arithmetic')],
                                                 'required': [('measurement_transformation_type', '=', 'arithmetic')]}"/>
                                 <field name="measurement_transformation_python"
-                                       attrs="{'invisible': [('measurement_transformation_type', '!=', 'custom_python')],
-                                                'required': [('measurement_transformation_type', '=', 'custom_python')]}"
+                                       attrs="{'invisible': [('measurement_transformation_type', 'not in', ('custom_python', 'multi_sensor'))],
+                                                'required': [('measurement_transformation_type', 'in', ('custom_python', 'multi_sensor'))]}"
                                        groups="base.group_system"/>
                             </group>
+                            <field name="dependency_line_ids"
+                                   attrs="{'invisible': [('measurement_transformation_type', '!=', 'multi_sensor')]}"
+                                   groups="base.group_system">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="dependency_sensor_id"
+                                           domain="[('id', '!=', parent.id)]"/>
+                                    <field name="variable_name"/>
+                                </tree>
+                            </field>
                             <div class="oe_edit_only alert alert-info" role="alert"
                                  attrs="{'invisible': [('measurement_transformation_type', '!=', 'arithmetic')]}">
                                 <strong>Arithmetic formula help:</strong>
@@ -87,6 +97,29 @@
                                 <strong>Example:</strong>
                                 <pre>pct = float(value)
 result = pct * 100</pre>
+                            </div>
+                            <div class="oe_edit_only alert alert-info" role="alert"
+                                 attrs="{'invisible': [('measurement_transformation_type', '!=', 'multi_sensor')]}"
+                                 groups="base.group_system">
+                                <strong>Multiple Sensors help:</strong>
+                                Add the dependency sensors above. Each one's
+                                latest active measurement value is available in the
+                                Custom Python code under its
+                                <strong>Variable Name</strong>.
+                                Dependency readings may differ by up to three
+                                hours; the computed reading is stored with the
+                                newest measurement time.
+                                Assign the result to <code>result</code>.
+                                <br/>
+                                <strong>Available:</strong>
+                                <code>math</code>, <code>sqrt</code>, <code>pow</code>,
+                                <code>log</code>, <code>log10</code>, <code>exp</code>,
+                                <code>abs</code>, <code>round</code>, <code>ceil</code>,
+                                <code>floor</code>, <code>min</code>, <code>max</code>
+                                <br/>
+                                <strong>Example</strong> (variable names
+                                <code>temperature</code>, <code>humidity</code>):
+                                <pre>result = (temperature + humidity) / 2</pre>
                             </div>
                         </page>
                         <page string="Range Validation" name="page_range_validation">

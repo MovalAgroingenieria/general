@@ -3,9 +3,12 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import logging
+import math
+from datetime import timedelta
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError
+from odoo.tools.safe_eval import safe_eval
 
 _logger = logging.getLogger(__name__)
 
@@ -66,6 +69,7 @@ class MeasurementDeviceSensor(models.Model):
         selection=[
             ('arithmetic', 'Arithmetic Expression'),
             ('custom_python', 'Custom Python'),
+            ('multi_sensor', 'Multiple Sensors (Custom Python)'),
         ],
         string='Transformation Type',
         required=True,
@@ -93,6 +97,16 @@ class MeasurementDeviceSensor(models.Model):
              'Example:\n'
              '  pct = float(value)\n'
              '  result = pct * 100',
+    )
+
+    dependency_line_ids = fields.One2many(
+        comodel_name='mdm.measurement.device.sensor.dependency',
+        inverse_name='computed_sensor_id',
+        string='Dependency Sensors',
+        help='Sensors whose last measurement value is injected into the '
+             'Custom Python transformation when Transformation Type is '
+             '"Multiple Sensors". Only used with that transformation '
+             'type.',
     )
 
     has_range_validation = fields.Boolean(
@@ -351,3 +365,108 @@ class MeasurementDeviceSensor(models.Model):
             'domain': [('sensor_id', '=', self.id)],
             'context': {'default_sensor_id': self.id},
         }
+
+    @api.multi
+    def compute_multi_sensor_readings(self):
+        reading_model = self.env['mdm.measurement.device.sensor.reading']
+        computed = 0
+        errors = 0
+        error_details = []
+        for sensor in self.filtered(
+                lambda s: s.measurement_transformation_type ==
+                'multi_sensor'):
+            try:
+                with self.env.cr.savepoint():
+                    result, dependency_measurement_time = (
+                        sensor._compute_multi_sensor_value())
+                    reading_vals = {
+                        'sensor_id': sensor.id,
+                        'measurement_time': dependency_measurement_time,
+                        'value': result,
+                    }
+                    reading = reading_model.search([
+                        ('sensor_id', '=', sensor.id),
+                        ('measurement_time', '=',
+                         dependency_measurement_time),
+                    ], limit=1)
+                    if reading:
+                        reading.write(reading_vals)
+                    else:
+                        reading_model.create(reading_vals)
+                    computed += 1
+            except Exception as e:
+                errors += 1
+                error_details.append({
+                    'sensor_name': sensor.name,
+                    'message': unicode(e),
+                })
+                _logger.warning(
+                    'Multi-sensor computation failed for sensor %s: %s',
+                    sensor.name, e)
+        return {
+            'computed': computed,
+            'errors': errors,
+            'error_details': error_details,
+        }
+
+    def _compute_multi_sensor_value(self):
+        self.ensure_one()
+        if not self.dependency_line_ids:
+            raise UserError(
+                _('Sensor "%s" has no dependency sensors configured.') %
+                self.name)
+        transformation = self.measurement_transformation_python or ''
+        if not transformation.strip():
+            raise UserError(
+                _('Sensor "%s" has no Custom Python transformation '
+                  'defined.') % self.name)
+        localdict = {
+            'result': None,
+            'math': math,
+            'sqrt': math.sqrt,
+            'pow': pow,
+            'log': math.log,
+            'log10': math.log10,
+            'exp': math.exp,
+            'abs': abs,
+            'round': round,
+            'ceil': math.ceil,
+            'floor': math.floor,
+            'min': min,
+            'max': max,
+        }
+        measurement_times = []
+        for line in self.dependency_line_ids:
+            dependency_sensor = line.dependency_sensor_id
+            if not dependency_sensor.last_measurement:
+                raise UserError(
+                    _('Dependency sensor "%s" has no active reading.') %
+                    dependency_sensor.name)
+            measurement_time = dependency_sensor.last_measurement_time
+            if isinstance(measurement_time, basestring):
+                measurement_time = fields.Datetime.from_string(
+                    measurement_time)
+            measurement_times.append(measurement_time)
+            localdict[line.variable_name] = (
+                dependency_sensor.last_measurement_value)
+        oldest_measurement_time = min(measurement_times)
+        newest_measurement_time = max(measurement_times)
+        if newest_measurement_time - oldest_measurement_time > timedelta(
+                hours=3):
+            raise UserError(
+                _('Dependency sensors for "%s" differ by more than three '
+                  'hours.') % self.name)
+        try:
+            safe_eval(transformation, localdict, mode='exec', nocopy=True)
+        except Exception as e:
+            raise UserError(
+                _('Error evaluating multi-sensor transformation for '
+                  '"%s": %s') % (self.name, e))
+        if localdict.get('result') is None:
+            raise UserError(
+                _('The multi-sensor transformation for "%s" must assign '
+                  'a value to "result".') % self.name)
+        return (
+            float(localdict['result']),
+            fields.Datetime.to_string(newest_measurement_time),
+        )
