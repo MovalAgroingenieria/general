@@ -18,3 +18,12 @@ class MeasurementDevice(models.Model):
         string='Available in Public Viewer',
         default=False,
     )
+
+    gis_realtime = fields.Boolean(
+        string='Real-time in Viewer',
+        default=False,
+        help='If enabled, the GIS viewer automatically runs the readings '
+             'procedure for this device on every refresh cycle, so its '
+             'sensor values and symbology update in near real time. '
+             'Requires a configured remote control readings procedure.',
+    )

@@ -20,6 +20,36 @@
                         <field name="geojson_style_preview" readonly="1" widget="html"/>
                         <field name="legend_symbology"/>
                     </group>
+                    <separator string="Conditional Symbology Rules"/>
+                    <field name="symbology_rule_ids">
+                        <tree>
+                            <field name="sequence" widget="handle"/>
+                            <field name="name"/>
+                            <field name="sensor_type_id"/>
+                            <field name="operator"/>
+                            <field name="value"/>
+                            <field name="value_max"/>
+                        </tree>
+                        <form>
+                            <group>
+                                <group>
+                                    <field name="name"/>
+                                    <field name="sensor_type_id"/>
+                                    <field name="operator"/>
+                                    <field name="value"/>
+                                    <field name="value_max" attrs="{'invisible': [('operator', '!=', 'between')]}"/>
+                                    <field name="animation"/>
+                                </group>
+                                <group>
+                                    <field name="geojson_style_preview" readonly="1" widget="html"/>
+                                </group>
+                            </group>
+                            <separator string="GeoJSON Style"/>
+                            <field name="geojson_style" nolabel="1"/>
+                            <separator string="Legend Symbology"/>
+                            <field name="legend_symbology" nolabel="1"/>
+                        </form>
+                    </field>
                 </page>
             </xpath>
         </field>

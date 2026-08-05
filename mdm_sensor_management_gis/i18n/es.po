@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-13 07:10+0000\n"
-"PO-Revision-Date: 2026-02-13 07:10+0000\n"
+"POT-Creation-Date: 2026-08-05 11:43+0000\n"
+"PO-Revision-Date: 2026-08-05 11:43+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,6 +19,16 @@ msgstr ""
 #: model:ir.ui.view,arch_db:mdm_sensor_management_gis.mdm_config_settings_view_form
 msgid "<span> seconds</span>"
 msgstr "<span> segundos</span>"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_active
+msgid "Active"
+msgstr "Activo"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_animation
+msgid "Animation"
+msgstr "Animación"
 
 #. module: mdm_sensor_management_gis
 #: model:ir.ui.view,arch_db:mdm_sensor_management_gis.mdm_measurement_device_view_search_gis
@@ -37,12 +47,22 @@ msgid "Available in Public Viewer"
 msgstr "Disponible en Visor Público"
 
 #. module: mdm_sensor_management_gis
-#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_config_settings_create_uid
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_category_id
+msgid "Category"
+msgstr "Categoría"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.ui.view,arch_db:mdm_sensor_management_gis.mdm_measurement_device_category_view_form_gis
+msgid "Conditional Symbology Rules"
+msgstr "Reglas de Simbología Condicionales"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_create_uid
 msgid "Created by"
 msgstr "Creado por"
 
 #. module: mdm_sensor_management_gis
-#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_config_settings_create_date
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_create_date
 msgid "Created on"
 msgstr "Creado el"
 
@@ -52,9 +72,14 @@ msgid "Default refresh interval for device information in GIS viewer"
 msgstr "Intervalo de actualización predeterminado para información de dispositivos en el visor GIS"
 
 #. module: mdm_sensor_management_gis
-#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_config_settings_display_name
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_display_name
 msgid "Display Name"
-msgstr "Nombre mostrado"
+msgstr "Nombre a mostrar"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,help:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_sequence
+msgid "Evaluation order. The first matching rule (lowest sequence) wins."
+msgstr "Evaluation order. The first matching rule (lowest sequence) wins."
 
 #. module: mdm_sensor_management_gis
 #: model:ir.ui.view,arch_db:mdm_sensor_management_gis.mdm_config_settings_view_form
@@ -67,6 +92,16 @@ msgid "GIS Devices Refresh Interval (seconds)"
 msgstr "Intervalo de actualización de dispositivos GIS (segundos)"
 
 #. module: mdm_sensor_management_gis
+#: model:ir.ui.view,arch_db:mdm_sensor_management_gis.mdm_measurement_device_category_view_form_gis
+msgid "GeoJSON Style"
+msgstr "Estilo GeoJSON"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,help:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_geojson_style
+msgid "GeoJSON style applied to the device when this rule matches."
+msgstr "Estilo GeoJSON aplicado al dispositivo cuando esta regla coincide."
+
+#. module: mdm_sensor_management_gis
 #: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_category_geojson_style
 msgid "GeoJSON style for viewer data"
 msgstr "Estilo GeoJSON en visor"
@@ -77,24 +112,44 @@ msgid "GeoJSON style for viewer data."
 msgstr "Estilo GeoJSON en visor."
 
 #. module: mdm_sensor_management_gis
-#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_config_settings_id
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_geojson_style
+msgid "GeoJSON style override"
+msgstr "Anulación de estilo GeoJSON"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_id
 msgid "ID"
 msgstr "ID"
 
 #. module: mdm_sensor_management_gis
-#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_config_settings___last_update
-msgid "Last Modified on"
-msgstr "Última modificación el"
+#: model:ir.model.fields,help:mdm_sensor_management_gis.field_mdm_measurement_device_gis_realtime
+msgid "If enabled, the GIS viewer automatically runs the readings procedure for this device on every refresh cycle, so its sensor values and symbology update in near real time. Requires a configured remote control readings procedure."
+msgstr "If enabled, the GIS viewer automatically runs the readings procedure for this device on every refresh cycle, so its sensor values and symbology update in near real time. Requires a configured remote control readings procedure."
 
 #. module: mdm_sensor_management_gis
-#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_config_settings_write_uid
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule___last_update
+msgid "Last Modified on"
+msgstr "Última modificación en"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_write_uid
 msgid "Last Updated by"
 msgstr "Última actualización por"
 
 #. module: mdm_sensor_management_gis
-#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_config_settings_write_date
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_write_date
 msgid "Last Updated on"
 msgstr "Última actualización el"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.ui.view,arch_db:mdm_sensor_management_gis.mdm_measurement_device_category_view_form_gis
+msgid "Legend Symbology"
+msgstr "Simbología de Leyenda"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_legend_symbology
+msgid "Legend symbology"
+msgstr "Simbología de leyenda"
 
 #. module: mdm_sensor_management_gis
 #: model:ir.model.fields,help:mdm_sensor_management_gis.field_mdm_measurement_device_category_legend_symbology
@@ -109,7 +164,7 @@ msgstr "Simbología de la leyenda en el visor"
 #. module: mdm_sensor_management_gis
 #: model:ir.model,name:mdm_sensor_management_gis.model_mdm_config_settings
 msgid "MDM Configuration Settings"
-msgstr "MDM Configuration Settings"
+msgstr "Configuración MDM"
 
 #. module: mdm_sensor_management_gis
 #: model:ir.model.fields,help:mdm_sensor_management_gis.field_mdm_measurement_device_category_available_for_gis_devices
@@ -122,6 +177,11 @@ msgid "Make this device available in GIS devices visualization mode"
 msgstr "Hacer disponible este dispositivo en el modo de visualización GIS de dispositivos"
 
 #. module: mdm_sensor_management_gis
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_value_max
+msgid "Max Value"
+msgstr "Valor máximo"
+
+#. module: mdm_sensor_management_gis
 #: model:ir.model,name:mdm_sensor_management_gis.model_mdm_measurement_device
 msgid "Measurement Device"
 msgstr "Dispositivo de medición"
@@ -132,17 +192,93 @@ msgid "Measurement Device Category"
 msgstr "Categoría de Dispositivo de Medición"
 
 #. module: mdm_sensor_management_gis
+#: model:ir.model,name:mdm_sensor_management_gis.model_mdm_measurement_device_symbology_rule
+msgid "Measurement Device Symbology Rule"
+msgstr "Regla de Simbología de Dispositivo de Medición"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: mdm_sensor_management_gis
+#: selection:mdm.measurement.device.symbology.rule,animation:0
+msgid "None"
+msgstr "Ninguno"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_operator
+msgid "Operator"
+msgstr "Operador"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,help:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_animation
+msgid "Optional animation applied to the marker in the viewer when this rule matches (e.g. a pulsing effect to represent an active/irrigating device)."
+msgstr "Optional animation applied to the marker in the viewer when this rule matches (e.g. a pulsing effect to represent an active/irrigating device)."
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,help:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_legend_symbology
+msgid "Optional legend entry shown in the viewer when this rule is active. Leave \"name\" empty to use the rule name as label."
+msgstr "Optional legend entry shown in the viewer when this rule is active. Leave \"name\" empty to use the rule name as label."
+
+#. module: mdm_sensor_management_gis
+#: selection:mdm.measurement.device.symbology.rule,animation:0
+msgid "Pulse"
+msgstr "Pulso"
+
+#. module: mdm_sensor_management_gis
 #: model:ir.ui.view,arch_db:mdm_sensor_management_gis.mdm_measurement_device_category_view_form_gis
 msgid "Randomize Style"
 msgstr "Aleatorizar estilo"
 
 #. module: mdm_sensor_management_gis
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_gis_realtime
+msgid "Real-time in Viewer"
+msgstr "Tiempo Real en Visor"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_sensor_type_id
+msgid "Sensor Type"
+msgstr "Tipo de sensor"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_sequence
+msgid "Sequence"
+msgstr "Secuencia"
+
+#. module: mdm_sensor_management_gis
 #: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_category_geojson_style_preview
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_geojson_style_preview
 msgid "Style Preview"
 msgstr "Previsualización estilo"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_category_symbology_rule_ids
+msgid "Symbology Rules"
+msgstr "Reglas de Simbología"
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,help:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_sensor_type_id
+msgid "The rule is evaluated against the last reading of a sensor of this type in the device."
+msgstr "La regla se evalúa contra la última lectura de un sensor de este tipo en el dispositivo."
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,help:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_value_max
+msgid "Upper bound, only used with the \"between\" operator."
+msgstr "Límite superior, solo se usa con el operador \"entre\"."
+
+#. module: mdm_sensor_management_gis
+#: model:ir.model.fields,field_description:mdm_sensor_management_gis.field_mdm_measurement_device_symbology_rule_value
+msgid "Value"
+msgstr "Valor"
 
 #. module: mdm_sensor_management_gis
 #: model:ir.ui.view,arch_db:mdm_sensor_management_gis.mdm_measurement_device_category_view_form_gis
 msgid "Viewer"
 msgstr "Visor"
+
+#. module: mdm_sensor_management_gis
+#: selection:mdm.measurement.device.symbology.rule,operator:0
+msgid "between"
+msgstr "entre"
 

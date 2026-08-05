@@ -4,7 +4,7 @@
 
 {
     'name': 'MDM Sensor Management GIS',
-    'version': '10.0.1.0.0',
+    'version': '10.0.1.1.0',
     'category': 'Tools',
     'summary': 'GIS integration for MDM sensor and device management',
     'description': 'Adds GIS visualization capabilities, category styles, '
@@ -16,6 +16,7 @@
         'mdm_sensor_management',
     ],
     'data': [
+        'security/ir.model.access.csv',
         'views/measurement_device_category_views.xml',
         'views/measurement_device_views.xml',
         'views/mdm_settings_views.xml',

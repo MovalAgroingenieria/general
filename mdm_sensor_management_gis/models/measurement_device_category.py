@@ -45,10 +45,17 @@ class MeasurementDeviceCategory(models.Model):
         [
             {
                 "fontAwesomeSymbol": "fas fa-circle",
-                "color": "#ff7800"
+                "color": "#ff7800",
+                "name": "Normal"
             }
         ]
         """,
+    )
+
+    symbology_rule_ids = fields.One2many(
+        comodel_name='mdm.measurement.device.symbology.rule',
+        inverse_name='category_id',
+        string='Symbology Rules',
     )
 
     def _generate_random_color(self):
@@ -68,6 +75,7 @@ class MeasurementDeviceCategory(models.Model):
             {
                 "fontAwesomeSymbol": "far fa-check-circle",
                 "color": new_fill_color,
+                "name": "Normal",
             },
         ]
         return json.dumps(style, indent=2), json.dumps(

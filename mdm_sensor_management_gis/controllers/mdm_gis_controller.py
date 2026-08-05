@@ -65,6 +65,8 @@ class MDMGisController(http.Controller):
             'name': sensor.name,
             'sensor_type': (sensor.type_id.name
                             if sensor.type_id else ''),
+            'sensor_type_id': (sensor.type_id.id
+                               if sensor.type_id else False),
             'last_value': last_reading.value if last_reading else None,
             'last_date': last_reading.measurement_time if last_reading else
             None,
@@ -89,6 +91,7 @@ class MDMGisController(http.Controller):
                             if device.category_id else False),
             'geometry': self._get_geojson_from_device(device),
             'photo_url': photo_url,
+            'gis_realtime': device.gis_realtime,
             'sensors': sensor_data,
         }
 
@@ -122,11 +125,31 @@ class MDMGisController(http.Controller):
             if category.legend_symbology:
                 legend_symbology = category.legend_symbology.replace(
                     '\n', '').strip()
+            symbology_rules = []
+            for rule in category.symbology_rule_ids:
+                rule_style = '{}'
+                if rule.geojson_style:
+                    rule_style = rule.geojson_style.replace(
+                        '\n', '').strip()
+                rule_legend = ''
+                if rule.legend_symbology:
+                    rule_legend = rule.legend_symbology.replace(
+                        '\n', '').strip()
+                symbology_rules.append({
+                    'sensor_type_id': rule.sensor_type_id.id,
+                    'operator': rule.operator,
+                    'value': rule.value,
+                    'value_max': rule.value_max,
+                    'animation': rule.animation,
+                    'geojson_style': rule_style,
+                    'legend_symbology': rule_legend,
+                })
             categories_output[self.to_valid_variable_name(category.name)] = {
                 'id': category.id,
                 'name': category.name,
                 'geojson_style': geojson_style,
                 'legend_symbology': legend_symbology,
+                'symbology_rules': symbology_rules,
                 'device_count': device_count,
             }
         output = {
