@@ -54,7 +54,13 @@
   <li><strong>Get pressure readings</strong> → iterate through plan and call <code>/api/presiones/historico</code> with filters by date, hidrante, electronica, and canal to upsert pressure readings into Odoo.</li>
 </ol>
 
-<h4>2.3 Batchline: Import pressure devices</h4>
+<h4>2.3 Batchline: Calculate Computed Sensors</h4>
+<ol>
+    <li>Runs after <strong>Batchline: Daily Sync</strong>.</li>
+    <li>Calculates sensors with Transformation Type <em>Multiple Sensors</em> for Batchline devices using their configured dependencies.</li>
+</ol>
+
+<h4>2.4 Batchline: Import pressure devices</h4>
 <ol>
   <li><strong>Get Token</strong> → obtain access token and store it in <code>bag["token"]</code>.</li>
   <li><strong>Import pressure devices</strong> → call <code>/api/presiones</code> and store the resulting JSON list in an attachment. Each device includes <code>Hidrante</code>, <code>Electronica</code>, <code>Canal</code>, <code>Alias</code>, <code>Unidad</code>, and current <code>Valor</code>.</li>
@@ -507,6 +513,34 @@ bag['errors'] = total_errors
 bag['audit_attachment_id'] = att.id
 
             ]]></field>
+        </record>
+
+        <record id="remotecontrol_batchline_action_compute_multi_sensor" model="remotecontrol.action">
+            <field name="name">Batchline: Calculate Computed Sensors</field>
+            <field name="remote_id" ref="remotecontrol_batchline"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+Remote = self.remote_id
+result = Remote.compute_device_multi_sensor_readings()
+
+bag['computed_sensors_computed'] = result.get('computed')
+bag['computed_sensors_errors'] = result.get('errors')
+bag['computed_sensors_error_details'] = result.get('error_details')
+
+body = u"[Computed Sensors] computed=%s errors=%s" % (
+    result.get('computed'), result.get('errors'))
+error_details = result.get('error_details') or []
+if error_details:
+    body += u"<br/><ul>"
+    for error_detail in error_details:
+        body += u"<li>%s: %s</li>" % (
+            error_detail.get('sensor_name'), error_detail.get('message'))
+    body += u"</ul>"
+Remote.message_post(body=body)
+]]></field>
         </record>
 
         <record id="remotecontrol_batchline_action_get_elements" model="remotecontrol.action">
@@ -1068,6 +1102,14 @@ bag[u'provision_attachment_id'] = att.id
             <field name="procedure_for_readings" eval="True"/>
 </record>
 
+        <record id="remotecontrol_batchline_procedure_compute_multi_sensor" model="remotecontrol.procedure">
+            <field name="name">Batchline: Calculate Computed Sensors</field>
+            <field name="remote_id" ref="remotecontrol_batchline"/>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+        </record>
+
         <record id="remotecontrol_batchline_procedure_pressures_import" model="remotecontrol.procedure">
             <field name="name">Batchline: Import pressure devices</field>
             <field name="remote_id" ref="remotecontrol_batchline"/>
@@ -1123,6 +1165,13 @@ bag[u'provision_attachment_id'] = att.id
             <field name="procedure_id" ref="remotecontrol_batchline_procedure"/>
             <field name="action_id" ref="remotecontrol_batchline_action_get_pressure_readings"/>
             <field name="sequence">50</field>
+        </record>
+
+        <record id="remotecontrol_batchline_step_10_compute_multi_sensor" model="remotecontrol.step">
+            <field name="name">Calculate Computed Sensors</field>
+            <field name="procedure_id" ref="remotecontrol_batchline_procedure_compute_multi_sensor"/>
+            <field name="action_id" ref="remotecontrol_batchline_action_compute_multi_sensor"/>
+            <field name="sequence">10</field>
         </record>
 
         <!-- Steps for Import pressure devices procedure -->
