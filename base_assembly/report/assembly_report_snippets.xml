@@ -1,61 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <!-- Shared fragments. Set ``asm`` = assembly.assembly before calling meta / publication blocks. -->
-    <template id="report_assembly_asm_meta_block">
-        <div class="text-center mb-3 o_assembly_report_asm_meta">
-            <div t-if="asm.code" class="small text-muted mb-1">
-                <span>Reference</span>:
-                <span t-field="asm.code"/>
-            </div>
-            <h4><span t-field="asm.name"/></h4>
-            <div t-if="asm.company_id" class="small" groups="base.group_multi_company">
-                <span class="text-muted">Company:</span>
-                <span t-field="asm.company_id"/>
-            </div>
-            <div t-if="asm.date_announcement" class="small">
-                <span class="text-muted">Announcement:</span>
-                <span t-field="asm.date_announcement" t-options="{'format': 'dd/MM/yyyy'}"/>
-            </div>
-            <div t-if="asm.date_first_call" class="small">
-                <span class="text-muted">First call:</span>
-                <span t-field="asm.date_first_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
-                <t t-if="asm.location"> — <span t-field="asm.location"/></t>
-            </div>
-            <div t-if="asm.date_second_call" class="small">
-                <span class="text-muted">Second call:</span>
-                <span t-field="asm.date_second_call" t-options="{'format': 'dd/MM/yyyy HH:mm'}"/>
-            </div>
-            <div t-if="asm.president_id or asm.secretary_id" class="small mt-1">
-                <t t-if="asm.president_id">
-                    <span class="text-muted">President:</span>
-                    <span t-field="asm.president_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
-                </t>
-                <t t-if="asm.president_id and asm.secretary_id"> — </t>
-                <t t-if="asm.secretary_id">
-                    <span class="text-muted">Secretary:</span>
-                    <span t-field="asm.secretary_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
-                </t>
-            </div>
-        </div>
-    </template>
-
-    <template id="report_assembly_operational_roster_note">
-        <p class="small text-muted text-center mb-3 o_assembly_report_operational_note">
-            Working list for the chair and minutes. It is not the legal convocation: use <strong>Assembly publication (PDF)</strong> for the formal notice text.
-        </p>
-    </template>
-
+    <!-- Shared report fragments. Set ``asm`` = assembly.assembly before calling. -->
     <template id="report_assembly_attendance_roster_footer">
         <div class="small text-muted mt-3 pt-2 border-top o_assembly_report_roster_footer">
             <span>Convocable members:</span>
             <strong><span t-field="asm.total_possible_attendees"/></strong>
             <span class="ms-3">Attended (confirmed):</span>
             <strong><span t-field="asm.total_present_attendees"/></strong>
-            <span class="ms-3">Attendance ratio:</span>
-            <strong><span t-field="asm.quorum_percentage"/>%</strong>
-            <span class="ms-3">Quorum reached:</span>
-            <strong t-if="asm.quorum_reached">Yes</strong>
-            <strong t-else="">No</strong>
         </div>
     </template>
 
@@ -114,6 +65,18 @@
         <t t-else="">—</t>
     </template>
 
+    <template id="report_assembly_v10_header">
+        <div class="text-center mb-4 o_assembly_report_v10_header">
+            <h4 class="mb-1"><strong t-out="asm.name"/></h4>
+            <div class="text-muted">
+                <span t-field="asm.date_first_call" t-options="{'format': 'dd/MM/yyyy'}"/>
+                <t t-set="city_txt" t-value="asm.city_id.name or asm.city"/>
+                <t t-if="city_txt"> — <span t-out="city_txt"/></t>
+                <t t-if="asm.state_id">, <span t-out="asm.state_id.name"/></t>
+            </div>
+        </div>
+    </template>
+
     <template id="report_assembly_publication_html_block">
         <t t-set="pub_html" t-value="asm.get_rendered_publication()"/>
         <div t-if="pub_html" class="mb-3 o_assembly_report_publication" t-out="pub_html"/>
@@ -155,40 +118,5 @@
                 </li>
             </ol>
         </t>
-    </template>
-
-    <template id="report_assembly_agenda_af_list_block">
-        <div class="row"><div class="col-12"><strong>Agenda</strong></div></div>
-        <ol class="mt-2">
-            <li t-foreach="assembly.agenda_ids.sorted(key=lambda x: x.sequence)" t-as="item">
-                <span t-field="item.name"/>
-                <span class="text-muted small"> — <span t-field="item.agenda_vote_mode"/></span>
-                <t t-if="item.requires_vote and item.vote_type_id"> (<span t-field="item.vote_type_id.name"/>)</t>
-                <div t-if="item.description" class="mt-1 ps-3 small border-start">
-                    <span t-field="item.description"/>
-                </div>
-                <t t-if="item.agenda_vote_mode == 'manual_yes_no'">
-                    <div class="small ms-3 mt-1 o_assembly_report_manual_yn">
-                        Manual counts — Yes: <span t-field="item.manual_yes"/>,
-                        No: <span t-field="item.manual_no"/>,
-                        Abstention: <span t-field="item.manual_abstain"/>,
-                        Blank: <span t-field="item.manual_count_blank"/>
-                        <t t-if="item.manual_total_expected">
-                            (expected total: <span t-field="item.manual_total_expected"/>)
-                        </t>
-                    </div>
-                </t>
-                <t t-if="item.agenda_vote_mode == 'manual_multi' and item.option_ids">
-                    <ul class="small ms-3 mt-1 mb-0 o_assembly_report_ballot_options">
-                        <li t-foreach="item.option_ids.sorted(key=lambda x: x.sequence)" t-as="opt">
-                            <span t-field="opt.name"/>
-                        </li>
-                    </ul>
-                </t>
-                <div t-if="item.final_summary" class="mt-1 ms-3 small border-start ps-2 o_assembly_report_final_summary">
-                    <span t-field="item.final_summary"/>
-                </div>
-            </li>
-        </ol>
     </template>
 </odoo>

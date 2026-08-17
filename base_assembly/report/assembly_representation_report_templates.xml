@@ -10,12 +10,9 @@
         <t t-call="web.html_container">
             <t t-call="web.external_layout">
                 <div class="page o_assembly_representation_register">
-                    <h3 class="text-center mb-2"><strong>Representation register</strong></h3>
-                    <p class="text-muted small text-center mb-3">
-                        Schedule of active representation records for this assembly (who acts for whom). This list is not a voting ballot and not a vote-delegation certificate.
-                    </p>
                     <t t-set="asm" t-value="o"/>
-                    <t t-call="base_assembly.report_assembly_asm_meta_block"/>
+                    <t t-call="base_assembly.report_assembly_v10_header"/>
+                    <h5 class="mb-2"><strong>Representation register</strong></h5>
                     <t t-set="rep_lines" t-value="o.representation_ids.filtered(lambda r: r.active)"/>
                     <table class="table table-sm table-bordered mt-2 o_assembly_representation_register_table" t-if="rep_lines">
                         <thead>
@@ -44,12 +41,10 @@
             <t t-foreach="docs" t-as="o">
                 <t t-call="web.external_layout">
                     <div class="page o_assembly_representation_poa">
-                        <h3 class="text-center mb-1"><strong>Power of attorney — assembly representation</strong></h3>
-                        <p class="small text-muted text-center mb-3 o_assembly_representation_poa_scope">
-                            Legal or physical representation for attendance and acts permitted by the bylaws. This document does not transfer voting rights by itself; vote delegation is separate.
-                        </p>
                         <t t-set="asm" t-value="o.assembly_id"/>
-                        <t t-call="base_assembly.report_assembly_asm_meta_block"/>
+                        <t t-call="base_assembly.report_assembly_v10_header"/>
+                        <h5 class="text-center mb-1"><strong>Power of attorney — assembly representation</strong></h5>
+                        <div class="mb-3 o_assembly_representation_poa_intro" t-if="asm.representation_document_text" t-out="asm.get_rendered_representation_document_text()"/>
                         <section class="mb-3 small o_assembly_representation_poa_formal">
                             <p class="fw-semibold mb-2">Formal statement</p>
                             <ol class="mb-0 ps-3">

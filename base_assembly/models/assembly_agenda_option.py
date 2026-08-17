@@ -35,7 +35,7 @@ class AssemblyAgendaOption(models.Model):
         help="Label for this choice as it appears on the ballot.",
     )
     sequence = fields.Integer(default=10)
-    manual_vote_count = fields.Integer(
+    manual_vote_count = fields.Float(
         string="Votes",
         default=0,
         help=(
@@ -52,13 +52,6 @@ class AssemblyAgendaOption(models.Model):
                     self.env._("Votes per option cannot be negative.")
                 )
 
-    def _revalidate_parent_agenda_manual_multi(self):
-        agendas = self.mapped("agenda_id").filtered(
-            lambda a: a.agenda_vote_mode == _AGENDA_VOTE_MODE_MANUAL_MULTI
-        )
-        for agenda in agendas:
-            agenda._validate_manual_expected_total_for_mode()
-
     @api.model_create_multi
     def create(self, vals_list):
         agenda_ids = [v.get("agenda_id") for v in vals_list if v.get("agenda_id")]
@@ -66,29 +59,19 @@ class AssemblyAgendaOption(models.Model):
             self.env["assembly.agenda"].browse(agenda_ids).mapped(
                 "assembly_id"
             )._assembly_ensure_not_closed_for_related_changes()
-        records = super().create(vals_list)
-        records._revalidate_parent_agenda_manual_multi()
-        return records
+        return super().create(vals_list)
 
     def write(self, vals):
         self.mapped(
             "agenda_id.assembly_id"
         )._assembly_ensure_not_closed_for_related_changes()
-        res = super().write(vals)
-        if any(k in vals for k in ("manual_vote_count", "agenda_id")):
-            self._revalidate_parent_agenda_manual_multi()
-        return res
+        return super().write(vals)
 
     def unlink(self):
         self.mapped(
             "agenda_id.assembly_id"
         )._assembly_ensure_not_closed_for_related_changes()
-        agendas = self.mapped("agenda_id")
-        res = super().unlink()
-        agendas.filtered(
-            lambda a: a.agenda_vote_mode == _AGENDA_VOTE_MODE_MANUAL_MULTI
-        )._validate_manual_expected_total_for_mode()
-        return res
+        return super().unlink()
 
     @api.constrains("agenda_id")
     def _check_agenda_allows_ballot_options(self):

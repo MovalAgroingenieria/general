@@ -42,14 +42,14 @@ class AssemblyVotingResult(models.Model):
         string="Option",
         required=True,
     )
-    total_votes = fields.Float(string="Total votes")
-    result_percentage = fields.Float(string="Percentage")
+    total_votes = fields.Float(string="Total votes", readonly=True)
+    result_percentage = fields.Float(string="Percentage", readonly=True)
 
     @api.model_create_multi
     def create(self, vals_list):
         vids = {v.get("voting_id") for v in vals_list if v.get("voting_id")}
         if vids:
-            self.env["assembly.voting"].browse(list(vids)).exists().mapped(
+            self.env["assembly.voting"].browse(vids).mapped(
                 "assembly_id"
             )._assembly_ensure_not_closed_for_related_changes()
         return super().create(vals_list)

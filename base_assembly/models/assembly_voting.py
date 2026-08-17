@@ -9,7 +9,6 @@ from .assembly_assembly import CTX_ASSEMBLY_INTERNAL_TRANSITION
 
 class AssemblyVoting(models.Model):
     _name = "assembly.voting"
-    _inherit = ["assembly.mixin.open.assembly"]
     _description = "Assembly voting"
     _order = "agenda_id, date_open desc"
 
@@ -125,24 +124,39 @@ class AssemblyVoting(models.Model):
             record.count_vote_lines = len(record.vote_line_ids)
             record.count_results = len(record.result_ids)
 
+    def action_open_assembly(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Assembly"),
+            "res_model": "assembly.assembly",
+            "res_id": self.assembly_id.id,
+            "view_mode": "form",
+            "target": "current",
+        }
+
     def action_open_agenda_item(self):
-        return self._action_window(
-            "assembly.agenda",
-            self.env._("Agenda item"),
-            "form",
-            extra={"res_id": self.agenda_id.id},
-        )
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Agenda item"),
+            "res_model": "assembly.agenda",
+            "res_id": self.agenda_id.id,
+            "view_mode": "form",
+            "target": "current",
+        }
 
     def action_open_vote_lines(self):
-        return self._action_window(
-            "assembly.voting.line",
-            self.env._("Votes cast"),
-            "list,form",
-            extra={
-                "domain": [("voting_id", "=", self.id)],
-                "context": {"default_voting_id": self.id},
-            },
-        )
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Votes cast"),
+            "res_model": "assembly.voting.line",
+            "view_mode": "list,form",
+            "target": "current",
+            "domain": [("voting_id", "=", self.id)],
+            "context": {"default_voting_id": self.id},
+        }
 
     def action_open_session_control(self):
         self.ensure_one()
@@ -240,15 +254,16 @@ class AssemblyVoting(models.Model):
         return {"type": "ir.actions.client", "tag": "reload"}
 
     def action_open_results(self):
-        return self._action_window(
-            "assembly.voting.result",
-            self.env._("Results"),
-            "list,form",
-            extra={
-                "domain": [("voting_id", "=", self.id)],
-                "context": {"default_voting_id": self.id},
-            },
-        )
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Results"),
+            "res_model": "assembly.voting.result",
+            "view_mode": "list,form",
+            "target": "current",
+            "domain": [("voting_id", "=", self.id)],
+            "context": {"default_voting_id": self.id},
+        }
 
     @api.constrains("name")
     def _check_name_non_empty(self):
@@ -310,8 +325,7 @@ class AssemblyVoting(models.Model):
         self._apply_default_name_to_voting_create_vals(vals_list)
         agenda_ids = {v.get("agenda_id") for v in vals_list if v.get("agenda_id")}
         if agenda_ids:
-            agendas = self.env["assembly.agenda"].browse(list(agenda_ids)).exists()
-            agendas.mapped(
+            self.env["assembly.agenda"].browse(agenda_ids).mapped(
                 "assembly_id"
             )._assembly_ensure_not_closed_for_related_changes()
         return super().create(vals_list)
@@ -390,6 +404,15 @@ class AssemblyVoting(models.Model):
             if record.voting_state != "open":
                 raise UserError(self.env._("Only open votings can be cancelled."))
             record.write({"voting_state": "cancelled"})
+
+    def action_reopen(self):
+        for record in self:
+            if record.voting_state != "closed":
+                raise UserError(self.env._("Only closed votings can be reopened."))
+            record.assembly_id._assembly_ensure_not_closed_for_related_changes()
+            record.result_ids.unlink()
+            record.write({"voting_state": "open", "date_close": False})
+            record.agenda_id.write({"agenda_state": "in_progress"})
 
     def _persist_closed_voting_results(self):
         self.ensure_one()

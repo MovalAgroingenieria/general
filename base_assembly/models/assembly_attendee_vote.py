@@ -128,7 +128,7 @@ class AssemblyAttendeeVote(models.Model):
     def create(self, vals_list):
         att_ids = {v.get("attendee_id") for v in vals_list if v.get("attendee_id")}
         if att_ids:
-            self.env["assembly.attendee"].browse(list(att_ids)).exists().mapped(
+            self.env["assembly.attendee"].browse(att_ids).mapped(
                 "assembly_id"
             )._assembly_ensure_not_closed_for_related_changes()
         return super().create(vals_list)

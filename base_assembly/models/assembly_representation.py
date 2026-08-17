@@ -7,6 +7,7 @@ Not vote delegation: separate from ``assembly.delegation`` and its business rule
 """
 
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 from .assembly_mixin import assembly_safe_report_filename
 
@@ -51,6 +52,12 @@ class AssemblyRepresentation(models.Model):
         ondelete="restrict",
         index=True,
     )
+    allowed_owner_partner_ids = fields.Many2many(
+        "res.partner",
+        string="Allowed represented members",
+        compute="_compute_allowed_owner_partner_ids",
+        help="Partners convocable to the assembly.",
+    )
     agent_partner_id = fields.Many2one(
         "res.partner",
         string="Representative (agent)",
@@ -60,7 +67,7 @@ class AssemblyRepresentation(models.Model):
     )
     active = fields.Boolean(default=True)
     notes = fields.Text(
-        help="Optional remarks for this representation record (AF v2.0).",
+        help="Optional remarks for this representation record.",
     )
 
     _sql_constraints = [
@@ -70,6 +77,33 @@ class AssemblyRepresentation(models.Model):
             "Each represented member may have only one representation per assembly.",
         ),
     ]
+
+    @api.depends("assembly_id")
+    def _compute_allowed_owner_partner_ids(self):
+        partner_model = self.env["res.partner"]
+        for record in self:
+            if record.assembly_id:
+                record.allowed_owner_partner_ids = partner_model.search(
+                    record.assembly_id._get_partner_domain()
+                )
+            else:
+                record.allowed_owner_partner_ids = partner_model.browse()
+
+    @api.constrains("assembly_id", "owner_partner_id")
+    def _check_owner_is_convocable(self):
+        for record in self:
+            if not record.assembly_id or not record.owner_partner_id:
+                continue
+            convocable = self.env["res.partner"].search(
+                record.assembly_id._get_partner_domain()
+            )
+            if record.owner_partner_id not in convocable:
+                raise ValidationError(
+                    self.env._(
+                        "The represented member must be included in the "
+                        "convocable partners of the assembly."
+                    )
+                )
 
     @api.model_create_multi
     def create(self, vals_list):

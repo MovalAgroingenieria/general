@@ -67,38 +67,13 @@ class AssemblyMailCommunication(models.AbstractModel):
 
     @api.model
     def _subject_for_kind(self, assembly, primary_kind, lang=None):
+        # Subjects are localized to the recipient language.
+        lang_env = self.with_context(lang=lang).env if lang else self.env
         if primary_kind == "publication":
-            tmpl = (
-                assembly.publication_mail_template_id
-                or assembly._assembly_company_default_mail_template("publication")
-                or assembly._assembly_mail_template_xmlid("publication")
-            )
-            return assembly._assembly_render_mail_subject(
-                tmpl,
-                self.env._("Assembly convocation: %s", assembly.name),
-                lang=lang,
-            )
+            return lang_env._("Assembly convocation: %s", assembly.name)
         if primary_kind == "ballot_intro":
-            tmpl = (
-                assembly.ballot_intro_mail_template_id
-                or assembly._assembly_company_default_mail_template("ballot_intro")
-                or assembly._assembly_mail_template_xmlid("ballot_intro")
-            )
-            return assembly._assembly_render_mail_subject(
-                tmpl,
-                self.env._("Voting ballot: %s", assembly.name),
-                lang=lang,
-            )
-        tmpl = (
-            assembly.delegation_document_mail_template_id
-            or assembly._assembly_company_default_mail_template("delegation_document")
-            or assembly._assembly_mail_template_xmlid("delegation_document")
-        )
-        return assembly._assembly_render_mail_subject(
-            tmpl,
-            self.env._("Vote delegation: %s", assembly.name),
-            lang=lang,
-        )
+            return lang_env._("Voting ballot: %s", assembly.name)
+        return lang_env._("Vote delegation: %s", assembly.name)
 
     @api.model
     def _render_report_pdf(self, report_xmlid, res_ids, lang=None):
@@ -234,6 +209,10 @@ class AssemblyMailCommunication(models.AbstractModel):
     def _send_one_partner_email(self, assembly, partner, primary_kind, attach_opts):
         """Send one email to ``partner``.
 
+        Sent as a direct ``mail.mail`` linked to the assembly (model/res_id) so it
+        shows in the assembly's outgoing-emails smart button but does NOT post a
+        message to the assembly chatter.
+
         Return ``"sent"``, ``"skipped"`` or ``("error", (partner_id, message))``.
         """
         if not partner.email:
@@ -244,23 +223,30 @@ class AssemblyMailCommunication(models.AbstractModel):
         att_ids = self.build_attachment_ids_for_partner(
             assembly, partner, attach_opts, lang=lang
         )
-        composer_model = self.env["mail.compose.message"].with_context(
-            assembly_use_rendered_mail_body=True,
-            mail_create_nosubscribe=True,
+        company = assembly.company_id
+        email_from = (
+            company.partner_id.email_formatted
+            or self.env.user.email_formatted
+            or company.email
         )
         try:
-            composer = composer_model.create(
-                {
-                    "model": "assembly.assembly",
-                    "res_ids": str([assembly.id]),
-                    "composition_mode": "comment",
-                    "partner_ids": [(6, 0, [partner.id])],
-                    "subject": subject,
-                    "body": body_base,
-                    "attachment_ids": [(6, 0, att_ids)],
-                }
+            mail = (
+                self.env["mail.mail"]
+                .sudo()
+                .create(
+                    {
+                        "subject": subject,
+                        "body_html": body_base,
+                        "email_from": email_from,
+                        "author_id": self.env.user.partner_id.id,
+                        "recipient_ids": [(6, 0, [partner.id])],
+                        "model": "assembly.assembly",
+                        "res_id": assembly.id,
+                        "attachment_ids": [(6, 0, att_ids)],
+                    }
+                )
             )
-            composer._action_send_mail()
+            mail.send()
         except Exception as exc:  # pylint: disable=broad-exception-caught
             return ("error", (partner.id, str(exc)))
         return "sent"

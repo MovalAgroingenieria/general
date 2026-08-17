@@ -60,6 +60,14 @@
                         invisible="voting_state != 'open'"
                         groups="base_assembly.assembly_group_manager"
                     />
+                    <button
+                        name="action_reopen"
+                        string="Reopen voting"
+                        type="object"
+                        class="btn-primary"
+                        invisible="voting_state != 'closed' or assembly_id.assembly_state == 'closed'"
+                        groups="base_assembly.assembly_group_manager"
+                    />
                     <field name="voting_state" widget="statusbar" statusbar_visible="open,closed,cancelled"/>
                 </header>
                 <sheet>

@@ -25,11 +25,6 @@ class AssemblyAssemblyHeaderActionsWizard(models.TransientModel):
         for record in self:
             record.has_attendees = bool(record.assembly_id.attendee_ids)
 
-    def action_wizard_generate_attendees(self):
-        self.ensure_one()
-        self.assembly_id.action_generate_attendees()
-        return {"type": "ir.actions.act_window_close"}
-
     def action_wizard_recompute_votes(self):
         self.ensure_one()
         self.assembly_id.action_recompute_attendee_votes()
@@ -38,10 +33,6 @@ class AssemblyAssemblyHeaderActionsWizard(models.TransientModel):
     def action_wizard_document_preview(self):
         self.ensure_one()
         return self.assembly_id.action_open_document_preview_wizard()
-
-    def action_wizard_communication_send(self):
-        self.ensure_one()
-        return self.assembly_id.action_open_communication_send_wizard()
 
     def action_wizard_ballot_print(self):
         self.ensure_one()
@@ -68,11 +59,3 @@ class AssemblyAssemblyHeaderActionsWizard(models.TransientModel):
         self.ensure_one()
         self.assembly_id.action_close()
         return {"type": "ir.actions.act_window_close"}
-
-    def action_wizard_open_communication_log(self):
-        self.ensure_one()
-        return self.assembly_id.action_open_assembly_communication_messages()
-
-    def action_wizard_open_outgoing_emails(self):
-        self.ensure_one()
-        return self.assembly_id.action_open_assembly_outbound_mails()

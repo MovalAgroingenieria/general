@@ -17,34 +17,17 @@ def assembly_safe_report_filename(label, default="record"):
     return text[:120] if text else default
 
 
-# oca-review: shared helper + abstract mixins are intentionally co-located.
-class AssemblyWindowActionMixin(models.AbstractModel):
-    _name = "assembly.mixin.window_action"
-    _description = "Mixin: standard window actions"
-
-    def _action_window(self, res_model, name, view_mode, *, extra=None):
-        self.ensure_one()
-        action = {
-            "type": "ir.actions.act_window",
-            "name": name,
-            "res_model": res_model,
-            "view_mode": view_mode,
-            "target": "current",
-        }
-        if extra:
-            action.update(extra)
-        return action
-
-
 class AssemblyOpenAssemblyMixin(models.AbstractModel):
     _name = "assembly.mixin.open.assembly"
-    _inherit = ["assembly.mixin.window_action"]
-    _description = "Mixin: open assembly form (assembly_id)"
+    _description = "Mixin: open the related assembly form"
 
     def action_open_assembly(self):
-        return self._action_window(
-            "assembly.assembly",
-            self.env._("Assembly"),
-            "form",
-            extra={"res_id": self.assembly_id.id},
-        )
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Assembly"),
+            "res_model": "assembly.assembly",
+            "res_id": self.assembly_id.id,
+            "view_mode": "form",
+            "target": "current",
+        }

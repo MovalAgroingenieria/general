@@ -29,9 +29,9 @@
             class="page o_assembly_ballot_print small"
             t-att-style="'page-break-after: always;' if not o_last else ''"
         >
-            <h4 class="text-center mb-2 text-uppercase fw-bold o_assembly_ballot_print_title">Voting ballot</h4>
             <t t-set="asm" t-value="assembly"/>
-            <t t-call="base_assembly.report_assembly_asm_meta_block"/>
+            <t t-call="base_assembly.report_assembly_v10_header"/>
+            <h5 class="text-center mb-2 text-uppercase fw-bold o_assembly_ballot_print_title">Voting ballot</h5>
             <p class="small text-muted mb-2 o_assembly_ballot_print_instructions">
                 Mark choices clearly. Weighted items apply to your voting power. Manual agenda lines show recorded totals for information only.
             </p>

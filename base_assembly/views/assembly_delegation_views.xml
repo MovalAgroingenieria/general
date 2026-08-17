@@ -5,7 +5,7 @@
         <field name="model">assembly.delegation</field>
         <field name="priority" eval="10" />
         <field name="arch" type="xml">
-            <list editable="bottom" default_order="partner_id" decoration-success="delegation_vote_transfer_state == 'active'" decoration-warning="delegation_vote_transfer_state == 'waiting_delegate'">
+            <list default_order="partner_id" decoration-success="delegation_vote_transfer_state == 'active'" decoration-warning="delegation_vote_transfer_state == 'waiting_delegate'">
                 <field name="assembly_id"/>
                 <field name="partner_id" string="Delegator"/>
                 <field name="delegate_partner_id" string="Delegate"/>
@@ -39,12 +39,14 @@
                     </div>
                     <div class="oe_title">
                         <label for="partner_id" string="Delegator:"/>
-                        <h1><field name="partner_id" options="{'no_create': True}" style="margin-top:5px;"/></h1>
+                        <field name="allowed_delegator_partner_ids" invisible="1"/>
+                        <h1><field name="partner_id" options="{'no_create': True}" style="margin-top:5px;" domain="[('id', 'in', allowed_delegator_partner_ids)]"/></h1>
                     </div>
-                    <group>
+                    <group readonly="assembly_id.assembly_state == 'closed'">
                         <group string="Delegation">
-                            <field name="assembly_id"/>
-                            <field name="delegate_partner_id" string="Delegate" options="{'no_create': True}"/>
+                            <field name="assembly_id" readonly="context.get('default_assembly_id')"/>
+                            <field name="allowed_delegate_partner_ids" invisible="1"/>
+                            <field name="delegate_partner_id" string="Delegate" options="{'no_create': True}" domain="[('id', 'in', allowed_delegate_partner_ids)]"/>
                             <field name="vote_type_ids" widget="many2many_tags"/>
                             <field name="date_delegation"/>
                         </group>

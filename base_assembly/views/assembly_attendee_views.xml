@@ -20,13 +20,11 @@
         <field name="arch" type="xml">
             <form string="Attendee">
                 <header>
-                    <button name="action_confirm" string="Mark Present" type="object" class="btn-success" title="Set attendance to Attended (confirmed present): member actually attended; counts for quorum and voting." invisible="assembly_id.assembly_state == 'closed' or attendee_state == 'confirmed'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_mark_absent" string="Mark Absent" type="object" class="btn-outline-secondary" title="Set attendance to Did not attend (absent): excluded from quorum; delegations received by this person stay inactive until attendance is confirmed." invisible="assembly_id.assembly_state == 'closed' or attendee_state != 'confirmed'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_print_ballot" string="Print ballot" type="object" class="btn-secondary" title="Member ballot PDF (per attendee, includes voting power and agenda)." groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_open_attendance_url" string="Open attendance link" type="object" class="btn-secondary" title="Open the tracked short URL for this member's attendance flow (opens counted)." invisible="not assembly_id.include_qr_code" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_show_attendance_qr" string="Show QR" type="object" class="btn-secondary" title="Show the QR code for this member's tracked attendance URL." invisible="not assembly_id.include_qr_code" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_confirm" string="Mark Present" type="object" class="btn-success" title="Set attendance to Attended (confirmed present): member actually attended; counts for quorum and voting." invisible="assembly_state != 'in_session' or attendee_state == 'confirmed'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_mark_absent" string="Mark Absent" type="object" class="btn-outline-secondary" title="Set attendance to Did not attend (absent): excluded from quorum; delegations received by this person stay inactive until attendance is confirmed." invisible="assembly_state != 'in_session' or attendee_state != 'confirmed'" groups="base_assembly.assembly_group_manager"/>
                 </header>
                 <sheet>
+                    <field name="assembly_state" invisible="1"/>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_assembly" type="object" class="oe_stat_button" icon="fa-building-o" title="Assembly">
                             <div class="o_form_field o_stat_info">
@@ -42,9 +40,9 @@
                     </div>
                     <div class="oe_title">
                         <label for="partner_id" string="Member:"/>
-                        <h1><field name="partner_id" options="{'no_create': True}" style="margin-top:5px;"/></h1>
+                        <h1><field name="partner_id" options="{'no_create': True}" style="margin-top:5px;" readonly="1"/></h1>
                     </div>
-                    <group>
+                    <group readonly="1">
                         <group name="assembly_attendee_attendee_data" string="Attendee data">
                             <field name="assembly_id"/>
                             <field name="participant_partner_id"/>
@@ -63,10 +61,7 @@
                             <field name="total_votes" readonly="1"/>
                         </group>
                     </group>
-                    <group string="Attendance &amp; sign-in (tracked link)">
-                        <div class="alert alert-light py-2 px-3 small mb-2" role="status" colspan="2" invisible="not assembly_id.include_qr_code">
-                            Each member can have a <strong>tracked attendance URL</strong> (opens counted). Use <strong>Open attendance link</strong> or <strong>Show QR</strong> in the header, or open the assembly <strong>Links &amp; QR</strong> smart button to list all. Finalize presence with <strong>Mark Present</strong>.
-                        </div>
+                    <group string="Attendance &amp; sign-in (tracked link)" readonly="assembly_state != 'in_session'">
                         <field name="attendance_notes" placeholder="Notes for this attendance…" nolabel="1" colspan="2" invisible="not assembly_id.allow_attendance_notes"/>
                         <field
                             name="attendance_signature"
@@ -91,19 +86,19 @@
         <field name="priority" eval="10" />
         <field name="arch" type="xml">
             <list decoration-muted="attendee_state == 'registered'" decoration-success="attendee_state == 'confirmed'" decoration-danger="attendee_state == 'absent'">
-                <field name="assembly_id"/>
+                <field name="assembly_id" optional="hide"/>
+                <field name="assembly_state" column_invisible="1"/>
                 <field name="partner_id"/>
                 <field name="participant_partner_id"/>
                 <field name="partner_vat" string="TIN"/>
-                <field name="attendance_type"/>
+                <field name="attendance_type" optional="hide"/>
                 <field name="attendee_state" readonly="1" widget="badge"/>
-                <field name="date_register"/>
+                <field name="date_register" optional="hide"/>
                 <field name="total_votes" sum="Total votes"/>
                 <field name="attendance_notes" invisible="not assembly_id.allow_attendance_notes"/>
                 <field name="attendance_signature" string="Signature" widget="signature" optional="hide"/>
-                <button name="action_confirm" string="Mark Present" type="object" class="btn-success btn-sm" title="Set attendance to Attended (confirmed present): member actually attended; counts for quorum and voting." invisible="assembly_id.assembly_state == 'closed' or attendee_state == 'confirmed'" groups="base_assembly.assembly_group_manager"/>
-                <button name="action_mark_absent" string="Mark Absent" type="object" class="btn-outline-secondary btn-sm" title="Set attendance to Did not attend (absent): excluded from quorum; delegations to this person stay inactive until attended." invisible="assembly_id.assembly_state == 'closed' or attendee_state != 'confirmed'" groups="base_assembly.assembly_group_manager"/>
-                <button name="action_print_ballot" type="object" icon="fa-print" class="btn-light btn-sm" title="Print ballot (PDF) for this attendee" width="48" invisible="assembly_id.assembly_state == 'closed'" groups="base_assembly.assembly_group_manager"/>
+                <button name="action_confirm" string="Mark Present" type="object" class="btn-success btn-sm" title="Set attendance to Attended (confirmed present): member actually attended; counts for quorum and voting." invisible="assembly_state != 'in_session' or attendee_state == 'confirmed'" groups="base_assembly.assembly_group_manager"/>
+                <button name="action_mark_absent" string="Mark Absent" type="object" class="btn-outline-secondary btn-sm" title="Set attendance to Did not attend (absent): excluded from quorum; delegations to this person stay inactive until attended." invisible="assembly_state != 'in_session' or attendee_state != 'confirmed'" groups="base_assembly.assembly_group_manager"/>
             </list>
         </field>
     </record>
@@ -132,6 +127,25 @@
         </field>
     </record>
 
+    <record id="assembly_attendee_view_tree_summary" model="ir.ui.view">
+        <field name="name">assembly.attendee.list.summary</field>
+        <field name="model">assembly.attendee</field>
+        <field name="priority" eval="95" />
+        <field name="arch" type="xml">
+            <list string="Attendance summary" create="false" edit="false" delete="false" default_order="assembly_id desc, partner_id" decoration-muted="attendee_state == 'registered'" decoration-success="attendee_state == 'confirmed'" decoration-danger="attendee_state == 'absent'">
+                <field name="company_id" optional="hide" groups="base.group_multi_company"/>
+                <field name="assembly_id"/>
+                <field name="partner_id" string="Member"/>
+                <field name="participant_partner_id" string="Present as" optional="show"/>
+                <field name="partner_vat" string="TIN" optional="hide"/>
+                <field name="attendance_type" optional="show"/>
+                <field name="attendee_state" widget="badge"/>
+                <field name="date_register" optional="hide"/>
+                <field name="total_votes" sum="Total votes"/>
+            </list>
+        </field>
+    </record>
+
     <record id="assembly_attendee_view_tree_call_register" model="ir.ui.view">
         <field name="name">assembly.attendee.list.call.register</field>
         <field name="model">assembly.attendee</field>
@@ -140,6 +154,7 @@
             <list string="Call register" default_order="assembly_id desc, partner_id" multi_edit="1" decoration-muted="attendee_state == 'registered'" decoration-success="attendee_state == 'confirmed'" decoration-danger="attendee_state == 'absent'">
                 <field name="company_id" optional="show" groups="base.group_multi_company"/>
                 <field name="assembly_id"/>
+                <field name="assembly_state" column_invisible="1"/>
                 <field name="partner_id" string="Member"/>
                 <field name="participant_partner_id" string="Present as"/>
                 <field name="call_register_representation_agent" string="Representative" optional="show"/>
@@ -152,9 +167,8 @@
                 <field name="call_register_has_outbound_delegation" string="Out. deleg." optional="hide"/>
                 <field name="call_register_has_inbound_delegation" string="In. deleg." optional="hide"/>
                 <field name="call_register_has_representation" string="Representation" optional="hide"/>
-                <button name="action_confirm" string="Mark Present" type="object" class="btn-success btn-sm" title="Set attendance to Attended (confirmed present): member actually attended; counts for quorum and voting." invisible="assembly_id.assembly_state == 'closed' or attendee_state == 'confirmed'" groups="base_assembly.assembly_group_manager"/>
-                <button name="action_mark_absent" string="Mark Absent" type="object" class="btn-outline-secondary btn-sm" title="Set attendance to Did not attend (absent): excluded from quorum; delegations to this person stay inactive until attended." invisible="assembly_id.assembly_state == 'closed' or attendee_state != 'confirmed'" groups="base_assembly.assembly_group_manager"/>
-                <button name="action_print_ballot" type="object" icon="fa-print" class="btn-light btn-sm" title="Print ballot (PDF) for this attendee" width="48" invisible="assembly_id.assembly_state == 'closed'" groups="base_assembly.assembly_group_manager"/>
+                <button name="action_confirm" string="Mark Present" type="object" class="btn-success btn-sm" title="Set attendance to Attended (confirmed present): member actually attended; counts for quorum and voting." invisible="assembly_state != 'in_session' or attendee_state == 'confirmed'" groups="base_assembly.assembly_group_manager"/>
+                <button name="action_mark_absent" string="Mark Absent" type="object" class="btn-outline-secondary btn-sm" title="Set attendance to Did not attend (absent): excluded from quorum; delegations to this person stay inactive until attended." invisible="assembly_state != 'in_session' or attendee_state != 'confirmed'" groups="base_assembly.assembly_group_manager"/>
             </list>
         </field>
     </record>

@@ -23,9 +23,7 @@ def _preview_category_for_document_type(doc_type):
     return "convocation"
 
 
-class AssemblyDocumentPreviewWizard(
-    models.TransientModel
-):  # pylint: disable=no-wizard-in-models
+class AssemblyDocumentPreviewWizard(models.TransientModel):
     _name = "assembly.document.preview.wizard"
     _description = "Preview rendered assembly document HTML"
 

@@ -7,7 +7,7 @@ from odoo.osv import expression
 
 class ResPartner(models.Model):
     _name = "res.partner"
-    _inherit = ["res.partner", "assembly.mixin.window_action"]
+    _inherit = ["res.partner"]
 
     assembly_attendee_ids = fields.One2many(
         "assembly.attendee",
@@ -56,15 +56,15 @@ class ResPartner(models.Model):
                 [("assembly_id.active", "=", True)],
             ]
         )
-        return self._action_window(
-            "assembly.attendee",
-            self.env._("Assembly attendances"),
-            "list,form",
-            extra={
-                "domain": domain,
-                "context": {"default_partner_id": self.id},
-            },
-        )
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Assembly attendances"),
+            "res_model": "assembly.attendee",
+            "view_mode": "list,form",
+            "target": "current",
+            "domain": domain,
+            "context": {"default_partner_id": self.id},
+        }
 
     def action_open_assembly_delegations(self):
         domain = expression.AND(
@@ -73,12 +73,12 @@ class ResPartner(models.Model):
                 [("assembly_id.active", "=", True)],
             ]
         )
-        return self._action_window(
-            "assembly.delegation",
-            self.env._("Delegations (as delegator)"),
-            "list,form",
-            extra={
-                "domain": domain,
-                "context": {"default_partner_id": self.id},
-            },
-        )
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Delegations (as delegator)"),
+            "res_model": "assembly.delegation",
+            "view_mode": "list,form",
+            "target": "current",
+            "domain": domain,
+            "context": {"default_partner_id": self.id},
+        }

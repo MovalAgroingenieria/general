@@ -4,34 +4,78 @@
         <html lang="en">
             <head>
                 <meta charset="utf-8"/>
-                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
                 <title t-out="page_title"/>
                 <style type="text/css">
-                    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; max-width: 40rem; line-height: 1.45; color: #1f1f1f; }
-                    h1 { font-size: 1.35rem; margin-bottom: 1rem; }
+                    * { box-sizing: border-box; }
+                    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; padding: 1rem; background: #f6f6f7; color: #1f1f1f; line-height: 1.4; }
+                    .card { max-width: 34rem; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 1.25rem; }
+                    h1 { font-size: 1.25rem; margin: 0 0 1rem; }
                     dl { margin: 0; padding: 0; }
-                    dt { font-weight: 600; margin-top: 0.65rem; color: #444; }
-                    dd { margin: 0.15rem 0 0 0; }
-                    .actions { margin-top: 1.5rem; }
-                    a.btn { display: inline-block; padding: 0.65rem 1.1rem; background: #714b67; color: #fff !important; text-decoration: none; border-radius: 4px; font-weight: 500; }
-                    a.btn:hover { filter: brightness(1.05); }
-                    .hint { margin-top: 1.25rem; font-size: 0.9rem; color: #555; }
+                    dt { font-weight: 600; margin-top: 0.6rem; color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+                    dd { margin: 0.1rem 0 0; }
+                    dd.member { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+                    dd.vat { font-size: 1.3rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+                    .notice { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-weight: 600; }
+                    .notice-success { background: #e6f4ea; color: #1e7e34; }
+                    .notice-error { background: #fdecef; color: #8b2942; }
+                    .sig-wrap { margin-top: 1.25rem; }
+                    .sig-label { font-weight: 600; color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; }
+                    .sig-hint { font-size: 0.85rem; color: #777; margin: 0.15rem 0 0.4rem; }
+                    canvas.sig-pad { width: 100%; height: 180px; border: 2px dashed #c4c4c4; border-radius: 8px; background: #fff; touch-action: none; display: block; }
+                    img.sig-saved { width: 100%; max-height: 180px; object-fit: contain; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+                    .sig-clear { margin-top: 0.4rem; background: none; border: none; color: #714b67; text-decoration: underline; font-size: 0.9rem; cursor: pointer; padding: 0.2rem 0; }
+                    .actions { margin-top: 1.25rem; }
+                    .btn-present { display: block; width: 100%; font-size: 1.25rem; padding: 1rem; background: #28a745; color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+                    .btn-present:active { filter: brightness(0.95); }
+                    .present-badge { display: block; text-align: center; padding: 1rem; background: #e6f4ea; color: #1e7e34; border-radius: 10px; font-weight: 700; font-size: 1.2rem; }
+                    .actions-secondary { margin-top: 1rem; text-align: center; }
+                    a.btn-link { color: #714b67; text-decoration: underline; font-size: 0.9rem; }
+                    .hint { margin-top: 1.25rem; font-size: 0.8rem; color: #999; }
+                    @media (max-width: 480px) { body { padding: 0; background: #fff; } .card { padding: 1rem; border-radius: 0; box-shadow: none; } }
                 </style>
             </head>
             <body>
-                <h1 t-out="heading"/>
-                <dl>
-                    <dt t-out="label_assembly"/>
-                    <dd t-out="assembly_name"/>
-                    <dt t-out="label_member"/>
-                    <dd t-out="participant_name"/>
-                    <dt t-out="label_state"/>
-                    <dd t-out="assembly_state_label"/>
-                </dl>
-                <div class="actions">
-                    <a t-att-href="open_form_url" class="btn" t-out="open_form_label"/>
+                <div class="card">
+                    <h1 t-out="heading"/>
+                    <div t-if="notice_message" t-attf-class="notice notice-#{notice_type or 'success'}" t-out="notice_message"/>
+                    <dl>
+                        <dt t-out="label_member"/>
+                        <dd class="member" t-out="participant_name"/>
+                        <dt t-out="label_vat"/>
+                        <dd class="vat" t-out="partner_vat"/>
+                        <dt t-out="label_attendee_state"/>
+                        <dd t-out="attendee_state_label"/>
+                        <dt t-out="label_assembly"/>
+                        <dd t-out="assembly_name"/>
+                    </dl>
+                    <div t-if="already_present" class="actions" style="margin-bottom:0.75rem;">
+                        <span class="present-badge">✓ <t t-out="attendee_state_label"/></span>
+                    </div>
+                    <div t-if="signature_img" class="sig-wrap">
+                        <div class="sig-label" t-out="label_signature_saved"/>
+                        <img t-att-src="image_data_uri(signature_img)" class="sig-saved"/>
+                    </div>
+                    <form t-if="show_action_form" id="attendance-form" method="post" t-att-action="mark_present_url">
+                        <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
+                        <input type="hidden" name="attendee_id" t-att-value="attendee_id"/>
+                        <input type="hidden" name="signature" id="sig-input"/>
+                        <div t-if="not signature_img" class="sig-wrap">
+                            <div class="sig-label" t-out="label_signature"/>
+                            <p class="sig-hint" t-out="signature_hint"/>
+                            <canvas id="sig-canvas" class="sig-pad"/>
+                            <button type="button" id="sig-clear" class="sig-clear" t-out="clear_label"/>
+                        </div>
+                        <div class="actions">
+                            <button type="submit" class="btn-present" t-out="submit_label"/>
+                        </div>
+                    </form>
+                    <div class="actions-secondary">
+                        <a t-att-href="open_form_url" class="btn-link" t-out="open_form_label"/>
+                    </div>
+                    <p class="hint" t-out="hint_direct"/>
                 </div>
-                <p class="hint" t-out="hint_direct"/>
+                <script type="text/javascript" src="/base_assembly/static/src/js/attendance_signature.js"/>
             </body>
         </html>
     </template>

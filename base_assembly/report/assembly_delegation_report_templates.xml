@@ -10,12 +10,9 @@
         <t t-call="web.html_container">
             <t t-call="web.external_layout">
                 <div class="page o_assembly_delegation_register">
-                    <h3 class="text-center mb-2"><strong>Vote delegation register</strong></h3>
-                    <p class="small text-muted text-center mb-3">
-                        Recorded vote delegations for this assembly (operational list). For a printable certificate per delegation row, use <strong>Vote delegation certificate</strong> on the delegation. Legal representation uses the representation reports, not this document.
-                    </p>
                     <t t-set="asm" t-value="o"/>
-                    <t t-call="base_assembly.report_assembly_asm_meta_block"/>
+                    <t t-call="base_assembly.report_assembly_v10_header"/>
+                    <h5 class="mb-2"><strong>Vote delegation register</strong></h5>
                     <table class="table table-sm table-bordered mt-2 o_assembly_delegation_register_table" t-if="o.delegation_ids">
                         <thead>
                             <tr>
@@ -52,12 +49,9 @@
             <t t-foreach="docs" t-as="o">
                 <t t-call="web.external_layout">
                     <div class="page o_assembly_delegation_certificate">
-                        <h3 class="text-center mb-2"><strong>Vote delegation certificate</strong></h3>
-                        <p class="small text-muted text-center mb-3">
-                            Delegation of voting rights only. This is not a power of attorney for legal representation at the assembly.
-                        </p>
                         <t t-set="asm" t-value="o.assembly_id"/>
-                        <t t-call="base_assembly.report_assembly_asm_meta_block"/>
+                        <t t-call="base_assembly.report_assembly_v10_header"/>
+                        <h5 class="text-center mb-2"><strong>Vote delegation certificate</strong></h5>
                         <section class="mb-3 o_assembly_delegation_certificate_parties">
                             <table class="table table-bordered table-sm">
                                 <tr>

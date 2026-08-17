@@ -1,7 +1,7 @@
 # 2026 Moval Agroingeniería
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-"""Open ``mail.compose.message`` with a pre-filled body from assembly AF render.
+"""Open ``mail.compose.message`` with a pre-filled body from an assembly render.
 
 The standard ``MailComposer._compute_body`` clears ``body`` when no template is
 selected; assembly actions pass rendered HTML via ``default_body`` and the context
@@ -11,7 +11,7 @@ flag ``assembly_use_rendered_mail_body``.
 from odoo import api, models
 
 
-class MailComposeMessage(models.TransientModel):  # pylint: disable=no-wizard-in-models
+class MailComposeMessage(models.TransientModel):
     _inherit = "mail.compose.message"
 
     @api.depends(

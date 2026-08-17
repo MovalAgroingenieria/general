@@ -5,9 +5,7 @@ from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
-class AssemblyCommunicationSendWizard(
-    models.TransientModel
-):  # pylint: disable=no-wizard-in-models
+class AssemblyCommunicationSendWizard(models.TransientModel):
     _name = "assembly.communication.send.wizard"
     _description = "Send assembly outbound emails (one per recipient)"
 
@@ -264,44 +262,24 @@ class AssemblyCommunicationSendWizard(
             primary_kind=self.primary_message_kind,
             attachment_options=attach_opts,
         )
-        kind_label = {
-            "publication": self.env._("Publication / call"),
-            "ballot_intro": self.env._("Member ballot"),
-            "delegation": self.env._("Delegation"),
-        }.get(self.primary_message_kind, self.primary_message_kind)
-        doc_part = ", ".join(self._document_summary_labels()) or self.env._("none")
-        summary = self.env._(
-            "Outbound email batch: %(kind)s. Sent: %(sent)d, skipped (no email or "
-            "error): %(skip)d. Attachments included: %(docs)s.",
-            kind=kind_label,
+        message = self.env._(
+            "%(sent)d message(s) sent. %(skip)d skipped.",
             sent=sent,
             skip=skipped,
-            docs=doc_part,
         )
         if errors:
-            detail = "; ".join(
-                self.env._("Partner %(pid)s: %(err)s", pid=pid, err=err)
-                for pid, err in errors[:10]
+            message = self.env._(
+                "%(message)s %(n)d error(s).",
+                message=message,
+                n=len(errors),
             )
-            summary = self.env._(
-                "%(summary)s Issues: %(detail)s", summary=summary, detail=detail
-            )
-        assembly.sudo().message_post(
-            body=summary,
-            message_type="comment",
-            subtype_xmlid="mail.mt_note",
-        )
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
             "params": {
                 "title": self.env._("Communications sent"),
-                "message": self.env._(
-                    "%(sent)d message(s) queued or sent. %(skip)d skipped.",
-                    sent=sent,
-                    skip=skipped,
-                ),
-                "type": "success",
-                "sticky": False,
+                "message": message,
+                "type": "warning" if errors else "success",
+                "sticky": bool(errors),
             },
         }

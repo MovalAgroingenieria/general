@@ -285,7 +285,7 @@ class AssemblyVotingLine(models.Model):
     def create(self, vals_list):
         vids = {v.get("voting_id") for v in vals_list if v.get("voting_id")}
         if vids:
-            self.env["assembly.voting"].browse(list(vids)).exists().mapped(
+            self.env["assembly.voting"].browse(vids).mapped(
                 "assembly_id"
             )._assembly_ensure_not_closed_for_related_changes()
         self._apply_audit_defaults_to_voting_line_create_vals(vals_list)

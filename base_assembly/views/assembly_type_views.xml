@@ -1,66 +1,100 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
+
     <record id="assembly_type_view_tree" model="ir.ui.view">
         <field name="name">assembly.type.tree</field>
         <field name="model">assembly.type</field>
         <field name="arch" type="xml">
             <list decoration-muted="not active">
-                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
                 <field name="name"/>
-                <field name="code"/>
+                <field name="description"/>
                 <field name="vote_type_ids" widget="many2many_tags" options="{'no_create': True, 'no_open': True}"/>
             </list>
         </field>
     </record>
+
     <record id="assembly_type_view_form" model="ir.ui.view">
         <field name="name">assembly.type.form</field>
         <field name="model">assembly.type</field>
         <field name="arch" type="xml">
             <form string="Assembly type">
+                <header>
+                    <button name="toggle_active" type="object" string="Archive" invisible="not active"/>
+                    <button name="toggle_active" type="object" string="Unarchive" invisible="active"/>
+                </header>
                 <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <field name="company_id" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Ordinary General Assembly"/></h1>
+                    </div>
                     <group>
                         <group>
-                            <field name="company_id" groups="base.group_multi_company"/>
-                            <field name="name"/>
-                            <field name="code"/>
+                            <field name="description" placeholder="Description"/>
+                        </group>
+                        <group>
                             <field name="vote_type_ids" widget="many2many_tags" options="{'no_create': True, 'no_open': True}"/>
                         </group>
-                        <group>
-                            <field name="default_quorum_type"/>
-                            <field name="default_quorum_value"/>
-                            <field name="default_quorum_second_call_type"/>
-                            <field name="default_quorum_second_call_value"/>
-                            <field name="active"/>
-                        </group>
                     </group>
-                    <group string="Default address">
-                        <field name="default_street" autocomplete="chrome-off"/>
-                        <field name="default_country_id" autocomplete="off"/>
-                        <field name="default_state_id" domain="[('country_id', '=', default_country_id)]" autocomplete="off"/>
-                        <field name="default_zip" autocomplete="chrome-off"/>
-                        <field name="default_city_id" options="{'no_open': True, 'no_create': True}" autocomplete="off"/>
-                        <field name="default_city" autocomplete="chrome-off"/>
-                    </group>
-                    <group string="Default responsible persons">
-                        <field name="default_president_id"/>
-                        <field name="default_secretary_id"/>
-                    </group>
-                    <group string="Controls (flags)">
-                        <field name="require_vat"/>
-                        <field name="default_allow_attendance_notes"/>
-                        <field name="default_include_qr_code"/>
-                        <div class="alert alert-light py-2 px-3 small mb-0" colspan="2" role="status" invisible="not default_include_qr_code">
-                            New assemblies will show the <strong>Links &amp; QR</strong> smart button and per-attendee <strong>Open attendance link</strong> / <strong>Show QR</strong> when this default is on.
-                        </div>
-                    </group>
-                    <group string="Attendance (defaults for new assemblies)">
-                        <field name="default_attendance_require_partner_vat_confirm"/>
-                        <field name="default_attendance_partner_vat_format_strict"/>
-                    </group>
-                    <group>
-                        <field name="description" placeholder="Description"/>
-                        <field name="partner_domain" widget="domain" options="{'model': 'res.partner'}"/>
-                    </group>
+                    <notebook>
+                        <page string="Address" name="address">
+                            <group string="Default address">
+                                <field name="default_street" autocomplete="chrome-off"/>
+                                <field name="default_country_id" autocomplete="off"/>
+                                <field name="default_state_id" domain="[('country_id', '=', default_country_id)]" autocomplete="off"/>
+                                <field name="default_zip" autocomplete="chrome-off"/>
+                                <field name="default_city_id" options="{'no_open': True, 'no_create': True}" autocomplete="off"/>
+                                <field name="default_city" autocomplete="chrome-off"/>
+                            </group>
+                            <group string="Default responsible persons">
+                                <field name="default_president_id"/>
+                                <field name="default_secretary_id"/>
+                            </group>
+                        </page>
+                        <page string="Configuration" name="config">
+                            <group string="Controls (flags)">
+                                <field name="default_allow_attendance_notes"/>
+                                <field name="default_include_qr_code"/>
+                                <div class="alert alert-light py-2 px-3 small mb-0" colspan="2" role="status" invisible="not default_include_qr_code">
+                                    New assemblies will show the <strong>Links &amp; QR</strong> smart button and per-attendee <strong>Open attendance link</strong> / <strong>Show QR</strong> when this default is on.
+                                </div>
+                            </group>
+                            <group string="Attendance (defaults for new assemblies)">
+                                <field name="default_attendance_require_partner_vat_confirm"/>
+                                <field name="default_attendance_partner_vat_format_strict"/>
+                            </group>
+                            <group string="Convocable partners">
+                                <field name="partner_domain" widget="domain" options="{'model': 'res.partner'}" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+                        <page string="Convocation text" name="text_publication">
+                            <div class="alert alert-info mb-2 py-2 px-3 small" role="status">
+                                Default document texts are copied (with translations) to new assemblies of this type. Support placeholders like <code>{{ object.name }}</code>.
+                            </div>
+                            <field name="default_publication_text" nolabel="1"/>
+                        </page>
+                        <page string="Delegation document" name="text_delegation_document">
+                            <field name="default_delegation_document_text" nolabel="1"/>
+                        </page>
+                        <page string="Delegation footer" name="text_delegation_footer">
+                            <field name="default_delegation_footer_text" nolabel="1"/>
+                        </page>
+                        <page string="Representation document" name="text_representation_document">
+                            <field name="default_representation_document_text" nolabel="1"/>
+                        </page>
+                        <page string="Ballot introduction" name="text_ballot_intro">
+                            <field name="default_ballot_intro_text" nolabel="1"/>
+                        </page>
+                        <page string="Nominative ballot introduction" name="text_ballot_nominative_intro">
+                            <field name="default_ballot_nominative_intro_text" nolabel="1"/>
+                        </page>
+                        <page string="Final text" name="text_final">
+                            <field name="default_final_text" nolabel="1"/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

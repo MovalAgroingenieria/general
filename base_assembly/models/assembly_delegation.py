@@ -3,8 +3,6 @@
 # Large delegation + vote-recompute surface kept in one module for cohesion.
 # pylint: disable=too-many-lines
 
-import logging
-import re
 from collections import defaultdict, deque
 
 from odoo import api, fields, models
@@ -12,16 +10,24 @@ from odoo.exceptions import ValidationError
 
 from .assembly_mixin import assembly_safe_report_filename
 
-_logger = logging.getLogger(__name__)
-
 
 class AssemblyDelegation(models.Model):
     """Vote delegation between assembly attendees."""
 
     _name = "assembly.delegation"
-    _inherit = ["assembly.mixin.open.assembly"]
     _description = "Vote delegation"
     _order = "assembly_id, partner_id"
+
+    def action_open_assembly(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Assembly"),
+            "res_model": "assembly.assembly",
+            "res_id": self.assembly_id.id,
+            "view_mode": "form",
+            "target": "current",
+        }
 
     def _get_report_base_filename(self):
         self.ensure_one()
@@ -75,6 +81,21 @@ class AssemblyDelegation(models.Model):
             "the covered types becomes active when they are recorded as Attended "
             "(confirmed present); until then the delegation is waiting."
         ),
+    )
+    allowed_delegate_partner_ids = fields.Many2many(
+        "res.partner",
+        string="Allowed delegates",
+        compute="_compute_allowed_delegate_partner_ids",
+        help="Assembly attendees eligible to receive delegated votes.",
+    )
+    allowed_delegator_partner_ids = fields.Many2many(
+        "res.partner",
+        "assembly_delegation_allowed_delegator_rel",
+        "delegation_id",
+        "delegator_partner_id",
+        string="Allowed delegators",
+        compute="_compute_allowed_delegator_partner_ids",
+        help="Partners convocable to the assembly.",
     )
     vote_type_ids = fields.Many2many(
         "vote.type",
@@ -886,6 +907,40 @@ class AssemblyDelegation(models.Model):
         )
         self.env["assembly.attendee"].recompute_votes(attendees)
 
+    @api.depends("assembly_id", "assembly_id.attendee_ids.partner_id")
+    def _compute_allowed_delegate_partner_ids(self):
+        for record in self:
+            record.allowed_delegate_partner_ids = (
+                record.assembly_id.attendee_ids.mapped("partner_id")
+            )
+
+    @api.depends("assembly_id")
+    def _compute_allowed_delegator_partner_ids(self):
+        partner_model = self.env["res.partner"]
+        for record in self:
+            if record.assembly_id:
+                record.allowed_delegator_partner_ids = partner_model.search(
+                    record.assembly_id._get_partner_domain()
+                )
+            else:
+                record.allowed_delegator_partner_ids = partner_model.browse()
+
+    @api.constrains("assembly_id", "partner_id")
+    def _check_delegator_is_convocable(self):
+        for record in self:
+            if not record.assembly_id or not record.partner_id:
+                continue
+            convocable = self.env["res.partner"].search(
+                record.assembly_id._get_partner_domain()
+            )
+            if record.partner_id not in convocable:
+                raise ValidationError(
+                    self.env._(
+                        "The delegator must be included in the convocable "
+                        "partners of the assembly."
+                    )
+                )
+
     @api.depends(
         "partner_id",
         "delegate_partner_id",
@@ -948,135 +1003,15 @@ class AssemblyDelegation(models.Model):
                     lines_in.mapped("delegated_in_votes")
                 )
 
-    @api.model
-    def _assembly_cleanup_delegation_state_in_views(self):
-        ir_ui_view = self.env["ir.ui.view"].sudo()
-        candidates = ir_ui_view.search(
-            [
-                ("arch_db", "ilike", "delegation_state"),
-                ("type", "not in", ("qweb",)),
-            ]
-        )
-        field_attr_re = re.compile(r"""(?m)\bname\s*=\s*(['"])delegation_state\1""")
-        replacements = (
-            (
-                "delegation_state == 'confirmed'",
-                "delegation_vote_transfer_state == 'active'",
-            ),
-            (
-                'delegation_state == "confirmed"',
-                "delegation_vote_transfer_state == 'active'",
-            ),
-            (
-                "delegation_state == 'draft'",
-                "delegation_vote_transfer_state == 'waiting_delegate'",
-            ),
-            (
-                'delegation_state == "draft"',
-                "delegation_vote_transfer_state == 'waiting_delegate'",
-            ),
-            (
-                "delegation_state == 'revoked'",
-                "delegation_vote_transfer_state == 'waiting_delegate'",
-            ),
-            (
-                'delegation_state == "revoked"',
-                "delegation_vote_transfer_state == 'waiting_delegate'",
-            ),
-            (
-                "'delegation_state', '=', 'confirmed'",
-                "'delegation_vote_transfer_state', '=', 'active'",
-            ),
-            (
-                "'delegation_state', '=', 'draft'",
-                "'delegation_vote_transfer_state', '=', 'waiting_delegate'",
-            ),
-            (
-                "'delegation_state', '=', 'revoked'",
-                "'delegation_vote_transfer_state', '=', 'waiting_delegate'",
-            ),
-            (
-                '"delegation_state", "=", "confirmed"',
-                '"delegation_vote_transfer_state", "=", "active"',
-            ),
-            (
-                '"delegation_state", "=", "draft"',
-                '"delegation_vote_transfer_state", "=", "waiting_delegate"',
-            ),
-            (
-                '"delegation_state", "=", "revoked"',
-                '"delegation_vote_transfer_state", "=", "waiting_delegate"',
-            ),
-            (
-                "group_by': 'delegation_state'",
-                "group_by': 'delegation_vote_transfer_state'",
-            ),
-            (
-                'group_by": "delegation_state"',
-                'group_by": "delegation_vote_transfer_state"',
-            ),
-            (
-                "default_delegation_state",
-                "default_delegation_vote_transfer_state",
-            ),
-        )
-        for view in candidates:
-            arch = view.arch_db
-            if not arch or "delegation_state" not in arch:
-                continue
-            new_arch = field_attr_re.sub(
-                r"name=\1delegation_vote_transfer_state\1",
-                arch,
-            )
-            for old, new in replacements:
-                new_arch = new_arch.replace(old, new)
-            if new_arch == arch:
-                continue
-            if "delegation_state" in new_arch:
-                _logger.warning(
-                    "base_assembly: view id=%s model=%s type=%s still contains "
-                    "delegation_state; fix manually or in Studio",
-                    view.id,
-                    view.model,
-                    view.type,
-                )
-                continue
-            try:
-                view.write({"arch_db": new_arch})
-            except Exception as exc:  # pylint: disable=broad-exception-caught
-                _logger.warning(
-                    "base_assembly: could not write cleaned view id=%s: %s",
-                    view.id,
-                    exc,
-                )
-                continue
-            _logger.info(
-                "base_assembly: updated view id=%s (%s) delegation_state references",
-                view.id,
-                view.name,
-            )
-        return True
-
-    def _register_hook(self):
-        super()._register_hook()
-        try:
-            self._assembly_cleanup_delegation_state_in_views()
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            _logger.warning(
-                "base_assembly: delegation view cleanup at registry init failed: %s",
-                exc,
-            )
-
     @api.model_create_multi
     def create(self, vals_list):
         if not vals_list:
             return self.browse()
-        self.check_access("create")
         asm_ids = {v.get("assembly_id") for v in vals_list if v.get("assembly_id")}
         if asm_ids:
             self.env["assembly.assembly"].browse(
-                list(asm_ids)
-            ).exists()._assembly_ensure_not_closed_for_related_changes()
+                asm_ids
+            )._assembly_ensure_not_closed_for_related_changes()
         for vals in vals_list:
             self._delegation_validate_create_vals(vals)
         delegations = super().create(vals_list)
@@ -1087,8 +1022,6 @@ class AssemblyDelegation(models.Model):
         vals = dict(vals)
         if self:
             self.mapped("assembly_id")._assembly_ensure_not_closed_for_related_changes()
-            self.check_access("write")
-            self.check_field_access_rights("write", list(vals))
         prev_endpoint_partners_by_id = None
         if self and ("partner_id" in vals or "delegate_partner_id" in vals):
             prev_endpoint_partners_by_id = {

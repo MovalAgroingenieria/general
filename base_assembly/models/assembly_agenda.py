@@ -101,7 +101,7 @@ class AssemblyAgenda(models.Model):
             "per-attendee votes are not recorded."
         ),
     )
-    manual_yes = fields.Integer(
+    manual_yes = fields.Float(
         string="Yes (total votes)",
         default=0,
         help=(
@@ -109,7 +109,7 @@ class AssemblyAgenda(models.Model):
             "Only aggregate totals are stored; votes are not recorded per attendee."
         ),
     )
-    manual_no = fields.Integer(
+    manual_no = fields.Float(
         string="No (total votes)",
         default=0,
         help=(
@@ -117,7 +117,7 @@ class AssemblyAgenda(models.Model):
             "Only aggregate totals are stored; votes are not recorded per attendee."
         ),
     )
-    manual_abstain = fields.Integer(
+    manual_abstain = fields.Float(
         string="Abstention (total votes)",
         default=0,
         help=(
@@ -125,7 +125,7 @@ class AssemblyAgenda(models.Model):
             "Only aggregate totals are stored; votes are not recorded per attendee."
         ),
     )
-    manual_count_blank = fields.Integer(
+    manual_count_blank = fields.Float(
         string="Blank (total votes)",
         default=0,
         help=(
@@ -162,6 +162,7 @@ class AssemblyAgenda(models.Model):
             ("pending", "Pending"),
             ("in_progress", "In progress"),
             ("voted", "Voted"),
+            ("addressed", "Addressed"),
             ("skipped", "Skipped"),
         ],
         string="State",
@@ -176,7 +177,7 @@ class AssemblyAgenda(models.Model):
         string="Option count",
         compute="_compute_manual_multi_ux_metrics",
     )
-    manual_multi_votes_sum = fields.Integer(
+    manual_multi_votes_sum = fields.Float(
         string="Sum of option votes",
         compute="_compute_manual_multi_ux_metrics",
     )
@@ -463,14 +464,22 @@ class AssemblyAgenda(models.Model):
         "agenda_vote_mode",
         "option_ids",
     )
-    def _check_manual_expected_total_sum(self):
+    def _check_manual_counts_non_negative(self):
         for record in self:
             if record.agenda_vote_mode not in (
                 _AGENDA_VOTE_MODE_MANUAL_YES_NO,
                 _AGENDA_VOTE_MODE_MANUAL_MULTI,
             ):
                 continue
-            record._validate_manual_expected_total_for_mode()
+            for f in _MANUAL_COUNT_FIELDS:
+                if getattr(record, f) < 0:
+                    raise ValidationError(
+                        self.env._("Manual vote counts cannot be negative.")
+                    )
+            if any(o.manual_vote_count < 0 for o in record.option_ids):
+                raise ValidationError(
+                    self.env._("Manual vote counts cannot be negative.")
+                )
 
     def _validate_manual_expected_total_for_mode(self):
         self.ensure_one()
@@ -755,6 +764,22 @@ class AssemblyAgenda(models.Model):
         self.ensure_one()
         self.write({"agenda_state": "skipped"})
 
+    def action_mark_addressed(self):
+        """Close a no-vote agenda item as addressed (discussed, no ballot)."""
+        for record in self:
+            if record.agenda_vote_mode != _AGENDA_VOTE_MODE_NO_VOTE:
+                raise UserError(
+                    self.env._("Only no-vote agenda items can be marked as addressed.")
+                )
+            if record.agenda_state not in ("pending", "in_progress"):
+                raise UserError(
+                    self.env._(
+                        "Only pending or in-progress items can be marked as "
+                        "addressed."
+                    )
+                )
+            record.write({"agenda_state": "addressed"})
+
     def action_session_safe_skip(self):
         for record in self:
             open_v = record.voting_ids.filtered(lambda v: v.voting_state == "open")
@@ -816,10 +841,29 @@ class AssemblyAgenda(models.Model):
             action["views"] = [(view.id, "form")]
         return action
 
+    def _action_open_live_voting_screen_no_vote(self):
+        self.ensure_one()
+        view = self.env.ref(
+            "base_assembly.assembly_agenda_view_form_session_manual",
+            raise_if_not_found=False,
+        )
+        action = {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Agenda item (session)"),
+            "res_model": "assembly.agenda",
+            "res_id": self.id,
+            "view_mode": "form",
+            "target": "current",
+            "context": dict(self.env.context, form_view_initial_mode="edit"),
+        }
+        if view:
+            action["views"] = [(view.id, "form")]
+        return action
+
     def action_open_live_voting_screen(self):
         self.ensure_one()
         if self.agenda_vote_mode == _AGENDA_VOTE_MODE_NO_VOTE:
-            raise UserError(self.env._("This agenda item does not include a vote."))
+            return self._action_open_live_voting_screen_no_vote()
         if self.agenda_state == "skipped":
             raise UserError(self.env._("This agenda item was skipped."))
         if self.agenda_vote_mode == _AGENDA_VOTE_MODE_WEIGHTED:
@@ -891,8 +935,6 @@ class AssemblyAgenda(models.Model):
             "assembly.voting",
             self.env._("Votings"),
             "list,kanban,graph,pivot,form",
-            extra={
-                "domain": [("agenda_id", "=", self.id)],
-                "context": {"default_agenda_id": self.id},
-            },
+            domain=[("agenda_id", "=", self.id)],
+            context={"default_agenda_id": self.id},
         )

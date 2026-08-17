@@ -3,10 +3,10 @@
 # pylint: disable=too-many-lines
 
 import math
-import re
-from html import unescape as html_unescape
+from datetime import datetime, time, timedelta
 
-from markupsafe import Markup, escape
+import pytz
+from markupsafe import Markup
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
@@ -19,15 +19,14 @@ from .assembly_mixin import assembly_safe_report_filename
 _DOMAIN_OPERATORS = frozenset(("&", "|", "!"))
 
 _ASSEMBLY_STATE_KEYS = frozenset(
-    {"draft", "announced", "open", "in_session", "closed", "cancelled"}
+    {"draft", "announced", "in_session", "closed", "cancelled"}
 )
 
 # Forward lifecycle (one step at a time).
 _ASSEMBLY_SEQUENTIAL_TRANSITIONS = frozenset(
     {
         ("draft", "announced"),
-        ("announced", "open"),
-        ("open", "in_session"),
+        ("announced", "in_session"),
         ("in_session", "closed"),
     }
 )
@@ -39,7 +38,7 @@ _ASSEMBLY_ALLOWED_STATE_TRANSITIONS = frozenset(
     | {("cancelled", "draft")}
 )
 
-_ASSEMBLY_STATES_ALLOW_GENERATE_ATTENDEES = frozenset(("draft", "announced", "open"))
+_ASSEMBLY_STATES_ALLOW_GENERATE_ATTENDEES = frozenset(("draft",))
 
 # Set on ``assembly.assembly`` writes that cascade to related models while the
 # assembly row still reads ``closed`` (e.g. cancel → close open votings).
@@ -71,56 +70,31 @@ def _eval_partner_domain_text(partner_domain_text):
     return out
 
 
-def _quorum_present_percentage(present, possible):
-    """Person-based attendance ratio (%) for stored ``quorum_percentage`` and rules."""
-    if possible <= 0:
-        return 0.0
-    return present / possible * 100.0
-
-
-# QWeb xml_ids (ir.ui.view) used when mail.template bodies render empty (e.g. after
-# Html sanitization stripped t-* directives on some DBs).
-_AF_QWEB_FALLBACK_XMLIDS = {
-    "publication": "base_assembly.assembly_af_publication_qweb",
-    "delegation_document": "base_assembly.assembly_af_delegation_document_qweb",
-    "delegation_footer": "base_assembly.assembly_af_delegation_footer_qweb",
-    "ballot_intro": "base_assembly.assembly_af_ballot_intro_qweb",
-    "ballot_nominative_intro": "base_assembly.assembly_af_ballot_nominative_intro_qweb",
-}
-
-_MAIL_SUFFIX_TO_COMPANY_FIELD = {
-    "publication": "assembly_default_publication_mail_template_id",
-    "delegation_document": "assembly_default_delegation_document_mail_template_id",
-    "delegation_footer": "assembly_default_delegation_footer_mail_template_id",
-    "ballot_intro": "assembly_default_ballot_intro_mail_template_id",
-    "ballot_nominative_intro": (
-        "assembly_default_ballot_nominative_intro_mail_template_id"
-    ),
-}
-
-_AF_SUFFIX_TO_COMPANY_VIEW_FIELD = {
-    "publication": "assembly_af_publication_fallback_qweb_id",
-    "delegation_document": "assembly_af_delegation_document_fallback_qweb_id",
-    "delegation_footer": "assembly_af_delegation_footer_fallback_qweb_id",
-    "ballot_intro": "assembly_af_ballot_intro_fallback_qweb_id",
-    "ballot_nominative_intro": "assembly_af_ballot_nominative_intro_fallback_qweb_id",
+# Maps assembly document text field -> assembly.type default field (copied on create).
+_TYPE_TEXT_DEFAULTS = {
+    "description": "default_publication_text",
+    "delegation_document_text": "default_delegation_document_text",
+    "delegation_footer_text": "default_delegation_footer_text",
+    "representation_document_text": "default_representation_document_text",
+    "ballot_intro_text": "default_ballot_intro_text",
+    "ballot_nominative_intro_text": "default_ballot_nominative_intro_text",
+    "final_text": "default_final_text",
 }
 
 
 class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
-    """Assembly lifecycle, quorum (stored), convocation.
+    """Assembly lifecycle and convocation.
 
-    **Quorum “present people” (single source):** distinct ``res.partner`` ids for the
-    assembly come only from :meth:`_get_present_partner_ids` (confirmed attendees plus
-    represented delegators in the convocation domain). Stored
-    ``total_present_attendees``, ``quorum_percentage``, and ``quorum_reached`` in
-    :meth:`_compute_quorum` are derived solely from that set and from the convocation
-    pool size (same domain as :meth:`_get_possible_attendees_count`, one search per
-    recompute when not cancelled) — never from vote weights or stored vote lines.
+    **Attendance “present people” (single source):** distinct ``res.partner`` ids
+    for the assembly come only from :meth:`_get_present_partner_ids` (confirmed
+    attendees plus represented delegators in the convocation domain). Stored
+    ``total_present_attendees`` in :meth:`_compute_attendee_counts` is derived solely
+    from that set; ``total_possible_attendees`` from the convocation pool size (same
+    domain as :meth:`_get_possible_attendees_count`).
     """
 
     _name = "assembly.assembly"
-    _inherit = ["mail.thread", "assembly.mixin.window_action"]
+    _inherit = ["mail.thread"]
     _description = "Assembly"
     _order = "date_first_call desc, id desc"
 
@@ -143,33 +117,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             self.display_name, default=self.env._("Assembly")
         )
 
-    assembly_id = fields.Many2one(
-        "assembly.assembly",
-        compute="_compute_report_filename_compat_fields",
-        store=False,
-    )
-    partner_id = fields.Many2one(
-        "res.partner",
-        string="Report filename contact",
-        compute="_compute_report_filename_compat_fields",
-        store=False,
-    )
-
-    @api.depends(
-        "name",
-        "president_id",
-        "president_id.partner_id",
-        "company_id",
-        "company_id.partner_id",
-    )
-    def _compute_report_filename_compat_fields(self):
-        for record in self:
-            record.assembly_id = record
-            if record.president_id and record.president_id.partner_id:
-                record.partner_id = record.president_id.partner_id
-            else:
-                record.partner_id = record.company_id.partner_id
-
     company_id = fields.Many2one(
         "res.company",
         required=True,
@@ -191,10 +138,13 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         ondelete="restrict",
         check_company=True,
     )
-    date_announcement = fields.Date(string="Announcement date")
+    date_announcement = fields.Date(
+        string="Notice date",
+        default=fields.Date.context_today,
+    )
     date_first_call = fields.Datetime(string="First call", index=True)
     date_second_call = fields.Datetime(string="Second call")
-    date_start = fields.Datetime(string="Session start")
+    date_start = fields.Date(string="Assembly date")
     date_end = fields.Datetime(string="Session end")
     location = fields.Char(
         help="Short venue label (e.g. room or building) for headers; use address "
@@ -224,45 +174,48 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         "res.users",
         ondelete="set null",
     )
-    description = fields.Html(string="Convocation text")
-    publication_mail_template_id = fields.Many2one(
-        "mail.template",
-        string="Publication template",
-        domain="[('model', '=', 'assembly.assembly')]",
-        help="Optional override. If empty, the standard publication template is used, "
-        "then the convocation HTML when the template body is empty.",
+    description = fields.Html(string="Convocation text", sanitize=False, translate=True)
+    delegation_document_text = fields.Html(
+        string="Delegation document text",
+        sanitize=False,
+        translate=True,
+        help="Delegation PDF introduction. Supports placeholders like "
+        "{{ object.name }}.",
     )
-    delegation_document_mail_template_id = fields.Many2one(
-        "mail.template",
-        string="Delegation document template",
-        domain="[('model', '=', 'assembly.assembly')]",
-        help="Optional override for the delegation PDF body. If empty, the standard "
-        "delegation template is used.",
+    delegation_footer_text = fields.Html(
+        string="Delegation footer text",
+        sanitize=False,
+        translate=True,
     )
-    delegation_footer_mail_template_id = fields.Many2one(
-        "mail.template",
-        string="Delegation footer template",
-        domain="[('model', '=', 'assembly.assembly')]",
-        help="Optional override for the delegation PDF footer. If empty, the standard "
-        "footer template is used.",
+    representation_document_text = fields.Html(
+        string="Representation document text",
+        sanitize=False,
+        translate=True,
+        help="Representation PDF introduction. Supports placeholders like "
+        "{{ object.name }}.",
     )
-    ballot_intro_mail_template_id = fields.Many2one(
-        "mail.template",
-        string="Ballot introduction template",
-        domain="[('model', '=', 'assembly.assembly')]",
-        help="Optional override for the assembly voting ballot introduction.",
+    notes = fields.Html(sanitize=False)
+    internal_notes = fields.Html(string="Internal notes", sanitize=False)
+    ballot_intro_text = fields.Html(
+        string="Ballot introduction text",
+        sanitize=False,
+        translate=True,
     )
-    ballot_nominative_intro_mail_template_id = fields.Many2one(
-        "mail.template",
-        string="Nominative ballot introduction template",
-        domain="[('model', '=', 'assembly.assembly')]",
-        help="Optional override for the nominative ballot introduction.",
+    ballot_nominative_intro_text = fields.Html(
+        string="Nominative ballot introduction text",
+        sanitize=False,
+        translate=True,
+    )
+    final_text = fields.Html(
+        string="Final text",
+        sanitize=False,
+        translate=True,
+        help="Closing paragraph printed after the agenda on the convocation.",
     )
     assembly_state = fields.Selection(
         [
             ("draft", "Draft"),
             ("announced", "Announced"),
-            ("open", "Registration open"),
             ("in_session", "In session"),
             ("closed", "Closed"),
             ("cancelled", "Cancelled"),
@@ -279,30 +232,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         "vote_type_id",
         string="Vote types",
         domain=[("active", "=", True)],
-    )
-    quorum_type = fields.Selection(
-        [("percentage", "Percentage"), ("fixed", "Fixed number")],
-        string="Quorum (1st call)",
-        default="percentage",
-    )
-    quorum_value = fields.Float(string="Quorum value (1st call)", default=50.0)
-    quorum_second_call_type = fields.Selection(
-        [
-            ("percentage", "Percentage"),
-            ("fixed", "Fixed number"),
-            ("any", "Any"),
-        ],
-        string="Quorum (2nd call)",
-        default="any",
-    )
-    quorum_second_call_value = fields.Float(
-        string="Quorum value (2nd call)", default=0.0
-    )
-    is_second_call = fields.Boolean(
-        string="Held in 2nd call",
-        default=False,
-        help="When set, quorum rules use the second-call type/value instead of the "
-        "first-call ones.",
     )
     allow_online_voting = fields.Boolean(
         string="Allow online voting",
@@ -379,20 +308,12 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     )
     total_possible_attendees = fields.Integer(
         string="Possible attendees",
-        compute="_compute_quorum",
+        compute="_compute_attendee_counts",
         store=True,
     )
     total_present_attendees = fields.Integer(
         string="Present attendees",
-        compute="_compute_quorum",
-        store=True,
-    )
-    quorum_reached = fields.Boolean(
-        compute="_compute_quorum",
-        store=True,
-    )
-    quorum_percentage = fields.Float(
-        compute="_compute_quorum",
+        compute="_compute_attendee_counts",
         store=True,
     )
     active = fields.Boolean(default=True, index=True)
@@ -415,10 +336,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     )
     mail_outbound_email_count = fields.Integer(
         string="Outgoing emails",
-        compute="_compute_mail_trace_counters",
-    )
-    assembly_communication_message_count = fields.Integer(
-        string="Thread messages",
         compute="_compute_mail_trace_counters",
     )
     attendee_tracked_link_count = fields.Integer(
@@ -505,7 +422,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     def _compute_mail_trace_counters(self):
         mail_mail = self.env["mail.mail"]
         for record in self:
-            record.assembly_communication_message_count = len(record.message_ids)
             record.mail_outbound_email_count = mail_mail.search_count(
                 [
                     ("model", "=", "assembly.assembly"),
@@ -585,19 +501,14 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         "delegation_ids.partner_id",
         "delegation_ids.delegate_partner_id",
         "delegation_ids.vote_type_ids",
-        "quorum_type",
-        "quorum_value",
-        "quorum_second_call_type",
-        "quorum_second_call_value",
-        "is_second_call",
     )
-    def _compute_quorum(self):
+    def _compute_attendee_counts(self):
         if self.ids:
             self.fetch(
                 ["attendee_ids", "delegation_ids", "partner_domain", "assembly_state"]
             )
-        # Quorum: DISTINCT people in convocation who are confirmed and/or represented
-        # by a quorum-effective delegation. Does not depend on ``partner.vote``,
+        # DISTINCT people in the convocation who are confirmed and/or represented by
+        # an effective vote delegation. Does not depend on ``partner.vote``,
         # ``assembly.attendee.vote``, vote types, or any vote totals (@api.depends
         # above must stay free of those models).
         for record in self:
@@ -610,18 +521,8 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                 present_partner_ids = record._get_present_partner_ids(
                     convocable_partner_ids=convocable
                 )
-            present = len(present_partner_ids)
             record.total_possible_attendees = possible
-            record.total_present_attendees = present
-            if record.assembly_state == "cancelled" or possible <= 0:
-                record.quorum_percentage = 0.0
-                record.quorum_reached = False
-            else:
-                pct = _quorum_present_percentage(present, possible)
-                record.quorum_percentage = pct
-                record.quorum_reached = record._is_quorum_reached(
-                    present_partner_ids, possible, quorum_percentage=pct
-                )
+            record.total_present_attendees = len(present_partner_ids)
 
     def _assembly_date_coherence_issue_messages(self):
         self.ensure_one()
@@ -631,23 +532,16 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                 msgs.append(
                     self.env._("Second call must be strictly after the first call.")
                 )
-        if self.date_announcement and self.date_first_call:
-            first_day = fields.Date.to_date(self.date_first_call)
-            if self.date_announcement > first_day:
+        if self.date_announcement and self.date_start:
+            if self.date_announcement > self.date_start:
                 msgs.append(
-                    self.env._(
-                        "Announcement date cannot be after the calendar day of "
-                        "the first call."
-                    )
-                )
-        if self.date_first_call and self.date_start:
-            if self.date_start < self.date_first_call:
-                msgs.append(
-                    self.env._("Session start cannot be before the first call.")
+                    self.env._("Notice date cannot be after the assembly date.")
                 )
         if self.date_start and self.date_end:
-            if self.date_end < self.date_start:
-                msgs.append(self.env._("Session end cannot be before session start."))
+            if fields.Date.to_date(self.date_end) < self.date_start:
+                msgs.append(
+                    self.env._("Session end cannot be before the assembly date.")
+                )
         return msgs
 
     @api.constrains(
@@ -683,6 +577,17 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             }
         }
 
+    @api.onchange("date_start")
+    def _onchange_date_start_sync_calls(self):
+        """Set first call at 00:00 and second call 30 min later (user adjusts)."""
+        if not self.date_start:
+            return
+        tz = pytz.timezone(self.env.context.get("tz") or self.env.user.tz or "UTC")
+        local_midnight = tz.localize(datetime.combine(self.date_start, time.min))
+        utc_dt = local_midnight.astimezone(pytz.utc).replace(tzinfo=None)
+        self.date_first_call = utc_dt
+        self.date_second_call = utc_dt + timedelta(minutes=30)
+
     @api.onchange("assembly_type_id")
     def _onchange_assembly_type_id(self):
         if self.assembly_type_id:
@@ -690,10 +595,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             if t.company_id:
                 self.company_id = t.company_id
             self.vote_type_ids = t.vote_type_ids
-            self.quorum_type = t.default_quorum_type
-            self.quorum_value = t.default_quorum_value
-            self.quorum_second_call_type = t.default_quorum_second_call_type
-            self.quorum_second_call_value = t.default_quorum_second_call_value
             self.partner_domain = t.partner_domain or "[]"
             self.street = t.default_street
             if t.default_city_id:
@@ -778,8 +679,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         """Whether ``vals[field_name]`` is absent or still the model field default.
 
         Web create often sends all columns with model defaults; then
-        :meth:`_apply_assembly_type_to_create_vals` must still copy the type
-        (AF §2.2).
+        :meth:`_apply_assembly_type_to_create_vals` must still copy the type.
         """
         if field_name not in vals:
             return True
@@ -866,7 +766,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     @api.model
     def _apply_assembly_type_to_create_vals(self, vals, atype):
-        """Copy template fields from ``assembly.type`` into create ``vals`` (AF §2.2).
+        """Copy template fields from ``assembly.type`` into create ``vals``.
 
         Fills gaps when keys are missing **or** still equal model defaults /
         empty, so browser creates (with ``default_*`` sent for every column)
@@ -877,18 +777,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             return
         if self._create_vals_vote_type_ids_unspecified_or_empty(vals):
             vals["vote_type_ids"] = [(6, 0, atype.vote_type_ids.ids)]
-        if self._create_vals_matches_assembly_field_default("quorum_type", vals):
-            vals["quorum_type"] = atype.default_quorum_type
-        if self._create_vals_matches_assembly_field_default("quorum_value", vals):
-            vals["quorum_value"] = atype.default_quorum_value
-        if self._create_vals_matches_assembly_field_default(
-            "quorum_second_call_type", vals
-        ):
-            vals["quorum_second_call_type"] = atype.default_quorum_second_call_type
-        if self._create_vals_matches_assembly_field_default(
-            "quorum_second_call_value", vals
-        ):
-            vals["quorum_second_call_value"] = atype.default_quorum_second_call_value
         if self._create_vals_partner_domain_unspecified_or_model_default(vals):
             vals["partner_domain"] = atype.partner_domain or "[]"
         self._apply_type_address_defaults(vals, atype)
@@ -1015,8 +903,40 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
     @api.model_create_multi
     def create(self, vals_list):
+        provided_texts = [
+            {f for f in _TYPE_TEXT_DEFAULTS if not is_html_empty(v.get(f))}
+            for v in vals_list
+        ]
         self._prepare_and_validate_assembly_create_vals_list(vals_list)
-        return super().create(vals_list)
+        assemblies = super().create(vals_list)
+        for assembly, provided in zip(assemblies, provided_texts):
+            assembly._copy_type_document_text_translations(provided)
+        return assemblies
+
+    def _copy_type_document_text_translations(self, provided_fields):
+        """Copy the assembly type document texts, keeping all translations.
+
+        Members may use different languages, so every installed-language value
+        from the type is copied to the assembly; documents rendered later for
+        each recipient then come out in that recipient's language. Fields the
+        user already filled in are left untouched.
+        """
+        self.ensure_one()
+        atype = self.assembly_type_id
+        if not atype:
+            return
+        # en_US is the source language and may be absent from get_installed().
+        langs = {code for code, __ in self.env["res.lang"].get_installed()} | {"en_US"}
+        for asm_field, type_field in _TYPE_TEXT_DEFAULTS.items():
+            if asm_field in provided_fields:
+                continue
+            translations = {}
+            for lang in langs:
+                value = atype.with_context(lang=lang)[type_field]
+                if value:
+                    translations[lang] = value
+            if translations:
+                self.update_field_translations(asm_field, translations)
 
     @api.model
     def _assembly_is_allowed_state_transition(self, old_state, new_state):
@@ -1095,12 +1015,12 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                     )
                 )
             not_done = self.agenda_ids.filtered(
-                lambda a: a.agenda_state not in ("voted", "skipped")
+                lambda a: a.agenda_state not in ("voted", "skipped", "addressed")
             )
             if not_done:
                 raise UserError(
                     self.env._(
-                        "All agenda items must be voted on or skipped "
+                        "All agenda items must be voted on, addressed or skipped "
                         "before closing the assembly."
                     )
                 )
@@ -1113,6 +1033,8 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             self._search_open_votings().with_context(
                 **{CTX_ASSEMBLY_INTERNAL_TRANSITION: True}
             ).write({"voting_state": "cancelled"})
+        if (old_state, new_state) == ("draft", "announced"):
+            self.action_generate_attendees()
         if (old_state, new_state) == ("cancelled", "draft"):
             self.attendee_ids.unlink()
             self._search_all_votings().unlink()
@@ -1132,15 +1054,11 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             record._check_transition_prerequisites(old_state, new_state)
             record._prepare_state_transition_before_write(old_state, new_state)
 
-    def _transition_assembly_state_via_write(self, new_state, extra_vals=None):
+    def _transition_assembly_state(self, new_state, extra_vals=None):
         self.ensure_one()
         vals = dict(extra_vals or ())
         vals["assembly_state"] = new_state
         return self.write(vals)
-
-    def _transition_assembly_state(self, new_state, extra_vals=None):
-        """Public lifecycle wrapper for ``_transition_assembly_state_via_write``."""
-        return self._transition_assembly_state_via_write(new_state, extra_vals)
 
     def _assembly_closed_write_allowed_vals(self, vals):
         """When ``assembly_state`` is ``closed``, only controlled transitions apply."""
@@ -1206,12 +1124,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                 if record.attendee_ids:
                     record.attendee_ids._sync_attendance_link_trackers()
         return res
-
-    def _get_active_quorum_rule(self):
-        self.ensure_one()
-        if self.is_second_call:
-            return self.quorum_second_call_type, self.quorum_second_call_value
-        return self.quorum_type, self.quorum_value
 
     def _get_possible_attendees_count(self):
         self.ensure_one()
@@ -1313,56 +1225,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         )
         return frozenset(confirmed | represented)
 
-    def _get_quorum_present_people_count(self):
-        """Headcount of distinct partners considered present for quorum.
-
-        Equivalent to ``len(self._get_present_partner_ids())``; use when you need only
-        the scalar (e.g. performance tests). Stored ``total_present_attendees`` uses
-        the same length in :meth:`_compute_quorum`.
-        """
-        self.ensure_one()
-        return len(self._get_present_partner_ids())
-
-    def _count_present_attendees(self):
-        """Alias of ``_get_quorum_present_people_count`` for explicit call sites."""
-        return self._get_quorum_present_people_count()
-
-    def _is_quorum_reached(self, present_partner_ids, possible, quorum_percentage=None):
-        """Whether the active quorum rule passes.
-
-        ``present_partner_ids`` must be the same frozenset as
-        :meth:`_get_present_partner_ids` for this record (callers pass it to avoid a
-        second recomputation of the set in :meth:`_compute_quorum`).
-        """
-        self.ensure_one()
-        if possible <= 0:
-            return False
-        present = len(present_partner_ids)
-        pct = (
-            quorum_percentage
-            if quorum_percentage is not None
-            else _quorum_present_percentage(present, possible)
-        )
-        qtype, qval = self._get_active_quorum_rule()
-        if qtype == "any":
-            return present > 0
-        if qtype == "percentage":
-            return pct >= qval
-        return present >= qval
-
-    def _session_start_ui_result(self, write_result):
-        self.ensure_one()
-        if self.quorum_reached:
-            return write_result
-        return {
-            "warning": {
-                "title": self.env._("Quorum not reached"),
-                "message": self.env._(
-                    "Quorum has not been reached. You may still start the session."
-                ),
-            },
-        }
-
     def _assembly_ensure_active_for_operational_views(self):
         if self.filtered(lambda a: not a.active):
             raise UserError(
@@ -1375,27 +1237,21 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     def _action_open_related(self, res_model, title):
         self.ensure_one()
         self._assembly_ensure_active_for_operational_views()
-        return self._action_window(
-            res_model,
-            title,
-            "list,form",
-            extra={
-                "domain": [("assembly_id", "=", self.id)],
-                "context": {"default_assembly_id": self.id},
-            },
-        )
+        return {
+            "type": "ir.actions.act_window",
+            "name": title,
+            "res_model": res_model,
+            "view_mode": "list,form",
+            "target": "current",
+            "domain": [("assembly_id", "=", self.id)],
+            "context": {"default_assembly_id": self.id},
+        }
 
     def action_announce(self):
         return self._transition_assembly_state("announced")
 
-    def action_open_registration(self):
-        return self._transition_assembly_state("open")
-
     def action_start_session(self):
-        res = self._transition_assembly_state(
-            "in_session", {"date_start": fields.Datetime.now()}
-        )
-        return self._session_start_ui_result(res)
+        return self._transition_assembly_state("in_session")
 
     def action_open_live_voting_dashboard(self):
         self.ensure_one()
@@ -1408,30 +1264,21 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                 )
             )
         agendas = self.agenda_ids.sorted(lambda a: (a.sequence, a.id))
+        if not agendas:
+            raise UserError(
+                self.env._(
+                    "No agenda item is ready for live voting. Open an item from "
+                    "the agenda list."
+                )
+            )
         for agenda in agendas:
             open_v = agenda.voting_ids.filtered(lambda v: v.voting_state == "open")
             if open_v:
                 v0 = open_v[0]
                 v0._ensure_roll_call_lines()
                 return v0.action_open_session_control()
-        for agenda in agendas:
-            if agenda.agenda_vote_mode == "weighted" and agenda.agenda_state in (
-                "pending",
-                "in_progress",
-            ):
-                return agenda.action_open_live_voting_screen()
-        for agenda in agendas:
-            if agenda.agenda_vote_mode in (
-                "manual_yes_no",
-                "manual_multi",
-            ) and agenda.agenda_state in ("pending", "in_progress"):
-                return agenda.action_open_live_voting_screen()
-        raise UserError(
-            self.env._(
-                "No agenda item is ready for live voting. Open an item from "
-                "the agenda list."
-            )
-        )
+        # Walk through every agenda item (including no-vote) from the first one.
+        return agendas[0].action_open_live_voting_screen()
 
     def action_close(self):
         return self._transition_assembly_state(
@@ -1439,10 +1286,10 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         )
 
     def action_cancel(self):
-        return self._transition_assembly_state("cancelled")
+        return self._transition_assembly_state("cancelled", {"date_end": False})
 
     def action_reopen(self):
-        return self._transition_assembly_state("draft")
+        return self._transition_assembly_state("draft", {"date_end": False})
 
     def action_reopen_from_closed(self):
         self.ensure_one()
@@ -1454,7 +1301,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             raise UserError(
                 self.env._("Only assembly managers can reopen a closed assembly.")
             )
-        self.check_access("write")
         self.message_post(
             body=self.env._("Assembly reopened from closed (session restored)."),
             message_type="notification",
@@ -1482,7 +1328,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         self.ensure_one()
         if self.assembly_state not in _ASSEMBLY_STATES_ALLOW_GENERATE_ATTENDEES:
             raise UserError(self.env._("Cannot generate attendees in current state."))
-        self.check_access("write")
         domain = expression.AND(
             [self._get_partner_domain(), [("assembly_excluded", "=", False)]]
         )
@@ -1501,7 +1346,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             self.env["assembly.attendee"].recompute_votes(self.attendee_ids)
 
     def action_recompute_attendee_votes(self):
-        """AF §6: Recompute stored vote lines for all attendees."""
+        """Recompute stored vote lines for all attendees."""
         self.ensure_one()
         self.env["assembly.assembly"]._assembly_raise_if_closed(self)
         if not self.attendee_ids:
@@ -1514,7 +1359,7 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
 
         Sum of stored ``assembly.attendee.vote`` ``attendee_vote_total`` for
         ``attendee_state=confirmed`` and ``vote_type_id in assembly.vote_type_ids``.
-        Used to validate manual yes/no counters (AF v2). Returns ``0.0`` when the
+        Used to validate manual yes/no counters. Returns ``0.0`` when the
         universe cannot be computed (no confirmed attendees or no vote types).
         """
         self.ensure_one()
@@ -1534,328 +1379,70 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
         )
         return float(sum(lines.mapped("attendee_vote_total")))
 
-    def _assembly_mail_template_xmlid(self, xmlid_suffix):
-        return self.env.ref(
-            "base_assembly.mail_template_assembly_%s_default" % xmlid_suffix,
-            raise_if_not_found=False,
-        )
+    def _render_assembly_doc_html(self, field_name):
+        """Render a per-assembly document text with inline_template placeholders.
 
-    def _assembly_company_default_mail_template(self, xmlid_suffix):
-        self.ensure_one()
-        field_name = _MAIL_SUFFIX_TO_COMPANY_FIELD.get(xmlid_suffix)
-        if not field_name or not self.company_id:
-            return self.env["mail.template"]
-        return getattr(self.company_id, field_name, self.env["mail.template"])
-
-    def _assembly_company_af_fallback_view(self, default_xmlid_suffix):
-        self.ensure_one()
-        field_name = _AF_SUFFIX_TO_COMPANY_VIEW_FIELD.get(default_xmlid_suffix)
-        if not field_name or not self.company_id:
-            return self.env["ir.ui.view"]
-        return getattr(self.company_id, field_name, self.env["ir.ui.view"])
-
-    @staticmethod
-    def _assembly_markup_from_render_result(fragment):
-        """Normalize renderer output to ``markupsafe.Markup`` (never None)."""
-        if fragment is None:
-            return Markup("")
-        if isinstance(fragment, Markup):
-            return fragment
-        return Markup(str(fragment))
-
-    @api.model
-    def _assembly_sanitize_mail_qweb_body_html(self, html):
-        """Fix broken QWeb in stored mail bodies (renamed variables)."""
-        if not html:
-            return ""
-        s = html_unescape(str(html))
-        if "objeto" not in s.lower():
-            return s
-        for old, new in (
-            ("objeto.descripci&#xF3;n", "object.description"),
-            ("objeto.descripción", "object.description"),
-            ("objeto.ubicaci&#xF3;n", "object.location"),
-            ("objeto.ubicación", "object.location"),
-            ("objeto.fecha_primera_llamada", "object.date_first_call"),
-            ("objeto.nombre", "object.name"),
-        ):
-            s = re.sub(re.escape(old), new, s, flags=re.IGNORECASE)
-        s = re.sub(r"\bobjeto\.", "object.", s, flags=re.IGNORECASE)
-        return s
-
-    def _render_mail_template_body_html(self, template, res_id):
-        """Render ``mail.template`` ``body_html`` using QWeb (with fixup)."""
-        if not template:
-            return ""
-        body = self._assembly_sanitize_mail_qweb_body_html(
-            str(template.body_html or "")
-        )
-        if not body.strip():
-            return ""
-        field = template._fields["body_html"]
-        field_options = dict(getattr(field, "render_options", None) or {})
-        field_options["post_process"] = False
-        engine = getattr(field, "render_engine", "qweb")
-        out = template.sudo()._render_template(
-            body,
-            template.model,
-            [res_id],
-            engine=engine,
-            options=field_options,
-        )
-        html = out.get(res_id)
-        return str(html) if html is not None else ""
-
-    def _render_assembly_af_qweb_fallback(self, default_xmlid_suffix):
-        """Render bundled AF QWeb views when mail templates are empty."""
-        self.ensure_one()
-        company_view = self._assembly_company_af_fallback_view(default_xmlid_suffix)
-        xmlid = _AF_QWEB_FALLBACK_XMLIDS.get(default_xmlid_suffix)
-        template_ref = company_view.id if company_view else (xmlid or None)
-        if not template_ref:
-            return Markup("")
-        qweb = self.env["ir.qweb"]
-        values = {"object": self}
-        for minimal in (True, False):
-            try:
-                html = qweb._render(
-                    template_ref,
-                    values,
-                    minimal_qcontext=minimal,
-                )
-            except Exception:  # pylint: disable=broad-exception-caught
-                continue
-            s = str(html) if html is not None else ""
-            if s and not is_html_empty(s):
-                return html if isinstance(html, Markup) else Markup(s)
-        return Markup("")
-
-    def _assembly_render_minimal_title_html(self):
-        """Last-resort HTML: assembly title only (always non-empty text)."""
-        self.ensure_one()
-        label = (self.name or "").strip() or self.env._("Assembly #%s", self.id)
-        return Markup(
-            '<section class="o_assembly_render_minimal">'
-            '<h2 class="o_assembly_render_title">%s</h2>'
-            "</section>"
-        ) % escape(label)
-
-    def _assembly_publication_missing_body_hint_html(self):
-        self.ensure_one()
-        msg = self.env._(
-            "Add convocation text on this assembly for the full notice. Set the first "
-            "call date to show when and where."
-        )
-        return Markup(
-            '<aside class="o_assembly_publication_hint text-muted" '
-            'role="note"><p>%s</p></aside>'
-        ) % escape(msg)
-
-    def _render_assembly_mail_template_chain_detail(
-        self,
-        override_template,
-        default_xmlid_suffix,
-        *,
-        raw_html_fallback=None,
-    ):
-        """Like ``_render_assembly_mail_template_chain`` but returns a dict.
-
-        *source* is ``mail`` (template body), ``description`` (raw HTML
-        fallback, typically assembly description), ``qweb`` (bundled/company AF
-        QWeb view), or ``minimal``.
+        Read under the current language, so callers that switch language
+        (``assembly.with_context(lang=...)``) get the text in that language and
+        generated documents come out in each recipient's language.
         """
         self.ensure_one()
-        company_tmpl = self._assembly_company_default_mail_template(
-            default_xmlid_suffix
-        )
-        default_tmpl = self._assembly_mail_template_xmlid(default_xmlid_suffix)
-        candidates = []
-        if override_template:
-            candidates.append(override_template)
-        if company_tmpl and company_tmpl not in candidates:
-            candidates.append(company_tmpl)
-        if default_tmpl and default_tmpl not in candidates:
-            candidates.append(default_tmpl)
-        for tmpl in candidates:
-            html = self._render_mail_template_body_html(tmpl, self.id)
-            if html and not is_html_empty(html):
-                return {"html": Markup(html), "source": "mail"}
-        if raw_html_fallback:
-            raw = raw_html_fallback()
-            if raw and not is_html_empty(str(raw)):
-                return {"html": Markup(str(raw)), "source": "description"}
-        fb = self._render_assembly_af_qweb_fallback(default_xmlid_suffix)
-        if fb and str(fb).strip() and not is_html_empty(str(fb)):
-            return {"html": fb, "source": "qweb"}
-        return {
-            "html": self._assembly_render_minimal_title_html(),
-            "source": "minimal",
-        }
-
-    def _render_assembly_mail_template_chain(
-        self,
-        override_template,
-        default_xmlid_suffix,
-        *,
-        raw_html_fallback=None,
-    ):
-        """Render document HTML via mail template, raw HTML, QWeb, then title.
-
-        Uses ``mail.template._render_field`` (standard Odoo path for template bodies).
-        Always returns non-empty ``Markup`` when the assembly has a name or id.
-        """
-        self.ensure_one()
-        detail = self._render_assembly_mail_template_chain_detail(
-            override_template,
-            default_xmlid_suffix,
-            raw_html_fallback=raw_html_fallback,
-        )
-        return detail["html"]
-
-    def _get_rendered_publication_parts(self):
-        self.ensure_one()
-        detail = self._render_assembly_mail_template_chain_detail(
-            self.publication_mail_template_id,
-            "publication",
-            raw_html_fallback=lambda: self.description or "",
-        )
-        html = detail["html"]
-        source = detail["source"]
-        if is_html_empty(self.description or ""):
-            frag = str(html)
-            if "o_assembly_publication_hint" not in frag:
-                base = html if isinstance(html, Markup) else Markup(str(html))
-                html = Markup("%s%s") % (
-                    base,
-                    self._assembly_publication_missing_body_hint_html(),
-                )
-        return self._assembly_markup_from_render_result(html), source
+        src = self[field_name]
+        if is_html_empty(src):
+            return Markup("")
+        rendered = self.env["mail.render.mixin"]._render_template(
+            str(src), self._name, [self.id], engine="inline_template"
+        )[self.id]
+        return Markup(rendered or "")
 
     def get_rendered_publication(self):
-        """Convocation HTML via mail template, description, QWeb, then title."""
+        """Convocation HTML rendered from the assembly convocation text."""
         self.ensure_one()
-        html, _src = self._get_rendered_publication_parts()
-        return html
+        return self._render_assembly_doc_html("description")
 
     def get_rendered_publication_text(self):
         """String form of :meth:`get_rendered_publication`."""
         self.ensure_one()
         return str(self.get_rendered_publication())
 
-    def _get_rendered_delegation_document_parts(self):
-        self.ensure_one()
-        detail = self._render_assembly_mail_template_chain_detail(
-            self.delegation_document_mail_template_id,
-            "delegation_document",
-        )
-        return (
-            self._assembly_markup_from_render_result(detail["html"]),
-            detail["source"],
-        )
-
-    def _get_rendered_delegation_footer_parts(self):
-        self.ensure_one()
-        detail = self._render_assembly_mail_template_chain_detail(
-            self.delegation_footer_mail_template_id,
-            "delegation_footer",
-        )
-        return (
-            self._assembly_markup_from_render_result(detail["html"]),
-            detail["source"],
-        )
-
-    def _get_rendered_ballot_intro_parts(self):
-        self.ensure_one()
-        detail = self._render_assembly_mail_template_chain_detail(
-            self.ballot_intro_mail_template_id,
-            "ballot_intro",
-        )
-        return (
-            self._assembly_markup_from_render_result(detail["html"]),
-            detail["source"],
-        )
-
-    def _get_rendered_ballot_nominative_intro_parts(self):
-        self.ensure_one()
-        detail = self._render_assembly_mail_template_chain_detail(
-            self.ballot_nominative_intro_mail_template_id,
-            "ballot_nominative_intro",
-        )
-        return (
-            self._assembly_markup_from_render_result(detail["html"]),
-            detail["source"],
-        )
-
-    def get_rendered_delegation(self):
-        """Delegation HTML: document + footer via the QWeb render chain."""
-        self.ensure_one()
-        body, _bs = self._get_rendered_delegation_document_parts()
-        foot, _fs = self._get_rendered_delegation_footer_parts()
-        out = (
-            Markup('<div class="o_assembly_af_delegation_bundle">')
-            + Markup('<div class="o_assembly_af_delegation_intro">')
-            + body
-            + Markup("</div>")
-            + Markup('<div class="o_assembly_af_delegation_footer">')
-            + foot
-            + Markup("</div></div>")
-        )
-        if is_html_empty(str(out)):
-            return (
-                Markup('<div class="o_assembly_af_delegation_bundle">')
-                + self._assembly_render_minimal_title_html()
-                + Markup("</div>")
-            )
-        return out
-
     def get_rendered_delegation_document_text(self):
         self.ensure_one()
-        html, _src = self._get_rendered_delegation_document_parts()
-        return html
+        return self._render_assembly_doc_html("delegation_document_text")
 
     def get_rendered_delegation_footer_text(self):
         self.ensure_one()
-        html, _src = self._get_rendered_delegation_footer_parts()
-        return html
+        return self._render_assembly_doc_html("delegation_footer_text")
+
+    def get_rendered_representation_document_text(self):
+        self.ensure_one()
+        return self._render_assembly_doc_html("representation_document_text")
 
     def get_rendered_ballot_intro_text(self):
         self.ensure_one()
-        html, _src = self._get_rendered_ballot_intro_parts()
-        return html
+        return self._render_assembly_doc_html("ballot_intro_text")
 
     def get_rendered_ballot_nominative_intro_text(self):
         self.ensure_one()
-        html, _src = self._get_rendered_ballot_nominative_intro_parts()
-        return html
+        return self._render_assembly_doc_html("ballot_nominative_intro_text")
 
-    def _preview_template_kind_from_sources(self, *sources):
-        """Return ``custom`` if any source is mail/description; else ``default``."""
-        if any(s in ("mail", "description") for s in sources):
-            return "custom"
-        return "default"
-
-    def _preview_badge_label_from_kind(self, kind):
+    def get_rendered_final_text(self):
         self.ensure_one()
-        if kind == "custom":
-            return self.env._("Using custom template")
-        return self.env._("Using default template")
+        return self._render_assembly_doc_html("final_text")
 
-    def _assembly_render_mail_subject(self, template, fallback_subject, *, lang=None):
-        """Render the mail template ``subject``, or use *fallback_subject*."""
+    def get_rendered_delegation(self):
+        """Delegation HTML: document introduction followed by the footer."""
         self.ensure_one()
-        if template:
-            render_kw = {"compute_lang": False}
-            if lang:
-                render_kw["set_lang"] = lang
-            out = template.sudo()._render_field(
-                "subject",
-                [self.id],
-                **render_kw,
-            )
-            val = out.get(self.id)
-            if val and str(val).strip():
-                return str(val)
-        return fallback_subject
+        body = self.get_rendered_delegation_document_text()
+        foot = self.get_rendered_delegation_footer_text()
+        return (
+            Markup('<div class="o_assembly_delegation_bundle">')
+            + Markup('<div class="o_assembly_delegation_intro">')
+            + body
+            + Markup("</div>")
+            + Markup('<div class="o_assembly_delegation_footer">')
+            + foot
+            + Markup("</div></div>")
+        )
 
     def action_open_communication_send_wizard(self):
         self.ensure_one()
@@ -1915,20 +1502,6 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
             "context": {"create": False, "edit": False},
         }
 
-    def action_open_assembly_communication_messages(self):
-        self.ensure_one()
-        return {
-            "type": "ir.actions.act_window",
-            "name": self.env._("Communication log"),
-            "res_model": "mail.message",
-            "view_mode": "list,form",
-            "domain": [
-                ("model", "=", "assembly.assembly"),
-                ("res_id", "=", self.id),
-            ],
-            "context": {"create": False},
-        }
-
     def action_open_document_preview_wizard(self):
         self.ensure_one()
         wiz = self.env["assembly.document.preview.wizard"].create(
@@ -1944,26 +1517,28 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     def action_open_agenda_items(self):
         self.ensure_one()
         self._assembly_ensure_active_for_operational_views()
-        return self._action_window(
-            "assembly.agenda",
-            self.env._("Agenda items"),
-            "list,kanban,graph,pivot,form",
-            extra={
-                "domain": [("assembly_id", "=", self.id)],
-                "context": {"default_assembly_id": self.id},
-            },
-        )
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Agenda items"),
+            "res_model": "assembly.agenda",
+            "view_mode": "list,kanban,graph,pivot,form",
+            "target": "current",
+            "domain": [("assembly_id", "=", self.id)],
+            "context": {"default_assembly_id": self.id},
+        }
 
     def action_open_votings(self):
         """Open all votings for this assembly (list + form)."""
         self.ensure_one()
         self._assembly_ensure_active_for_operational_views()
-        return self._action_window(
-            "assembly.voting",
-            self.env._("Votings"),
-            "list,kanban,graph,pivot,form",
-            extra={"domain": [("assembly_id", "=", self.id)]},
-        )
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Votings"),
+            "res_model": "assembly.voting",
+            "view_mode": "list,kanban,graph,pivot,form",
+            "target": "current",
+            "domain": [("assembly_id", "=", self.id)],
+        }
 
     def action_open_delegations(self):
         return self._action_open_related(
@@ -1988,12 +1563,12 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                 "search_default_filter_attendance_tracked_link": 1,
             }
         )
-        return self._action_window(
-            "assembly.attendee",
-            self.env._("Attendees (tracked links & QR)"),
-            "list,form",
-            extra={
-                "domain": [("assembly_id", "=", self.id)],
-                "context": ctx,
-            },
-        )
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Attendees (tracked links & QR)"),
+            "res_model": "assembly.attendee",
+            "view_mode": "list,form",
+            "target": "current",
+            "domain": [("assembly_id", "=", self.id)],
+            "context": ctx,
+        }

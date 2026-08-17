@@ -9,15 +9,16 @@
     <record id="assembly_group_user" model="res.groups">
         <field name="name">Assembly User</field>
         <field name="category_id" ref="module_category_assembly"/>
-        <field name="comment">Read-only on assemblies, agenda, delegations, votings, results. Read/write/create attendees (no unlink); record rules limit attendee rows to the user&apos;s own partner, so bulk or third-party lines are blocked at rule level. May create own voting lines (cast vote); no write/unlink on those lines. Not implied by Assembly Manager; assign groups separately.</field>
+        <field name="comment">Assembly member access: read assemblies and agenda, register own attendance, and cast own votes. Record rules limit attendee, delegation, representation, and voting-line rows to the user's own partner. Base level of the Assembly category.</field>
     </record>
     <record id="assembly_group_manager" model="res.groups">
         <field name="name">Assembly Manager</field>
         <field name="category_id" ref="module_category_assembly"/>
-        <field name="comment">Full CRUD on assembly models (ACL). Implied by Settings / Administration (base.group_system). Does not imply Assembly User; if both groups are assigned, permissive manager ir.rule ORs with user rules so back-office rows stay visible.</field>
+        <field name="implied_ids" eval="[(4, ref('assembly_group_user'))]"/>
+        <field name="comment">Full access to all assembly records. Includes Assembly User and sees every row in the allowed companies (permissive record rules). Granted automatically to Settings / Administration.</field>
     </record>
 
-    <!-- Settings / Administration users get Assembly Manager  -->
+    <!-- Settings / Administration users get Assembly Manager (which implies Assembly User) -->
     <record id="base.group_system" model="res.groups">
         <field name="implied_ids" eval="[(4, ref('assembly_group_manager'))]"/>
     </record>

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
+
     <record id="assembly_agenda_view_tree" model="ir.ui.view">
         <field name="name">assembly.agenda.tree</field>
         <field name="model">assembly.agenda</field>
         <field name="arch" type="xml">
-            <list editable="bottom">
+            <list>
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="agenda_vote_mode"/>
@@ -21,14 +22,11 @@
                 <field name="manual_count_blank" string="Blank (total)" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
                 <field name="manual_total_expected" string="Expected total votes" optional="hide" invisible="agenda_vote_mode not in ('manual_yes_no','manual_multi')"/>
                 <field name="assembly_state" column_invisible="1"/>
-                <field name="agenda_state"/>
-                <button name="action_open_live_voting_screen" string="Live" type="object" icon="fa-desktop" title="Open live voting screen" invisible="assembly_state == 'closed' or assembly_state != 'in_session' or agenda_vote_mode == 'no_vote' or agenda_state == 'skipped'" groups="base_assembly.assembly_group_manager"/>
-                <button name="action_start_voting" string="Start voting" type="object" icon="fa-check" invisible="assembly_state == 'closed' or agenda_state not in ('pending','in_progress') or agenda_vote_mode != 'weighted'" groups="base_assembly.assembly_group_manager"/>
-                <button name="action_finalize_manual" string="Finalize manual" type="object" icon="fa-check-circle" invisible="assembly_state == 'closed' or agenda_vote_mode not in ('manual_yes_no','manual_multi') or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
-                <button name="action_skip" string="Skip" type="object" icon="fa-forward" invisible="assembly_state == 'closed' or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
+                <field name="agenda_state" readonly="1" widget="badge"/>
             </list>
         </field>
     </record>
+
     <record id="assembly_agenda_view_search" model="ir.ui.view">
         <field name="name">assembly.agenda.search</field>
         <field name="model">assembly.agenda</field>
@@ -47,6 +45,7 @@
             </search>
         </field>
     </record>
+
     <record id="assembly_agenda_view_form" model="ir.ui.view">
         <field name="name">assembly.agenda.form</field>
         <field name="model">assembly.agenda</field>
@@ -54,9 +53,10 @@
             <form string="Agenda item">
                 <header>
                     <button name="action_open_live_voting_screen" string="Live voting" type="object" class="btn-primary" invisible="assembly_state == 'closed' or assembly_state != 'in_session' or agenda_vote_mode == 'no_vote' or agenda_state == 'skipped'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_start_voting" string="Start voting" type="object" invisible="assembly_state == 'closed' or agenda_vote_mode != 'weighted' or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_finalize_manual" string="Finalize manual" type="object" invisible="assembly_state == 'closed' or agenda_vote_mode not in ('manual_yes_no','manual_multi') or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_skip" string="Skip" type="object" invisible="assembly_state == 'closed' or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_start_voting" string="Start voting" type="object" invisible="assembly_state != 'in_session' or agenda_vote_mode != 'weighted' or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_finalize_manual" string="Finalize manual" type="object" invisible="assembly_state != 'in_session' or agenda_vote_mode not in ('manual_yes_no','manual_multi') or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_mark_addressed" string="Mark addressed" type="object" invisible="assembly_state != 'in_session' or agenda_vote_mode != 'no_vote' or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_skip" string="Skip" type="object" invisible="assembly_state != 'in_session' or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -75,9 +75,9 @@
                     <div class="oe_title">
                         <h1>
                             <span>Item </span>
-                            <field name="sequence" style="width: 80px;" class="oe_inline"/>
+                            <field name="sequence" style="width: 80px;" class="oe_inline" readonly="assembly_state == 'closed'"/>
                             <span> – </span>
-                            <field name="name" placeholder="Title" class="oe_inline" style="min-width: 200px;"/>
+                            <field name="name" placeholder="Title" class="oe_inline" style="min-width: 200px;" readonly="assembly_state == 'closed'"/>
                         </h1>
                     </div>
                     <group>
@@ -86,9 +86,9 @@
                     </group>
                     <div class="mb-3 p-3 bg-light border rounded">
                         <label for="description" string="Description"/>
-                        <field name="description" nolabel="1" placeholder="Detail of this agenda item…"/>
+                        <field name="description" nolabel="1" placeholder="Detail of this agenda item…" readonly="assembly_state == 'closed'"/>
                     </div>
-                    <group string="Voting">
+                    <group string="Voting" readonly="assembly_state == 'closed'">
                         <group>
                             <field name="agenda_vote_mode"/>
                             <field name="requires_vote" invisible="agenda_vote_mode != 'weighted'"/>
@@ -98,7 +98,7 @@
                                 required="agenda_vote_mode == 'weighted'"
                                 options="{'no_create': True, 'no_open': True}"
                             />
-                            <field name="agenda_state"/>
+                            <field name="agenda_state" readonly="1" widget="badge"/>
                         </group>
                     </group>
                     <div class="alert alert-secondary mb-3 p-2 small" role="status" invisible="agenda_vote_mode != 'weighted'">
@@ -115,7 +115,7 @@
                         enter aggregate totals per ballot option only; per-attendee vote lines are not created for this item.
                     </div>
                     <field name="session_manual_has_variance" invisible="1"/>
-                    <group string="Final vote totals (aggregate)" invisible="agenda_vote_mode != 'manual_yes_no'">
+                    <group string="Final vote totals (aggregate)" invisible="agenda_vote_mode != 'manual_yes_no'" readonly="assembly_state == 'closed'">
                         <group>
                             <field name="manual_yes"/>
                             <field name="manual_no"/>
@@ -125,7 +125,7 @@
                     </group>
                     <field name="manual_multi_options_count" invisible="1"/>
                     <field name="manual_multi_votes_sum" invisible="1"/>
-                    <group string="Expected total and check" invisible="agenda_vote_mode != 'manual_yes_no'">
+                    <group string="Expected total and check" invisible="agenda_vote_mode != 'manual_yes_no'" readonly="assembly_state == 'closed'">
                         <group>
                             <field name="manual_total_expected"/>
                         </group>
@@ -142,7 +142,7 @@
                     >
                         Entered total votes do not match the expected reference total. Adjust the counters or expected total before finalizing.
                     </div>
-                    <group string="Voting options (choices and vote totals)" invisible="agenda_vote_mode != 'manual_multi'">
+                    <group string="Voting options (choices and vote totals)" invisible="agenda_vote_mode != 'manual_multi'" readonly="assembly_state == 'closed'">
                         <div class="alert alert-secondary mb-2 p-2 small" role="status" colspan="2">
                             <strong>Choices and totals for this agenda item only:</strong>
                             add one row per ballot choice (<em>Choice</em>), reorder with the handle, then enter <em>Votes</em> (aggregate counts per choice).
@@ -159,7 +159,7 @@
                             </list>
                         </field>
                     </group>
-                    <group string="Expected total and check" invisible="agenda_vote_mode != 'manual_multi'">
+                    <group string="Expected total and check" invisible="agenda_vote_mode != 'manual_multi'" readonly="assembly_state == 'closed'">
                         <group>
                             <field name="manual_total_expected"/>
                         </group>
@@ -179,7 +179,7 @@
                     <div class="alert alert-info mb-3 p-2 small" role="status" invisible="agenda_vote_mode != 'manual_multi'">
                         When <em>Expected total votes</em> is set (non-zero), the sum of all <em>Votes</em> must match it; other validation still applies when it is zero.
                     </div>
-                    <group string="Final summary">
+                    <group string="Final summary" readonly="assembly_state == 'closed'">
                         <field name="final_summary" nolabel="1" colspan="2" placeholder="HTML summary when the point is closed…"/>
                     </group>
                 </sheet>
@@ -223,6 +223,7 @@
             </kanban>
         </field>
     </record>
+
     <record id="assembly_agenda_view_graph" model="ir.ui.view">
         <field name="name">assembly.agenda.graph</field>
         <field name="model">assembly.agenda</field>
@@ -232,6 +233,7 @@
             </graph>
         </field>
     </record>
+
     <record id="assembly_agenda_view_pivot" model="ir.ui.view">
         <field name="name">assembly.agenda.pivot</field>
         <field name="model">assembly.agenda</field>
@@ -250,13 +252,13 @@
             <form string="Assembly">
                 <header>
                     <button name="action_announce" string="Announce assembly" type="object" class="oe_highlight" invisible="assembly_state != 'draft'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_open_registration" string="Abrir registro de asistentes" type="object" class="oe_highlight" invisible="assembly_state != 'announced'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_start_session" string="Start session" type="object" class="oe_highlight" invisible="assembly_state != 'open'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_start_session" string="Start session" type="object" class="oe_highlight" invisible="assembly_state != 'announced'" groups="base_assembly.assembly_group_manager"/>
                     <button name="action_open_live_voting_dashboard" string="Voting dashboard" type="object" class="oe_highlight" invisible="assembly_state != 'in_session'" groups="base_assembly.assembly_group_manager"/>
                     <button name="action_close" string="Close assembly" type="object" invisible="assembly_state != 'in_session'" groups="base_assembly.assembly_group_manager"/>
                     <button name="action_reopen_from_closed" string="Reopen session" type="object" class="oe_highlight" invisible="assembly_state != 'closed'" groups="base_assembly.assembly_group_manager"/>
-                    <button name="action_reopen" string="Volver a borrador" type="object" class="oe_highlight" invisible="assembly_state != 'cancelled'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_reopen" string="Back to draft" type="object" class="oe_highlight" invisible="assembly_state != 'cancelled'" groups="base_assembly.assembly_group_manager"/>
                     <button name="action_open_header_actions_wizard" string="Actions" type="object" invisible="assembly_state == 'cancelled'" groups="base_assembly.assembly_group_manager"/>
+                    <field name="assembly_state" widget="statusbar" statusbar_visible="draft,announced,in_session,closed"/>
                 </header>
                 <sheet>
                     <div class="alert alert-warning mb-3" role="alert" invisible="assembly_state != 'closed'">
@@ -264,16 +266,14 @@
                     </div>
                     <field name="active" invisible="1"/>
                     <field name="mail_outbound_email_count" invisible="1"/>
-                    <field name="assembly_communication_message_count" invisible="1"/>
-                    <field name="attendee_tracked_link_count" invisible="1"/>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_agenda_items" type="object" class="oe_stat_button" icon="fa-list-ol" invisible="not active">
                             <div class="o_form_field o_stat_info">
                                 <span class="o_stat_value"><field name="count_agenda_items"/></span>
-                                <span class="o_stat_text">Agenda</span>
+                                <span class="o_stat_text">Agenda items</span>
                             </div>
                         </button>
-                        <button name="action_open_votings" type="object" class="oe_stat_button" icon="fa-check-square-o" invisible="not active">
+                        <button name="action_open_votings" type="object" class="oe_stat_button" icon="fa-check-square-o" invisible="not active or assembly_state == 'draft'">
                             <div class="o_form_field o_stat_info">
                                 <span class="o_stat_value"><field name="voting_sessions_count"/></span>
                                 <span class="o_stat_text">Votings</span>
@@ -297,192 +297,103 @@
                                 <span class="o_stat_text">Attendees</span>
                             </div>
                         </button>
-                        <button name="action_open_attendance_links" type="object" class="oe_stat_button" icon="fa-qrcode" invisible="not active or not include_qr_code" groups="base_assembly.assembly_group_manager" title="List attendees with a tracked sign-in URL; from there open the link or QR per row.">
-                            <div class="o_form_field o_stat_info">
-                                <span class="o_stat_value"><field name="attendee_tracked_link_count"/></span>
-                                <span class="o_stat_text">Links &amp; QR</span>
-                            </div>
-                        </button>
                         <button name="action_open_assembly_outbound_mails" type="object" class="oe_stat_button" icon="fa-envelope-o" invisible="assembly_state == 'closed'" groups="base_assembly.assembly_group_manager" title="Emails queued or sent from this assembly (mail queue: outgoing, sent, exception).">
                             <div class="o_form_field o_stat_info">
                                 <span class="o_stat_value"><field name="mail_outbound_email_count"/></span>
                                 <span class="o_stat_text">Outgoing emails</span>
                             </div>
                         </button>
-                        <button name="action_open_assembly_communication_messages" type="object" class="oe_stat_button" icon="fa-comments" invisible="assembly_state == 'closed'" groups="base_assembly.assembly_group_manager" title="Chatter messages and notes on this assembly (including send summaries).">
-                            <div class="o_form_field o_stat_info">
-                                <span class="o_stat_value"><field name="assembly_communication_message_count"/></span>
-                                <span class="o_stat_text">Communication log</span>
-                            </div>
-                        </button>
                     </div>
                     <div class="oe_title">
-                        <h1><field name="name" placeholder="Assembly name" readonly="assembly_state == 'closed'"/></h1>
-                        <field name="code" readonly="1"/>
+                        <h1><field name="name" placeholder="Assembly name" readonly="assembly_state != 'draft'"/></h1>
+                        <field name="code" readonly="1" invisible="1"/>
                     </div>
-                    <field name="assembly_state" widget="statusbar" statusbar_visible="draft,announced,open,in_session,closed,cancelled"/>
-                    <div class="row mt-3 mb-2">
-                        <div class="col-12">
-                            <button name="action_open_agenda_items" type="object" class="btn btn-link px-2 o_smart_button" invisible="not active">
-                                <i class="fa fa-list-ol fa-2x d-block text-primary" title="Agenda"/>
-                                <span class="o_stat_info"><field name="count_agenda_items"/></span> Agenda
-                            </button>
-                            <button name="action_open_votings" type="object" class="btn btn-link px-2 o_smart_button" invisible="not active">
-                                <i class="fa fa-check-square-o fa-2x d-block text-primary" title="Votings"/>
-                                <span class="o_stat_info"><field name="voting_sessions_count"/></span> Votings
-                            </button>
-                            <button name="action_open_delegations" type="object" class="btn btn-link px-2 o_smart_button" invisible="not active or assembly_state == 'draft'">
-                                <i class="fa fa-hand-o-right fa-2x d-block text-primary" title="Delegations"/>
-                                <span class="o_stat_info"><field name="count_delegations"/></span> Delegations
-                            </button>
-                            <button name="action_open_representations" type="object" class="btn btn-link px-2 o_smart_button" invisible="not active or assembly_state == 'draft'">
-                                <i class="fa fa-user fa-2x d-block text-primary" title="Representations"/>
-                                <span class="o_stat_info"><field name="count_representations"/></span> Representations
-                            </button>
-                            <button name="action_open_attendees" type="object" class="btn btn-link px-2 o_smart_button" invisible="not active or assembly_state == 'draft'">
-                                <i class="fa fa-users fa-2x d-block text-primary" title="Attendees"/>
-                                <span class="o_stat_info"><field name="total_present_attendees"/></span> Attendees
-                            </button>
-                            <button name="action_open_attendance_links" type="object" class="btn btn-link px-2 o_smart_button" invisible="not active or not include_qr_code" groups="base_assembly.assembly_group_manager" title="Tracked attendance links and QR (per attendee)">
-                                <i class="fa fa-qrcode fa-2x d-block text-primary" title="Links &amp; QR"/>
-                                <span class="o_stat_info"><field name="attendee_tracked_link_count"/></span> Links &amp; QR
-                            </button>
-                        </div>
-                    </div>
-                    <group readonly="assembly_state == 'closed'">
+                    <group readonly="assembly_state != 'draft'">
                         <group>
-                            <field name="company_id" groups="base.group_multi_company" readonly="assembly_state == 'closed'"/>
+                            <field name="company_id" groups="base.group_multi_company" invisible="1"/>
                             <field name="assembly_type_id" domain="[('company_id', '=', company_id)]"/>
-                            <field name="date_announcement"/>
+                            <field name="date_start"/>
                             <field name="date_first_call"/>
                             <field name="date_second_call"/>
-                            <field name="date_start"/>
-                            <field name="date_end"/>
-                            <field name="location"/>
-                            <field name="is_second_call"/>
-                            <field name="president_id"/>
-                            <field name="secretary_id"/>
+                            <field name="date_announcement"/>
                         </group>
                         <group>
-                            <field name="total_possible_attendees" readonly="1"/>
-                            <field name="total_present_attendees" readonly="1"/>
-                            <field name="quorum_percentage" readonly="1"/>
-                            <field name="quorum_reached" readonly="1"/>
+                            <field name="location" readonly="assembly_state != 'draft'"/>
+                            <label for="street" string="Venue address (for documents)"/>
+                            <div class="o_address_format">
+                                <field name="street" placeholder="Street" class="o_address_street" readonly="assembly_state != 'draft'" autocomplete="chrome-off"/>
+                                <field name="zip" placeholder="ZIP" class="o_address_zip" readonly="assembly_state != 'draft'" autocomplete="chrome-off"/>
+                                <field name="city_id" placeholder="City (directory)" class="o_address_city" options="{'no_open': True, 'no_create': True}" readonly="assembly_state != 'draft'" autocomplete="off"/>
+                                <field name="city" placeholder="City (manual)" class="o_address_city" readonly="assembly_state != 'draft'" autocomplete="chrome-off"/>
+                                <field name="state_id" placeholder="State" class="o_address_state" domain="[('country_id', '=', country_id)]" options="{'no_open': True}" readonly="assembly_state != 'draft'" autocomplete="off"/>
+                                <field name="country_id" placeholder="Country" class="o_address_country" options="{'no_open': True}" readonly="assembly_state != 'draft'" autocomplete="off"/>
+                            </div>
+                            <field name="president_id" readonly="assembly_state != 'draft'"/>
+                            <field name="secretary_id" readonly="assembly_state != 'draft'"/>
+                            <field name="date_end" readonly="1" invisible="not date_end"/>
                         </group>
                     </group>
-                    <group string="Address (for documents)" readonly="assembly_state == 'closed'">
-                        <field name="street" autocomplete="chrome-off"/>
-                        <field name="country_id" autocomplete="off"/>
-                        <field name="state_id" domain="[('country_id', '=', country_id)]" autocomplete="off"/>
-                        <field name="zip" autocomplete="chrome-off"/>
-                        <field name="city_id" options="{'no_open': True, 'no_create': True}" autocomplete="off"/>
-                        <field name="city" autocomplete="chrome-off"/>
-                    </group>
                     <notebook>
-                        <page string="Agenda" name="agenda" invisible="not active">
-                            <field name="agenda_ids" readonly="assembly_state == 'closed'">
-                                <list>
-                                    <field name="sequence" widget="handle"/>
-                                    <field name="name"/>
-                                    <field name="agenda_vote_mode"/>
-                                    <field name="requires_vote" invisible="agenda_vote_mode != 'weighted'" optional="hide"/>
-                                    <field
-                                        name="vote_type_id"
-                                        required="agenda_vote_mode == 'weighted'"
-                                        invisible="agenda_vote_mode != 'weighted'"
-                                        options="{'no_create': True, 'no_open': True}"
-                                    />
-                                    <field name="manual_yes" string="Yes (total)" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
-                                    <field name="manual_no" string="No (total)" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
-                                    <field name="manual_abstain" string="Abstention (total)" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
-                                    <field name="manual_count_blank" string="Blank (total)" optional="hide" invisible="agenda_vote_mode != 'manual_yes_no'"/>
-                                    <field name="manual_total_expected" string="Expected total votes" optional="hide" invisible="agenda_vote_mode not in ('manual_yes_no','manual_multi')"/>
-                                    <field name="assembly_state" column_invisible="1"/>
-                                    <field name="agenda_state"/>
-                                    <button name="action_open_live_voting_screen" string="Live" type="object" icon="fa-desktop" title="Open live voting screen" invisible="assembly_state == 'closed' or assembly_state != 'in_session' or agenda_vote_mode == 'no_vote' or agenda_state == 'skipped'" groups="base_assembly.assembly_group_manager"/>
-                                    <button name="action_start_voting" string="Start voting" type="object" icon="fa-check" invisible="assembly_state == 'closed' or agenda_state not in ('pending','in_progress') or agenda_vote_mode != 'weighted'" groups="base_assembly.assembly_group_manager"/>
-                                    <button name="action_finalize_manual" string="Finalize manual" type="object" icon="fa-check-circle" invisible="assembly_state == 'closed' or agenda_vote_mode not in ('manual_yes_no','manual_multi') or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
-                                    <button name="action_skip" string="Skip" type="object" icon="fa-forward" invisible="assembly_state == 'closed' or agenda_state not in ('pending','in_progress')" groups="base_assembly.assembly_group_manager"/>
-                                </list>
-                            </field>
+                        <page string="Notes" name="doc_notes">
+                            <group readonly="assembly_state == 'closed'">
+                                <field name="notes" nolabel="1" colspan="2" placeholder="Notes…"/>
+                            </group>
                         </page>
-                        <page string="Attendees" name="attendees" invisible="not active">
-                            <div class="alert alert-secondary mb-2 small" role="status">
-                                <strong>Attendance:</strong>
-                                <em>Listed — not finalized</em> = on the list only (not quorum, not an active delegate).
-                                <em>Attended (confirmed present)</em> = counts for quorum and voting; delegations to this person can activate.
-                                <em>Did not attend</em> = absent (excluded from quorum).
-                                Each row shows one main action: <strong>Mark Present</strong> until attended, then <strong>Mark Absent</strong>. Use the print icon for a ballot PDF.
+                        <page string="Internal notes" name="doc_internal_notes" groups="base_assembly.assembly_group_manager">
+                            <group readonly="assembly_state == 'closed'">
+                                <field name="internal_notes" nolabel="1" colspan="2" placeholder="Internal notes…"/>
+                            </group>
+                        </page>
+                        <page string="Convocation text" name="doc_convocation">
+                            <div class="alert alert-info mb-3 py-2 px-3 small" role="status">
+                                Text for the assembly documents. Supports placeholders like <code>{{ object.name }}</code>. New assemblies start from the assembly type's default texts (per language); edit here to override for this assembly.
                             </div>
-                            <field name="attendee_ids" readonly="assembly_state == 'closed'">
-                                <list decoration-muted="attendee_state == 'registered'" decoration-success="attendee_state == 'confirmed'" decoration-danger="attendee_state == 'absent'">
-                                    <field name="partner_id"/>
-                                    <field name="participant_partner_id"/>
-                                    <field name="partner_vat" string="TIN"/>
-                                    <field name="attendance_type"/>
-                                    <field name="attendee_state" readonly="1" widget="badge"/>
-                                    <field name="date_register"/>
-                                    <field name="total_votes" sum="Total"/>
-                                    <field name="attendance_notes" invisible="not parent.allow_attendance_notes"/>
-                                    <field name="attendance_signature" column_invisible="1"/>
-                                    <button name="action_confirm" string="Mark Present" type="object" class="btn-success btn-sm" title="Set attendance to Attended (confirmed present): member actually attended; counts for quorum and voting." invisible="parent.assembly_state == 'closed' or attendee_state == 'confirmed'" groups="base_assembly.assembly_group_manager"/>
-                                    <button name="action_mark_absent" string="Mark Absent" type="object" class="btn-outline-secondary btn-sm" title="Set attendance to Did not attend (absent): excluded from quorum; delegations to this person stay inactive until attended." invisible="parent.assembly_state == 'closed' or attendee_state != 'confirmed'" groups="base_assembly.assembly_group_manager"/>
-                                    <button name="action_print_ballot" type="object" icon="fa-print" class="btn-light btn-sm" title="Print ballot (PDF) for this attendee" width="48" invisible="parent.assembly_state == 'closed'" groups="base_assembly.assembly_group_manager"/>
-                                </list>
-                            </field>
+                            <group readonly="assembly_state == 'closed'">
+                                <field name="description" nolabel="1" colspan="2" placeholder="Convocation / publication text…"/>
+                            </group>
                         </page>
-                        <page string="Delegations" name="delegations" groups="base_assembly.assembly_group_manager" invisible="not active">
-                            <div class="alert alert-info mb-2 small" role="status">
-                                <p class="mb-1 fw-semibold">Vote delegation (stored rules)</p>
-                                <ul class="mb-0 ps-3">
-                                    <li>Saving creates or updates the rule on the server; <strong>delete the row</strong> to revoke (stored vote lines refresh on the next rebuild or attendance change).</li>
-                                    <li><strong>Delegator</strong> transfers units only for the vote types on the row (empty = all types on this assembly).</li>
-                                    <li>Transfer becomes <strong>Active</strong> only when the <strong>delegate</strong> is <strong>Attended (confirmed present)</strong>; until then the row shows <em>Waiting</em>.</li>
-                                    <li>Inspect <em>delegated out</em> / <em>delegated in</em> on each attendee’s <em>Votes by type</em>.</li>
-                                </ul>
-                            </div>
-                            <field
-                                name="delegation_ids"
-                                readonly="assembly_state == 'closed'"
-                            >
-                                <list editable="bottom" decoration-success="delegation_vote_transfer_state == 'active'" decoration-warning="delegation_vote_transfer_state == 'waiting_delegate'">
-                                    <field name="partner_id" string="Delegator"/>
-                                    <field name="delegate_partner_id" string="Delegate"/>
-                                    <field name="delegation_vote_transfer_state" widget="badge" optional="show"/>
-                                    <field name="vote_type_ids" widget="many2many_tags"/>
-                                    <field name="date_delegation"/>
-                                </list>
-                            </field>
+                        <page string="Final paragraph" name="doc_final">
+                            <group readonly="assembly_state == 'closed'">
+                                <field name="final_text" nolabel="1" colspan="2" placeholder="Closing paragraph after the agenda…"/>
+                            </group>
                         </page>
-                        <page string="Representations" name="representations" groups="base_assembly.assembly_group_manager" invisible="not active">
-                            <field
-                                name="representation_ids"
-                                readonly="assembly_state == 'closed'"
-                                context="{'default_assembly_id': id}"
-                            >
-                                <list editable="bottom">
-                                    <field name="owner_partner_id"/>
-                                    <field name="agent_partner_id"/>
-                                    <field name="active"/>
-                                </list>
-                            </field>
+                        <page string="Voting ballot" name="doc_ballot_intro" groups="base_assembly.assembly_group_manager">
+                            <group readonly="assembly_state == 'closed'">
+                                <field name="ballot_intro_text" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+                        <page string="Nominative voting ballot" name="doc_ballot_nominative_intro" groups="base_assembly.assembly_group_manager">
+                            <group readonly="assembly_state == 'closed'">
+                                <field name="ballot_nominative_intro_text" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+                        <page string="Vote delegation text" name="doc_delegation_document" groups="base_assembly.assembly_group_manager">
+                            <group readonly="assembly_state == 'closed'">
+                                <field name="delegation_document_text" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+                        <page string="Delegation footer" name="doc_delegation_footer" groups="base_assembly.assembly_group_manager">
+                            <group readonly="assembly_state == 'closed'">
+                                <field name="delegation_footer_text" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+                        <page string="Representation text" name="doc_representation" groups="base_assembly.assembly_group_manager">
+                            <group readonly="assembly_state == 'closed'">
+                                <field name="representation_document_text" nolabel="1" colspan="2"/>
+                            </group>
                         </page>
                         <page string="Configuration" name="config">
                             <group readonly="assembly_state == 'closed'">
-                                <group string="Quorum &amp; online voting">
+                                <group string="Online voting &amp; attendance">
                                     <field name="allow_online_voting"/>
                                     <field name="allow_attendance_notes"/>
                                     <field name="include_qr_code"/>
                                     <div class="alert alert-light py-2 px-3 small mb-0" role="status" colspan="2" invisible="not include_qr_code">
-                                        <strong>Where to use it:</strong> top smart button <strong>Links &amp; QR</strong> (and the same shortcut under the title), or each attendee form — header buttons <strong>Open attendance link</strong> / <strong>Show QR</strong>, plus the <strong>Tracked attendance URL</strong> field. Opens are counted on the link tracker. Landing/error QWeb: Settings → Assemblies → Attendance deep links (HTTP).
+                                        <strong>Where to use it:</strong> top smart button <strong>Links &amp; QR</strong>, or each attendee form — header buttons <strong>Open attendance link</strong> / <strong>Show QR</strong>, plus the <strong>Tracked attendance URL</strong> field. Opens are counted on the link tracker. Landing/error QWeb: Settings → Assemblies → Attendance deep links (HTTP).
                                     </div>
                                     <field name="attendance_require_partner_vat_confirm"/>
                                     <field name="attendance_partner_vat_format_strict"
                                            invisible="not attendance_require_partner_vat_confirm"/>
-                                    <field name="quorum_type"/>
-                                    <field name="quorum_value"/>
-                                    <field name="quorum_second_call_type"/>
-                                    <field name="quorum_second_call_value"/>
                                 </group>
                                 <group string="Vote types">
                                     <field
@@ -500,21 +411,6 @@
                                     options="{'model': 'res.partner'}"
                                 />
                             </group>
-                            <group readonly="assembly_state == 'closed'">
-                                <field
-                                    name="description"
-                                    string="Convocation / description"
-                                    placeholder="Convocation text"
-                                    colspan="2"
-                                />
-                            </group>
-                            <group string="Document templates (optional overrides)" readonly="assembly_state == 'closed'" groups="base_assembly.assembly_group_manager">
-                                <field name="publication_mail_template_id" options="{'no_create': True}"/>
-                                <field name="delegation_document_mail_template_id" options="{'no_create': True}"/>
-                                <field name="delegation_footer_mail_template_id" options="{'no_create': True}"/>
-                                <field name="ballot_intro_mail_template_id" options="{'no_create': True}"/>
-                                <field name="ballot_nominative_intro_mail_template_id" options="{'no_create': True}"/>
-                            </group>
                         </page>
                     </notebook>
                 </sheet>
@@ -530,17 +426,16 @@
             <list decoration-muted="assembly_state == 'cancelled'" default_order="date_first_call desc">
                 <field name="name"/>
                 <field name="code"/>
-                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <field name="company_id" optional="hide" groups="base.group_multi_company"/>
                 <field name="assembly_type_id"/>
                 <field name="assembly_state"/>
-                <field name="date_first_call"/>
+                <field name="date_first_call" optional="hide"/>
                 <field name="date_start"/>
                 <field name="location"/>
                 <field name="president_id"/>
                 <field name="secretary_id"/>
                 <field name="total_possible_attendees"/>
                 <field name="total_present_attendees"/>
-                <field name="quorum_reached"/>
             </list>
         </field>
     </record>
@@ -559,7 +454,6 @@
                 <field name="secretary_id"/>
                 <filter string="Draft" name="filter_draft" domain="[('assembly_state','=','draft')]"/>
                 <filter string="Announced" name="filter_announced" domain="[('assembly_state','=','announced')]"/>
-                <filter string="Open" name="filter_open" domain="[('assembly_state','=','open')]"/>
                 <filter string="In session" name="filter_in_session" domain="[('assembly_state','=','in_session')]"/>
                 <filter string="Closed" name="filter_closed" domain="[('assembly_state','=','closed')]"/>
                 <filter string="Cancelled" name="filter_cancelled" domain="[('assembly_state','=','cancelled')]"/>
@@ -591,8 +485,6 @@
                 <field name="kanban_call_month_year"/>
                 <field name="kanban_call_time"/>
                 <field name="kanban_location_label"/>
-                <field name="quorum_percentage"/>
-                <field name="quorum_reached"/>
                 <field name="total_present_attendees"/>
                 <field name="total_possible_attendees"/>
                 <field name="kanban_open_votings_count"/>
@@ -643,16 +535,9 @@
                                         <i t-if="record.assembly_state.raw_value === 'cancelled'" class="fa fa-ban fa-fw text-danger ms-1" title="Cancelled"/>
                                     </div>
                                     <div class="mb-2">
-                                        <div class="d-flex justify-content-between text-muted mb-1">
-                                            <span><i class="fa fa-users me-1"/>Quorum</span>
-                                            <span><field name="total_present_attendees"/> / <field name="total_possible_attendees"/> · <field name="quorum_percentage"/>%</span>
-                                        </div>
-                                        <div class="progress rounded-pill" style="height: 6px;">
-                                            <div role="progressbar" t-att-class="'progress-bar ' + (record.quorum_reached.raw_value ? 'bg-success' : 'bg-warning')" t-attf-style="width: {{ Math.min(100, Math.round(100 * (record.total_present_attendees.raw_value || 0) / (record.total_possible_attendees.raw_value || 1))) }}%;"></div>
-                                        </div>
-                                        <div class="mt-1 small">
-                                            <span t-if="record.quorum_reached.raw_value" class="text-success"><i class="fa fa-check-circle me-1"/>Quorum reached</span>
-                                            <span t-else="" class="text-warning"><i class="fa fa-exclamation-circle me-1"/>Quorum pending</span>
+                                        <div class="d-flex justify-content-between text-muted">
+                                            <span><i class="fa fa-users me-1"/>Attendees</span>
+                                            <span><field name="total_present_attendees"/> / <field name="total_possible_attendees"/></span>
                                         </div>
                                     </div>
                                     <div class="d-flex flex-wrap gap-1 mb-1">

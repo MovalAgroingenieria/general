@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-13 08:33+0000\n"
-"PO-Revision-Date: 2026-04-13 08:33+0000\n"
+"POT-Creation-Date: 2026-08-14 08:09+0000\n"
+"PO-Revision-Date: 2026-08-14 08:09+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,13 +17,19 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
 msgid ""
 "%(count)d recipient(s): one separate email each; nominative attachments "
 "match the addressee."
 msgstr ""
 "%(count)d destinatario(s): un correo electrónico separado cada uno; los "
 "adjuntos nominativos coinciden con el destinatario."
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
+msgid "%(message)s %(n)d error(s)."
+msgstr "%(message)s %(n)d error(es)."
 
 #. module: base_assembly
 #. odoo-python
@@ -39,15 +45,15 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
-msgid "%(sent)d message(s) queued or sent. %(skip)d skipped."
-msgstr "%(sent)d mensaje(s) en cola o enviado(s). %(skip)d omitido(s)."
+#: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
+msgid "%(sent)d message(s) sent. %(skip)d skipped."
+msgstr "%(sent)d mensaje(s) enviados. %(skip)d omitidos."
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
-msgid "%(summary)s Issues: %(detail)s"
-msgstr "%(summary)s Problemas: %(detail)s"
+#: code:addons/base_assembly/controllers/attendance.py:0
+msgid "%s is already marked present."
+msgstr "%s ya se ha marcado como presente."
 
 #. module: base_assembly
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_attendance
@@ -129,28 +135,13 @@ msgstr ""
 "'Delegación - %s - %s' % (object.assembly_id.name, object.partner_id.name)"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_ballot_nominative_intro_qweb
-msgid "(Agenda items appear when defined on the assembly)"
-msgstr ""
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_publication_qweb
-msgid "(To be confirmed)"
-msgstr ""
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_agenda_af_list_block
-msgid "(expected total:"
-msgstr "(total esperado:"
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
 msgid ""
 ",\n"
 "                            Abstention:"
 msgstr ""
 ",\n"
-"Abstención:"
+"                            Abstención:"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
@@ -159,7 +150,7 @@ msgid ""
 "                            Blank:"
 msgstr ""
 ",\n"
-"Blanco:"
+"                            Blanco:"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
@@ -168,143 +159,17 @@ msgid ""
 "                            No:"
 msgstr ""
 ",\n"
-"No:"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_agenda_af_list_block
-msgid ""
-",\n"
-"                        Abstention:"
-msgstr ""
-",\n"
-"                        Abstención:"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_agenda_af_list_block
-msgid ""
-",\n"
-"                        Blank:"
-msgstr ""
-",\n"
-"                        En blanco:"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_agenda_af_list_block
-msgid ""
-",\n"
-"                        No:"
-msgstr ""
-",\n"
-"No:"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_delegation_footer_qweb
-msgid ""
-", subject to the\n"
-"                limits recorded in the system. The delegate confirms acceptance of this mandate."
-msgstr ""
-
-#. module: base_assembly
-#: model:mail.template,body_html:base_assembly.mail_template_assembly_ballot_intro_default
-msgid ""
-"<div class=\"o_assembly_ballot_intro\">\n"
-"                <p>Voting ballot for <strong t-out=\"object.name\"/>.</p>\n"
-"                <p>Mark your choice clearly for each agenda item.</p>\n"
-"            </div>\n"
-"        "
-msgstr ""
-"<div class=\"o_assembly_ballot_intro\">\n"
-"                <p>Papeleta de votación para <strong t-out=\"object.name\"/>.</p>\n"
-"                <p>Marque con claridad su opción en cada punto del orden del día.</p>\n"
-"            </div>\n"
-"        "
-
-#. module: base_assembly
-#: model:mail.template,body_html:base_assembly.mail_template_assembly_ballot_nominative_intro_default
-msgid ""
-"<div class=\"o_assembly_ballot_nominative_intro\">\n"
-"                <p>Personalized voting ballot for the assembly <strong t-out=\"object.name\"/>.</p>\n"
-"            </div>\n"
-"        "
-msgstr ""
-"<div class=\"o_assembly_ballot_nominative_intro\">\n"
-"                <p>Papeleta de votación personalizada para la asamblea <strong t-out=\"object.name\"/>.</p>\n"
-"            </div>\n"
-"        "
-
-#. module: base_assembly
-#: model:mail.template,body_html:base_assembly.mail_template_assembly_delegation_footer_default
-msgid ""
-"<div class=\"o_assembly_delegation_footer\">\n"
-"                <p>The delegator certifies the accuracy of the information above and authorizes the delegate to cast votes on their behalf for the indicated vote type(s).</p>\n"
-"            </div>\n"
-"        "
-msgstr ""
-"<div class=\"o_assembly_delegation_footer\">\n"
-"                <p>El delegante certifica la exactitud de la información anterior y autoriza al delegado a emitir votos en su nombre para el/los tipo(s) de voto indicados.</p>\n"
-"            </div>\n"
-"        "
-
-#. module: base_assembly
-#: model:mail.template,body_html:base_assembly.mail_template_assembly_delegation_document_default
-msgid ""
-"<div class=\"o_assembly_delegation_intro\">\n"
-"                <p>Vote delegation form for the assembly <strong t-out=\"object.name\"/>.</p>\n"
-"                <p>Identify the delegator and the delegate below and specify the vote types delegated.</p>\n"
-"            </div>\n"
-"        "
-msgstr ""
-"<div class=\"o_assembly_delegation_intro\">\n"
-"                <p>Formulario de delegación de voto para la asamblea <strong t-out=\"object.name\"/>.</p>\n"
-"                <p>Identifique al delegante y al delegado y especifique los tipos de voto delegados.</p>\n"
-"            </div>\n"
-"        "
-
-#. module: base_assembly
-#: model:mail.template,body_html:base_assembly.mail_template_assembly_publication_default
-msgid ""
-"<div class=\"o_assembly_publication\">\n"
-"                <h2 t-out=\"object.name\"/>\n"
-"                <p t-if=\"object.date_first_call\">\n"
-"                    <span t-field=\"object.date_first_call\"/>\n"
-"                    <t t-if=\"object.location\"> — <span t-field=\"object.location\"/></t>\n"
-"                </p>\n"
-"                <div t-if=\"object.description\" t-field=\"object.description\"/>\n"
-"            </div>\n"
-"        "
-msgstr ""
-"<div class=\"o_assembly_publication\">\n"
-"<h2 t-out=\"objeto.nombre\"/>\n"
-"<p t-if=\"objeto.fecha_primera_llamada\">\n"
-"<span t-field=\"object.date_first_call\"/>\n"
-"<t t-if=\"objeto.ubicación\"> — <span t-field=\"objeto.ubicación\"/></t>\n"
-"</p>\n"
-"<div t-if=\"objeto.descripción\" t-field=\"objeto.descripción\"/>\n"
-"</div>"
+"                            No:"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
 msgid "<em>Options (recorded)</em>"
-msgstr "<em>Opciones (grabadas)</em>"
+msgstr "<em>Opciones (guardadas)</em>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_kanban
 msgid "<i class=\"fa fa-check me-1\" title=\"Closed votings\"/>"
 msgstr "<i class=\"fa fa-check me-1\" title=\"Votaciones cerradas\"/>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_kanban
-msgid "<i class=\"fa fa-check-circle me-1\"/>Quorum reached"
-msgstr "<i class=\"fa fa-check-circle me-1\"/>Cuórum alcanzado"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid ""
-"<i class=\"fa fa-check-square-o fa-2x d-block text-primary\" "
-"title=\"Votings\"/>"
-msgstr ""
-"<i class=\"fa fa-check-square-o fa-2x d-block text-primary\" "
-"title=\"Votaciones\"/>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_kanban
@@ -318,34 +183,13 @@ msgstr "<i class=\"fa fa-database me-1\" title=\"Resultados\"/>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_kanban
-msgid "<i class=\"fa fa-exclamation-circle me-1\"/>Quorum pending"
-msgstr "<i class=\"fa fa-exclamation-circle me-1\"/>Cuórum pendiente"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_kanban
 msgid "<i class=\"fa fa-folder-open-o me-1\" title=\"Open votings\"/>"
 msgstr "<i class=\"fa fa-folder-open-o me-1\" title=\"Votaciones abiertas\"/>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid ""
-"<i class=\"fa fa-hand-o-right fa-2x d-block text-primary\" "
-"title=\"Delegations\"/>"
-msgstr ""
-"<i class=\"fa fa-hand-o-right fa-2x d-block text-primary\" "
-"title=\"Delegaciones\"/>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_kanban
 msgid "<i class=\"fa fa-list-alt me-1\" title=\"Agenda\"/>"
 msgstr "<i class=\"fa fa-list-alt me-1\" title=\"Orden del día\"/>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "<i class=\"fa fa-list-ol fa-2x d-block text-primary\" title=\"Agenda\"/>"
-msgstr ""
-"<i class=\"fa fa-list-ol fa-2x d-block text-primary\" title=\"Orden del "
-"día\"/>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_kanban
@@ -361,13 +205,6 @@ msgstr "<i class=\"fa fa-map-marker me-1\" title=\"Lugar\"/>"
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_kanban
 msgid "<i class=\"fa fa-pie-chart me-1\"/>Avg. participation (closed):"
 msgstr "<i class=\"fa fa-pie-chart me-1\"/>Participación media (cerradas):"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid ""
-"<i class=\"fa fa-qrcode fa-2x d-block text-primary\" title=\"Links &amp; "
-"QR\"/>"
-msgstr "<i class=\"fa fa-qrcode fa-2x d-block text-primary\" title=\"Enlaces y QR\"/>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_kanban
@@ -386,50 +223,9 @@ msgid "<i class=\"fa fa-tag me-1\" title=\"Assembly type\"/>"
 msgstr "<i class=\"fa fa-tag me-1\" title=\"Tipo de asamblea\"/>"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "<i class=\"fa fa-user fa-2x d-block text-primary\" title=\"Representations\"/>"
-msgstr ""
-"<i class=\"fa fa-user fa-2x d-block text-primary\" "
-"title=\"Representaciones\"/>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "<i class=\"fa fa-users fa-2x d-block text-primary\" title=\"Attendees\"/>"
-msgstr "<i class=\"fa fa-users fa-2x d-block text-primary\" title=\"Asistentes\"/>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_delegation_document_qweb
-msgid "<span class=\"fst-italic text-muted\">(Delegate name)</span>"
-msgstr ""
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_delegation_document_qweb
-msgid ""
-"<span class=\"fst-italic text-muted\">(Member name — generate attendees to "
-"preview a sample)</span>"
-msgstr ""
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_ballot_nominative_intro_qweb
-msgid ""
-"<span class=\"fst-italic text-muted\">(Member — generate attendees for a "
-"sample name)</span>"
-msgstr ""
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_roster_footer
-msgid "<span class=\"ms-3\">Attendance ratio:</span>"
-msgstr "<span class=\"ms-3\">Proporción de asistencia:</span>"
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_roster_footer
 msgid "<span class=\"ms-3\">Attended (confirmed):</span>"
 msgstr "<span class=\"ms-3\">Asistió (confirmado):</span>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_roster_footer
-msgid "<span class=\"ms-3\">Quorum reached:</span>"
-msgstr "<span class=\"ms-3\">Cuórum alcanzado:</span>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form_session
@@ -438,6 +234,10 @@ msgstr "<span class=\"o_stat_text\">Elemento del orden del día</span>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
+msgid "<span class=\"o_stat_text\">Agenda items</span>"
+msgstr "<span class=\"o_stat_text\">Puntos</span>"
+
+#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form
 msgid "<span class=\"o_stat_text\">Agenda</span>"
 msgstr "<span class=\"o_stat_text\">Orden del día</span>"
@@ -453,7 +253,7 @@ msgid "<span class=\"o_stat_text\">Assembly</span>"
 msgstr "<span class=\"o_stat_text\">Asamblea</span>"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_partner_view_form_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.view_partner_form
 msgid "<span class=\"o_stat_text\">Attendances</span>"
 msgstr "<span class=\"o_stat_text\">Asistencias</span>"
 
@@ -464,19 +264,9 @@ msgstr "<span class=\"o_stat_text\">Asistentes</span>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "<span class=\"o_stat_text\">Communication log</span>"
-msgstr "<span class=\"o_stat_text\">Registro de comunicaciones</span>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_partner_view_form_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.view_partner_form
 msgid "<span class=\"o_stat_text\">Delegations</span>"
 msgstr "<span class=\"o_stat_text\">Delegaciones</span>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "<span class=\"o_stat_text\">Links &amp; QR</span>"
-msgstr "<span class=\"o_stat_text\">Enlaces y enlacesQR</span>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
@@ -513,7 +303,7 @@ msgstr "<span class=\"o_stat_text\">Votaciones</span>"
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_kanban
 msgid "<span class=\"text-muted opacity-50\">&gt;</span>"
-msgstr ""
+msgstr "<span class=\"text-muted opacity-50\">&gt;</span>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form_session_manual
@@ -578,44 +368,14 @@ msgstr ""
 "<span class=\"text-muted\">Todos los tipos de votación en la asamblea</span>"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_asm_meta_block
-msgid "<span class=\"text-muted\">Announcement:</span>"
-msgstr "<span class=\"text-muted\">Anuncio:</span>"
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form_session
 msgid "<span class=\"text-muted\">Assembly</span>"
 msgstr "<span class=\"text-muted\">Asamblea</span>"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_asm_meta_block
-msgid "<span class=\"text-muted\">Company:</span>"
-msgstr "<span class=\"text-muted\">Empresa:</span>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_asm_meta_block
-msgid "<span class=\"text-muted\">First call:</span>"
-msgstr "<span class=\"text-muted\">Primera llamada:</span>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_asm_meta_block
-msgid "<span class=\"text-muted\">President:</span>"
-msgstr "<span class=\"text-muted\">Presidente:</span>"
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_representation_cell
 msgid "<span class=\"text-muted\">Represented by </span>"
 msgstr "<span class=\"text-muted\">Representado por </span>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_asm_meta_block
-msgid "<span class=\"text-muted\">Second call:</span>"
-msgstr "<span class=\"text-muted\">Segunda llamada:</span>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_asm_meta_block
-msgid "<span class=\"text-muted\">Secretary:</span>"
-msgstr "<span class=\"text-muted\">Secretaria:</span>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form_session
@@ -650,7 +410,7 @@ msgstr "<span class=\"text-muted\">votaciones</span>"
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
 msgid "<span> – </span>"
-msgstr ""
+msgstr "<span> – </span>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_kanban
@@ -668,57 +428,16 @@ msgstr ""
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_kanban
-msgid "<span><i class=\"fa fa-users me-1\"/>Quorum</span>"
-msgstr "<span><i class=\"fa fa-users me-1\"/>Cuórum</span>"
+msgid "<span><i class=\"fa fa-users me-1\"/>Attendees</span>"
+msgstr "<span><i class=\"fa fa-users me-1\"/>Asistentes</span>"
 
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_roster_footer
-msgid "<span>Convocable members:</span>"
-msgstr "<span>Miembros convocables:</span>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
-msgid "<span>Item </span>"
-msgstr "<span>Punto </span>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_asm_meta_block
-msgid "<span>Reference</span>:"
-msgstr "<span>Referencia</span>:"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_call_doc
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_call_doc_votes
-msgid "<strong>Addressee</strong>"
-msgstr "<strong>Destinatario</strong>"
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_agenda_summary_compact_block
 msgid "<strong>Agenda summary</strong>"
 msgstr "<strong>Resumen de la agenda</strong>"
 
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_agenda_af_list_block
-msgid "<strong>Agenda</strong>"
-msgstr "<strong>Orden del día</strong>"
 
+#. odoo-python
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_publication_document_doc
-msgid "<strong>Assembly notice</strong>"
-msgstr "<strong>Aviso de asamblea</strong>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_ballot_nominative_intro_qweb
-msgid "<strong>Assembly: </strong>"
-msgstr ""
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_present
-msgid "<strong>Attendance sheet (present only)</strong>"
-msgstr "<strong>Hoja de asistencia (solo presente)</strong>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_present_delegation
 msgid "<strong>Attendance sheet (present, with delegated votes)</strong>"
 msgstr "<strong>Hoja de asistencia (presente, con votos delegados)</strong>"
 
@@ -734,22 +453,7 @@ msgstr ""
 "<em>Listado: no finalizado</em> = solo en la lista (no cuenta para el cuórum ni como delegado activo).\n"
 "<em>Asistió (presente confirmado)</em> = realmente presente; cuenta para el cuórum y la votación; las delegaciones a esta persona pueden activarse.\n"
 "<em>No asistió</em> = registrado ausente; no cuenta para el cuórum; use <strong>Marcar presente</strong> si eso cambia."
-
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid ""
-"<strong>Attendance:</strong>\n"
-"                                <em>Listed — not finalized</em> = on the list only (not quorum, not an active delegate).\n"
-"                                <em>Attended (confirmed present)</em> = counts for quorum and voting; delegations to this person can activate.\n"
-"                                <em>Did not attend</em> = absent (excluded from quorum).\n"
-"                                Each row shows one main action: <strong>Mark Present</strong> until attended, then <strong>Mark Absent</strong>. Use the print icon for a ballot PDF."
-msgstr ""
-"<strong>Asistencia:</strong>\n"
-"<em>Listado: no finalizado</em> = solo en la lista (no cuenta para el cuórum ni como delegado activo).\n"
-"<em>Asistió (presente confirmado)</em> = cuenta para el cuórum y la votación; las delegaciones a esta persona pueden activarse.\n"
-"<em>No asistió</em> = ausente (excluido del cuórum).\n"
-"Cada fila muestra una acción principal: <strong>Marcar presente</strong> hasta confirmar asistencia y luego <strong>Marcar ausente</strong>. Use el icono de impresión para un PDF de papeleta."
-
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_all
 msgid "<strong>Attendees list (all)</strong>"
@@ -772,6 +476,9 @@ msgid ""
 "                            add one row per ballot choice (<em>Choice</em>), reorder with the handle, then enter <em>Votes</em> (aggregate counts per choice).\n"
 "                            Only totals are stored; individual attendee votes are not recorded."
 msgstr ""
+"<strong>Opciones y totales solo para este punto del orden del día:</strong>\n"
+"                            añade una fila por opción de votación (<em>Opción</em>), reordena con el manejador, luego introduce <em>Votos</em> (recuentos totales por opción).\n"
+"                            Solo se almacenan los totales; los votos individuales de los asistentes no se registran."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form_session_manual
@@ -779,6 +486,8 @@ msgid ""
 "<strong>Choices and totals for this agenda item only:</strong>\n"
 "                            one row per ballot option; <em>Choice</em> is the label, <em>Votes</em> the aggregate count (not per attendee)."
 msgstr ""
+"<strong>Opciones y totales solo para este punto del orden del día:</strong>\n"
+"                            una fila por opción de votación; <em>Opción</em> es la etiqueta, <em>Votos</em> el recuento total (no por asistente)."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
@@ -788,42 +497,13 @@ msgid "<strong>Date:</strong> _____________________________"
 msgstr "<strong>Fecha:</strong> _____________________________"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid ""
-"<strong>Delegator</strong> transfers units only for the vote types on the "
-"row (empty = all types on this assembly)."
-msgstr ""
-"El <strong>delegador</strong> transfiere unidades solo para los tipos de "
-"voto en la fila (vacío = todos los tipos en esta asamblea)."
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_publication_qweb
-msgid "<strong>First call: </strong>"
-msgstr ""
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_document_preview_wizard_view_form
 msgid ""
 "<strong>How this preview works:</strong>\n"
-"                        Odoo renders configured <em>mail templates</em> when they produce body content; otherwise the\n"
-"                        built-in QWeb fallbacks below are used. Use <strong>Refresh</strong> after changing templates,\n"
-"                        agenda lines, or assembly fields."
+"                        The document text on the assembly (seeded from the assembly type, with placeholders like <code>{{ object.name }}</code>) is rendered here. Use <strong>Refresh</strong> after editing the texts, agenda lines, or assembly fields."
 msgstr ""
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_call_doc_votes
-msgid "<strong>Individual call (with votes)</strong>"
-msgstr "<strong>Citación individual (con votos)</strong>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_call_doc
-msgid "<strong>Individual call</strong>"
-msgstr "<strong>Citación individual</strong>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_publication_qweb
-msgid "<strong>Location: </strong>"
-msgstr ""
+"<strong>Cómo funciona esta vista previa:</strong>\n"
+"                        El texto del documento de la asamblea (inicializado desde el tipo de asamblea, con marcadores de posición como <code>{{ object.name }}</code>) se renderiza aquí. Usa <strong>Actualizar</strong> después de editar los textos, líneas del orden del día o campos de la asamblea."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
@@ -832,7 +512,9 @@ msgid ""
 "                        enter aggregate totals per ballot option only; per-attendee vote lines are not created for this item."
 msgstr ""
 "<strong>Voto manual (multiopción):</strong>\n"
-"ingresar totales agregados por opción de boleta únicamente;No se crean líneas de voto por asistente para este elemento."
+"                        introduce solo los totales agregados por opción de votación; no se crean líneas de voto por asistente para este punto."
+"<strong>Voto manual (multiopción):</strong>\n"
+"ingresar totales agregados por opción de papeleta únicamente;No se crean líneas de voto por asistente para este elemento."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
@@ -846,11 +528,6 @@ msgstr ""
 "El sistema no registra cómo votó cada asistente;no se crean líneas de voto por asistente para este elemento."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_ballot_nominative_intro_qweb
-msgid "<strong>Member: </strong>"
-msgstr ""
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form_session_manual
 msgid ""
 "<strong>Multi-option mode:</strong>\n"
@@ -858,6 +535,15 @@ msgid ""
 msgstr ""
 "<strong>Modo de opciones múltiples:</strong>\n"
 "las opciones definen las opciones disponibles;<em>Votos</em> almacena únicamente los recuentos finales."
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form_session_manual
+msgid ""
+"<strong>No vote:</strong>\n"
+"                        informational item; review it and click <strong>Mark addressed</strong> (or <strong>Skip and next</strong>), then move to the next item."
+msgstr ""
+"<strong>Sin votación:</strong>\n"
+"                        elemento informativo; revísalo y haz clic en <strong>Marcar abordado</strong> (o <strong>Saltar y siguiente</strong>), luego pasa al siguiente elemento."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_record
@@ -885,16 +571,6 @@ msgstr "<strong>Registro de representación</strong>"
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_table_block
 msgid "<strong>Representations (registered)</strong>"
 msgstr "<strong>Representaciones (registradas)</strong>"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_publication_qweb
-msgid "<strong>Second call: </strong>"
-msgstr ""
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_publication_qweb
-msgid "<strong>Session start: </strong>"
-msgstr ""
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_delegation_certificate
@@ -949,11 +625,6 @@ msgid "<strong>Vote delegation register</strong>"
 msgstr "<strong>Registro de delegación de votos</strong>"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_call_doc_votes
-msgid "<strong>Votes by type</strong>"
-msgstr "<strong>Votos por tipo</strong>"
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
 msgid ""
 "<strong>Weighted vote:</strong>\n"
@@ -966,19 +637,15 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid ""
 "<strong>Where to use it:</strong> top smart button <strong>Links &amp; "
-"QR</strong> (and the same shortcut under the title), or each attendee form —"
-" header buttons <strong>Open attendance link</strong> / <strong>Show "
-"QR</strong>, plus the <strong>Tracked attendance URL</strong> field. Opens "
-"are counted on the link tracker. Landing/error QWeb: Settings → Assemblies →"
-" Attendance deep links (HTTP)."
+"QR</strong>, or each attendee form — header buttons <strong>Open attendance "
+"link</strong> / <strong>Show QR</strong>, plus the <strong>Tracked "
+"attendance URL</strong> field. Opens are counted on the link tracker. "
+"Landing/error QWeb: Settings → Assemblies → Attendance deep links (HTTP)."
 msgstr ""
 "<strong>Dónde usarlo:</strong> botón inteligente superior <strong>Enlaces y "
-"enlaces.QR</strong> (y el mismo acceso directo debajo del título), o el "
-"formulario de cada asistente: botones de encabezado <strong>Abrir enlace de "
-"asistencia</strong> / <strong>Mostrar QR</strong>, más el campo <strong>URL "
-"de asistencia registrada</strong>.Las aperturas se cuentan en el rastreador "
-"de enlaces.Aterrizaje/error QWeb: Configuración → Asambleas → Enlaces "
-"profundos de asistencia (HTTP)."
+"códigos QR</strong>, o formulario de cada asistente — botones de encabezado <strong>Abrir enlace de asistencia</strong> / <strong>Mostrar código QR</strong>, "
+"además del campo <strong>URL de asistencia rastreada</strong>. Los aperturas se cuentan en el rastreador de enlaces. "
+"Landing/error QWeb: Configuración → Asambleas → Enlaces profundos de asistencia (HTTP)."
 
 #. module: base_assembly
 #. odoo-python
@@ -993,8 +660,8 @@ msgstr ""
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_voting_line.py:0
-msgid "A vote line can only be created when the voting is open."
-msgstr "Una línea de voto solo puede crearse cuando la votación está abierta."
+msgid "A vote record can only be created when the voting is open."
+msgstr "Un registro de voto solo se puede crear cuando la votación está abierta."
 
 #. module: base_assembly
 #. odoo-python
@@ -1018,38 +685,6 @@ msgstr ""
 "Una sesión de votación sólo puede iniciarse en modo de voto ponderado."
 
 #. module: base_assembly
-#: model:mail.template,description:base_assembly.mail_template_assembly_publication_default
-msgid "AF v2.0 default convocation/publication layout for assembly.assembly."
-msgstr ""
-"AF v2.0: diseño por defecto de convocatoria/publicación para "
-"assembly.assembly."
-
-#. module: base_assembly
-#: model:mail.template,description:base_assembly.mail_template_assembly_delegation_footer_default
-msgid "AF v2.0 default delegation PDF footer."
-msgstr "AF v2.0: pie por defecto del PDF de delegación."
-
-#. module: base_assembly
-#: model:mail.template,description:base_assembly.mail_template_assembly_delegation_document_default
-msgid "AF v2.0 default delegation PDF introduction."
-msgstr "AF v2.0: introducción por defecto del PDF de delegación."
-
-#. module: base_assembly
-#: model:mail.template,description:base_assembly.mail_template_assembly_ballot_nominative_intro_default
-msgid "AF v2.0 default nominative ballot introduction."
-msgstr "AF v2.0: introducción por defecto de la papeleta nominativa."
-
-#. module: base_assembly
-#: model:mail.template,description:base_assembly.mail_template_assembly_ballot_intro_default
-msgid "AF v2.0 default voting ballot introduction."
-msgstr "AF v2.0: introducción por defecto de la papeleta de votación."
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "Abrir registro de asistentes"
-msgstr ""
-
-#. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting_line__vote_option__abstention
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting_result__vote_option__abstention
 msgid "Abstention"
@@ -1062,7 +697,6 @@ msgstr "Abstención manual"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_tree
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Abstention (total)"
 msgstr "Abstención (total)"
 
@@ -1127,30 +761,18 @@ msgstr "Añada al menos una opción de papeleta antes de cerrar este punto."
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
 msgid "Add at least one ballot option row before entering vote counts."
 msgstr ""
-"Agregue al menos una fila de opciones de boleta antes de ingresar el conteo "
+"Agregue al menos una fila de opciones de papeleta antes de ingresar el conteo "
 "de votos."
 
 #. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_assembly.py:0
-msgid ""
-"Add convocation text on this assembly for the full notice. Set the first "
-"call date to show when and where."
-msgstr ""
-"Añada el texto de convocatoria en esta asamblea para el aviso completo. "
-"Indique la fecha de primera convocatoria para cuándo y dónde."
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
+msgid "Address"
+msgstr "Abordar"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_publication_qweb
-msgid ""
-"Additional legal or practical wording can be stored in the assembly description field,\n"
-"                        or supplied through a configured convocation mail template."
-msgstr ""
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "Address (for documents)"
-msgstr "Dirección (para documentos)"
+#: model:ir.model.fields.selection,name:base_assembly.selection__assembly_agenda__agenda_state__addressed
+msgid "Addressed"
+msgstr "Abordado"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_communication_send_wizard_view_form
@@ -1160,6 +782,7 @@ msgid ""
 " tracking depends on your mail stack; delivery state is stored on each "
 "email."
 msgstr ""
+"Después de enviar, usa el botón inteligente <strong>Correos electrónicos salientes</strong> de la asamblea para revisar la cola de correo (estado: saliente, enviado o excepción). El rastreo de aperturas depende de tu pila de correo; el estado de entrega se almacena en cada correo."
 "Después del envío, utilice el botón inteligente del conjunto <strong>Correos"
 " electrónicos salientes</strong> para revisar la cola de correo (estado: "
 "saliente, enviado o excepción).El seguimiento abierto depende de su pila de "
@@ -1169,8 +792,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_agenda.py:0
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__agenda_ids
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_publication_qweb
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Agenda"
 msgstr "Orden del día"
 
@@ -1179,7 +800,6 @@ msgstr "Orden del día"
 #: code:addons/base_assembly/models/assembly_voting.py:0
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda_option__agenda_id
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting__agenda_id
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_ballot_nominative_intro_qweb
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form
 msgid "Agenda item"
@@ -1187,23 +807,21 @@ msgstr "Punto del orden del día"
 
 #. module: base_assembly
 #. odoo-python
+#: code:addons/base_assembly/models/assembly_agenda.py:0
+msgid "Agenda item (session)"
+msgstr "Punto del orden del día (sesión)"
+
+#. module: base_assembly
+#. odoo-python
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 #: model:ir.actions.act_window,name:base_assembly.assembly_agenda_action
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__count_agenda_items
-#: model:ir.ui.menu,name:base_assembly.assembly_agenda_menu
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_graph
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_pivot
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_search
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
 msgid "Agenda items"
 msgstr "Puntos del orden del día"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_publication_qweb
-msgid ""
-"Agenda items will appear here once they are added to this assembly.\n"
-"                        Use the agenda tab on the assembly form to define each point, vote mode, and materials."
-msgstr ""
 
 #. module: base_assembly
 #: model:ir.model,name:base_assembly.model_assembly_agenda_option
@@ -1219,10 +837,11 @@ msgstr "Apoderado"
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 msgid ""
-"All agenda items must be voted on or skipped before closing the assembly."
+"All agenda items must be voted on, addressed or skipped before closing the "
+"assembly."
 msgstr ""
-"Todos los puntos del orden del día deben votarse o omitirse antes de cerrar "
-"la asamblea."
+"Todos los puntos del orden del día deben ser votados, abordados o omitidos "
+"antes de cerrar la asamblea."
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_communication_send_wizard__recipient_audience__all
@@ -1237,7 +856,7 @@ msgstr "Permitir anotaciones de asistencia"
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_allow_edit_closed_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_allow_edit_closed_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
 msgid "Allow editing closed assemblies"
 msgstr "Permitir editar asambleas cerradas"
 
@@ -1250,7 +869,22 @@ msgstr "Permitir votación online"
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_communication_send_wizard__allowed_partner_ids
 msgid "Allowed Partner"
-msgstr "Socio permitido"
+msgstr "Contacto permitido"
+
+#. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_delegation__allowed_delegate_partner_ids
+msgid "Allowed delegates"
+msgstr "Delegados permitidos"
+
+#. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_delegation__allowed_delegator_partner_ids
+msgid "Allowed delegators"
+msgstr "Delegantes permitidos"
+
+#. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_representation__allowed_owner_partner_ids
+msgid "Allowed represented members"
+msgstr "Miembros representados permitidos"
 
 #. module: base_assembly
 #: model:ir.model.constraint,message:base_assembly.constraint_assembly_assembly_assembly_name_company_uniq
@@ -1269,26 +903,13 @@ msgid "Announced"
 msgstr "Convocada"
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__date_announcement
-msgid "Announcement date"
-msgstr "Fecha de convocatoria"
-
-#. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_assembly.py:0
-msgid "Announcement date cannot be after the calendar day of the first call."
-msgstr ""
-"La fecha de convocatoria no puede ser posterior al día natural de la primera"
-" convocatoria."
-
-#. module: base_assembly
-#: model:ir.model.fields.selection,name:base_assembly.selection__assembly_assembly__quorum_second_call_type__any
-#: model:ir.model.fields.selection,name:base_assembly.selection__assembly_type__default_quorum_second_call_type__any
-msgid "Any"
-msgstr "Cualquiera"
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
+msgid "Archive"
+msgstr "Archivar"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_representation_view_search
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
 msgid "Archived"
 msgstr "Archivado"
 
@@ -1300,8 +921,8 @@ msgstr "Archivado"
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_graph
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_pivot
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_search
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_partner_view_form_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:base_assembly.view_partner_form
 msgid "Assemblies"
 msgstr "Asambleas"
 
@@ -1314,9 +935,10 @@ msgstr "Asambleas"
 #: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/models/assembly_mixin.py:0
 #: code:addons/base_assembly/models/assembly_representation.py:0
+#: code:addons/base_assembly/models/assembly_voting.py:0
+#: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 #: model:ir.model,name:base_assembly.model_assembly_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__assembly_id
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__assembly_id
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly_header_actions_wizard__assembly_id
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee__assembly_id
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_ballot_print_wizard__assembly_id
@@ -1327,7 +949,6 @@ msgstr "Asambleas"
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting__assembly_id
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting_line__assembly_id
 #: model:ir.module.category,name:base_assembly.module_category_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_delegation_document_qweb
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
@@ -1337,12 +958,6 @@ msgstr "Asambleas"
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form
 msgid "Assembly"
 msgstr "Asamblea"
-
-#. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_assembly.py:0
-msgid "Assembly #%s"
-msgstr "Asamblea n.º %s"
 
 #. module: base_assembly
 #: model:ir.module.category,description:base_assembly.module_category_assembly
@@ -1373,6 +988,8 @@ msgstr "Asistencia a asamblea — %s"
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/res_partner.py:0
+#: model:ir.model.fields,field_description:base_assembly.field_fsm_location__assembly_attendee_ids
+#: model:ir.model.fields,field_description:base_assembly.field_fsm_person__assembly_attendee_ids
 #: model:ir.model.fields,field_description:base_assembly.field_res_partner__assembly_attendee_ids
 #: model:ir.model.fields,field_description:base_assembly.field_res_users__assembly_attendee_ids
 msgid "Assembly attendances"
@@ -1384,20 +1001,45 @@ msgid "Assembly attendee"
 msgstr "Asistente a asamblea"
 
 #. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_assembly_delegation__allowed_delegate_partner_ids
+msgid "Assembly attendees eligible to receive delegated votes."
+msgstr "Asistentes a asamblea elegibles para recibir votos delegados."
+
+#. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_mail_communication.py:0
 msgid "Assembly convocation: %s"
 msgstr "Convocatoria de asamblea: %s"
 
 #. module: base_assembly
-#: model:mail.template,subject:base_assembly.mail_template_assembly_publication_default
-msgid "Assembly convocation: {{ object.name }}"
-msgstr "Convocatoria de asamblea: {{ object.name }}"
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__date_start
+msgid "Assembly date"
+msgstr "Inicio de sesión"
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
+msgid "Assembly date:"
+msgstr "Fecha de asamblea:"
 
 #. module: base_assembly
 #: model:ir.model,name:base_assembly.model_assembly_assembly_header_actions_wizard
 msgid "Assembly header secondary actions"
+msgstr "Acciones secundarias del encabezado de asamblea"
+
+#. module: base_assembly
+#: model:res.groups,comment:base_assembly.assembly_group_user
+msgid ""
+"Assembly member access: read assemblies and agenda, register own attendance,"
+" and cast own votes. Record rules limit attendee, delegation, "
+"representation, and voting-line rows to the user's own partner. Base level "
+"of the Assembly category."
 msgstr ""
+"Acceso de miembro de asamblea: leer asambleas y orden del día, registrar la "
+"propia asistencia y emitir los propios votos. Las reglas de registro limitan"
+" las filas de asistente, delegación, representación y líneas de voto al "
+"contacto del propio usuario. Nivel base de la categoría Asambleas."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
@@ -1411,7 +1053,6 @@ msgid "Assembly not available"
 msgstr "Asamblea no disponible"
 
 #. module: base_assembly
-#. odoo-python
 #: code:addons/base_assembly/controllers/attendance.py:0
 msgid "Assembly not found."
 msgstr "Asamblea no encontrada."
@@ -1437,7 +1078,7 @@ msgstr ""
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_sequence_id
 #: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_sequence_id
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
 msgid "Assembly reference sequence"
 msgstr "Secuencia de referencia de asamblea"
 
@@ -1460,14 +1101,22 @@ msgstr "Configuración de asamblea"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__assembly_state
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee__assembly_state
 msgid "Assembly state"
-msgstr "estado de asamblea"
+msgstr "Estado de asamblea"
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/controllers/attendance.py:0
 msgid "Assembly status"
 msgstr "Estado de la asamblea"
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
+msgid "Assembly text"
+msgstr "Texto de asamblea"
 
 #. module: base_assembly
 #: model:ir.model,name:base_assembly.model_assembly_type
@@ -1494,31 +1143,6 @@ msgid "Assembly voting"
 msgstr "Votación de asamblea"
 
 #. module: base_assembly
-#: model:mail.template,name:base_assembly.mail_template_assembly_ballot_intro_default
-msgid "Assembly: ballot introduction (default)"
-msgstr "Asamblea: introducción de papeleta (predeterminada)"
-
-#. module: base_assembly
-#: model:mail.template,name:base_assembly.mail_template_assembly_delegation_document_default
-msgid "Assembly: delegation document (default)"
-msgstr "Asamblea: documento de delegación (predeterminado)"
-
-#. module: base_assembly
-#: model:mail.template,name:base_assembly.mail_template_assembly_delegation_footer_default
-msgid "Assembly: delegation footer (default)"
-msgstr "Asamblea: pie de delegación (predeterminado)"
-
-#. module: base_assembly
-#: model:mail.template,name:base_assembly.mail_template_assembly_ballot_nominative_intro_default
-msgid "Assembly: nominative ballot introduction (default)"
-msgstr "Asamblea: introducción de papeleta nominativa (predeterminada)"
-
-#. module: base_assembly
-#: model:mail.template,name:base_assembly.mail_template_assembly_publication_default
-msgid "Assembly: publication (default)"
-msgstr "Asamblea: publicación (predeterminada)"
-
-#. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 msgid ""
@@ -1534,6 +1158,12 @@ msgid "Attachment Count"
 msgstr "Nº de adjuntos"
 
 #. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/controllers/attendance.py:0
+msgid "Attendance"
+msgstr "Asistencia"
+
+#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
 msgid "Attendance & sign-in (tracked link)"
 msgstr "Asistencia e inicio de sesión (enlace de seguimiento)"
@@ -1542,6 +1172,11 @@ msgstr "Asistencia e inicio de sesión (enlace de seguimiento)"
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
 msgid "Attendance (defaults for new assemblies)"
 msgstr "Asistencia (valores por defecto para nuevas asambleas)"
+
+#. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee__attendance_qr_png
+msgid "Attendance QR"
+msgstr "QR de la asistencia"
 
 #. module: base_assembly
 #. odoo-python
@@ -1556,14 +1191,14 @@ msgid "Attendance check-in"
 msgstr "Registro de asistencia"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
 msgid "Attendance deep link — error page"
-msgstr ""
+msgstr "Enlace profundo de asistencia — página de error"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
 msgid "Attendance deep link — landing page"
-msgstr ""
+msgstr "Enlace profundo de asistencia — página de aterrizaje"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_attendance_error_qweb_id
@@ -1576,6 +1211,11 @@ msgstr "Página de error de enlace profundo de asistencia (QWeb)"
 #: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_attendance_landing_qweb_id
 msgid "Attendance deep-link landing page (QWeb)"
 msgstr "Página de inicio de enlace profundo de asistencia (QWeb)"
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
+msgid "Attendance deep-link pages"
+msgstr "Páginas de enlaces profundos de asistencia"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_search_call_register
@@ -1618,6 +1258,19 @@ msgid ""
 "Present\" or \"Mark Absent\" on the attendee (or the same server actions / "
 "API those buttons call)."
 msgstr ""
+"El estado de asistencia no puede cambiar con un guardado genérico. Use \"Marcar presente\" o \"Marcar ausente\" en el asistente."
+
+#. module: base_assembly
+#: model:ir.actions.act_window,name:base_assembly.assembly_attendee_action_summary
+#: model:ir.ui.menu,name:base_assembly.assembly_attendee_summary_menu
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_summary
+msgid "Attendance summary"
+msgstr "Resumen de asistencia"
+
+#. module: base_assembly
+#: model_terms:ir.actions.act_window,help:base_assembly.assembly_attendee_action_summary
+msgid "Attendance summary across assemblies, grouped by assembly."
+msgstr "Resumen de asistencia en todas las asambleas, agrupado por asamblea."
 
 #. module: base_assembly
 #. odoo-python
@@ -1626,6 +1279,8 @@ msgid "Attendance — %s"
 msgstr "Asistencia — %s"
 
 #. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_fsm_location__count_assembly_attendees
+#: model:ir.model.fields,field_description:base_assembly.field_fsm_person__count_assembly_attendees
 #: model:ir.model.fields,field_description:base_assembly.field_res_partner__count_assembly_attendees
 #: model:ir.model.fields,field_description:base_assembly.field_res_users__count_assembly_attendees
 msgid "Attendances count"
@@ -1671,6 +1326,12 @@ msgid "Attendee name"
 msgstr "Nombre del asistente"
 
 #. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/controllers/attendance.py:0
+msgid "Attendee not found."
+msgstr "Asistente no encontrado."
+
+#. module: base_assembly
 #: model:ir.model,name:base_assembly.model_assembly_attendee_vote
 msgid "Attendee vote by type"
 msgstr "Voto del asistente por tipo"
@@ -1679,7 +1340,6 @@ msgstr "Voto del asistente por tipo"
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__attendee_ids
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_search
 msgid "Attendees"
 msgstr "Asistentes"
@@ -1721,32 +1381,31 @@ msgid "Avg. participation (closed)"
 msgstr "Participación media (cerradas)"
 
 #. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
+msgid "Back to draft"
+msgstr "Volver a borrador"
+
+#. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
 msgid "Ballot PDF (merged)"
 msgstr "Papeleta PDF (fusionar)"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_communication_send_wizard__attach_generic_ballot_pdf
 msgid "Ballot PDF (merged, all attendees)"
-msgstr "Boleta en PDF (fusionada, todos los asistentes)"
+msgstr "Papeleta en PDF (fusionada, todos los asistentes)"
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_document_preview_wizard__document_type__ballot_intro
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
 msgid "Ballot introduction"
 msgstr "Introducción de papeleta"
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_af_ballot_intro_fallback_qweb_id
-#: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_af_ballot_intro_fallback_qweb_id
-msgid "Ballot introduction QWeb fallback"
-msgstr "Introducción a la boleta Reserva QWeb"
-
-#. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__ballot_intro_mail_template_id
-msgid "Ballot introduction template"
-msgstr "Plantilla de introducción de papeleta"
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__ballot_intro_text
+msgid "Ballot introduction text"
+msgstr "Texto de introducción de la papeleta"
 
 #. module: base_assembly
 #. odoo-python
@@ -1760,7 +1419,7 @@ msgstr ""
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_document_preview_wizard__document_category__ballots
 msgid "Ballots"
-msgstr ""
+msgstr "Papeletas"
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting_line__vote_option__blank
@@ -1775,7 +1434,6 @@ msgstr "Voto en blanco manual"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_tree
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Blank (total)"
 msgstr "En blanco (total)"
 
@@ -1785,15 +1443,7 @@ msgid "Blank ☐"
 msgstr "En blanco ☐"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_delegation_footer_qweb
-msgid ""
-"By signing below, the delegator confirms that the information provided is accurate and that they authorise\n"
-"                the delegate to cast votes on their behalf for the assembly"
-msgstr ""
-
-#. module: base_assembly
 #: model:ir.actions.act_window,name:base_assembly.assembly_attendee_action_call_register
-#: model:ir.ui.menu,name:base_assembly.assembly_attendee_call_register_menu
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form_call_register
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_call_register
 msgid "Call register"
@@ -1806,7 +1456,6 @@ msgstr "Acta de asistencia (presentes)"
 
 #. module: base_assembly
 #: model:ir.actions.act_window,name:base_assembly.assembly_attendee_action_called_members
-#: model:ir.ui.menu,name:base_assembly.assembly_attendee_called_menu
 msgid "Called members"
 msgstr "Convocados"
 
@@ -1923,14 +1572,6 @@ msgid "Channel"
 msgstr "Canal"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid ""
-"Chatter messages and notes on this assembly (including send summaries)."
-msgstr ""
-"Mensajes de Chatter y notas sobre esta asamblea (incluido el envío de "
-"resúmenes)."
-
-#. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda_option__name
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_option_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_option_view_tree
@@ -1941,19 +1582,27 @@ msgstr "Opción"
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
 msgid "Choose an attendee with an email address."
 msgstr "Elija un asistente con una dirección de correo electrónico."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__city_id
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "City (directory)"
 msgstr "Ciudad (directorio)"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__city
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "City (manual)"
 msgstr "Ciudad"
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/controllers/attendance.py:0
+msgid "Clear"
+msgstr "Limpiar"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_document_preview_wizard_view_form
@@ -2028,9 +1677,14 @@ msgid "Closing"
 msgstr "Cierre"
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__code
-msgid "Code"
-msgstr "Código"
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
+msgid "Closing paragraph after the agenda…"
+msgstr "Párrafo de cierre después del orden del día…"
+
+#. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_assembly_assembly__final_text
+msgid "Closing paragraph printed after the agenda on the convocation."
+msgstr "Párrafo de cierre impreso después de la agenda en la convocatoria."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
@@ -2039,14 +1693,7 @@ msgstr "Comunicación"
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_assembly.py:0
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
-msgid "Communication log"
-msgstr "Registro de comunicación"
-
-#. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
 msgid "Communications sent"
 msgstr "Comunicaciones enviadas"
 
@@ -2076,24 +1723,21 @@ msgstr "Compañía"
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Company:"
-msgstr ""
-
-#. module: base_assembly
-#: model:ir.model,name:base_assembly.model_res_config_settings
-msgid "Config Settings"
-msgstr "Ajustes de configuración"
+msgstr "Compañía:"
 
 #. module: base_assembly
 #: model:ir.ui.menu,name:base_assembly.assembly_menu_config
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
 msgid "Configuration"
 msgstr "Configuración"
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_delegation__delegation_state__confirmed
 msgid "Confirmed"
-msgstr ""
+msgstr "Confirmada"
 
 #. module: base_assembly
 #: model:ir.model,name:base_assembly.model_res_partner
@@ -2111,45 +1755,29 @@ msgstr ""
 "cuando corresponda."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
-msgid "Control"
-msgstr "Seguimiento"
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
 msgid "Controls (flags)"
 msgstr "Controles (indicadores)"
 
 #. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
+msgid "Convocable partners"
+msgstr "Socios convocables"
+
+#. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_document_preview_wizard__document_category__convocation
 msgid "Convocation"
-msgstr ""
+msgstr "Convocatoria"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "Convocation / description"
-msgstr "Convocatoria / descripción"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_call_doc
-msgid ""
-"Convocation summary and agenda for the addressee. Registered legal "
-"representations are listed in the representation register report."
-msgstr ""
-"Resumen de la convocatoria y orden del día del destinatario.Las "
-"representaciones legales inscritas figuran en el informe de registro de "
-"representaciones."
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_call_doc_votes
-msgid "Convocation summary, agenda, and vote entitlements for the addressee."
-msgstr ""
-"Resumen de la convocatoria, orden del día y derechos de voto del "
-"destinatario."
+msgid "Convocation / publication text…"
+msgstr "Texto de convocatoria/publicación…"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__description
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
 msgid "Convocation text"
 msgstr "Texto de convocatoria"
 
@@ -2165,10 +1793,23 @@ msgstr ""
 "desactivado, no se crean enlaces cortos de asistente para QR."
 
 #. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_assembly_type__default_publication_text
+msgid ""
+"Copied to the convocation text of new assemblies of this type. Supports "
+"placeholders such as {{ object.name }}."
+msgstr "Se copia al texto de convocatoria de las nuevas asambleas de este tipo. Admite marcadores de posición como {{ object.name }}."
+
+#. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_agenda.py:0
 msgid "Could not find this item on the assembly agenda."
 msgstr "No se pudo encontrar este tema en la agenda de la asamblea."
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/controllers/attendance.py:0
+msgid "Could not mark present."
+msgstr "No se pudo marcar como presente."
 
 #. module: base_assembly
 #. odoo-python
@@ -2190,6 +1831,7 @@ msgstr ""
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__country_id
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Country"
 msgstr "País"
 
@@ -2239,12 +1881,7 @@ msgstr "Creado el"
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_document_preview_wizard__preview_template_kind__custom
 msgid "Custom template"
-msgstr ""
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_delegation_footer_qweb
-msgid "Date"
-msgstr ""
+msgstr "Plantilla personalizada"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_delegation__date_delegation
@@ -2257,16 +1894,20 @@ msgid "Date recorded"
 msgstr "Fecha de grabación"
 
 #. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_res_company__assembly_default_use_qr
+#: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_default_use_qr
+msgid "Default Include QR / tracked links for new company assemblies."
+msgstr "Incluir código QR / enlaces rastreados por defecto para nuevas asambleas de la compañía."
+
+#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
 msgid "Default address"
 msgstr "Dirección por defecto"
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_default_ballot_intro_mail_template_id
-#: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_default_ballot_intro_mail_template_id
-msgid "Default ballot introduction mail template"
-msgstr ""
-"Plantilla de correo electrónico de presentación de boleta predeterminada"
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_ballot_intro_text
+msgid "Default ballot introduction"
+msgstr "Introducción de papeleta predeterminada"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_city_id
@@ -2279,21 +1920,34 @@ msgid "Default city (manual)"
 msgstr "Ciudad por defecto"
 
 #. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_publication_text
+msgid "Default convocation text"
+msgstr "Texto de convocatoria predeterminado"
+
+#. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_country_id
 msgid "Default country"
 msgstr "País por defecto"
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_default_delegation_document_mail_template_id
-#: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_default_delegation_document_mail_template_id
-msgid "Default delegation document mail template"
-msgstr "Plantilla de correo de documento de delegación predeterminada"
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_delegation_document_text
+msgid "Default delegation document"
+msgstr "Documento de delegación predeterminado"
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_default_delegation_footer_mail_template_id
-#: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_default_delegation_footer_mail_template_id
-msgid "Default delegation footer mail template"
-msgstr "Plantilla de correo de pie de página de delegación predeterminada"
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_delegation_footer_text
+msgid "Default delegation footer"
+msgstr "Pie de delegación predeterminado"
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
+msgid ""
+"Default document texts are copied (with translations) to new assemblies of "
+"this type. Support placeholders like <code>{{ object.name }}</code>."
+msgstr ""
+"Los textos de documentos predeterminados se copian (con sus traducciones) "
+"a las nuevas asambleas de este tipo. Admiten marcadores de posición como "
+"<code>{{ object.name }}</code>."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_type__partner_domain
@@ -2301,32 +1955,23 @@ msgid "Default domain for convocable partners."
 msgstr "Dominio por defecto para socios convocables."
 
 #. module: base_assembly
-#: model:ir.model.fields,help:base_assembly.field_res_company__assembly_default_use_qr
-#: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_default_use_qr
-msgid ""
-"Default for Include QR / tracked links on new assemblies in this company."
-msgstr ""
-"Valor predeterminado para incluir código QR y enlaces de asistencia "
-"rastreados en asambleas nuevas de esta compañía."
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_final_text
+msgid "Default final text"
+msgstr "Texto final predeterminado"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
 msgid ""
 "Default for new assemblies when no assembly type is applied yet; the "
 "assembly type still overrides when chosen."
 msgstr ""
+"Valor predeterminado para nuevas asambleas cuando aún no se ha aplicado "
+"ningún tipo; el tipo de asamblea lo sustituye al seleccionarlo."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
-msgid "Default mail templates"
-msgstr "Plantillas de correo predeterminadas"
-
-#. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_default_ballot_nominative_intro_mail_template_id
-#: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_default_ballot_nominative_intro_mail_template_id
-msgid "Default nominative ballot introduction mail template"
-msgstr ""
-"Plantilla de correo de presentación de boleta nominativa predeterminada"
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_ballot_nominative_intro_text
+msgid "Default nominative ballot introduction"
+msgstr "Introducción nominativa de papeleta predeterminada"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_president_id
@@ -2334,10 +1979,9 @@ msgid "Default president"
 msgstr "Presidente por defecto"
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_default_publication_mail_template_id
-#: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_default_publication_mail_template_id
-msgid "Default publication mail template"
-msgstr "Plantilla de correo de publicación predeterminada"
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_representation_document_text
+msgid "Default representation document"
+msgstr "Documento de representación predeterminado"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
@@ -2362,7 +2006,7 @@ msgstr "Calle por defecto"
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_document_preview_wizard__preview_template_kind__default
 msgid "Default template"
-msgstr ""
+msgstr "Plantilla predeterminada"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_default_use_qr
@@ -2399,9 +2043,6 @@ msgstr "Por defecto: añadir código QR (enlace de asistencia rastreado)"
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_delegation.py:0
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_delegation__delegate_partner_id
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_delegation_document_qweb
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_delegation_footer_qweb
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_delegation_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_delegation_view_search
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_delegation_view_tree
@@ -2462,8 +2103,6 @@ msgstr ""
 "%(value)s"
 
 #. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_communication_send_wizard__primary_message_kind__delegation
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_document_preview_wizard__document_category__delegation
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_delegation_view_form
@@ -2484,21 +2123,21 @@ msgstr "Delegación/representación"
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_communication_send_wizard__attach_delegation_pdf
 msgid "Delegation PDF"
 msgstr "Delegación PDF"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
-msgid "Delegation document"
-msgstr "Documento de delegación"
+#: model:ir.model.fields,help:base_assembly.field_assembly_assembly__delegation_document_text
+msgid ""
+"Delegation PDF introduction. Supports placeholders like {{ object.name }}."
+msgstr "Introducción del PDF de delegación. Admite marcadores de posición como {{ object.name }}."
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_af_delegation_document_fallback_qweb_id
-#: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_af_delegation_document_fallback_qweb_id
-msgid "Delegation document QWeb fallback"
-msgstr "Documento de delegación de reserva de QWeb"
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
+msgid "Delegation document"
+msgstr "Documento de delegación"
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_document_preview_wizard__document_type__delegation_body
@@ -2506,53 +2145,32 @@ msgid "Delegation document body"
 msgstr "Cuerpo del documento de delegación"
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__delegation_document_mail_template_id
-msgid "Delegation document template"
-msgstr "Plantilla del documento de delegación"
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__delegation_document_text
+msgid "Delegation document text"
+msgstr "Texto del documento de delegación"
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_document_preview_wizard__document_type__delegation_footer
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
 msgid "Delegation footer"
 msgstr "Pie de delegación"
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_af_delegation_footer_fallback_qweb_id
-#: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_af_delegation_footer_fallback_qweb_id
-msgid "Delegation footer QWeb fallback"
-msgstr "Pie de página de delegación QWeb alternativo"
-
-#. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__delegation_footer_mail_template_id
-msgid "Delegation footer template"
-msgstr "Plantilla del pie de delegación"
-
-#. module: base_assembly
-#: model:mail.template,subject:base_assembly.mail_template_assembly_delegation_footer_default
-msgid "Delegation footer: {{ object.name }}"
-msgstr "Pie de delegación: {{ object.name }}"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_delegation_certificate
-msgid ""
-"Delegation of voting rights only. This is not a power of attorney for legal "
-"representation at the assembly."
-msgstr ""
-"Únicamente delegación de derechos de voto.Este no es un poder para "
-"representación legal en la asamblea."
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__delegation_footer_text
+msgid "Delegation footer text"
+msgstr "Texto del pie de delegación"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_delegation__delegation_state
 msgid "Delegation state"
-msgstr ""
+msgstr "Estado de delegación"
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 #: model:ir.actions.act_window,name:base_assembly.assembly_delegation_action_manager
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__delegation_ids
-#: model:ir.ui.menu,name:base_assembly.assembly_delegation_menu
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_delegation_view_search
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_delegation_view_tree_manager
 msgid "Delegations"
@@ -2561,6 +2179,8 @@ msgstr "Delegaciones"
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/res_partner.py:0
+#: model:ir.model.fields,field_description:base_assembly.field_fsm_location__assembly_delegation_ids
+#: model:ir.model.fields,field_description:base_assembly.field_fsm_person__assembly_delegation_ids
 #: model:ir.model.fields,field_description:base_assembly.field_res_partner__assembly_delegation_ids
 #: model:ir.model.fields,field_description:base_assembly.field_res_users__assembly_delegation_ids
 msgid "Delegations (as delegator)"
@@ -2568,6 +2188,8 @@ msgstr "Delegaciones (como delegante)"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__count_delegations
+#: model:ir.model.fields,field_description:base_assembly.field_fsm_location__count_assembly_delegations
+#: model:ir.model.fields,field_description:base_assembly.field_fsm_person__count_assembly_delegations
 #: model:ir.model.fields,field_description:base_assembly.field_res_partner__count_assembly_delegations
 #: model:ir.model.fields,field_description:base_assembly.field_res_users__count_assembly_delegations
 msgid "Delegations count"
@@ -2595,9 +2217,6 @@ msgstr "Delegaciones recibidas"
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_delegation.py:0
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_delegation__partner_id
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_delegation_document_qweb
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_delegation_footer_qweb
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_delegation_view_search
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_delegation_view_tree
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_delegation_view_tree_manager
@@ -2621,6 +2240,7 @@ msgstr "Delegante:"
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_type__description
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting__name
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form_session_manual
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
 msgid "Description"
 msgstr "Descripción"
@@ -2679,17 +2299,12 @@ msgstr "Documento"
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_document_preview_wizard__document_category
 msgid "Document group"
-msgstr ""
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "Document templates (optional overrides)"
-msgstr "Plantillas de documento (sustituciones opcionales)"
+msgstr "Grupo de documentos"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_document_preview_wizard__document_type_whitelist
 msgid "Document type whitelist"
-msgstr ""
+msgstr "Lista blanca de tipos de documento"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
@@ -2714,29 +2329,9 @@ msgid "Each matching attendee (one email each)"
 msgstr "Cada asistente coincidente (un correo electrónico cada uno)"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
-msgid ""
-"Each member can have a <strong>tracked attendance URL</strong> (opens "
-"counted). Use <strong>Open attendance link</strong> or <strong>Show "
-"QR</strong> in the header, or open the assembly <strong>Links &amp; "
-"QR</strong> smart button to list all. Finalize presence with <strong>Mark "
-"Present</strong>."
-msgstr ""
-"Cada miembro puede tener una <strong>URL de asistencia registrada</strong> "
-"(las aperturas se cuentan).Utilice <strong>Abrir enlace de "
-"asistencia</strong> o <strong>Mostrar QR</strong> en el encabezado, o abra "
-"la asamblea <strong>Enlaces y enlaces.Botón inteligente QR</strong> para "
-"enumerar todos.Finalice la presencia con <strong>Registrar como "
-"asistente</strong>."
-
-#. module: base_assembly
 #: model:ir.model.constraint,message:base_assembly.constraint_assembly_representation_assembly_representation_assembly_owner_uniq
-msgid ""
-"Each represented member may have only one representation record per "
-"assembly."
-msgstr ""
-"Cada miembro representado solo puede tener un registro de representación por"
-" asamblea."
+msgid "Each represented member may have only one representation per assembly."
+msgstr "Cada miembro representado solo puede tener una representación por asamblea."
 
 #. module: base_assembly
 #: model:ir.model.constraint,message:base_assembly.constraint_assembly_voting_result_voting_result_option_uniq
@@ -2787,6 +2382,8 @@ msgid "Entered total votes minus the reference expected total."
 msgstr "Total de votos ingresados ​​menos el total esperado de referencia."
 
 #. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_fsm_location__assembly_excluded
+#: model:ir.model.fields,field_description:base_assembly.field_fsm_person__assembly_excluded
 #: model:ir.model.fields,field_description:base_assembly.field_res_partner__assembly_excluded
 #: model:ir.model.fields,field_description:base_assembly.field_res_users__assembly_excluded
 msgid "Excluded from assemblies"
@@ -2811,7 +2408,6 @@ msgstr ""
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__manual_total_expected
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_tree
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Expected total votes"
 msgstr "Unidades de voto totales esperadas"
 
@@ -2840,11 +2436,6 @@ msgid ""
 msgstr ""
 "El total de votos esperado se aplica solo en el modo de votación manual "
 "(recuento simple) o votación manual (opción múltiple)."
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
-msgid "Fallback QWeb views"
-msgstr ""
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
@@ -2888,10 +2479,21 @@ msgstr ""
 "totales agregados;Las votaciones no se registran por asistente."
 
 #. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
+msgid "Final paragraph"
+msgstr "Párrafo final"
+
+#. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__final_summary
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
 msgid "Final summary"
 msgstr "Resumen final"
+
+#. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__final_text
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
+msgid "Final text"
+msgstr "Texto final"
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_agenda_option__manual_vote_count
@@ -2899,8 +2501,8 @@ msgid ""
 "Final total votes cast for this choice. Enter aggregate counts only; votes "
 "are not recorded per attendee."
 msgstr ""
-"Peso de voto registrado para esta opción (modo manual multirrespuesta, AF "
-"v2.0)."
+"Votos totales finales para esta opción. Introduzca solo recuentos agregados;"
+" los votos no se registran por asistente."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
@@ -2919,16 +2521,15 @@ msgstr "Finalizar"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_tree
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Finalize manual"
 msgstr "Finalizar manual"
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "First and second call scheduled."
-msgstr ""
+msgstr "Primera y segunda convocatoria programadas."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__date_first_call
@@ -2938,22 +2539,16 @@ msgstr "Primera convocatoria"
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "First call scheduled."
-msgstr ""
+msgstr "Primera convocatoria programada."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "First call:"
-msgstr ""
-
-#. module: base_assembly
-#: model:ir.model.fields.selection,name:base_assembly.selection__assembly_assembly__quorum_second_call_type__fixed
-#: model:ir.model.fields.selection,name:base_assembly.selection__assembly_assembly__quorum_type__fixed
-#: model:ir.model.fields.selection,name:base_assembly.selection__assembly_type__default_quorum_second_call_type__fixed
-#: model:ir.model.fields.selection,name:base_assembly.selection__assembly_type__default_quorum_type__fixed
-msgid "Fixed number"
-msgstr "Número fijo"
+msgstr "Primera convocatoria:"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__message_follower_ids
@@ -2966,15 +2561,6 @@ msgstr "Seguidores"
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__message_partner_ids
 msgid "Followers (Partners)"
 msgstr "Seguidores (contactos)"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_publication_document_doc
-msgid ""
-"Formal convocation text below; agenda titles are summarized after it for "
-"quick reference."
-msgstr ""
-"Texto de convocatoria formal a continuación;Los títulos de la agenda se "
-"resumen después para una referencia rápida."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_record
@@ -3006,23 +2592,20 @@ msgstr "Congelado del total de votos del asistente en el momento de emisión."
 #. module: base_assembly
 #: model:res.groups,comment:base_assembly.assembly_group_manager
 msgid ""
-"Full CRUD on assembly models (ACL). Implied by Settings / Administration "
-"(base.group_system). Does not imply Assembly User; if both groups are "
-"assigned, permissive manager ir.rule ORs with user rules so back-office rows"
-" stay visible."
+"Full access to all assembly records. Includes Assembly User and sees every "
+"row in the allowed companies (permissive record rules). Granted "
+"automatically to Settings / Administration."
 msgstr ""
-"Acceso completo a asambleas, orden del día, votaciones. Implica Usuario; "
-"reglas de registro O para que el gestor vea todo."
+"Acceso completo a todos los registros de asambleas. Incluye Usuario de "
+"asambleas y ve todas las filas de las empresas permitidas (reglas de "
+"registro permisivas). Se concede automáticamente a Ajustes / "
+"Administración.Acceso completo a asambleas, orden del día, votaciones. "
+"Implica Usuario; reglas de registro O para que el gestor vea todo."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
 msgid "General"
-msgstr ""
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
-msgid "Generate attendees"
-msgstr "Generar asistentes"
+msgstr "General"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
@@ -3035,7 +2618,7 @@ msgstr "Generar papeletas"
 #: model:ir.actions.act_window,name:base_assembly.action_assembly_ballot_print_wizard
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_ballot_print_wizard_view_form
 msgid "Generate voting ballots"
-msgstr "Imprimir boletas"
+msgstr "Imprimir papeletas"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_ballot_print_wizard_view_form
@@ -3043,7 +2626,7 @@ msgid ""
 "Generates one <strong>member ballot PDF per attendee</strong> (name, VAT/NIF, voting power with delegations, agenda items).\n"
 "                    Enable <em>Merge into one PDF</em> for a single file; otherwise you get a ZIP with one PDF per attendee."
 msgstr ""
-"Genera un <strong>PDF de boleta de miembro por asistente</strong> (nombre, IVA/NIF, poder de voto en las delegaciones, puntos del orden del día).\n"
+"Genera un <strong>PDF de papeleta de miembro por asistente</strong> (nombre, IVA/NIF, poder de voto en las delegaciones, puntos del orden del día).\n"
 "Habilite <em>Combinar en un PDF</em> para un solo archivo;de lo contrario, obtendrás un ZIP con un PDF por asistente."
 
 #. module: base_assembly
@@ -3065,6 +2648,7 @@ msgid ""
 "HTML error page for attendance deep links (invalid access, wrong state, "
 "etc.)."
 msgstr ""
+"Página de error HTML para enlaces directos de asistencia (acceso no válido, estado incorrecto, etc.)."
 "Página de error HTML para enlaces profundos de asistencia (acceso no válido,"
 " estado incorrecto, etc.)."
 
@@ -3072,7 +2656,7 @@ msgstr ""
 #: model:ir.model.fields,help:base_assembly.field_res_company__assembly_attendance_landing_qweb_id
 #: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_attendance_landing_qweb_id
 msgid "HTML shown for manager attendance deep links when not using direct=1."
-msgstr ""
+msgstr "HTML que se muestra para los enlaces directos de asistencia del gerente cuando no se usa direct=1."
 "Se muestra HTML para los enlaces profundos de asistencia del gerente cuando "
 "no se usa direct=1."
 
@@ -3084,18 +2668,13 @@ msgstr "Resumen HTML cuando el punto se cierra…"
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly_header_actions_wizard__has_attendees
 msgid "Has Attendees"
-msgstr ""
+msgstr "Tiene asistentes"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__has_message
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__has_message
 msgid "Has Message"
 msgstr "Tiene mensaje"
-
-#. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__is_second_call
-msgid "Held in 2nd call"
-msgstr "Celebrada en 2ª convocatoria"
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_voting_line__vote_channel
@@ -3147,17 +2726,6 @@ msgstr ""
 "establecerse en los registros."
 
 #. module: base_assembly
-#: model:ir.model.fields,help:base_assembly.field_assembly_type__require_vat
-msgid ""
-"If enabled, recording an assembly attendee as attended is blocked when the "
-"member has no tax identification number (VAT/TIN) or only the exempt "
-"placeholder."
-msgstr ""
-"Si está activado, se bloquea confirmar un asistente a la asamblea cuando el "
-"miembro no tiene número de identificación fiscal (IVA/NIF) o solo el "
-"marcador de exento."
-
-#. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_res_company__assembly_allow_edit_closed_assembly
 #: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_allow_edit_closed_assembly
 msgid "If set, assemblies in closed state can still be edited (per company)."
@@ -3166,6 +2734,8 @@ msgstr ""
 "(por compañía)."
 
 #. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_fsm_location__assembly_excluded
+#: model:ir.model.fields,help:base_assembly.field_fsm_person__assembly_excluded
 #: model:ir.model.fields,help:base_assembly.field_res_partner__assembly_excluded
 #: model:ir.model.fields,help:base_assembly.field_res_users__assembly_excluded
 msgid "If set, this partner is excluded from generated attendee lists."
@@ -3210,15 +2780,6 @@ msgid "Inbound vote delegation (as delegate)"
 msgstr "Delegación de voto entrante (como delegado)"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_delegation
-msgid ""
-"Includes inbound and outbound vote delegations per row (representation is "
-"separate)."
-msgstr ""
-"Incluye delegaciones de voto entrante y saliente por fila (la representación"
-" es separada)."
-
-#. module: base_assembly
 #: model:ir.actions.report,name:base_assembly.assembly_attendee_action_report_individual_call
 msgid "Individual call"
 msgstr "Citación individual"
@@ -3229,13 +2790,15 @@ msgid "Individual call (with votes)"
 msgstr "Citación individual (con votos)"
 
 #. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__internal_notes
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid ""
-"Inspect <em>delegated out</em> / <em>delegated in</em> on each attendee’s "
-"<em>Votes by type</em>."
-msgstr ""
-"Inspeccione los <em>delegados salientes</em> y los <em>delegados "
-"entrantes</em> en los <em>votos por tipo</em> de cada asistente."
+msgid "Internal notes"
+msgstr "Notas internas"
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
+msgid "Internal notes…"
+msgstr "Notas internas…"
 
 #. module: base_assembly
 #. odoo-python
@@ -3312,7 +2875,7 @@ msgstr "Kanban etiqueta de lugar"
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_agenda_option__name
 msgid "Label for this choice as it appears on the ballot."
-msgstr "Etiqueta para esta elección tal como aparece en la boleta."
+msgstr "Etiqueta para esta elección tal como aparece en la papeleta."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__write_uid
@@ -3353,34 +2916,9 @@ msgid "Last Updated on"
 msgstr "Última actualización el"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_record
-msgid ""
-"Legal or physical representation for attendance and acts permitted by the "
-"bylaws. This document does not transfer voting rights by itself; vote "
-"delegation is separate."
-msgstr ""
-"Representación legal o física para asistencia y actos permitidos por los "
-"estatutos.Este documento no transfiere derechos de voto por sí solo;La "
-"delegación de votos es separada."
-
-#. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee__attendance_link_tracker_id
 msgid "Link tracker (opens counted)"
 msgstr "Rastreador de enlace de asistencia"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "Links &amp; QR"
-msgstr "Enlaces yQR"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid ""
-"List attendees with a tracked sign-in URL; from there open the link or QR "
-"per row."
-msgstr ""
-"Enumerar a los asistentes con una URL de inicio de sesión rastreada;desde "
-"allí abre el enlace o QR por fila."
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_communication_send_wizard__recipient_audience__registered
@@ -3407,12 +2945,6 @@ msgstr ""
 "(cuenta para cuórum); ausente: no asistió."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_tree
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "Live"
-msgstr "Vivir"
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
 msgid "Live voting"
 msgstr "Votación en vivo"
@@ -3425,8 +2957,9 @@ msgstr "Lugar"
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Location:"
-msgstr ""
+msgstr "Lugar:"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_communication_send_wizard__primary_message_kind
@@ -3440,11 +2973,6 @@ msgid "Manual counts sum to %(actual)s but expected total is %(expected)s."
 msgstr ""
 "Los recuentos manuales suman %(actual)s pero el total esperado es "
 "%(expected)s."
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_agenda_af_list_block
-msgid "Manual counts — Yes:"
-msgstr "Recuentos manuales — Sí:"
 
 #. module: base_assembly
 #. odoo-python
@@ -3530,22 +3058,27 @@ msgid ""
 "Confirmed. Prefer Vote transfer; revoked rows no longer exist (unlink the "
 "delegation to revoke)."
 msgstr ""
+"Mapea la transferencia de votos para UI antiga y exportaciones: En espera → Borrador, Activa → Confirmada. Prefiera Transferencia de votos; las filas revocadas ya no existen (desvincula la delegación para revocar)."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_call_register
 msgid "Mark Absent"
-msgstr ""
+msgstr "Marcar ausente"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_call_register
 msgid "Mark Present"
-msgstr ""
+msgstr "Marcar presente"
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form_session_manual
+msgid "Mark addressed"
+msgstr "Marcar abordado"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
@@ -3558,11 +3091,16 @@ msgstr ""
 "registrados únicamente con fines informativos."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_ballot_nominative_intro_qweb
-msgid ""
-"Mark exactly one option per row unless the chair instructs otherwise. Illegible or ambiguous marks may be\n"
-"                treated as abstention under your internal rules."
-msgstr ""
+#. odoo-python
+#: code:addons/base_assembly/controllers/attendance.py:0
+msgid "Mark present"
+msgstr "Marcar presente"
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/controllers/attendance.py:0
+msgid "Marked as present: %s"
+msgstr "Marcado como presente: %s"
 
 #. module: base_assembly
 #. odoo-python
@@ -3571,6 +3109,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee__partner_id
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting_line__partner_id
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_call_register
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_summary
 msgid "Member"
 msgstr "Socio"
 
@@ -3580,11 +3119,9 @@ msgid "Member (convocable)"
 msgstr "Miembro (convocable)"
 
 #. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_communication_send_wizard__primary_message_kind__ballot_intro
 msgid "Member ballot"
-msgstr "Boleta de miembro"
+msgstr "Papeleta de miembro"
 
 #. module: base_assembly
 #: model:ir.actions.report,name:base_assembly.assembly_attendee_action_report_voting_ballot_nominative
@@ -3592,15 +3129,9 @@ msgid "Member ballot (attendee)"
 msgstr "Papeleta de votación (nominativa)"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
-msgid "Member ballot PDF (per attendee, includes voting power and agenda)."
-msgstr ""
-"PDF de boleta de miembros (por asistente, incluye poder de voto y agenda)."
-
-#. module: base_assembly
 #: model:ir.actions.report,name:base_assembly.assembly_attendee_action_report_voting_ballot
 msgid "Member ballot — generic intro (optional)"
-msgstr "Boleta de miembro: introducción genérica (opcional)"
+msgstr "Papeleta de miembro: introducción genérica (opcional)"
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_attendee__partner_id
@@ -3631,6 +3162,21 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
 msgid "Member:"
 msgstr "Miembro:"
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/models/assembly_attendee.py:0
+msgid ""
+"Members can only be marked as absent once the assembly session has started."
+msgstr "Los miembros solo pueden marcarse como ausentes una vez iniciada la sesión de la asamblea."
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/models/assembly_attendee.py:0
+msgid ""
+"Members can only be marked as attended once the assembly session has "
+"started."
+msgstr "Los miembros solo pueden marcarse como asistentes una vez iniciada la sesión de la asamblea."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_ballot_print_wizard__merge_single_pdf
@@ -3671,13 +3217,8 @@ msgstr ""
 
 #. module: base_assembly
 #: model:ir.model,name:base_assembly.model_assembly_mixin_open_assembly
-msgid "Mixin: open assembly form (assembly_id)"
-msgstr "Mixin: abrir formulario de asamblea (assembly_id)"
-
-#. module: base_assembly
-#: model:ir.model,name:base_assembly.model_assembly_mixin_window_action
-msgid "Mixin: standard window actions"
-msgstr "Mixin: acciones de ventana estándar"
+msgid "Mixin: open the related assembly form"
+msgstr "Mixin: abrir el formulario de la asamblea relacionada"
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_delegation__delegate_partner_id
@@ -3695,11 +3236,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_type__name
 msgid "Name"
 msgstr "Nombre"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_delegation_footer_qweb
-msgid "Name and signature"
-msgstr ""
 
 #. module: base_assembly
 #. odoo-python
@@ -3744,9 +3280,8 @@ msgstr "Siguiente elemento"
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting_line__vote_option__no
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting_result__vote_option__no
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_roster_footer
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__manual_no
@@ -3755,7 +3290,6 @@ msgstr "No manual"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_tree
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "No (total)"
 msgstr "Ningún (total)"
 
@@ -3801,7 +3335,7 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_ballot_print_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_ballot_print_wizard.py:0
 msgid "No attendees match the selected options."
 msgstr "Ningún asistente coincide con las opciones seleccionadas."
 
@@ -3817,7 +3351,7 @@ msgstr "No hay filas de delegación registradas para esta asamblea."
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
 msgid ""
 "No recipients with an email address were found for the selected options."
 msgstr ""
@@ -3833,41 +3367,30 @@ msgstr "Sin voto"
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
 msgid "No ☐"
-msgstr ""
+msgstr "No ☐"
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_communication_send_wizard__attach_nominative_ballot_pdf
 msgid "Nominative ballot PDF"
-msgstr "Boleta nominativa PDF"
+msgstr "Papeleta nominativa PDF"
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_document_preview_wizard__document_type__ballot_nominative
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
 msgid "Nominative ballot introduction"
 msgstr "Introducción de papeleta nominativa"
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_af_ballot_nominative_intro_fallback_qweb_id
-#: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_af_ballot_nominative_intro_fallback_qweb_id
-msgid "Nominative ballot introduction QWeb fallback"
-msgstr "Introducción a la boleta nominativa Respaldo de QWeb"
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__ballot_nominative_intro_text
+msgid "Nominative ballot introduction text"
+msgstr "Texto de introducción de la papeleta nominativa"
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__ballot_nominative_intro_mail_template_id
-msgid "Nominative ballot introduction template"
-msgstr "Plantilla de introducción de papeleta nominativa"
-
-#. module: base_assembly
-#: model:mail.template,subject:base_assembly.mail_template_assembly_ballot_nominative_intro_default
-msgid "Nominative ballot: {{ object.name }}"
-msgstr "Papeleta nominativa: {{ object.name }}"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_ballot_nominative_intro_qweb
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Nominative voting ballot"
-msgstr ""
+msgstr "Papeleta de votación nominativa"
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting_result__vote_option__not_cast
@@ -3877,7 +3400,6 @@ msgstr "No emitido"
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_voting_line.py:0
-#: code:addons/base_assembly/tests/test_assembly_session_voting_ux.py:0
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting_line__session_control_state__ineligible
 msgid "Not eligible"
 msgstr "No elegible"
@@ -3899,7 +3421,9 @@ msgid "Not recorded"
 msgstr "No registrado"
 
 #. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__notes
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_representation__notes
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_representation_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_doc
 msgid "Notes"
@@ -3909,6 +3433,22 @@ msgstr "Notas"
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
 msgid "Notes for this attendance…"
 msgstr "Notas para esta asistencia…"
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
+msgid "Notes…"
+msgstr "Notas…"
+
+#. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__date_announcement
+msgid "Notice date"
+msgstr "Fecha de convocatoria"
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/models/assembly_assembly.py:0
+msgid "Notice date cannot be after the assembly date."
+msgstr "La fecha de convocatoria no puede ser posterior a la fecha de la asamblea."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__message_needaction_counter
@@ -3975,12 +3515,12 @@ msgid ""
 "all."
 msgstr ""
 "Un <strong>correo electrónico saliente por destinatario</strong>.Los PDF de "
-"las boletas nominativas se crean por destinatario;Los PDF de publicación y "
+"las papeletas nominativas se crean por destinatario;Los PDF de publicación y "
 "delegación son idénticos para todos."
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
 msgid "One email to %(email)s."
 msgstr "Un correo electrónico a %(email)s."
 
@@ -4000,10 +3540,21 @@ msgid "Online"
 msgstr "En línea"
 
 #. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
+msgid "Online voting & attendance"
+msgstr "Votación y asistencia en línea"
+
+#. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 msgid "Only assembly managers can reopen a closed assembly."
 msgstr "Sólo los directores de asamblea pueden reabrir una asamblea cerrada."
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/models/assembly_voting.py:0
+msgid "Only closed votings can be reopened."
+msgstr "Solo se pueden reabrir las votaciones cerradas."
 
 #. module: base_assembly
 #. odoo-python
@@ -4024,6 +3575,12 @@ msgid ""
 msgstr ""
 "Sólo los miembros enumerados (no finalizados) o registrados como no "
 "asistieron pueden marcarse como asistidos (presentes confirmados)."
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/models/assembly_agenda.py:0
+msgid "Only no-vote agenda items can be marked as addressed."
+msgstr "Solo se pueden marcar como abordados los puntos del orden del día sin votación."
 
 #. module: base_assembly
 #. odoo-python
@@ -4050,6 +3607,12 @@ msgid "Only pending or in-progress items can be finalized."
 msgstr "Solo pueden finalizarse puntos pendientes o en curso."
 
 #. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/models/assembly_agenda.py:0
+msgid "Only pending or in-progress items can be marked as addressed."
+msgstr "Solo se pueden marcar como abordados los puntos pendientes o en curso."
+
+#. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_agenda__requires_vote
 msgid ""
 "Only used in weighted vote mode. When enabled, opening a voting session "
@@ -4068,36 +3631,15 @@ msgstr ""
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting__voting_state__open
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_search
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_search
 msgid "Open"
 msgstr "Abierta"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
-msgid "Open attendance link"
-msgstr "Abrir enlace de asistencia"
-
-#. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/controllers/attendance.py:0
-msgid "Open attendee registration"
-msgstr "Abrir registro de asistentes"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_tree
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "Open live voting screen"
-msgstr "Abrir pantalla de votación en vivo"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
-msgid ""
-"Open the tracked short URL for this member's attendance flow (opens "
-"counted)."
-msgstr ""
-"Abra la URL corta rastreada para el flujo de asistencia de este miembro "
-"(aperturas contadas)."
+msgid "Open full registration form"
+msgstr "Abrir formulario completo de registro"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__kanban_open_votings_count
@@ -4149,65 +3691,14 @@ msgid "Optional notes…"
 msgstr "Notas opcionales…"
 
 #. module: base_assembly
-#: model:ir.model.fields,help:base_assembly.field_assembly_assembly__ballot_intro_mail_template_id
-msgid "Optional override for the assembly voting ballot introduction."
-msgstr ""
-"Sustitución opcional para la introducción de la papeleta de votación de la "
-"asamblea."
-
-#. module: base_assembly
-#: model:ir.model.fields,help:base_assembly.field_assembly_assembly__delegation_document_mail_template_id
-msgid ""
-"Optional override for the delegation PDF body. If empty, the standard "
-"delegation template is used."
-msgstr ""
-"Sustitución opcional para el cuerpo del PDF de delegación. Si está vacío, se"
-" usa la plantilla estándar de delegación."
-
-#. module: base_assembly
-#: model:ir.model.fields,help:base_assembly.field_assembly_assembly__delegation_footer_mail_template_id
-msgid ""
-"Optional override for the delegation PDF footer. If empty, the standard "
-"footer template is used."
-msgstr ""
-"Sustitución opcional para el pie del PDF de delegación. Si está vacío, se "
-"usa la plantilla estándar de pie."
-
-#. module: base_assembly
-#: model:ir.model.fields,help:base_assembly.field_assembly_assembly__ballot_nominative_intro_mail_template_id
-msgid "Optional override for the nominative ballot introduction."
-msgstr "Sustitución opcional para la introducción de la papeleta nominativa."
-
-#. module: base_assembly
-#: model:ir.model.fields,help:base_assembly.field_assembly_assembly__publication_mail_template_id
-msgid ""
-"Optional override. If empty, the standard publication template is used, then"
-" the convocation HTML when the template body is empty."
-msgstr ""
-"Sustitución opcional. Si está vacío, se usa la plantilla estándar de "
-"publicación y, si el cuerpo de la plantilla está vacío, el HTML de "
-"convocatoria."
-
-#. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_representation__notes
-msgid "Optional remarks for this representation record (AF v2.0)."
-msgstr ""
-"Observaciones opcionales para este registro de representación (AF v2.0)."
+msgid "Optional remarks for this representation record."
+msgstr "Observaciones opcionales para este registro de representación."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_call_register
 msgid "Out. deleg."
 msgstr "Del. sal."
-
-#. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
-msgid ""
-"Outbound email batch: %(kind)s. Sent: %(sent)d, skipped (no email or error):"
-" %(skip)d. Attachments included: %(docs)s."
-msgstr ""
-"Lote de correo saliente: %(kind)s. Enviados: %(sent)d, omitidos (sin correo "
-"o error): %(skip)d. Adjuntos incluidos: %(docs)s."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee__call_register_has_outbound_delegation
@@ -4219,7 +3710,6 @@ msgstr "Delegación de voto saliente"
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__mail_outbound_email_count
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
 msgid "Outgoing emails"
 msgstr "Correos electrónicos salientes"
 
@@ -4261,12 +3751,6 @@ msgid "Participation Percentage"
 msgstr "Porcentaje de participación"
 
 #. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
-msgid "Partner %(pid)s: %(err)s"
-msgstr "Socio %(pid)s: %(err)s"
-
-#. module: base_assembly
 #: model:ir.model.constraint,message:base_assembly.constraint_assembly_attendee_assembly_partner_uniq
 msgid "Partner can only be registered once per assembly."
 msgstr "Un socio solo puede registrarse una vez por asamblea."
@@ -4283,9 +3767,14 @@ msgid "Partner domain (convocable partners)"
 msgstr "Dominio de socios (socios convocables)"
 
 #. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_assembly_delegation__allowed_delegator_partner_ids
+#: model:ir.model.fields,help:base_assembly.field_assembly_representation__allowed_owner_partner_ids
+msgid "Partners convocable to the assembly."
+msgstr "Socios convocables para la asamblea."
+
+#. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_voting_line.py:0
-#: code:addons/base_assembly/tests/test_assembly_session_voting_ux.py:0
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_agenda__agenda_state__pending
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting_line__session_control_state__pending
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_search
@@ -4299,10 +3788,6 @@ msgstr "Votos pendientes"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting_result__result_percentage
-#: model:ir.model.fields.selection,name:base_assembly.selection__assembly_assembly__quorum_second_call_type__percentage
-#: model:ir.model.fields.selection,name:base_assembly.selection__assembly_assembly__quorum_type__percentage
-#: model:ir.model.fields.selection,name:base_assembly.selection__assembly_type__default_quorum_second_call_type__percentage
-#: model:ir.model.fields.selection,name:base_assembly.selection__assembly_type__default_quorum_type__percentage
 msgid "Percentage"
 msgstr "Porcentaje"
 
@@ -4312,16 +3797,8 @@ msgid ""
 "Personalized member ballot for this recipient only (requires an attendee row"
 " for that partner)."
 msgstr ""
-"Boleta de miembro personalizada solo para este destinatario (requiere una "
+"Papeleta de miembro personalizada solo para este destinatario (requiere una "
 "fila de asistente para ese socio)."
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_ballot_intro_qweb
-msgid ""
-"Please clearly mark your voting choice for each agenda item according to the instructions printed beside\n"
-"                each question. Use only the official channels established by the chair. If you delegate your vote,\n"
-"                ensure the delegation is active before the vote is opened."
-msgstr ""
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__total_possible_attendees
@@ -4334,16 +3811,9 @@ msgid "Preparation"
 msgstr "Preparación"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
-msgid ""
-"Prepare the assembly by generating attendees and calculating voting power."
-msgstr ""
-"Prepare la asamblea generando la lista de asistentes y recalculando el poder"
-" de voto."
-
-#. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee__participant_partner_id
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_call_register
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_summary
 msgid "Present as"
 msgstr "Participante"
 
@@ -4356,12 +3826,6 @@ msgstr "Asistentes presentes"
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_ballot_print_wizard__only_present
 msgid "Present attendees only"
 msgstr "Sólo asistentes presentes"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_present_delegation
-msgid "Present members only; includes inbound and outbound vote delegations."
-msgstr ""
-"Sólo miembros presentes;incluye delegaciones de voto entrantes y salientes."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__president_id
@@ -4382,10 +3846,11 @@ msgstr "Vista previa de documentos"
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid ""
-"Preview only — not a signed or filed document. Configure mail templates "
-"under company or assembly settings for production output."
-msgstr ""
+"Preview only — not a signed or filed document. Edit the document texts on "
+"the assembly (or its type) for production output."
+msgstr "Solo vista previa: no es un documento firmado ni registrado. Edite los textos de los documentos en la asamblea (o en su tipo) para obtener el documento definitivo."
 
 #. module: base_assembly
 #: model:ir.model,name:base_assembly.model_assembly_document_preview_wizard
@@ -4410,30 +3875,18 @@ msgid "Print PDFs"
 msgstr "Imprimir archivos PDF"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
-msgid "Print ballot"
-msgstr "imprimir boleta"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_call_register
-msgid "Print ballot (PDF) for this attendee"
-msgstr "Imprimir boleta (PDF) para este asistente"
-
-#. module: base_assembly
 #: model:ir.model,name:base_assembly.model_assembly_ballot_print_wizard
 msgid "Print ballots (PDF) for assembly attendees"
-msgstr "Imprimir boletas (PDF) para los asistentes a la asamblea"
+msgstr "Imprimir papeletas (PDF) para los asistentes a la asamblea"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
-msgid "Publication"
-msgstr "Publicación"
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
+msgid ""
+"Public pages shown for tracked attendance deep links (landing before the "
+"form and errors for invalid or expired links)."
+msgstr "Páginas públicas mostradas para los enlaces profundos de asistencia rastreados (página de inicio antes del formulario y errores para enlaces no válidos o caducados)."
 
 #. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_communication_send_wizard__primary_message_kind__publication
 msgid "Publication / call"
 msgstr "Publicación/convocatoria"
@@ -4445,95 +3898,33 @@ msgstr "Publicación / convocatoria"
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_communication_send_wizard__attach_publication_pdf
 msgid "Publication PDF"
 msgstr "Publicación PDF"
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_af_publication_fallback_qweb_id
-#: model:ir.model.fields,field_description:base_assembly.field_res_config_settings__assembly_af_publication_fallback_qweb_id
-msgid "Publication QWeb fallback"
-msgstr "Publicación QWeb alternativa"
+#: model:ir.model.fields,help:base_assembly.field_assembly_attendee__attendance_qr_png
+msgid "QR image encoding the tracked attendance URL, for printed documents."
+msgstr "Imagen QR que codifica la URL de asistencia rastreada, para documentos impresos."
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__publication_mail_template_id
-msgid "Publication template"
-msgstr "Plantilla de publicación"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
-msgid ""
-"QWeb used when mail template bodies are empty, and pages for tracked "
-"attendance deep links (landing before the form and errors for invalid or "
-"expired links)."
-msgstr ""
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "Quorum & online voting"
-msgstr "Cuórum y votación en línea"
-
-#. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__quorum_type
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_quorum_type
-msgid "Quorum (1st call)"
-msgstr "Cuórum (1ª convocatoria)"
-
-#. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__quorum_second_call_type
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_quorum_second_call_type
-msgid "Quorum (2nd call)"
-msgstr "Cuórum (2ª convocatoria)"
-
-#. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__quorum_percentage
-msgid "Quorum Percentage"
-msgstr "Porcentaje de cuórum"
-
-#. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__quorum_reached
-msgid "Quorum Reached"
-msgstr "Cuórum alcanzado"
-
-#. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_assembly.py:0
-msgid "Quorum has not been reached. You may still start the session."
-msgstr "No se ha alcanzado el cuórum. Aun así puede iniciar la sesión."
-
-#. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_assembly.py:0
-msgid "Quorum not reached"
-msgstr "Cuórum no alcanzado"
-
-#. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__quorum_value
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_quorum_value
-msgid "Quorum value (1st call)"
-msgstr "Valor de cuórum (1ª convocatoria)"
-
-#. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__quorum_second_call_value
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_quorum_second_call_value
-msgid "Quorum value (2nd call)"
-msgstr "Valor de cuórum (2ª convocatoria)"
-
-#. module: base_assembly
-#: model:res.groups,comment:base_assembly.assembly_group_user
-msgid ""
-"Read-only on assemblies, agenda, delegations, votings, results. "
-"Read/write/create attendees (no unlink); record rules limit attendee rows to"
-" the user's own partner, so bulk or third-party lines are blocked at rule "
-"level. May create own voting lines (cast vote); no write/unlink on those "
-"lines. Not implied by Assembly Manager—assign groups separately."
-msgstr "Ver asambleas, gestionar propia asistencia y delegaciones."
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__rating_ids
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__rating_ids
+msgid "Ratings"
+msgstr "Valoraciones"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
 msgid "Recalculate votes"
 msgstr "Recalcular votos"
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
+msgid ""
+"Recalculate voting power after attendance or delegation changes. Attendees "
+"are generated automatically when the assembly is announced."
+msgstr "Recalcula el poder de voto tras cambios en la asistencia o las delegaciones. Los asistentes se generan automáticamente al convocar la asamblea."
 
 #. module: base_assembly
 #. odoo-python
@@ -4560,7 +3951,6 @@ msgstr "Destinatarios (vista previa)"
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_voting_line.py:0
-#: code:addons/base_assembly/tests/test_assembly_session_voting_ux.py:0
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting_line__session_control_state__recorded
 msgid "Recorded"
 msgstr "Grabado"
@@ -4574,20 +3964,6 @@ msgstr "Grabado en"
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form_session
 msgid "Recorded by"
 msgstr "Grabado por"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_delegation_register_doc
-msgid ""
-"Recorded vote delegations for this assembly (operational list). For a "
-"printable certificate per delegation row, use <strong>Vote delegation "
-"certificate</strong> on the delegation. Legal representation uses the "
-"representation reports, not this document."
-msgstr ""
-"Voto registrado de las delegaciones de esta asamblea (lista operativa).Para "
-"obtener un certificado imprimible por fila de delegación, utilice "
-"<strong>Certificado de delegación de voto</strong> en la delegación.La "
-"representación legal utiliza los informes de representación, no este "
-"documento."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting__count_recorded_votes
@@ -4653,11 +4029,6 @@ msgid "Registration date"
 msgstr "Fecha de registro"
 
 #. module: base_assembly
-#: model:ir.model.fields.selection,name:base_assembly.selection__assembly_assembly__assembly_state__open
-msgid "Registration open"
-msgstr "Registro abierto"
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form_session
 msgid "Remaining"
 msgstr "Restante"
@@ -4679,30 +4050,15 @@ msgid "Rendered preview"
 msgstr "Vista previa renderizada"
 
 #. module: base_assembly
-#: model:ir.model.fields,help:base_assembly.field_res_company__assembly_af_publication_fallback_qweb_id
-#: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_af_publication_fallback_qweb_id
-msgid ""
-"Rendered when publication mail templates and convocation HTML are empty."
-msgstr ""
-"Se representa cuando las plantillas de correo de publicación y el HTML de "
-"convocatoria están vacíos."
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Reopen session"
 msgstr "Reabrir sesión"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_delegation_document_qweb
-msgid ""
-"Replace this block with your organisation’s delegation form text using a mail template or a company-level\n"
-"                fallback view when you need clauses specific to your statutes."
-msgstr ""
-
-#. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__partner_id
-msgid "Report filename contact"
-msgstr "Contacto para el nombre del archivo del informe"
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form_session
+msgid "Reopen voting"
+msgstr "Reabrir votación"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_call_register
@@ -4721,6 +4077,24 @@ msgid "Representation (power of attorney)"
 msgstr "Representación (poder notarial)"
 
 #. module: base_assembly
+#: model:ir.model.fields,help:base_assembly.field_assembly_assembly__representation_document_text
+msgid ""
+"Representation PDF introduction. Supports placeholders like {{ object.name "
+"}}."
+msgstr ""
+"Introducción de PDF de representación. Admite marcadores de posición como {{ object.name }}."
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
+msgid "Representation document"
+msgstr "Documento de representación"
+
+#. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__representation_document_text
+msgid "Representation document text"
+msgstr "Texto del documento de representación"
+
+#. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee__call_register_has_representation
 msgid "Representation record"
 msgstr "Registro de representación"
@@ -4729,6 +4103,11 @@ msgstr "Registro de representación"
 #: model:ir.actions.report,name:base_assembly.assembly_assembly_action_report_representation
 msgid "Representation register (assembly)"
 msgstr "Representación (plantilla)"
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
+msgid "Representation text"
+msgstr "Texto de representación"
 
 #. module: base_assembly
 #. odoo-python
@@ -4741,20 +4120,22 @@ msgstr "Representación: %(agent)s"
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 #: model:ir.actions.act_window,name:base_assembly.assembly_representation_action
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__representation_ids
-#: model:ir.ui.menu,name:base_assembly.assembly_representation_menu
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_representation_view_search
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_representation_view_tree
 msgid "Representations"
 msgstr "Representaciones"
 
 #. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_fsm_location__assembly_representation_agent_ids
+#: model:ir.model.fields,field_description:base_assembly.field_fsm_person__assembly_representation_agent_ids
 #: model:ir.model.fields,field_description:base_assembly.field_res_partner__assembly_representation_agent_ids
 #: model:ir.model.fields,field_description:base_assembly.field_res_users__assembly_representation_agent_ids
 msgid "Representations (as agent)"
 msgstr "Representaciones (como apoderado)"
 
 #. module: base_assembly
+#: model:ir.model.fields,field_description:base_assembly.field_fsm_location__assembly_representation_owner_ids
+#: model:ir.model.fields,field_description:base_assembly.field_fsm_person__assembly_representation_owner_ids
 #: model:ir.model.fields,field_description:base_assembly.field_res_partner__assembly_representation_owner_ids
 #: model:ir.model.fields,field_description:base_assembly.field_res_users__assembly_representation_owner_ids
 msgid "Representations (as represented member)"
@@ -4820,11 +4201,6 @@ msgid "Require TIN to mark attended"
 msgstr "Exigir NIF para confirmar asistencia"
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_type__require_vat
-msgid "Require VAT to mark attended"
-msgstr "DNI obligatorio"
-
-#. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_agenda__vote_type_id
 msgid ""
 "Required in weighted vote mode. Must be one of the assembly vote types."
@@ -4875,14 +4251,9 @@ msgstr ""
 "asambleas."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
-msgid "Review messages and outbound mail for this assembly."
-msgstr "Revise los mensajes y el correo saliente de esta asamblea."
-
-#. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_delegation__delegation_state__revoked
 msgid "Revoked"
-msgstr ""
+msgstr "Revocada"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form
@@ -4902,36 +4273,15 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
+#: code:addons/base_assembly/controllers/attendance.py:0
+msgid "Save signature"
+msgstr "Guardar firma"
+
+#. module: base_assembly
+#. odoo-python
 #: code:addons/base_assembly/models/assembly_attendee.py:0
 msgid "Save the attendee before opening the attendance link or QR."
 msgstr "Guarde al asistente antes de abrir el enlace de asistencia o QR."
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid ""
-"Saving creates or updates the rule on the server; <strong>delete the "
-"row</strong> to revoke (stored vote lines refresh on the next rebuild or "
-"attendance change)."
-msgstr ""
-"Guardar crea o actualiza la regla en el servidor;<strong>elimine la "
-"fila</strong> a revocar (las líneas de votación almacenadas se actualizan en"
-" la próxima reconstrucción o cambio de asistencia)."
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_publication_qweb
-msgid "Schedule and venue"
-msgstr ""
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_doc
-msgid ""
-"Schedule of active representation records for this assembly (who acts for "
-"whom). This list is not a voting ballot and not a vote-delegation "
-"certificate."
-msgstr ""
-"Calendario de actas de representación activa de esta asamblea (quién actúa "
-"por quién).Esta lista no es una papeleta de votación ni un certificado de "
-"delegación de voto."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__date_second_call
@@ -4948,14 +4298,16 @@ msgstr ""
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Second call scheduled."
-msgstr ""
+msgstr "Segunda convocatoria programada."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Second call:"
-msgstr ""
+msgstr "Segunda convocatoria:"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__secretary_id
@@ -4965,7 +4317,7 @@ msgstr "Secretario"
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
 msgid "Select one attendee as the recipient."
 msgstr "Seleccione un asistente como destinatario."
 
@@ -4989,7 +4341,6 @@ msgstr "Enviar correo de papeletas"
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 #: model:ir.actions.act_window,name:base_assembly.action_assembly_communication_send_wizard
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_communication_send_wizard_view_form
 msgid "Send communication"
 msgstr "Enviar comunicación"
@@ -5030,19 +4381,16 @@ msgstr "La secuencia debe ser única por asamblea."
 #: model:ir.model.fields,help:base_assembly.field_res_company__assembly_sequence_id
 #: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_sequence_id
 msgid ""
-"Sequence used to generate assembly reference codes. If empty, the system "
-"falls back to any sequence with code “assembly.assembly”."
-msgstr ""
-"Secuencia utilizada para generar códigos de referencia de asamblea. Si está "
-"vacío, el sistema recurre a cualquier secuencia con el código "
-"«assembly.assembly»."
+"Sequence used to generate assembly reference codes. If empty, any sequence "
+"with code “assembly.assembly” is used."
+msgstr "Secuencia utilizada para generar los códigos de referencia de las asambleas. Si está vacía, se utiliza cualquier secuencia con el código “assembly.assembly”."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
 msgid ""
 "Sequence used to generate assembly reference codes. Leave empty to resolve "
 "by sequence code assembly.assembly."
-msgstr ""
+msgstr "Secuencia utilizada para generar los códigos de referencia de las asambleas. Déjela vacía para resolverla mediante el código de secuencia assembly.assembly."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_voting_line__vote_cast_at
@@ -5062,25 +4410,8 @@ msgstr "Fin de sesión"
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_assembly.py:0
-msgid "Session end cannot be before session start."
-msgstr "El fin de sesión no puede ser anterior al inicio de sesión."
-
-#. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__date_start
-msgid "Session start"
-msgstr "Inicio de sesión"
-
-#. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_assembly.py:0
-msgid "Session start cannot be before the first call."
-msgstr "El inicio de sesión no puede ser anterior a la primera convocatoria."
-
-#. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
-msgid "Session start:"
-msgstr ""
+msgid "Session end cannot be before the assembly date."
+msgstr "El final de la sesión no puede ser anterior a la fecha de la asamblea."
 
 #. module: base_assembly
 #. odoo-python
@@ -5089,7 +4420,6 @@ msgid "Set a vote type for this agenda item."
 msgstr "Establezca un tipo de voto para este punto del orden del día."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_call_register
@@ -5111,7 +4441,6 @@ msgstr ""
 "confirme la asistencia."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_call_register
 msgid ""
@@ -5152,27 +4481,10 @@ msgid ""
 msgstr "Descripción breve de la ubicación"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
-msgid "Show QR"
-msgstr "Mostrar QR"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
-msgid "Show the QR code for this member's tracked attendance URL."
-msgstr ""
-"Muestre el código QR de la URL de asistencia registrada de este miembro."
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_call_register
-msgid ""
-"Sign-in register for members attended (confirmed present). For the legal "
-"convocation and full agenda wording, print <strong>Assembly publication "
-"(PDF)</strong> or the <strong>Individual call</strong> per member."
-msgstr ""
-"Registro de inicio de sesión de los miembros asistidos (presente "
-"confirmado).Para la convocatoria legal y redacción completa del orden del "
-"día, imprima la <strong>publicación de la Asamblea (PDF)</strong> o la "
-"<strong>convocatoria individual</strong> por socio."
+#. odoo-python
+#: code:addons/base_assembly/controllers/attendance.py:0
+msgid "Sign in the box below with your finger, then tap the button."
+msgstr "Firme en el recuadro inferior con el dedo y después pulse el botón."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee__attendance_signature
@@ -5185,12 +4497,30 @@ msgid "Signature"
 msgstr "Firma"
 
 #. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/controllers/attendance.py:0
+msgid "Signature (optional)"
+msgstr "Firma (opcional)"
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/controllers/attendance.py:0
+msgid "Signature on file"
+msgstr "Firma registrada"
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/controllers/attendance.py:0
+msgid "Signature saved for %s"
+msgstr "Firma guardada para %s"
+
+#. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_communication_send_wizard__attach_generic_ballot_pdf
 msgid ""
 "Single PDF with every member ballot in sequence. Same attachment on each "
 "email when enabled; use together with nominative only if you intend both."
 msgstr ""
-"PDF único con cada boleta de miembro en secuencia.El mismo archivo adjunto "
+"PDF único con cada papeleta de miembro en secuencia.El mismo archivo adjunto "
 "en cada correo electrónico cuando está habilitado;Úselo junto con el "
 "nominativo solo si desea utilizar ambos."
 
@@ -5200,13 +4530,11 @@ msgid ""
 "Single PDF with one member ballot per page (nominative intro). If disabled, "
 "download a ZIP with one PDF per attendee."
 msgstr ""
-"PDF único con una boleta de miembro por página (introducción nominativa).Si "
+"PDF único con una papeleta de miembro por página (introducción nominativa).Si "
 "está deshabilitado, descargue un ZIP con un PDF por asistente."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_tree
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Skip"
 msgstr "Saltar"
 
@@ -5232,14 +4560,13 @@ msgstr "Iniciar sesión"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_tree
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Start voting"
 msgstr "Iniciar votación"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__agenda_state
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting__voting_state
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "State"
 msgstr "Estado"
 
@@ -5281,8 +4608,14 @@ msgstr ""
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__street
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Street"
 msgstr "Calle"
+
+#. module: base_assembly
+#: model:ir.model,name:base_assembly.model_res_config_settings
+msgid "Street type settings"
+msgstr "Ajustes de configuración"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__attendance_partner_vat_format_strict
@@ -5334,12 +4667,14 @@ msgstr ""
 "votos de opciones (multiopción)."
 
 #. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/controllers/attendance.py:0
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee__partner_vat
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_search
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_call_register
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_summary
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_all
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_call_register
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_delegation
@@ -5354,14 +4689,30 @@ msgid "TIN / VAT (NIF)"
 msgstr "TIN/IVA (NIF)"
 
 #. module: base_assembly
+#: model:ir.ui.menu,name:base_assembly.assembly_menu_technical
+msgid "Technical"
+msgstr "Técnico"
+
+#. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_document_preview_wizard__preview_template_kind
 msgid "Template kind"
-msgstr ""
+msgstr "Tipo de plantilla"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_document_preview_wizard__preview_template_label
 msgid "Template source"
-msgstr ""
+msgstr "Origen de la plantilla"
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
+msgid ""
+"Text for the assembly documents. Supports placeholders like <code>{{ "
+"object.name }}</code>. New assemblies start from the assembly type's default"
+" texts (per language); edit here to override for this assembly."
+msgstr "Texto para los documentos de la asamblea. Admite marcadores de posición "
+"como <code>{{ object.name }}</code>. Las nuevas asambleas parten de los "
+"textos predeterminados del tipo de asamblea (por idioma); edítelos aquí para "
+"sustituirlos en esta asamblea."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_record
@@ -5392,7 +4743,9 @@ msgid ""
 "The assembly belongs to a company that is not in your current session. "
 "Switch to that company or include it among your allowed companies before "
 "sending mail."
-msgstr ""
+msgstr "La asamblea pertenece a una compañía que no está en su sesión actual. "
+"Cambie a esa compañía o inclúyala entre sus compañías permitidas antes de "
+"enviar el correo."
 
 #. module: base_assembly
 #: model:ir.model.constraint,message:base_assembly.constraint_assembly_assembly_assembly_company_code_uniq
@@ -5404,11 +4757,6 @@ msgstr "El código de referencia de la asamblea debe ser único por compañía."
 #: code:addons/base_assembly/models/assembly_voting_line.py:0
 msgid "The attendee must belong to the same assembly as this voting."
 msgstr "El asistente debe pertenecer a la misma asamblea que esta votación."
-
-#. module: base_assembly
-#: model:ir.model.constraint,message:base_assembly.constraint_assembly_type_assembly_type_code_company_uniq
-msgid "The code must be unique per company."
-msgstr "El código debe ser único por compañía."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_delegation_certificate
@@ -5454,6 +4802,14 @@ msgstr ""
 "delegado pueda emitir votos dentro del alcance indicado."
 
 #. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/models/assembly_delegation.py:0
+msgid ""
+"The delegator must be included in the convocable partners of the assembly."
+msgstr "El delegante debe estar incluido entre los socios convocables de la "
+"asamblea."
+
+#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_delegation_certificate
 msgid ""
 "The delegator named above authorizes the delegate to cast votes on their behalf at the assembly identified in this document,\n"
@@ -5463,18 +4819,11 @@ msgstr ""
 "estrictamente dentro del alcance de los tipos de voto enumerados (o todos los tipos de voto de la asamblea cuando se aplica “todos los tipos”), sujeto a las reglas de la asamblea vigentes."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_delegation_document_qweb
-msgid ""
-"The delegator named below transfers the exercise of voting rights for this assembly to the delegate,\n"
-"                within the limits of applicable law and the vote types specified on the delegation record.\n"
-"                The delegate must be recorded as present for the delegation to take effect."
-msgstr ""
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_document_preview_wizard_view_form
 msgid ""
 "The framed area simulates a printed page; it is not a stored legal document."
-msgstr ""
+msgstr "El área enmarcada simula una página impresa; no es un documento legal "
+"almacenado."
 
 #. module: base_assembly
 #. odoo-python
@@ -5519,13 +4868,22 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
+#: code:addons/base_assembly/models/assembly_representation.py:0
+msgid ""
+"The represented member must be included in the convocable partners of the "
+"assembly."
+msgstr "El miembro representado debe estar incluido entre los socios convocables "
+"de la asamblea."
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
 msgid "The selected contact has no email address."
 msgstr "El contacto seleccionado no tiene dirección de correo electrónico."
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
+#: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
 msgid "The selected partner is not an attendee of this assembly."
 msgstr "El socio seleccionado no es asistente a esta asamblea."
 
@@ -5585,12 +4943,6 @@ msgstr ""
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_agenda.py:0
-msgid "This agenda item does not include a vote."
-msgstr "Este punto del orden del día no incluye votación."
-
-#. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_agenda.py:0
 msgid "This agenda item is not available for manual entry."
 msgstr "Este punto de la agenda no está disponible para entrada manual."
 
@@ -5635,17 +4987,6 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_attendee.py:0
-msgid ""
-"This assembly type requires a tax identification number (TIN/VAT) on the "
-"member before they can be marked as attended (confirmed present)."
-msgstr ""
-"Este tipo de asamblea requiere un número de identificación fiscal (TIN/IVA) "
-"del miembro antes de que pueda ser marcado como asistido (presente "
-"confirmado)."
-
-#. module: base_assembly
-#. odoo-python
 #: code:addons/base_assembly/models/assembly_voting_line.py:0
 msgid "This attendee has no votes for this vote type (delegated out)."
 msgstr "Este asistente no tiene votos para este tipo de voto (delegados)."
@@ -5672,13 +5013,6 @@ msgstr ""
 "Este formulario define quién delega (<strong>Delegador</strong>) y quién "
 "recibe unidades (<strong>Delegado</strong>).El ahorro escribe la "
 "regla;<strong>eliminar el registro</strong> para revocarlo."
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_ballot_intro_qweb
-msgid ""
-"This introduction can be replaced with your standard ballot preamble via "
-"mail template or company settings."
-msgstr ""
 
 #. module: base_assembly
 #. odoo-python
@@ -5708,28 +5042,12 @@ msgstr ""
 "como ausentes."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_publication_qweb
-msgid ""
-"This notice constitutes the official convocation for the assembly named above.\n"
-"                    Members and invited participants are requested to attend at the date, time, and venue indicated below,\n"
-"                    and to review the agenda. Voting rights and quorum rules follow the bylaws of the convening body and\n"
-"                    the configuration of this assembly in Odoo."
-msgstr ""
-
-#. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__assembly_communication_message_count
-msgid "Thread messages"
-msgstr "Mensajes de hilo"
-
-#. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/controllers/attendance.py:0
 msgid ""
-"Tip: append the query parameter \"direct=1\" for an immediate redirect "
+"Tip: append the query parameter ``direct=1`` for an immediate redirect "
 "without this page (e.g. for bookmarks or automation)."
-msgstr ""
-"Consejo: añada el parámetro de consulta \"direct=1\" para una redirección "
-"inmediata sin esta página (p. ej. marcadores o automatización)."
+msgstr "Consejo: añada el parámetro de consulta ``direct=1`` para redirigir inmediatamente sin pasar por esta página (por ejemplo, en marcadores o automatizaciones)."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__name
@@ -5739,11 +5057,10 @@ msgstr "Título"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee_vote__attendee_vote_total
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_call_doc_votes
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
 msgid "Total"
-msgstr ""
+msgstr "Total"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting__total_votes_cast
@@ -5765,6 +5082,7 @@ msgstr "Total de votos posibles"
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting_result__total_votes
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_call_register
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_summary
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_all
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_call_register
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_doc_delegation
@@ -5804,14 +5122,9 @@ msgid "Tracked attendance links & QR"
 msgstr "Añadir código QR (enlace de asistencia rastreado)"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
 msgid "Tracked attendance links & QR by default"
 msgstr "Enlaces de asistencia rastreados y QR por defecto"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "Tracked attendance links and QR (per attendee)"
-msgstr "Enlaces de seguimiento de asistencia y QR (por asistente)"
 
 #. module: base_assembly
 #. odoo-python
@@ -5837,20 +5150,14 @@ msgid "Tracked short URL (from link tracker)"
 msgstr "URL corta rastreada (desde el rastreador de enlaces)"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid ""
-"Transfer becomes <strong>Active</strong> only when the "
-"<strong>delegate</strong> is <strong>Attended (confirmed present)</strong>; "
-"until then the row shows <em>Waiting</em>."
-msgstr ""
-"La transferencia se vuelve <strong>activa</strong> solo cuando el "
-"<strong>delegado</strong> está <strong>asistido (confirmado "
-"presente)</strong>;hasta entonces la fila muestra <em>Esperando</em>."
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_delegation_certificate
 msgid "Transfer status"
 msgstr "Estado de transferencia"
+
+#. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
+msgid "Unarchive"
+msgstr "Desarchivar"
 
 #. module: base_assembly
 #. odoo-python
@@ -5871,55 +5178,10 @@ msgid ""
 " per-member intro. For special cases only; default member flow uses the "
 "attendee-based nominative ballot."
 msgstr ""
-"Utilice la introducción genérica de la boleta a nivel de asamblea en lugar "
+"Utilice la introducción genérica de la papeleta a nivel de asamblea en lugar "
 "de la introducción nominativa por miembro.Sólo para casos especiales;El "
-"flujo de miembros predeterminado utiliza la boleta nominativa basada en los "
+"flujo de miembros predeterminado utiliza la papeleta nominativa basada en los "
 "asistentes."
-
-#. module: base_assembly
-#: model:ir.model.fields,help:base_assembly.field_res_company__assembly_default_ballot_intro_mail_template_id
-#: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_default_ballot_intro_mail_template_id
-msgid "Used when an assembly has no ballot introduction template override."
-msgstr ""
-"Se utiliza cuando una asamblea no tiene anulación de plantilla de "
-"introducción de boleta."
-
-#. module: base_assembly
-#: model:ir.model.fields,help:base_assembly.field_res_company__assembly_default_delegation_document_mail_template_id
-#: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_default_delegation_document_mail_template_id
-msgid "Used when an assembly has no delegation document template override."
-msgstr ""
-"Se utiliza cuando una asamblea no tiene sustitución de plantilla del "
-"documento de delegación."
-
-#. module: base_assembly
-#: model:ir.model.fields,help:base_assembly.field_res_company__assembly_default_delegation_footer_mail_template_id
-#: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_default_delegation_footer_mail_template_id
-msgid "Used when an assembly has no delegation footer template override."
-msgstr ""
-"Se utiliza cuando una asamblea no tiene sustitución de plantilla del pie de "
-"página de delegación."
-
-#. module: base_assembly
-#: model:ir.model.fields,help:base_assembly.field_res_company__assembly_default_ballot_nominative_intro_mail_template_id
-#: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_default_ballot_nominative_intro_mail_template_id
-msgid "Used when an assembly has no nominative ballot introduction override."
-msgstr ""
-"Se utiliza cuando una asamblea no tiene anulación de introducción de boleta "
-"nominativa."
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
-msgid "Used when an assembly has no override on the corresponding document."
-msgstr ""
-
-#. module: base_assembly
-#: model:ir.model.fields,help:base_assembly.field_res_company__assembly_default_publication_mail_template_id
-#: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_default_publication_mail_template_id
-msgid "Used when an assembly has no publication template override."
-msgstr ""
-"Se utiliza cuando una asamblea no tiene sustitución de plantilla de "
-"publicación."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_voting_line__vote_cast_by_user_id
@@ -5929,21 +5191,9 @@ msgstr ""
 "token."
 
 #. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_assembly.py:0
-msgid "Using custom template"
-msgstr ""
-
-#. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_assembly.py:0
-msgid "Using default template"
-msgstr ""
-
-#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "Volver a borrador"
-msgstr ""
+msgid "Venue address (for documents)"
+msgstr "Dirección del lugar (para documentos)"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting_line__vote_option
@@ -5953,7 +5203,7 @@ msgid "Vote"
 msgstr "Voto"
 
 #. module: base_assembly
-#: model:ir.model,name:base_assembly.model_vote_type
+#: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__vote_type_id
 msgid "Vote Type"
 msgstr "Tipo de Voto"
 
@@ -5966,11 +5216,6 @@ msgstr "Tipos de voto"
 #: model:ir.model,name:base_assembly.model_assembly_delegation
 msgid "Vote delegation"
 msgstr "Delegación de voto"
-
-#. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
-msgid "Vote delegation (stored rules)"
-msgstr "Delegación de votos (reglas almacenadas)"
 
 #. module: base_assembly
 #: model:ir.actions.report,name:base_assembly.assembly_delegation_action_report_vote_delegation_certificate
@@ -5991,20 +5236,15 @@ msgstr ""
 "destinatario)."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_delegation_document_qweb
-msgid "Vote delegation —"
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
+msgid "Vote delegation text"
+msgstr "Texto de delegación de voto"
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_mail_communication.py:0
 msgid "Vote delegation: %s"
 msgstr "Delegación de voto: %s"
-
-#. module: base_assembly
-#: model:mail.template,subject:base_assembly.mail_template_assembly_delegation_document_default
-msgid "Vote delegation: {{ object.name }}"
-msgstr "Delegación de voto: {{ object.name }}"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting__count_vote_lines
@@ -6024,7 +5264,6 @@ msgid "Vote transfer"
 msgstr "transferencia de voto"
 
 #. module: base_assembly
-#: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__vote_type_id
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee_vote__vote_type_id
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting__vote_type_id
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_call_doc_votes
@@ -6078,8 +5317,8 @@ msgstr "Número de tipos de voto"
 msgid ""
 "Vote types covered by this delegation. Leave empty to delegate every vote "
 "type configured on the assembly. Totals and roll-call use the stored "
-"snapshot on each attendee row (delegated out / delegated in)."
-msgstr "Deje vacío para delegar todos los tipos de voto."
+"snapshot on each attendee row (delegated out / in)."
+msgstr "Tipos de voto cubiertos por esta delegación. Déjelo vacío para delegar todos los tipos de voto configurados en la asamblea. Los totales y el llamamiento utilizan la instantánea almacenada en cada asistente (delegados salientes/entrantes)."
 
 #. module: base_assembly
 #. odoo-python
@@ -6129,15 +5368,11 @@ msgstr ""
 " este tipo."
 
 #. module: base_assembly
-#: model:ir.ui.menu,name:base_assembly.assembly_partner_vote_menu
-msgid "Votes by Contact"
-msgstr "Votos por Contacto"
-
-#. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_attendee.py:0
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee__attendee_vote_ids
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
+#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_call_doc_votes
 msgid "Votes by type"
 msgstr "Votos por tipo"
 
@@ -6183,21 +5418,16 @@ msgid "Voting"
 msgstr "Votación"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_ballot_intro_qweb
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
 msgid "Voting ballot"
-msgstr "boleta de votación"
+msgstr "Papeleta de votación"
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_mail_communication.py:0
 msgid "Voting ballot: %s"
 msgstr "Papeleta de votación: %s"
-
-#. module: base_assembly
-#: model:mail.template,subject:base_assembly.mail_template_assembly_ballot_intro_default
-msgid "Voting ballot: {{ object.name }}"
-msgstr "Papeleta de votación: {{ object.name }}"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
@@ -6218,7 +5448,7 @@ msgstr "Línea de votación (voto emitido)"
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_option_view_form
 msgid "Voting option"
-msgstr ""
+msgstr "Opción de votación"
 
 #. module: base_assembly
 #: model:ir.model.constraint,message:base_assembly.constraint_assembly_agenda_option_assembly_agenda_option_agenda_sequence_uniq
@@ -6238,7 +5468,7 @@ msgstr "Opciones"
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form_session_manual
 msgid "Voting options (choices and vote totals)"
-msgstr ""
+msgstr "Opciones de votación (opciones y totales de votos)"
 
 #. module: base_assembly
 #: model:ir.model,name:base_assembly.model_assembly_voting_result
@@ -6274,8 +5504,6 @@ msgstr "Peso de voto"
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 #: model:ir.actions.act_window,name:base_assembly.assembly_voting_action
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__voting_ids
-#: model:ir.ui.menu,name:base_assembly.assembly_voting_menu
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_graph
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_pivot
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_search
@@ -6343,7 +5571,7 @@ msgstr ""
 "Voto ponderado: cada asistente elegible emite sus propios votos utilizando "
 "el tipo de voto seleccionado; el sistema almacena líneas de votación "
 "individuales (llamada nominal). Modos manuales: ingrese solo totales "
-"agregados (sí/no/abstención/en blanco o recuentos por opción de boleta); no "
+"agregados (sí/no/abstención/en blanco o recuentos por opción de papeleta); no "
 "se crean líneas de voto por asistente para este elemento. Sin votación: "
 "discusión o sólo información."
 
@@ -6386,11 +5614,11 @@ msgstr ""
 " usa el marcador de exento."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form_inherit_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
 msgid ""
 "When enabled, assemblies in closed state can still be edited for this "
 "company."
-msgstr ""
+msgstr "Cuando está activado, las asambleas cerradas de esta compañía aún se pueden editar."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_assembly__include_qr_code
@@ -6437,15 +5665,6 @@ msgstr ""
 "longitud mínima)."
 
 #. module: base_assembly
-#: model:ir.model.fields,help:base_assembly.field_assembly_assembly__is_second_call
-msgid ""
-"When set, quorum rules use the second-call type/value instead of the first-"
-"call ones."
-msgstr ""
-"Si está activado, las reglas de cuórum usan el tipo/valor de segunda "
-"convocatoria en lugar de los de la primera."
-
-#. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_assembly__attendance_require_partner_vat_confirm
 msgid ""
 "When set, recording a member as attended (confirmed present) is blocked if "
@@ -6484,19 +5703,8 @@ msgid "With tracked sign-in URL"
 msgstr "Con URL de inicio de sesión rastreada"
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_operational_roster_note
-msgid ""
-"Working list for the chair and minutes. It is not the legal convocation: use"
-" <strong>Assembly publication (PDF)</strong> for the formal notice text."
-msgstr ""
-"Lista de trabajo de la presidencia y actas.No es la convocatoria legal: "
-"utilice <strong>publicación de asamblea (PDF)</strong> para el texto del "
-"aviso formal."
-
-#. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting_line__vote_option__yes
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting_result__vote_option__yes
-#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_roster_footer
 msgid "Yes"
 msgstr "Sí"
 
@@ -6507,7 +5715,6 @@ msgstr "Sí manual"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_tree
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Yes (total)"
 msgstr "Sí (total)"
 
@@ -6554,18 +5761,6 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/vote_type.py:0
-msgid ""
-"You cannot delete vote type(s) already used in assemblies: %(names)s. Remove"
-" them from assemblies, assembly types, agenda items, votings, delegations, "
-"or attendee vote lines first."
-msgstr ""
-"No puede eliminar los tipos de voto ya utilizados en las asambleas: "
-"%(names)s. Elimínelos primero de asambleas, tipos de asamblea, puntos del "
-"orden del día, votaciones, delegaciones o líneas de voto de asistentes."
-
-#. module: base_assembly
-#. odoo-python
 #: code:addons/base_assembly/models/assembly_voting_line.py:0
 msgid "You cannot record a vote for an attendee marked absent."
 msgstr "No puede registrar un voto para un asistente marcado como ausente."
@@ -6578,12 +5773,8 @@ msgstr ""
 "Debe pertenecer al grupo Responsable de asambleas para abrir este enlace."
 
 #. module: base_assembly
-#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_af_ballot_nominative_intro_qweb
-msgid "Your vote / notes"
-msgstr ""
-
-#. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__zip
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "ZIP"
 msgstr "Código postal"
 
@@ -6598,10 +5789,9 @@ msgid "closed"
 msgstr "cerrada"
 
 #. module: base_assembly
-#. odoo-python
-#: code:addons/base_assembly/models/assembly_communication_send_wizard.py:0
-msgid "none"
-msgstr "ninguno"
+#: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
+msgid "e.g. Ordinary General Assembly"
+msgstr "p. ej., Asamblea General Ordinaria"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_kanban
@@ -6637,6 +5827,12 @@ msgstr "votantes en lista"
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form_session
 msgid "weight not cast"
 msgstr "peso no fundido"
+
+#. module: base_assembly
+#. odoo-python
+#: code:addons/base_assembly/controllers/attendance.py:0
+msgid "— (not set)"
+msgstr "— (no establecido)"
 
 #. module: base_assembly
 #. odoo-python

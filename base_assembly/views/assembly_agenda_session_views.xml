@@ -30,11 +30,19 @@
                         groups="base_assembly.assembly_group_manager"
                     />
                     <button
+                        name="action_mark_addressed"
+                        string="Mark addressed"
+                        type="object"
+                        class="btn-primary"
+                        invisible="agenda_vote_mode != 'no_vote' or agenda_state not in ('pending','in_progress')"
+                        groups="base_assembly.assembly_group_manager"
+                    />
+                    <button
                         name="action_finalize_manual"
                         string="Finalize"
                         type="object"
                         class="btn-primary"
-                        invisible="agenda_state not in ('pending','in_progress')"
+                        invisible="agenda_vote_mode not in ('manual_yes_no','manual_multi') or agenda_state not in ('pending','in_progress')"
                         groups="base_assembly.assembly_group_manager"
                     />
                 </header>
@@ -139,6 +147,13 @@
                     >
                         Sum of votes in the table does not match the expected reference total. Adjust the Votes column or expected total before finalizing.
                     </div>
+                    <div class="alert alert-secondary mb-3 py-2 px-3 small" role="status" invisible="agenda_vote_mode != 'no_vote'">
+                        <strong>No vote:</strong>
+                        informational item; review it and click <strong>Mark addressed</strong> (or <strong>Skip and next</strong>), then move to the next item.
+                    </div>
+                    <group string="Description" invisible="agenda_vote_mode != 'no_vote'">
+                        <field name="description" nolabel="1" colspan="2" readonly="1"/>
+                    </group>
                 </sheet>
             </form>
         </field>

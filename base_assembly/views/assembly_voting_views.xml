@@ -46,6 +46,7 @@
                     <button name="action_refresh_roll_call" string="Refresh roll call" type="object" class="btn-secondary" invisible="voting_state != 'open'"/>
                     <button name="action_close" string="Close voting" type="object" class="btn-primary" invisible="voting_state != 'open'" groups="base_assembly.assembly_group_manager"/>
                     <button name="action_cancel" string="Cancel voting" type="object" invisible="voting_state != 'open'" groups="base_assembly.assembly_group_manager"/>
+                    <button name="action_reopen" string="Reopen voting" type="object" class="btn-primary" invisible="voting_state != 'closed' or assembly_id.assembly_state == 'closed'" groups="base_assembly.assembly_group_manager"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -72,7 +73,7 @@
                             </div>
                         </button>
                     </div>
-                    <group>
+                    <group readonly="assembly_id.assembly_state == 'closed'">
                         <field name="assembly_id" readonly="1"/>
                         <field name="agenda_id"/>
                         <field name="vote_type_id"/>
@@ -87,7 +88,7 @@
                     </group>
                     <notebook>
                         <page string="Roll call" name="lines">
-                            <field name="vote_line_ids">
+                            <field name="vote_line_ids" readonly="assembly_id.assembly_state == 'closed'">
                                 <list
                                     string="Roll call"
                                     editable="top"

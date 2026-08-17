@@ -40,10 +40,9 @@
             <t t-call="web.external_layout">
                 <t t-set="attendees" t-value="o.attendee_ids.sorted(key=lambda a: a.partner_id.name)"/>
                 <div class="page o_assembly_report_attendance_all">
-                    <h3 class="text-center"><strong>Attendees list (all)</strong></h3>
                     <t t-set="asm" t-value="o"/>
-                    <t t-call="base_assembly.report_assembly_asm_meta_block"/>
-                    <t t-call="base_assembly.report_assembly_operational_roster_note"/>
+                    <t t-call="base_assembly.report_assembly_v10_header"/>
+                    <h5 class="mb-2"><strong>Attendees list (all)</strong></h5>
                     <table class="table table-sm table-bordered mt-2">
                         <thead>
                             <tr>
@@ -66,7 +65,7 @@
                                     <t t-if="att.participant_partner_id and att.participant_partner_id != att.partner_id">
                                         <span t-field="att.participant_partner_id" t-options="{'widget': 'contact', 'fields': ['name'], 'no_marker': True}"/>
                                     </t>
-                                    <t t-else="">–</t>
+                                    <t t-else="">-</t>
                                 </td>
                                 <td><span t-field="att.partner_id.vat"/></td>
                                 <td><span t-field="att.attendance_type"/></td>
@@ -100,10 +99,9 @@
             <t t-call="web.external_layout">
                 <t t-set="attendees" t-value="o.attendee_ids.filtered(lambda a: a.attendee_state == 'confirmed').sorted(key=lambda a: a.partner_id.name)"/>
                 <div class="page o_assembly_report_attendance_present">
-                    <h3 class="text-center"><strong>Attendance sheet (present only)</strong></h3>
                     <t t-set="asm" t-value="o"/>
-                    <t t-call="base_assembly.report_assembly_asm_meta_block"/>
-                    <t t-call="base_assembly.report_assembly_operational_roster_note"/>
+                    <t t-call="base_assembly.report_assembly_v10_header"/>
+                    <h5 class="mb-2"><strong>Attendance sheet (present only)</strong></h5>
                     <table class="table table-sm table-bordered mt-2">
                         <thead>
                             <tr>
@@ -162,11 +160,9 @@
             <t t-call="web.external_layout">
                 <t t-set="attendees" t-value="o.attendee_ids.sorted(key=lambda a: a.partner_id.name)"/>
                 <div class="page o_assembly_report_attendance_delegation">
-                    <h3 class="text-center"><strong>Attendees list (with delegated votes)</strong></h3>
-                    <p class="small text-muted text-center mb-2">Includes inbound and outbound vote delegations per row (representation is separate).</p>
                     <t t-set="asm" t-value="o"/>
-                    <t t-call="base_assembly.report_assembly_asm_meta_block"/>
-                    <t t-call="base_assembly.report_assembly_operational_roster_note"/>
+                    <t t-call="base_assembly.report_assembly_v10_header"/>
+                    <h5 class="mb-2"><strong>Attendees list (with delegated votes)</strong></h5>
                     <table class="table table-sm table-bordered mt-2">
                         <thead>
                             <tr>
@@ -223,11 +219,9 @@
             <t t-call="web.external_layout">
                 <t t-set="attendees" t-value="o.attendee_ids.filtered(lambda a: a.attendee_state == 'confirmed').sorted(key=lambda a: a.partner_id.name)"/>
                 <div class="page o_assembly_report_attendance_present_delegation">
-                    <h3 class="text-center"><strong>Attendance sheet (present, with delegated votes)</strong></h3>
-                    <p class="small text-muted text-center mb-2">Present members only; includes inbound and outbound vote delegations.</p>
                     <t t-set="asm" t-value="o"/>
-                    <t t-call="base_assembly.report_assembly_asm_meta_block"/>
-                    <t t-call="base_assembly.report_assembly_operational_roster_note"/>
+                    <t t-call="base_assembly.report_assembly_v10_header"/>
+                    <h5 class="mb-2"><strong>Attendance sheet (present, with delegated votes)</strong></h5>
                     <table class="table table-sm table-bordered mt-2">
                         <thead>
                             <tr>
@@ -286,12 +280,9 @@
             <t t-call="web.external_layout">
                 <t t-set="attendees" t-value="o.attendee_ids.filtered(lambda a: a.attendee_state == 'confirmed').sorted(key=lambda a: a.partner_id.name)"/>
                 <div class="page o_assembly_report_call_register">
-                    <h3 class="text-center"><strong>Call register</strong></h3>
-                    <p class="small text-muted text-center mb-3 o_assembly_report_call_register_note">
-                        Sign-in register for members attended (confirmed present). For the legal convocation and full agenda wording, print <strong>Assembly publication (PDF)</strong> or the <strong>Individual call</strong> per member.
-                    </p>
                     <t t-set="asm" t-value="o"/>
-                    <t t-call="base_assembly.report_assembly_asm_meta_block"/>
+                    <t t-call="base_assembly.report_assembly_v10_header"/>
+                    <h5 class="mb-2"><strong>Call register</strong></h5>
                     <table class="table table-sm table-bordered mt-2">
                         <thead>
                             <tr>
@@ -360,20 +351,30 @@
     <template id="report_assembly_attendee_call_doc">
         <t t-call="web.html_container">
             <t t-call="web.external_layout">
-                <t t-set="assembly" t-value="o.assembly_id"/>
+                <t t-set="assembly" t-value="o.assembly_id.with_context(lang=(o.partner_id.lang or 'en_US'))"/>
                 <div class="page o_assembly_report_individual_call">
-                    <div class="mb-4">
-                        <strong>Addressee</strong>
-                        <div t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['address', 'name', 'phone', 'vat'], 'no_marker': True}"/>
+                    <div class="row mb-5 align-items-start">
+                        <div t-if="o.attendance_qr_png" class="col-4 text-center">
+                            <img t-att-src="image_data_uri(o.attendance_qr_png)" style="width: 130px; height: 130px;"/>
+                        </div>
+                        <div t-attf-class="col-#{8 if o.attendance_qr_png else 12} text-end">
+                            <div t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['address', 'name', 'vat'], 'no_marker': True}"/>
+                        </div>
                     </div>
-                    <h3 class="text-center mb-2"><strong>Individual call</strong></h3>
-                    <t t-set="asm" t-value="assembly"/>
-                    <t t-call="base_assembly.report_assembly_asm_meta_block"/>
-                    <p class="small text-muted text-center mb-3">
-                        Convocation summary and agenda for the addressee. Registered legal representations are listed in the representation register report.
-                    </p>
-                    <t t-call="base_assembly.report_assembly_publication_html_block"/>
-                    <t t-call="base_assembly.report_assembly_agenda_af_list_block"/>
+                    <h3 class="text-center mb-4"><strong t-out="assembly.name"/></h3>
+                    <div class="o_assembly_report_publication" t-out="assembly.get_rendered_publication()"/>
+                    <table class="table table-borderless table-sm mt-3 mb-3">
+                        <tbody>
+                            <tr t-foreach="assembly.agenda_ids.sorted(lambda a: a.sequence)" t-as="item">
+                                <td class="text-end align-top" style="width: 3rem;"><strong><span t-out="item_index + 1"/>.-</strong></td>
+                                <td class="text-justify">
+                                    <strong t-out="item.name"/>
+                                    <div t-if="item.description" t-out="item.description"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="mt-4 o_assembly_report_final" t-out="assembly.get_rendered_final_text()"/>
                 </div>
             </t>
         </t>
@@ -382,25 +383,32 @@
     <template id="report_assembly_attendee_call_doc_votes">
         <t t-call="web.html_container">
             <t t-call="web.external_layout">
-                <t t-set="assembly" t-value="o.assembly_id"/>
+                <t t-set="assembly" t-value="o.assembly_id.with_context(lang=(o.partner_id.lang or 'en_US'))"/>
                 <div class="page o_assembly_report_individual_call_votes">
-                    <div class="mb-4">
-                        <strong>Addressee</strong>
-                        <div t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['address', 'name', 'phone', 'vat'], 'no_marker': True}"/>
-                    </div>
-                    <h3 class="text-center mb-2"><strong>Individual call (with votes)</strong></h3>
-                    <t t-set="asm" t-value="assembly"/>
-                    <t t-call="base_assembly.report_assembly_asm_meta_block"/>
-                    <p class="small text-muted text-center mb-3">
-                        Convocation summary, agenda, and vote entitlements for the addressee.
-                    </p>
-                    <t t-call="base_assembly.report_assembly_publication_html_block"/>
-                    <t t-call="base_assembly.report_assembly_agenda_af_list_block"/>
-                    <t t-if="o.attendee_vote_ids">
-                        <div class="row mt-4">
-                            <div class="col-12"><strong>Votes by type</strong></div>
+                    <div class="row mb-5 align-items-start">
+                        <div t-if="o.attendance_qr_png" class="col-4 text-center">
+                            <img t-att-src="image_data_uri(o.attendance_qr_png)" style="width: 130px; height: 130px;"/>
                         </div>
-                        <table class="table table-sm table-bordered mt-2">
+                        <div t-attf-class="col-#{8 if o.attendance_qr_png else 12} text-end">
+                            <div t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['address', 'name', 'vat'], 'no_marker': True}"/>
+                        </div>
+                    </div>
+                    <h3 class="text-center mb-4"><strong t-out="assembly.name"/></h3>
+                    <div class="o_assembly_report_publication" t-out="assembly.get_rendered_publication()"/>
+                    <table class="table table-borderless table-sm mt-3 mb-3">
+                        <tbody>
+                            <tr t-foreach="assembly.agenda_ids.sorted(lambda a: a.sequence)" t-as="item">
+                                <td class="text-end align-top" style="width: 3rem;"><strong><span t-out="item_index + 1"/>.-</strong></td>
+                                <td class="text-justify">
+                                    <strong t-out="item.name"/>
+                                    <div t-if="item.description" t-out="item.description"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <t t-if="o.attendee_vote_ids">
+                        <p class="fw-semibold mb-1 mt-3">Votes by type</p>
+                        <table class="table table-sm table-bordered">
                             <thead>
                                 <tr>
                                     <th>Vote type</th>
@@ -421,6 +429,7 @@
                             </tbody>
                         </table>
                     </t>
+                    <div class="mt-4 o_assembly_report_final" t-out="assembly.get_rendered_final_text()"/>
                 </div>
             </t>
         </t>

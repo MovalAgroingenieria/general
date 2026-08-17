@@ -2,6 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 # pylint: disable=too-many-lines
 
+import base64
 import re
 from collections import defaultdict
 from urllib.parse import urlencode
@@ -36,7 +37,6 @@ class AssemblyAttendee(models.Model):
     """Assembly member row; quorum uses presence, votes use ``partner_id``."""
 
     _name = "assembly.attendee"
-    _inherit = ["assembly.mixin.open.assembly"]
     _description = "Assembly attendee"
     _order = "assembly_id, partner_id"
     _rec_name = "name"
@@ -63,6 +63,10 @@ class AssemblyAttendee(models.Model):
         ondelete="cascade",
         index=True,
         check_company=True,
+    )
+    assembly_state = fields.Selection(
+        related="assembly_id.assembly_state",
+        string="Assembly state",
     )
     company_id = fields.Many2one(
         "res.company",
@@ -190,6 +194,11 @@ class AssemblyAttendee(models.Model):
             "Settings → Assemblies."
         ),
     )
+    attendance_qr_png = fields.Binary(
+        string="Attendance QR",
+        compute="_compute_attendance_qr_png",
+        help="QR image encoding the tracked attendance URL, for printed documents.",
+    )
     partner_vat = fields.Char(
         string="TIN",
         related="partner_id.vat",
@@ -257,6 +266,20 @@ class AssemblyAttendee(models.Model):
         for record in self:
             lt = record.attendance_link_tracker_id
             record.attendance_url = (lt.short_url or "") if lt else ""
+
+    @api.depends("attendance_url", "assembly_id.include_qr_code")
+    def _compute_attendance_qr_png(self):
+        report_model = self.env["ir.actions.report"]
+        for record in self:
+            url = record.attendance_url
+            if record.assembly_id.include_qr_code and url:
+                try:
+                    img = report_model.barcode("QR", url, width=200, height=200)
+                    record.attendance_qr_png = base64.b64encode(img)
+                except (ValueError, TypeError):
+                    record.attendance_qr_png = False
+            else:
+                record.attendance_qr_png = False
 
     def _attendance_flow_target_url(self):
         """Absolute URL for the attendance entry of this attendee."""
@@ -454,16 +477,28 @@ class AssemblyAttendee(models.Model):
         positive_ids = self.search(OR(doms)).ids if doms else []
         return self._call_register_boolean_search_domain(operator, value, positive_ids)
 
+    def action_open_assembly(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Assembly"),
+            "res_model": "assembly.assembly",
+            "res_id": self.assembly_id.id,
+            "view_mode": "form",
+            "target": "current",
+        }
+
     def action_open_attendee_votes(self):
-        return self._action_window(
-            "assembly.attendee.vote",
-            self.env._("Votes by type"),
-            "list",
-            extra={
-                "domain": [("attendee_id", "=", self.id)],
-                "context": {"default_attendee_id": self.id},
-            },
-        )
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": self.env._("Votes by type"),
+            "res_model": "assembly.attendee.vote",
+            "view_mode": "list",
+            "target": "current",
+            "domain": [("attendee_id", "=", self.id)],
+            "context": {"default_attendee_id": self.id},
+        }
 
     def action_print_ballot(self):
         self.ensure_one()
@@ -564,25 +599,10 @@ class AssemblyAttendee(models.Model):
         self._validate_attendee_create_initial_states(vals_list)
         asm_ids = {v.get("assembly_id") for v in vals_list if v.get("assembly_id")}
         if asm_ids:
-            asm_existing = self.env["assembly.assembly"].browse(list(asm_ids)).exists()
-            asm_existing._assembly_ensure_not_closed_for_related_changes()
-        else:
-            asm_existing = self.env["assembly.assembly"]
-        bypass_attendee_create_acl = False
-        if (
-            not self.env.su
-            and not self.env["ir.model.access"].check(
-                self._name, "create", raise_exception=False
-            )
-            and asm_ids
-        ):
-            bypass_attendee_create_acl = len(asm_existing) == len(asm_ids) and all(
-                asm.has_access("write") for asm in asm_existing
-            )
-        if bypass_attendee_create_acl:
-            recs = self.env["assembly.attendee"].sudo().create(vals_list)
-        else:
-            recs = super().create(vals_list)
+            self.env["assembly.assembly"].browse(
+                asm_ids
+            )._assembly_ensure_not_closed_for_related_changes()
+        recs = super().create(vals_list)
         if not self.env.context.get("assembly_attendee_skip_link_tracker_resync"):
             recs._sync_attendance_link_trackers()
         return recs
@@ -798,10 +818,9 @@ class AssemblyAttendee(models.Model):
     def _validate_can_confirm(self):
         """Gate for :meth:`action_confirm` (and internal confirm path).
 
-        * ``assembly_id.attendance_require_partner_vat_confirm``: non-empty TIN;
-          optional ``attendance_partner_vat_format_strict`` (from type defaults).
-        * ``assembly.assembly_type_id.require_vat``: same TIN rule with a
-          type-scoped message when the assembly flag above is off.
+        When ``assembly_id.attendance_require_partner_vat_confirm`` is set, the
+        member needs a non-empty TIN; ``attendance_partner_vat_format_strict``
+        adds a light format check.
         """
         self._ensure_assembly_and_partner_for_action(
             no_assembly_msg=self.env._(
@@ -811,48 +830,35 @@ class AssemblyAttendee(models.Model):
         )
         self.ensure_one()
         asm = self.assembly_id
+        if asm.assembly_state != "in_session":
+            raise ValidationError(
+                self.env._(
+                    "Members can only be marked as attended once the assembly "
+                    "session has started."
+                )
+            )
+        if not asm.attendance_require_partner_vat_confirm:
+            return
         raw = (self.partner_id.vat or "").strip()
-        atype = asm.assembly_type_id
-        type_requires_vat = bool(atype and atype.require_vat)
-        if asm.attendance_require_partner_vat_confirm:
-            if not raw or raw == "/":
+        if not raw or raw == "/":
+            raise ValidationError(
+                self.env._(
+                    "This assembly requires a tax identification number (TIN/VAT) "
+                    "on the member before they can be marked as attended "
+                    "(confirmed present)."
+                )
+            )
+        if asm.attendance_partner_vat_format_strict:
+            attendee_model = self.env["assembly.attendee"]
+            if not attendee_model._partner_vat_passes_light_format_check(raw):
                 raise ValidationError(
                     self.env._(
-                        "This assembly requires a tax identification number (TIN/VAT) "
-                        "on the member before they can be marked as attended "
-                        "(confirmed present)."
+                        "The member's tax identification number (TIN/VAT) does not "
+                        "meet the required format for this assembly."
                     )
                 )
-            if asm.attendance_partner_vat_format_strict:
-                attendee_model = self.env["assembly.attendee"]
-                if not attendee_model._partner_vat_passes_light_format_check(raw):
-                    raise ValidationError(
-                        self.env._(
-                            "The member's tax identification number (TIN/VAT) does not "
-                            "meet the required format for this assembly."
-                        )
-                    )
-        elif type_requires_vat:
-            if not raw or raw == "/":
-                raise ValidationError(
-                    self.env._(
-                        "This assembly type requires a tax identification number "
-                        "(TIN/VAT) on the member before they can be marked as attended "
-                        "(confirmed present)."
-                    )
-                )
-            if asm.attendance_partner_vat_format_strict:
-                attendee_model = self.env["assembly.attendee"]
-                if not attendee_model._partner_vat_passes_light_format_check(raw):
-                    raise ValidationError(
-                        self.env._(
-                            "The member's tax identification number (TIN/VAT) does "
-                            "not meet the required format for this assembly."
-                        )
-                    )
-        if asm.attendance_require_partner_vat_confirm or type_requires_vat:
-            # AF v2.0 §2.5 / §4.11: use Odoo ``base_vat`` rules when TIN is required.
-            self.partner_id.check_vat()
+        # Use Odoo ``base_vat`` rules when a TIN is required.
+        self.partner_id.check_vat()
 
     def _apply_confirm_state(self):
         self.ensure_one()
@@ -1017,6 +1023,13 @@ class AssemblyAttendee(models.Model):
             no_assembly_msg=self.env._("Cannot record as absent without an assembly."),
             no_partner_msg=self.env._("Cannot record as absent without a member."),
         )
+        if self.assembly_id.assembly_state != "in_session":
+            raise ValidationError(
+                self.env._(
+                    "Members can only be marked as absent once the assembly "
+                    "session has started."
+                )
+            )
         open_cast = self.env["assembly.voting.line"].search(
             [
                 ("attendee_id", "=", self.id),

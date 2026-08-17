@@ -5,46 +5,6 @@ from odoo import api, fields, models
 
 _ASSEMBLY_COMPANY_DEFAULT_CONFIG_REFS = (
     (
-        "assembly_default_publication_mail_template_id",
-        "base_assembly.mail_template_assembly_publication_default",
-    ),
-    (
-        "assembly_default_delegation_document_mail_template_id",
-        "base_assembly.mail_template_assembly_delegation_document_default",
-    ),
-    (
-        "assembly_default_delegation_footer_mail_template_id",
-        "base_assembly.mail_template_assembly_delegation_footer_default",
-    ),
-    (
-        "assembly_default_ballot_intro_mail_template_id",
-        "base_assembly.mail_template_assembly_ballot_intro_default",
-    ),
-    (
-        "assembly_default_ballot_nominative_intro_mail_template_id",
-        "base_assembly.mail_template_assembly_ballot_nominative_intro_default",
-    ),
-    (
-        "assembly_af_publication_fallback_qweb_id",
-        "base_assembly.assembly_af_publication_qweb",
-    ),
-    (
-        "assembly_af_delegation_document_fallback_qweb_id",
-        "base_assembly.assembly_af_delegation_document_qweb",
-    ),
-    (
-        "assembly_af_delegation_footer_fallback_qweb_id",
-        "base_assembly.assembly_af_delegation_footer_qweb",
-    ),
-    (
-        "assembly_af_ballot_intro_fallback_qweb_id",
-        "base_assembly.assembly_af_ballot_intro_qweb",
-    ),
-    (
-        "assembly_af_ballot_nominative_intro_fallback_qweb_id",
-        "base_assembly.assembly_af_ballot_nominative_intro_qweb",
-    ),
-    (
         "assembly_attendance_landing_qweb_id",
         "base_assembly.assembly_attendance_landing_page",
     ),
@@ -75,62 +35,6 @@ class ResCompany(models.Model):
         "('company_id', '=', False), ('company_id', '=', id)]",
         help="Sequence used to generate assembly reference codes. "
         "If empty, any sequence with code “assembly.assembly” is used.",
-    )
-    assembly_default_publication_mail_template_id = fields.Many2one(
-        "mail.template",
-        string="Default publication mail template",
-        domain="[('model', '=', 'assembly.assembly')]",
-        help="Used when an assembly has no publication template override.",
-    )
-    assembly_default_delegation_document_mail_template_id = fields.Many2one(
-        "mail.template",
-        string="Default delegation document mail template",
-        domain="[('model', '=', 'assembly.assembly')]",
-        help="Used when an assembly has no delegation document template override.",
-    )
-    assembly_default_delegation_footer_mail_template_id = fields.Many2one(
-        "mail.template",
-        string="Default delegation footer mail template",
-        domain="[('model', '=', 'assembly.assembly')]",
-        help="Used when an assembly has no delegation footer template override.",
-    )
-    assembly_default_ballot_intro_mail_template_id = fields.Many2one(
-        "mail.template",
-        string="Default ballot introduction mail template",
-        domain="[('model', '=', 'assembly.assembly')]",
-        help="Used when an assembly has no ballot introduction template override.",
-    )
-    assembly_default_ballot_nominative_intro_mail_template_id = fields.Many2one(
-        "mail.template",
-        string="Default nominative ballot introduction mail template",
-        domain="[('model', '=', 'assembly.assembly')]",
-        help="Used when an assembly has no nominative ballot introduction override.",
-    )
-    assembly_af_publication_fallback_qweb_id = fields.Many2one(
-        "ir.ui.view",
-        string="Publication QWeb fallback",
-        domain="[('type', '=', 'qweb')]",
-        help="Rendered when publication mail templates and convocation HTML are empty.",
-    )
-    assembly_af_delegation_document_fallback_qweb_id = fields.Many2one(
-        "ir.ui.view",
-        string="Delegation document QWeb fallback",
-        domain="[('type', '=', 'qweb')]",
-    )
-    assembly_af_delegation_footer_fallback_qweb_id = fields.Many2one(
-        "ir.ui.view",
-        string="Delegation footer QWeb fallback",
-        domain="[('type', '=', 'qweb')]",
-    )
-    assembly_af_ballot_intro_fallback_qweb_id = fields.Many2one(
-        "ir.ui.view",
-        string="Ballot introduction QWeb fallback",
-        domain="[('type', '=', 'qweb')]",
-    )
-    assembly_af_ballot_nominative_intro_fallback_qweb_id = fields.Many2one(
-        "ir.ui.view",
-        string="Nominative ballot introduction QWeb fallback",
-        domain="[('type', '=', 'qweb')]",
     )
     assembly_attendance_landing_qweb_id = fields.Many2one(
         "ir.ui.view",

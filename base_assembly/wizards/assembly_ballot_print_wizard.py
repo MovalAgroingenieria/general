@@ -9,9 +9,7 @@ from odoo import fields, models
 from odoo.exceptions import UserError
 
 
-class AssemblyBallotPrintWizard(
-    models.TransientModel
-):  # pylint: disable=no-wizard-in-models
+class AssemblyBallotPrintWizard(models.TransientModel):
     _name = "assembly.ballot.print.wizard"
     _description = "Print ballots (PDF) for assembly attendees"
 

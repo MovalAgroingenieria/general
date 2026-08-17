@@ -10,14 +10,39 @@ Lookups intersect ``env.companies`` so deep links stay within the session-allowe
 companies (in addition to ``ir.rule`` multi-company domains).
 """
 
+import base64
+import binascii
+
 from odoo import http
+from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.osv import expression
 
-_ALLOWED_ASSEMBLY_STATES = frozenset(("open", "in_session"))
+_ALLOWED_ASSEMBLY_STATES = frozenset(("announced", "in_session"))
 _MANAGER_GROUP_XMLID = "base_assembly.assembly_group_manager"
 _DEFAULT_TEMPLATE_LANDING_XMLID = "base_assembly.assembly_attendance_landing_page"
 _DEFAULT_TEMPLATE_ERROR_XMLID = "base_assembly.assembly_attendance_error_page"
+# A signature PNG is small; cap generously to reject oversized payloads.
+_SIGNATURE_MAX_B64_LEN = 6_000_000
+
+
+def _extract_signature_b64(raw):
+    """Return clean base64 for a data-URL PNG signature, or ``None`` if invalid."""
+    if not raw:
+        return None
+    val = raw.strip()
+    if val.startswith("data:"):
+        parts = val.split(",", 1)
+        if len(parts) != 2 or "base64" not in parts[0]:
+            return None
+        val = parts[1]
+    if not val or len(val) > _SIGNATURE_MAX_B64_LEN:
+        return None
+    try:
+        base64.b64decode(val, validate=True)
+    except (binascii.Error, ValueError):
+        return None
+    return val
 
 
 def _wants_direct_redirect(params):
@@ -151,6 +176,56 @@ class AttendanceController(http.Controller):
             return self._attendance_attendee_response(env, attendee, direct)
         return self._attendance_no_attendee_response(env, aid, direct)
 
+    @http.route(
+        "/assembly/attendance/mark_present",
+        type="http",
+        auth="user",
+        methods=["POST"],
+    )
+    def mark_present(self, attendee_id=None, signature=None, **kw):
+        """Mark an attendee present from the QR landing page (managers only)."""
+        env = request.env
+        if not env.user.has_group(_MANAGER_GROUP_XMLID):
+            return self._attendance_access_denied_response(env, False)
+        try:
+            aid = int(str(attendee_id).strip())
+        except (TypeError, ValueError):
+            aid = 0
+        attendee = env["assembly.attendee"].search(
+            _attendance_domain_scoped_to_session_companies([("id", "=", aid)], env),
+            limit=1,
+        )
+        if not attendee:
+            return _attendance_error_html(
+                404, env, env._("Not found"), env._("Attendee not found.")
+            )
+        asm = attendee.assembly_id
+        if asm.assembly_state not in _ALLOWED_ASSEMBLY_STATES:
+            return self._attendance_state_error_response(env, asm, False)
+        form_hash = "/web#model=assembly.attendee&id=%s&view_type=form" % attendee.id
+        sig_b64 = _extract_signature_b64(signature)
+        already = attendee.attendee_state == "confirmed"
+        try:
+            if not already:
+                attendee.action_confirm()
+            if sig_b64:
+                attendee.write({"attendance_signature": sig_b64})
+            if already and sig_b64:
+                msg = env._("Signature saved for %s", attendee.display_name)
+            elif already:
+                msg = env._("%s is already marked present.", attendee.display_name)
+            else:
+                msg = env._("Marked as present: %s", attendee.display_name)
+            notice = {"type": "success", "message": msg}
+        except UserError as exc:
+            notice = {
+                "type": "error",
+                "message": (
+                    exc.args[0] if exc.args else env._("Could not mark present.")
+                ),
+            }
+        return self._attendance_render_landing(env, attendee, asm, form_hash, notice)
+
     def _attendance_invalid_ids_response(self, env, direct):
         msg = env._(
             "Missing or invalid assembly_id or participant_id. "
@@ -190,8 +265,7 @@ class AttendanceController(http.Controller):
             return request.redirect(form_hash)
         return self._attendance_render_landing(env, attendee, asm, form_hash)
 
-    def _attendance_render_landing(self, env, attendee, asm, form_hash):
-        partner = attendee.partner_id
+    def _attendance_render_landing(self, env, attendee, asm, form_hash, notice=None):
         landing_ref = _attendance_resolve_qweb_template_ref(
             env,
             asm.company_id,
@@ -203,23 +277,7 @@ class AttendanceController(http.Controller):
             .sudo()
             ._render_template(
                 landing_ref,
-                {
-                    "page_title": env._("Attendance — %s", asm.display_name),
-                    "heading": env._("Attendance check-in"),
-                    "label_assembly": env._("Assembly"),
-                    "assembly_name": asm.display_name,
-                    "label_member": env._("Member"),
-                    "participant_name": partner.display_name if partner else "",
-                    "label_state": env._("Assembly status"),
-                    "assembly_state_label": _assembly_state_label(env, asm),
-                    "open_form_url": form_hash,
-                    "open_form_label": env._("Open attendee registration"),
-                    "hint_direct": env._(
-                        "Tip: append the query parameter ``direct=1`` "
-                        "for an immediate redirect without this page "
-                        "(e.g. for bookmarks or automation)."
-                    ),
-                },
+                self._attendance_landing_context(env, attendee, asm, form_hash, notice),
             )
         )
         return request.make_response(
@@ -231,6 +289,60 @@ class AttendanceController(http.Controller):
                 ("Cache-Control", "no-store, private"),
             ],
         )
+
+    def _attendance_landing_context(self, env, attendee, asm, form_hash, notice):
+        partner = attendee.partner_id
+        state_sel = dict(
+            env["assembly.attendee"]
+            ._fields["attendee_state"]
+            ._description_selection(env)
+        )
+        notice = notice or {}
+        return {
+            "page_title": env._("Attendance — %s", asm.display_name),
+            "heading": env._("Attendance check-in"),
+            "label_assembly": env._("Assembly"),
+            "assembly_name": asm.display_name,
+            "label_member": env._("Member"),
+            "participant_name": partner.display_name if partner else "",
+            "label_vat": env._("TIN"),
+            "partner_vat": attendee.partner_vat or env._("— (not set)"),
+            "label_attendee_state": env._("Attendance"),
+            "attendee_state_label": state_sel.get(
+                attendee.attendee_state, attendee.attendee_state or ""
+            ),
+            "label_state": env._("Assembly status"),
+            "assembly_state_label": _assembly_state_label(env, asm),
+            "already_present": attendee.attendee_state == "confirmed",
+            "signature_img": attendee.attendance_signature or False,
+            "label_signature_saved": env._("Signature on file"),
+            "show_action_form": not (
+                attendee.attendee_state == "confirmed" and attendee.attendance_signature
+            ),
+            "attendee_id": attendee.id,
+            "csrf_token": request.csrf_token(),
+            "mark_present_url": "/assembly/attendance/mark_present",
+            "mark_present_label": env._("Mark present"),
+            "submit_label": (
+                env._("Save signature")
+                if attendee.attendee_state == "confirmed"
+                else env._("Mark present")
+            ),
+            "label_signature": env._("Signature (optional)"),
+            "signature_hint": env._(
+                "Sign in the box below with your finger, then tap the button."
+            ),
+            "clear_label": env._("Clear"),
+            "open_form_url": form_hash,
+            "open_form_label": env._("Open full registration form"),
+            "notice_type": notice.get("type"),
+            "notice_message": notice.get("message"),
+            "hint_direct": env._(
+                "Tip: append the query parameter ``direct=1`` "
+                "for an immediate redirect without this page "
+                "(e.g. for bookmarks or automation)."
+            ),
+        }
 
     def _attendance_no_attendee_response(self, env, aid, direct):
         assembly = env["assembly.assembly"].search(
