@@ -15,6 +15,7 @@
         "security/base_vote_groups.xml",
         "security/ir.model.access.csv",
         "data/ir_cron_data.xml",
+        "data/vote_type_data.xml",
         "views/vote_type_views.xml",
         "views/partner_vote_views.xml",
         "views/res_partner_views.xml",

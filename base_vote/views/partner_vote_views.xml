@@ -4,7 +4,7 @@
         <field name="name">partner.vote.list</field>
         <field name="model">partner.vote</field>
         <field name="arch" type="xml">
-            <list decoration-muted="vote_type_id.active == False">
+            <list decoration-muted="vote_type_id.active == False" create="false" edit="false" delete="false">
                 <field name="partner_id"/>
                 <field name="vote_type_id"/>
                 <field name="vote_count_display"/>
