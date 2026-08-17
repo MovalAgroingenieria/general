@@ -1,6 +1,8 @@
 # 2026 Moval Agroingenieria
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+import json
+
 from odoo import models
 
 
@@ -8,9 +10,6 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     def _get_sii_identifier(self):
-        """Get the SII structure for a partner identifier depending on the
-        conditions of the invoice.
-        """
         self.ensure_one()
         gen_type = self._get_sii_gen_type()
         partner = self._aeat_get_partner()
@@ -19,13 +18,11 @@ class AccountMove(models.Model):
             identifier_type,
             identifier,
         ) = partner._parse_aeat_vat_info()
-        # Take into account some vats construction like Greece
         vat_country_code = (
             partner._map_aeat_country_iso_code(partner.country_id) or country_code
         )
         if identifier == "/":
             identifier = False
-        # Limpiar alfanum
         if identifier:
             identifier = "".join(e for e in identifier if e.isalnum()).upper()
         else:
@@ -58,9 +55,7 @@ class AccountMove(models.Model):
         elif gen_type == 2:
             return {"IDOtro": {"IDType": "02", "ID": vat_country_code + identifier}}
         elif gen_type == 3 and identifier_type:
-            # Si usamos identificador tipo 02 en exportaciones, el envío falla con:
-            #   {'CodigoErrorRegistro': 1104,
-            #    'DescripcionErrorRegistro': 'Valor del campo ID incorrecto'}
+
             if identifier_type == "02":
                 identifier_type = "06"
             return {
@@ -72,3 +67,12 @@ class AccountMove(models.Model):
             }
         elif gen_type == 3:
             return {"NIF": identifier}
+        return {"NIF": identifier}
+
+    def _sii_invoice_dict_not_modified(self):
+        self.ensure_one()
+        if self.env.context.get("_sii_only_analytic_change"):
+            return True
+        to_send = self._get_aeat_invoice_dict()
+        content_sent = json.loads(self.aeat_content_sent)
+        return to_send == content_sent
