@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-14 08:09+0000\n"
-"PO-Revision-Date: 2026-08-14 08:09+0000\n"
+"POT-Creation-Date: 2026-08-18 08:08+0000\n"
+"PO-Revision-Date: 2026-08-18 08:08+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -21,13 +21,15 @@ msgstr ""
 msgid ""
 "%(count)d recipient(s): one separate email each; nominative attachments "
 "match the addressee."
-msgstr "%(count)d destinatari(s): un correu electrònic separat per a cadascun; els adjunts nominatius corresponen al destinatari."
+msgstr ""
+"%(count)d destinatari(s): un correu electrònic separat per a cadascun; els "
+"adjunts nominatius corresponen al destinatari."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
 msgid "%(message)s %(n)d error(s)."
-msgstr "%(message)s %(n)d error(s)."
+msgstr ""
 
 #. module: base_assembly
 #. odoo-python
@@ -36,7 +38,10 @@ msgid ""
 "%(partner)s has %(count)d active delegation(s) to: %(delegates)s. Voting "
 "units stay assigned until those delegation records are removed from the "
 "assembly."
-msgstr "%(partner)s té %(count)d delegació(ons) activa(es) cap a: %(delegates)s. Les unitats de vot continuen assignades fins que s'eliminin aquests registres de delegació de l'assemblea."
+msgstr ""
+"%(partner)s té %(count)d delegació(ons) activa(es) cap a: %(delegates)s. Les"
+" unitats de vot continuen assignades fins que s'eliminin aquests registres "
+"de delegació de l'assemblea."
 
 #. module: base_assembly
 #. odoo-python
@@ -69,7 +74,8 @@ msgstr "'Assistents_present - %s' % (object._get_report_base_filename())"
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_attendance_present_with_delegationvote
 msgid ""
 "'Attendees_present_delegations - %s' % (object._get_report_base_filename())"
-msgstr "'Assistents_present_delegacions - %s' % (object._get_report_base_filename())"
+msgstr ""
+"'Assistents_present_delegacions - %s' % (object._get_report_base_filename())"
 
 #. module: base_assembly
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_attendee_action_report_voting_ballot_nominative
@@ -115,7 +121,8 @@ msgstr "'Plantilla_representació - %s' % (object._get_report_base_filename())"
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_delegation_action_report_vote_delegation_certificate
 msgid ""
 "'Vote_delegation_certificate - %s' % (object._get_report_base_filename())"
-msgstr "'Certificat_delegació_vot - %s' % (object._get_report_base_filename())"
+msgstr ""
+"'Certificat_delegació_vot - %s' % (object._get_report_base_filename())"
 
 #. module: base_assembly
 #: model:ir.actions.report,print_report_name:base_assembly.assembly_assembly_action_report_delegationvote
@@ -146,13 +153,24 @@ msgid ""
 ",\n"
 "                            No:"
 msgstr ""
-",\n"
-"                            No:"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
 msgid "<em>Options (recorded)</em>"
 msgstr "<em>Opcions (registrades)</em>"
+
+#. module: base_assembly
+#: model:assembly.type,default_publication_text:base_assembly.assembly_type_general
+msgid ""
+"<h2>{{ object.name }}</h2>\n"
+"            <p>{{ format_datetime(object.date_first_call) if object.date_first_call else '' }}{{ ' — ' + object.location if object.location else '' }}</p>\n"
+"            <p>This notice is the official convocation for the assembly above. Members are requested to attend at the date, time and venue indicated, and to review the agenda.</p>\n"
+"        "
+msgstr ""
+"<h2>{{ object.name }}</h2>\n"
+"            <p>{{ format_datetime(object.date_first_call) if object.date_first_call else '' }}{{ ' — ' + object.location if object.location else '' }}</p>\n"
+"            <p>Aquesta comunicació constitueix la convocatòria oficial de l'assemblea indicada. Es prega als socis que assisteixin a la data, hora i lloc indicats, i que revisin l'ordre del dia.</p>\n"
+"        "
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_kanban
@@ -209,6 +227,66 @@ msgstr "<i class=\"fa fa-sliders me-1\" title=\"Mode de votació\"/>"
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_kanban
 msgid "<i class=\"fa fa-tag me-1\" title=\"Assembly type\"/>"
 msgstr "<i class=\"fa fa-tag me-1\" title=\"Tipus d'assemblea\"/>"
+
+#. module: base_assembly
+#: model:assembly.type,default_ballot_nominative_intro_text:base_assembly.assembly_type_general
+msgid ""
+"<p>Personalized voting ballot for the assembly <strong>{{ object.name }}</strong>.</p>\n"
+"        "
+msgstr ""
+"<p>Butlleta de votació personalitzada per a l'assemblea <strong>{{ object.name }}</strong>.</p>\n"
+"        "
+
+#. module: base_assembly
+#: model:assembly.type,default_representation_document_text:base_assembly.assembly_type_general
+msgid ""
+"<p>Representation form for the assembly <strong>{{ object.name }}</strong>.</p>\n"
+"            <p>The represented member appoints the representative below to attend and act on their behalf at this assembly.</p>\n"
+"        "
+msgstr ""
+"<p>Formulari de representació per a l'assemblea <strong>{{ object.name }}</strong>.</p>\n"
+"            <p>El soci representat designa el representant indicat a continuació per assistir i actuar en nom seu en aquesta assemblea.</p>\n"
+"        "
+
+#. module: base_assembly
+#: model:assembly.type,default_delegation_footer_text:base_assembly.assembly_type_general
+msgid ""
+"<p>The delegator certifies the accuracy of the information above and authorizes the delegate to cast votes on their behalf for the indicated vote type(s).</p>\n"
+"        "
+msgstr ""
+"<p>El delegant certifica la veracitat de la informació anterior i autoritza el delegat a emetre vots en nom seu per al(s) tipus de vot indicat(s).</p>\n"
+"        "
+
+#. module: base_assembly
+#: model:assembly.type,default_delegation_document_text:base_assembly.assembly_type_general
+msgid ""
+"<p>Vote delegation form for the assembly <strong>{{ object.name }}</strong>.</p>\n"
+"            <p>Identify the delegator and the delegate below and specify the vote types delegated.</p>\n"
+"        "
+msgstr ""
+"<p>Formulari de delegació de vot per a l'assemblea <strong>{{ object.name }}</strong>.</p>\n"
+"            <p>Identifiqueu a continuació el delegant i el delegat, i especifiqueu els tipus de vot delegats.</p>\n"
+"        "
+
+#. module: base_assembly
+#: model:assembly.type,default_ballot_intro_text:base_assembly.assembly_type_general
+msgid ""
+"<p>Voting ballot for <strong>{{ object.name }}</strong>.</p>\n"
+"            <p>Mark your choice clearly for each agenda item.</p>\n"
+"        "
+msgstr ""
+"<p>Butlleta de votació per a <strong>{{ object.name }}</strong>.</p>\n"
+"            <p>Marqueu clarament la vostra opció per a cada punt de l'ordre del dia.</p>\n"
+"        "
+
+#. module: base_assembly
+#: model:assembly.type,default_final_text:base_assembly.assembly_type_general
+msgid ""
+"<p>What is set out above is hereby notified for your information and attendance.</p>\n"
+"        "
+msgstr ""
+"<p>El que s'ha exposat anteriorment es notifica per al vostre coneixement i assistència.</p>\n"
+"        "
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendance_roster_footer
@@ -291,7 +369,7 @@ msgstr "<span class=\"o_stat_text\">Votacions</span>"
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_kanban
 msgid "<span class=\"text-muted opacity-50\">&gt;</span>"
-msgstr "<span class=\"text-muted opacity-50\">&gt;</span>"
+msgstr ""
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form_session_manual
@@ -306,7 +384,7 @@ msgstr "<span class=\"text-muted small\">Assemblea</span>"
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form_session_manual
 msgid "<span class=\"text-muted small\">Mode</span>"
-msgstr "<span class=\"text-muted small\">Mode</span>"
+msgstr ""
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form_session
@@ -314,7 +392,8 @@ msgid ""
 "<span class=\"text-muted small\">Rows: pending first, then recorded, then "
 "not eligible.</span>"
 msgstr ""
-"<span class=\"text-muted small\">Files: pendents primer, després registrades i després no elegibles.</span>"
+"<span class=\"text-muted small\">Files: pendents primer, després registrades"
+" i després no elegibles.</span>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form_session_manual
@@ -326,7 +405,9 @@ msgstr "<span class=\"text-muted small\">Estat</span>"
 msgid ""
 "<span class=\"text-muted\"><i class=\"fa fa-tag me-1\" title=\"Vote "
 "type\"/></span>"
-msgstr "<span class=\"text-muted\"><i class=\"fa fa-tag me-1\" title=\"Tipus de vot\"/></span>"
+msgstr ""
+"<span class=\"text-muted\"><i class=\"fa fa-tag me-1\" title=\"Tipus de "
+"vot\"/></span>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_representation_cell
@@ -342,7 +423,9 @@ msgstr "<span class=\"text-muted\">Punt de l'ordre del dia</span>"
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_delegation_certificate
 msgid ""
 "<span class=\"text-muted\">All vote types configured on the assembly</span>"
-msgstr "<span class=\"text-muted\">Tots els tipus de vot configurats a l'assemblea</span>"
+msgstr ""
+"<span class=\"text-muted\">Tots els tipus de vot configurats a "
+"l'assemblea</span>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_delegation_register_doc
@@ -392,7 +475,7 @@ msgstr "<span class=\"text-muted\">votacions</span>"
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
 msgid "<span> – </span>"
-msgstr "<span> – </span>"
+msgstr ""
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_kanban
@@ -404,7 +487,9 @@ msgstr "<span><i class=\"fa fa-bar-chart me-1\"/>Participació</span>"
 msgid ""
 "<span><i class=\"fa fa-globe me-1\"/>Online voting is allowed on this "
 "assembly.</span>"
-msgstr "<span><i class=\"fa fa-globe me-1\"/>La votació en línia està permesa en aquesta assemblea.</span>"
+msgstr ""
+"<span><i class=\"fa fa-globe me-1\"/>La votació en línia està permesa en "
+"aquesta assemblea.</span>"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_kanban
@@ -521,7 +606,7 @@ msgstr ""
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_record
 msgid "<strong>Notes</strong>"
-msgstr "<strong>Notes</strong>"
+msgstr ""
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
@@ -559,14 +644,16 @@ msgstr "<strong>Signatura (delegant):</strong> _____________________________"
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_record
 msgid ""
 "<strong>Signature (representative):</strong> _____________________________"
-msgstr "<strong>Signatura (representant):</strong> _____________________________"
+msgstr ""
+"<strong>Signatura (representant):</strong> _____________________________"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_record
 msgid ""
 "<strong>Signature (represented member):</strong> "
 "_____________________________"
-msgstr "<strong>Signatura (membre representat):</strong> "
+msgstr ""
+"<strong>Signatura (membre representat):</strong> "
 "_____________________________"
 
 #. module: base_assembly
@@ -574,7 +661,8 @@ msgstr "<strong>Signatura (membre representat):</strong> "
 msgid ""
 "<strong>Signature (voter / representative):</strong> "
 "_____________________________"
-msgstr "<strong>Signatura (votant / representant):</strong> "
+msgstr ""
+"<strong>Signatura (votant / representant):</strong> "
 "_____________________________"
 
 #. module: base_assembly
@@ -609,7 +697,13 @@ msgid ""
 "link</strong> / <strong>Show QR</strong>, plus the <strong>Tracked "
 "attendance URL</strong> field. Opens are counted on the link tracker. "
 "Landing/error QWeb: Settings → Assemblies → Attendance deep links (HTTP)."
-msgstr "<strong>On utilitzar-ho:</strong> botó intel·ligent superior <strong>Enllaços i QR</strong>, o cada formulari d'assistent — botons de capçalera <strong>Obrir enllaç d'assistència</strong> / <strong>Mostrar QR</strong>, i el camp <strong>URL d'assistència rastrejada</strong>. Les obertures es comptabilitzen al rastrejador d'enllaços. QWeb d'inici/error: Configuració → Assemblees → Enllaços profunds d'assistència (HTTP)."
+msgstr ""
+"<strong>On utilitzar-ho:</strong> botó intel·ligent superior "
+"<strong>Enllaços i QR</strong>, o cada formulari d'assistent — botons de "
+"capçalera <strong>Obrir enllaç d'assistència</strong> / <strong>Mostrar "
+"QR</strong>, i el camp <strong>URL d'assistència rastrejada</strong>. Les "
+"obertures es comptabilitzen al rastrejador d'enllaços. QWeb d'inici/error: "
+"Configuració → Assemblees → Enllaços profunds d'assistència (HTTP)."
 
 #. module: base_assembly
 #. odoo-python
@@ -638,7 +732,9 @@ msgstr "En el mode de vot ponderat cal indicar un tipus de vot."
 #: code:addons/base_assembly/models/assembly_agenda.py:0
 msgid ""
 "A vote type must be specified when enabling requires vote in weighted mode."
-msgstr "Cal especificar un tipus de vot en activar el vot obligatori en mode ponderat."
+msgstr ""
+"Cal especificar un tipus de vot en activar el vot obligatori en mode "
+"ponderat."
 
 #. module: base_assembly
 #. odoo-python
@@ -722,7 +818,9 @@ msgstr "Afegiu almenys una opció de butlleta abans de tancar aquest punt."
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
 msgid "Add at least one ballot option row before entering vote counts."
-msgstr "Afegiu almenys una fila d'opcions de butlleta abans d'introduir els recomptes de vots."
+msgstr ""
+"Afegiu almenys una fila d'opcions de butlleta abans d'introduir els "
+"recomptes de vots."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
@@ -741,7 +839,11 @@ msgid ""
 "button to review the mail queue (status: outgoing, sent, or exception). Open"
 " tracking depends on your mail stack; delivery state is stored on each "
 "email."
-msgstr "Després d'enviar, utilitzeu el botó intel·ligent <strong>Correus sortints</strong> de l'assemblea per revisar la cua de correu (estat: sortint, enviat o excepció). El seguiment d'obertures depèn de la vostra infraestructura de correu; l'estat de lliurament es desa en cada correu."
+msgstr ""
+"Després d'enviar, utilitzeu el botó intel·ligent <strong>Correus "
+"sortints</strong> de l'assemblea per revisar la cua de correu (estat: "
+"sortint, enviat o excepció). El seguiment d'obertures depèn de la vostra "
+"infraestructura de correu; l'estat de lliurament es desa en cada correu."
 
 #. module: base_assembly
 #. odoo-python
@@ -794,7 +896,9 @@ msgstr "Apoderat"
 msgid ""
 "All agenda items must be voted on, addressed or skipped before closing the "
 "assembly."
-msgstr "Cal votar, abordar o ometre tots els punts de l'ordre del dia abans de tancar l'assemblea."
+msgstr ""
+"Cal votar, abordar o ometre tots els punts de l'ordre del dia abans de "
+"tancar l'assemblea."
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_communication_send_wizard__recipient_audience__all
@@ -885,7 +989,6 @@ msgstr "Assemblees"
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 #: code:addons/base_assembly/models/assembly_attendee.py:0
 #: code:addons/base_assembly/models/assembly_delegation.py:0
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/models/assembly_mixin.py:0
 #: code:addons/base_assembly/models/assembly_representation.py:0
 #: code:addons/base_assembly/models/assembly_voting.py:0
@@ -971,7 +1074,6 @@ msgstr "Data de l'assemblea"
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Assembly date:"
 msgstr "Data de l'assemblea:"
@@ -988,7 +1090,11 @@ msgid ""
 " and cast own votes. Record rules limit attendee, delegation, "
 "representation, and voting-line rows to the user's own partner. Base level "
 "of the Assembly category."
-msgstr "Accés de membre de l'assemblea: llegir assemblees i ordre del dia, registrar la pròpia assistència i emetre els propis vots. Les regles de registre limiten les files d'assistents, delegacions, representacions i línies de vot al soci de l'usuari. Nivell base de la categoria Assemblea."
+msgstr ""
+"Accés de membre de l'assemblea: llegir assemblees i ordre del dia, registrar"
+" la pròpia assistència i emetre els propis vots. Les regles de registre "
+"limiten les files d'assistents, delegacions, representacions i línies de vot"
+" al soci de l'usuari. Nivell base de la categoria Assemblea."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
@@ -1021,7 +1127,9 @@ msgstr "Publicació de l'assemblea (PDF)"
 #: model:ir.model.fields,help:base_assembly.field_assembly_communication_send_wizard__attach_publication_pdf
 msgid ""
 "Assembly publication / convocation PDF (same file for every recipient)."
-msgstr "PDF de publicació/convocatòria de l'assemblea (el mateix fitxer per a tots els destinataris)."
+msgstr ""
+"PDF de publicació/convocatòria de l'assemblea (el mateix fitxer per a tots "
+"els destinataris)."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_res_company__assembly_sequence_id
@@ -1061,7 +1169,6 @@ msgstr "Estat de l'assemblea"
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Assembly text"
 msgstr "Text de l'assemblea"
@@ -1095,7 +1202,9 @@ msgstr "Votació de l'assemblea"
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 msgid ""
 "At least one agenda item must be added before the assembly can be announced."
-msgstr "Cal afegir almenys un punt de l'ordre del dia abans de poder convocar l'assemblea."
+msgstr ""
+"Cal afegir almenys un punt de l'ordre del dia abans de poder convocar "
+"l'assemblea."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__message_attachment_count
@@ -1203,7 +1312,10 @@ msgid ""
 "Attendance status cannot be changed with a generic save. Use \"Mark "
 "Present\" or \"Mark Absent\" on the attendee (or the same server actions / "
 "API those buttons call)."
-msgstr "L'estat d'assistència no es pot canviar amb un desament genèric. Utilitzeu «Marcar present» o «Marcar absent» a l'assistent (o les mateixes accions de servidor o API que utilitzen aquests botons)."
+msgstr ""
+"L'estat d'assistència no es pot canviar amb un desament genèric. Utilitzeu "
+"«Marcar present» o «Marcar absent» a l'assistent (o les mateixes accions de "
+"servidor o API que utilitzen aquests botons)."
 
 #. module: base_assembly
 #: model:ir.actions.act_window,name:base_assembly.assembly_attendee_action_summary
@@ -1215,7 +1327,8 @@ msgstr "Resum d'assistència"
 #. module: base_assembly
 #: model_terms:ir.actions.act_window,help:base_assembly.assembly_attendee_action_summary
 msgid "Attendance summary across assemblies, grouped by assembly."
-msgstr "Resum de l'assistència de totes les assemblees, agrupat per assemblea."
+msgstr ""
+"Resum de l'assistència de totes les assemblees, agrupat per assemblea."
 
 #. module: base_assembly
 #. odoo-python
@@ -1357,7 +1470,9 @@ msgstr "Text d'introducció de la butlleta"
 #: code:addons/base_assembly/models/assembly_agenda.py:0
 #: code:addons/base_assembly/models/assembly_agenda_option.py:0
 msgid "Ballot options are only allowed in manual multi-option mode."
-msgstr "Les opcions de butlleta només es permeten en el mode manual de múltiples opcions."
+msgstr ""
+"Les opcions de butlleta només es permeten en el mode manual de múltiples "
+"opcions."
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_document_preview_wizard__document_category__ballots
@@ -1416,7 +1531,9 @@ msgstr "Cancel·lar assemblea"
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
 msgid "Cancel this assembly? It will be marked as cancelled for participants."
-msgstr "Voleu cancel·lar aquesta assemblea? Es marcarà com a cancel·lada per als participants."
+msgstr ""
+"Voleu cancel·lar aquesta assemblea? Es marcarà com a cancel·lada per als "
+"participants."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form
@@ -1439,7 +1556,9 @@ msgstr "Cancel·lada"
 msgid ""
 "Cannot change vote mode while weighted vote sessions exist for this agenda "
 "item."
-msgstr "No es pot canviar el mode de votació mentre hi hagi sessions de vot ponderat per a aquest punt de l'ordre del dia."
+msgstr ""
+"No es pot canviar el mode de votació mentre hi hagi sessions de vot ponderat"
+" per a aquest punt de l'ordre del dia."
 
 #. module: base_assembly
 #. odoo-python
@@ -1488,7 +1607,10 @@ msgid ""
 "Chained delegations are not allowed: this delegate already delegates outward"
 " on overlapping vote types. Remove or narrow that delegation before they can"
 " receive these votes."
-msgstr "No es permeten delegacions encadenades: aquest delegat ja delega cap enfora en tipus de vot coincidents. Elimineu o limiteu aquesta delegació abans que pugui rebre aquests vots."
+msgstr ""
+"No es permeten delegacions encadenades: aquest delegat ja delega cap enfora "
+"en tipus de vot coincidents. Elimineu o limiteu aquesta delegació abans que "
+"pugui rebre aquests vots."
 
 #. module: base_assembly
 #. odoo-python
@@ -1497,7 +1619,10 @@ msgid ""
 "Chained delegations are not allowed: this delegator already receives votes "
 "(delegation to them) on at least one of the same vote types. Only your own "
 "votes can be delegated, not votes received from someone else."
-msgstr "No es permeten delegacions encadenades: aquest delegant ja rep vots (delegacions cap a ell) en almenys un dels mateixos tipus de vot. Només es poden delegar els vostres propis vots, no els rebuts d'una altra persona."
+msgstr ""
+"No es permeten delegacions encadenades: aquest delegant ja rep vots "
+"(delegacions cap a ell) en almenys un dels mateixos tipus de vot. Només es "
+"poden delegar els vostres propis vots, no els rebuts d'una altra persona."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting_line__vote_channel
@@ -1557,7 +1682,9 @@ msgstr "Tancar assemblea"
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 msgid "Close or cancel all open votings before closing the assembly."
-msgstr "Tanqueu o cancel·leu totes les votacions obertes abans de tancar l'assemblea."
+msgstr ""
+"Tanqueu o cancel·leu totes les votacions obertes abans de tancar "
+"l'assemblea."
 
 #. module: base_assembly
 #. odoo-python
@@ -1565,14 +1692,19 @@ msgstr "Tanqueu o cancel·leu totes les votacions obertes abans de tancar l'asse
 msgid ""
 "Close or cancel open weighted vote sessions before finalizing a manual-mode "
 "item."
-msgstr "Tanqueu o cancel·leu les sessions obertes de vot ponderat abans de finalitzar un punt en mode manual."
+msgstr ""
+"Tanqueu o cancel·leu les sessions obertes de vot ponderat abans de "
+"finalitzar un punt en mode manual."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
 msgid ""
 "Close this assembly? Ensure voting and the agenda are complete. Reopening a "
 "closed assembly may be restricted by your settings."
-msgstr "Voleu tancar aquesta assemblea? Assegureu-vos que la votació i l'ordre del dia estiguin completes. La reobertura d'una assemblea tancada pot estar restringida per la configuració."
+msgstr ""
+"Voleu tancar aquesta assemblea? Assegureu-vos que la votació i l'ordre del "
+"dia estiguin completes. La reobertura d'una assemblea tancada pot estar "
+"restringida per la configuració."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form
@@ -1611,7 +1743,8 @@ msgstr "Paràgraf de tancament després de l'ordre del dia…"
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_assembly__final_text
 msgid "Closing paragraph printed after the agenda on the convocation."
-msgstr "Paràgraf de tancament imprès després de l'ordre del dia a la convocatòria."
+msgstr ""
+"Paràgraf de tancament imprès després de l'ordre del dia a la convocatòria."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
@@ -1649,7 +1782,6 @@ msgstr "Companyia"
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Company:"
 msgstr "Companyia:"
@@ -1677,7 +1809,10 @@ msgid ""
 "Contact who is physically present or signs for the member (e.g. proxy). "
 "Defaults to the member. Informational for lists and signatures; voting "
 "rights remain with Member."
-msgstr "Contacte que és present físicament o signa pel membre (p. ex., apoderat). Per defecte és el membre. Informatiu per a llistes i signatures; els drets de vot continuen corresponent al membre."
+msgstr ""
+"Contacte que és present físicament o signa pel membre (p. ex., apoderat). "
+"Per defecte és el membre. Informatiu per a llistes i signatures; els drets "
+"de vot continuen corresponent al membre."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
@@ -1713,14 +1848,21 @@ msgid ""
 "attendee short URLs (opens counted) and QR actions on each attendee; the "
 "assembly form shows the Links & QR smart button. When disabled, trackers are"
 " not created for new assemblies using this default."
-msgstr "Es copia a les assemblees noves d'aquest tipus. Quan està activat, els responsables obtenen URL curtes per assistent (obertures comptabilitzades) i accions QR a cada assistent; el formulari de l'assemblea mostra el botó intel·ligent Enllaços i QR. Quan està desactivat, no es creen rastrejadors per a les assemblees noves que utilitzen aquest valor predeterminat."
+msgstr ""
+"Es copia a les assemblees noves d'aquest tipus. Quan està activat, els "
+"responsables obtenen URL curtes per assistent (obertures comptabilitzades) i"
+" accions QR a cada assistent; el formulari de l'assemblea mostra el botó "
+"intel·ligent Enllaços i QR. Quan està desactivat, no es creen rastrejadors "
+"per a les assemblees noves que utilitzen aquest valor predeterminat."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_type__default_publication_text
 msgid ""
 "Copied to the convocation text of new assemblies of this type. Supports "
 "placeholders such as {{ object.name }}."
-msgstr "Es copia al text de convocatòria de les assemblees noves d'aquest tipus. Admet marcadors de posició com {{ object.name }}."
+msgstr ""
+"Es copia al text de convocatòria de les assemblees noves d'aquest tipus. "
+"Admet marcadors de posició com {{ object.name }}."
 
 #. module: base_assembly
 #. odoo-python
@@ -1746,7 +1888,11 @@ msgid ""
 "Counted units move only when the delegate’s attendance is <strong>Attended "
 "(confirmed present)</strong>. Until then, <em>Vote transfer</em> stays "
 "<em>Waiting (delegate not attended yet)</em>."
-msgstr "Les unitats comptabilitzades només es mouen quan l'assistència del delegat és <strong>Ha assistit (presència confirmada)</strong>. Fins aleshores, la <em>Transferència de vot</em> es manté en <em>En espera (el delegat encara no ha assistit)</em>."
+msgstr ""
+"Les unitats comptabilitzades només es mouen quan l'assistència del delegat "
+"és <strong>Ha assistit (presència confirmada)</strong>. Fins aleshores, la "
+"<em>Transferència de vot</em> es manté en <em>En espera (el delegat encara "
+"no ha assistit)</em>."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__country_id
@@ -1816,7 +1962,9 @@ msgstr "Data de registre"
 #: model:ir.model.fields,help:base_assembly.field_res_company__assembly_default_use_qr
 #: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_default_use_qr
 msgid "Default Include QR / tracked links for new company assemblies."
-msgstr "Incloure QR / enllaços rastrejats per defecte per a noves assemblees de la companyia."
+msgstr ""
+"Incloure QR / enllaços rastrejats per defecte per a noves assemblees de la "
+"companyia."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
@@ -1863,7 +2011,10 @@ msgstr "Peu de delegació predeterminat"
 msgid ""
 "Default document texts are copied (with translations) to new assemblies of "
 "this type. Support placeholders like <code>{{ object.name }}</code>."
-msgstr "Els textos de documents predeterminats es copien (amb traduccions) a les assemblees noves d'aquest tipus. Admeten marcadors de posició com <code>{{ object.name }}</code>."
+msgstr ""
+"Els textos de documents predeterminats es copien (amb traduccions) a les "
+"assemblees noves d'aquest tipus. Admeten marcadors de posició com <code>{{ "
+"object.name }}</code>."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_type__partner_domain
@@ -1880,7 +2031,9 @@ msgstr "Text final predeterminat"
 msgid ""
 "Default for new assemblies when no assembly type is applied yet; the "
 "assembly type still overrides when chosen."
-msgstr "Valor predeterminat per a assemblees noves quan encara no s'ha aplicat cap tipus d'assemblea; el tipus d'assemblea el substitueix quan se selecciona."
+msgstr ""
+"Valor predeterminat per a assemblees noves quan encara no s'ha aplicat cap "
+"tipus d'assemblea; el tipus d'assemblea el substitueix quan se selecciona."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_type__default_ballot_nominative_intro_text
@@ -1992,7 +2145,8 @@ msgstr "Els vots delegats entrants no poden ser negatius."
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_attendee_vote.py:0
 msgid "Delegated in votes cannot be negative. Current value: %(value)s"
-msgstr "Els vots delegats entrants no poden ser negatius. Valor actual: %(value)s"
+msgstr ""
+"Els vots delegats entrants no poden ser negatius. Valor actual: %(value)s"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee_vote__delegated_out_votes
@@ -2010,7 +2164,8 @@ msgstr "Els vots delegats sortints no poden ser negatius."
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_attendee_vote.py:0
 msgid "Delegated out votes cannot be negative. Current value: %(value)s"
-msgstr "Els vots delegats sortints no poden ser negatius. Valor actual: %(value)s"
+msgstr ""
+"Els vots delegats sortints no poden ser negatius. Valor actual: %(value)s"
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_communication_send_wizard__primary_message_kind__delegation
@@ -2042,7 +2197,9 @@ msgstr "PDF de delegació"
 #: model:ir.model.fields,help:base_assembly.field_assembly_assembly__delegation_document_text
 msgid ""
 "Delegation PDF introduction. Supports placeholders like {{ object.name }}."
-msgstr "Introducció del PDF de delegació. Admet marcadors de posició com {{ object.name }}."
+msgstr ""
+"Introducció del PDF de delegació. Admet marcadors de posició com {{ "
+"object.name }}."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
@@ -2204,7 +2361,7 @@ msgstr "Nom per mostrar"
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_document_preview_wizard__document_type
 msgid "Document"
-msgstr "Document"
+msgstr ""
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_document_preview_wizard__document_category
@@ -2219,7 +2376,7 @@ msgstr "Llista blanca de tipus de document"
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
 msgid "Documents"
-msgstr "Documents"
+msgstr ""
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_assembly__assembly_state__draft
@@ -2241,7 +2398,8 @@ msgstr "Cada assistent coincident (un correu per persona)"
 #. module: base_assembly
 #: model:ir.model.constraint,message:base_assembly.constraint_assembly_representation_assembly_representation_assembly_owner_uniq
 msgid "Each represented member may have only one representation per assembly."
-msgstr "Cada membre representat només pot tenir una representació per assemblea."
+msgstr ""
+"Cada membre representat només pot tenir una representació per assemblea."
 
 #. module: base_assembly
 #: model:ir.model.constraint,message:base_assembly.constraint_assembly_voting_result_voting_result_option_uniq
@@ -2258,14 +2416,18 @@ msgstr "Assistent de redacció d'emails"
 msgid ""
 "Emails queued or sent from this assembly (mail queue: outgoing, sent, "
 "exception)."
-msgstr "Correus en cua o enviats des d'aquesta assemblea (cua de correu: sortint, enviat o excepció)."
+msgstr ""
+"Correus en cua o enviats des d'aquesta assemblea (cua de correu: sortint, "
+"enviat o excepció)."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_delegation_view_form
 msgid ""
 "Empty <em>Vote types</em> = delegate all vote types configured on the "
 "assembly; otherwise only the tags you set."
-msgstr "<em>Tipus de vot</em> buit = delegar tots els tipus de vot configurats a l'assemblea; altrament, només les etiquetes que establiu."
+msgstr ""
+"<em>Tipus de vot</em> buit = delegar tots els tipus de vot configurats a "
+"l'assemblea; altrament, només les etiquetes que establiu."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__session_manual_entered_total
@@ -2278,7 +2440,9 @@ msgstr "Vots totals introduïts"
 msgid ""
 "Entered total votes do not match the expected reference total. Adjust the "
 "counters or expected total before finalizing."
-msgstr "El total de vots introduïts no coincideix amb el total de referència esperat. Ajusteu els comptadors o el total esperat abans de finalitzar."
+msgstr ""
+"El total de vots introduïts no coincideix amb el total de referència "
+"esperat. Ajusteu els comptadors o el total esperat abans de finalitzar."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_agenda__session_manual_delta
@@ -2304,7 +2468,9 @@ msgstr "Total esperat i comprovació"
 msgid ""
 "Expected total from the field above when set; otherwise the total vote units"
 " from confirmed attendees when the system can compute them."
-msgstr "Total esperat del camp superior quan s'estableix; altrament, les unitats de vot totals dels assistents confirmats quan el sistema les pot calcular."
+msgstr ""
+"Total esperat del camp superior quan s'estableix; altrament, les unitats de "
+"vot totals dels assistents confirmats quan el sistema les pot calcular."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__manual_total_expected
@@ -2318,7 +2484,9 @@ msgstr "Vots totals esperats"
 msgid ""
 "Expected total votes (%(expected)s) does not match the %(possible)s votes "
 "from confirmed attendees for the assembly vote types."
-msgstr "El total de vots esperat (%(expected)s) no coincideix amb els %(possible)s vots dels assistents confirmats per als tipus de vot de l'assemblea."
+msgstr ""
+"El total de vots esperat (%(expected)s) no coincideix amb els %(possible)s "
+"vots dels assistents confirmats per als tipus de vot de l'assemblea."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__session_manual_expected_display
@@ -2331,7 +2499,9 @@ msgstr "Vots totals esperats (referència)"
 msgid ""
 "Expected total votes applies only in manual vote (simple count) or manual "
 "vote (multi-option) mode."
-msgstr "El total de vots esperat només s'aplica al mode de vot manual (recompte simple) o de vot manual (múltiples opcions)."
+msgstr ""
+"El total de vots esperat només s'aplica al mode de vot manual (recompte "
+"simple) o de vot manual (múltiples opcions)."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
@@ -2343,28 +2513,36 @@ msgstr "Accions finals. Aquestes operacions poden ser irreversibles."
 msgid ""
 "Final number of abstention votes for this item. Only aggregate totals are "
 "stored; votes are not recorded per attendee."
-msgstr "Nombre final de vots d'abstenció per a aquest punt. Només es desen totals agregats; els vots no es registren per assistent."
+msgstr ""
+"Nombre final de vots d'abstenció per a aquest punt. Només es desen totals "
+"agregats; els vots no es registren per assistent."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_agenda__manual_count_blank
 msgid ""
 "Final number of blank votes for this item. Only aggregate totals are stored;"
 " votes are not recorded per attendee."
-msgstr "Nombre final de vots en blanc per a aquest punt. Només es desen totals agregats; els vots no es registren per assistent."
+msgstr ""
+"Nombre final de vots en blanc per a aquest punt. Només es desen totals "
+"agregats; els vots no es registren per assistent."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_agenda__manual_no
 msgid ""
 "Final number of no votes for this item. Only aggregate totals are stored; "
 "votes are not recorded per attendee."
-msgstr "Nombre final de vots negatius per a aquest punt. Només es desen totals agregats; els vots no es registren per assistent."
+msgstr ""
+"Nombre final de vots negatius per a aquest punt. Només es desen totals "
+"agregats; els vots no es registren per assistent."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_agenda__manual_yes
 msgid ""
 "Final number of yes votes for this item. Only aggregate totals are stored; "
 "votes are not recorded per attendee."
-msgstr "Nombre final de vots afirmatius per a aquest punt. Només es desen totals agregats; els vots no es registren per assistent."
+msgstr ""
+"Nombre final de vots afirmatius per a aquest punt. Només es desen totals "
+"agregats; els vots no es registren per assistent."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
@@ -2388,7 +2566,9 @@ msgstr "Text final"
 msgid ""
 "Final total votes cast for this choice. Enter aggregate counts only; votes "
 "are not recorded per attendee."
-msgstr "Total final de vots emesos per a aquesta opció. Introduïu només recomptes agregats; els vots no es registren per assistent."
+msgstr ""
+"Total final de vots emesos per a aquesta opció. Introduïu només recomptes "
+"agregats; els vots no es registren per assistent."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
@@ -2412,7 +2592,6 @@ msgstr "Finalitzar manualment"
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "First and second call scheduled."
 msgstr "Primera i segona convocatòria programades."
@@ -2424,14 +2603,12 @@ msgstr "Primera convocatòria"
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "First call scheduled."
 msgstr "Primera convocatòria programada."
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "First call:"
 msgstr "Primera convocatòria:"
@@ -2461,17 +2638,21 @@ msgstr "Text lliure predeterminat quan no s'utilitza el directori de ciutats."
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_assembly__city
 msgid "Free text for documents when not using the city directory."
-msgstr "Text lliure per als documents quan no s'utilitza el directori de ciutats."
+msgstr ""
+"Text lliure per als documents quan no s'utilitza el directori de ciutats."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_attendee__attendance_notes
 msgid "Free-text notes for this registration (not used by core quorum logic)."
-msgstr "Notes de text lliure per a aquest registre (no les utilitza la lògica central del quòrum)."
+msgstr ""
+"Notes de text lliure per a aquest registre (no les utilitza la lògica "
+"central del quòrum)."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_voting_line__votes_applied
 msgid "Frozen from attendee vote total at cast time."
-msgstr "Fixat a partir del total de vots de l'assistent en el moment de l'emissió."
+msgstr ""
+"Fixat a partir del total de vots de l'assistent en el moment de l'emissió."
 
 #. module: base_assembly
 #: model:res.groups,comment:base_assembly.assembly_group_manager
@@ -2479,12 +2660,21 @@ msgid ""
 "Full access to all assembly records. Includes Assembly User and sees every "
 "row in the allowed companies (permissive record rules). Granted "
 "automatically to Settings / Administration."
-msgstr "Accés complet a tots els registres d'assemblees. Inclou l'usuari d'assemblees i permet veure totes les files de les companyies permeses (regles de registre permissives). Es concedeix automàticament a Configuració/Administració."
+msgstr ""
+"Accés complet a tots els registres d'assemblees. Inclou l'usuari "
+"d'assemblees i permet veure totes les files de les companyies permeses "
+"(regles de registre permissives). Es concedeix automàticament a "
+"Configuració/Administració."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
 msgid "General"
-msgstr "General"
+msgstr ""
+
+#. module: base_assembly
+#: model:assembly.type,name:base_assembly.assembly_type_general
+msgid "General Assembly"
+msgstr "Assemblea General"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
@@ -2504,7 +2694,9 @@ msgstr "Generar butlletes de votació"
 msgid ""
 "Generates one <strong>member ballot PDF per attendee</strong> (name, VAT/NIF, voting power with delegations, agenda items).\n"
 "                    Enable <em>Merge into one PDF</em> for a single file; otherwise you get a ZIP with one PDF per attendee."
-msgstr "Genera un <strong>PDF de butlleta de soci per assistent</strong> (nom, IVA/NIF, poder de vot amb delegacions i punts de l'ordre del dia).\nActiveu <em>Fusionar en un PDF</em> per obtenir un únic fitxer; altrament obtindreu un ZIP amb un PDF per assistent."
+msgstr ""
+"Genera un <strong>PDF de butlleta de soci per assistent</strong> (nom, IVA/NIF, poder de vot amb delegacions i punts de l'ordre del dia).\n"
+"Activeu <em>Fusionar en un PDF</em> per obtenir un únic fitxer; altrament obtindreu un ZIP amb un PDF per assistent."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_ballot_print_wizard__use_generic_intro_template
@@ -2524,13 +2716,17 @@ msgstr "Agrupar per"
 msgid ""
 "HTML error page for attendance deep links (invalid access, wrong state, "
 "etc.)."
-msgstr "Pàgina d'error HTML per als enllaços profunds d'assistència (accés no vàlid, estat incorrecte, etc.)."
+msgstr ""
+"Pàgina d'error HTML per als enllaços profunds d'assistència (accés no vàlid,"
+" estat incorrecte, etc.)."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_res_company__assembly_attendance_landing_qweb_id
 #: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_attendance_landing_qweb_id
 msgid "HTML shown for manager attendance deep links when not using direct=1."
-msgstr "HTML que es mostra per als enllaços profunds d'assistència dels responsables quan no s'utilitza direct=1."
+msgstr ""
+"HTML que es mostra per als enllaços profunds d'assistència dels responsables"
+" quan no s'utilitza direct=1."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
@@ -2575,7 +2771,7 @@ msgstr "Com funciona la delegació de vots"
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting_line__id
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting_result__id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_agenda__message_needaction
@@ -2593,13 +2789,17 @@ msgstr "Si està marcat, alguns missatges tenen un error de lliurament."
 #: model:ir.model.fields,help:base_assembly.field_assembly_assembly__allow_attendance_notes
 msgid ""
 "If disabled, attendance notes are hidden and cannot be set on registrations."
-msgstr "Si està desactivat, les notes d'assistència s'amaguen i no es poden establir als registres."
+msgstr ""
+"Si està desactivat, les notes d'assistència s'amaguen i no es poden establir"
+" als registres."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_res_company__assembly_allow_edit_closed_assembly
 #: model:ir.model.fields,help:base_assembly.field_res_config_settings__assembly_allow_edit_closed_assembly
 msgid "If set, assemblies in closed state can still be edited (per company)."
-msgstr "Si s'estableix, les assemblees tancades encara es poden editar (per companyia)."
+msgstr ""
+"Si s'estableix, les assemblees tancades encara es poden editar (per "
+"companyia)."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_fsm_location__assembly_excluded
@@ -2607,7 +2807,9 @@ msgstr "Si s'estableix, les assemblees tancades encara es poden editar (per comp
 #: model:ir.model.fields,help:base_assembly.field_res_partner__assembly_excluded
 #: model:ir.model.fields,help:base_assembly.field_res_users__assembly_excluded
 msgid "If set, this partner is excluded from generated attendee lists."
-msgstr "Si s'estableix, aquest soci queda exclòs de les llistes d'assistents generades."
+msgstr ""
+"Si s'estableix, aquest soci queda exclòs de les llistes d'assistents "
+"generades."
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting_line__vote_channel__in_person
@@ -2713,7 +2915,9 @@ msgstr "És seguidor"
 msgid ""
 "Item titles and voting mode only; full wording stays in the notice body or "
 "the detailed agenda report."
-msgstr "Només els títols dels punts i el mode de votació; el text complet es manté al cos de l'avís o a l'informe detallat de l'ordre del dia."
+msgstr ""
+"Només els títols dels punts i el mode de votació; el text complet es manté "
+"al cos de l'avís o a l'informe detallat de l'ordre del dia."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__kanban_call_day
@@ -2803,7 +3007,13 @@ msgid ""
 "confirmed delegate for vote transfer. Attended (confirmed present): the "
 "member actually attended; counts for quorum and voting, and a delegate in "
 "this state receives delegated votes. Did not attend: recorded as absent."
-msgstr "Llistat — no finalitzat: el membre només és a la llista; l'assistència encara no està finalitzada, per tant no compta com a present per al quòrum ni com a delegat confirmat per a la transferència de vots. Ha assistit (presència confirmada): el membre ha assistit realment; compta per al quòrum i la votació, i un delegat en aquest estat rep els vots delegats. No hi ha assistit: registrat com a absent."
+msgstr ""
+"Llistat — no finalitzat: el membre només és a la llista; l'assistència "
+"encara no està finalitzada, per tant no compta com a present per al quòrum "
+"ni com a delegat confirmat per a la transferència de vots. Ha assistit "
+"(presència confirmada): el membre ha assistit realment; compta per al quòrum"
+" i la votació, i un delegat en aquest estat rep els vots delegats. No hi ha "
+"assistit: registrat com a absent."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
@@ -2817,7 +3027,6 @@ msgstr "Ubicació"
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Location:"
 msgstr "Ubicació:"
@@ -2831,7 +3040,9 @@ msgstr "Missatge principal"
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_agenda.py:0
 msgid "Manual counts sum to %(actual)s but expected total is %(expected)s."
-msgstr "Els recomptes manuals sumen %(actual)s, però el total esperat és %(expected)s."
+msgstr ""
+"Els recomptes manuals sumen %(actual)s, però el total esperat és "
+"%(expected)s."
 
 #. module: base_assembly
 #. odoo-python
@@ -2839,13 +3050,16 @@ msgstr "Els recomptes manuals sumen %(actual)s, però el total esperat és %(exp
 msgid ""
 "Manual finalization applies only to manual vote (simple count) or manual "
 "vote (multi-option) modes."
-msgstr "La finalització manual només s'aplica als modes de vot manual (recompte simple) o vot manual (múltiples opcions)."
+msgstr ""
+"La finalització manual només s'aplica als modes de vot manual (recompte "
+"simple) o vot manual (múltiples opcions)."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_agenda.py:0
 msgid "Manual multi-option mode requires at least one ballot option."
-msgstr "El mode manual de múltiples opcions requereix almenys una opció de butlleta."
+msgstr ""
+"El mode manual de múltiples opcions requereix almenys una opció de butlleta."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__session_manual_has_variance
@@ -2865,7 +3079,11 @@ msgid ""
 "Choice column for the label members see, and the Votes column for the final "
 "total count per choice. Only aggregate totals are stored; per-attendee votes"
 " are not recorded."
-msgstr "Vot manual (múltiples opcions): afegiu una fila per opció a la butlleta. Utilitzeu la columna Opció per a l'etiqueta que veuen els membres i la columna Vots per al recompte total final de cada opció. Només es desen totals agregats; no es registren vots per assistent."
+msgstr ""
+"Vot manual (múltiples opcions): afegiu una fila per opció a la butlleta. "
+"Utilitzeu la columna Opció per a l'etiqueta que veuen els membres i la "
+"columna Vots per al recompte total final de cada opció. Només es desen "
+"totals agregats; no es registren vots per assistent."
 
 #. module: base_assembly
 #. odoo-python
@@ -2892,7 +3110,9 @@ msgstr "Els recomptes de vot manual no poden ser negatius."
 msgid ""
 "Manual vote counts must be zero when there are no votes from confirmed "
 "attendees for this assembly."
-msgstr "Els recomptes de vot manual han de ser zero quan no hi ha vots d'assistents confirmats per a aquesta assemblea."
+msgstr ""
+"Els recomptes de vot manual han de ser zero quan no hi ha vots d'assistents "
+"confirmats per a aquesta assemblea."
 
 #. module: base_assembly
 #. odoo-python
@@ -2900,7 +3120,9 @@ msgstr "Els recomptes de vot manual han de ser zero quan no hi ha vots d'assiste
 msgid ""
 "Manual vote counts sum to %(actual)s but confirmed attendees account for "
 "%(possible)s votes for this assembly's vote types."
-msgstr "Els recomptes de vot manual sumen %(actual)s, però els assistents confirmats representen %(possible)s vots per als tipus de vot d'aquesta assemblea."
+msgstr ""
+"Els recomptes de vot manual sumen %(actual)s, però els assistents confirmats"
+" representen %(possible)s vots per als tipus de vot d'aquesta assemblea."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_delegation__delegation_state
@@ -2908,7 +3130,11 @@ msgid ""
 "Maps vote transfer for older UI and exports: Waiting → Draft, Active → "
 "Confirmed. Prefer Vote transfer; revoked rows no longer exist (unlink the "
 "delegation to revoke)."
-msgstr "Mapeja la transferència de vots per a la interfície antiga i les exportacions: En espera → Esborrany, Activa → Confirmada. Preferiu Transferència de vot; les files revocades ja no existeixen (desenllaceu la delegació per revocar-la)."
+msgstr ""
+"Mapeja la transferència de vots per a la interfície antiga i les "
+"exportacions: En espera → Esborrany, Activa → Confirmada. Preferiu "
+"Transferència de vot; les files revocades ja no existeixen (desenllaceu la "
+"delegació per revocar-la)."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
@@ -2935,7 +3161,10 @@ msgstr "Marcar com abordat"
 msgid ""
 "Mark choices clearly. Weighted items apply to your voting power. Manual "
 "agenda lines show recorded totals for information only."
-msgstr "Marqueu les opcions clarament. Els punts ponderats s'apliquen al vostre poder de vot. Les línies manuals de l'ordre del dia només mostren totals registrats a títol informatiu."
+msgstr ""
+"Marqueu les opcions clarament. Els punts ponderats s'apliquen al vostre "
+"poder de vot. Les línies manuals de l'ordre del dia només mostren totals "
+"registrats a títol informatiu."
 
 #. module: base_assembly
 #. odoo-python
@@ -2986,7 +3215,9 @@ msgstr "Butlleta del soci — introducció genèrica (opcional)"
 msgid ""
 "Member holding this assembly seat. Quorum, delegations, and vote rows are "
 "keyed to this partner (not to the attendance contact)."
-msgstr "Membre titular d'aquest escó de l'assemblea. El quòrum, les delegacions i les files de vot s'associen a aquest soci (no al contacte d'assistència)."
+msgstr ""
+"Membre titular d'aquest escó de l'assemblea. El quòrum, les delegacions i "
+"les files de vot s'associen a aquest soci (no al contacte d'assistència)."
 
 #. module: base_assembly
 #: model_terms:ir.actions.act_window,help:base_assembly.assembly_attendee_action_called_members
@@ -2999,7 +3230,11 @@ msgid ""
 "Member who transfers voting units. Saving this row registers the delegation;"
 " units move only after the delegate is Attended (confirmed present) (see "
 "vote transfer status). Delete the row to stop delegating."
-msgstr "Membre que transfereix unitats de vot. En desar aquesta fila es registra la delegació; les unitats només es mouen després que el delegat hagi assistit (presència confirmada) (vegeu l'estat de transferència de vot). Elimineu la fila per deixar de delegar."
+msgstr ""
+"Membre que transfereix unitats de vot. En desar aquesta fila es registra la "
+"delegació; les unitats només es mouen després que el delegat hagi assistit "
+"(presència confirmada) (vegeu l'estat de transferència de vot). Elimineu la "
+"fila per deixar de delegar."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
@@ -3011,7 +3246,9 @@ msgstr "Membre:"
 #: code:addons/base_assembly/models/assembly_attendee.py:0
 msgid ""
 "Members can only be marked as absent once the assembly session has started."
-msgstr "Els membres només es poden marcar com a absents un cop iniciada la sessió de l'assemblea."
+msgstr ""
+"Els membres només es poden marcar com a absents un cop iniciada la sessió de"
+" l'assemblea."
 
 #. module: base_assembly
 #. odoo-python
@@ -3019,7 +3256,9 @@ msgstr "Els membres només es poden marcar com a absents un cop iniciada la sess
 msgid ""
 "Members can only be marked as attended once the assembly session has "
 "started."
-msgstr "Els membres només es poden marcar com a assistents un cop iniciada la sessió de l'assemblea."
+msgstr ""
+"Els membres només es poden marcar com a assistents un cop iniciada la sessió"
+" de l'assemblea."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_ballot_print_wizard__merge_single_pdf
@@ -3054,7 +3293,9 @@ msgstr "Falta el NIF o l'IVA"
 msgid ""
 "Missing or invalid assembly_id or participant_id. Both must be positive "
 "integers."
-msgstr "Falta assembly_id o participant_id, o no són vàlids. Tots dos han de ser enters positius."
+msgstr ""
+"Falta assembly_id o participant_id, o no són vàlids. Tots dos han de ser "
+"enters positius."
 
 #. module: base_assembly
 #: model:ir.model,name:base_assembly.model_assembly_mixin_open_assembly
@@ -3067,7 +3308,10 @@ msgid ""
 "Must already be listed as an assembly attendee. Vote transfer for the "
 "covered types becomes active when they are recorded as Attended (confirmed "
 "present); until then the delegation is waiting."
-msgstr "Ja ha de constar com a assistent de l'assemblea. La transferència de vots dels tipus coberts s'activa quan es registra que ha assistit (presència confirmada); fins aleshores la delegació està en espera."
+msgstr ""
+"Ja ha de constar com a assistent de l'assemblea. La transferència de vots "
+"dels tipus coberts s'activa quan es registra que ha assistit (presència "
+"confirmada); fins aleshores la delegació està en espera."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__name
@@ -3085,7 +3329,9 @@ msgstr "Nou"
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 msgid "New assemblies must be created in draft status. Got: %(state)s"
-msgstr "Les assemblees noves s'han de crear en estat d'esborrany. S'ha rebut: %(state)s"
+msgstr ""
+"Les assemblees noves s'han de crear en estat d'esborrany. S'ha rebut: "
+"%(state)s"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
@@ -3093,14 +3339,19 @@ msgid ""
 "New assemblies will show the <strong>Links &amp; QR</strong> smart button "
 "and per-attendee <strong>Open attendance link</strong> / <strong>Show "
 "QR</strong> when this default is on."
-msgstr "Les assemblees noves mostraran el botó intel·ligent <strong>Enllaços i QR</strong> i, per assistent, <strong>Obrir enllaç d'assistència</strong> / <strong>Mostrar QR</strong> quan aquest valor predeterminat estigui activat."
+msgstr ""
+"Les assemblees noves mostraran el botó intel·ligent <strong>Enllaços i "
+"QR</strong> i, per assistent, <strong>Obrir enllaç d'assistència</strong> / "
+"<strong>Mostrar QR</strong> quan aquest valor predeterminat estigui activat."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_attendee.py:0
 msgid ""
 "New attendees must be created as listed (not finalized). Got: %(state)s"
-msgstr "Els assistents nous s'han de crear com a llistats (no finalitzats). S'ha rebut: %(state)s"
+msgstr ""
+"Els assistents nous s'han de crear com a llistats (no finalitzats). S'ha "
+"rebut: %(state)s"
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form_session_manual
@@ -3112,7 +3363,7 @@ msgstr "Punt següent"
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting_line__vote_option__no
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting_result__vote_option__no
 msgid "No"
-msgstr "No"
+msgstr ""
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__manual_no
@@ -3122,7 +3373,7 @@ msgstr "No (vots totals)"
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_tree
 msgid "No (total)"
-msgstr "No (total)"
+msgstr ""
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_doc
@@ -3140,7 +3391,9 @@ msgstr "No hi ha cap punt adjacent de l'ordre del dia en aquesta direcció."
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 msgid ""
 "No agenda item is ready for live voting. Open an item from the agenda list."
-msgstr "Cap punt de l'ordre del dia està preparat per a la votació en directe. Obriu un punt de la llista de l'ordre del dia."
+msgstr ""
+"Cap punt de l'ordre del dia està preparat per a la votació en directe. Obriu"
+" un punt de la llista de l'ordre del dia."
 
 #. module: base_assembly
 #. odoo-python
@@ -3148,14 +3401,19 @@ msgstr "Cap punt de l'ordre del dia està preparat per a la votació en directe.
 msgid ""
 "No attendance URL is available. Ensure the assembly has members and that QR "
 "links are enabled, then save this attendee again."
-msgstr "No hi ha cap URL d'assistència disponible. Assegureu-vos que l'assemblea tingui membres i que els enllaços QR estiguin activats; després deseu de nou aquest assistent."
+msgstr ""
+"No hi ha cap URL d'assistència disponible. Assegureu-vos que l'assemblea "
+"tingui membres i que els enllaços QR estiguin activats; després deseu de nou"
+" aquest assistent."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/controllers/attendance.py:0
 msgid ""
 "No attendee is registered for this assembly with the given participant."
-msgstr "No hi ha cap assistent registrat per a aquesta assemblea amb el participant indicat."
+msgstr ""
+"No hi ha cap assistent registrat per a aquesta assemblea amb el participant "
+"indicat."
 
 #. module: base_assembly
 #. odoo-python
@@ -3178,7 +3436,9 @@ msgstr "No hi ha files de delegació registrades per a aquesta assemblea."
 #: code:addons/base_assembly/wizards/assembly_communication_send_wizard.py:0
 msgid ""
 "No recipients with an email address were found for the selected options."
-msgstr "No s'han trobat destinataris amb una adreça electrònica per a les opcions seleccionades."
+msgstr ""
+"No s'han trobat destinataris amb una adreça electrònica per a les opcions "
+"seleccionades."
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_agenda__agenda_vote_mode__no_vote
@@ -3189,7 +3449,7 @@ msgstr "Sense votació"
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
 msgid "No ☐"
-msgstr "No ☐"
+msgstr ""
 
 #. module: base_assembly
 #. odoo-python
@@ -3249,7 +3509,7 @@ msgstr "No registrat"
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_representation_view_form
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_doc
 msgid "Notes"
-msgstr "Notes"
+msgstr ""
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
@@ -3259,7 +3519,7 @@ msgstr "Notes per a aquesta assistència…"
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "Notes…"
-msgstr "Notes…"
+msgstr ""
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__date_announcement
@@ -3270,7 +3530,8 @@ msgstr "Data de convocatòria"
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 msgid "Notice date cannot be after the assembly date."
-msgstr "La data de convocatòria no pot ser posterior a la data de l'assemblea."
+msgstr ""
+"La data de convocatòria no pot ser posterior a la data de l'assemblea."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__message_needaction_counter
@@ -3281,7 +3542,9 @@ msgstr "Nombre d'accions"
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_assembly__voting_sessions_count
 msgid "Number of assembly.voting records linked to this assembly's agenda."
-msgstr "Nombre de registres assembly.voting vinculats a l'ordre del dia d'aquesta assemblea."
+msgstr ""
+"Nombre de registres assembly.voting vinculats a l'ordre del dia d'aquesta "
+"assemblea."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__message_has_error_counter
@@ -3307,14 +3570,20 @@ msgid ""
 "Odoo domain (list/tuple form, as text) on res.partner defining who may be "
 "convoked; evaluated server-side with safe_eval. Invalid text is treated as "
 "an empty domain."
-msgstr "Domini d'Odoo (en forma de llista/tupla, com a text) a res.partner que defineix qui pot ser convocat; s'avalua al servidor amb safe_eval. El text no vàlid es tracta com un domini buit."
+msgstr ""
+"Domini d'Odoo (en forma de llista/tupla, com a text) a res.partner que "
+"defineix qui pot ser convocat; s'avalua al servidor amb safe_eval. El text "
+"no vàlid es tracta com un domini buit."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_attendee__attendance_link_tracker_id
 msgid ""
 "Odoo link tracker for this attendee: short URL to the attendance entry (GET "
 "/assembly/attendance). Each open is counted on the tracker."
-msgstr "Rastreador d'enllaços d'Odoo per a aquest assistent: URL curta a l'entrada d'assistència (GET /assembly/attendance). Cada obertura es comptabilitza al rastrejador."
+msgstr ""
+"Rastreador d'enllaços d'Odoo per a aquest assistent: URL curta a l'entrada "
+"d'assistència (GET /assembly/attendance). Cada obertura es comptabilitza al "
+"rastrejador."
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_attendee__attendance_type__present
@@ -3328,7 +3597,10 @@ msgid ""
 "One <strong>outgoing email per recipient</strong>. Nominative ballot PDFs "
 "are built per addressee; publication and delegation PDFs are identical for "
 "all."
-msgstr "Un <strong>correu sortint per destinatari</strong>. Els PDF de butlleta nominativa es creen per destinatari; els PDF de publicació i delegació són idèntics per a tothom."
+msgstr ""
+"Un <strong>correu sortint per destinatari</strong>. Els PDF de butlleta "
+"nominativa es creen per destinatari; els PDF de publicació i delegació són "
+"idèntics per a tothom."
 
 #. module: base_assembly
 #. odoo-python
@@ -3360,7 +3632,8 @@ msgstr "Votació i assistència en línia"
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 msgid "Only assembly managers can reopen a closed assembly."
-msgstr "Només els responsables d'assemblees poden reobrir una assemblea tancada."
+msgstr ""
+"Només els responsables d'assemblees poden reobrir una assemblea tancada."
 
 #. module: base_assembly
 #. odoo-python
@@ -3374,7 +3647,9 @@ msgstr "Només es poden reobrir les votacions tancades."
 msgid ""
 "Only members listed (not finalized) or already attended (confirmed present) "
 "can be recorded as did not attend."
-msgstr "Només els membres llistats (no finalitzats) o que ja han assistit (presència confirmada) es poden registrar com a no assistents."
+msgstr ""
+"Només els membres llistats (no finalitzats) o que ja han assistit (presència"
+" confirmada) es poden registrar com a no assistents."
 
 #. module: base_assembly
 #. odoo-python
@@ -3382,13 +3657,17 @@ msgstr "Només els membres llistats (no finalitzats) o que ja han assistit (pres
 msgid ""
 "Only members listed (not finalized) or recorded as did not attend can be "
 "marked as attended (confirmed present)."
-msgstr "Només els membres llistats (no finalitzats) o registrats com a no assistents es poden marcar com a assistents (presència confirmada)."
+msgstr ""
+"Només els membres llistats (no finalitzats) o registrats com a no assistents"
+" es poden marcar com a assistents (presència confirmada)."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_agenda.py:0
 msgid "Only no-vote agenda items can be marked as addressed."
-msgstr "Només es poden marcar com abordats els punts de l'ordre del dia sense votació."
+msgstr ""
+"Només es poden marcar com abordats els punts de l'ordre del dia sense "
+"votació."
 
 #. module: base_assembly
 #. odoo-python
@@ -3426,14 +3705,20 @@ msgid ""
 "Only used in weighted vote mode. When enabled, opening a voting session "
 "records votes per attendee using the vote type. In manual and no-vote modes "
 "this stays off by design."
-msgstr "Només s'utilitza en el mode de vot ponderat. Quan està activat, en obrir una sessió de votació es registren els vots per assistent utilitzant el tipus de vot. En els modes manuals i sense votació es manté desactivat expressament."
+msgstr ""
+"Només s'utilitza en el mode de vot ponderat. Quan està activat, en obrir una"
+" sessió de votació es registren els vots per assistent utilitzant el tipus "
+"de vot. En els modes manuals i sense votació es manté desactivat "
+"expressament."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_communication_send_wizard__recipient_audience
 msgid ""
 "Only used when sending to each matching attendee. Partners without an email "
 "are skipped."
-msgstr "Només s'utilitza quan s'envia a cada assistent coincident. Els socis sense correu electrònic s'ometen."
+msgstr ""
+"Només s'utilitza quan s'envia a cada assistent coincident. Els socis sense "
+"correu electrònic s'ometen."
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_voting__voting_state__open
@@ -3463,7 +3748,9 @@ msgstr "Oberta el"
 msgid ""
 "Operational lists and shortcuts are not available for archived assemblies. "
 "Unarchive the assembly first."
-msgstr "Les llistes operatives i les dreceres no estan disponibles per a assemblees arxivades. Desarxiveu primer l'assemblea."
+msgstr ""
+"Les llistes operatives i les dreceres no estan disponibles per a assemblees "
+"arxivades. Desarxiveu primer l'assemblea."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting_result__vote_option
@@ -3480,12 +3767,15 @@ msgstr "Nombre d'opcions"
 msgid ""
 "Optional HTML notes for this agenda item (e.g. after closing). Not filled "
 "automatically by the system."
-msgstr "Notes HTML opcionals per a aquest punt de l'ordre del dia (p. ex., després del tancament). El sistema no les omple automàticament."
+msgstr ""
+"Notes HTML opcionals per a aquest punt de l'ordre del dia (p. ex., després "
+"del tancament). El sistema no les omple automàticament."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_attendee__attendance_signature
 msgid "Optional capture of attendance proof (e.g. on-site sign-in)."
-msgstr "Captura opcional de prova d'assistència (p. ex., registre presencial)."
+msgstr ""
+"Captura opcional de prova d'assistència (p. ex., registre presencial)."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_representation_view_form
@@ -3598,7 +3888,9 @@ msgstr "Percentatge"
 msgid ""
 "Personalized member ballot for this recipient only (requires an attendee row"
 " for that partner)."
-msgstr "Butlleta de soci personalitzada només per a aquest destinatari (requereix una fila d'assistent per a aquest soci)."
+msgstr ""
+"Butlleta de soci personalitzada només per a aquest destinatari (requereix "
+"una fila d'assistent per a aquest soci)."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__total_possible_attendees
@@ -3631,7 +3923,7 @@ msgstr "Només assistents presents"
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__president_id
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_search
 msgid "President"
-msgstr "President"
+msgstr ""
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
@@ -3645,12 +3937,14 @@ msgstr "Previsualitzar documents"
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid ""
 "Preview only — not a signed or filed document. Edit the document texts on "
 "the assembly (or its type) for production output."
-msgstr "Només és una previsualització: no és un document signat ni registrat. Editeu els textos dels documents de l'assemblea (o del seu tipus) per obtenir el resultat definitiu."
+msgstr ""
+"Només és una previsualització: no és un document signat ni registrat. Editeu"
+" els textos dels documents de l'assemblea (o del seu tipus) per obtenir el "
+"resultat definitiu."
 
 #. module: base_assembly
 #: model:ir.model,name:base_assembly.model_assembly_document_preview_wizard
@@ -3684,7 +3978,10 @@ msgstr "Imprimir butlletes (PDF) per als assistents de l'assemblea"
 msgid ""
 "Public pages shown for tracked attendance deep links (landing before the "
 "form and errors for invalid or expired links)."
-msgstr "Pàgines públiques mostrades per als enllaços profunds d'assistència rastrejats (pàgina d'inici abans del formulari i errors per a enllaços no vàlids o caducats)."
+msgstr ""
+"Pàgines públiques mostrades per als enllaços profunds d'assistència "
+"rastrejats (pàgina d'inici abans del formulari i errors per a enllaços no "
+"vàlids o caducats)."
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_communication_send_wizard__primary_message_kind__publication
@@ -3706,7 +4003,9 @@ msgstr "PDF de publicació"
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_attendee__attendance_qr_png
 msgid "QR image encoding the tracked attendance URL, for printed documents."
-msgstr "Imatge QR que codifica l'URL d'assistència rastrejada, per a documents impresos."
+msgstr ""
+"Imatge QR que codifica l'URL d'assistència rastrejada, per a documents "
+"impresos."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__rating_ids
@@ -3724,7 +4023,9 @@ msgstr "Recalcular els vots"
 msgid ""
 "Recalculate voting power after attendance or delegation changes. Attendees "
 "are generated automatically when the assembly is announced."
-msgstr "Recalculeu el poder de vot després de canvis d'assistència o delegació. Els assistents es generen automàticament quan es convoca l'assemblea."
+msgstr ""
+"Recalculeu el poder de vot després de canvis d'assistència o delegació. Els "
+"assistents es generen automàticament quan es convoca l'assemblea."
 
 #. module: base_assembly
 #. odoo-python
@@ -3793,7 +4094,14 @@ msgid ""
 "zero, rules still use attendee vote units when they can be computed. In "
 "manual vote (multi-option), the sum of option counts is checked the same "
 "way. This mode records final counts only, not how each member voted."
-msgstr "Total de referència per a la validació. En el vot manual (recompte simple), quan és diferent de zero, la suma de sí, no, abstenció i en blanc ha de coincidir amb aquest valor; quan és zero, les regles continuen utilitzant les unitats de vot dels assistents quan es poden calcular. En el vot manual (múltiples opcions), la suma dels recomptes d'opcions es comprova de la mateixa manera. Aquest mode només registra els recomptes finals, no com ha votat cada membre."
+msgstr ""
+"Total de referència per a la validació. En el vot manual (recompte simple), "
+"quan és diferent de zero, la suma de sí, no, abstenció i en blanc ha de "
+"coincidir amb aquest valor; quan és zero, les regles continuen utilitzant "
+"les unitats de vot dels assistents quan es poden calcular. En el vot manual "
+"(múltiples opcions), la suma dels recomptes d'opcions es comprova de la "
+"mateixa manera. Aquest mode només registra els recomptes finals, no com ha "
+"votat cada membre."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_document_preview_wizard_view_form
@@ -3874,7 +4182,9 @@ msgstr "Representació (poder)"
 msgid ""
 "Representation PDF introduction. Supports placeholders like {{ object.name "
 "}}."
-msgstr "Introducció del PDF de representació. Admet marcadors de posició com {{ object.name }}."
+msgstr ""
+"Introducció del PDF de representació. Admet marcadors de posició com {{ "
+"object.name }}."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_type_view_form
@@ -3954,16 +4264,19 @@ msgid "Representative (agent)"
 msgstr "Representant (apoderat)"
 
 #. module: base_assembly
+#. odoo-python
 #: code:addons/base_assembly/models/assembly_representation.py:0
 msgid "Represented"
 msgstr "Representat"
 
 #. module: base_assembly
+#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
 msgid "Represented entity"
 msgstr "Entitat representada"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_representation__owner_partner_id
+#: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_doc
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_record
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_table_block
 msgid "Represented member"
@@ -3993,7 +4306,9 @@ msgstr "Exigir el NIF per confirmar l'assistència"
 #: model:ir.model.fields,help:base_assembly.field_assembly_agenda__vote_type_id
 msgid ""
 "Required in weighted vote mode. Must be one of the assembly vote types."
-msgstr "Obligatori en mode de vot ponderat. Ha de ser un dels tipus de vot de l'assemblea."
+msgstr ""
+"Obligatori en mode de vot ponderat. Ha de ser un dels tipus de vot de "
+"l'assemblea."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__requires_vote
@@ -4033,7 +4348,9 @@ msgstr "Resum de resultats"
 msgid ""
 "Review called members, contacts, and attendance preparation across "
 "assemblies."
-msgstr "Reviseu els membres convocats, els contactes i la preparació de l'assistència de totes les assemblees."
+msgstr ""
+"Reviseu els membres convocats, els contactes i la preparació de "
+"l'assistència de totes les assemblees."
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_delegation__delegation_state__revoked
@@ -4052,7 +4369,9 @@ msgstr "Registre"
 msgid ""
 "Roll-call votings can only be linked to agenda items in weighted (roll-call)"
 " mode."
-msgstr "Les votacions nominals només es poden vincular a punts de l'ordre del dia en mode ponderat (nominal)."
+msgstr ""
+"Les votacions nominals només es poden vincular a punts de l'ordre del dia en"
+" mode ponderat (nominal)."
 
 #. module: base_assembly
 #. odoo-python
@@ -4079,14 +4398,12 @@ msgstr "La segona convocatòria ha de ser estrictament posterior a la primera."
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Second call scheduled."
 msgstr "Segona convocatòria programada."
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Second call:"
 msgstr "Segona convocatòria:"
@@ -4129,7 +4446,8 @@ msgstr "Enviar comunicació"
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
 msgid "Send convocation and related communications to participants."
-msgstr "Enviar la convocatòria i les comunicacions relacionades als participants."
+msgstr ""
+"Enviar la convocatòria i les comunicacions relacionades als participants."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_header_actions_wizard_view_form
@@ -4163,14 +4481,19 @@ msgstr "La seqüència ha de ser única per assemblea."
 msgid ""
 "Sequence used to generate assembly reference codes. If empty, any sequence "
 "with code “assembly.assembly” is used."
-msgstr "Seqüència utilitzada per generar els codis de referència de l'assemblea. Si està buida, s'utilitza qualsevol seqüència amb el codi «assembly.assembly»."
+msgstr ""
+"Seqüència utilitzada per generar els codis de referència de l'assemblea. Si "
+"està buida, s'utilitza qualsevol seqüència amb el codi «assembly.assembly»."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
 msgid ""
 "Sequence used to generate assembly reference codes. Leave empty to resolve "
 "by sequence code assembly.assembly."
-msgstr "Seqüència utilitzada per generar els codis de referència de l'assemblea. Deixeu-la buida per resoldre-la mitjançant el codi de seqüència assembly.assembly."
+msgstr ""
+"Seqüència utilitzada per generar els codis de referència de l'assemblea. "
+"Deixeu-la buida per resoldre-la mitjançant el codi de seqüència "
+"assembly.assembly."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_voting_line__vote_cast_at
@@ -4206,14 +4529,19 @@ msgstr "Establiu un tipus de vot per a aquest punt de l'ordre del dia."
 msgid ""
 "Set attendance to Attended (confirmed present): member actually attended; "
 "counts for quorum and voting."
-msgstr "Establiu l'assistència com a Ha assistit (presència confirmada): el membre ha assistit realment; compta per al quòrum i la votació."
+msgstr ""
+"Establiu l'assistència com a Ha assistit (presència confirmada): el membre "
+"ha assistit realment; compta per al quòrum i la votació."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_form
 msgid ""
 "Set attendance to Did not attend (absent): excluded from quorum; delegations"
 " received by this person stay inactive until attendance is confirmed."
-msgstr "Establiu l'assistència com a No hi ha assistit (absent): queda exclòs del quòrum; les delegacions rebudes per aquesta persona romanen inactives fins que se'n confirma l'assistència."
+msgstr ""
+"Establiu l'assistència com a No hi ha assistit (absent): queda exclòs del "
+"quòrum; les delegacions rebudes per aquesta persona romanen inactives fins "
+"que se'n confirma l'assistència."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree
@@ -4221,7 +4549,10 @@ msgstr "Establiu l'assistència com a No hi ha assistit (absent): queda exclòs 
 msgid ""
 "Set attendance to Did not attend (absent): excluded from quorum; delegations"
 " to this person stay inactive until attended."
-msgstr "Establiu l'assistència com a No hi ha assistit (absent): queda exclòs del quòrum; les delegacions a aquesta persona romanen inactives fins que assisteixi."
+msgstr ""
+"Establiu l'assistència com a No hi ha assistit (absent): queda exclòs del "
+"quòrum; les delegacions a aquesta persona romanen inactives fins que "
+"assisteixi."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form_session
@@ -4230,7 +4561,11 @@ msgid ""
 "<strong>Voting weight</strong> is fixed for this round. Use <strong>Refresh "
 "roll call</strong> to add new eligible seats without clearing recorded "
 "votes."
-msgstr "Establiu el <strong>Vot</strong> de cada membre mentre la sessió està oberta. El <strong>pes de votació</strong> és fix per a aquesta ronda. Utilitzeu <strong>Actualitzar el registre</strong> per afegir escons elegibles nous sense esborrar els vots registrats."
+msgstr ""
+"Establiu el <strong>Vot</strong> de cada membre mentre la sessió està "
+"oberta. El <strong>pes de votació</strong> és fix per a aquesta ronda. "
+"Utilitzeu <strong>Actualitzar el registre</strong> per afegir escons "
+"elegibles nous sense esborrar els vots registrats."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_attendee__attendance_url
@@ -4239,14 +4574,21 @@ msgid ""
 "or encode it in a QR; opens are counted. With a manager session, the landing"
 " page opens first (append direct=1 on the target URL to skip to the form). "
 "Configure landing/error QWeb under Settings → Assemblies."
-msgstr "URL curta del rastrejador d'enllaços al flux d'assistència d'aquest membre. Compartiu-la o codifiqueu-la en un QR; les obertures es comptabilitzen. Amb una sessió de responsable, primer s'obre la pàgina d'inici (afegiu direct=1 a l'URL de destinació per anar directament al formulari). Configureu el QWeb d'inici/error a Configuració → Assemblees."
+msgstr ""
+"URL curta del rastrejador d'enllaços al flux d'assistència d'aquest membre. "
+"Compartiu-la o codifiqueu-la en un QR; les obertures es comptabilitzen. Amb "
+"una sessió de responsable, primer s'obre la pàgina d'inici (afegiu direct=1 "
+"a l'URL de destinació per anar directament al formulari). Configureu el QWeb"
+" d'inici/error a Configuració → Assemblees."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_assembly__location
 msgid ""
 "Short venue label (e.g. room or building) for headers; use address fields "
 "for postal details in documents."
-msgstr "Etiqueta breu del lloc (p. ex., sala o edifici) per a les capçaleres; utilitzeu els camps d'adreça per als detalls postals dels documents."
+msgstr ""
+"Etiqueta breu del lloc (p. ex., sala o edifici) per a les capçaleres; "
+"utilitzeu els camps d'adreça per als detalls postals dels documents."
 
 #. module: base_assembly
 #. odoo-python
@@ -4287,14 +4629,19 @@ msgstr "Signatura desada per a %s"
 msgid ""
 "Single PDF with every member ballot in sequence. Same attachment on each "
 "email when enabled; use together with nominative only if you intend both."
-msgstr "Un únic PDF amb totes les butlletes dels socis en seqüència. El mateix adjunt a cada correu quan està activat; utilitzeu-lo amb el nominatiu només si voleu tots dos."
+msgstr ""
+"Un únic PDF amb totes les butlletes dels socis en seqüència. El mateix "
+"adjunt a cada correu quan està activat; utilitzeu-lo amb el nominatiu només "
+"si voleu tots dos."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_ballot_print_wizard__merge_single_pdf
 msgid ""
 "Single PDF with one member ballot per page (nominative intro). If disabled, "
 "download a ZIP with one PDF per attendee."
-msgstr "Un únic PDF amb una butlleta de soci per pàgina (introducció nominativa). Si està desactivat, descarregueu un ZIP amb un PDF per assistent."
+msgstr ""
+"Un únic PDF amb una butlleta de soci per pàgina (introducció nominativa). Si"
+" està desactivat, descarregueu un ZIP amb un PDF per assistent."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
@@ -4360,7 +4707,13 @@ msgid ""
 "Present or Mark Absent, when delegations change, or via “Recompute votes” on"
 " the assembly. Contact “Votes per contact” (partner.vote) is the source for "
 "own amounts; until a rebuild runs, lines here can be missing or stale."
-msgstr "Instantània desada per tipus de vot de l'assemblea (propis / delegats entrants-sortints). Es reconstrueix quan genereu assistents, canvieu els tipus de vot de l'assemblea, marqueu Present o Absent, quan canvien les delegacions o mitjançant «Recalcular vots» a l'assemblea. «Vots per contacte» (partner.vote) és la font dels imports propis; fins que s'executi una reconstrucció, les línies poden faltar o estar obsoletes."
+msgstr ""
+"Instantània desada per tipus de vot de l'assemblea (propis / delegats "
+"entrants-sortints). Es reconstrueix quan genereu assistents, canvieu els "
+"tipus de vot de l'assemblea, marqueu Present o Absent, quan canvien les "
+"delegacions o mitjançant «Recalcular vots» a l'assemblea. «Vots per "
+"contacte» (partner.vote) és la font dels imports propis; fins que s'executi "
+"una reconstrucció, les línies poden faltar o estar obsoletes."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__street
@@ -4371,7 +4724,7 @@ msgstr "Carrer"
 #. module: base_assembly
 #: model:ir.model,name:base_assembly.model_res_config_settings
 msgid "Street type settings"
-msgstr "Paràmetres de configuració"
+msgstr "Ajustos de configuració"
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__attendance_partner_vat_format_strict
@@ -4388,14 +4741,20 @@ msgstr "Suma dels vots de les opcions"
 msgid ""
 "Sum of stored delegated-in units on the delegate's vote lines for the types "
 "covered by this delegation, when transfer is active."
-msgstr "Suma de les unitats delegades entrants desades a les línies de vot del delegat per als tipus coberts per aquesta delegació, quan la transferència està activa."
+msgstr ""
+"Suma de les unitats delegades entrants desades a les línies de vot del "
+"delegat per als tipus coberts per aquesta delegació, quan la transferència "
+"està activa."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_delegation__delegation_snapshot_units_out
 msgid ""
 "Sum of stored delegated-out units on the delegator's vote lines for the "
 "types covered by this delegation, when transfer is active."
-msgstr "Suma de les unitats delegades sortints desades a les línies de vot del delegant per als tipus coberts per aquesta delegació, quan la transferència està activa."
+msgstr ""
+"Suma de les unitats delegades sortints desades a les línies de vot del "
+"delegant per als tipus coberts per aquesta delegació, quan la transferència "
+"està activa."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
@@ -4403,14 +4762,18 @@ msgstr "Suma de les unitats delegades sortints desades a les línies de vot del 
 msgid ""
 "Sum of votes in the table does not match the expected reference total. "
 "Adjust the Votes column or expected total before finalizing."
-msgstr "La suma dels vots de la taula no coincideix amb el total de referència esperat. Ajusteu la columna Vots o el total esperat abans de finalitzar."
+msgstr ""
+"La suma dels vots de la taula no coincideix amb el total de referència "
+"esperat. Ajusteu la columna Vots o el total esperat abans de finalitzar."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_agenda__session_manual_entered_total
 msgid ""
 "Sum of yes, no, abstention, and blank (simple count) or sum of option votes "
 "(multi-option)."
-msgstr "Suma dels vots de sí, no, abstenció i en blanc (recompte simple) o suma dels vots de les opcions (múltiples opcions)."
+msgstr ""
+"Suma dels vots de sí, no, abstenció i en blanc (recompte simple) o suma dels"
+" vots de les opcions (múltiples opcions)."
 
 #. module: base_assembly
 #. odoo-python
@@ -4455,7 +4818,11 @@ msgid ""
 "Text for the assembly documents. Supports placeholders like <code>{{ "
 "object.name }}</code>. New assemblies start from the assembly type's default"
 " texts (per language); edit here to override for this assembly."
-msgstr "Text per als documents de l'assemblea. Admet marcadors de posició com <code>{{ object.name }}</code>. Les assemblees noves parteixen dels textos predeterminats del tipus d'assemblea (per idioma); editeu-los aquí per substituir-los en aquesta assemblea."
+msgstr ""
+"Text per als documents de l'assemblea. Admet marcadors de posició com "
+"<code>{{ object.name }}</code>. Les assemblees noves parteixen dels textos "
+"predeterminats del tipus d'assemblea (per idioma); editeu-los aquí per "
+"substituir-los en aquesta assemblea."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_record
@@ -4463,7 +4830,10 @@ msgid ""
 "The <strong>represented member</strong> identified below appoints the "
 "<strong>representative</strong> identified below to represent them at the "
 "assembly referenced above."
-msgstr "El <strong>membre representat</strong> identificat a continuació nomena el <strong>representant</strong> identificat a continuació perquè el representi a l'assemblea esmentada anteriorment."
+msgstr ""
+"El <strong>membre representat</strong> identificat a continuació nomena el "
+"<strong>representant</strong> identificat a continuació perquè el representi"
+" a l'assemblea esmentada anteriorment."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_attendee__partner_vat
@@ -4471,7 +4841,10 @@ msgid ""
 "The Tax Identification Number. Values here will be validated based on the "
 "country format. You can use '/' to indicate that the partner is not subject "
 "to tax."
-msgstr "El número d'identificació fiscal. Aquests valors es validaran segons el format del país. Podeu utilitzar «/» per indicar que el soci no està subjecte a impostos."
+msgstr ""
+"El número d'identificació fiscal. Aquests valors es validaran segons el "
+"format del país. Podeu utilitzar «/» per indicar que el soci no està "
+"subjecte a impostos."
 
 #. module: base_assembly
 #. odoo-python
@@ -4480,7 +4853,10 @@ msgid ""
 "The assembly belongs to a company that is not in your current session. "
 "Switch to that company or include it among your allowed companies before "
 "sending mail."
-msgstr "L'assemblea pertany a una companyia que no és a la sessió actual. Canvieu a aquesta companyia o incloeu-la entre les companyies permeses abans d'enviar correu."
+msgstr ""
+"L'assemblea pertany a una companyia que no és a la sessió actual. Canvieu a "
+"aquesta companyia o incloeu-la entre les companyies permeses abans d'enviar "
+"correu."
 
 #. module: base_assembly
 #: model:ir.model.constraint,message:base_assembly.constraint_assembly_assembly_assembly_company_code_uniq
@@ -4491,7 +4867,8 @@ msgstr "El codi de referència de l'assemblea ha de ser únic per companyia."
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_voting_line.py:0
 msgid "The attendee must belong to the same assembly as this voting."
-msgstr "L'assistent ha de pertànyer a la mateixa assemblea que aquesta votació."
+msgstr ""
+"L'assistent ha de pertànyer a la mateixa assemblea que aquesta votació."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_delegation_certificate
@@ -4499,7 +4876,10 @@ msgid ""
 "The delegate acknowledges that voting power transfers according to system "
 "rules (for example, once the delegate is recorded as attended, where "
 "applicable)."
-msgstr "El delegat reconeix que el poder de vot es transfereix d'acord amb les regles del sistema (per exemple, quan es registra que el delegat ha assistit, quan sigui aplicable)."
+msgstr ""
+"El delegat reconeix que el poder de vot es transfereix d'acord amb les "
+"regles del sistema (per exemple, quan es registra que el delegat ha "
+"assistit, quan sigui aplicable)."
 
 #. module: base_assembly
 #. odoo-python
@@ -4507,7 +4887,9 @@ msgstr "El delegat reconeix que el poder de vot es transfereix d'acord amb les r
 msgid ""
 "The delegate must be an attendee in the assembly. Please add the delegate as"
 " an attendee first."
-msgstr "El delegat ha de ser assistent de l'assemblea. Afegiu primer el delegat com a assistent."
+msgstr ""
+"El delegat ha de ser assistent de l'assemblea. Afegiu primer el delegat com "
+"a assistent."
 
 #. module: base_assembly
 #. odoo-python
@@ -4527,14 +4909,17 @@ msgstr "El delegant i el delegat han de ser socis diferents."
 msgid ""
 "The delegator confirms the accuracy of the data above and accepts that votes"
 " may be cast by the delegate within the stated scope."
-msgstr "El delegant confirma l'exactitud de les dades anteriors i accepta que el delegat pugui emetre vots dins de l'àmbit indicat."
+msgstr ""
+"El delegant confirma l'exactitud de les dades anteriors i accepta que el "
+"delegat pugui emetre vots dins de l'àmbit indicat."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_delegation.py:0
 msgid ""
 "The delegator must be included in the convocable partners of the assembly."
-msgstr "El delegant ha d'estar inclòs entre els socis convocables de l'assemblea."
+msgstr ""
+"El delegant ha d'estar inclòs entre els socis convocables de l'assemblea."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_delegation_certificate
@@ -4547,14 +4932,18 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_document_preview_wizard_view_form
 msgid ""
 "The framed area simulates a printed page; it is not a stored legal document."
-msgstr "L'àrea emmarcada simula una pàgina impresa; no és un document legal emmagatzemat."
+msgstr ""
+"L'àrea emmarcada simula una pàgina impresa; no és un document legal "
+"emmagatzemat."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 msgid ""
 "The live voting screen is only available while the assembly is in session."
-msgstr "La pantalla de votació en directe només està disponible mentre l'assemblea està en sessió."
+msgstr ""
+"La pantalla de votació en directe només està disponible mentre l'assemblea "
+"està en sessió."
 
 #. module: base_assembly
 #. odoo-python
@@ -4562,7 +4951,9 @@ msgstr "La pantalla de votació en directe només està disponible mentre l'asse
 msgid ""
 "The member's tax identification number (TIN/VAT) does not meet the required "
 "format for this assembly."
-msgstr "El número d'identificació fiscal (NIF/IVA) del membre no compleix el format requerit per a aquesta assemblea."
+msgstr ""
+"El número d'identificació fiscal (NIF/IVA) del membre no compleix el format "
+"requerit per a aquesta assemblea."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_record
@@ -4570,7 +4961,10 @@ msgid ""
 "The representative may register attendance and perform other acts expressly "
 "allowed by the applicable rules, to the exclusion of any matter not covered "
 "by representation."
-msgstr "El representant pot registrar l'assistència i fer altres actes permesos expressament per les normes aplicables, amb exclusió de qualsevol qüestió no coberta per la representació."
+msgstr ""
+"El representant pot registrar l'assistència i fer altres actes permesos "
+"expressament per les normes aplicables, amb exclusió de qualsevol qüestió no"
+" coberta per la representació."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_representation_record
@@ -4578,7 +4972,10 @@ msgid ""
 "The represented member declares that the information stated is correct and "
 "undertakes to notify the assembly secretariat of any change that affects "
 "this appointment."
-msgstr "El membre representat declara que la informació indicada és correcta i es compromet a notificar a la secretaria de l'assemblea qualsevol canvi que afecti aquest nomenament."
+msgstr ""
+"El membre representat declara que la informació indicada és correcta i es "
+"compromet a notificar a la secretaria de l'assemblea qualsevol canvi que "
+"afecti aquest nomenament."
 
 #. module: base_assembly
 #. odoo-python
@@ -4586,7 +4983,9 @@ msgstr "El membre representat declara que la informació indicada és correcta i
 msgid ""
 "The represented member must be included in the convocable partners of the "
 "assembly."
-msgstr "El membre representat ha d'estar inclòs entre els socis convocables de l'assemblea."
+msgstr ""
+"El membre representat ha d'estar inclòs entre els socis convocables de "
+"l'assemblea."
 
 #. module: base_assembly
 #. odoo-python
@@ -4606,7 +5005,9 @@ msgstr "El soci seleccionat no és assistent d'aquesta assemblea."
 msgid ""
 "The vote type cannot be changed because the agenda item already has votings."
 " Once voting has started, the vote type becomes immutable."
-msgstr "No es pot canviar el tipus de vot perquè el punt de l'ordre del dia ja té votacions. Un cop iniciada la votació, el tipus de vot esdevé immutable."
+msgstr ""
+"No es pot canviar el tipus de vot perquè el punt de l'ordre del dia ja té "
+"votacions. Un cop iniciada la votació, el tipus de vot esdevé immutable."
 
 #. module: base_assembly
 #. odoo-python
@@ -4614,19 +5015,24 @@ msgstr "No es pot canviar el tipus de vot perquè el punt de l'ordre del dia ja 
 msgid ""
 "The vote type cannot be cleared in weighted mode while requires vote is "
 "enabled."
-msgstr "No es pot buidar el tipus de vot en mode ponderat mentre «Requereix votació» estigui activat."
+msgstr ""
+"No es pot buidar el tipus de vot en mode ponderat mentre «Requereix votació»"
+" estigui activat."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_voting.py:0
 msgid "The voting vote type must be one of the assembly's vote types."
-msgstr "El tipus de vot de la votació ha de ser un dels tipus de vot de l'assemblea."
+msgstr ""
+"El tipus de vot de la votació ha de ser un dels tipus de vot de l'assemblea."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_voting.py:0
 msgid "The voting vote type must match the agenda item's vote type."
-msgstr "El tipus de vot de la votació ha de coincidir amb el del punt de l'ordre del dia."
+msgstr ""
+"El tipus de vot de la votació ha de coincidir amb el del punt de l'ordre del"
+" dia."
 
 #. module: base_assembly
 #. odoo-python
@@ -4640,13 +5046,16 @@ msgstr "Aquesta acció només està disponible quan l'assemblea està tancada."
 msgid ""
 "This agenda item already has an open voting. Close or cancel it before "
 "starting a new one."
-msgstr "Aquest punt de l'ordre del dia ja té una votació oberta. Tanqueu-la o cancel·leu-la abans d'iniciar-ne una de nova."
+msgstr ""
+"Aquest punt de l'ordre del dia ja té una votació oberta. Tanqueu-la o "
+"cancel·leu-la abans d'iniciar-ne una de nova."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_agenda.py:0
 msgid "This agenda item is not available for manual entry."
-msgstr "Aquest punt de l'ordre del dia no està disponible per a l'entrada manual."
+msgstr ""
+"Aquest punt de l'ordre del dia no està disponible per a l'entrada manual."
 
 #. module: base_assembly
 #. odoo-python
@@ -4672,7 +5081,10 @@ msgid ""
 "This assembly is closed: data is read-only on the server. Use "
 "<strong>Cancel</strong> to void it, or <strong>Reopen session</strong> "
 "(managers) to allow edits again."
-msgstr "Aquesta assemblea està tancada: les dades són de només lectura al servidor. Utilitzeu <strong>Cancel·lar</strong> per anul·lar-la o <strong>Reobrir sessió</strong> (responsables) per tornar a permetre'n l'edició."
+msgstr ""
+"Aquesta assemblea està tancada: les dades són de només lectura al servidor. "
+"Utilitzeu <strong>Cancel·lar</strong> per anul·lar-la o <strong>Reobrir "
+"sessió</strong> (responsables) per tornar a permetre'n l'edició."
 
 #. module: base_assembly
 #. odoo-python
@@ -4680,13 +5092,16 @@ msgstr "Aquesta assemblea està tancada: les dades són de només lectura al ser
 msgid ""
 "This assembly requires a tax identification number (TIN/VAT) on the member "
 "before they can be marked as attended (confirmed present)."
-msgstr "Aquesta assemblea requereix un número d'identificació fiscal (NIF/IVA) del membre abans de poder marcar-lo com a assistent (presència confirmada)."
+msgstr ""
+"Aquesta assemblea requereix un número d'identificació fiscal (NIF/IVA) del "
+"membre abans de poder marcar-lo com a assistent (presència confirmada)."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_voting_line.py:0
 msgid "This attendee has no votes for this vote type (delegated out)."
-msgstr "Aquest assistent no té vots per a aquest tipus de vot (delegats sortints)."
+msgstr ""
+"Aquest assistent no té vots per a aquest tipus de vot (delegats sortints)."
 
 #. module: base_assembly
 #. odoo-python
@@ -4695,7 +5110,10 @@ msgid ""
 "This delegation would create a circular chain of vote delegations for at "
 "least one vote type. Delegations must not form cycles (for example A → B and"
 " B → A on overlapping vote types)."
-msgstr "Aquesta delegació crearia una cadena circular de delegacions de vot per a almenys un tipus de vot. Les delegacions no poden formar cicles (per exemple, A → B i B → A en tipus de vot coincidents)."
+msgstr ""
+"Aquesta delegació crearia una cadena circular de delegacions de vot per a "
+"almenys un tipus de vot. Les delegacions no poden formar cicles (per "
+"exemple, A → B i B → A en tipus de vot coincidents)."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_delegation_view_form
@@ -4703,7 +5121,10 @@ msgid ""
 "This form defines who delegates (<strong>Delegator</strong>) and who "
 "receives units (<strong>Delegate</strong>). Saving writes the rule; "
 "<strong>delete the record</strong> to revoke it."
-msgstr "Aquest formulari defineix qui delega (<strong>Delegant</strong>) i qui rep les unitats (<strong>Delegat</strong>). En desar s'escriu la regla; <strong>elimineu el registre</strong> per revocar-la."
+msgstr ""
+"Aquest formulari defineix qui delega (<strong>Delegant</strong>) i qui rep "
+"les unitats (<strong>Delegat</strong>). En desar s'escriu la regla; "
+"<strong>elimineu el registre</strong> per revocar-la."
 
 #. module: base_assembly
 #. odoo-python
@@ -4717,7 +5138,9 @@ msgstr "Aquest punt no està obert a votació."
 msgid ""
 "This link is only valid while the assembly is open for registration or in "
 "session."
-msgstr "Aquest enllaç només és vàlid mentre l'assemblea estigui oberta al registre o en sessió."
+msgstr ""
+"Aquest enllaç només és vàlid mentre l'assemblea estigui oberta al registre o"
+" en sessió."
 
 #. module: base_assembly
 #. odoo-python
@@ -4725,7 +5148,10 @@ msgstr "Aquest enllaç només és vàlid mentre l'assemblea estigui oberta al re
 msgid ""
 "This member has already cast a vote in an open roll-call voting. Cancel or "
 "close that voting (or clear the vote line) before recording them as absent."
-msgstr "Aquest membre ja ha emès un vot en una votació nominal oberta. Cancel·leu o tanqueu la votació (o esborreu la línia de vot) abans de registrar-lo com a absent."
+msgstr ""
+"Aquest membre ja ha emès un vot en una votació nominal oberta. Cancel·leu o "
+"tanqueu la votació (o esborreu la línia de vot) abans de registrar-lo com a "
+"absent."
 
 #. module: base_assembly
 #. odoo-python
@@ -4733,7 +5159,10 @@ msgstr "Aquest membre ja ha emès un vot en una votació nominal oberta. Cancel�
 msgid ""
 "Tip: append the query parameter ``direct=1`` for an immediate redirect "
 "without this page (e.g. for bookmarks or automation)."
-msgstr "Consell: afegiu el paràmetre de consulta ``direct=1`` per redirigir immediatament sense aquesta pàgina (per exemple, per a adreces d'interès o automatitzacions)."
+msgstr ""
+"Consell: afegiu el paràmetre de consulta ``direct=1`` per redirigir "
+"immediatament sense aquesta pàgina (per exemple, per a adreces d'interès o "
+"automatitzacions)."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__name
@@ -4746,7 +5175,7 @@ msgstr "Títol"
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_call_doc_votes
 #: model_terms:ir.ui.view,arch_db:base_assembly.report_assembly_attendee_voting_ballot_page
 msgid "Total"
-msgstr "Total"
+msgstr ""
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_voting__total_votes_cast
@@ -4787,7 +5216,10 @@ msgstr "Poder de votació total"
 msgid ""
 "Totals use the stored snapshot on <em>Votes by type</em> (delegated out / "
 "delegated in) on each attendee; open delegator or delegate rows to verify."
-msgstr "Els totals utilitzen la instantània desada a <em>Vots per tipus</em> (delegats sortints / entrants) de cada assistent; obriu les files del delegant o del delegat per verificar-ho."
+msgstr ""
+"Els totals utilitzen la instantània desada a <em>Vots per tipus</em> "
+"(delegats sortints / entrants) de cada assistent; obriu les files del "
+"delegant o del delegat per verificar-ho."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_tree_call_register
@@ -4816,7 +5248,10 @@ msgid ""
 "Tracked attendance links and QR codes are disabled for this assembly. Enable"
 " \"Add QR code (tracked attendance link)\" on the assembly Configuration "
 "tab."
-msgstr "Els enllaços d'assistència rastrejats i els codis QR estan desactivats per a aquesta assemblea. Activeu «Afegir codi QR (enllaç d'assistència rastrejat)» a la pestanya Configuració de l'assemblea."
+msgstr ""
+"Els enllaços d'assistència rastrejats i els codis QR estan desactivats per a"
+" aquesta assemblea. Activeu «Afegir codi QR (enllaç d'assistència "
+"rastrejat)» a la pestanya Configuració de l'assemblea."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_attendee__call_register_link_ready
@@ -4857,12 +5292,17 @@ msgid ""
 "Use the assembly-level generic ballot introduction instead of the nominative"
 " per-member intro. For special cases only; default member flow uses the "
 "attendee-based nominative ballot."
-msgstr "Utilitzeu la introducció genèrica de la butlleta de nivell d'assemblea en lloc de la introducció nominativa per membre. Només per a casos especials; el flux predeterminat utilitza la butlleta nominativa basada en l'assistent."
+msgstr ""
+"Utilitzeu la introducció genèrica de la butlleta de nivell d'assemblea en "
+"lloc de la introducció nominativa per membre. Només per a casos especials; "
+"el flux predeterminat utilitza la butlleta nominativa basada en l'assistent."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_voting_line__vote_cast_by_user_id
 msgid "User who cast the vote (portal/backend). Empty if cast via token."
-msgstr "Usuari que ha emès el vot (portal/backend). Buit si s'ha emès mitjançant un testimoni."
+msgstr ""
+"Usuari que ha emès el vot (portal/backend). Buit si s'ha emès mitjançant un "
+"testimoni."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
@@ -4905,7 +5345,9 @@ msgstr "Registre de delegació de vot (assemblea)"
 #: model:ir.model.fields,help:base_assembly.field_assembly_communication_send_wizard__attach_delegation_pdf
 msgid ""
 "Vote delegation register for the assembly (same file for every recipient)."
-msgstr "Registre de delegació de vots per a l'assemblea (el mateix fitxer per a tots els destinataris)."
+msgstr ""
+"Registre de delegació de vots per a l'assemblea (el mateix fitxer per a tots"
+" els destinataris)."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
@@ -4949,7 +5391,9 @@ msgstr "Tipus de vot"
 msgid ""
 "Vote type '%(vote_type)s' cannot be used because the assembly has no vote "
 "types configured."
-msgstr "No es pot utilitzar el tipus de vot «%(vote_type)s» perquè l'assemblea no té cap tipus de vot configurat."
+msgstr ""
+"No es pot utilitzar el tipus de vot «%(vote_type)s» perquè l'assemblea no té"
+" cap tipus de vot configurat."
 
 #. module: base_assembly
 #. odoo-python
@@ -4957,7 +5401,9 @@ msgstr "No es pot utilitzar el tipus de vot «%(vote_type)s» perquè l'assemble
 msgid ""
 "Vote type '%(vote_type)s' must be one of the assembly's vote types. "
 "Available types: %(available)s"
-msgstr "El tipus de vot «%(vote_type)s» ha de ser un dels tipus de vot de l'assemblea. Tipus disponibles: %(available)s"
+msgstr ""
+"El tipus de vot «%(vote_type)s» ha de ser un dels tipus de vot de "
+"l'assemblea. Tipus disponibles: %(available)s"
 
 #. module: base_assembly
 #. odoo-python
@@ -4986,13 +5432,18 @@ msgid ""
 "Vote types covered by this delegation. Leave empty to delegate every vote "
 "type configured on the assembly. Totals and roll-call use the stored "
 "snapshot on each attendee row (delegated out / in)."
-msgstr "Tipus de vot coberts per aquesta delegació. Deixeu-ho buit per delegar tots els tipus de vot configurats a l'assemblea. Els totals i el registre utilitzen la instantània desada a cada assistent (delegats sortints/entrants)."
+msgstr ""
+"Tipus de vot coberts per aquesta delegació. Deixeu-ho buit per delegar tots "
+"els tipus de vot configurats a l'assemblea. Els totals i el registre "
+"utilitzen la instantània desada a cada assistent (delegats "
+"sortints/entrants)."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_delegation.py:0
 msgid "Vote types must be selected from the assembly's vote types."
-msgstr "Els tipus de vot s'han de seleccionar entre els tipus de vot de l'assemblea."
+msgstr ""
+"Els tipus de vot s'han de seleccionar entre els tipus de vot de l'assemblea."
 
 #. module: base_assembly
 #: model:ir.model.fields.selection,name:base_assembly.selection__assembly_agenda__agenda_state__voted
@@ -5025,13 +5476,17 @@ msgstr "Els vots aplicats no poden ser negatius."
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_voting_line.py:0
 msgid "Votes applied is frozen at cast time and cannot be changed."
-msgstr "Els vots aplicats queden fixats en el moment de l'emissió i no es poden canviar."
+msgstr ""
+"Els vots aplicats queden fixats en el moment de l'emissió i no es poden "
+"canviar."
 
 #. module: base_assembly
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_voting_line.py:0
 msgid "Votes applied must match the attendee's vote total for this type."
-msgstr "Els vots aplicats han de coincidir amb el total de vots de l'assistent per a aquest tipus."
+msgstr ""
+"Els vots aplicats han de coincidir amb el total de vots de l'assistent per a"
+" aquest tipus."
 
 #. module: base_assembly
 #. odoo-python
@@ -5051,7 +5506,8 @@ msgstr "Vots per tipus (drets)"
 #. odoo-python
 #: code:addons/base_assembly/models/assembly_voting_line.py:0
 msgid "Votes can only be changed while the voting session is open."
-msgstr "Els vots només es poden modificar mentre la sessió de votació està oberta."
+msgstr ""
+"Els vots només es poden modificar mentre la sessió de votació està oberta."
 
 #. module: base_assembly
 #. odoo-python
@@ -5117,7 +5573,9 @@ msgstr "Opció de votació"
 #. module: base_assembly
 #: model:ir.model.constraint,message:base_assembly.constraint_assembly_agenda_option_assembly_agenda_option_agenda_sequence_uniq
 msgid "Voting option sequence must be unique per agenda item."
-msgstr "La seqüència de l'opció de votació ha de ser única per punt de l'ordre del dia."
+msgstr ""
+"La seqüència de l'opció de votació ha de ser única per punt de l'ordre del "
+"dia."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__option_ids
@@ -5189,7 +5647,12 @@ msgid ""
 " present), so units are not transferred yet. Active: the delegate is "
 "attended (confirmed present); covered types are transferred for vote totals "
 "(other rules such as vote-type overlap still apply in the engine)."
-msgstr "En espera: la delegació està desada però el delegat no ha assistit (presència confirmada), per tant les unitats encara no es transfereixen. Activa: el delegat ha assistit (presència confirmada); els tipus coberts es transfereixen per als totals de vot (altres regles, com la coincidència de tipus, també s'apliquen al motor)."
+msgstr ""
+"En espera: la delegació està desada però el delegat no ha assistit "
+"(presència confirmada), per tant les unitats encara no es transfereixen. "
+"Activa: el delegat ha assistit (presència confirmada); els tipus coberts es "
+"transfereixen per als totals de vot (altres regles, com la coincidència de "
+"tipus, també s'apliquen al motor)."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_agenda__website_message_ids
@@ -5224,7 +5687,13 @@ msgid ""
 "Manual modes: enter only aggregate totals (yes/no/abstain/blank or per "
 "ballot option counts); no per-attendee vote lines are created for this item."
 " No vote: discussion or information only."
-msgstr "Vot ponderat: cada assistent elegible emet els seus propis vots utilitzant el tipus de vot seleccionat; el sistema desa línies de vot individuals (registre nominal). Modes manuals: introduïu només totals agregats (sí/no/abstenció/en blanc o recomptes per opció de butlleta); no es creen línies de vot per assistent per a aquest punt. Sense votació: només discussió o informació."
+msgstr ""
+"Vot ponderat: cada assistent elegible emet els seus propis vots utilitzant "
+"el tipus de vot seleccionat; el sistema desa línies de vot individuals "
+"(registre nominal). Modes manuals: introduïu només totals agregats "
+"(sí/no/abstenció/en blanc o recomptes per opció de butlleta); no es creen "
+"línies de vot per assistent per a aquest punt. Sense votació: només "
+"discussió o informació."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_agenda_view_form
@@ -5232,12 +5701,16 @@ msgid ""
 "When <em>Expected total votes</em> is set (non-zero), the sum of all "
 "<em>Votes</em> must match it; other validation still applies when it is "
 "zero."
-msgstr "Quan s'estableix <em>Vots totals esperats</em> (diferent de zero), la suma de tots els <em>Vots</em> hi ha de coincidir; quan és zero, també s'aplica la resta de validacions."
+msgstr ""
+"Quan s'estableix <em>Vots totals esperats</em> (diferent de zero), la suma "
+"de tots els <em>Vots</em> hi ha de coincidir; quan és zero, també s'aplica "
+"la resta de validacions."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_type__default_allow_attendance_notes
 msgid "When creating an assembly from this type, copy this to the assembly."
-msgstr "En crear una assemblea a partir d'aquest tipus, copieu-ho a l'assemblea."
+msgstr ""
+"En crear una assemblea a partir d'aquest tipus, copieu-ho a l'assemblea."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_type__default_attendance_partner_vat_format_strict
@@ -5245,7 +5718,10 @@ msgid ""
 "When creating an assembly from this type, copy this to the assembly. If "
 "enabled together with the requirement above, the TIN must pass a light "
 "normalized format check (alphanumeric, length)."
-msgstr "En crear una assemblea a partir d'aquest tipus, copieu-ho a l'assemblea. Si està activat juntament amb el requisit anterior, el NIF ha de superar una comprovació lleugera de format normalitzat (alfanumèric i longitud)."
+msgstr ""
+"En crear una assemblea a partir d'aquest tipus, copieu-ho a l'assemblea. Si "
+"està activat juntament amb el requisit anterior, el NIF ha de superar una "
+"comprovació lleugera de format normalitzat (alfanumèric i longitud)."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_type__default_attendance_require_partner_vat_confirm
@@ -5253,14 +5729,19 @@ msgid ""
 "When creating an assembly from this type, copy this to the assembly. If "
 "enabled, recording a member as attended is blocked when the member has no "
 "TIN or uses the exempt placeholder."
-msgstr "En crear una assemblea a partir d'aquest tipus, copieu-ho a l'assemblea. Si està activat, es bloqueja el registre d'assistència d'un membre quan no té NIF o utilitza el marcador d'exempció."
+msgstr ""
+"En crear una assemblea a partir d'aquest tipus, copieu-ho a l'assemblea. Si "
+"està activat, es bloqueja el registre d'assistència d'un membre quan no té "
+"NIF o utilitza el marcador d'exempció."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
 msgid ""
 "When enabled, assemblies in closed state can still be edited for this "
 "company."
-msgstr "Quan està activat, les assemblees tancades d'aquesta companyia encara es poden editar."
+msgstr ""
+"Quan està activat, les assemblees tancades d'aquesta companyia encara es "
+"poden editar."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_assembly__include_qr_code
@@ -5272,7 +5753,16 @@ msgid ""
 " on this assembly. When disabled, existing trackers for this assembly's "
 "attendees are cleared and new ones are not created. Landing and error pages:"
 " Settings → Assemblies → Attendance deep links."
-msgstr "Quan està activat, cada assistent obté una URL curta del rastrejador d'enllaços per al flux d'assistència (les obertures es comptabilitzen) i la mateixa URL es pot mostrar com a codi QR. Els responsables l'obren des del botó intel·ligent Enllaços i QR de l'assemblea, des de cada formulari d'assistent (capçalera: Obrir enllaç d'assistència / Mostrar QR) o des de l'ajuda de la pestanya Configuració d'aquesta assemblea. Quan està desactivat, s'esborren els rastrejadors existents dels assistents i no se'n creen de nous. Pàgines d'inici i d'error: Configuració → Assemblees → Enllaços profunds d'assistència."
+msgstr ""
+"Quan està activat, cada assistent obté una URL curta del rastrejador "
+"d'enllaços per al flux d'assistència (les obertures es comptabilitzen) i la "
+"mateixa URL es pot mostrar com a codi QR. Els responsables l'obren des del "
+"botó intel·ligent Enllaços i QR de l'assemblea, des de cada formulari "
+"d'assistent (capçalera: Obrir enllaç d'assistència / Mostrar QR) o des de "
+"l'ajuda de la pestanya Configuració d'aquesta assemblea. Quan està "
+"desactivat, s'esborren els rastrejadors existents dels assistents i no se'n "
+"creen de nous. Pàgines d'inici i d'error: Configuració → Assemblees → "
+"Enllaços profunds d'assistència."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_assembly__allow_online_voting
@@ -5280,35 +5770,48 @@ msgstr "Quan està activat, cada assistent obté una URL curta del rastrejador d
 msgid ""
 "When enabled, eligible portal users may cast votes through the website for "
 "open votings of this assembly (subject to portal routes)."
-msgstr "Quan està activat, els usuaris del portal elegibles poden emetre vots a través del lloc web en les votacions obertes d'aquesta assemblea (subjecte a les rutes del portal)."
+msgstr ""
+"Quan està activat, els usuaris del portal elegibles poden emetre vots a "
+"través del lloc web en les votacions obertes d'aquesta assemblea (subjecte a"
+" les rutes del portal)."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_ballot_print_wizard__only_present
 msgid ""
 "When enabled, only attendees in Attended (confirmed present) are included. "
 "Turn off to include the full list."
-msgstr "Quan està activat, només s'inclouen els assistents que han assistit (presència confirmada). Desactiveu-lo per incloure la llista completa."
+msgstr ""
+"Quan està activat, només s'inclouen els assistents que han assistit "
+"(presència confirmada). Desactiveu-lo per incloure la llista completa."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_assembly__attendance_partner_vat_format_strict
 msgid ""
 "When set together with the requirement above, the TIN must pass a light "
 "normalized format check (alphanumeric characters, minimum length)."
-msgstr "Quan s'estableix juntament amb el requisit anterior, el NIF ha de superar una comprovació lleugera de format normalitzat (caràcters alfanumèrics i longitud mínima)."
+msgstr ""
+"Quan s'estableix juntament amb el requisit anterior, el NIF ha de superar "
+"una comprovació lleugera de format normalitzat (caràcters alfanumèrics i "
+"longitud mínima)."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_assembly__attendance_require_partner_vat_confirm
 msgid ""
 "When set, recording a member as attended (confirmed present) is blocked if "
 "the member has no TIN (VAT) or it is the exempt placeholder (/)."
-msgstr "Quan s'estableix, es bloqueja el registre d'un membre com a assistent (presència confirmada) si no té NIF (IVA) o utilitza el marcador d'exempció (/)."
+msgstr ""
+"Quan s'estableix, es bloqueja el registre d'un membre com a assistent "
+"(presència confirmada) si no té NIF (IVA) o utilitza el marcador d'exempció "
+"(/)."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_attendee__date_register
 msgid ""
 "When the member was last recorded as attended (set when using Mark Present; "
 "optional for other flows)."
-msgstr "Quan es va registrar per última vegada que el membre havia assistit (s'estableix en utilitzar Marcar present; opcional per a altres fluxos)."
+msgstr ""
+"Quan es va registrar per última vegada que el membre havia assistit "
+"(s'estableix en utilitzar Marcar present; opcional per a altres fluxos)."
 
 #. module: base_assembly
 #: model:ir.model.fields,help:base_assembly.field_assembly_attendee__attendance_type
@@ -5316,7 +5819,10 @@ msgid ""
 "Whether participation is on-site or remote. Quorum and voting eligibility "
 "follow attendance status (Listed / Attended / Did not attend), not this "
 "field."
-msgstr "Si la participació és presencial o remota. El quòrum i l'elegibilitat per votar segueixen l'estat d'assistència (Llistat / Ha assistit / No hi ha assistit), no aquest camp."
+msgstr ""
+"Si la participació és presencial o remota. El quòrum i l'elegibilitat per "
+"votar segueixen l'estat d'assistència (Llistat / Ha assistit / No hi ha "
+"assistit), no aquest camp."
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_attendee_view_search_call_register
@@ -5354,7 +5860,9 @@ msgstr "Sí ☐"
 #: code:addons/base_assembly/models/assembly_agenda.py:0
 msgid ""
 "Yes/no/abstain/blank counters apply only in manual vote (simple count) mode."
-msgstr "Els comptadors de sí/no/abstenció/en blanc només s'apliquen en el mode de vot manual (recompte simple)."
+msgstr ""
+"Els comptadors de sí/no/abstenció/en blanc només s'apliquen en el mode de "
+"vot manual (recompte simple)."
 
 #. module: base_assembly
 #. odoo-python
@@ -5362,7 +5870,9 @@ msgstr "Els comptadors de sí/no/abstenció/en blanc només s'apliquen en el mod
 msgid ""
 "Yes/no/abstain/blank counts are not used in manual multi-option mode; use "
 "ballot options instead."
-msgstr "Els recomptes de sí/no/abstenció/en blanc no s'utilitzen en el mode manual de múltiples opcions; utilitzeu les opcions de la butlleta."
+msgstr ""
+"Els recomptes de sí/no/abstenció/en blanc no s'utilitzen en el mode manual "
+"de múltiples opcions; utilitzeu les opcions de la butlleta."
 
 #. module: base_assembly
 #. odoo-python
@@ -5376,7 +5886,9 @@ msgstr "Només podeu actualitzar el registre mentre la votació està oberta."
 msgid ""
 "You cannot change the assembly or member on an existing registration. Remove"
 " this row and add a new one instead."
-msgstr "No podeu canviar l'assemblea ni el membre en un registre existent. Elimineu aquesta fila i afegiu-ne una de nova."
+msgstr ""
+"No podeu canviar l'assemblea ni el membre en un registre existent. Elimineu "
+"aquesta fila i afegiu-ne una de nova."
 
 #. module: base_assembly
 #. odoo-python
@@ -5388,13 +5900,15 @@ msgstr "No podeu registrar un vot per a un assistent marcat com a absent."
 #. odoo-python
 #: code:addons/base_assembly/controllers/attendance.py:0
 msgid "You must belong to the Assembly manager group to open this link."
-msgstr "Heu de pertànyer al grup de responsables d'assemblees per obrir aquest enllaç."
+msgstr ""
+"Heu de pertànyer al grup de responsables d'assemblees per obrir aquest "
+"enllaç."
 
 #. module: base_assembly
 #: model:ir.model.fields,field_description:base_assembly.field_assembly_assembly__zip
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_form
 msgid "ZIP"
-msgstr "ZIP"
+msgstr ""
 
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_voting_view_form_session

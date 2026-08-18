@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-14 08:08+0000\n"
-"PO-Revision-Date: 2026-08-14 08:08+0000\n"
+"POT-Creation-Date: 2026-08-18 08:08+0000\n"
+"PO-Revision-Date: 2026-08-18 08:08+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -149,6 +149,15 @@ msgid "<em>Options (recorded)</em>"
 msgstr ""
 
 #. module: base_assembly
+#: model:assembly.type,default_publication_text:base_assembly.assembly_type_general
+msgid ""
+"<h2>{{ object.name }}</h2>\n"
+"            <p>{{ format_datetime(object.date_first_call) if object.date_first_call else '' }}{{ ' — ' + object.location if object.location else '' }}</p>\n"
+"            <p>This notice is the official convocation for the assembly above. Members are requested to attend at the date, time and venue indicated, and to review the agenda.</p>\n"
+"        "
+msgstr ""
+
+#. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_kanban
 msgid "<i class=\"fa fa-check me-1\" title=\"Closed votings\"/>"
 msgstr ""
@@ -202,6 +211,51 @@ msgstr ""
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.assembly_assembly_view_kanban
 msgid "<i class=\"fa fa-tag me-1\" title=\"Assembly type\"/>"
+msgstr ""
+
+#. module: base_assembly
+#: model:assembly.type,default_ballot_nominative_intro_text:base_assembly.assembly_type_general
+msgid ""
+"<p>Personalized voting ballot for the assembly <strong>{{ object.name }}</strong>.</p>\n"
+"        "
+msgstr ""
+
+#. module: base_assembly
+#: model:assembly.type,default_representation_document_text:base_assembly.assembly_type_general
+msgid ""
+"<p>Representation form for the assembly <strong>{{ object.name }}</strong>.</p>\n"
+"            <p>The represented member appoints the representative below to attend and act on their behalf at this assembly.</p>\n"
+"        "
+msgstr ""
+
+#. module: base_assembly
+#: model:assembly.type,default_delegation_footer_text:base_assembly.assembly_type_general
+msgid ""
+"<p>The delegator certifies the accuracy of the information above and authorizes the delegate to cast votes on their behalf for the indicated vote type(s).</p>\n"
+"        "
+msgstr ""
+
+#. module: base_assembly
+#: model:assembly.type,default_delegation_document_text:base_assembly.assembly_type_general
+msgid ""
+"<p>Vote delegation form for the assembly <strong>{{ object.name }}</strong>.</p>\n"
+"            <p>Identify the delegator and the delegate below and specify the vote types delegated.</p>\n"
+"        "
+msgstr ""
+
+#. module: base_assembly
+#: model:assembly.type,default_ballot_intro_text:base_assembly.assembly_type_general
+msgid ""
+"<p>Voting ballot for <strong>{{ object.name }}</strong>.</p>\n"
+"            <p>Mark your choice clearly for each agenda item.</p>\n"
+"        "
+msgstr ""
+
+#. module: base_assembly
+#: model:assembly.type,default_final_text:base_assembly.assembly_type_general
+msgid ""
+"<p>What is set out above is hereby notified for your information and attendance.</p>\n"
+"        "
 msgstr ""
 
 #. module: base_assembly
@@ -874,7 +928,6 @@ msgstr ""
 #: code:addons/base_assembly/models/assembly_assembly.py:0
 #: code:addons/base_assembly/models/assembly_attendee.py:0
 #: code:addons/base_assembly/models/assembly_delegation.py:0
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/models/assembly_mixin.py:0
 #: code:addons/base_assembly/models/assembly_representation.py:0
 #: code:addons/base_assembly/models/assembly_voting.py:0
@@ -960,7 +1013,6 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Assembly date:"
 msgstr ""
@@ -1050,7 +1102,6 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Assembly text"
 msgstr ""
@@ -1638,7 +1689,6 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Company:"
 msgstr ""
@@ -2401,7 +2451,6 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "First and second call scheduled."
 msgstr ""
@@ -2413,14 +2462,12 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "First call scheduled."
 msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "First call:"
 msgstr ""
@@ -2473,6 +2520,11 @@ msgstr ""
 #. module: base_assembly
 #: model_terms:ir.ui.view,arch_db:base_assembly.res_config_settings_view_form
 msgid "General"
+msgstr ""
+
+#. module: base_assembly
+#: model:assembly.type,name:base_assembly.assembly_type_general
+msgid "General Assembly"
 msgstr ""
 
 #. module: base_assembly
@@ -2806,7 +2858,6 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Location:"
 msgstr ""
@@ -3634,7 +3685,6 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid ""
 "Preview only — not a signed or filed document. Edit the document texts on "
@@ -4071,14 +4121,12 @@ msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Second call scheduled."
 msgstr ""
 
 #. module: base_assembly
 #. odoo-python
-#: code:addons/base_assembly/models/assembly_document_preview_wizard.py:0
 #: code:addons/base_assembly/wizards/assembly_document_preview_wizard.py:0
 msgid "Second call:"
 msgstr ""

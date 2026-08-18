@@ -596,6 +596,8 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
                 self.company_id = t.company_id
             self.vote_type_ids = t.vote_type_ids
             self.partner_domain = t.partner_domain or "[]"
+            for asm_field, type_field in _TYPE_TEXT_DEFAULTS.items():
+                self[asm_field] = t[type_field]
             self.street = t.default_street
             if t.default_city_id:
                 self.city_id = t.default_city_id
@@ -904,14 +906,34 @@ class AssemblyAssembly(models.Model):  # pylint: disable=too-many-public-methods
     @api.model_create_multi
     def create(self, vals_list):
         provided_texts = [
-            {f for f in _TYPE_TEXT_DEFAULTS if not is_html_empty(v.get(f))}
-            for v in vals_list
+            self._assembly_user_provided_text_fields(v) for v in vals_list
         ]
         self._prepare_and_validate_assembly_create_vals_list(vals_list)
         assemblies = super().create(vals_list)
         for assembly, provided in zip(assemblies, provided_texts):
             assembly._copy_type_document_text_translations(provided)
         return assemblies
+
+    @api.model
+    def _assembly_user_provided_text_fields(self, vals):
+        """Text fields the user set to a value other than the type autofill.
+
+        The ``assembly_type_id`` onchange copies the type document texts (current
+        language) for display; those must still get the full multi-language copy
+        on create, so a value equal to the type's is not treated as provided.
+        """
+        atype = None
+        if vals.get("assembly_type_id"):
+            atype = self.env["assembly.type"].browse(vals["assembly_type_id"])
+        provided = set()
+        for asm_field, type_field in _TYPE_TEXT_DEFAULTS.items():
+            value = vals.get(asm_field)
+            if is_html_empty(value):
+                continue
+            if atype and value == atype[type_field]:
+                continue
+            provided.add(asm_field)
+        return provided
 
     def _copy_type_document_text_translations(self, provided_fields):
         """Copy the assembly type document texts, keeping all translations.

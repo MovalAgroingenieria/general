@@ -3,31 +3,6 @@
 
 from odoo import api, fields, models
 
-_DEFAULT_PUBLICATION_TEXT = """<h2>{{ object.name }}</h2>
-<p>{{ format_datetime(object.date_first_call) if object.date_first_call else '' }}{{ ' — ' + object.location if object.location else '' }}</p>
-<p>This notice is the official convocation for the assembly above. Members are requested to attend at the date, time and venue indicated, and to review the agenda.</p>"""
-
-_DEFAULT_DELEGATION_DOCUMENT_TEXT = """<p>Vote delegation form for the assembly <strong>{{ object.name }}</strong>.</p>
-<p>Identify the delegator and the delegate below and specify the vote types delegated.</p>"""
-
-_DEFAULT_DELEGATION_FOOTER_TEXT = """<p>The delegator certifies the accuracy of the information above and authorizes the delegate to cast votes on their behalf for the indicated vote type(s).</p>"""
-
-_DEFAULT_REPRESENTATION_DOCUMENT_TEXT = """<p>Representation form for the assembly <strong>{{ object.name }}</strong>.</p>
-<p>The represented member appoints the representative below to attend and act on their behalf at this assembly.</p>"""
-
-_DEFAULT_BALLOT_INTRO_TEXT = """<p>Voting ballot for <strong>{{ object.name }}</strong>.</p>
-<p>Mark your choice clearly for each agenda item.</p>"""
-
-_DEFAULT_BALLOT_NOMINATIVE_INTRO_TEXT = (
-    "<p>Personalized voting ballot for the assembly "
-    "<strong>{{ object.name }}</strong>.</p>"
-)
-
-_DEFAULT_FINAL_TEXT = (
-    "<p>What is set out above is hereby notified for your information "
-    "and attendance.</p>"
-)
-
 
 class AssemblyType(models.Model):
     _name = "assembly.type"
@@ -46,7 +21,6 @@ class AssemblyType(models.Model):
         string="Default convocation text",
         sanitize=False,
         translate=True,
-        default=_DEFAULT_PUBLICATION_TEXT,
         help="Copied to the convocation text of new assemblies of this type. "
         "Supports placeholders such as {{ object.name }}.",
     )
@@ -54,37 +28,31 @@ class AssemblyType(models.Model):
         string="Default delegation document",
         sanitize=False,
         translate=True,
-        default=_DEFAULT_DELEGATION_DOCUMENT_TEXT,
     )
     default_delegation_footer_text = fields.Html(
         string="Default delegation footer",
         sanitize=False,
         translate=True,
-        default=_DEFAULT_DELEGATION_FOOTER_TEXT,
     )
     default_representation_document_text = fields.Html(
         string="Default representation document",
         sanitize=False,
         translate=True,
-        default=_DEFAULT_REPRESENTATION_DOCUMENT_TEXT,
     )
     default_ballot_intro_text = fields.Html(
         string="Default ballot introduction",
         sanitize=False,
         translate=True,
-        default=_DEFAULT_BALLOT_INTRO_TEXT,
     )
     default_ballot_nominative_intro_text = fields.Html(
         string="Default nominative ballot introduction",
         sanitize=False,
         translate=True,
-        default=_DEFAULT_BALLOT_NOMINATIVE_INTRO_TEXT,
     )
     default_final_text = fields.Html(
         string="Default final text",
         sanitize=False,
         translate=True,
-        default=_DEFAULT_FINAL_TEXT,
     )
     vote_type_ids = fields.Many2many(
         "vote.type",
