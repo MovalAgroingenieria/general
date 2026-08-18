@@ -20,7 +20,7 @@ class AccountMoveLine(models.Model):
         )
 
         if only_analytic_changes:
-            records = self.with_context(_sii_only_analytic_change=True)
-            return super(AccountMoveLine, records).write(vals)
+            # pylint: disable=W0642
+            self = self.with_context(_sii_only_analytic_change=True)
 
         return super().write(vals)

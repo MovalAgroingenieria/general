@@ -69,6 +69,12 @@ class AccountMove(models.Model):
             return {"NIF": identifier}
         return {"NIF": identifier}
 
+    def _post(self, *args, **kwargs):
+        if self.sii_enabled and self.aeat_state in ("sent", "sent_w_errors", "sent_modified"):
+            # pylint: disable=W0642
+            self = self.with_context(_sii_only_analytic_change=True)
+        return super()._post(*args, **kwargs)
+
     def _sii_invoice_dict_not_modified(self):
         self.ensure_one()
         if self.env.context.get("_sii_only_analytic_change"):
