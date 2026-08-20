@@ -70,7 +70,8 @@ class AccountMove(models.Model):
         return {"NIF": identifier}
 
     def _post(self, *args, **kwargs):
-        if self.sii_enabled and self.aeat_state in ("sent", "sent_w_errors", "sent_modified"):
+        sent_states = ("sent", "sent_w_errors", "sent_modified")
+        if any(self.filtered(lambda move: move.sii_enabled and move.aeat_state in sent_states)):
             # pylint: disable=W0642
             self = self.with_context(_sii_only_analytic_change=True)
         return super()._post(*args, **kwargs)
