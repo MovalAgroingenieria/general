@@ -444,6 +444,10 @@ for plan_item in sensor_plan:
             if len(date_components) != 3:
                 continue
             ts_formatted = '%s-%s-%s %s' % (date_components[2], date_components[1], date_components[0], time_part)
+            date_time_read = fields.Datetime.from_string(ts_formatted)
+            date_time_read = pytz.timezone('Europe/Madrid').localize(date_time_read)
+            date_time_read = date_time_read.astimezone(pytz.timezone('UTC'))
+            ts_formatted = date_time_read.strftime('%Y-%m-%d %H:%M:%S')
             try:
                 Remote.upsert(
                     'mdm.measurement.device.sensor.reading',
