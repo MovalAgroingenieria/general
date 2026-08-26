@@ -137,8 +137,10 @@ for sensor in sensors:
 
     if 0 <= contador_id <= 5:
         value_field = 'cont%s' % (contador_id + 1)
-    elif 1 <= contador_id <= 6:
-        value_field = 'cont%s' % contador_id
+    elif contador_id == 6:
+        value_field = 'Altura'
+    elif contador_id == 7:
+        value_field = 'Altura2'
     else:
         plan_skipped_sensor_id_out_of_range += 1
         _logger.info(
