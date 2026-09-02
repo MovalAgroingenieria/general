@@ -20,7 +20,7 @@
 }
             ]]></field>
             <field name="remotecontrol_help"><![CDATA[
-<h2>Regaber SKYplatform API · Odoo Integration</h2>
+<h2>Regaber SKYplatform API v2.7 · Odoo Integration</h2>
 
 <hr/>
 
@@ -48,6 +48,8 @@ Project (Type 1)
             └── SKYreg WaterMeter (Type 207)
 SKYmeter NB-IoT (Type 3106)
 └── SKYmeterNBIoT WaterMeter (Type 3107)
+ATLAS (Type 3500)
+└── ATLAS WaterMeter (Type 3510)
 </pre>
 <p>Use <code>GET /TreeNode</code> to discover the full tree and obtain element IDs.</p>
 
@@ -57,6 +59,7 @@ SKYmeter NB-IoT (Type 3106)
   <tr><td>SKYreg WaterMeter</td><td><code>GET /SKYreg/WaterMeter/LastValue/?id={id}</code></td></tr>
   <tr><td>SKYreg Hydrant (water meter)</td><td><code>GET /SKYreg/Hydrant/WaterMeter/LastValue/?id={id}</code></td></tr>
   <tr><td>SKYmeter NB-IoT WaterMeter</td><td><code>GET /SKYmeterNBIoT/WaterMeter/LastValue/?id={id}</code></td></tr>
+    <tr><td>ATLAS WaterMeter</td><td><code>GET /Atlas/WaterMeter/LastValue?id={id}</code></td></tr>
 </table>
 
 <h3>4) Response Format</h3>
@@ -85,7 +88,7 @@ SKYmeter NB-IoT (Type 3106)
 <p>In each <code>wua.waterconnection</code>:</p>
 <ul>
   <li><strong>Regaber TreeNode ID</strong>: Integer ID from <code>GET /TreeNode</code>.</li>
-  <li><strong>Regaber Device Type</strong>: <code>skyreg</code>, <code>skyreg_hydrant</code>, or <code>skymeter_nbiot</code>.</li>
+    <li><strong>Regaber Device Type</strong>: <code>skyreg</code>, <code>skyreg_hydrant</code>, <code>skymeter_nbiot</code>, or <code>atlas</code>.</li>
     <li><strong>project_id</strong> in <code>connection_params</code> is optional but recommended. If set, discovery/import is limited to that project.</li>
 </ul>
 
@@ -312,7 +315,7 @@ headers = {
 }
 api_base = (base_url or '').rstrip('/')
 # target_nodes: list of dicts with keys node_id, device_type
-# device_type values: 'skyreg', 'skyreg_hydrant', 'skymeter_nbiot'
+# device_type values: skyreg, skyreg_hydrant, skymeter_nbiot, atlas
 target_nodes = bag.get('target_nodes') or []
 last_readings = {}
 errors = []
@@ -321,6 +324,7 @@ endpoint_map = {
     'skyreg': '/SKYreg/WaterMeter/LastValue/',
     'skyreg_hydrant': '/SKYreg/Hydrant/WaterMeter/LastValue/',
     'skymeter_nbiot': '/SKYmeterNBIoT/WaterMeter/LastValue/',
+    'atlas': '/Atlas/WaterMeter/LastValue',
 }
 for target in target_nodes:
     if not isinstance(target, dict):

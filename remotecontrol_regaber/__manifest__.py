@@ -6,7 +6,7 @@
     "name": "RemoteControl: Regaber SKYplatform",
     "summary": "Remotecontrol Regaber SKYplatform REST API with default "
                "actions and procedures for water meter counter readings",
-    "version": "10.0.1.0.0",
+    "version": "10.0.1.0.1",
     "category": "Tools",
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",
