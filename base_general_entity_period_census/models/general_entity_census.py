@@ -256,6 +256,16 @@ class GeneralEntityCensus(models.Model):
                 raise UserError(self.env._("Only locked censuses can be unlocked."))
             census.state = "draft"
 
+    def action_mass_validate_all_lines(self):
+        """Validate draft lines from every selected unlocked census."""
+        unlocked_censuses = self.filtered(lambda census: census.state == "draft")
+        unlocked_censuses.action_validate_all_lines()
+
+    def action_mass_lock(self):
+        """Lock every selected draft census, skipping locked ones."""
+        draft_censuses = self.filtered(lambda census: census.state == "draft")
+        draft_censuses.action_lock()
+
     def _get_period_relativedelta(self):
         """Return the relativedelta for advancing one period based on type."""
         self.ensure_one()

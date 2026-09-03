@@ -492,6 +492,72 @@ class TestCensusLineProtections(TransactionCase):
             self.census.action_validate_all_lines()
 
 
+class TestCensusContextActions(TransactionCase):
+    """Tests for idempotent actions available from the census list."""
+
+    def setUp(self):
+        super().setUp()
+        self.Census = self.env["general.entity.census"]
+        self.CensusLine = self.env["general.entity.census.line"]
+        primary = self.env["res.partner"].create(
+            {
+                "name": "Context Actions Community",
+                "is_primary_entity": True,
+                "entity_global_code": 4100,
+            }
+        )
+        member = self.env["res.partner"].create(
+            {
+                "name": "Context Actions Member",
+                "is_secondary_entity": True,
+                "entity_global_code": 4101,
+            }
+        )
+        self.first_census = self.Census.create(
+            {
+                "primary_partner_id": primary.id,
+                "period_date": date(2026, 1, 1),
+            }
+        )
+        self.second_census = self.Census.create(
+            {
+                "primary_partner_id": primary.id,
+                "period_date": date(2026, 2, 1),
+            }
+        )
+        self.first_line = self.CensusLine.create(
+            {
+                "census_id": self.first_census.id,
+                "member_partner_id": member.id,
+            }
+        )
+        self.second_line = self.CensusLine.create(
+            {
+                "census_id": self.second_census.id,
+                "member_partner_id": member.id,
+            }
+        )
+
+    def test_context_action_validates_only_unlocked_censuses(self):
+        """The list action validates open censuses and skips locked ones."""
+        self.first_census.action_lock()
+
+        (self.first_census | self.second_census).action_mass_validate_all_lines()
+
+        self.assertEqual(self.first_line.state, "draft")
+        self.assertEqual(self.second_line.state, "validated")
+
+    def test_context_action_locks_mixed_selection_idempotently(self):
+        """The list action locks drafts and ignores already locked censuses."""
+        self.first_census.action_lock()
+
+        censuses = self.first_census | self.second_census
+        censuses.action_mass_lock()
+        censuses.action_mass_lock()
+
+        self.assertEqual(set(censuses.mapped("state")), {"locked"})
+
+
 class TestCensusSharesChanged(TransactionCase):
     """Tests for shares_changed detection."""
 

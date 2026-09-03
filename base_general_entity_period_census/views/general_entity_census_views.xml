@@ -633,4 +633,22 @@
             </form>
         </field>
     </record>
+
+    <record id="action_server_validate_census_lines" model="ir.actions.server">
+        <field name="name">Validate Census Lines</field>
+        <field name="model_id" ref="model_general_entity_census" />
+        <field name="binding_model_id" ref="model_general_entity_census" />
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">records.action_mass_validate_all_lines()</field>
+    </record>
+
+    <record id="action_server_lock_censuses" model="ir.actions.server">
+        <field name="name">Lock Censuses</field>
+        <field name="model_id" ref="model_general_entity_census" />
+        <field name="binding_model_id" ref="model_general_entity_census" />
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">records.action_mass_lock()</field>
+    </record>
 </odoo>
