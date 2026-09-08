@@ -951,9 +951,7 @@ except Exception as conn_error:
 bag['_sql_cursor'] = cursor
 
 try:
-    # Wrap all ORM operations in savepoint to handle transaction state
     with self.env.cr.savepoint():
-        # Get waterconnections that are configured for irrigation event import
         waterconnections = WaterConnection.search([
             ('telecontrol_associated', '=', 'regacom'),
             ('irrigationshed_id.regacom_enabled', '=', True),
@@ -972,11 +970,9 @@ try:
         total_events_skipped = 0
 
         if allowed_diriru:
-            # Determine start date: last event irrigation_end_date or first day of current month
             today = fields.Date.today()
             first_day_month = '%s-01' % today[:7]
 
-            # Check if there are existing irrigation events
             last_event = IrrigationEvent.search(
                 [('irrigation_end_date', '!=', False)],
                 order='irrigation_end_date desc',
@@ -1027,41 +1023,47 @@ try:
                     try:
                         with self.env.cr.savepoint():
                             event_date = fecha_hora[:10] if fecha_hora else None
+                            event_datetime = fecha_hora if fecha_hora else (event_date + ' 12:00:00')
+
+                            try:
+                                if isinstance(event_datetime, str):
+                                    dt_obj = datetime.strptime(event_datetime[:19], '%Y-%m-%d %H:%M:%S')
+                                else:
+                                    dt_obj = event_datetime
+                                madrid_tz = pytz.timezone('Europe/Madrid')
+                                dt_localized = madrid_tz.localize(dt_obj)
+                                dt_utc = dt_localized.astimezone(pytz.timezone('UTC'))
+                                event_datetime_utc = dt_utc.strftime('%Y-%m-%d %H:%M:%S')
+                            except Exception as e:
+                                logger.warning('REGACOM irrigation_events(xml): Failed to convert timezone for %s: %s',
+                                              event_datetime, str(e))
+                                event_datetime_utc = event_datetime
+
                             existing = IrrigationEvent.search([
                                 ('waterconnection_id', '=', wc.id),
-                                ('irrigation_volume', '=', consumo),
+                                ('irrigation_start_date', '=', event_datetime_utc),
+                                ('irrigation_end_date', '=', event_datetime_utc),
                             ], limit=1)
 
-                            if existing:
-                                event_date_only = event_date
-                                existing_date_only = existing.irrigation_end_date.split()[0]
-                                if event_date_only != existing_date_only:
-                                    existing = False
-
                             if not existing:
-                                event_datetime = fecha_hora if fecha_hora else (event_date + ' 12:00:00')
-
                                 try:
-                                    if isinstance(event_datetime, str):
-                                        dt_obj = datetime.strptime(event_datetime[:19], '%Y-%m-%d %H:%M:%S')
+                                    IrrigationEvent.create({
+                                        'waterconnection_id': wc.id,
+                                        'irrigation_start_date': event_datetime_utc,
+                                        'irrigation_end_date': event_datetime_utc,
+                                        'irrigation_volume': consumo,
+                                    })
+                                    total_events_created += 1
+                                except Exception as create_error:
+                                    error_str = str(create_error)
+                                    if 'unique_name' in error_str or 'UNIQUE' in error_str:
+                                        logger.info('REGACOM irrigation_events(xml): Event already exists (unique constraint), skipping wc=%s date=%s',
+                                                   wc.id, event_datetime_utc)
+                                        total_events_skipped += 1
                                     else:
-                                        dt_obj = event_datetime
-                                    madrid_tz = pytz.timezone('Europe/Madrid')
-                                    dt_localized = madrid_tz.localize(dt_obj)
-                                    dt_utc = dt_localized.astimezone(pytz.timezone('UTC'))
-                                    event_datetime_utc = dt_utc.strftime('%Y-%m-%d %H:%M:%S')
-                                except Exception as e:
-                                    logger.warning('REGACOM irrigation_events(xml): Failed to convert timezone for %s: %s',
-                                                  event_datetime, str(e))
-                                    event_datetime_utc = event_datetime
-
-                                IrrigationEvent.create({
-                                    'waterconnection_id': wc.id,
-                                    'irrigation_start_date': event_datetime_utc,
-                                    'irrigation_end_date': event_datetime_utc,
-                                    'irrigation_volume': consumo,
-                                })
-                                total_events_created += 1
+                                        logger.warning('REGACOM irrigation_events(xml): Failed to create event for wc=%s: %s',
+                                                      wc.id, error_str)
+                                        total_events_skipped += 1
                             else:
                                 total_events_skipped += 1
                     except Exception as e:
@@ -1081,7 +1083,6 @@ except Exception as error:
     logger.exception('REGACOM irrigation_events(xml): SQL/action error')
     raise
 finally:
-    # Always close the connection
     cursor = bag.get('_sql_cursor')
     if cursor:
         sql_close(cursor)
