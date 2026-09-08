@@ -1,0 +1,765 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="remotecontrol_kuvio" model="remotecontrol">
+            <field name="name">Kuvio</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://app.kuvio.tech/api</field>
+            <field name="timeout">30</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">2</field>
+            <field name="backoff">2.0</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "username": "your_email@example.com",
+  "password": "your_password"
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>Kuvio · Odoo Integration Help</h2>
+<p><strong>Type:</strong> HTTP REST API Connection</p>
+<p><strong>Platform:</strong> Kuvio IoT telemetry platform for water monitoring devices</p>
+
+<hr/>
+
+<h3>1) Connection Configuration</h3>
+<p>Connection uses HTTP REST API with token authentication.</p>
+
+<h4>URL Base field</h4>
+<p>The connector reads the API base URL from the remote control field <strong>URL Base</strong>.</p>
+
+<h4>connection_params (JSON)</h4>
+<p>Only credentials are required in connection_params:</p>
+
+<pre>{
+  "username": "your_email@example.com",
+  "password": "your_password"
+}</pre>
+
+<h3>2) Authentication Flow</h3>
+<p>The connector logs in at <code>POST /auth/login</code> and stores the token during execution.</p>
+
+<h4>Procedure 1: Get Devices (Manual)</h4>
+<p>Fetches all devices from Kuvio and generates a JSON attachment.</p>
+<ol>
+    <li><strong>Get Devices</strong> - Authenticates if needed, resolves customerId, paginates devices, and creates attachment.</li>
+</ol>
+
+<h4>Procedure 2: Daily Telemetry Sync (Scheduled)</h4>
+<p>Synchronizes historical telemetry readings for configured sensors.</p>
+<ol>
+  <li><strong>Login</strong> - Obtain authentication token</li>
+    <li><strong>Create Sensor Plan</strong> - Builds plan from existing Odoo sensors/devices</li>
+    <li><strong>Get Historical Readings</strong> - Downloads and upserts all returned points</li>
+</ol>
+
+<h3>3) Available Procedures</h3>
+
+<h4>A) Kuvio: Get Devices</h4>
+<p>Manual procedure to fetch the device catalog from all API pages.</p>
+<ul>
+    <li>Uses endpoint: <code>GET /customer/{customerId}/devices?pageSize=100&amp;page=N</code></li>
+    <li>Follows pagination using <code>hasNext</code> / <code>totalPages</code></li>
+    <li>Creates a JSON attachment on the remotecontrol record</li>
+    <li>Each device entry is filtered to: <code>id</code> and <code>name</code></li>
+</ul>
+
+<h4>B) Kuvio: Daily Telemetry Sync</h4>
+<p>Scheduled procedure to retrieve readings and store them idempotently.</p>
+
+<h3>4) Device Configuration</h3>
+<p>Devices and sensors must exist in Odoo and be configured with remotecontrol parameters.</p>
+
+<p>Each <strong>mdm.measurement.device</strong> stores:</p>
+<ul>
+  <li><strong>remotecontrol_id</strong> = Kuvio remote control</li>
+    <li><strong>remotecontrol_params</strong> (JSON) with <code>device_id</code> and optional <code>start_date</code></li>
+</ul>
+
+<h4>Example device params:</h4>
+<pre>{
+  "device_id": "device_uuid_from_kuvio",
+  "start_date": "2026-01-15"
+}</pre>
+
+<h4>Start date/time priority used in telemetry sync</h4>
+<ul>
+    <li>1) Last reading timestamp of the device (any sensor), plus 1 ms</li>
+    <li>2) Device <code>start_date</code> (if no previous readings)</li>
+    <li>3) January 1st of current year (fallback)</li>
+</ul>
+
+<h3>5) Sensor Configuration</h3>
+<p>Sensors are taken from existing Odoo sensor records linked to the device.</p>
+
+<p>Each <strong>mdm.measurement.device.sensor</strong> stores:</p>
+<ul>
+    <li><strong>remotecontrol_params</strong> with telemetry key in <code>sensor_id</code> (or <code>key</code> for backward compatibility)</li>
+</ul>
+
+<h4>Example sensor params:</h4>
+<pre>{
+    "sensor_id": "consumo_total"
+}</pre>
+
+<h4>Common telemetry keys (update sensor remotecontrol_params to use):</h4>
+<ul>
+  <li><code>consumo_total</code> - Total accumulated consumption</li>
+  <li><code>consumo_mensual</code> - Monthly consumption</li>
+  <li><code>delta</code> - Consumption since last reading</li>
+</ul>
+
+<h3>6) API Endpoints Used</h3>
+<ul>
+  <li><code>POST /auth/login</code> - Authenticate and get token</li>
+  <li><code>GET /auth/user</code> - Get current user profile (customerId)</li>
+    <li><code>GET /customer/{customerId}/devices?pageSize=100&amp;page=N</code> - List paginated devices</li>
+    <li><code>GET /plugins/telemetry/DEVICE/{deviceId}/values/timeseries?keys={sensor_id}&amp;startTs={ms}&amp;endTs={ms}&amp;orderBy=DESC</code> - Get historical readings</li>
+</ul>
+
+<h3>7) Security &amp; Performance</h3>
+<ul>
+  <li>Token-based authentication (expires and is refreshed per run)</li>
+  <li>HTTPS only (enforced by Kuvio platform)</li>
+    <li>Rate limiting between requests (configurable in remotecontrol)</li>
+  <li>Automatic retry on network failures</li>
+    <li>Per-sensor savepoint isolation to avoid aborting the full sync on a single error</li>
+</ul>
+
+<h3>8) Readings Storage Behavior</h3>
+<ul>
+    <li>All points returned by the telemetry endpoint are processed (not only the latest one)</li>
+    <li>Each point is upserted into <code>mdm.measurement.device.sensor.reading</code> using key: <code>sensor_id + measurement_time</code></li>
+    <li>Value scaling applied: API value / 1000, rounded to 3 decimals before upsert</li>
+</ul>
+
+<h3>9) Troubleshooting</h3>
+<ul>
+    <li><strong>401 Unauthorized</strong> - Check username/password in connection_params</li>
+    <li><strong>Missing base URL</strong> - Configure URL Base field in remotecontrol</li>
+    <li><strong>404 Device Not Found</strong> - Verify device_id in device remotecontrol_params</li>
+    <li><strong>Empty readings</strong> - Verify sensor key (sensor_id) and reporting period</li>
+</ul>
+            ]]></field>
+        </record>
+
+        <!-- Step 1: Authenticate with Kuvio (Login) -->
+        <record id="remotecontrol_kuvio_action_login" model="remotecontrol.action">
+            <field name="name">Kuvio: Login</field>
+            <field name="remote_id" ref="remotecontrol_kuvio"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">2</field>
+            <field name="backoff">1.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Step 1: Authenticate with Kuvio and obtain token
+import requests
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+Remote = self.remote_id
+
+try:
+    connection_params = json.loads(Remote.connection_params or '{}')
+except Exception:
+    connection_params = {}
+
+base_url = (Remote.base_url or '').strip()
+username = connection_params.get('username', '')
+password = connection_params.get('password', '')
+
+if not base_url:
+    raise Exception('Kuvio base URL not configured in URL Base field')
+
+if not username or not password:
+    raise Exception('Kuvio credentials (username/password) not configured in connection_params')
+
+login_url = '%s/auth/login' % base_url
+payload = {
+    'username': username,
+    'password': password
+}
+
+try:
+    response = requests.post(login_url, json=payload, timeout=30)
+    response.raise_for_status()
+except requests.exceptions.RequestException as e:
+    error_msg = 'Kuvio login failed: %s' % str(e)
+    logger.error(error_msg)
+    raise Exception(error_msg)
+
+try:
+    response_data = response.json()
+    token = response_data.get('token')
+    if not token:
+        raise Exception('No token in login response')
+except (ValueError, KeyError) as e:
+    error_msg = 'Failed to parse Kuvio login response: %s' % str(e)
+    logger.error(error_msg)
+    raise Exception(error_msg)
+
+bag['kuvio_token'] = token
+bag['base_url'] = base_url
+logger.info('Kuvio: Login successful, token obtained')
+            ]]></field>
+        </record>
+
+
+
+        <!-- Step 2: Get Devices List -->
+        <record id="remotecontrol_kuvio_action_get_devices" model="remotecontrol.action">
+            <field name="name">Kuvio: Get Devices</field>
+            <field name="remote_id" ref="remotecontrol_kuvio"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">2</field>
+            <field name="backoff">1.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Step: Get list of devices from Kuvio
+import requests
+import json
+import logging
+import base64
+
+logger = logging.getLogger(__name__)
+Remote = self.remote_id
+
+# Get token from bag if available (from login step), or authenticate fresh
+token = bag.get('kuvio_token')
+base_url = (bag.get('base_url') or Remote.base_url or '').strip()
+
+if not token or not base_url:
+    # Need to authenticate first
+    try:
+        connection_params = json.loads(Remote.connection_params or '{}')
+    except Exception:
+        connection_params = {}
+
+    base_url = (Remote.base_url or '').strip()
+    username = connection_params.get('username', '')
+    password = connection_params.get('password', '')
+
+    if not base_url:
+        raise Exception('Kuvio base URL not configured in URL Base field')
+
+    if not username or not password:
+        raise Exception('Kuvio credentials not configured')
+
+    login_url = '%s/auth/login' % base_url
+    try:
+        response = requests.post(login_url, json={'username': username, 'password': password}, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+        token = response_data.get('token')
+        if not token:
+            raise Exception('No token in login response')
+    except Exception as e:
+        raise Exception('Kuvio authentication failed: %s' % str(e))
+
+    bag['kuvio_token'] = token
+    bag['base_url'] = base_url
+
+# Get customer_id from user info
+user_url = '%s/auth/user' % base_url
+headers = {'Authorization': 'Bearer %s' % token}
+
+try:
+    response = requests.get(user_url, headers=headers, timeout=30)
+    response.raise_for_status()
+    response_data = response.json()
+    customer_id = response_data.get('customerId')
+
+    # Kuvio may return customerId as UUID string or as object {'id': 'uuid', ...}
+    if isinstance(customer_id, dict):
+        customer_id = customer_id.get('id')
+
+    if customer_id is not None:
+        customer_id = str(customer_id)
+
+    if not customer_id:
+        raise Exception('No customerId in user response')
+    logger.info('Kuvio: /auth/user resolved customer_id=%s', customer_id)
+except Exception as e:
+    status_code = getattr(response, 'status_code', None) if 'response' in locals() else None
+    response_text = ''
+    if 'response' in locals():
+        try:
+            response_text = response.text or ''
+        except Exception:
+            response_text = ''
+    response_text = response_text[:500]
+    raise Exception('Failed to get customer ID: %s (status=%s, body=%s)' % (
+        str(e), status_code, response_text))
+
+bag['customer_id'] = customer_id
+
+# Now get devices list
+page_size = 100
+page = 0
+has_next = True
+devices = []
+api_total_pages = 0
+api_total_elements = 0
+pages_fetched = 0
+devices_url = ''
+
+try:
+    while has_next:
+        devices_url = '%s/customer/%s/devices?pageSize=%d&page=%d' % (
+            base_url, customer_id, page_size, page)
+        response = requests.get(devices_url, headers=headers, timeout=30)
+        response.raise_for_status()
+        response_data = response.json()
+
+        if isinstance(response_data, dict):
+            page_devices = response_data.get('data') or response_data.get('items') or []
+            api_total_pages = response_data.get('totalPages') or api_total_pages
+            api_total_elements = response_data.get('totalElements') or api_total_elements
+            has_next_value = response_data.get('hasNext')
+            if has_next_value is None:
+                if api_total_pages:
+                    has_next = (page + 1) < int(api_total_pages)
+                else:
+                    has_next = len(page_devices) == page_size
+            else:
+                has_next = bool(has_next_value)
+        elif isinstance(response_data, list):
+            page_devices = response_data
+            has_next = False
+        else:
+            page_devices = []
+            has_next = False
+
+        if not isinstance(page_devices, list):
+            raise Exception('Invalid devices payload type: %s' % type(page_devices).__name__)
+
+        devices.extend(page_devices)
+        pages_fetched += 1
+
+        if has_next:
+            page += 1
+            if page > 10000:
+                raise Exception('Pagination safety limit reached while fetching devices')
+except Exception as e:
+    status_code = getattr(response, 'status_code', None) if 'response' in locals() else None
+    response_text = ''
+    if 'response' in locals():
+        try:
+            response_text = response.text or ''
+        except Exception:
+            response_text = ''
+    response_text = response_text[:500]
+    raise Exception('Kuvio get devices failed: %s (url=%s, page=%s, status=%s, body=%s)' % (
+        str(e), devices_url, page, status_code, response_text))
+
+# Build filtered device list and map
+devices_filtered = []
+devices_map = {}
+for device in devices:
+    if not isinstance(device, dict):
+        continue
+
+    device_id_block = device.get('id')
+    device_name = device.get('name')
+
+    # Kuvio may return nested identifiers as objects {'id': 'uuid', ...}
+    device_id = device_id_block
+    if isinstance(device_id_block, dict):
+        device_id = device_id_block.get('id')
+
+    if device_id is not None:
+        device_id = str(device_id)
+
+    if device_id:
+        filtered_device = {
+            'id': device_id_block,
+            'name': device_name,
+        }
+        devices_filtered.append(filtered_device)
+        devices_map[device_id] = filtered_device
+
+bag['devices'] = devices_filtered
+bag['devices_map'] = devices_map
+
+payload = {
+    'procedure': 'Kuvio: Get Devices',
+    'executed_at': fields.Datetime.now(),
+    'summary': {
+        'total_devices': len(devices),
+        'total_indexed_devices': len(devices_map),
+        'customer_id': customer_id,
+        'total_pages': api_total_pages,
+        'total_elements': api_total_elements,
+        'pages_fetched': pages_fetched,
+    },
+    'devices': devices_filtered,
+}
+
+json_str = json.dumps(payload, ensure_ascii=False, indent=2)
+encoded = base64.b64encode(json_str.encode('utf-8'))
+timestamp = fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+fname = 'kuvio_devices_%s.json' % timestamp
+
+att = env['ir.attachment'].create({
+    'name': fname,
+    'datas_fname': fname,
+    'datas': encoded,
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol',
+    'res_id': Remote.id
+})
+
+Remote.message_post(
+    body='[KUVIO] Devices=%s - JSON generated for import/setup' % len(devices),
+    attachment_ids=[att.id]
+)
+
+bag['attachment_id'] = att.id
+bag['attachment_name'] = fname
+result = 'Kuvio get devices OK - %d devices. File: %s' % (len(devices), fname)
+logger.info('Kuvio: Got %d devices across %d pages', len(devices), pages_fetched)
+            ]]></field>
+        </record>
+
+        <!-- Step 3: Create Sensor Plan -->
+        <record id="remotecontrol_kuvio_action_create_sensor_plan" model="remotecontrol.action">
+            <field name="name">Kuvio: Create Sensor Plan</field>
+            <field name="remote_id" ref="remotecontrol_kuvio"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">2</field>
+            <field name="backoff">1.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Step 3: Create sensor plan for devices (builds configuration for Get Readings)
+import json
+import logging
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+
+# Get all sensors configured for Kuvio
+sensors = Sensor.search([
+    ('remotecontrol_params', '!=', False),
+    ('device_id.remotecontrol_id', '=', Remote.id),
+    ('active', '=', True),
+])
+
+logger.info('Kuvio: [CreateSensorPlan] Building sensor plan from %d sensors', len(sensors))
+
+sensor_plan = []
+for sensor in sensors:
+    device = sensor.device_id
+
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        sensor_cfg = {}
+
+    try:
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+    except Exception:
+        device_cfg = {}
+
+    key = sensor_cfg.get('sensor_id') or sensor_cfg.get('key')
+    device_id = device_cfg.get('device_id')
+    start_date = device_cfg.get('start_date')
+
+    if device_id is not None:
+        device_id = str(device_id)
+
+    if not key or not device_id:
+        logger.warning('Kuvio: [CreateSensorPlan] Sensor %s missing required config (key=%s, device_id=%s)',
+                      sensor.id, key, device_id)
+        continue
+
+    plan_item = {
+        'odoo_sensor_id': sensor.id,
+        'key': key,
+        'device_id': device_id,
+        'start_date': start_date
+    }
+    sensor_plan.append(plan_item)
+    logger.debug('Kuvio: [CreateSensorPlan] Added to plan: sensor_id=%s, device_id=%s, key=%s, start_date=%s',
+                sensor.id, device_id, key, start_date)
+
+bag['sensor_plan'] = sensor_plan
+logger.info('Kuvio: [CreateSensorPlan] Sensor plan built with %d items ready for telemetry queries', len(sensor_plan))
+result = 'Sensor plan built - %d sensors configured' % len(sensor_plan)
+            ]]></field>
+        </record>
+
+        <!-- Step 4: Get Historical Telemetry -->
+        <record id="remotecontrol_kuvio_action_get_readings_historical" model="remotecontrol.action">
+            <field name="name">Kuvio: Get Historical Readings</field>
+            <field name="remote_id" ref="remotecontrol_kuvio"/>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">1.0</field>
+            <field name="max_retries">2</field>
+            <field name="backoff">1.0</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Step 4: Get historical telemetry readings for all sensors (from start_date to now)
+import requests
+import json
+import logging
+from datetime import datetime, timedelta
+import time
+import pytz
+import calendar
+
+logger = logging.getLogger(__name__)
+Remote = self.remote_id
+Sensor = env['mdm.measurement.device.sensor']
+Reading = env['mdm.measurement.device.sensor.reading']
+
+token = bag.get('kuvio_token')
+base_url = bag.get('base_url')
+sensor_plan = bag.get('sensor_plan', [])
+
+if not token or not base_url:
+    raise Exception('Login step must be executed first')
+
+if not sensor_plan:
+    raise Exception('Please run "Create Sensor Plan" action first')
+
+total_readings = 0
+total_errors = 0
+
+logger.info('Kuvio: [GetReadingsHistorical] Starting telemetry sync for %d sensors', len(sensor_plan))
+
+headers = {'Authorization': 'Bearer %s' % token}
+madrid_tz = pytz.timezone('Europe/Madrid')
+utc_tz = pytz.timezone('UTC')
+year_start = '%s-01-01' % fields.Date.today()[:4]
+
+# End time: now in UTC (milliseconds)
+now_utc = datetime.now(utc_tz)
+end_ts = int(calendar.timegm(now_utc.timetuple()) * 1000)
+
+logger.debug('Kuvio: [GetReadingsHistorical] End timestamp: %d ms (now in UTC)', end_ts)
+
+for plan_idx, plan_item in enumerate(sensor_plan, 1):
+    try:
+        with env.cr.savepoint():
+            odoo_sensor_id = plan_item.get('odoo_sensor_id')
+            key = plan_item.get('key')
+            device_id = plan_item.get('device_id')
+            start_date_str = plan_item.get('start_date')
+
+            logger.debug('Kuvio: [GetReadingsHistorical] Processing plan item %d/%d: sensor_id=%s, device_id=%s, key=%s',
+                        plan_idx, len(sensor_plan), odoo_sensor_id, device_id, key)
+
+            if not odoo_sensor_id or not key or not device_id:
+                logger.warning('Kuvio: [GetReadingsHistorical] Plan item incomplete: sensor_id=%s, device_id=%s, key=%s',
+                              odoo_sensor_id, device_id, key)
+                total_errors += 1
+                continue
+
+            # Get sensor record
+            sensor = Sensor.browse(odoo_sensor_id)
+            if not sensor.exists():
+                logger.warning('Kuvio: [GetReadingsHistorical] Sensor %s does not exist in database', odoo_sensor_id)
+                total_errors += 1
+                continue
+
+            device = sensor.device_id
+
+            # Determine initial date priority:
+            # 1) last reading date in any sensor of the device
+            # 2) device remotecontrol_params.start_date
+            # 3) Jan 1 of current year
+            start_ts = None
+            device_last_reading = Reading.search([
+                ('sensor_id.device_id', '=', device.id),
+                ('active', '=', True)
+            ], order='measurement_time desc', limit=1)
+
+            if device_last_reading:
+                last_mt = device_last_reading.measurement_time
+                dt_last_utc = None
+                if isinstance(last_mt, datetime):
+                    dt_last_utc = last_mt
+                else:
+                    try:
+                        dt_last_utc = datetime.strptime(str(last_mt)[:19], '%Y-%m-%d %H:%M:%S')
+                    except Exception:
+                        dt_last_utc = None
+
+                if dt_last_utc is not None:
+                    if dt_last_utc.tzinfo is None:
+                        dt_last_utc = utc_tz.localize(dt_last_utc)
+                    else:
+                        dt_last_utc = dt_last_utc.astimezone(utc_tz)
+
+                    # Start just after the last stored reading timestamp.
+                    start_ts = int(calendar.timegm(dt_last_utc.timetuple()) * 1000) + 1
+                    start_date_str = dt_last_utc.strftime('%Y-%m-%d')
+                    logger.debug('Kuvio: [GetReadingsHistorical] Device %s has last reading - using timestamp %d',
+                                device_id, start_ts)
+                else:
+                    start_date_str = str(last_mt)[:10]
+                    logger.debug('Kuvio: [GetReadingsHistorical] Device %s last reading could not be parsed, fallback date %s',
+                                device_id, start_date_str)
+            elif start_date_str:
+                start_date_str = str(start_date_str)[:10]
+                logger.debug('Kuvio: [GetReadingsHistorical] Device %s has no readings - using device start_date %s',
+                            device_id, start_date_str)
+            else:
+                start_date_str = year_start
+                logger.debug('Kuvio: [GetReadingsHistorical] Device %s without readings/start_date - using year start %s',
+                            device_id, start_date_str)
+
+            # If there is no previous reading timestamp, convert fallback date to timestamp.
+            if start_ts is None:
+                try:
+                    dt_madrid = madrid_tz.localize(datetime.strptime(start_date_str, '%Y-%m-%d').replace(hour=0, minute=0, second=0))
+                    dt_utc = dt_madrid.astimezone(utc_tz)
+                    start_ts = int(calendar.timegm(dt_utc.timetuple()) * 1000)  # milliseconds
+                    logger.debug('Kuvio: [GetReadingsHistorical] Converted start_date %s to %d ms (UTC)', start_date_str, start_ts)
+                except Exception as e:
+                    logger.error('Kuvio: [GetReadingsHistorical] Failed to convert start_date %s: %s', start_date_str, e)
+                    total_errors += 1
+                    continue
+
+            # Build telemetry query URL
+            # Note: endTs is the target time (upper limit), startTs must be well before to ensure data exists
+            telemetry_url = ('%s/plugins/telemetry/DEVICE/%s/values/timeseries?keys=%s' +
+                             '&startTs=%d&endTs=%d&orderBy=DESC') % (
+                base_url, device_id, key, start_ts, end_ts)
+
+            logger.info('Kuvio: [GetReadingsHistorical] Sensor %s: URL=%s/plugins/telemetry/DEVICE/%s/values/timeseries?keys=%s&startTs=%d&endTs=%d&orderBy=DESC',
+                        odoo_sensor_id, base_url, device_id, key, start_ts, end_ts)
+
+            try:
+                logger.debug('Kuvio: [GetReadingsHistorical] Fetching telemetry...')
+                response = requests.get(telemetry_url, headers=headers, timeout=30)
+                response.raise_for_status()
+                response_data = response.json()
+
+                logger.debug('Kuvio: [GetReadingsHistorical] API response received (status=%d)', response.status_code)
+
+                # Response structure: {key: [{ts: timestamp, value: value}, ...]}
+                readings = []
+                if isinstance(response_data, dict):
+                    readings = response_data.get(key) or []
+
+                if readings:
+                    sensor_upserts = 0
+                    for point in readings:
+                        if not isinstance(point, dict):
+                            continue
+
+                        timestamp = point.get('ts')
+                        value = point.get('value')
+
+                        if not timestamp or value is None:
+                            continue
+
+                        try:
+                            ts_float = float(timestamp)
+                            reading_value = round(float(value) / 1000.0, 3)
+                        except Exception:
+                            logger.warning('Kuvio: [GetReadingsHistorical] Invalid reading format for sensor %s: ts=%s value=%s',
+                                          odoo_sensor_id, timestamp, value)
+                            total_errors += 1
+                            continue
+
+                        # Kuvio ts comes in epoch ms. Convert to epoch seconds when needed.
+                        if ts_float > 9999999999:
+                            ts_float = ts_float / 1000.0
+
+                        dt_reading_utc = datetime.fromtimestamp(ts_float, utc_tz)
+                        measurement_time_str = dt_reading_utc.strftime('%Y-%m-%d %H:%M:%S')
+
+                        Remote.upsert(
+                            'mdm.measurement.device.sensor.reading',
+                            {
+                                'sensor_id': odoo_sensor_id,
+                                'measurement_time': measurement_time_str,
+                            },
+                            {
+                                'value': reading_value,
+                                'remotecontrol_origin_id': Remote.id,
+                            }
+                        )
+                        sensor_upserts += 1
+
+                    total_readings += sensor_upserts
+                    logger.info('Kuvio: [GetReadingsHistorical] Upserted %s readings for sensor %s (device=%s)',
+                               sensor_upserts, odoo_sensor_id, device_id)
+                else:
+                    logger.warning('Kuvio: [GetReadingsHistorical] No data for key=%s on device=%s in time window [%s - now]',
+                                  key, device_id, start_date_str)
+
+            except requests.exceptions.RequestException as e:
+                logger.exception('Kuvio: [GetReadingsHistorical] Request failed for device %s: %s', device_id, str(e))
+                total_errors += 1
+            except Exception as e:
+                logger.exception('Kuvio: [GetReadingsHistorical] Error processing sensor %s: %s', odoo_sensor_id, str(e))
+                total_errors += 1
+    except Exception as e:
+        logger.exception('Kuvio: [GetReadingsHistorical] Savepoint error in plan item %d: %s', plan_idx, str(e))
+        total_errors += 1
+
+logger.info('Kuvio: [GetReadingsHistorical] Sync complete - %d readings upserted, %d errors',
+            total_readings, total_errors)
+result = 'Readings sync complete - %d readings upserted, %d errors' % (total_readings, total_errors)
+            ]]></field>
+        </record>
+
+        <!-- Procedure 1: Get Devices -->
+        <record id="remotecontrol_kuvio_procedure_get_devices" model="remotecontrol.procedure">
+            <field name="name">Kuvio: Get Devices</field>
+            <field name="remote_id" ref="remotecontrol_kuvio"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="False"/>
+        </record>
+
+        <record id="remotecontrol_kuvio_step_get_devices" model="remotecontrol.step">
+            <field name="name">Get Devices</field>
+            <field name="procedure_id" ref="remotecontrol_kuvio_procedure_get_devices"/>
+            <field name="action_id" ref="remotecontrol_kuvio_action_get_devices"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <!-- Procedure 2: Daily Telemetry Sync -->
+        <record id="remotecontrol_kuvio_procedure_daily_sync" model="remotecontrol.procedure">
+            <field name="name">Kuvio: Daily Telemetry Sync</field>
+            <field name="remote_id" ref="remotecontrol_kuvio"/>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="True"/>
+        </record>
+
+        <record id="remotecontrol_kuvio_step_login" model="remotecontrol.step">
+            <field name="name">Login</field>
+            <field name="procedure_id" ref="remotecontrol_kuvio_procedure_daily_sync"/>
+            <field name="action_id" ref="remotecontrol_kuvio_action_login"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_kuvio_step_create_sensor_plan" model="remotecontrol.step">
+            <field name="name">Create Sensor Plan</field>
+            <field name="procedure_id" ref="remotecontrol_kuvio_procedure_daily_sync"/>
+            <field name="action_id" ref="remotecontrol_kuvio_action_create_sensor_plan"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_kuvio_step_get_readings" model="remotecontrol.step">
+            <field name="name">Get Historical Readings</field>
+            <field name="procedure_id" ref="remotecontrol_kuvio_procedure_daily_sync"/>
+            <field name="action_id" ref="remotecontrol_kuvio_action_get_readings_historical"/>
+            <field name="sequence">30</field>
+        </record>
+
+    </data>
+</odoo>
