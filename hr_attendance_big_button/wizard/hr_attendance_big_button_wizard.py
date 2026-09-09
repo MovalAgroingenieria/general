@@ -77,11 +77,18 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
                 else record.env._("Salida")
             )
 
-    @api.depends("reason_action_type", "company_id")
+    @api.depends(
+        "reason_action_type",
+        "company_id",
+        "show_reason_on_attendance_screen",
+    )
     def _compute_show_reason_selector(self):
         reason_model = self.env["hr.attendance.reason"]
         for record in self:
-            if not record.reason_action_type:
+            if (
+                not record.reason_action_type
+                or not record.show_reason_on_attendance_screen
+            ):
                 record.show_reason_selector = False
                 continue
             record.show_reason_selector = bool(
@@ -101,34 +108,31 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
     )
     def _onchange_attendance_state(self):
         for record in self:
-            if record.reason_id:
+            action_type = (
+                "sign_in" if record.attendance_state == "checked_out" else "sign_out"
+            )
+            if record.reason_id and record.reason_id.action_type == action_type:
                 continue
-            if record.attendance_state == "checked_out":
-                record.reason_id = record.default_sign_in_reason_id or self.env[
-                    "hr.attendance.reason"
-                ].search(
-                    [
-                        ("show_on_attendance_screen", "=", True),
-                        ("action_type", "=", "sign_in"),
-                        "|",
-                        ("company_id", "=", False),
-                        ("company_id", "=", record.company_id.id),
-                    ],
-                    limit=1,
-                )
-            else:
-                record.reason_id = record.default_sign_out_reason_id or self.env[
-                    "hr.attendance.reason"
-                ].search(
-                    [
-                        ("show_on_attendance_screen", "=", True),
-                        ("action_type", "=", "sign_out"),
-                        "|",
-                        ("company_id", "=", False),
-                        ("company_id", "=", record.company_id.id),
-                    ],
-                    limit=1,
-                )
+
+            default_reason = (
+                record.default_sign_in_reason_id
+                if action_type == "sign_in"
+                else record.default_sign_out_reason_id
+            )
+            if default_reason and default_reason.action_type == action_type:
+                record.reason_id = default_reason
+                continue
+
+            record.reason_id = self.env["hr.attendance.reason"].search(
+                [
+                    ("show_on_attendance_screen", "=", True),
+                    ("action_type", "=", action_type),
+                    "|",
+                    ("company_id", "=", False),
+                    ("company_id", "=", record.company_id.id),
+                ],
+                limit=1,
+            )
 
     @api.model
     def default_get(self, field_list):
@@ -185,7 +189,7 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
 
     def action_toggle_attendance(self):
         self.ensure_one()
-        employee = self.employee_id
+        employee = self.employee_id.sudo()
         if not employee:
             raise UserError(
                 self.env._(
@@ -194,8 +198,7 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
                 )
             )
         if (
-            self.show_reason_selector
-            and self.show_reason_on_attendance_screen
+            self.show_reason_on_attendance_screen
             and self.required_reason_on_attendance_screen
             and not self.reason_id
         ):
@@ -208,6 +211,7 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
         employee.with_context(
             **context
         )._attendance_action_change()  # pylint: disable=protected-access
+        employee.invalidate_recordset()
         return {"type": "ir.actions.client", "tag": "reload"}
 
     @api.model
