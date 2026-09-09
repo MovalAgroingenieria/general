@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_hr_attendance_big_button_wizard_form" model="ir.ui.view">
+        <field name="name">hr.attendance.big.button.wizard.form</field>
+        <field name="model">hr.attendance.big.button.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Attendances" create="false" delete="false">
+                <field name="attendance_state" invisible="1"/>
+                <field name="employee_id" invisible="1"/>
+                <field name="company_id" invisible="1"/>
+                <field name="reason_action_type" invisible="1"/>
+                <field name="next_action_text" invisible="1"/>
+                <field name="show_reason_on_attendance_screen" invisible="1"/>
+                <field name="required_reason_on_attendance_screen" invisible="1"/>
+                <field name="show_reason_selector" invisible="1"/>
+                <div class="o_hr_attendance_big_button_layout">
+                    <div class="o_hr_attendance_big_button_card">
+                        <div class="o_hr_attendance_big_button_card_header">Entrada / Salida</div>
+                        <div class="o_hr_attendance_big_button_avatar_wrap">
+                            <field
+                                name="employee_avatar_1920"
+                                widget="image"
+                                class="o_hr_attendance_big_button_avatar"
+                                options="{'size': [128, 128]}"
+                                nolabel="1"
+                            />
+                        </div>
+                        <div class="o_hr_attendance_big_button_body">
+                            <h2 class="o_hr_attendance_big_button_name">
+                                <field name="employee_name" nolabel="1" readonly="1"/>
+                            </h2>
+                            <div class="o_hr_attendance_big_button_question">
+                                ¿Desea registrar su
+                                <field name="next_action_text" nolabel="1" readonly="1"/>?
+                            </div>
+                            <div
+                                class="o_hr_attendance_big_button_reason_label"
+                                invisible="not show_reason_selector"
+                            >
+                                Opciones / Motivo
+                            </div>
+                            <field
+                                name="reason_id"
+                                options="{'no_create': True, 'no_open': True}"
+                                placeholder="Seleccione una opcion"
+                                invisible="not show_reason_selector"
+                                required="required_reason_on_attendance_screen"
+                            />
+                            <button
+                                name="action_toggle_attendance"
+                                type="object"
+                                class="btn btn-primary o_hr_attendance_big_button"
+                                string="Registrar"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_hr_attendance_big_button_open" model="ir.actions.server">
+        <field name="name">Entrada / Salida</field>
+        <field name="model_id" ref="model_hr_attendance_big_button_wizard"/>
+        <field name="state">code</field>
+        <field name="code">
+wizard = env['hr.attendance.big.button.wizard'].create({})
+action = {
+    'name': 'Entrada / Salida',
+    'type': 'ir.actions.act_window',
+    'res_model': 'hr.attendance.big.button.wizard',
+    'view_mode': 'form',
+    'view_id': env.ref('hr_attendance_big_button.view_hr_attendance_big_button_wizard_form').id,
+    'target': 'current',
+    'res_id': wizard.id,
+}
+        </field>
+    </record>
+
+    <record id="action_hr_attendance_big_button" model="ir.actions.act_window">
+        <field name="name">Entrada / Salida</field>
+        <field name="res_model">hr.attendance.big.button.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_hr_attendance_big_button_wizard_form"/>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem
+        id="menu_hr_attendance_big_button_employees"
+        name="Attendance Clock"
+        parent="hr.menu_hr_root"
+        action="action_hr_attendance_big_button_open"
+        sequence="5"
+        groups="base.group_user"
+    />
+
+    <menuitem
+        id="menu_hr_attendance_big_button_attendances"
+        name="Attendance Clock"
+        parent="hr_attendance.menu_hr_attendance_root"
+        action="action_hr_attendance_big_button_open"
+        sequence="4"
+        groups="hr_attendance.group_hr_attendance_officer"
+    />
+</odoo>
