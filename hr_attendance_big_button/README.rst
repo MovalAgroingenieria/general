@@ -13,14 +13,27 @@ This module adds a fullscreen attendance clock view with a large button to
 check in and check out, designed for quick usage on desktop or tablet,
 similar to kiosk workflows.
 
-Usage
-=====
-
-1. Open Attendances.
-2. Click Attendance Clock.
-3. Use the large button to check in or check out.
-
 Credits
 =======
 
 * Moval Agroingeniería S.L.
+
+Contributors
+------------
+
+* Alberto Hernández <ahernandez@moval.es>
+* Eduardo Iniesta <einiesta@moval.es>
+* Miguel Mora <mmora@moval.es>
+* Juanu Sandoval <jsandoval@moval.es>
+* Salvador Sánchez <ssanchez@moval.es>
+* Jorge Vera <jvera@moval.es>
+* César Andrés <candres@moval.es>
+
+Maintainer
+----------
+
+.. image:: https://raw.githubusercontent.com/MovalAgroingenieria/public-assets/master/logos/logo_moval_small.png
+   :target: http://moval.es
+   :alt: Moval Agroingeniería
+
+This module is maintained by Moval Agroingeniería.

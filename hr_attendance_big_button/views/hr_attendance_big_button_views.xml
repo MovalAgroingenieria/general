@@ -21,7 +21,7 @@
                 <field name="show_reason_selector" invisible="1"/>
                 <div class="o_hr_attendance_big_button_layout">
                     <div class="o_hr_attendance_big_button_card">
-                        <div class="o_hr_attendance_big_button_card_header">Entrada / Salida</div>
+                        <div class="o_hr_attendance_big_button_card_header">Check In / Check Out</div>
                         <div class="o_hr_attendance_big_button_avatar_wrap">
                             <field
                                 name="employee_avatar_1920"
@@ -36,19 +36,19 @@
                                 <field name="employee_name" nolabel="1" readonly="1"/>
                             </h2>
                             <div class="o_hr_attendance_big_button_question">
-                                ¿Desea registrar su
+                                Do you want to register your
                                 <field name="next_action_text" nolabel="1" readonly="1"/>?
                             </div>
                             <div
                                 class="o_hr_attendance_big_button_reason_label"
                                 invisible="not show_reason_selector"
                             >
-                                Opciones / Motivo
+                                Options / Reason
                             </div>
                             <field
                                 name="reason_id"
                                 options="{'no_create': True, 'no_open': True}"
-                                placeholder="Seleccione una opcion"
+                                placeholder="Select an option"
                                 invisible="not show_reason_selector"
                                 required="required_reason_on_attendance_screen"
                             />
@@ -56,7 +56,7 @@
                                 name="action_toggle_attendance"
                                 type="object"
                                 class="btn btn-primary o_hr_attendance_big_button"
-                                string="Registrar"
+                                string="Register"
                             />
                         </div>
                     </div>
@@ -66,13 +66,13 @@
     </record>
 
     <record id="action_hr_attendance_big_button_open" model="ir.actions.server">
-        <field name="name">Entrada / Salida</field>
+        <field name="name">Check In / Check Out</field>
         <field name="model_id" ref="model_hr_attendance_big_button_wizard"/>
         <field name="state">code</field>
         <field name="code">
 wizard = env['hr.attendance.big.button.wizard'].create({})
 action = {
-    'name': 'Entrada / Salida',
+    'name': 'Check In / Check Out',
     'type': 'ir.actions.act_window',
     'res_model': 'hr.attendance.big.button.wizard',
     'view_mode': 'form',

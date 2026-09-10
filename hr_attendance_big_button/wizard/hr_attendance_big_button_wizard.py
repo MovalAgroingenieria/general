@@ -90,9 +90,9 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
     def _compute_next_action_text(self):
         for record in self:
             record.next_action_text = (
-                record.env._("Entrada")
+                record.env._("Check in")
                 if record.reason_action_type == "sign_in"
-                else record.env._("Salida")
+                else record.env._("Check out")
             )
 
     @api.depends(
@@ -208,7 +208,7 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
             }
         )
         return {
-            "name": self.env._("Entrada / Salida"),
+            "name": self.env._("Check In / Check Out"),
             "type": "ir.actions.act_window",
             "res_model": self._name,
             "view_mode": "form",

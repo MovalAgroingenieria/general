@@ -6,11 +6,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-09 11:46+0000\n"
-"PO-Revision-Date: 2026-09-09 13:53+0200\n"
+"POT-Creation-Date: 2026-09-10 11:48+0000\n"
+"PO-Revision-Date: 2026-09-10 13:51+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: es_ES\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -18,9 +18,15 @@ msgstr ""
 "X-Generator: Poedit 3.9\n"
 
 #. module: hr_attendance_big_button
+#. odoo-javascript
+#: code:addons/hr_attendance_big_button/static/src/xml/attendance_menu.xml:0
+msgid "Attendance"
+msgstr "Asistencia"
+
+#. module: hr_attendance_big_button
 #: model:ir.model,name:hr_attendance_big_button.model_hr_attendance_big_button_wizard
 msgid "Attendance Big Button Wizard"
-msgstr "Asistente "
+msgstr "Asistente"
 
 #. module: hr_attendance_big_button
 #: model:ir.ui.menu,name:hr_attendance_big_button.menu_hr_attendance_big_button_attendances
@@ -41,6 +47,26 @@ msgstr "Asistencias"
 #: model:ir.model.fields,field_description:hr_attendance_big_button.field_hr_attendance_big_button_wizard__employee_avatar_1920
 msgid "Avatar"
 msgstr "Avatar"
+
+#. module: hr_attendance_big_button
+#. odoo-python
+#: code:addons/hr_attendance_big_button/wizard/hr_attendance_big_button_wizard.py:0
+#: model:ir.actions.server,name:hr_attendance_big_button.action_hr_attendance_big_button_open
+#: model_terms:ir.ui.view,arch_db:hr_attendance_big_button.view_hr_attendance_big_button_wizard_form
+msgid "Check In / Check Out"
+msgstr "Llegadas / Salidas"
+
+#. module: hr_attendance_big_button
+#. odoo-python
+#: code:addons/hr_attendance_big_button/wizard/hr_attendance_big_button_wizard.py:0
+msgid "Check in"
+msgstr "Entrada"
+
+#. module: hr_attendance_big_button
+#. odoo-python
+#: code:addons/hr_attendance_big_button/wizard/hr_attendance_big_button_wizard.py:0
+msgid "Check out"
+msgstr "Salida"
 
 #. module: hr_attendance_big_button
 #: model:ir.model.fields.selection,name:hr_attendance_big_button.selection__hr_attendance_big_button_wizard__attendance_state__checked_in
@@ -68,21 +94,14 @@ msgid "Created on"
 msgstr "Creado el"
 
 #. module: hr_attendance_big_button
-#: model:ir.model.fields,field_description:hr_attendance_big_button.field_hr_attendance_big_button_wizard__default_sign_in_reason_id
-
-msgid "Default sign-in reason for attendance screen"
-msgstr "Motivo predeterminado de registro en la pantalla de asistencia"
-
-#. module: hr_attendance_big_button
-#: model:ir.model.fields,field_description:hr_attendance_big_button.field_hr_attendance_big_button_wizard__default_sign_out_reason_id
-
-msgid "Default sign-out reason for attendance screen"
-msgstr "Motivo predeterminado para dar por finalizada la sesión en la pantalla de asistencia"
-
-#. module: hr_attendance_big_button
 #: model:ir.model.fields,field_description:hr_attendance_big_button.field_hr_attendance_big_button_wizard__display_name
 msgid "Display Name"
 msgstr "Nombre para mostrar"
+
+#. module: hr_attendance_big_button
+#: model_terms:ir.ui.view,arch_db:hr_attendance_big_button.view_hr_attendance_big_button_wizard_form
+msgid "Do you want to register your"
+msgstr "¿Quieres registrar tu"
 
 #. module: hr_attendance_big_button
 #: model:ir.model.fields,field_description:hr_attendance_big_button.field_hr_attendance_big_button_wizard__employee_id
@@ -93,22 +112,6 @@ msgstr "Empleado"
 #: model:ir.model.fields,field_description:hr_attendance_big_button.field_hr_attendance_big_button_wizard__employee_name
 msgid "Employee Name"
 msgstr "Nombre de Empleado"
-
-#. module: hr_attendance_big_button
-#. odoo-python
-#: code:addons/hr_attendance_big_button/wizard/hr_attendance_big_button_wizard.py:0
-msgid "Entrada"
-msgstr "Entrada"
-
-#. module: hr_attendance_big_button
-#. odoo-python
-#: code:addons/hr_attendance_big_button/wizard/hr_attendance_big_button_wizard.py:0
-#: model:ir.actions.act_window,name:hr_attendance_big_button.action_hr_attendance_big_button
-#: model:ir.actions.server,name:hr_attendance_big_button.action_hr_attendance_big_button_open
-#: model_terms:ir.ui.view,arch_db:hr_attendance_big_button.view_hr_attendance_big_button_wizard_form
-
-msgid "Entrada / Salida"
-msgstr "Entrada / Salida"
 
 #. module: hr_attendance_big_button
 #: model:ir.model.fields,field_description:hr_attendance_big_button.field_hr_attendance_big_button_wizard__id
@@ -127,20 +130,17 @@ msgstr "Actualizado el"
 
 #. module: hr_attendance_big_button
 #: model:ir.model.fields,field_description:hr_attendance_big_button.field_hr_attendance_big_button_wizard__next_action_text
-
 msgid "Next Action Text"
 msgstr "Texto de la siguiente acción"
 
 #. module: hr_attendance_big_button
 #: model_terms:ir.ui.view,arch_db:hr_attendance_big_button.view_hr_attendance_big_button_wizard_form
-
-msgid "Opciones / Motivo"
+msgid "Options / Reason"
 msgstr "Opciones / Motivo"
 
 #. module: hr_attendance_big_button
 #. odoo-python
 #: code:addons/hr_attendance_big_button/wizard/hr_attendance_big_button_wizard.py:0
-
 msgid "Please, select a reason."
 msgstr "Por favor, selecciona un motivo."
 
@@ -151,42 +151,31 @@ msgstr "Razón"
 
 #. module: hr_attendance_big_button
 #: model:ir.model.fields,field_description:hr_attendance_big_button.field_hr_attendance_big_button_wizard__reason_action_type
-
 msgid "Reason Action Type"
 msgstr "Motivo Tipo de acción"
 
 #. module: hr_attendance_big_button
 #: model_terms:ir.ui.view,arch_db:hr_attendance_big_button.view_hr_attendance_big_button_wizard_form
-msgid "Registrar"
-msgstr "Registrar"
+msgid "Register"
+msgstr "Registrarse"
 
 #. module: hr_attendance_big_button
 #: model:ir.model.fields,field_description:hr_attendance_big_button.field_hr_attendance_big_button_wizard__required_reason_on_attendance_screen
-
 msgid "Required reason on attendance screen"
 msgstr "Es obligatorio indicar el motivo en la pantalla de asistencia"
 
 #. module: hr_attendance_big_button
-#. odoo-python
-#: code:addons/hr_attendance_big_button/wizard/hr_attendance_big_button_wizard.py:0
-msgid "Salida"
-msgstr "Salida"
-
-#. module: hr_attendance_big_button
 #: model_terms:ir.ui.view,arch_db:hr_attendance_big_button.view_hr_attendance_big_button_wizard_form
-
-msgid "Seleccione una opcion"
-msgstr "Seleccione una opción"
+msgid "Select an option"
+msgstr "Selecciona una opción"
 
 #. module: hr_attendance_big_button
 #: model:ir.model.fields,field_description:hr_attendance_big_button.field_hr_attendance_big_button_wizard__show_reason_selector
-
 msgid "Show Reason Selector"
 msgstr "Mostrar selector de motivos"
 
 #. module: hr_attendance_big_button
 #: model:ir.model.fields,field_description:hr_attendance_big_button.field_hr_attendance_big_button_wizard__show_reason_on_attendance_screen
-
 msgid "Show reasons on attendance screen"
 msgstr "Mostrar los motivos en la pantalla de asistencia"
 
@@ -203,12 +192,5 @@ msgstr "Cerrar sesión"
 #. module: hr_attendance_big_button
 #. odoo-python
 #: code:addons/hr_attendance_big_button/wizard/hr_attendance_big_button_wizard.py:0
-
 msgid "Your user is not linked to an employee. Please contact your administrator."
 msgstr "Tu cuenta de usuario no está vinculada a ningún empleado. Ponte en contacto con tu administrador."
-
-#. module: hr_attendance_big_button
-#: model_terms:ir.ui.view,arch_db:hr_attendance_big_button.view_hr_attendance_big_button_wizard_form
-
-msgid "¿Desea registrar su"
-msgstr "¿Desea registrar su"
