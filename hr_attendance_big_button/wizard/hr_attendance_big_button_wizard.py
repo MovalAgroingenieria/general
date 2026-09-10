@@ -53,13 +53,17 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
 
     @api.model
     def get_employee_attendance_state(self, employee):
-        attendance = self.env["hr.attendance"].sudo().search(
-            [
-                ("employee_id", "=", employee.id),
-                ("check_in", "<=", fields.Datetime.now()),
-            ],
-            order="check_in desc",
-            limit=1,
+        attendance = (
+            self.env["hr.attendance"]
+            .sudo()
+            .search(
+                [
+                    ("employee_id", "=", employee.id),
+                    ("check_in", "<=", fields.Datetime.now()),
+                ],
+                order="check_in desc",
+                limit=1,
+            )
         )
         return (
             "checked_in" if attendance and not attendance.check_out else "checked_out"
@@ -196,13 +200,13 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
 
         employee.invalidate_recordset(["last_attendance_id", "attendance_state"])
         # pylint: disable=protected-access
-        employee.with_context(
-            **context
-        )._attendance_action_change()
+        employee.with_context(**context)._attendance_action_change()
         employee.invalidate_recordset()
-        wizard = self.with_context(clear_reason=True).create({
-            "employee_id": employee.id,
-        })
+        wizard = self.with_context(clear_reason=True).create(
+            {
+                "employee_id": employee.id,
+            }
+        )
         return {
             "name": self.env._("Entrada / Salida"),
             "type": "ir.actions.act_window",
