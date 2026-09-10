@@ -17,6 +17,8 @@
     "assets": {
         "web.assets_backend": [
             "hr_attendance_big_button/static/src/scss/hr_attendance_big_button.scss",
+            "hr_attendance_big_button/static/src/js/attendance_menu.js",
+            "hr_attendance_big_button/static/src/xml/attendance_menu.xml",
         ],
     },
 }

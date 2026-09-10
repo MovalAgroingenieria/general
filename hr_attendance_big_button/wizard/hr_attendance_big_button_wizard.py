@@ -44,22 +44,36 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
         related="company_id.required_reason_on_attendance_screen",
         readonly=True,
     )
-    default_sign_in_reason_id = fields.Many2one(
-        related="company_id.reason_on_attendance_screen_default_sign_in",
-        readonly=True,
-    )
-    default_sign_out_reason_id = fields.Many2one(
-        related="company_id.reason_on_attendance_screen_default_sign_out",
-        readonly=True,
-    )
     reason_id = fields.Many2one(
         "hr.attendance.reason",
-        domain="[('show_on_attendance_screen', '=', True), ('action_type', '=', reason_action_type), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        domain="[('show_on_attendance_screen', '=', True), "
+        "('action_type', '=', reason_action_type), '|', "
+        "('company_id', '=', False), ('company_id', '=', company_id)]",
     )
 
+    @api.model
+    def get_employee_attendance_state(self, employee):
+        attendance = self.env["hr.attendance"].sudo().search(
+            [
+                ("employee_id", "=", employee.id),
+                ("check_in", "<=", fields.Datetime.now()),
+            ],
+            order="check_in desc",
+            limit=1,
+        )
+        return (
+            "checked_in" if attendance and not attendance.check_out else "checked_out"
+        )
+
+    @api.depends("employee_id", "employee_id.attendance_state")
     def _compute_attendance_state(self):
         for record in self:
-            record.attendance_state = record.env.user.attendance_state or "checked_out"
+            employee = record.employee_id or record.env.user.employee_id
+            record.attendance_state = (
+                self.get_employee_attendance_state(employee)
+                if employee
+                else "checked_out"
+            )
 
     @api.depends("attendance_state")
     def _compute_reason_action_type(self):
@@ -103,43 +117,15 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
                 )
             )
 
-    @api.onchange(
-        "attendance_state", "default_sign_in_reason_id", "default_sign_out_reason_id"
-    )
-    def _onchange_attendance_state(self):
-        for record in self:
-            action_type = (
-                "sign_in" if record.attendance_state == "checked_out" else "sign_out"
-            )
-            if record.reason_id and record.reason_id.action_type == action_type:
-                continue
-
-            default_reason = (
-                record.default_sign_in_reason_id
-                if action_type == "sign_in"
-                else record.default_sign_out_reason_id
-            )
-            if default_reason and default_reason.action_type == action_type:
-                record.reason_id = default_reason
-                continue
-
-            record.reason_id = self.env["hr.attendance.reason"].search(
-                [
-                    ("show_on_attendance_screen", "=", True),
-                    ("action_type", "=", action_type),
-                    "|",
-                    ("company_id", "=", False),
-                    ("company_id", "=", record.company_id.id),
-                ],
-                limit=1,
-            )
-
     @api.model
     def default_get(self, field_list):
         values = super().default_get(field_list)
+        if self.env.context.get("clear_reason"):
+            values["reason_id"] = False
         if values.get("employee_id"):
             employee = self.env["hr.employee"].browse(values["employee_id"])
-            values["reason_id"] = self._get_default_reason_for_employee(employee).id
+            if not self.env.context.get("clear_reason"):
+                values["reason_id"] = self._get_default_reason_for_employee(employee).id
             return values
 
         employee = self.env.user.employee_id
@@ -151,7 +137,8 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
                 )
             )
         values["employee_id"] = employee.id
-        values["reason_id"] = self._get_default_reason_for_employee(employee).id
+        if not self.env.context.get("clear_reason"):
+            values["reason_id"] = self._get_default_reason_for_employee(employee).id
         return values
 
     @api.model
@@ -159,9 +146,8 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
         if not employee:
             return self.env["hr.attendance.reason"]
 
-        action_type = (
-            "sign_in" if employee.attendance_state == "checked_out" else "sign_out"
-        )
+        current_state = self.get_employee_attendance_state(employee)
+        action_type = "sign_in" if current_state == "checked_out" else "sign_out"
         company = employee.company_id
         default_reason = (
             company.reason_on_attendance_screen_default_sign_in
@@ -189,7 +175,7 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
 
     def action_toggle_attendance(self):
         self.ensure_one()
-        employee = self.employee_id.sudo()
+        employee = self.env["hr.employee"].sudo().browse(self.employee_id.id)
         if not employee:
             raise UserError(
                 self.env._(
@@ -208,15 +194,15 @@ class HrAttendanceBigButtonWizard(models.TransientModel):
         if self.reason_id:
             context["attendance_reason_id"] = self.reason_id.id
 
+        employee.invalidate_recordset(["last_attendance_id", "attendance_state"])
+        # pylint: disable=protected-access
         employee.with_context(
             **context
-        )._attendance_action_change()  # pylint: disable=protected-access
+        )._attendance_action_change()
         employee.invalidate_recordset()
-        return {"type": "ir.actions.client", "tag": "reload"}
-
-    @api.model
-    def action_open_wizard(self):
-        wizard = self.create({})
+        wizard = self.with_context(clear_reason=True).create({
+            "employee_id": employee.id,
+        })
         return {
             "name": self.env._("Entrada / Salida"),
             "type": "ir.actions.act_window",

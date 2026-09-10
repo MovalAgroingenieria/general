@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="hr_attendance_big_button.attendance_button">
+        <button
+            type="button"
+            class="o_hr_attendance_v16_button"
+            t-att-class="this.state.checkedIn ? 'o_hr_attendance_v16_button o_hr_attendance_v16_button--out' : 'o_hr_attendance_v16_button o_hr_attendance_v16_button--in'"
+            t-on-click="this.openAttendance"
+            title="Attendance"
+            aria-label="Attendance"
+        >
+            <span class="o_hr_attendance_v16_button_icon">
+                <i class="fa fa-lg" t-att-class="this.state.checkedIn ? 'fa-sign-out' : 'fa-sign-in'"/>
+            </span>
+            <span t-if="this.state.checkedIn" class="o_hr_attendance_v16_button_time">
+                <t t-esc="this.state.elapsed"/>
+            </span>
+        </button>
+    </t>
+</templates>

@@ -1,9 +1,44 @@
+body:has(.o_form_view.o_hr_attendance_big_button_form) .o_control_panel,
+body:has(.o_form_view.o_hr_attendance_big_button_form) .breadcrumb,
+body:has(.o_form_view.o_hr_attendance_big_button_form) .o_cp_pager,
+body:has(.o_form_view.o_hr_attendance_big_button_form) .o_searchview,
+.o_action_manager:has(.o_form_view.o_hr_attendance_big_button_form) .o_control_panel,
+.o_action_manager:has(.o_form_view.o_hr_attendance_big_button_form) .breadcrumb,
+.o_action_manager:has(.o_form_view.o_hr_attendance_big_button_form) .o_cp_pager,
+.o_action_manager:has(.o_form_view.o_hr_attendance_big_button_form) .o_searchview {
+    display: none !important;
+}
+
+body:has(.o_form_view.o_hr_attendance_big_button_form)
+    .o_form_view.o_hr_attendance_big_button_form,
+body:has(.o_form_view.o_hr_attendance_big_button_form)
+    .o_action_manager,
+body:has(.o_form_view.o_hr_attendance_big_button_form)
+    .o_action_manager
+    .o_action,
+body:has(.o_form_view.o_hr_attendance_big_button_form)
+    .o_form_view.o_hr_attendance_big_button_form
+    .o_content,
+body:has(.o_form_view.o_hr_attendance_big_button_form)
+    .o_form_view.o_hr_attendance_big_button_form
+    .o_form_renderer {
+    background: transparent !important;
+    padding: 0 !important;
+    padding-top: 0 !important;
+    margin: 0 !important;
+    margin-top: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
 .o_hr_attendance_big_button_layout {
-    min-height: calc(100vh - 230px);
+    min-height: calc(100vh - 46px);
+    height: calc(100vh - 46px);
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1.2rem 0.8rem;
+    padding: 1.2rem 0;
     background: rgba(141, 146, 153, 0.35);
 }
 
@@ -81,9 +116,69 @@
     letter-spacing: 0.01em;
 }
 
+.o_hr_attendance_v16_button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-width: 2.85rem;
+    min-height: 2.35rem;
+    height: auto;
+    max-height: 2.45rem;
+    margin: 0.18rem 0.2rem;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 0.8rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 5px 12px rgba(0, 0, 0, 0.15);
+    color: #fff;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+
+.o_hr_attendance_v16_button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.02);
+}
+
+.o_hr_attendance_v16_button--in {
+    background: linear-gradient(180deg, #f26d6d 0%, #d85656 100%);
+}
+
+.o_hr_attendance_v16_button--out {
+    background: linear-gradient(180deg, #4fbf72 0%, #2f9e5d 100%);
+}
+
+.o_hr_attendance_v16_button_icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 0.82rem;
+    flex-shrink: 0;
+}
+
+.o_hr_attendance_v16_button_time {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    padding: 0.13rem 0.26rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+}
+
 @media (max-width: 767.98px) {
     .o_hr_attendance_big_button_layout {
-        min-height: calc(100vh - 180px);
+        min-height: calc(100vh - 46px);
+        height: calc(100vh - 46px);
         padding: 0.7rem;
     }
 

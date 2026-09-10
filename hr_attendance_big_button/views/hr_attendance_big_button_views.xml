@@ -4,7 +4,13 @@
         <field name="name">hr.attendance.big.button.wizard.form</field>
         <field name="model">hr.attendance.big.button.wizard</field>
         <field name="arch" type="xml">
-            <form string="Attendances" create="false" delete="false">
+            <form
+                string="Attendances"
+                class="o_hr_attendance_big_button_form"
+                create="false"
+                delete="false"
+                header="False"
+            >
                 <field name="attendance_state" invisible="1"/>
                 <field name="employee_id" invisible="1"/>
                 <field name="company_id" invisible="1"/>
@@ -75,14 +81,6 @@ action = {
     'res_id': wizard.id,
 }
         </field>
-    </record>
-
-    <record id="action_hr_attendance_big_button" model="ir.actions.act_window">
-        <field name="name">Entrada / Salida</field>
-        <field name="res_model">hr.attendance.big.button.wizard</field>
-        <field name="view_mode">form</field>
-        <field name="view_id" ref="view_hr_attendance_big_button_wizard_form"/>
-        <field name="target">current</field>
     </record>
 
     <menuitem
