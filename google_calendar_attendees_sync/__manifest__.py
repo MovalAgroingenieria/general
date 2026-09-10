@@ -1,6 +1,6 @@
 {
     'name': 'Google Calendar Attendees Sync',
-    'version': '16.0.1.0.0',
+    'version': '16.0.1.1.0',
     'category': 'Productivity',
     'summary': 'Sync Odoo events in Google Calendar for all attendees',
     'description': '''

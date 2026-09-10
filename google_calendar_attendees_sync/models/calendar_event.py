@@ -1,11 +1,11 @@
-# 2025 Moval Agroingeniería
+# 2025 Moval Agroingenieria
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import models, fields, api, _
-from odoo.exceptions import UserError
-from odoo.addons.google_calendar.models.google_sync import google_calendar_token
-from odoo.addons.google_calendar.utils.google_calendar import GoogleCalendarService
 import logging
+
+from odoo import _, api, fields, models
+from odoo.addons.google_calendar.utils.google_calendar import GoogleCalendarService
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -16,180 +16,153 @@ class CalendarEvent(models.Model):
     attendee_sync_enabled = fields.Boolean(
         'Sync with Attendees',
         default=True,
-        help="If enabled, this event will be synchronized with Google Calendar of all attendees"
+        help=(
+            'Enable the additional attendee synchronization controls for this '
+            'event. Google Calendar still uses the canonical event and its '
+            'attendee list; no per-attendee copies are created.'
+        ),
     )
     last_attendee_sync = fields.Datetime(
         'Last Attendee Synchronization',
-        readonly=True
+        readonly=True,
     )
     sync_errors = fields.Text(
         'Synchronization Errors',
-        readonly=True
+        readonly=True,
     )
 
-    def _google_values(self):
-        """Override to add automatic invitation configuration"""
-        values = super()._google_values()
+    def _attendee_google_users(self):
+        """Return Google-enabled internal users related to this event.
 
-        # Option 4: Automatic invitation configuration
-        if values:
-            values.update({
-                'sendNotifications': True,  # Send email notifications
-                'sendUpdates': 'all',       # Notify all attendees
-            })
+        The organizer is included when Google Calendar is configured. Attendee
+        users are included only when their additional attendee synchronization
+        flag is enabled.
 
-        return values
-
-    def _sync_attendees_calendars(self):
+        This method deliberately returns users, not Google event ids. The
+        canonical Google identity is ``calendar.event.google_id`` managed by
+        Odoo's ``google_calendar`` addon.
         """
-        Synchronize the event with all attendees' Google Calendars.
-        This method uses Odoo's existing Google Calendar infrastructure.
-        """
-        if not self.attendee_sync_enabled or not self.attendee_ids:
-            return
+        self.ensure_one()
 
-        success_count = 0
-        error_count = 0
-        errors = []
-
-        # Get all attendee users who have Google Calendar configured
-        attendee_users = self.attendee_ids.mapped('partner_id.user_ids').filtered(
-            lambda u: not u.share and hasattr(u, 'google_calendar_token') and u.google_calendar_token
+        organizer = self.user_id.sudo().filtered(
+            lambda user: (
+                not user.share
+                and user.google_calendar_rtoken
+                and not user.google_synchronization_stopped
+            )
         )
 
-        for user in attendee_users:
-            try:
-                # Create a copy of the event from this user's perspective
-                event_copy = self.with_user(user)
-
-                # Trigger normal Google Calendar sync for this user
-                # This leverages Odoo's existing sync mechanism
-                if hasattr(event_copy, '_google_insert') or hasattr(event_copy, '_sync_google2odoo'):
-                    # Use Odoo's native sync methods if available
-                    event_copy.write({'need_sync': True})
-                    success_count += 1
-                    _logger.info(f"Scheduled Google sync for user {user.name}")
-                else:
-                    # Fallback: just log the action
-                    _logger.info(f"Google Calendar sync attempted for user {user.name}")
-                    success_count += 1
-
-            except Exception as e:
-                error_msg = f"Error syncing for user {user.name}: {str(e)}"
-                errors.append(error_msg)
-                error_count += 1
-                _logger.warning(error_msg)
-
-        # Update sync information
-        self.write({
-            'last_attendee_sync': fields.Datetime.now(),
-            'sync_errors': '\n'.join(errors) if errors else False
-        })
-
-        if success_count > 0:
-            _logger.info(f"Attendee sync completed for event '{self.name}': {success_count} users")
-
-        if errors:
-            self.message_post(
-                body=_("Attendee synchronization errors:\n%s") % '\n'.join(errors),
-                message_type='notification'
+        attendee_users = self.attendee_ids.mapped(
+            'partner_id.user_ids'
+        ).sudo().filtered(
+            lambda user: (
+                not user.share
+                and user.google_calendar_attendee_sync
+                and user.google_calendar_rtoken
+                and not user.google_synchronization_stopped
             )
+        )
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        """Override create to automatically synchronize with attendees"""
-        records = super().create(vals_list)
+        return organizer | attendee_users
 
-        # Schedule synchronization for events with attendees
-        for record in records.filtered(lambda r: r.active and r.attendee_ids and r.attendee_sync_enabled):
-            try:
-                # Use after_commit to ensure event is properly saved
-                self.env.cr.after('commit', record._sync_attendees_calendars)
-            except Exception as e:
-                _logger.warning(f"Could not schedule attendee sync for event {record.name}: {e}")
+    def _sync_attendees_calendars(self):
+        """Synchronize using Odoo's native Google Calendar engine.
 
-        return records
+        No attendee-specific Google event is inserted here. Odoo synchronizes
+        one canonical ``calendar.event`` / ``google_id`` and Google distributes
+        that event to the attendees contained in the event payload.
+        """
+        google_service = GoogleCalendarService(self.env['google.service'])
 
-    def write(self, values):
-        """Override write to re-synchronize when attendees change"""
-        res = super().write(values)
+        for event in self:
+            if not event.attendee_sync_enabled or not event.attendee_ids:
+                continue
 
-        # Re-synchronize if relevant fields were modified
-        sync_fields = {'attendee_ids', 'partner_ids', 'name', 'start', 'stop', 'allday', 'location', 'description'}
+            errors = []
+            users = event._attendee_google_users()
 
-        if any(field in values for field in sync_fields):
-            for record in self.filtered(lambda r: r.active and r.attendee_sync_enabled and r.attendee_ids):
+            for user in users:
                 try:
-                    # Use after_commit to avoid transaction problems
-                    self.env.cr.after('commit', record._sync_attendees_calendars)
-                except Exception as e:
-                    _logger.warning(f"Could not schedule attendee sync for event {record.name}: {e}")
+                    # Keep exactly the same execution pattern used by Odoo's
+                    # native Google Calendar cron. This method performs both
+                    # Google -> Odoo and Odoo -> Google reconciliation and uses
+                    # calendar.event.google_id as the canonical identity.
+                    user.with_user(user).sudo()._sync_google_calendar(
+                        google_service
+                    )
+                except Exception as exc:
+                    error = _(
+                        'Error synchronizing Google Calendar for %(user)s: %(error)s',
+                        user=user.name,
+                        error=str(exc),
+                    )
+                    errors.append(error)
+                    _logger.exception(
+                        'Attendee calendar synchronization failed for event %s '
+                        '(id=%s), user %s (id=%s)',
+                        event.name,
+                        event.id,
+                        user.name,
+                        user.id,
+                    )
 
-        return res
+            event.sudo().write({
+                'last_attendee_sync': fields.Datetime.now(),
+                'sync_errors': '\n'.join(errors) if errors else False,
+            })
+
+            if errors:
+                event.message_post(
+                    body=_(
+                        'Attendee synchronization errors:<br/>%s',
+                        '<br/>'.join(errors),
+                    ),
+                    message_type='notification',
+                )
+
+        return True
 
     def action_sync_attendees(self):
-        """Manual action to synchronize attendees"""
+        """Manually run native Google Calendar reconciliation."""
         self.ensure_one()
 
         if not self.attendee_ids:
-            raise UserError(_("This event has no attendees to synchronize."))
+            raise UserError(_('This event has no attendees to synchronize.'))
 
-        try:
-            self._sync_attendees_calendars()
+        self._sync_attendees_calendars()
 
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': _('Synchronization completed'),
-                    'message': _('The event synchronization has been scheduled for all attendees.'),
-                    'type': 'success',
-                }
-            }
-        except Exception as e:
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': _('Synchronization Error'),
-                    'message': str(e),
-                    'type': 'danger',
-                }
-            }
+        if self.sync_errors:
+            notification_type = 'warning'
+            message = _(
+                'Synchronization finished with errors. Check the event '
+                'synchronization log.'
+            )
+        else:
+            notification_type = 'success'
+            message = _(
+                'Google Calendar synchronization completed without creating '
+                'attendee-specific event copies.'
+            )
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Synchronization completed'),
+                'message': message,
+                'type': notification_type,
+            },
+        }
 
     @api.model
     def _cron_sync_attendee_events(self):
-        """
-        Scheduled task to synchronize attendee events.
-        This method processes events where users are attendees.
-        """
-        try:
-            # Search for events that need attendee synchronization
-            domain = [
-                ('attendee_sync_enabled', '=', True),
-                ('active', '=', True),
-                ('attendee_ids', '!=', False),
-                ('start', '>=', fields.Datetime.now() - fields.timedelta(days=7)),
-                ('start', '<=', fields.Datetime.now() + fields.timedelta(days=90)),
-            ]
-
-            events = self.search(domain, limit=100)  # Limit to avoid timeout
-
-            _logger.info(f"Cron job processing {len(events)} events for attendee sync")
-
-            for event in events:
-                try:
-                    event._sync_attendees_calendars()
-                except Exception as e:
-                    _logger.error(f"Cron sync failed for event {event.name}: {e}")
-
-        except Exception as e:
-            _logger.error(f"Attendee sync cron job failed: {e}")
+        """Compatibility cron: delegate to the single native-based user cron."""
+        return self.env['res.users']._cron_sync_attendee_events_all_users()
 
     def action_mass_sync_attendees(self):
-        """Server action for bulk synchronization of selected events"""
+        """Synchronize selected events without creating Google copies."""
         active_ids = self.env.context.get('active_ids', [])
-        events = self.browse(active_ids)
+        events = self.browse(active_ids).exists()
 
         if not events:
             return {
@@ -199,139 +172,54 @@ class CalendarEvent(models.Model):
                     'title': _('No Events Selected'),
                     'message': _('Please select events to synchronize.'),
                     'type': 'warning',
-                }
+                },
             }
 
-        success_count = 0
-        error_count = 0
+        users = self.env['res.users'].sudo()
+        target_events = events.filtered(
+            lambda event: (
+                event.active
+                and event.attendee_sync_enabled
+                and event.attendee_ids
+            )
+        )
+        for event in target_events:
+            users |= event._attendee_google_users()
 
-        for event in events:
+        google_service = GoogleCalendarService(self.env['google.service'])
+        errors = []
+        synchronized_users = 0
+
+        for user in users:
             try:
-                if event.attendee_sync_enabled and event.attendee_ids:
-                    event._sync_attendees_calendars()
-                    success_count += 1
-                elif not event.attendee_ids:
-                    _logger.info(f"Event {event.name} has no attendees, skipping")
-                else:
-                    _logger.info(f"Event {event.name} has attendee sync disabled, skipping")
-            except Exception as e:
-                _logger.error(f"Mass sync failed for event {event.name}: {e}")
-                error_count += 1
+                user.with_user(user).sudo()._sync_google_calendar(google_service)
+                synchronized_users += 1
+            except Exception as exc:
+                errors.append('%s: %s' % (user.name, exc))
+                _logger.exception(
+                    'Mass attendee calendar synchronization failed for user %s '
+                    '(id=%s)',
+                    user.name,
+                    user.id,
+                )
 
-        message = f"Processed {len(events)} events. Synchronized: {success_count}, Errors: {error_count}"
+        target_events.sudo().write({
+            'last_attendee_sync': fields.Datetime.now(),
+            'sync_errors': '\n'.join(errors) if errors else False,
+        })
 
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
                 'title': _('Bulk Synchronization Complete'),
-                'message': message,
-                'type': 'success' if error_count == 0 else 'warning',
-            }
+                'message': _(
+                    'Processed %(events)s events with %(users)s Google users. '
+                    'Errors: %(errors)s.',
+                    events=len(target_events),
+                    users=synchronized_users,
+                    errors=len(errors),
+                ),
+                'type': 'success' if not errors else 'warning',
+            },
         }
-
-    def _google_values_for_attendee(self, attendee):
-        """
-        Generate event values adapted for a specific attendee.
-        The event will be shown in their calendar as a guest, not as organizer.
-        """
-        try:
-            # Get base event values
-            base_values = self._google_values()
-            if not base_values:
-                return False
-
-            # Configure event from attendee's perspective
-            attendee_values = {
-                **base_values,
-                'organizer': {
-                    'email': self.user_id.email or self.user_id.partner_id.email,
-                    'displayName': self.user_id.name,
-                    'self': False  # The attendee is not the organizer
-                },
-                'attendees': self._get_attendees_for_google(),
-                # Configure so attendee receives invitations
-                'sendNotifications': True,
-                'sendUpdates': 'all',
-                'guestsCanModify': False,
-                'guestsCanInviteOthers': False,
-                'guestsCanSeeOtherGuests': True,
-            }
-
-            # Mark current attendee in the attendees list
-            for att_data in attendee_values.get('attendees', []):
-                if att_data.get('email') == attendee.partner_id.email:
-                    att_data['self'] = True
-                    break
-
-            return attendee_values
-
-        except Exception as e:
-            _logger.error(f"Error generating Google values for attendee {attendee.partner_id.name}: {e}")
-            return False
-
-    def _get_attendees_for_google(self):
-        """Get attendees list formatted for Google Calendar"""
-        attendees = []
-        for attendee in self.attendee_ids:
-            if attendee.partner_id.email:
-                attendees.append({
-                    'email': attendee.partner_id.email,
-                    'displayName': attendee.partner_id.name,
-                    'responseStatus': self._map_odoo_state_to_google(attendee.state),
-                    'self': False
-                })
-        return attendees
-
-    def _map_odoo_state_to_google(self, odoo_state):
-        """Map Odoo state to Google Calendar state"""
-        mapping = {
-            'needsAction': 'needsAction',
-            'accepted': 'accepted',
-            'declined': 'declined',
-            'tentative': 'tentative',
-        }
-        return mapping.get(odoo_state, 'needsAction')
-
-    def _find_existing_google_event_for_user(self, user):
-        """
-        Search if the event already exists in the user's Google Calendar.
-        Returns google_id if it exists, False otherwise.
-        """
-        # This function should implement Google Calendar search
-        # For now we return False to force creation of new events
-        return False
-
-    def _sync_single_attendee_event(self, attendee):
-        """Synchronize a specific event for an individual attendee"""
-        user = self.env.user
-
-        try:
-            google_values = self._google_values_for_attendee(attendee)
-            if not google_values:
-                return
-
-            google_service = GoogleCalendarService(self.env['google.service'])
-
-            with google_calendar_token(user.sudo()) as token:
-                if token:
-                    existing_event_id = self._find_existing_google_event_for_user(user)
-
-                    if existing_event_id:
-                        google_service.patch(
-                            existing_event_id,
-                            google_values,
-                            token=token,
-                            timeout=10
-                        )
-                    else:
-                        google_service.insert(
-                            google_values,
-                            token=token,
-                            timeout=10
-                        )
-
-                    _logger.info(f"Event {self.name} synchronized for {user.name}")
-
-        except Exception as e:
-            _logger.error(f"Error synchronizing event {self.name} for {user.name}: {e}")
