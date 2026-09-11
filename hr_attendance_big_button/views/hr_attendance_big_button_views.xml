@@ -65,6 +65,14 @@
         </field>
     </record>
 
+    <record id="action_hr_attendance_big_button" model="ir.actions.act_window">
+        <field name="name">Check In / Check Out</field>
+        <field name="res_model">hr.attendance.big.button.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_hr_attendance_big_button_wizard_form"/>
+        <field name="target">current</field>
+    </record>
+
     <record id="action_hr_attendance_big_button_open" model="ir.actions.server">
         <field name="name">Check In / Check Out</field>
         <field name="model_id" ref="model_hr_attendance_big_button_wizard"/>
@@ -87,7 +95,7 @@ action = {
         id="menu_hr_attendance_big_button_attendances"
         name="Attendance Clock"
         parent="hr_attendance.menu_hr_attendance_root"
-        action="action_hr_attendance_big_button_open"
+        action="action_hr_attendance_big_button"
         sequence="4"
         groups="base.group_user"
     />
