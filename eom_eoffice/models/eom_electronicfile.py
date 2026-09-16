@@ -157,7 +157,7 @@ class EomElectronicfile(models.Model):
 
     resolution = fields.Text(
         string='Resolution',
-        index=True)
+    )
 
     number_of_attachments = fields.Integer(
         string='Number of attachments',
@@ -177,6 +177,10 @@ class EomElectronicfile(models.Model):
          'UNIQUE (name)',
          'Existing electronic file (repeated code).'),
         ]
+
+    def init(self):
+        self._cr.execute(
+            'DROP INDEX IF EXISTS eom_electronicfile_resolution_index')
 
     @api.model
     def _default_company_id(self):
