@@ -62,6 +62,15 @@ ATLAS (Type 3500)
     <tr><td>ATLAS WaterMeter</td><td><code>GET /Atlas/WaterMeter/LastValue?id={id}</code></td></tr>
 </table>
 
+<h3>3.1) Pressure Sensor Endpoint</h3>
+<table border="1" cellpadding="4" cellspacing="0">
+    <tr><th>Device Type</th><th>Endpoint</th></tr>
+    <tr><td>ATLAS Sensor (Type 3512)</td><td><code>GET /Atlas/Sensor/LastValue?id={id}</code></td></tr>
+</table>
+<p>ATLAS Sensor responses include their unit. WUA pressure measurements accept
+<code>bar</code>, <code>mbar</code>, and <code>atm</code>; values in
+<code>atm</code> are converted to bar.</p>
+
 <h3>4) Response Format</h3>
 <h4>SKYreg / SKYreg Hydrant:</h4>
 <pre>{
@@ -315,7 +324,8 @@ headers = {
 }
 api_base = (base_url or '').rstrip('/')
 # target_nodes: list of dicts with keys node_id, device_type
-# device_type values: skyreg, skyreg_hydrant, skymeter_nbiot, atlas
+# device_type values: skyreg, skyreg_hydrant, skymeter_nbiot, atlas,
+# atlas_sensor
 target_nodes = bag.get('target_nodes') or []
 last_readings = {}
 errors = []
@@ -325,6 +335,7 @@ endpoint_map = {
     'skyreg_hydrant': '/SKYreg/Hydrant/WaterMeter/LastValue/',
     'skymeter_nbiot': '/SKYmeterNBIoT/WaterMeter/LastValue/',
     'atlas': '/Atlas/WaterMeter/LastValue',
+    'atlas_sensor': '/Atlas/Sensor/LastValue',
 }
 for target in target_nodes:
     if not isinstance(target, dict):
@@ -352,6 +363,9 @@ for target in target_nodes:
             })
             continue
         payload = resp.json() or {}
+        # Atlas/Sensor/LastValue returns array; others return object
+        if isinstance(payload, list):
+            payload = payload[0] if payload else {}
         last_value_obj = payload.get('LastValue') or {}
         value = last_value_obj.get('Value')
         date_str = last_value_obj.get('DateTime') or ''
@@ -537,6 +551,8 @@ endpoint_map = {
     'skyreg': '/SKYreg/WaterMeter/LastValue/',
     'skyreg_hydrant': '/SKYreg/Hydrant/WaterMeter/LastValue/',
     'skymeter_nbiot': '/SKYmeterNBIoT/WaterMeter/LastValue/',
+    'atlas': '/Atlas/WaterMeter/LastValue',
+    'atlas_sensor': '/Atlas/Sensor/LastValue',
 }
 total_upserts = 0
 total_errors = 0
@@ -574,6 +590,9 @@ for sensor_plan in plan:
             total_errors += 1
             continue
         payload = resp.json() or {}
+        # Atlas/Sensor/LastValue returns array; others return object
+        if isinstance(payload, list):
+            payload = payload[0] if payload else {}
         last_value_obj = payload.get('LastValue') or {}
         value = last_value_obj.get('Value')
         date_str = last_value_obj.get('DateTime') or ''
