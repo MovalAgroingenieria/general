@@ -4,13 +4,14 @@
 {
     "name": "Portal Extended",
     "summary": "Modify and extend Portal module",
-    "version": '10.0.1.1.0',
+    "version": '10.0.1.3.0',
     "category": "Tools",
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",
     "license": "AGPL-3",
     "depends": [
         'portal',
+        'base_setup',
     ],
     "data": [
         'data/res_config_settings_data.xml',

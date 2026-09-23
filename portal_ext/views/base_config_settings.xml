@@ -5,11 +5,22 @@
         <field name="model">base.config.settings</field>
         <field name="inherit_id" ref="base_setup.view_general_configuration" />
         <field name="arch" type="xml">
+            <field name="auth_signup_reset_password" position="before">
+                <field name="keep_partner_email_on_user_change"
+                       class="oe_inline"/>
+                <label for="keep_partner_email_on_user_change"/>
+                <br/>
+            </field>
             <group name="report" position="before">
                 <group name="portal" string="Portal">
                     <label for="partner_child_portal"/>
                     <div>
                         <field name="partner_child_portal" class="oe_inline"/>
+                    </div>
+                    <label for="portal_login_from_vat"/>
+                    <div>
+                        <field name="portal_login_from_vat"
+                               class="oe_inline"/>
                     </div>
                 </group>
             </group>

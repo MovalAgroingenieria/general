@@ -3,3 +3,4 @@
 
 import mail_message
 import res_config
+import res_users
