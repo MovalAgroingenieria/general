@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="remotecontrol_netilion" model="remotecontrol">
+            <field name="name">Netilion Connect</field>
+            <field name="remotecontrol_type">rest</field>
+            <field name="base_url">https://api.netilion.endress.com</field>
+            <field name="timeout">60</field>
+            <field name="verify_ssl">True</field>
+            <field name="rate_limit_seconds">0.5</field>
+            <field name="max_retries">3</field>
+            <field name="backoff">1.5</field>
+            <field name="readonly">True</field>
+            <field name="connection_params"><![CDATA[
+{
+  "api_key": "",
+  "username": "",
+  "password": "",
+  "history_asset_id": "",
+  "history_key": "",
+  "history_from": "",
+  "history_to": ""
+}
+            ]]></field>
+            <field name="remotecontrol_help"><![CDATA[
+<h2>Netilion Connect REST API</h2>
+<p>Configure <code>api_key</code>, <code>username</code> y <code>password</code> en <code>connection_params</code>. Netilion usa BasicAuth con el usuario técnico y la cabecera <code>API-Key</code>.</p>
+<p>Ejecute <em>Netilion: Import elements</em> para descargar una propuesta JSON. No crea datos en Odoo.</p>
+<p>En cada <code>mdm.measurement.device</code> cree un equipo por <code>asset_id</code> y configure <code>{"asset_id": 12345}</code>. Cree dentro un sensor por cada variable <code>key</code>, elija su tipo MDM y configure <code>{"key": "temperature"}</code>.</p>
+<p>Daily Sync obtiene <code>/v1/assets/{asset_id}/values?include=unit</code> una vez por equipo y reparte las lecturas por clave.</p>
+<p>La propuesta incluye valores <code>simulated</code> y <code>hold</code>; estos indicadores se conservan como información de revisión y no excluyen sensores.</p>
+<p>Get Variable History usa los campos opcionales <code>history_asset_id</code>, <code>history_key</code>, <code>history_from</code> y <code>history_to</code>.</p>
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_netilion_action_get_token" model="remotecontrol.action">
+            <field name="name">Netilion: Validate Credentials</field>
+            <field name="remote_id" ref="remotecontrol_netilion"/>
+            <field name="sequence">10</field>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+try:
+    cfg = json.loads(self.remote_id.connection_params or '{}') or {}
+except Exception:
+    cfg = {}
+api_key = (cfg.get('api_key') or '').strip()
+username = (cfg.get('username') or '').strip()
+password = cfg.get('password') or ''
+if not all([api_key, username, password]):
+    raise Exception('Missing Netilion api_key, username or password.')
+headers = {
+    'API-Key': api_key,
+    'Authorization': 'Basic %s' % base64.b64encode('%s:%s' % (username, password)),
+    'Accept': 'application/json',
+}
+resp = request_retry('GET', (base_url or '').rstrip('/') + '/v1/users/current', headers=headers, timeout=timeout)
+if resp.status_code >= 400:
+    raise Exception('Netilion credentials validation failed: %s %s' % (
+        resp.status_code, resp.text))
+bag['netilion_headers'] = headers
+bag['netilion_user'] = resp.json() or {}
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_netilion_action_refresh_token" model="remotecontrol.action">
+            <field name="name">Netilion: Refresh Token</field>
+            <field name="remote_id" ref="remotecontrol_netilion"/>
+            <field name="sequence">20</field>
+            <field name="active">False</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+raise Exception('Netilion Swagger authentication uses BasicAuth plus API-Key; no OAuth refresh token is used.')
+            ]]></field>
+        </record>
+
+        <!--
+        Previous OAuth implementation retained no records. Netilion Swagger
+        authorizes requests with BasicAuth (technical user) and API-Key.
+        -->
+        <!-- obsolete OAuth action body removed -->
+        <!--
+        
+    'Authorization': 'Basic %s' % basic,
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'Accept': 'application/json',
+}, timeout=timeout)
+if resp.status_code >= 400:
+    raise Exception('Netilion token request failed: %s %s' % (
+        resp.status_code, resp.text))
+payload = resp.json() or {}
+if not payload.get('access_token'):
+    raise Exception('Netilion login returned no access_token: %s' % payload)
+bag['access_token'] = payload['access_token']
+bag['refresh_token'] = payload.get('refresh_token') or ''
+bag['expires_in'] = payload.get('expires_in')
+        -->
+
+        <record id="remotecontrol_netilion_action_get_assets" model="remotecontrol.action">
+            <field name="name">Netilion: Get Assets</field>
+            <field name="remote_id" ref="remotecontrol_netilion"/>
+            <field name="sequence">30</field>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+headers = bag.get('netilion_headers') or {}
+if not headers:
+    raise Exception("Missing Netilion credentials in bag. Run 'Validate Credentials' first.")
+assets = []
+page = 1
+while True:
+    url = '%s/v1/assets?page=%s&per_page=100' % ((base_url or '').rstrip('/'), page)
+    resp = request_retry('GET', url, headers=headers, timeout=timeout)
+    if resp.status_code >= 400:
+        raise Exception('GET /v1/assets failed: %s %s' % (resp.status_code, resp.text))
+    payload = resp.json() or {}
+    records = payload.get('assets', [])
+    if not isinstance(records, list):
+        raise Exception('Unexpected Netilion assets response: %s' % payload)
+    assets.extend(records)
+    pagination = payload.get('pagination') or {}
+    if page >= int(pagination.get('page_count') or page):
+        break
+    page += 1
+content = json.dumps({'executed_at': fields.Datetime.now(), 'assets': assets},
+    ensure_ascii=False, indent=2).encode('utf-8')
+fname = 'netilion_assets_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+att = env['ir.attachment'].create({
+    'name': fname, 'datas_fname': fname, 'datas': base64.b64encode(content),
+    'mimetype': 'application/json', 'res_model': 'remotecontrol', 'res_id': self.remote_id.id,
+})
+self.remote_id.message_post(body=u'[Netilion] assets=%s' % len(assets), attachment_ids=[att.id])
+bag['assets'] = assets
+bag['assets_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_netilion_action_get_variable_history" model="remotecontrol.action">
+            <field name="name">Netilion: Get Variable History</field>
+            <field name="remote_id" ref="remotecontrol_netilion"/>
+            <field name="sequence">40</field>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+from urllib import urlencode
+
+headers = bag.get('netilion_headers') or {}
+if not headers:
+    raise Exception("Missing Netilion credentials in bag. Run 'Validate Credentials' first.")
+try:
+    cfg = json.loads(self.remote_id.connection_params or '{}') or {}
+except Exception:
+    cfg = {}
+asset_id = cfg.get('history_asset_id')
+key = cfg.get('history_key')
+if not asset_id or not key:
+    raise Exception('Set history_asset_id and history_key in connection_params.')
+params = {'page': 1, 'per_page': 100}
+if cfg.get('history_from'):
+    params['from'] = cfg['history_from']
+if cfg.get('history_to'):
+    params['to'] = cfg['history_to']
+url = '%s/v1/assets/%s/values/%s?%s' % (
+    (base_url or '').rstrip('/'), asset_id, key, urlencode(params))
+resp = request_retry('GET', url, headers=headers, timeout=timeout)
+if resp.status_code >= 400:
+    raise Exception('GET Netilion variable history failed: %s %s' % (resp.status_code, resp.text))
+content = json.dumps(resp.json() or [], ensure_ascii=False, indent=2).encode('utf-8')
+fname = 'netilion_history_%s_%s.json' % (asset_id, key)
+att = env['ir.attachment'].create({
+    'name': fname, 'datas_fname': fname, 'datas': base64.b64encode(content),
+    'mimetype': 'application/json', 'res_model': 'remotecontrol', 'res_id': self.remote_id.id,
+})
+self.remote_id.message_post(body=u'[Netilion] history asset=%s key=%s' % (asset_id, key), attachment_ids=[att.id])
+bag['history_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_netilion_action_get_devices" model="remotecontrol.action">
+            <field name="name">Netilion: Get Devices (Plan)</field>
+            <field name="remote_id" ref="remotecontrol_netilion"/>
+            <field name="sequence">50</field>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+condition = [('remotecontrol_params', '!=', False), ('device_id.remotecontrol_id', '=', self.remote_id.id)]
+if selected_device_ids:
+    condition.append(('device_id', 'in', selected_device_ids))
+plan = []
+for sensor in env['mdm.measurement.device.sensor'].search(condition):
+    try:
+        device_cfg = json.loads(sensor.device_id.remotecontrol_params or '{}') or {}
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+    except Exception:
+        continue
+    asset_id = device_cfg.get('asset_id')
+    key = sensor_cfg.get('key')
+    if asset_id and key:
+        plan.append({'sensor_id': sensor.id, 'device_id': sensor.device_id.id,
+                     'asset_id': asset_id, 'key': key})
+bag['sensors_plan'] = plan
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_netilion_action_get_readings" model="remotecontrol.action">
+            <field name="name">Netilion: Get Readings</field>
+            <field name="remote_id" ref="remotecontrol_netilion"/>
+            <field name="sequence">60</field>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+headers = bag.get('netilion_headers') or {}
+if not headers:
+    raise Exception("Missing Netilion credentials in bag. Run 'Validate Credentials' first.")
+plans_by_asset = {}
+for plan in bag.get('sensors_plan') or []:
+    plans_by_asset.setdefault(str(plan['asset_id']), []).append(plan)
+items = []
+total_upserts = 0
+total_errors = 0
+for asset_id, asset_plans in plans_by_asset.items():
+    try:
+        values = []
+        page = 1
+        while True:
+            url = '%s/v1/assets/%s/values?include=unit&page=%s&per_page=100' % ((base_url or '').rstrip('/'), asset_id, page)
+            resp = request_retry('GET', url, headers=headers, timeout=timeout)
+            if resp.status_code >= 400:
+                raise Exception('%s %s' % (resp.status_code, resp.text))
+            payload = resp.json() or {}
+            records = payload.get('values', [])
+            if not isinstance(records, list):
+                raise Exception('Unexpected Netilion values response: %s' % payload)
+            values.extend(records)
+            pagination = payload.get('pagination') or {}
+            if page >= int(pagination.get('page_count') or page):
+                break
+            page += 1
+        values_by_key = dict((record.get('key'), record) for record in values if record.get('key'))
+        for plan in asset_plans:
+            record = values_by_key.get(plan['key']) or {}
+            value = record.get('value')
+            timestamp = record.get('timestamp') or record.get('time') or record.get('created_at') or ''
+            if value in (None, '') or not timestamp:
+                raise Exception('Missing value or timestamp for key %s' % plan['key'])
+            date_iso = timestamp.replace('T', ' ').replace('Z', '')[:19]
+            fields.Datetime.from_string(date_iso)
+            self.remote_id.upsert('mdm.measurement.device.sensor.reading',
+                {'sensor_id': plan['sensor_id'], 'measurement_time': date_iso},
+                {'value': float(value), 'device_id': plan['device_id']})
+            total_upserts += 1
+            items.append({'asset_id': asset_id, 'sensor_id': plan['sensor_id'],
+                          'key': plan['key'], 'value': float(value),
+                          'date': date_iso, 'unit': record.get('unit')})
+    except Exception as error:
+        total_errors += len(asset_plans)
+        for plan in asset_plans:
+            items.append({'asset_id': asset_id, 'sensor_id': plan['sensor_id'],
+                          'key': plan['key'], 'error': str(error)})
+content = json.dumps({'executed_at': fields.Datetime.now(), 'total_upserts': total_upserts,
+    'total_errors': total_errors, 'items': items}, ensure_ascii=False, indent=2).encode('utf-8')
+fname = 'netilion_readings_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+att = env['ir.attachment'].create({
+    'name': fname, 'datas_fname': fname, 'datas': base64.b64encode(content),
+    'mimetype': 'application/json', 'res_model': 'remotecontrol', 'res_id': self.remote_id.id,
+})
+self.remote_id.message_post(body=u'[Netilion] upserts=%s errors=%s' % (total_upserts, total_errors), attachment_ids=[att.id])
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_netilion_action_import_elements" model="remotecontrol.action">
+            <field name="name">Netilion: Import elements</field>
+            <field name="remote_id" ref="remotecontrol_netilion"/>
+            <field name="sequence">70</field>
+            <field name="active">True</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+headers = bag.get('netilion_headers') or {}
+if not headers:
+    raise Exception("Missing Netilion credentials in bag. Run 'Validate Credentials' first.")
+assets = bag.get('assets') or []
+if not assets:
+    raise Exception("Missing assets in bag. Run 'Get Assets' first.")
+elements = []
+sensor_config_suggestions = []
+diagnostics = []
+for asset in assets:
+    asset_id = asset.get('id')
+    if not asset_id:
+        continue
+    serial_number = asset.get('serial_number') or str(asset_id)
+    diagnostic = {'asset_id': asset_id, 'serial_number': serial_number, 'pages': 0,
+                  'values': 0, 'error': ''}
+    values = []
+    try:
+        page = 1
+        while True:
+            url = '%s/v1/assets/%s/values?include=unit&page=%s&per_page=100' % (
+                (base_url or '').rstrip('/'), asset_id, page)
+            resp = request_retry('GET', url, headers=headers, timeout=timeout)
+            if resp.status_code >= 400:
+                raise Exception('%s %s' % (resp.status_code, resp.text))
+            payload = resp.json() or {}
+            records = payload.get('values', [])
+            if not isinstance(records, list):
+                raise Exception('Unexpected Netilion values response: %s' % payload)
+            values.extend(records)
+            diagnostic['pages'] += 1
+            pagination = payload.get('pagination') or {}
+            if page >= int(pagination.get('page_count') or page):
+                break
+            page += 1
+        diagnostic['values'] = len(values)
+    except Exception as error:
+        diagnostic['error'] = str(error)
+    diagnostics.append(diagnostic)
+    element = {
+        'asset_id': asset_id,
+        'serial_number': serial_number,
+        'asset': asset,
+        'values': values,
+        'odoo_device_name': serial_number,
+        'odoo_device_params': json.dumps({'asset_id': asset_id}, ensure_ascii=True),
+    }
+    elements.append(element)
+    for value_data in values:
+        key = value_data.get('key')
+        if not key:
+            continue
+        unit = value_data.get('unit') or {}
+        sensor_config_suggestions.append({
+            'asset_id': asset_id,
+            'serial_number': serial_number,
+            'key': key,
+            'value': value_data.get('value'),
+            'timestamp': value_data.get('timestamp'),
+            'unit_id': unit.get('id'),
+            'unit_href': unit.get('href'),
+            'status': value_data.get('status'),
+            'simulated': value_data.get('simulated', False),
+            'hold': value_data.get('hold', False),
+            'odoo_sensor_name': key,
+            'odoo_device_params': json.dumps({'asset_id': asset_id}, ensure_ascii=True),
+            'odoo_sensor_params': json.dumps({'key': key}, ensure_ascii=True),
+        })
+audit = {
+    'executed_at': fields.Datetime.now(),
+    'total_assets': len(elements),
+    'total_sensor_suggestions': len(sensor_config_suggestions),
+    'total_errors': len([item for item in diagnostics if item.get('error')]),
+    'elements': elements,
+    'sensor_config_suggestions': sensor_config_suggestions,
+    'diagnostics': diagnostics,
+}
+content = json.dumps(audit, ensure_ascii=False, indent=2, default=str).encode('utf-8')
+fname = 'netilion_elements_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+att = env['ir.attachment'].create({
+    'name': fname, 'datas_fname': fname, 'datas': base64.b64encode(content),
+    'mimetype': 'application/json', 'res_model': 'remotecontrol', 'res_id': self.remote_id.id,
+})
+self.remote_id.message_post(
+    body=u'[Netilion] Import elements: %s assets, %s sensor suggestions, %s errors' % (
+        len(elements), len(sensor_config_suggestions), audit['total_errors']),
+    attachment_ids=[att.id])
+bag['elements_attachment_id'] = att.id
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_netilion_procedure_daily_sync" model="remotecontrol.procedure">
+            <field name="name">Netilion: Daily Sync</field>
+            <field name="remote_id" ref="remotecontrol_netilion"/>
+            <field name="sequence">10</field>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="True"/>
+        </record>
+        <record id="remotecontrol_netilion_step_daily_10_token" model="remotecontrol.step">
+            <field name="name">Validate Credentials</field>
+            <field name="procedure_id" ref="remotecontrol_netilion_procedure_daily_sync"/>
+            <field name="action_id" ref="remotecontrol_netilion_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+        <record id="remotecontrol_netilion_step_daily_20_devices" model="remotecontrol.step">
+            <field name="name">Get Devices (Plan)</field>
+            <field name="procedure_id" ref="remotecontrol_netilion_procedure_daily_sync"/>
+            <field name="action_id" ref="remotecontrol_netilion_action_get_devices"/>
+            <field name="sequence">20</field>
+        </record>
+        <record id="remotecontrol_netilion_step_daily_30_readings" model="remotecontrol.step">
+            <field name="name">Get Readings</field>
+            <field name="procedure_id" ref="remotecontrol_netilion_procedure_daily_sync"/>
+            <field name="action_id" ref="remotecontrol_netilion_action_get_readings"/>
+            <field name="sequence">30</field>
+        </record>
+
+        <record id="remotecontrol_netilion_procedure_import_elements" model="remotecontrol.procedure">
+            <field name="name">Netilion: Import elements</field>
+            <field name="remote_id" ref="remotecontrol_netilion"/>
+            <field name="sequence">20</field>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="False"/>
+        </record>
+        <record id="remotecontrol_netilion_step_import_10_token" model="remotecontrol.step">
+            <field name="name">Validate Credentials</field>
+            <field name="procedure_id" ref="remotecontrol_netilion_procedure_import_elements"/>
+            <field name="action_id" ref="remotecontrol_netilion_action_get_token"/>
+            <field name="sequence">10</field>
+        </record>
+        <record id="remotecontrol_netilion_step_import_20_assets" model="remotecontrol.step">
+            <field name="name">Get Assets</field>
+            <field name="procedure_id" ref="remotecontrol_netilion_procedure_import_elements"/>
+            <field name="action_id" ref="remotecontrol_netilion_action_get_assets"/>
+            <field name="sequence">20</field>
+        </record>
+        <record id="remotecontrol_netilion_step_import_30_elements" model="remotecontrol.step">
+            <field name="name">Import elements</field>
+            <field name="procedure_id" ref="remotecontrol_netilion_procedure_import_elements"/>
+            <field name="action_id" ref="remotecontrol_netilion_action_import_elements"/>
+            <field name="sequence">30</field>
+        </record>
+    </data>
+</odoo>
