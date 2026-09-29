@@ -59,6 +59,21 @@ class TestGeneralEntity(TransactionCase):
         with self.assertRaises(ValidationError):
             self.secondary_member_1.write({"is_primary_entity": True})
 
+    def test_child_contact_is_not_an_entity(self):
+        """A child contact cannot be created as an entity or get a code."""
+        child_contact = self.partner_model.create(
+            {
+                "name": "Test Child Contact",
+                "parent_id": self.primary_entity.id,
+                "is_primary_entity": True,
+                "is_secondary_entity": True,
+                "entity_global_code": 3001,
+            }
+        )
+        self.assertFalse(child_contact.is_primary_entity)
+        self.assertFalse(child_contact.is_secondary_entity)
+        self.assertFalse(child_contact.entity_global_code)
+
     # ------------------------------------------------------------------
     # Relationship creation and computed fields
     # ------------------------------------------------------------------

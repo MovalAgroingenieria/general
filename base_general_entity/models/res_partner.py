@@ -91,6 +91,15 @@ class ResPartner(models.Model):
         sequences. Only applied when no code is provided (empty or 0);
         existing/manual codes are always respected.
         """
+        for vals in vals_list:
+            if vals.get("parent_id"):
+                vals.update(
+                    {
+                        "is_primary_entity": False,
+                        "is_secondary_entity": False,
+                        "entity_global_code": False,
+                    }
+                )
         records = super().create(vals_list)
         for is_primary in (True, False):
             pending = records.filtered(
