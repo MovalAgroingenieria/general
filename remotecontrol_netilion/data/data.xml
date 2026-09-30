@@ -80,7 +80,7 @@ raise Exception('Netilion Swagger authentication uses BasicAuth plus API-Key; no
         -->
         <!-- obsolete OAuth action body removed -->
         <!--
-        
+
     'Authorization': 'Basic %s' % basic,
     'Content-Type': 'application/x-www-form-urlencoded',
     'Accept': 'application/json',
@@ -245,9 +245,12 @@ for asset_id, asset_plans in plans_by_asset.items():
                 raise Exception('Missing value or timestamp for key %s' % plan['key'])
             date_iso = timestamp.replace('T', ' ').replace('Z', '')[:19]
             fields.Datetime.from_string(date_iso)
-            self.remote_id.upsert('mdm.measurement.device.sensor.reading',
-                {'sensor_id': plan['sensor_id'], 'measurement_time': date_iso},
-                {'value': float(value), 'device_id': plan['device_id']})
+            with env.cr.savepoint():
+                self.remote_id.with_context(
+                    disable_test_create_reading=True).upsert(
+                    'mdm.measurement.device.sensor.reading',
+                    {'sensor_id': plan['sensor_id'], 'measurement_time': date_iso},
+                    {'value': float(value), 'device_id': plan['device_id']})
             total_upserts += 1
             items.append({'asset_id': asset_id, 'sensor_id': plan['sensor_id'],
                           'key': plan['key'], 'value': float(value),
@@ -257,8 +260,19 @@ for asset_id, asset_plans in plans_by_asset.items():
         for plan in asset_plans:
             items.append({'asset_id': asset_id, 'sensor_id': plan['sensor_id'],
                           'key': plan['key'], 'error': str(error)})
-content = json.dumps({'executed_at': fields.Datetime.now(), 'total_upserts': total_upserts,
-    'total_errors': total_errors, 'items': items}, ensure_ascii=False, indent=2).encode('utf-8')
+def to_unicode(value):
+    if isinstance(value, str):
+        return value.decode('utf-8', 'replace')
+    if isinstance(value, list):
+        return [to_unicode(item) for item in value]
+    if isinstance(value, dict):
+        return dict((to_unicode(key), to_unicode(item))
+                    for key, item in value.items())
+    return value
+
+content = json.dumps(to_unicode({
+    'executed_at': fields.Datetime.now(), 'total_upserts': total_upserts,
+    'total_errors': total_errors, 'items': items}), ensure_ascii=False, indent=2).encode('utf-8')
 fname = 'netilion_readings_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
 att = env['ir.attachment'].create({
     'name': fname, 'datas_fname': fname, 'datas': base64.b64encode(content),
