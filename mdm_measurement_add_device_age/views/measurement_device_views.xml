@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="mdm_device_view_form" model="ir.ui.view">
+        <field name="name">Measurement Device Form</field>
+        <field name="model">mdm.measurement.device</field>
+        <field name="inherit_id" ref="mdm_sensor_management.mdm_device_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='installation_date']" position="after">
+                <field name="device_age" readonly="1" />
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
