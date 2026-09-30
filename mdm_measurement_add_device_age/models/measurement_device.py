@@ -24,5 +24,6 @@ class MeasurementDevice(models.Model):
             today = fields.Date.from_string(fields.Date.today())
             installation_date = fields.Date.from_string(self.installation_date)
 
-            self.device_age = (today - installation_date).days
+            days = (today - installation_date).days
+            self.device_age = days if days > 0 else 0
 
