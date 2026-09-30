@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_move_line_tree" model="ir.ui.view">
+        <field name="name">account.move.line.list.primary.entity</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account.view_move_line_tree" />
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="primary_entity_manual_allowed" column_invisible="True" />
+                <field name="primary_entity_id"
+                    readonly="not primary_entity_manual_allowed" optional="hide" />
+            </field>
+        </field>
+    </record>
+
+    <record id="view_move_line_form_primary_entity" model="ir.ui.view">
+        <field name="name">account.move.line.form.primary.entity</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account.view_move_line_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet/group/field[@name='partner_id']" position="after">
+                <field name="primary_entity_manual_allowed" invisible="1" />
+                <field name="primary_entity_id"
+                    readonly="not primary_entity_manual_allowed" />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_move_line_filter" model="ir.ui.view">
+        <field name="name">account.move.line.search.primary.entity</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account.view_account_move_line_filter" />
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="primary_entity_id" />
+            </field>
+            <filter name="to_check" position="after">
+                <separator />
+                <filter name="with_primary_entity" string="With Primary Entity"
+                    domain="[('primary_entity_id', '!=', False)]" />
+                <filter name="without_primary_entity" string="Without Primary Entity"
+                    domain="[('primary_entity_id', '=', False)]" />
+                <separator />
+            </filter>
+            <filter name="group_by_partner" position="after">
+                <filter name="group_by_primary_entity" string="Primary Entity"
+                    context="{'group_by': 'primary_entity_id'}" />
+            </filter>
+        </field>
+    </record>
+
+    <record id="account_move_line_view_list" model="ir.ui.view">
+        <field name="name">account.move.line.invoice.list.primary.entity</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="base_invoicing.account_move_line_view_list" />
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="primary_entity_manual_allowed" column_invisible="True" />
+                <field name="primary_entity_id"
+                    readonly="not primary_entity_manual_allowed" optional="hide" />
+            </field>
+        </field>
+    </record>
+
+    <record id="account_move_line_view_search" model="ir.ui.view">
+        <field name="name">account.move.line.invoice.search.primary.entity</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="base_invoicing.account_move_line_view_search" />
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="primary_entity_id" />
+            </field>
+            <filter name="my_invoice_lines" position="after">
+                <separator />
+                <filter name="with_primary_entity" string="With Primary Entity"
+                    domain="[('primary_entity_id', '!=', False)]" />
+                <filter name="without_primary_entity" string="Without Primary Entity"
+                    domain="[('primary_entity_id', '=', False)]" />
+                <separator />
+            </filter>
+            <filter name="grouped_by_partner_id" position="after">
+                <filter name="group_by_primary_entity" string="Primary Entity"
+                    context="{'group_by': 'primary_entity_id'}" />
+            </filter>
+        </field>
+    </record>
+</odoo>

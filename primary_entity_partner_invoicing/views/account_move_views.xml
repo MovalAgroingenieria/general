@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_move_form" model="ir.ui.view">
+        <field name="name">account.move.form.primary.entity</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='name']" position="after">
+                <field name="primary_entity_manual_allowed" column_invisible="True" />
+                <field name="primary_entity_id"
+                    readonly="not primary_entity_manual_allowed" optional="hide" />
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/list/field[@name='name']" position="after">
+                <field name="primary_entity_manual_allowed" column_invisible="True" />
+                <field name="primary_entity_id"
+                    readonly="not primary_entity_manual_allowed" optional="hide" />
+            </xpath>
+        </field>
+    </record>
+</odoo>
