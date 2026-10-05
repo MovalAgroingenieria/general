@@ -24,7 +24,11 @@ def _connection_info_for(db_name):
     db_or_uri, connection_info = odoo.sql_db.connection_info_for(db_name)
     for p in ('host', 'port'):
         cfg = (os.environ.get('ODOO_IMDISPATCHER_DB_%s' % p.upper())
-               or config.get('imdispatcher_db_' + p))
+               or config.get('imdispatcher_db_' + p)
+               or os.environ.get(
+                   'ODOO_QUEUE_JOB_JOBRUNNER_DB_%s' % p.upper())
+               or config.misc
+               .get('queue_job', {}).get('jobrunner_db_' + p))
         if cfg:
             connection_info[p] = cfg
     return connection_info
