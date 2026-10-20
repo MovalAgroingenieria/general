@@ -12,7 +12,12 @@
 // Vars
 $frontend_url = '[CHANGE-ME]';
 $cipher_key = 'a%C*F-JaNdRgUkXqj8Ymx59IYhv0vHe2' [CHANGE-ME];
-$authorized_organizations = array("DIRECCION GENERAL DE LA POLICIA", "FNMT-RCM", "ACCV");
+$authorized_organizations = array(
+   "DIRECCION GENERAL DE LA POLICIA",
+   "FNMT-RCM",
+   "ACCV",
+   "UANATACA S.A."
+);
 $RootCA = "/etc/ssl/certs/sede_accepted_certs.pem";
 $sslClientVerify = getenv('SSL_CLIENT_VERIFY');
 
@@ -103,6 +108,8 @@ if ( ! $ocspUrl) {
       $ocspUrl = "http://ocspusu.cert.fnmt.es/ocspusu/OcspResponder/";
    } elseif ($authority == "ACCV") {
       $ocspUrl = "http://ocsp.accv.es/";
+   } elseif ($authority == "UANATACA S.A.") {
+      $ocspUrl = "http://ocsp1.uanataca.com/public/pki/ocsp/";
    } else {
       echo '<div>';
       echo '<strong>Advertencia</strong>';

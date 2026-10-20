@@ -112,6 +112,46 @@ Downloads
 | DGP        | https://www.policia.es/_es/certificados_digitales.php                                    |              |
 +------------+------------------------------------------------------------------------------------------+--------------+
 
+UANATACA
+--------
+
+Official downloads: https://web.uanataca.com/es/certificados-ca
+
+* Root: UANATACA ROOT 2016, valid until 11/03/2041.
+* Intermediate: UANATACA CA1 2016, valid until 11/03/2029.
+* Intermediate: UANATACA CA2 2016, valid until 11/03/2029.
+* Intermediate: UANATACA CA1 2021, valid until 03/06/2034.
+* Intermediate: UANATACA CA2 2021, valid until 03/06/2034.
+
+The root and four issuing CA certificates are included in
+*static/certs/ac_uanataca.pem* and in the combined web server bundle.
+Timestamping and delivery service certificates are not included.
+The authorized issuer organization is exactly ``UANATACA S.A.``.
+
+The OCSP URL embedded in the client certificate takes precedence. If absent,
+the fallback is ``http://ocsp1.uanataca.com/public/pki/ocsp/``. Certificate chain
+and revocation checks remain mandatory.
+
+For an existing installation:
+
+1. Update the deployed copy of *static/php/eoffice_generic.php*, preserving
+   the site's frontend URL and cipher key. Add the UANATACA organization and
+   OCSP fallback from this template.
+2. Replace the deployed *sede_accepted_certs.pem* with the updated combined
+   bundle, or verify that its symbolic link points to the updated file.
+3. Reload the web server so that its client certificate trust store is refreshed.
+4. Test access with a valid UANATACA personal certificate. Expired, revoked
+   and untrusted certificates must still be rejected.
+
+Updating the Odoo module alone does not update separately deployed PHP or
+certificate files.
+
+Standalone regression checks (PHP CLI with the OpenSSL extension):
+
+.. code-block:: console
+
+   php tests/test_uanataca.php
+
 Credits
 =======
 
