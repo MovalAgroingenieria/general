@@ -104,14 +104,15 @@ Communication is done in JSON format, with the following main fields:</p>
   "comando": "consultaHistoricos",
   "correo": "USERNAME",
   "contrasenya": "PASSWORD",
-  "variables": [42955],
-  "fechaIni": "2025-10-01 00:00:00"
+  "variables": [42955, 42956],
+  "fechaIni": "2025-10-01 00:00:00",
+  "fechaFin": "2025-10-29 00:00:00"
 }</pre>
 
 <p>The API returns a list of readings, each containing two values: the <strong>timestamp</strong> (for example, "2025-10-15 08:00:00") and the <strong>measured value</strong> (for example, "75").
 Each pair becomes a reading in Odoo.</p>
 
-<p>The system performs one request per configured sensor, ensuring that each reading is linked to the correct sensor and device.</p>
+<p>The system groups variables in windows of up to 28 days, always sends both dates, and limits calls and retries per command. Failed sensor windows are rolled back and stopped to preserve pending history. Quota coordination covers workers in this database; other databases or external clients sharing credentials need separate coordination.</p>
 
 <hr>
 
@@ -186,6 +187,7 @@ A summary message is also recorded in the same entry, allowing historical tracki
             <field name="readonly">True</field>
             <field name="code"><![CDATA[
 from datetime import datetime
+import pytz
 
 Remote = self.remote_id
 Sensor = env['mdm.measurement.device.sensor']
@@ -230,8 +232,10 @@ for sensor in sensors:
         last_reading_time = last_readings_map.get(sensor.id)
         if last_reading_time:
             try:
-                last_dt = fields.Datetime.from_string(
-                    last_reading_time)
+                last_dt = (last_reading_time if isinstance(last_reading_time, datetime)
+                           else fields.Datetime.from_string(last_reading_time))
+                last_dt = pytz.UTC.localize(last_dt).astimezone(
+                    pytz.timezone('Europe/Madrid'))
                 start_date = last_dt.strftime('%Y-%m-%d %H:%M:%S')
             except Exception:
                 start_date = str(last_reading_time)
@@ -273,159 +277,192 @@ bag['sensors_plan'] = plan
             <field name="backoff">1.6</field>
             <field name="readonly">True</field>
             <field name="code"><![CDATA[
-
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 import hashlib
+import math
 
 Remote = self.remote_id
-SensorModel = env['mdm.measurement.device.sensor']
-ReadingModel = env['mdm.measurement.device.sensor.reading']
 plan = bag.get('sensors_plan') or []
-base_url = Remote.base_url
-cfg = {}
-try:
-    cfg = json.loads(Remote.connection_params or '{}') or {}
-except Exception:
-    cfg = {}
+cfg = json.loads(Remote.connection_params or '{}') or {}
 username = (cfg.get('username') or '').strip()
 password = (cfg.get('password') or '').strip()
 if not username or not password:
-    raise Exception("Missing credentials: please configure username/password in connection_params")
+    raise Exception('Missing credentials: configure username/password')
 password_md5 = hashlib.md5(password.encode('utf-8')).hexdigest()
-url = base_url + '/apirest'
+url = Remote.base_url.rstrip('/') + '/apirest'
 headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+
+# Shared quota control for workers in the same database.
+import requests
+import time
+
+def salz_request(payload, attempts=None):
+    attempts = attempts if attempts is not None else []
+    quota = '%s|%s|%s' % (
+        url.rstrip('/').lower(), username.lower(), payload['comando'])
+    lock_id = int(hashlib.sha256(quota.encode('utf-8')).hexdigest()[:15], 16)
+    retries = min(2, max(0, int(self.max_retries or 0)))
+    with env.registry.cursor() as quota_cr:
+        quota_cr.execute('SELECT pg_advisory_xact_lock(%s)', (lock_id,))
+        for attempt in range(retries + 1):
+            detail = {'attempt': attempt + 1, 'started_at': fields.Datetime.now()}
+            attempts.append(detail)
+            try:
+                response = requests.request(
+                    'POST', url, headers=headers, json=payload,
+                    timeout=Remote.timeout or 60,
+                    verify=Remote.verify_ssl, allow_redirects=False)
+            except requests.RequestException as exc:
+                detail['network_error'] = type(exc).__name__
+                if attempt >= retries:
+                    raise
+                continue
+            finally:
+                # No hidden retries. Keep the lock through every cooldown.
+                time.sleep(3.1)
+            detail['status'] = response.status_code
+            try:
+                body = response.json()
+            except ValueError:
+                body = {}
+            api_code = body.get('codError') if isinstance(body, dict) else None
+            detail['codError'] = api_code
+            limited = response.status_code == 429 or str(api_code) == '19'
+            transient = response.status_code >= 500
+            if (limited or transient) and attempt < retries:
+                delay = 61.0
+                try:
+                    delay = max(delay, float(response.headers.get('Retry-After', 0)))
+                except (TypeError, ValueError):
+                    pass
+                if delay > 300:
+                    detail['retry_deferred'] = True
+                    return response
+                detail['retry_wait_seconds'] = delay
+                # Holding the shared lock prevents another local worker
+                # from consuming this command's quota during recovery.
+                remaining = delay
+                while remaining > 0:
+                    pause = min(remaining, 30.0)
+                    time.sleep(pause)
+                    remaining -= pause
+                continue
+            return response
+
+
+def parse_date(value):
+    value = unicode(value).strip().replace('/', '-')
+    if len(value) == 10:
+        value += ' 00:00:00'
+    return datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+
+def error_text(exc):
+    try:
+        return unicode(exc)
+    except Exception:
+        return str(exc).decode('utf-8', 'replace')
+
+tz_madrid = pytz.timezone('Europe/Madrid')
+end = datetime.now(pytz.UTC).astimezone(tz_madrid).replace(tzinfo=None, microsecond=0)
 total_upserts = 0
 total_errors = 0
 items = []
-tz_madrid = pytz.timezone('Europe/Madrid')
-tz_utc = pytz.timezone('UTC')
-for sensor_plan in plan:
-    sensor_id = sensor_plan['sensor_id']
-    device_id = sensor_plan['device_id']
-    sensor_id_value = sensor_plan['sensor_id_value']
-    start_date = sensor_plan['start_date']
-    if len(start_date) == 10:
-        fecha_ini = start_date + ' 00:00:00'
-    else:
-        fecha_ini = start_date
+pending = []
+for entry in plan:
     try:
-        s = fecha_ini.strip().replace('/', '-')
-        parts = s.split(' ')
-        if len(parts) == 1:
-            date_part = parts[0]
-            time_part = '00:00:00'
-        else:
-            date_part = parts[0]
-            time_part = parts[1]
-        ymd = [b.zfill(2) for b in date_part.split('-')]
-        hms = [p.zfill(2) for p in time_part.split(':')]
-        while len(hms) < 3:
-            hms.append('00')
-        fecha_ini = "%s-%s-%s %02d:%02d:%02d" % (
-            ymd[0], ymd[1], ymd[2],
-            int(hms[0]), int(hms[1]), int(hms[2])
-        )
-    except Exception:
-        pass
-    payload = {
-        'comando': 'consultaHistoricos',
-        'correo': username,
-        'contrasenya': password_md5,
-        'variables': [sensor_id_value],
-        'fechaIni': fecha_ini,
-    }
-    try:
-        resp = request_retry('POST', url, headers=headers, json=payload, timeout=Remote.timeout)
-        code = resp.status_code
-        if code >= 400:
-            items.append({
-                'sensor_id': sensor_id,
-                'status': code,
-                'error': (resp.text or '')[:400],
-                'url': url
-            })
-            total_errors += 1
-            continue
-        data = resp.json() or {}
-        cod_error = data.get('codError', -1)
-        if cod_error != 0:
-            error_msg = data.get('error', '')
-            if isinstance(error_msg, list):
-                error_msg = '; '.join(error_msg)
-            items.append({
-                'sensor_id': sensor_id,
-                'status': code,
-                'error': 'API codError=%s: %s' % (cod_error, error_msg),
-                'url': url
-            })
-            total_errors += 1
-            continue
-        historicos = data.get('historicos', {}) or {}
-        readings = historicos.get(str(sensor_id_value)) or []
-        upserts = 0
-        errs = 0
-        readings_summary = []
-        for entry in readings:
-            ts_s = entry.get('fecha')
-            val_s = entry.get('valor')
-            if not ts_s or val_s is None:
-                continue
-            try:
-                valf = float(val_s)
-            except Exception:
-                continue
-            try:
-                s2 = unicode(ts_s).strip().replace('/', '-')
-                parts2 = s2.split(' ')
-                if len(parts2) == 1:
-                    date_part2 = parts2[0]
-                    time_part2 = '00:00:00'
-                else:
-                    date_part2 = parts2[0]
-                    time_part2 = parts2[1]
-                ymd2 = [b.zfill(2) for b in date_part2.split('-')]
-                hms2 = [p.zfill(2) for p in time_part2.split(':')]
-                while len(hms2) < 3:
-                    hms2.append('00')
-                ts_norm = "%s-%s-%s %02d:%02d:%02d" % (
-                    ymd2[0], ymd2[1], ymd2[2],
-                    int(hms2[0]), int(hms2[1]), int(hms2[2])
-                )
-                dt_ts = datetime.strptime(ts_norm, '%Y-%m-%d %H:%M:%S')
-                dt_local = tz_madrid.localize(dt_ts)
-                dt_utc = dt_local.astimezone(tz_utc)
-                ts_store = dt_utc.strftime('%Y-%m-%d %H:%M:%S')
-            except Exception:
-                ts_store = ts_s
-            try:
-                Remote.upsert(
-                    'mdm.measurement.device.sensor.reading',
-                    {'sensor_id': sensor_id, 'measurement_time': ts_store},
-                    {'value': valf, 'remotecontrol_origin_id': Remote.id}
-                )
-                upserts += 1
-                readings_summary.append({'ts': ts_store, 'value': valf})
-            except Exception as e:
-                errs += 1
-                readings_summary.append({'ts': ts_store, 'value': valf, 'error': str(e)})
-        total_upserts += upserts
-        total_errors += errs
-        items.append({
-            'sensor_id': sensor_id,
-            'device_id': device_id,
-            'sensor_id_value': sensor_id_value,
-            'status': 200,
-            'url': url,
-            'points_found': len(readings),
-            'upserts': upserts,
-            'errors': errs,
-            'readings': readings_summary,
-        })
-    except Exception as e:
+        sensor = dict(entry)
+        sensor['cursor'] = parse_date(sensor['start_date'])
+        if sensor['cursor'] < end:
+            pending.append(sensor)
+    except Exception as exc:
         total_errors += 1
-        items.append({'sensor_id': sensor_id, 'status': -1, 'error': str(e)})
+        items.append({'sensor_id': entry.get('sensor_id'), 'error': error_text(exc)})
+
+while pending:
+    start = min(s['cursor'] for s in pending)
+    finish = min(start + timedelta(days=28), end)
+    batch = [s for s in pending if s['cursor'] < finish]
+    variables = sorted(set(s['sensor_id_value'] for s in batch))
+    payload = {
+        'comando': 'consultaHistoricos', 'correo': username,
+        'contrasenya': password_md5, 'variables': variables,
+        'fechaIni': start.strftime('%Y-%m-%d %H:%M:%S'),
+        'fechaFin': finish.strftime('%Y-%m-%d %H:%M:%S'),
+    }
+    request_item = {
+        'fechaIni': payload['fechaIni'], 'fechaFin': payload['fechaFin'],
+        'variables': variables, 'sensors': [], 'attempts': [],
+    }
+    items.append(request_item)
+    try:
+        resp = salz_request(payload, request_item['attempts'])
+        request_item['status'] = resp.status_code
+        if not 200 <= resp.status_code < 300:
+            raise Exception('HTTP %s from consultaHistoricos' % resp.status_code)
+        data = resp.json()
+        request_item['codError'] = data.get('codError', -1)
+        if str(data.get('codError')) != '0':
+            raise Exception('API codError=%s: %s' % (
+                data.get('codError'), data.get('error', '')))
+        historicos = data.get('historicos')
+        if not isinstance(historicos, dict):
+            raise Exception('Invalid historicos response')
+    except Exception as exc:
+        request_item['error'] = error_text(exc)
+        if (request_item.get('status') == 429 or
+                str(request_item.get('codError')) == '19'):
+            request_item['stopped_reason'] = 'rate_limit_exhausted'
+            request_item['pending_sensor_ids'] = [s['sensor_id'] for s in pending]
+            total_errors += len(pending)
+            # A command-wide rejection must not trigger more batches.
+            break
+        total_errors += len(batch)
+        # Never advance affected sensors past a failed interval.
+        pending = [s for s in pending if s not in batch]
+        continue
+    for sensor in batch:
+        result = {'sensor_id': sensor['sensor_id'],
+                  'sensor_id_value': sensor['sensor_id_value'], 'upserts': 0}
+        request_item['sensors'].append(result)
+        try:
+            variable = str(sensor['sensor_id_value'])
+            if variable not in historicos:
+                raise Exception('Variable missing from historicos: %s' % variable)
+            values = historicos[variable]
+            if not isinstance(values, list):
+                raise Exception('Invalid readings list: %s' % variable)
+            points = []
+            for value in values:
+                stamp = parse_date(value['fecha'])
+                number = float(value['valor'])
+                if math.isnan(number) or math.isinf(number):
+                    raise Exception('Non-finite reading')
+                if stamp < sensor['cursor']:
+                    continue
+                if stamp > finish:
+                    raise Exception('Reading outside requested interval')
+                utc = tz_madrid.localize(stamp).astimezone(pytz.UTC)
+                points.append((utc.strftime('%Y-%m-%d %H:%M:%S'), number))
+            # Atomic sensor/window: a failed create must not leave newer
+            # readings that would hide a gap on the next execution.
+            with env.cr.savepoint():
+                for stamp, number in sorted(points):
+                    Remote.upsert(
+                        'mdm.measurement.device.sensor.reading',
+                        {'sensor_id': sensor['sensor_id'], 'measurement_time': stamp},
+                        {'value': number, 'remotecontrol_origin_id': Remote.id})
+            result['upserts'] = len(points)
+            total_upserts += len(points)
+            sensor['cursor'] = finish
+            if finish == end:
+                pending.remove(sensor)
+        except Exception as exc:
+            result['error'] = error_text(exc)
+            total_errors += 1
+            pending.remove(sensor)
 audit = {
+    'integration_version': '10.0.1.0.8',
     'executed_at': fields.Datetime.now(),
     'total_upserts': total_upserts,
     'total_errors': total_errors,
@@ -515,28 +552,84 @@ if not username or not password:
         "in connection_params"
     )
 password_md5 = hashlib.md5(password.encode('utf-8')).hexdigest()
-url = base_url + '/apirest'
+url = base_url.rstrip('/') + '/apirest'
 headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
 }
+
+# Shared quota control for workers in the same database.
+import requests
+import time
+
+def salz_request(payload, attempts=None):
+    attempts = attempts if attempts is not None else []
+    quota = '%s|%s|%s' % (
+        url.rstrip('/').lower(), username.lower(), payload['comando'])
+    lock_id = int(hashlib.sha256(quota.encode('utf-8')).hexdigest()[:15], 16)
+    retries = min(2, max(0, int(self.max_retries or 0)))
+    with env.registry.cursor() as quota_cr:
+        quota_cr.execute('SELECT pg_advisory_xact_lock(%s)', (lock_id,))
+        for attempt in range(retries + 1):
+            detail = {'attempt': attempt + 1, 'started_at': fields.Datetime.now()}
+            attempts.append(detail)
+            try:
+                response = requests.request(
+                    'POST', url, headers=headers, json=payload,
+                    timeout=Remote.timeout or 60,
+                    verify=Remote.verify_ssl, allow_redirects=False)
+            except requests.RequestException as exc:
+                detail['network_error'] = type(exc).__name__
+                if attempt >= retries:
+                    raise
+                continue
+            finally:
+                # No hidden retries. Keep the lock through every cooldown.
+                time.sleep(3.1)
+            detail['status'] = response.status_code
+            try:
+                body = response.json()
+            except ValueError:
+                body = {}
+            api_code = body.get('codError') if isinstance(body, dict) else None
+            detail['codError'] = api_code
+            limited = response.status_code == 429 or str(api_code) == '19'
+            transient = response.status_code >= 500
+            if (limited or transient) and attempt < retries:
+                delay = 61.0
+                try:
+                    delay = max(delay, float(response.headers.get('Retry-After', 0)))
+                except (TypeError, ValueError):
+                    pass
+                if delay > 300:
+                    detail['retry_deferred'] = True
+                    return response
+                detail['retry_wait_seconds'] = delay
+                # Holding the shared lock prevents another local worker
+                # from consuming this command's quota during recovery.
+                remaining = delay
+                while remaining > 0:
+                    pause = min(remaining, 30.0)
+                    time.sleep(pause)
+                    remaining -= pause
+                continue
+            return response
+
 payload = {
     'comando': 'consultaRemotas',
     'correo': username,
     'contrasenya': password_md5,
 }
-resp = request_retry(
-    'POST', url, headers=headers, json=payload,
-    timeout=Remote.timeout,
-)
+request_attempts = []
+resp = salz_request(payload, request_attempts)
 code = resp.status_code
-if code >= 400:
+if not 200 <= code < 300:
     raise Exception(
         "HTTP %s from consultaRemotas: %s" % (code, (resp.text or '')[:500])
     )
 data = resp.json() or {}
 cod_error = data.get('codError', -1)
-if cod_error != 0:
+if str(cod_error) != '0':
     error_msg = data.get('error', '')
     if isinstance(error_msg, list):
         error_msg = '; '.join(error_msg)
@@ -611,6 +704,8 @@ for el in elements:
             })
 audit = {
     'executed_at': fields.Datetime.now(),
+    'integration_version': '10.0.1.0.8',
+    'attempts': request_attempts,
     'total_remotas': len(elements),
     'total_variables': len(sensor_config_table),
     'elements': elements,
@@ -668,3 +763,4 @@ Remote.message_post(
 
     </data>
 </odoo>
+
