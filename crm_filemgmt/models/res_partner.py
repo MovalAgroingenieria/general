@@ -107,7 +107,8 @@ class ResPartner(models.Model):
             "res_model": "ir.attachment",
             "view_mode": "kanban,list,form",
             "views": [
-                (self.env.ref("base.view_attachment_kanban").id, "kanban"),
+                # base.view_attachment_kanban no longer exists in Odoo 18
+                (self.env.ref("mail.view_document_file_kanban").id, "kanban"),
                 (self.env.ref("base.view_attachment_tree").id, "list"),
                 (False, "form"),
             ],

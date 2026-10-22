@@ -5,6 +5,7 @@
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.osv import expression
 
 
 class ResFiletag(models.Model):
@@ -213,17 +214,18 @@ class ResFiletag(models.Model):
     # ==========================
 
     @api.model
-    def name_search(  # pylint: disable=too-many-arguments,too-many-positional-arguments
-        self, name="", args=None, operator="ilike", limit=100, name_get_uid=None
-    ):
+    def name_search(self, name="", args=None, operator="ilike", limit=100):
         """Enhanced search for tags.
 
         Searches in both name and notes fields.
         """
-        if args is None:
-            args = []
-        domain = args + ["|", ("name", operator, name), ("notes", operator, name)]
-        return self._search(domain, limit=limit, access_rights_uid=name_get_uid)
+        domain = args or []
+        if name:
+            domain = expression.AND(
+                [domain, ["|", ("name", operator, name), ("notes", operator, name)]]
+            )
+        # name/operator not forwarded: filtering already applied above
+        return super().name_search(args=domain, limit=limit)
 
     # ==========================
     # UI/VIEW HELPERS
