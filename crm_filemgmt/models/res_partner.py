@@ -54,6 +54,13 @@ class ResPartner(models.Model):
     def _compute_number_of_files(self):
         """Compute the number of files linked through res.file.partnerlink."""
         for partner in self:
+            partner.number_of_files = 0
+        # Avoid AccessError for users without file management permissions
+        try:
+            self.env["res.file.partnerlink"].check_access("read")
+        except AccessError:
+            return
+        for partner in self:
             partner.number_of_files = len(partner.file_ids)
 
     @api.depends_context("uid")
@@ -101,15 +108,21 @@ class ResPartner(models.Model):
         Returns: Action dictionary for opening attachments
         """
         self.ensure_one()
+
+        # Fallback to default views if the specific ones are missing
+        kanban_view = self.env.ref(
+            "mail.view_document_file_kanban", raise_if_not_found=False
+        )
+        list_view = self.env.ref("base.view_attachment_tree", raise_if_not_found=False)
+
         return {
             "name": self.env._("Partner Attachments"),
             "type": "ir.actions.act_window",
             "res_model": "ir.attachment",
             "view_mode": "kanban,list,form",
             "views": [
-                # base.view_attachment_kanban no longer exists in Odoo 18
-                (self.env.ref("mail.view_document_file_kanban").id, "kanban"),
-                (self.env.ref("base.view_attachment_tree").id, "list"),
+                (kanban_view.id if kanban_view else False, "kanban"),
+                (list_view.id if list_view else False, "list"),
                 (False, "form"),
             ],
             "domain": [
@@ -146,11 +159,21 @@ class ResPartner(models.Model):
             # Return False to maintain backward compatibility
             return False
 
+        # Fallback to default view if the dedicated one is missing
+        list_view = self.env.ref(
+            "crm_filemgmt.res_file_partnerlink_of_partner_view_list",
+            raise_if_not_found=False,
+        )
+
         return {
             "type": "ir.actions.act_window",
             "name": self.env._("Linked Files - %s", self.name),
             "res_model": "res.file.partnerlink",
             "view_mode": "list,form",
+            "views": [
+                (list_view.id if list_view else False, "list"),
+                (False, "form"),
+            ],
             # Use ID-based domain as the test expects
             "domain": [("id", "in", self.file_ids.ids)],
             "context": {
@@ -168,9 +191,7 @@ class ResPartner(models.Model):
         self.ensure_one()
 
         # Check if we should show file links or direct attachments
-        if self.file_ids and self.env.user.has_group(
-            "crm_filemgmt.group_filemgmt_user"
-        ):
+        if self.file_ids and self.env.user.has_group("crm_filemgmt.group_file_user"):
             return self.action_get_files()
         # Fall back to attachments view
         return self.action_open_partner_files()
@@ -196,9 +217,7 @@ class ResPartner(models.Model):
         doc = etree.XML(res["arch"])  # pylint: disable=c-extension-no-member
 
         # Check if user has access to file management
-        has_filemgmt_access = self.env.user.has_group(
-            "crm_filemgmt.group_filemgmt_user"
-        )
+        has_filemgmt_access = self.env.user.has_group("crm_filemgmt.group_file_user")
 
         # Process file-related buttons
         for node in doc.xpath("//button[@name='action_get_files']"):

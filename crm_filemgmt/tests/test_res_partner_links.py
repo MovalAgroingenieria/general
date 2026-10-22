@@ -116,6 +116,7 @@ class TestResPartnerFileLinks(BaseCase):
         domain = act.get("domain") or []
         ids_in_domain = set(domain[0][2]) if domain and domain[0][0] == "id" else set()
         self.assertTrue({l1.id, l2.id}.issubset(ids_in_domain))
+        self.assertEqual(self.partner_b.number_of_files, 2)
 
 
 if __name__ == "__main__":
