@@ -6,7 +6,7 @@
     "name": "RemoteControl: Batchline",
     "summary": "Remotecontrol Batchline (REST) with default actions and "
                "procedures",
-    "version": "10.0.1.0.6",
+    "version": "10.0.1.0.7",
     "category": "Tools",
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",
@@ -14,6 +14,7 @@
     "depends": [
         "base_remotecontrol",
         "mdm_sensor_management_remotecontrol",
+        "cron_daylight_saving_time_resistant",
     ],
     "data": [
         "data/data.xml",

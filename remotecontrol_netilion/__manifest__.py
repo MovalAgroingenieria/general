@@ -5,7 +5,7 @@
 {
     "name": "RemoteControl: Netilion",
     "summary": "Netilion Connect REST API actions and MDM sensor readings",
-    "version": "10.0.1.0.1",
+    "version": "10.0.1.0.2",
     "category": "Tools",
     "author": "Moval Agroingeniería",
     "website": "https://www.moval.es",
@@ -13,6 +13,7 @@
     "depends": [
         "base_remotecontrol",
         "mdm_sensor_management_remotecontrol",
+        "cron_daylight_saving_time_resistant",
     ],
     "data": [
         "data/data.xml",

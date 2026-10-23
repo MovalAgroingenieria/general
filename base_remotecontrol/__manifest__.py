@@ -6,7 +6,7 @@
     'name': 'Base Remote Control Engine',
     'summary': 'Generic engine to integrate remote controls (REST/SQL) '
                'with actions and procedures',
-    'version': '10.0.1.0.1',
+    'version': '10.0.1.0.2',
     'category': 'Tools',
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",
@@ -16,6 +16,7 @@
         "mail",
         "web_ir_actions_act_window_message",
         "document",
+        "cron_daylight_saving_time_resistant",
     ],
     'data': [
         'security/security.xml',

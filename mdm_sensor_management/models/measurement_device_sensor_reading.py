@@ -155,14 +155,22 @@ class MeasurementDeviceSensorReading(models.Model):
 
     @api.depends('device_id.name', 'sensor_id.name', 'measurement_time')
     def _compute_name(self):
+        madrid_tz = pytz.timezone('Europe/Madrid')
         for record in self:
             name = ''
             if (record.device_id and record.sensor_id and
                     record.measurement_time):
+                dt = fields.Datetime.from_string(record.measurement_time)
+                if dt.tzinfo is None:
+                    dt_utc = pytz.UTC.localize(dt)
+                else:
+                    dt_utc = dt.astimezone(pytz.UTC)
+                dt_madrid = dt_utc.astimezone(madrid_tz)
+                display_time = dt_madrid.strftime('%Y-%m-%d %H:%M:%S')
                 name = '%s - %s - %s' % (
                     record.device_id.name,
                     record.sensor_id.name,
-                    record.measurement_time)
+                    display_time)
             record.name = name
 
     @api.depends('sensor_id')

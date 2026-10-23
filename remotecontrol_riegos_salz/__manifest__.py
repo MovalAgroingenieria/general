@@ -6,13 +6,14 @@
     "name": "RemoteControl: Riegos Salz",
     "summary": "Remotecontrol Riegos Salz (REST) with default actions and "
                "procedures",
-    "version": "10.0.1.0.8",
+    "version": "10.0.1.0.9",
     "category": "Tools",
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",
     "license": "AGPL-3",
     "depends": [
         "base_remotecontrol",
+        "cron_daylight_saving_time_resistant",
     ],
     "data": [
         "data/data.xml",

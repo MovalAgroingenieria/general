@@ -6,7 +6,7 @@
     'name': 'MDM Sensor Management: Remotecontrol Integration',
     'summary': 'Measurement Devices and Sensors Management: '
                'Add Remotecontrol Integration',
-    'version': '10.0.1.1.0',
+    'version': '10.0.1.1.1',
     'category': 'Tools',
     'website': 'https://www.moval.es',
     'author': 'Moval Agroingeniería',
@@ -14,6 +14,7 @@
     'depends': [
         'mdm_sensor_management',
         'base_remotecontrol',
+        'cron_daylight_saving_time_resistant',
     ],
     'data': [
         'security/security.xml',

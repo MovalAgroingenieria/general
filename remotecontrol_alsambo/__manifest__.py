@@ -3,7 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 {
     'name': 'Remote Control - Alsambo',
-    'version': '10.0.1.0.2',
+    'version': '10.0.1.0.3',
     'category': 'Hidden',
     'summary': 'Integration with Alsambo SQL database (valoresmoval table)',
     'author': 'Moval Agroingenieria',
@@ -11,6 +11,7 @@
     'license': 'AGPL-3',
     'depends': [
         'base_remotecontrol',
+        'cron_daylight_saving_time_resistant',
     ],
     'data': [
         'data/data.xml',

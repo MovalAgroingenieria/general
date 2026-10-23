@@ -642,6 +642,7 @@ class RemoteControlProcedure(models.Model):
                 'nextcall': proc.nextcall,
                 'numbercall': proc.numbercall,
                 'doall': False,
+                'daylight_saving_time_resistant': True,
                 'active': proc.active,
             }
             if proc.cron_id:

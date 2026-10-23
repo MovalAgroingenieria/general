@@ -6,13 +6,14 @@
     "name": "RemoteControl: Electrosegura",
     "summary": "Telecontrol Electrosegura with default actions and "
                "procedures for MariaDB/MySQL integration",
-    "version": "10.0.1.0.0",
+    "version": "10.0.1.0.1",
     "category": "Tools",
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",
     "license": "AGPL-3",
     "depends": [
         "base_remotecontrol",
+        "cron_daylight_saving_time_resistant",
     ],
     "external_dependencies": {
         "python": ["pyodbc"],

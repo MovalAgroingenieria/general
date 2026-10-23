@@ -6,13 +6,14 @@
     "name": "RemoteControl: ICC PRO",
     "summary": "Remotecontrol ICC PRO (REST) with default actions and "
                "procedures for water meter readings",
-    "version": "10.0.1.0.2",
+    "version": "10.0.1.0.3",
     "category": "Tools",
     "author": "Moval Agroingeniería",
     "website": "https://moval.es",
     "license": "AGPL-3",
     "depends": [
         "base_remotecontrol",
+        "cron_daylight_saving_time_resistant",
     ],
     "data": [
         "data/data.xml",
