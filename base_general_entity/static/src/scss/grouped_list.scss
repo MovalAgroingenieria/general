@@ -1,0 +1,14 @@
+// Reserve room for group labels before the first numeric aggregate column.
+.o_list_table:has(> thead th[data-name="entity_global_code"]):has(
+    > tbody > .o_group_header
+) {
+    > thead > tr > th.o_list_record_selector {
+        width: 240px !important;
+        min-width: 240px;
+    }
+
+    > tbody > .o_group_header > .o_group_name {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+}

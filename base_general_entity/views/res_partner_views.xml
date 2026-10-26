@@ -24,6 +24,9 @@
         <field name="name">res.partner.primary.entity.form</field>
         <field name="model">res.partner</field>
         <field name="priority" eval="20" />
+        <!-- Reset inheritance before loading this standalone form on upgrade.
+             Downstream modules may have made it an inherited primary view. -->
+        <field name="inherit_id" eval="False" />
         <field name="arch" type="xml">
             <form string="Primary Entity">
                 <header />

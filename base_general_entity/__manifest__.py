@@ -29,6 +29,7 @@
     "assets": {
         "web.assets_backend": [
             "base_general_entity/static/lib/entity_iconset/entity_iconset.css",
+            "base_general_entity/static/src/scss/grouped_list.scss",
         ],
         "web.assets_frontend": [
             "base_general_entity/static/lib/entity_iconset/entity_iconset.css",
