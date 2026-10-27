@@ -246,26 +246,38 @@ bag['sensors_plan'] = plan
             <field name="backoff">1.6</field>
             <field name="readonly">True</field>
             <field name="code"><![CDATA[
+# Action B: fetch readings from Sentilo ACA API and upsert in batches
+import logging
+from datetime import datetime
+
+_logger = logging.getLogger('remotecontrol_sentilo_aca')
+BATCH_SIZE = 1000
+
 Remote = self.remote_id
 SensorModel = env['mdm.measurement.device.sensor']
 plan = bag.get('sensors_plan') or []
 total_upserts = 0
 total_errors = 0
 items = []
-from datetime import datetime
+total_sensors = len(plan)
 
 today_str = fields.Date.today()
 to_date_str = "%s/%s/%s" % (today_str[8:10], today_str[5:7], today_str[:4])
 to_str = to_date_str + "T23:59:59"
 
-for sensor_plan in plan:
+_logger.info(
+    '[Sentilo ACA] Get readings start: remote_id=%s sensors=%s batch_size=%s',
+    Remote.id, total_sensors, BATCH_SIZE,
+)
+
+for sensor_idx, sensor_plan in enumerate(plan, 1):
     sensor_id = sensor_plan['sensor_id']
     device_id = sensor_plan['device_id']
     sensor = sensor_plan.get('sensor_code')
     provider = sensor_plan.get('provider') or ""
     initial_date = sensor_plan.get('initial_date')
     if not initial_date:
-        initial_date = fields.Date.today().strftime('%Y-%m-%d')
+        initial_date = fields.Date.today()
 
     sensor_record = SensorModel.browse(sensor_id)
 
@@ -294,6 +306,10 @@ for sensor_plan in plan:
             payload = resp.json() or {}
             observations = payload.get('observations', [])
             if not observations:
+                _logger.info(
+                    '[Sentilo ACA] Sensor %s/%s (sensor_id=%s device_id=%s): 0/0 readings to process (no observations)',
+                    sensor_idx, total_sensors, sensor_id, device_id,
+                )
                 items.append({
                     'sensor_id': sensor_id,
                     'device_id': device_id,
@@ -305,57 +321,87 @@ for sensor_plan in plan:
                 })
                 continue
 
+            total_readings = len(observations)
+            _logger.info(
+                '[Sentilo ACA] Sensor %s/%s (sensor_id=%s device_id=%s): 0/%s readings to process',
+                sensor_idx, total_sensors, sensor_id, device_id, total_readings,
+            )
+
             upserts = 0
             errs = 0
             readings_summary = []
 
-            for obs in observations:
+            for reading_idx, obs in enumerate(observations, 1):
                 raw_value = obs.get('value')
                 raw_ts = obs.get('timestamp')
 
                 try:
                     dt_obj = datetime.strptime(raw_ts, "%d/%m/%YT%H:%M:%S")
                     measurement_time = dt_obj.strftime("%Y-%m-%d %H:%M:%S")
-                except:
+                except Exception:
                     measurement_time = None
 
                 try:
                     valf = float(str(raw_value).replace(',', '.'))
-                except:
+                except Exception:
                     valf = None
 
                 if measurement_time and valf is not None:
                     try:
-                        Remote.upsert(
-                            'mdm.measurement.device.sensor.reading',
-                            {
-                                'sensor_id': sensor_record.id,
-                                'measurement_time': measurement_time,
-                            },
-                            {
-                                'value': valf,
-                                'remotecontrol_origin_id': Remote.id,
-                            },
-                        )
+                        with env.cr.savepoint():
+                            Remote.upsert(
+                                'mdm.measurement.device.sensor.reading',
+                                {
+                                    'sensor_id': sensor_record.id,
+                                    'measurement_time': measurement_time,
+                                },
+                                {
+                                    'value': valf,
+                                    'remotecontrol_origin_id': Remote.id,
+                                },
+                            )
                         upserts += 1
                         readings_summary.append({
                             'ts': measurement_time,
                             'value': valf,
                         })
                     except Exception as e:
+                        env.clear()
                         errs += 1
+                        try:
+                            err_msg = str(e).decode('utf-8', 'replace')
+                        except Exception:
+                            err_msg = unicode(e)
+                        _logger.error(
+                            u'[Sentilo ACA] Failed reading on sensor_id=%s device_id=%s ts=%s value=%s: %s',
+                            sensor_id, device_id, measurement_time, valf, err_msg,
+                        )
                         readings_summary.append({
                             'ts': measurement_time,
                             'value': valf,
-                            'error': str(e),
+                            'error': err_msg,
                         })
                 else:
                     errs += 1
+                    _logger.warning(
+                        u'[Sentilo ACA] Invalid reading on sensor_id=%s device_id=%s ts=%s value=%s',
+                        sensor_id, device_id, raw_ts, raw_value,
+                    )
                     readings_summary.append({
                         'ts': raw_ts,
                         'value': raw_value,
                         'error': 'Invalid measurement_time or value',
                     })
+
+                if (reading_idx % BATCH_SIZE == 0) or (reading_idx == total_readings):
+                    try:
+                        env.cr.commit()
+                    except Exception as commit_err:
+                        _logger.warning('[Sentilo ACA] Batch commit warning: %s', commit_err)
+                    _logger.info(
+                        '[Sentilo ACA] Sensor %s/%s (sensor_id=%s): %s/%s readings processed (batch committed, upserts=%s, errors=%s)',
+                        sensor_idx, total_sensors, sensor_id, reading_idx, total_readings, upserts, errs,
+                    )
 
             total_upserts += upserts
             total_errors += errs
@@ -375,6 +421,10 @@ for sensor_plan in plan:
 
         else:
             total_errors += 1
+            _logger.warning(
+                '[Sentilo ACA] Sensor %s/%s (sensor_id=%s) HTTP %s error: %s',
+                sensor_idx, total_sensors, sensor_id, code, (resp.text or '')[:200],
+            )
             items.append({
                 'sensor_id': sensor_id,
                 'device_id': device_id,
@@ -387,13 +437,21 @@ for sensor_plan in plan:
 
     except Exception as e:
         total_errors += 1
+        try:
+            err_msg = str(e).decode('utf-8', 'replace')
+        except Exception:
+            err_msg = unicode(e)
+        _logger.error(
+            u'[Sentilo ACA] Sensor %s/%s (sensor_id=%s) request exception: %s',
+            sensor_idx, total_sensors, sensor_id, err_msg,
+        )
         items.append({
             'sensor_id': sensor_id,
             'device_id': device_id,
             'sensor': sensor,
             'provider': provider,
             'status': -1,
-            'error': str(e),
+            'error': err_msg,
         })
 
 audit = {
@@ -428,6 +486,10 @@ att = env['ir.attachment'].create({
 })
 
 Remote.message_post(body=u"[ACA Readings] upserts=%s errors=%s" % (total_upserts, total_errors), attachment_ids=[att.id])
+_logger.info(
+    '[Sentilo ACA] Get readings finished: remote_id=%s total_upserts=%s total_errors=%s',
+    Remote.id, total_upserts, total_errors,
+)
 
 bag['upserts'] = total_upserts
 bag['errors'] = total_errors
