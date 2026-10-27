@@ -5,7 +5,7 @@
 {
     'name': 'MDM Sensor Management',
     'summary': 'Measurement Devices and Sensors Management',
-    'version': '10.0.1.2.0',
+    'version': '10.0.1.2.1',
     'category': 'Tools',
     'website': 'https://www.moval.es',
     'author': 'Moval Agroingeniería',
