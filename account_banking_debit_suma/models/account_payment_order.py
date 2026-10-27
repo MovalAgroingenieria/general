@@ -398,6 +398,11 @@ class AccountPaymentOrder(models.Model):
              "first semester or quarter: 01; third quarter: 03.\nEmpty "
              "if the periodicity is annual")
 
+    tax_period = fields.Char(
+        string="Tax period",
+        store=True,
+        compute='_compute_tax_period')
+
     # SUMA resume related fields
     suma_filename = fields.Char(string="suma filename")
     currency_id = fields.Many2one('res.currency', string='Currency',
@@ -683,6 +688,7 @@ class AccountPaymentOrder(models.Model):
                             _("The entry number %s has failed, the lastname"
                               "for partner %s not found." %
                               (entry_num_padded, line.partner_id.name)) + '\n'
+                        taxpayer_name = ""
                     else:
                         raise ValidationError(
                             _("The entry number %s has failed, the lastname"
@@ -702,7 +708,8 @@ class AccountPaymentOrder(models.Model):
                             _("The entry number %s has failed, the firstname "
                               "for partner %s not found." %
                               (entry_num_padded, line.partner_id.name)))
-                taxpayer_name_padded = taxpayer_name.ljust(60)
+                # @INFO: Truncate to 60 chars to avoid record displacement
+                taxpayer_name_padded = taxpayer_name.strip()[:60].ljust(60)
             else:
                 if self.error_mode == 'permissive':
                     error_num += 1
@@ -1386,7 +1393,8 @@ class AccountPaymentOrder(models.Model):
                             _("The entry number %s has failed, the firstname "
                               "for partner %s not found." %
                               (entry_num_padded, line.partner_id.name)))
-                taxpayer_name_padded = taxpayer_name.ljust(60)
+                # @INFO: Truncate to 60 chars to avoid record displacement
+                taxpayer_name_padded = taxpayer_name.strip()[:60].ljust(60)
             else:
                 if self.error_mode == 'permissive':
                     error_num += 1
@@ -1603,3 +1611,72 @@ class AccountPaymentOrder(models.Model):
                                 'suma_ref': False,
                                 })
         return super(AccountPaymentOrder, self).action_done_cancel()
+
+    @api.depends('charge_issuance', 'periodicity', 'charge_year')
+    def _compute_tax_period(self):
+        # @INFO: Stored value, so translate it with the user language or,
+        #        when there is none (crons, module updates), with the
+        #        company partner language
+        for record in self:
+            tax_period = False
+            if record.charge_issuance and record.periodicity \
+                    and record.charge_year:
+                lang = self.env.lang or record.company_id.partner_id.lang
+                tax_period = record.with_context(
+                    lang=lang)._get_tax_period_label()
+            record.tax_period = tax_period
+
+    def _get_tax_period_label(self):
+        # @INFO: Format "<ordinal issuance> <periodicity noun> <year>",
+        #        e.g. charge_issuance=02, periodicity=S, charge_year=2026
+        #        -> "2nd SEMESTER 2026" (es: "2º SEMESTRE 2026")
+        return "%s %s %s" % (
+            self._get_charge_issuance_ordinal(),
+            self._get_periodicity_noun(),
+            self.charge_year,
+        )
+
+    def _get_charge_issuance_ordinal(self):
+        # @INFO: One literal per value so every language can translate its
+        #        own ordinal abbreviation (es: 1º, 2º; ca: 1r, 2n, 4t, 5è)
+        ordinals = {
+            1: _("1st"),
+            2: _("2nd"),
+            3: _("3rd"),
+            4: _("4th"),
+            5: _("5th"),
+            6: _("6th"),
+            7: _("7th"),
+            8: _("8th"),
+            9: _("9th"),
+            10: _("10th"),
+            11: _("11th"),
+            12: _("12th"),
+            13: _("13th"),
+            14: _("14th"),
+            15: _("15th"),
+            16: _("16th"),
+            17: _("17th"),
+            18: _("18th"),
+            19: _("19th"),
+            20: _("20th"),
+            21: _("21st"),
+            22: _("22nd"),
+            23: _("23rd"),
+            24: _("24th"),
+            25: _("25th"),
+        }
+        number = int(self.charge_issuance)
+        return ordinals.get(number, str(number))
+
+    def _get_periodicity_noun(self):
+        nouns = {
+            'A': _("YEAR"),
+            'S': _("SEMESTER"),
+            'T': _("QUARTER"),
+            'M': _("MONTH"),
+            'B': _("TWO-MONTH PERIOD"),
+            'C': _("FOUR-MONTH PERIOD"),
+            'N': _("QUARTER"),
+        }
+        return nouns.get(self.periodicity, '')

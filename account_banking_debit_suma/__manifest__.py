@@ -5,7 +5,7 @@
 {
     "name": "Account Banking Debit SUMA",
     "summary": "This module generate a normalized payment file for (SUMA)",
-    "version": '10.0.1.1.0',
+    "version": '10.0.1.2.0',
     "category": "Moval General Addons",
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",
