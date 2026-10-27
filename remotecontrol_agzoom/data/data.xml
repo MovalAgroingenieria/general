@@ -329,7 +329,12 @@ bag['sensors_plan'] = plan
             <field name="readonly">True</field>
             <field name="sequence">30</field>
             <field name="code"><![CDATA[
-# Action C: fetch readings from AgZoom API and upsert
+# Action C: fetch readings from AgZoom API and upsert in batches
+import logging
+
+_logger = logging.getLogger('remotecontrol_agzoom')
+BATCH_SIZE = 1000
+
 Remote = self.remote_id
 SensorModel = env['mdm.measurement.device.sensor']
 plan = bag.get('sensors_plan') or []
@@ -343,7 +348,12 @@ window_end_suffix = ' 23:59:59'
 total_upserts = 0
 total_errors = 0
 items = []
-for sensor_plan in plan:
+total_sensors = len(plan)
+_logger.info(
+    '[AgZoom] Get readings start: remote_id=%s sensors=%s batch_size=%s',
+    Remote.id, total_sensors, BATCH_SIZE,
+)
+for sensor_idx, sensor_plan in enumerate(plan, 1):
     sensor_id = sensor_plan['sensor_id']
     device_id = sensor_plan['device_id']
     agzoom_device_id = sensor_plan['agzoom_device_id']
@@ -364,6 +374,10 @@ for sensor_plan in plan:
             payload = resp.json() or {}
             status = payload.get('status', '-1')
             if status != '0':
+                _logger.warning(
+                    '[AgZoom] Sensor %s/%s (sensor_id=%s device_id=%s) API error status: %s',
+                    sensor_idx, total_sensors, sensor_id, device_id, status,
+                )
                 items.append({'sensor_id': sensor_id, 'device_id': device_id, 'agzoom_device_id': agzoom_device_id, 'status': code, 'error': 'AgZoom API error status: %s' % status, 'url': full_url})
                 continue
             data_list = []
@@ -380,30 +394,61 @@ for sensor_plan in plan:
                             if str(variable.get('id', '')) == id:
                                 timestamp = variable.get('date', '')
                                 value = variable.get('data', '')
-                                if timestamp and value:
+                                if timestamp and value not in (None, ''):
                                     data_list.append({'ts': timestamp, 'value': value})
             window_start = initial_date + window_start_suffix
             window_end = final_date + window_end_suffix
+            filtered_list = []
+            for reading in data_list:
+                ts_s = reading['ts']
+                ts_comparable = str(ts_s).replace('T', ' ').replace('Z', '')
+                if (ts_comparable >= window_start) and (ts_comparable <= window_end):
+                    filtered_list.append({
+                        'ts': ts_comparable,
+                        'value': reading['value'],
+                    })
+            total_readings = len(filtered_list)
+            _logger.info(
+                '[AgZoom] Sensor %s/%s (sensor_id=%s device_id=%s): 0/%s readings to process',
+                sensor_idx, total_sensors, sensor_id, device_id, total_readings,
+            )
             upserts = 0
             errs = 0
             readings_summary = []
-            for reading in data_list:
-                ts_s = reading['ts']
-                valf = float(reading['value'])
-                # Convert ISO 8601 timestamp to comparable format (remove Z and T for comparison)
-                ts_comparable = ts_s.replace('T', ' ').replace('Z', '')
-                if (ts_comparable >= window_start) and (ts_comparable <= window_end):
-                    try:
+            for reading_idx, reading in enumerate(filtered_list, 1):
+                ts_comparable = reading['ts']
+                raw_val = reading['value']
+                try:
+                    valf = float(raw_val)
+                    with env.cr.savepoint():
                         Remote.upsert(
                             'mdm.measurement.device.sensor.reading',
                             {'sensor_id': sensor_record.id, 'measurement_time': ts_comparable},
                             {'value': valf, 'remotecontrol_origin_id': Remote.id}
                         )
-                        upserts += 1
-                        readings_summary.append({'ts': ts_comparable, 'value': valf})
-                    except Exception as e:
-                        errs += 1
-                        readings_summary.append({'ts': ts_comparable, 'value': valf, 'error': str(e)})
+                    upserts += 1
+                    readings_summary.append({'ts': ts_comparable, 'value': valf})
+                except Exception as e:
+                    env.clear()
+                    errs += 1
+                    try:
+                        err_msg = str(e).decode('utf-8', 'replace')
+                    except Exception:
+                        err_msg = unicode(e)
+                    _logger.error(
+                        u'[AgZoom] Failed reading on sensor_id=%s device_id=%s ts=%s value=%s: %s',
+                        sensor_id, device_id, ts_comparable, raw_val, err_msg,
+                    )
+                    readings_summary.append({'ts': ts_comparable, 'value': raw_val, 'error': err_msg})
+                if (reading_idx % BATCH_SIZE == 0) or (reading_idx == total_readings):
+                    try:
+                        env.cr.commit()
+                    except Exception as commit_err:
+                        _logger.warning('[AgZoom] Batch commit warning: %s', commit_err)
+                    _logger.info(
+                        '[AgZoom] Sensor %s/%s (sensor_id=%s): %s/%s readings processed (batch committed, upserts=%s, errors=%s)',
+                        sensor_idx, total_sensors, sensor_id, reading_idx, total_readings, upserts, errs,
+                    )
             total_upserts += upserts
             total_errors += errs
             items.append({
@@ -420,8 +465,16 @@ for sensor_plan in plan:
                 'readings': readings_summary,
             })
         else:
+            _logger.warning(
+                '[AgZoom] Sensor %s/%s (sensor_id=%s) HTTP %s error: %s',
+                sensor_idx, total_sensors, sensor_id, code, (resp.text or '')[:200],
+            )
             items.append({'sensor_id': sensor_id, 'device_id': device_id, 'agzoom_device_id': agzoom_device_id, 'status': code, 'error': (resp.text or '')[:400], 'url': full_url})
     except Exception as e:
+        _logger.error(
+            '[AgZoom] Sensor %s/%s (sensor_id=%s) request exception: %s',
+            sensor_idx, total_sensors, sensor_id, e,
+        )
         items.append({'sensor_id': sensor_id, 'device_id': device_id, 'agzoom_device_id': agzoom_device_id, 'status': -1, 'error': str(e)})
 audit = {'executed_at': fields.Datetime.now(), 'final_date': final_date, 'total_upserts': total_upserts, 'total_errors': total_errors, 'items': items}
 try:
@@ -434,6 +487,10 @@ except Exception as json_error:
 fname = 'agzoom_readings_fetch_%s.json' % fields.Datetime.now().replace(':','').replace('-','').replace(' ','_')
 att = env['ir.attachment'].create({'name': fname, 'datas_fname': fname, 'datas': b64, 'mimetype': 'application/json', 'res_model': 'remotecontrol', 'res_id': Remote.id})
 Remote.message_post(body=u"[AgZoom Readings] upserts=%s errors=%s" % (total_upserts, total_errors), attachment_ids=[att.id])
+_logger.info(
+    '[AgZoom] Get readings finished: remote_id=%s total_upserts=%s total_errors=%s',
+    Remote.id, total_upserts, total_errors,
+)
 bag['upserts'] = total_upserts
 bag['errors'] = total_errors
 bag['audit_attachment_id'] = att.id
