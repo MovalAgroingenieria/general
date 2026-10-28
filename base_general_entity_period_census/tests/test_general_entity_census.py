@@ -370,6 +370,50 @@ class TestCensusLineProtections(TransactionCase):
 
     # ===== Line State Protections =====
 
+    def test_locked_census_cannot_delete(self):
+        self.census.action_lock()
+        with self.assertRaises(UserError), self.cr.savepoint():
+            self.census.unlink()
+        self.assertTrue(self.census.exists())
+        self.assertTrue(self.line.exists())
+
+    def test_census_with_validated_lines_cannot_delete(self):
+        self.line.action_validate()
+        with self.assertRaises(UserError), self.cr.savepoint():
+            self.census.unlink()
+        self.assertTrue(self.census.exists())
+        self.assertTrue(self.line.exists())
+
+    def test_unlocked_census_with_draft_lines_can_delete(self):
+        additional = self.Additional.create(
+            {"census_line_id": self.line.id, "qty": 5.0}
+        )
+        self.census.unlink()
+        self.assertFalse(self.census.exists())
+        self.assertFalse(self.line.exists())
+        self.assertFalse(additional.exists())
+
+    def test_census_can_delete_after_unlocking_and_unvalidating(self):
+        self.line.action_validate()
+        self.census.action_lock()
+        self.census.action_unlock()
+        self.line.action_unvalidate()
+        self.census.unlink()
+        self.assertFalse(self.census.exists())
+
+    def test_mixed_census_deletion_is_atomic(self):
+        other = self.Census.create(
+            {
+                "primary_partner_id": self.primary.id,
+                "period_date": date(2026, 2, 1),
+            }
+        )
+        self.census.action_lock()
+        with self.assertRaises(UserError), self.cr.savepoint():
+            (other | self.census).unlink()
+        self.assertTrue(other.exists())
+        self.assertTrue(self.census.exists())
+
     def test_validated_line_cannot_modify_shares(self):
         """Cannot modify shares on a validated line."""
         self.line.action_validate()

@@ -242,6 +242,16 @@ class GeneralEntityCensus(models.Model):
             result,
         )
 
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_locked_or_validated(self):
+        """Protect headers before SQL cascades bypass line deletion guards."""
+        if any(census.state == "locked" for census in self):
+            raise UserError(
+                self.env._("Cannot delete locked censuses. Unlock them first.")
+            )
+        # SQL cascade deletion does not invoke the lines' ORM ondelete hooks.
+        self.line_ids._check_can_delete()  # pylint: disable=protected-access
+
     def action_lock(self):
         """Lock census to prevent modifications."""
         for census in self:
