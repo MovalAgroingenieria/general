@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-26 18:13+0000\n"
-"PO-Revision-Date: 2025-10-26 18:13+0000\n"
+"POT-Creation-Date: 2026-10-16 11:22+0000\n"
+"PO-Revision-Date: 2026-10-16 11:22+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,6 +17,7 @@ msgstr ""
 
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:134
+#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:134
 #, python-format
 msgid "<a href='%s' target='_blank'>Open in Grafana</a>"
 msgstr "<a href='%s' target='_blank'>Abrir en Grafana</a>"
@@ -37,7 +38,11 @@ msgid "Cancel"
 msgstr "Cancelar"
 
 #. module: board_grafana_integration
+#. openerp-web
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:104
+#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:24
+#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:104
+#: code:addons/moval_addons/general/board_grafana_integration/static/src/xml/board_grafana_panel.xml:24
 #, python-format
 msgid "Close"
 msgstr "Cerrar"
@@ -63,6 +68,7 @@ msgstr "Panel de control"
 
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:128
+#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:128
 #, python-format
 msgid "Dashboard '%s' imported successfully."
 msgstr "Panel de control '%s' importado correctamente."
@@ -117,7 +123,16 @@ msgid "Display Name"
 msgstr "Nombre a mostrar"
 
 #. module: board_grafana_integration
+#. openerp-web
+#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:14
+#: code:addons/moval_addons/general/board_grafana_integration/static/src/xml/board_grafana_panel.xml:14
+#, python-format
+msgid "Drag to resize"
+msgstr "Arrastre para cambiar el tamaño"
+
+#. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:141
+#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:141
 #, python-format
 msgid "Failed to import dashboard '%s'. HTTP %s: %s"
 msgstr "Error importando el panel de control '%s'. HTTP %s: %s"
@@ -138,10 +153,16 @@ msgid "Frame width"
 msgstr "Ancho marco"
 
 #. module: board_grafana_integration
+#. openerp-web
+#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:6
+#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:16
+#: code:addons/moval_addons/general/board_grafana_integration/static/src/xml/board_grafana_panel.xml:6
+#: code:addons/moval_addons/general/board_grafana_integration/static/src/xml/board_grafana_panel.xml:16
 #: model:ir.actions.act_window,name:board_grafana_integration.login_into_grafana_action
 #: model:ir.ui.menu,name:board_grafana_integration.menu_board_grafana_home
 #: model:ir.ui.menu,name:board_grafana_integration.menu_board_grafana_root
 #: model:ir.ui.menu,name:board_grafana_integration.menu_board_grafana_sidebar
+#, python-format
 msgid "Grafana"
 msgstr "Grafana"
 
@@ -152,6 +173,7 @@ msgstr "Grafana llave API"
 
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:145
+#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:145
 #, python-format
 msgid "Grafana Dashboard Import"
 msgstr "Importación panel de control Grafana"
@@ -170,6 +192,7 @@ msgstr "URL Grafana"
 
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:112
+#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:112
 #, python-format
 msgid "Grafana URL or API key not found."
 msgstr "No se ha encontrado la URL o la llave API de Grafana."
@@ -183,6 +206,13 @@ msgstr "Configuración Grafana"
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_grafana_frame
 msgid "Grafana frame"
 msgstr "Marco Grafana"
+
+#. module: board_grafana_integration
+#: code:addons/board_grafana_integration/models/board_grafana.py:79
+#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana.py:79
+#, python-format
+msgid "Grafana is not configured"
+msgstr "Grafana no está configurado"
 
 #. module: board_grafana_integration
 #: model:ir.actions.server,name:board_grafana_integration.go_to_grafana_server_action
@@ -250,6 +280,7 @@ msgstr "Integración"
 
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:101
+#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:101
 #, python-format
 msgid "Invalid JSON for dashboard '%s': %s"
 msgstr "El JSON del panel de control '%s' no es válido: %s"
@@ -257,6 +288,8 @@ msgstr "El JSON del panel de control '%s' no es válido: %s"
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:160
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:175
+#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:160
+#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:175
 #, python-format
 msgid "Invalid JSON. Dashboard '%s': %s"
 msgstr "El JSON del panel de control '%s' no es válido: %s"
@@ -288,6 +321,14 @@ msgid "Last Updated on"
 msgstr "Última actualización el"
 
 #. module: board_grafana_integration
+#. openerp-web
+#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:21
+#: code:addons/moval_addons/general/board_grafana_integration/static/src/xml/board_grafana_panel.xml:21
+#, python-format
+msgid "Open in a new tab"
+msgstr "Abrir en una pestaña nueva"
+
+#. module: board_grafana_integration
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_integrated_panel_id
 msgid "Panel id"
 msgstr "ID panel"
@@ -298,15 +339,40 @@ msgid "Panel only"
 msgstr "Solo panel"
 
 #. module: board_grafana_integration
+#. openerp-web
+#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:18
+#: code:addons/moval_addons/general/board_grafana_integration/static/src/xml/board_grafana_panel.xml:18
+#, python-format
+msgid "Reload"
+msgstr "Recargar"
+
+#. module: board_grafana_integration
 #: model:ir.actions.act_window,name:board_grafana_integration.grafana_configuration_action
 #: model:ir.ui.menu,name:board_grafana_integration.menu_board_grafana_settings
 msgid "Settings"
 msgstr "Configuración"
 
 #. module: board_grafana_integration
+#: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_show_navbar_button
+msgid "Show navbar button"
+msgstr "Mostrar botón en la barra de navegación"
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_configuration_grafana_show_navbar_button
+msgid "Show the Grafana button in the top navigation bar, which opens Grafana in a side panel."
+msgstr "Muestra el botón de Grafana en la barra de navegación superior, que abre Grafana en un panel lateral."
+
+#. module: board_grafana_integration
 #: model:ir.model,name:board_grafana_integration.model_board_grafana_dashboard_storage
 msgid "Storage of Grafana Dashboards"
 msgstr "Almacén de paneles de control Grafana"
+
+#. module: board_grafana_integration
+#: code:addons/board_grafana_integration/models/board_grafana.py:80
+#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana.py:80
+#, python-format
+msgid "The Grafana URL has not been set. Please ask an administrator to configure it in Dashboards > Grafana > Settings."
+msgstr "No se ha establecido la URL de Grafana. Pida a un administrador que la configure en Tableros > Grafana > Configuración."
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_dashboard_json
@@ -329,9 +395,12 @@ msgid "The default datasource."
 msgstr "La fuente de datos por defecto."
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana.py:23
-#: code:addons/board_grafana_integration/models/board_grafana.py:54
-#: code:addons/board_grafana_integration/models/board_grafana.py:67
+#: code:addons/board_grafana_integration/models/board_grafana.py:21
+#: code:addons/board_grafana_integration/models/board_grafana.py:91
+#: code:addons/board_grafana_integration/models/board_grafana.py:104
+#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana.py:21
+#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana.py:91
+#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana.py:104
 #, python-format
 msgid "The grafana configuration parameters have not been set."
 msgstr "Los parámetros de configuración de Grafana no han sido establecidos."

@@ -21,6 +21,9 @@
         "views/board_grafana_dashboard_storage_view.xml",
         "data/welcome_grafana_dashboard.xml",
     ],
+    "qweb": [
+        "static/src/xml/board_grafana_panel.xml",
+    ],
     "installable": True,
     "application": False,
 }

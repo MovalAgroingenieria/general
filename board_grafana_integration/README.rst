@@ -21,6 +21,28 @@ After the configuration you will be able to transparently connect to this
 server and use the features of Grafana to extract metrics, analyze data or
 create dashboards and panels.
 
+Side panel
+----------
+
+The module adds a Grafana icon to the top bar that opens Grafana in a side
+panel on the right, available from any application. It shows the welcome
+dashboard, or the dashboard list if none is set.
+
+* The icon is disabled by default. Enable *Show navbar button* in
+  *Dashboards > Grafana > Settings* to show it.
+* The icon is only shown to users with access to the module (internal users),
+  never to portal users.
+* Grafana is loaded the first time the panel is opened and is kept while
+  navigating between applications. Closing the panel only hides it.
+* The panel can be resized by dragging its left edge. The width is saved in
+  the browser.
+* *Open in a new tab* opens the page being displayed in the panel.
+* On wide screens (1400 px or more) the panel takes its space from the
+  content. On smaller screens it floats over the content, and on phones it
+  covers the whole screen.
+* It can be open at the same time as the Open WebUI side panel
+  (``openwebui_odoo_integration``); both panels are then shown side by side.
+
 Credits
 =======
 

@@ -33,6 +33,13 @@ class BoardGrafanaConfigSettings(models.TransientModel):
         help="The id of the welcome dashboard "
              "(optional, else the dashboard list will be shown).")
 
+    grafana_show_navbar_button = fields.Boolean(
+        string="Show navbar button",
+        default=False,
+        help="Show the Grafana button in the top navigation bar, which "
+             "opens Grafana in a side panel.",
+    )
+
     @api.depends("grafana_url_raw")
     def _compute_grafana_url(self):
         for record in self:
@@ -59,3 +66,6 @@ class BoardGrafanaConfigSettings(models.TransientModel):
         values.set_default("board.grafana.configuration",
                            "grafana_dashboard_uid",
                            self.grafana_dashboard_uid)
+        values.set_default("board.grafana.configuration",
+                           "grafana_show_navbar_button",
+                           self.grafana_show_navbar_button)

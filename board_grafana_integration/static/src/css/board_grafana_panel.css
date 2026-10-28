@@ -1,0 +1,134 @@
+.o_grafana_systray_item .fa-grafana-logo {
+    position: relative;
+    top: 3px;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.o_grafana_panel {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    position: relative;
+    max-width: 100%;
+    background-color: #fff;
+    border-left: 1px solid #afafb6;
+}
+
+.o_grafana_panel_resizer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -3px;
+    width: 6px;
+    cursor: col-resize;
+    z-index: 1;
+}
+
+.o_grafana_panel_header {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 4px 4px 12px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.o_grafana_panel_title {
+    font-weight: bold;
+}
+
+.o_grafana_panel_buttons .btn-link {
+    color: #666;
+}
+
+.o_grafana_panel_body {
+    flex: 1 1 auto;
+    position: relative;
+    min-height: 0;
+}
+
+.o_grafana_panel_body .o_grafana_panel_frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.o_grafana_panel_body .o_grafana_panel_alert {
+    padding: 16px;
+}
+
+.o_grafana_panel_loading {
+    padding-top: 64px;
+    text-align: center;
+    color: #999;
+}
+
+.o_grafana_panel_resizing,
+.o_grafana_panel_resizing .o_grafana_panel_frame {
+    pointer-events: none;
+    user-select: none;
+}
+
+.o_grafana_panel_resizing .o_grafana_panel_resizer {
+    pointer-events: auto;
+}
+
+/* Wide screens: the panel takes its space from the content */
+@media (min-width: 1400px) {
+    .o_web_client > .o_main > .o_main_content {
+        min-width: 0;
+    }
+}
+
+/* Laptops and tablets: the panel floats over the content */
+@media (max-width: 1399px) {
+    body.o_grafana_panel_open > .o_main {
+        position: relative;
+    }
+    .o_grafana_panel {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1001;
+        box-shadow: -4px 0 12px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Phones: the panel covers the whole screen */
+@media (max-width: 767px) {
+    .o_grafana_panel {
+        width: 100% !important;
+        left: 0;
+    }
+    .o_grafana_panel_resizer {
+        display: none;
+    }
+}
+
+/* Keep Odoo chat windows and notifications next to the panel */
+@media (min-width: 768px) {
+    body.o_grafana_panel_open .o_chat_window,
+    body.o_grafana_panel_open .o_notification_manager {
+        margin-right: var(--o-grafana-panel-width, 0px);
+    }
+}
+
+/* Open WebUI side panel (openwebui_odoo_integration) also open */
+@media (min-width: 768px) and (max-width: 1399px) {
+    body.o_grafana_panel_open.o_openwebui_panel_open .o_grafana_panel {
+        right: var(--o-openwebui-panel-width, 0px);
+    }
+}
+
+@media (min-width: 768px) {
+    body.o_grafana_panel_open.o_openwebui_panel_open .o_chat_window,
+    body.o_grafana_panel_open.o_openwebui_panel_open .o_notification_manager {
+        margin-right: calc(var(--o-grafana-panel-width, 0px) +
+            var(--o-openwebui-panel-width, 0px));
+    }
+}

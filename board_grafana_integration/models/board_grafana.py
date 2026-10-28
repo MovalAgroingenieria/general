@@ -3,6 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, models, fields, exceptions, _
+from odoo.tools import html_escape
 
 
 class BoardGrafana(models.Model):
@@ -12,20 +13,12 @@ class BoardGrafana(models.Model):
     DEFAULT_DASHBOARD_HEIGHT = 800
 
     def _default_grafana_frame(self):
-        grafana_url = self.env['ir.values'].get_default(
-            'board.grafana.configuration', 'grafana_url')
         grafana_dashboard_height = self.env['ir.values'].get_default(
             'board.grafana.configuration', 'grafana_dashboard_height')
-        grafana_dashboard_uid = self.env['ir.values'].get_default(
-            'board.grafana.configuration', 'grafana_dashboard_uid')
-        if (not grafana_url):
+        url = self._get_grafana_home_url()
+        if not url:
             raise exceptions.ValidationError(
                 _('The grafana configuration parameters have not been set.'))
-        url = grafana_url
-        if grafana_dashboard_uid:
-            url = url + '/d/' + grafana_dashboard_uid
-        else:
-            url = url + '/dashboards'
         # Does not allow to browse dashboards
         # url = url + '?kiosk'
         height = self.DEFAULT_DASHBOARD_HEIGHT
@@ -46,6 +39,48 @@ class BoardGrafana(models.Model):
     @api.multi
     def _compute_grafana_frame(self):
         self.grafana_frame = False
+
+    @api.model
+    def _get_grafana_home_url(self):
+        values_model = self.env['ir.values']
+        grafana_url = values_model.get_default(
+            'board.grafana.configuration', 'grafana_url')
+        grafana_dashboard_uid = values_model.get_default(
+            'board.grafana.configuration', 'grafana_dashboard_uid')
+        url = False
+        if grafana_url and grafana_dashboard_uid:
+            url = grafana_url + '/d/' + grafana_dashboard_uid
+        elif grafana_url:
+            url = grafana_url + '/dashboards'
+        return url
+
+    @api.model
+    def is_grafana_navbar_button_visible(self):
+        # Follows the module ACLs, so portal users never get the button
+        show_navbar_button = self.env['ir.values'].get_default(
+            'board.grafana.configuration', 'grafana_show_navbar_button')
+        return bool(show_navbar_button) and self.check_access_rights(
+            'read', raise_exception=False)
+
+    @api.model
+    def get_grafana_panel_frame(self):
+        url = self._get_grafana_home_url()
+        if url:
+            frame = (
+                '<iframe class="o_grafana_panel_frame" src="%s" '
+                'allow="fullscreen" frameborder="0"></iframe>'
+            ) % html_escape(url)
+        else:
+            frame = (
+                '<div class="o_grafana_panel_alert">'
+                '<div class="alert alert-info" role="alert">'
+                '<h4>%s</h4><p>%s</p>'
+                '</div></div>') % (
+                html_escape(_('Grafana is not configured')),
+                html_escape(_('The Grafana URL has not been set. Please '
+                              'ask an administrator to configure it in '
+                              'Dashboards > Grafana > Settings.')))
+        return frame
 
     @api.multi
     def action_go_to_grafana_server(self):
