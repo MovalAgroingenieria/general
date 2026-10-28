@@ -685,13 +685,13 @@ class AccountPaymentOrder(models.Model):
                     if self.error_mode == 'permissive':
                         error_num += 1
                         errors += '[' + str(error_num).zfill(4) + '] ' + \
-                            _("The entry number %s has failed, the lastname"
+                            _("The entry number %s has failed, the lastname "
                               "for partner %s not found." %
                               (entry_num_padded, line.partner_id.name)) + '\n'
                         taxpayer_name = ""
                     else:
                         raise ValidationError(
-                            _("The entry number %s has failed, the lastname"
+                            _("The entry number %s has failed, the lastname "
                               "for partner %s not found." %
                               (entry_num_padded, line.partner_id.name)))
                 if line.partner_id.firstname:
@@ -1629,12 +1629,13 @@ class AccountPaymentOrder(models.Model):
     def _get_tax_period_label(self):
         # @INFO: Format "<ordinal issuance> <periodicity noun> <year>",
         #        e.g. charge_issuance=02, periodicity=S, charge_year=2026
-        #        -> "2nd SEMESTER 2026" (es: "2º SEMESTRE 2026")
-        return "%s %s %s" % (
-            self._get_charge_issuance_ordinal(),
-            self._get_periodicity_noun(),
-            self.charge_year,
-        )
+        #        -> "2nd SEMESTER 2026" (es: "2º SEMESTRE 2026").
+        #        Annual periodicity has no ordinal: "YEAR 2026"
+        #        (es: "AÑO 2026")
+        label = "%s %s" % (self._get_periodicity_noun(), self.charge_year)
+        if self.periodicity != 'A':
+            label = "%s %s" % (self._get_charge_issuance_ordinal(), label)
+        return label
 
     def _get_charge_issuance_ordinal(self):
         # @INFO: One literal per value so every language can translate its
