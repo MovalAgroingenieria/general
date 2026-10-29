@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_base_language_export_form_multilang" model="ir.ui.view">
+        <field name="name">base.language.export.form.multilang</field>
+        <field name="model">base.language.export</field>
+        <field name="inherit_id" ref="base.wizard_lang_export" />
+        <field name="arch" type="xml">
+            <field name="lang" position="attributes">
+                <attribute name="invisible">export_type == 'module' and lang_ids</attribute>
+            </field>
+            <field name="lang" position="before">
+                <label for="lang_ids" invisible="export_type != 'module'" />
+                <div class="o_row" invisible="export_type != 'module'">
+                    <field
+                        name="lang_ids"
+                        widget="many2many_tags"
+                        options="{'no_create': True, 'no_open': True}"
+                    />
+                    <button
+                        name="action_select_all_languages"
+                        type="object"
+                        string="Select all"
+                        class="btn-secondary oe_inline"
+                    />
+                </div>
+            </field>
+        </field>
+    </record>
+</odoo>
