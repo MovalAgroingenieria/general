@@ -1,0 +1,51 @@
+# -*- coding: utf-8 -*-
+# 2026 Moval Agroingeniería
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
+{
+    "name": "Bundle common accounting",
+    "summary": "Install at once all common modules related to the accounting.",
+    "version": "10.0.1.0.0",
+    "category": "Hidden",
+    "website": "http://www.moval.es",
+    "author": "Moval Agroingeniería",
+    "license": "AGPL-3",
+    "installable": True,
+    "application": False,
+    "depends": [
+        "l10n_es",
+        "l10n_es_partner",
+        "account",
+        "account_accountant",
+        "account_banking_mandate",
+        "account_banking_pain_base",
+        "account_banking_sepa_credit_transfer",
+        "account_banking_sepa_direct_debit",
+        "account_bank_statement_import",
+        "account_due_list",
+        "account_due_list_payment_mode",
+        "account_financial_report_date_range",
+        "account_financial_report_qweb",
+        "account_fiscal_year",
+        "account_group",
+        "account_payment_mode",
+        "account_payment_order",
+        "account_payment_partner",
+        "account_renumber",
+        "account_tax_balance",
+        "base_iban",
+        "base_vat",
+        "l10n_es_account_bank_statement_import_n43",
+        "l10n_es_account_invoice_sequence",
+        "l10n_es_aeat",
+        "l10n_es_aeat_mod111",
+        "l10n_es_aeat_mod303",
+        "l10n_es_mis_report",
+        "l10n_es_vat_book",
+        "mis_builder",
+        "mis_builder_budget",
+    ],
+    "data": [
+    ],
+
+}
