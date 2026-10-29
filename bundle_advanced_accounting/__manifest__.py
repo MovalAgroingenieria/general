@@ -5,7 +5,7 @@
 {
     "name": "Bundle advanced accounting",
     "summary": "Install at once all modules related to the advanced "
-               "accounting.",
+               "and common accounting.",
     "version": "10.0.1.0.0",
     "category": "Hidden",
     "website": "http://www.moval.es",

@@ -14,7 +14,6 @@
     "application": False,
     "depends": [
         "l10n_es",
-        "l10n_es_partner",
         "account",
         "account_accountant",
         "account_banking_mandate",
