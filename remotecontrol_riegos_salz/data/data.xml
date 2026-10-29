@@ -278,9 +278,13 @@ bag['sensors_plan'] = plan
             <field name="readonly">True</field>
             <field name="code"><![CDATA[
 from datetime import datetime, timedelta
+import logging
 import pytz
 import hashlib
 import math
+
+_logger = logging.getLogger('remotecontrol_riegos_salz')
+BATCH_SIZE = 1000
 
 Remote = self.remote_id
 plan = bag.get('sensors_plan') or []
@@ -359,9 +363,12 @@ def parse_date(value):
 
 def error_text(exc):
     try:
-        return unicode(exc)
-    except Exception:
         return str(exc).decode('utf-8', 'replace')
+    except Exception:
+        try:
+            return unicode(exc)
+        except Exception:
+            return u'(unknown error)'
 
 tz_madrid = pytz.timezone('Europe/Madrid')
 end = datetime.now(pytz.UTC).astimezone(tz_madrid).replace(tzinfo=None, microsecond=0)
@@ -377,7 +384,17 @@ for entry in plan:
             pending.append(sensor)
     except Exception as exc:
         total_errors += 1
-        items.append({'sensor_id': entry.get('sensor_id'), 'error': error_text(exc)})
+        err_msg = error_text(exc)
+        _logger.error(
+            u'[Riegos Salz] Invalid sensor plan entry sensor_id=%s: %s',
+            entry.get('sensor_id'), err_msg,
+        )
+        items.append({'sensor_id': entry.get('sensor_id'), 'error': err_msg})
+
+_logger.info(
+    '[Riegos Salz] Get readings start: remote_id=%s sensors_planned=%s sensors_pending=%s batch_size=%s',
+    Remote.id, len(plan), len(pending), BATCH_SIZE,
+)
 
 while pending:
     start = min(s['cursor'] for s in pending)
@@ -395,6 +412,10 @@ while pending:
         'variables': variables, 'sensors': [], 'attempts': [],
     }
     items.append(request_item)
+    _logger.info(
+        '[Riegos Salz] Requesting window %s -> %s (sensors=%s, variables=%s)',
+        payload['fechaIni'], payload['fechaFin'], len(batch), len(variables),
+    )
     try:
         resp = salz_request(payload, request_item['attempts'])
         request_item['status'] = resp.status_code
@@ -409,7 +430,12 @@ while pending:
         if not isinstance(historicos, dict):
             raise Exception('Invalid historicos response')
     except Exception as exc:
-        request_item['error'] = error_text(exc)
+        err_msg = error_text(exc)
+        request_item['error'] = err_msg
+        _logger.error(
+            u'[Riegos Salz] Window %s -> %s request failed: %s',
+            payload['fechaIni'], payload['fechaFin'], err_msg,
+        )
         if (request_item.get('status') == 429 or
                 str(request_item.get('codError')) == '19'):
             request_item['stopped_reason'] = 'rate_limit_exhausted'
@@ -421,48 +447,117 @@ while pending:
         # Never advance affected sensors past a failed interval.
         pending = [s for s in pending if s not in batch]
         continue
-    for sensor in batch:
-        result = {'sensor_id': sensor['sensor_id'],
-                  'sensor_id_value': sensor['sensor_id_value'], 'upserts': 0}
+    total_batch_sensors = len(batch)
+    for sensor_idx, sensor in enumerate(batch, 1):
+        sensor_id = sensor['sensor_id']
+        device_id = sensor.get('device_id')
+        sensor_var = sensor['sensor_id_value']
+        result = {
+            'sensor_id': sensor_id,
+            'sensor_id_value': sensor_var,
+            'upserts': 0,
+            'errors': 0,
+        }
         request_item['sensors'].append(result)
         try:
-            variable = str(sensor['sensor_id_value'])
+            variable = str(sensor_var)
             if variable not in historicos:
                 raise Exception('Variable missing from historicos: %s' % variable)
             values = historicos[variable]
             if not isinstance(values, list):
                 raise Exception('Invalid readings list: %s' % variable)
             points = []
+            upserts = 0
+            errs = 0
+            reading_errors = []
             for value in values:
-                stamp = parse_date(value['fecha'])
-                number = float(value['valor'])
-                if math.isnan(number) or math.isinf(number):
-                    raise Exception('Non-finite reading')
-                if stamp < sensor['cursor']:
-                    continue
-                if stamp > finish:
-                    raise Exception('Reading outside requested interval')
-                utc = tz_madrid.localize(stamp).astimezone(pytz.UTC)
-                points.append((utc.strftime('%Y-%m-%d %H:%M:%S'), number))
-            # Atomic sensor/window: a failed create must not leave newer
-            # readings that would hide a gap on the next execution.
-            with env.cr.savepoint():
-                for stamp, number in sorted(points):
-                    Remote.upsert(
-                        'mdm.measurement.device.sensor.reading',
-                        {'sensor_id': sensor['sensor_id'], 'measurement_time': stamp},
-                        {'value': number, 'remotecontrol_origin_id': Remote.id})
-            result['upserts'] = len(points)
-            total_upserts += len(points)
+                raw_fecha = value.get('fecha') if isinstance(value, dict) else None
+                raw_valor = value.get('valor') if isinstance(value, dict) else None
+                try:
+                    stamp = parse_date(raw_fecha)
+                    number = float(raw_valor)
+                    if math.isnan(number) or math.isinf(number):
+                        raise Exception('Non-finite reading')
+                    if stamp < sensor['cursor'] or stamp > finish:
+                        continue
+                    utc = tz_madrid.localize(stamp).astimezone(pytz.UTC)
+                    points.append((utc.strftime('%Y-%m-%d %H:%M:%S'), number))
+                except Exception as parse_exc:
+                    errs += 1
+                    err_msg = error_text(parse_exc)
+                    _logger.warning(
+                        u'[Riegos Salz] Invalid reading on sensor_id=%s device_id=%s ts=%s value=%s: %s',
+                        sensor_id, device_id, raw_fecha, raw_valor, err_msg,
+                    )
+                    reading_errors.append({
+                        'ts': raw_fecha,
+                        'value': raw_valor,
+                        'error': err_msg,
+                    })
+            sorted_points = sorted(points)
+            total_readings = len(sorted_points)
+            _logger.info(
+                '[Riegos Salz] Sensor %s/%s (sensor_id=%s variable=%s): 0/%s readings to process',
+                sensor_idx, total_batch_sensors, sensor_id, sensor_var, total_readings,
+            )
+            for reading_idx, (stamp, number) in enumerate(sorted_points, 1):
+                try:
+                    with env.cr.savepoint():
+                        Remote.upsert(
+                            'mdm.measurement.device.sensor.reading',
+                            {'sensor_id': sensor_id, 'measurement_time': stamp},
+                            {'value': number, 'remotecontrol_origin_id': Remote.id},
+                        )
+                    upserts += 1
+                except Exception as upsert_exc:
+                    env.clear()
+                    errs += 1
+                    err_msg = error_text(upsert_exc)
+                    _logger.error(
+                        u'[Riegos Salz] Failed reading on sensor_id=%s device_id=%s ts=%s value=%s: %s',
+                        sensor_id, device_id, stamp, number, err_msg,
+                    )
+                    reading_errors.append({
+                        'ts': stamp,
+                        'value': number,
+                        'error': err_msg,
+                    })
+                if (reading_idx % BATCH_SIZE == 0) or (reading_idx == total_readings):
+                    try:
+                        env.cr.commit()
+                    except Exception as commit_err:
+                        _logger.warning('[Riegos Salz] Batch commit warning: %s', commit_err)
+                    _logger.info(
+                        '[Riegos Salz] Sensor %s/%s (sensor_id=%s): %s/%s readings processed (batch committed, upserts=%s, errors=%s)',
+                        sensor_idx, total_batch_sensors, sensor_id, reading_idx, total_readings, upserts, errs,
+                    )
+            if total_readings == 0 and errs > 0:
+                try:
+                    env.cr.commit()
+                except Exception:
+                    pass
+            result['upserts'] = upserts
+            result['errors'] = errs
+            if reading_errors:
+                result['reading_errors'] = reading_errors
+            total_upserts += upserts
+            total_errors += errs
             sensor['cursor'] = finish
             if finish == end:
                 pending.remove(sensor)
         except Exception as exc:
-            result['error'] = error_text(exc)
+            env.clear()
+            err_msg = error_text(exc)
+            result['error'] = err_msg
+            result['errors'] = result.get('errors', 0) + 1
             total_errors += 1
+            _logger.error(
+                u'[Riegos Salz] Sensor %s/%s (sensor_id=%s variable=%s) failed: %s',
+                sensor_idx, total_batch_sensors, sensor_id, sensor_var, err_msg,
+            )
             pending.remove(sensor)
 audit = {
-    'integration_version': '10.0.1.0.8',
+    'integration_version': '10.0.1.0.10',
     'executed_at': fields.Datetime.now(),
     'total_upserts': total_upserts,
     'total_errors': total_errors,
@@ -492,6 +587,10 @@ att = env['ir.attachment'].create({
 Remote.message_post(
     body=u"[RiegosSalz] upserts=%s errors=%s" % (total_upserts, total_errors),
     attachment_ids=[att.id]
+)
+_logger.info(
+    '[Riegos Salz] Get readings finished: remote_id=%s total_upserts=%s total_errors=%s',
+    Remote.id, total_upserts, total_errors,
 )
 bag['upserts'] = total_upserts
 bag['errors'] = total_errors
