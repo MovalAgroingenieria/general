@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="view_deca_version_form" model="ir.ui.view">
+        <field name="name">deca.version.form</field>
+        <field name="model">deca.version</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false" delete="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="deca_number" />
+                            <span> - rev. </span>
+                            <field name="sequence" />
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="issued_at" />
+                            <field name="author_id" />
+                            <field name="reason" />
+                            <field name="previous_version_id" />
+                        </group>
+                        <group>
+                            <field name="transport_date" />
+                            <field name="origin" />
+                            <field name="destination" />
+                            <field name="vehicle_plate" />
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Loading Party">
+                            <field name="loading_name" />
+                            <field name="loading_vat" />
+                            <field name="loading_address" />
+                        </group>
+                        <group string="Effective Carrier">
+                            <field name="carrier_name" />
+                            <field name="carrier_vat" />
+                        </group>
+                    </group>
+                    <group string="Goods">
+                        <field name="goods_description" />
+                        <field name="weight_kg" />
+                        <field name="alternative_measure" />
+                    </group>
+                    <field name="line_ids">
+                        <list>
+                            <field name="name" />
+                            <field name="quantity" />
+                            <field name="uom_name" />
+                            <field name="weight_kg" />
+                        </list>
+                    </field>
+                    <group string="Integrity">
+                        <field name="public_url" widget="url" />
+                        <field name="sha256" />
+                        <field name="pdf_attachment_id" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_deca_version_list" model="ir.ui.view">
+        <field name="name">deca.version.list</field>
+        <field name="model">deca.version</field>
+        <field name="arch" type="xml">
+            <list create="false" delete="false">
+                <field name="deca_number" />
+                <field name="sequence" />
+                <field name="issued_at" />
+                <field name="author_id" />
+                <field name="reason" />
+            </list>
+        </field>
+    </record>
+
+</odoo>

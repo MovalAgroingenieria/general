@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="view_deca_new_confirm_form" model="ir.ui.view">
+        <field name="name">deca.new.confirm.form</field>
+        <field name="model">deca.new.confirm</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="picking_id" invisible="1" />
+                <div class="alert alert-warning" role="alert">
+                    This transfer already has an issued DECA document. Create a
+                    new one only if it corresponds to a different shipment
+                    (e.g. a separate vehicle or carrier).
+                </div>
+                <field name="existing_deca_ids" readonly="1">
+                    <list>
+                        <field name="name" />
+                        <field name="transport_date" />
+                        <field name="vehicle_plate" />
+                        <field name="state" />
+                    </list>
+                </field>
+                <footer>
+                    <button
+                        name="action_confirm"
+                        type="object"
+                        string="Create New DECA"
+                        class="btn-primary"
+                    />
+                    <button string="Cancel" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

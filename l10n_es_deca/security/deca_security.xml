@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="group_deca_user" model="res.groups">
+        <field name="name">DECA: User</field>
+        <field name="category_id" ref="base.module_category_inventory_inventory" />
+    </record>
+
+    <record id="group_deca_manager" model="res.groups">
+        <field name="name">DECA: Manager</field>
+        <field name="category_id" ref="base.module_category_inventory_inventory" />
+        <field name="implied_ids" eval="[(4, ref('group_deca_user'))]" />
+    </record>
+
+    <record id="deca_company_rule" model="ir.rule">
+        <field name="name">DECA: multi-company</field>
+        <field name="model_id" ref="model_deca_document" />
+        <field
+            name="domain_force"
+        >['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="global" eval="True" />
+    </record>
+
+</odoo>

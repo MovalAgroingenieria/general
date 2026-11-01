@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="action_report_deca" model="ir.actions.report">
+        <field name="name">DECA</field>
+        <field name="model">deca.document</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_es_deca.report_deca</field>
+        <field name="report_file">l10n_es_deca.report_deca</field>
+        <field name="print_report_name">'DECA-%s' % (object.name or object.id)</field>
+        <field name="binding_model_id" ref="model_deca_document" />
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_deca_version" model="ir.actions.report">
+        <field name="name">DECA Version</field>
+        <field name="model">deca.version</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_es_deca.report_deca_version</field>
+        <field name="report_file">l10n_es_deca.report_deca_version</field>
+        <field
+            name="print_report_name"
+        >'DECA-%s-v%s' % (object.deca_number or object.id, object.sequence)</field>
+    </record>
+
+</odoo>

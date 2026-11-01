@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template
+        id="report_delivery_document_deca_qr"
+        inherit_id="stock.report_delivery_document"
+        priority="100"
+    >
+        <xpath expr="//div[hasclass('page')]//h2" position="after">
+            <t
+                t-set="deca"
+                t-value="o.deca_ids and o.deca_ids.sorted('id', reverse=True)[0] or False"
+            />
+            <t t-if="deca and deca.qr_image">
+                <div class="text-end mb-2" style="margin-top: -12px;">
+                    <img
+                        t-att-src="'data:image/png;base64,%s' % deca.qr_image.decode()"
+                        style="width: 110px; height: 110px; border: 1px solid #d5d5d5; background: white; padding: 4px;"
+                        alt="DECA QR"
+                    />
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>

@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <template id="deca_report_styles">
+        <style>
+            .deca-eyebrow {
+                font-size: 9px;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                color: #8a8a8a;
+                margin-bottom: 2px;
+            }
+            .deca-title {
+                font-size: 22px;
+                font-weight: bold;
+                margin: 0;
+                color: #222;
+            }
+            .deca-title small {
+                color: #8a8a8a;
+                font-size: 13px;
+                font-weight: normal;
+            }
+            .deca-meta {
+                font-size: 11px;
+                color: #444;
+                margin-top: 2px;
+            }
+            /* Separacion real de 16px entre las dos columnas Bootstrap */
+            .deca-two-columns > .col-6:first-child {
+                padding-left: 0 !important;
+                padding-right: 8px !important;
+            }
+            .deca-two-columns > .col-6:last-child {
+                padding-left: 8px !important;
+                padding-right: 0 !important;
+            }
+            .deca-two-columns > .col-6 {
+                box-sizing: border-box !important;
+            }
+            .deca-two-columns .deca-box {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .deca-box {
+                border: 1px solid #d5d5d5;
+                border-radius: 4px;
+                padding: 8px 10px;
+                margin-top: 10px;
+                min-height: 70px;
+            }
+            .deca-box h4 {
+                font-size: 10px;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+                color: #666;
+                margin: 0 0 6px;
+                padding-bottom: 4px;
+                border-bottom: 1px solid #eee;
+            }
+            .deca-box p {
+                margin: 0;
+                font-size: 11px;
+                line-height: 1.45;
+            }
+            .deca-band {
+                width: 100%;
+                border-collapse: collapse;
+                border: 1px solid #d5d5d5;
+                border-radius: 4px;
+                margin-top: 10px;
+            }
+            .deca-band td {
+                width: 25%;
+                padding: 6px 10px;
+                border-right: 1px solid #eee;
+                font-size: 11px;
+                vertical-align: top;
+            }
+            .deca-band td:last-child {
+                border-right: none;
+            }
+            .deca-lbl {
+                display: block;
+                font-size: 8px;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+                color: #999;
+                margin-bottom: 1px;
+            }
+            .deca-goods {
+                width: 100%;
+                margin-top: 12px;
+                border-collapse: collapse;
+            }
+            .deca-goods th {
+                background: #f2f2f2;
+                border-bottom: 2px solid #ccc;
+                font-size: 9px;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+                color: #555;
+                padding: 6px 8px;
+            }
+            .deca-goods td {
+                padding: 5px 8px;
+                border-bottom: 1px solid #eee;
+                font-size: 11px;
+            }
+            .deca-goods tfoot td {
+                border-top: 2px solid #ccc;
+                border-bottom: none;
+                font-size: 11px;
+            }
+            .deca-sign {
+                border-top: 1px solid #333;
+                margin-top: 55px;
+                padding-top: 4px;
+                font-size: 9px;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+                color: #555;
+                text-align: center;
+            }
+            .deca-footer {
+                font-size: 8px;
+                color: #999;
+                margin-top: 18px;
+                word-break: break-all;
+            }
+            /* Spacing between the report sections */
+            .deca-report-content > .row + .row {
+                margin-top: 12px;
+            }
+            .deca-report-content > .deca-band,
+            .deca-report-content > .deca-goods {
+                margin-top: 16px;
+            }
+            .deca-report-content > .deca-box {
+                margin-top: 16px;
+            }
+        </style>
+    </template>
+
+    <template id="deca_report_body">
+        <t t-set="deca_num" t-value="doc.deca_number if is_version else doc.name" />
+        <t t-call="l10n_es_deca.deca_report_styles" />
+        <div class="page deca-report-content">
+
+            <div class="row">
+                <div class="col-8">
+                    <div class="deca-eyebrow">Electronic Administrative Control Document</div>
+                    <h2 class="deca-title">
+                        <span>DECA</span>
+                        <span t-out="deca_num" />
+                        <small t-if="is_version and doc.sequence > 1">
+                            (rev.
+                            <span t-out="doc.sequence" />)
+                        </small>
+                    </h2>
+                    <div class="deca-meta">
+                        <strong>Date: </strong>
+                        <span t-field="doc.transport_date" />
+                    </div>
+                </div>
+                <div class="col-4 text-end">
+                    <img
+                        t-if="doc.qr_image"
+                        t-att-src="'data:image/png;base64,%s' % doc.qr_image.decode()"
+                        style="max-width: 110px; height: auto;"
+                        alt="QR"
+                    />
+                </div>
+            </div>
+
+            <div class="row deca-two-columns" style="margin-left: 0; margin-right: 0;">
+                <div class="col-6" style="width: 50%; padding-left: 0; padding-right: 8px; box-sizing: border-box;">
+                    <div class="deca-box">
+                        <h4>Loading Party</h4>
+                        <p>
+                            <t t-if="not is_version and doc.loading_partner_id">
+                                <span t-field="doc.loading_partner_id" />
+                            </t>
+                            <t t-else="">
+                                <span t-field="doc.loading_name" />
+                            </t>
+                            <br />
+                            <strong>VAT: </strong>
+                            <span t-field="doc.loading_vat" />
+                            <t t-if="doc.loading_address">
+                                <br />
+                                <span t-field="doc.loading_address" />
+                            </t>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-6" style="width: 50%; padding-left: 8px; padding-right: 0; box-sizing: border-box;">
+                    <div class="deca-box">
+                        <h4>Effective Carrier</h4>
+                        <p>
+                            <t t-if="not is_version and doc.carrier_partner_id">
+                                <span t-field="doc.carrier_partner_id" />
+                            </t>
+                            <t t-else="">
+                                <span t-field="doc.carrier_name" />
+                            </t>
+                            <br />
+                            <strong>VAT: </strong>
+                            <span t-field="doc.carrier_vat" />
+                            <t t-if="doc.driver_name">
+                                <br />
+                                <strong>Driver: </strong>
+                                <span t-field="doc.driver_name" />
+                                <span t-if="doc.driver_vat" t-field="doc.driver_vat" />
+                            </t>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row deca-two-columns" style="margin-left: 0; margin-right: 0;">
+                <div class="col-6" style="width: 50%; padding-left: 0; padding-right: 8px; box-sizing: border-box;">
+                    <div class="deca-box">
+                        <h4>Origin</h4>
+                        <p t-field="doc.origin" />
+                    </div>
+                </div>
+                <div class="col-6" style="width: 50%; padding-left: 8px; padding-right: 0; box-sizing: border-box;">
+                    <div class="deca-box">
+                        <h4>Destination</h4>
+                        <p t-field="doc.destination" />
+                    </div>
+                </div>
+            </div>
+
+            <table class="deca-band">
+                <tr>
+                    <td>
+                        <span class="deca-lbl">Vehicle plate</span>
+                        <span t-field="doc.vehicle_plate" />
+                    </td>
+                    <td>
+                        <span class="deca-lbl">Trailer plate</span>
+                        <span t-field="doc.trailer_plate" />
+                    </td>
+                    <td>
+                        <span class="deca-lbl">Special authorization</span>
+                        <span t-field="doc.special_authorization" />
+                    </td>
+                    <td>
+                        <span class="deca-lbl">Weight (kg)</span>
+                        <span t-field="doc.weight_kg" />
+                        <span
+                            t-if="doc.alternative_measure"
+                            t-field="doc.alternative_measure"
+                        />
+                    </td>
+                </tr>
+            </table>
+
+            <div
+                t-if="doc.goods_description"
+                class="deca-meta"
+                style="margin-top: 8px;"
+            >
+                <span class="deca-lbl">Goods</span>
+                <span t-field="doc.goods_description" />
+            </div>
+
+            <table class="deca-goods" t-if="doc.line_ids">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th class="text-end">Quantity</th>
+                        <th>UoM</th>
+                        <th class="text-end">Weight (kg)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="doc.line_ids" t-as="line">
+                        <td><span t-field="line.name" /></td>
+                        <td class="text-end"><span t-field="line.quantity" /></td>
+                        <td><span t-field="line.uom_name" /></td>
+                        <td class="text-end"><span t-field="line.weight_kg" /></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end">
+                            <strong>Total goods</strong>
+                        </td>
+                        <td class="text-end">
+                            <strong>
+                                <span
+                                    t-out="round(sum(doc.line_ids.mapped('weight_kg')), 3)"
+                                />
+                            </strong>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div t-if="doc.observations" class="deca-box">
+                <h4>Observations</h4>
+                <p t-field="doc.observations" />
+            </div>
+
+            <div class="row">
+                <div class="col-4">
+                    <div class="deca-sign">Loading party signature</div>
+                </div>
+                <div class="col-4">
+                    <div class="deca-sign">Carrier signature</div>
+                </div>
+                <div class="col-4">
+                    <div class="deca-sign">Consignee signature</div>
+                </div>
+            </div>
+
+            <div t-if="is_version" class="deca-footer">
+                <span>Issued at: </span>
+                <span t-field="doc.issued_at" />
+                <span> � SHA-256: </span>
+                <span t-field="doc.sha256" />
+            </div>
+
+        </div>
+    </template>
+
+    <template id="report_deca">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <t t-call="l10n_es_deca.deca_report_body">
+                        <t t-set="is_version" t-value="False" />
+                    </t>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_deca_version">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <t t-call="l10n_es_deca.deca_report_body">
+                        <t t-set="is_version" t-value="True" />
+                    </t>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

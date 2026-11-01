@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="view_picking_form_deca" model="ir.ui.view">
+        <field name="name">stock.picking.form.deca</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button
+                    name="action_view_deca"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-truck"
+                    invisible="deca_count == 0"
+                >
+                    <field name="deca_count" widget="statinfo" string="DECA" />
+                </button>
+            </xpath>
+            <xpath expr="//header" position="inside">
+                <button
+                    name="action_prepare_deca"
+                    type="object"
+                    string="Prepare DECA"
+                    groups="l10n_es_deca.group_deca_user"
+                />
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
