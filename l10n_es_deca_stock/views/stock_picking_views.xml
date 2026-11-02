@@ -25,6 +25,27 @@
                     groups="l10n_es_deca.group_deca_user"
                 />
             </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="DECA" name="page_deca" invisible="deca_count == 0">
+                    <group>
+                        <field name="deca_qr_image" widget="image" readonly="1" />
+                    </group>
+                    <div class="text-muted">
+                        DECA document QR
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_deca_document_form_stock" model="ir.ui.view">
+        <field name="name">deca.document.form.stock</field>
+        <field name="model">deca.document</field>
+        <field name="inherit_id" ref="l10n_es_deca.view_deca_document_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='goods_description']" position="before">
+                <field name="picking_id" readonly="1" />
+            </xpath>
         </field>
     </record>
 

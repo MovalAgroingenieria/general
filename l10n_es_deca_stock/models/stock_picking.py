@@ -16,6 +16,30 @@ class StockPicking(models.Model):
         compute="_compute_deca_count",
         string="DECA Count",
     )
+    deca_qr_image = fields.Binary(
+        compute="_compute_deca_qr_image",
+        string="DECA QR",
+    )
+
+    @api.depends("deca_ids", "deca_ids.qr_image")
+    def _compute_deca_qr_image(self):
+        for picking in self:
+            deca = picking.deca_ids.sorted("id", reverse=True)[:1]
+            picking.deca_qr_image = deca.qr_image if deca else False
+
+    def _deca_loading_partner(self):
+        self.ensure_one()
+        return self.company_id.partner_id or self.partner_id
+
+    def _deca_city_value(self, partner):
+        self.ensure_one()
+        return partner.city or partner.zip_id.city or False
+
+    def _deca_latest_document(self):
+        self.ensure_one()
+        if not self.deca_ids:
+            return self.env["deca.document"]
+        return self.deca_ids.sorted("id", reverse=True)[0]
 
     @api.depends("deca_ids")
     def _compute_deca_count(self):
@@ -47,6 +71,7 @@ class StockPicking(models.Model):
     def _prepare_deca_vals(self):
         self.ensure_one()
         partner = self.partner_id
+        loading_partner = self._deca_loading_partner()
         line_vals = [
             (0, 0, self._prepare_deca_line_vals(move))
             for move in self.move_ids
@@ -54,22 +79,22 @@ class StockPicking(models.Model):
         return {
             "company_id": self.company_id.id,
             "picking_id": self.id,
-            "loading_partner_id": partner.id,
-            "loading_name": partner.name,
-            "loading_vat": partner.vat,
+            "loading_partner_id": loading_partner.id,
+            "loading_name": loading_partner.name,
+            "loading_vat": loading_partner.vat,
             "loading_address": ", ".join(
                 filter(
                     None,
-                    [partner.street, partner.street2, partner.zip_id.display_name],
+                    [
+                        loading_partner.street,
+                        loading_partner.street2,
+                        loading_partner.zip,
+                        loading_partner.city,
+                    ],
                 )
             ),
-            "origin": self.location_id.company_id.zip_id.display_name,
-            "destination": ", ".join(
-                filter(
-                    None,
-                    [partner.street, partner.street2, partner.zip_id.display_name],
-                )
-            ),
+            "origin": self.location_id.company_id.partner_id.city,
+            "destination": self._deca_city_value(partner),
             "transport_date": self.scheduled_date
             and self.scheduled_date.date(),
             "goods_description": self.origin or self.name,

@@ -161,6 +161,11 @@
                     <div class="deca-meta">
                         <strong>Date: </strong>
                         <span t-field="doc.transport_date" />
+                        <t t-if="doc.picking_id">
+                            <br />
+                            <strong>Transfer: </strong>
+                            <span t-field="doc.picking_id" />
+                        </t>
                     </div>
                 </div>
                 <div class="col-4 text-end">
@@ -168,8 +173,11 @@
                         t-if="doc.qr_image"
                         t-att-src="'data:image/png;base64,%s' % doc.qr_image.decode()"
                         style="max-width: 110px; height: auto;"
-                        alt="QR"
+                        alt="DECA QR"
                     />
+                    <div class="deca-footer" t-if="doc.qr_image">
+                        DECA document QR
+                    </div>
                 </div>
             </div>
 

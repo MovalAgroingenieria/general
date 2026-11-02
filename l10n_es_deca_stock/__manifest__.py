@@ -4,7 +4,7 @@
 {
     "name": "DECA - Stock",
     "summary": "Prepare and print DECA transport documents from stock pickings",
-    "version": "18.0.1.0.0",
+    "version": "18.0.1.0.1",
     "category": "Localization/Spain",
     "website": "https://www.moval.es",
     "author": "Moval Agroingeniería",

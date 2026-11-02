@@ -16,6 +16,7 @@ class DecaDocument(models.Model):
         string="Transfer",
         copy=False,
         index=True,
+        tracking=True,
     )
 
     def _check_issue_values(self):
