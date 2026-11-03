@@ -16,7 +16,8 @@ $authorized_organizations = array(
    "DIRECCION GENERAL DE LA POLICIA",
    "FNMT-RCM",
    "ACCV",
-   "UANATACA S.A."
+   "UANATACA S.A.",
+   "AC CAMERFIRMA S.A."
 );
 $RootCA = "/etc/ssl/certs/sede_accepted_certs.pem";
 $sslClientVerify = getenv('SSL_CLIENT_VERIFY');
@@ -110,6 +111,8 @@ if ( ! $ocspUrl) {
       $ocspUrl = "http://ocsp.accv.es/";
    } elseif ($authority == "UANATACA S.A.") {
       $ocspUrl = "http://ocsp1.uanataca.com/public/pki/ocsp/";
+   } elseif ($authority == "AC CAMERFIRMA S.A.") {
+      $ocspUrl = "http://ocsp.camerfirma.com";
    } else {
       echo '<div>';
       echo '<strong>Advertencia</strong>';

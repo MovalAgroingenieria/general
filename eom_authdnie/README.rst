@@ -152,6 +152,22 @@ Standalone regression checks (PHP CLI with the OpenSSL extension):
 
    php tests/test_uanataca.php
 
+CAMERFIRMA
+----------
+
+Official downloads: https://www.camerfirma.com/area-de-soporte/jerarquia-de-certificacion-camerfirma/
+
+* Root: CHAMBERS OF COMMERCE ROOT - 2016, valid until 08/04/2040.
+* Intermediate: AC CAMERFIRMA FOR NATURAL PERSONS - 2016, valid until 09/03/2040.
+* Intermediate: AC CAMERFIRMA FOR LEGAL PERSONS - 2016, valid until 09/03/2040.
+
+The root and two issuing CA certificates are included in
+*static/certs/ac_camerfirma.pem* and in the combined web server bundle.
+The authorized issuer organization is exactly ``AC CAMERFIRMA S.A.``.
+
+The OCSP URL embedded in the client certificate takes precedence. If absent,
+the fallback is ``http://ocsp.camerfirma.com``.
+
 Credits
 =======
 
