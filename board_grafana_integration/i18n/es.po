@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-16 11:22+0000\n"
-"PO-Revision-Date: 2026-10-16 11:22+0000\n"
+"POT-Creation-Date: 2026-11-09 11:44+0000\n"
+"PO-Revision-Date: 2026-11-09 11:44+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,7 +17,6 @@ msgstr ""
 
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:134
-#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:134
 #, python-format
 msgid "<a href='%s' target='_blank'>Open in Grafana</a>"
 msgstr "<a href='%s' target='_blank'>Abrir en Grafana</a>"
@@ -26,6 +25,11 @@ msgstr "<a href='%s' target='_blank'>Abrir en Grafana</a>"
 #: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_config_settings_view_form
 msgid "Apply"
 msgstr "Aplicar"
+
+#. module: board_grafana_integration
+#: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_config_settings_view_form
+msgid "Automatic login (JWT)"
+msgstr "Inicio de sesión automático (JWT)"
 
 #. module: board_grafana_integration
 #: model:ir.model,name:board_grafana_integration.model_board_grafana
@@ -41,8 +45,6 @@ msgstr "Cancelar"
 #. openerp-web
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:104
 #: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:24
-#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:104
-#: code:addons/moval_addons/general/board_grafana_integration/static/src/xml/board_grafana_panel.xml:24
 #, python-format
 msgid "Close"
 msgstr "Cerrar"
@@ -68,7 +70,6 @@ msgstr "Panel de control"
 
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:128
-#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:128
 #, python-format
 msgid "Dashboard '%s' imported successfully."
 msgstr "Panel de control '%s' importado correctamente."
@@ -125,14 +126,12 @@ msgstr "Nombre a mostrar"
 #. module: board_grafana_integration
 #. openerp-web
 #: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:14
-#: code:addons/moval_addons/general/board_grafana_integration/static/src/xml/board_grafana_panel.xml:14
 #, python-format
 msgid "Drag to resize"
 msgstr "Arrastre para cambiar el tamaño"
 
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:141
-#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:141
 #, python-format
 msgid "Failed to import dashboard '%s'. HTTP %s: %s"
 msgstr "Error importando el panel de control '%s'. HTTP %s: %s"
@@ -156,8 +155,6 @@ msgstr "Ancho marco"
 #. openerp-web
 #: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:6
 #: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:16
-#: code:addons/moval_addons/general/board_grafana_integration/static/src/xml/board_grafana_panel.xml:6
-#: code:addons/moval_addons/general/board_grafana_integration/static/src/xml/board_grafana_panel.xml:16
 #: model:ir.actions.act_window,name:board_grafana_integration.login_into_grafana_action
 #: model:ir.ui.menu,name:board_grafana_integration.menu_board_grafana_home
 #: model:ir.ui.menu,name:board_grafana_integration.menu_board_grafana_root
@@ -173,7 +170,6 @@ msgstr "Grafana llave API"
 
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:145
-#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:145
 #, python-format
 msgid "Grafana Dashboard Import"
 msgstr "Importación panel de control Grafana"
@@ -192,7 +188,6 @@ msgstr "URL Grafana"
 
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:112
-#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:112
 #, python-format
 msgid "Grafana URL or API key not found."
 msgstr "No se ha encontrado la URL o la llave API de Grafana."
@@ -208,8 +203,7 @@ msgid "Grafana frame"
 msgstr "Marco Grafana"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana.py:79
-#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana.py:79
+#: code:addons/board_grafana_integration/models/board_grafana.py:176
 #, python-format
 msgid "Grafana is not configured"
 msgstr "Grafana no está configurado"
@@ -224,6 +218,11 @@ msgstr "Servidor Grafana"
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_url
 msgid "Grafana url"
 msgstr "URL Grafana"
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_jwt_login
+msgid "Grafana user"
+msgstr "Usuario de Grafana"
 
 #. module: board_grafana_integration
 #: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_dashboard_storage_view_search
@@ -280,7 +279,6 @@ msgstr "Integración"
 
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:101
-#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:101
 #, python-format
 msgid "Invalid JSON for dashboard '%s': %s"
 msgstr "El JSON del panel de control '%s' no es válido: %s"
@@ -288,8 +286,6 @@ msgstr "El JSON del panel de control '%s' no es válido: %s"
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:160
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:175
-#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:160
-#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana_dashboard_storage.py:175
 #, python-format
 msgid "Invalid JSON. Dashboard '%s': %s"
 msgstr "El JSON del panel de control '%s' no es válido: %s"
@@ -298,6 +294,11 @@ msgstr "El JSON del panel de control '%s' no es válido: %s"
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_dashboard_json
 msgid "JSON Content"
 msgstr "Contenido JSON"
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_jwt_key_value
+msgid "JWT public key"
+msgstr "Clave pública JWT"
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana___last_update
@@ -321,9 +322,19 @@ msgid "Last Updated on"
 msgstr "Última actualización el"
 
 #. module: board_grafana_integration
+#: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_configuration_grafana_jwt_login
+msgid "Login of the Grafana user (e.g. odooreader) that Odoo users are signed in as with a JWT. It must exist in Grafana with the Viewer role. Leave empty to disable the automatic login."
+msgstr "Usuario de Grafana (p. ej. odooreader) con el que los usuarios de Odoo inician sesión mediante un JWT. Debe existir en Grafana con el rol Viewer. Déjelo vacío para desactivar el inicio de sesión automático."
+
+#. module: board_grafana_integration
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:123
+#, python-format
+msgid "Only administrators can change the settings"
+msgstr "Solo los administradores pueden cambiar la configuración"
+
+#. module: board_grafana_integration
 #. openerp-web
 #: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:21
-#: code:addons/moval_addons/general/board_grafana_integration/static/src/xml/board_grafana_panel.xml:21
 #, python-format
 msgid "Open in a new tab"
 msgstr "Abrir en una pestaña nueva"
@@ -339,9 +350,18 @@ msgid "Panel only"
 msgstr "Solo panel"
 
 #. module: board_grafana_integration
+#: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_config_settings_view_form
+msgid "Public key to set in grafana.ini. Regenerating it stops the automatic login until grafana.ini is updated."
+msgstr "Clave pública a configurar en grafana.ini. Regenerarla detiene el inicio de sesión automático hasta que se actualice grafana.ini."
+
+#. module: board_grafana_integration
+#: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_config_settings_view_form
+msgid "Regenerate key"
+msgstr "Regenerar clave"
+
+#. module: board_grafana_integration
 #. openerp-web
 #: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:18
-#: code:addons/moval_addons/general/board_grafana_integration/static/src/xml/board_grafana_panel.xml:18
 #, python-format
 msgid "Reload"
 msgstr "Recargar"
@@ -368,8 +388,7 @@ msgid "Storage of Grafana Dashboards"
 msgstr "Almacén de paneles de control Grafana"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana.py:80
-#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana.py:80
+#: code:addons/board_grafana_integration/models/board_grafana.py:177
 #, python-format
 msgid "The Grafana URL has not been set. Please ask an administrator to configure it in Dashboards > Grafana > Settings."
 msgstr "No se ha establecido la URL de Grafana. Pida a un administrador que la configure en Tableros > Grafana > Configuración."
@@ -385,6 +404,11 @@ msgid "The URL of grafana host."
 msgstr "La URL de Grafana."
 
 #. module: board_grafana_integration
+#: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_config_settings_view_form
+msgid "The current key will stop working. Are you sure you want to regenerate it?"
+msgstr "La clave actual dejará de funcionar. ¿Está seguro de que desea regenerarla?"
+
+#. module: board_grafana_integration
 #: sql_constraint:board.grafana.dashboard.storage:0
 msgid "The dashboard name must be unique!"
 msgstr "El nombre del panel de control debe ser único."
@@ -395,12 +419,9 @@ msgid "The default datasource."
 msgstr "La fuente de datos por defecto."
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana.py:21
-#: code:addons/board_grafana_integration/models/board_grafana.py:91
-#: code:addons/board_grafana_integration/models/board_grafana.py:104
-#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana.py:21
-#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana.py:91
-#: code:addons/moval_addons/general/board_grafana_integration/models/board_grafana.py:104
+#: code:addons/board_grafana_integration/models/board_grafana.py:43
+#: code:addons/board_grafana_integration/models/board_grafana.py:188
+#: code:addons/board_grafana_integration/models/board_grafana.py:201
 #, python-format
 msgid "The grafana configuration parameters have not been set."
 msgstr "Los parámetros de configuración de Grafana no han sido establecidos."
@@ -426,6 +447,11 @@ msgid "The title of the embebbed dashboard."
 msgstr "El título del panel de control incrustado."
 
 #. module: board_grafana_integration
+#: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_configuration_grafana_jwt_key_value
+msgid "Value of the 'key_value' setting of the [auth.jwt] section of grafana.ini, so that Grafana accepts the JWT signed by Odoo. The RSA key pair is generated when the settings are applied; the private key never leaves Odoo."
+msgstr "Valor del parámetro 'key_value' de la sección [auth.jwt] de grafana.ini, para que Grafana acepte el JWT firmado por Odoo. El par de claves RSA se genera al aplicar la configuración; la clave privada nunca sale de Odoo."
+
+#. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_frame_width
 msgid "Width of the iframe. Default is 100%."
 msgstr "Ancho del marco. Por defecto es 100%."
@@ -434,4 +460,9 @@ msgstr "Ancho del marco. Por defecto es 100%."
 #: model:ir.model,name:board_grafana_integration.model_board_grafana_configuration
 msgid "board.grafana.configuration"
 msgstr "board.grafana.configuration"
+
+#. module: board_grafana_integration
+#: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_config_settings_view_form
+msgid "odooreader"
+msgstr "odooreader"
 

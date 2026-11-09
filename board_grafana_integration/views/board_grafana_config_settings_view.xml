@@ -22,6 +22,16 @@
                         <field name="grafana_show_navbar_button"/>
                     </group>
                 </group>
+                <group string="Automatic login (JWT)" name="grafana_jwt_group">
+                    <field name="grafana_jwt_login" placeholder="odooreader"/>
+                </group>
+                <div name="grafana_jwt_key_value" attrs="{'invisible': [('grafana_jwt_key_value', '=', False)]}">
+                    <p class="oe_grey">
+                        Public key to set in grafana.ini. Regenerating it stops the automatic login until grafana.ini is updated.
+                    </p>
+                    <field name="grafana_jwt_key_value" class="o_grafana_jwt_key_value"/>
+                    <button string="Regenerate key" type="object" name="action_generate_grafana_jwt_key" class="oe_link" confirm="The current key will stop working. Are you sure you want to regenerate it?"/>
+                </div>
             </form>
         </field>
     </record>

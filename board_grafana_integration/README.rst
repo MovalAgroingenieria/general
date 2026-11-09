@@ -21,6 +21,58 @@ After the configuration you will be able to transparently connect to this
 server and use the features of Grafana to extract metrics, analyze data or
 create dashboards and panels.
 
+Automatic login (JWT)
+---------------------
+
+Odoo users are signed in to Grafana as a single Grafana user with the Viewer
+role (e.g. ``odooreader``), so anonymous access is not needed. Odoo signs a
+JWT (RS256) and Grafana checks it with the public key of Odoo:
+
+#. Create the Grafana user (e.g. ``odooreader``) with the Viewer role in the
+   organization and make that organization its default one.
+#. In *Dashboards > Grafana > Settings*, set *Grafana user* and apply. An
+   RSA key pair is generated; the private key is only readable by
+   administrators and never reaches the browser.
+#. Configure grafana.ini with the *JWT public key* shown in the settings,
+   disable the anonymous access and allow embedding::
+
+    [auth.anonymous]
+    enabled = false
+
+    [security]
+    allow_embedding = true
+
+    [auth.jwt]
+    enabled = true
+    header_name = X-JWT-Assertion
+    username_claim = sub
+    url_login = true
+    auto_sign_up = false
+    skip_org_role_sync = true
+    key_value = <JWT public key>
+    expect_claims = {"iss": "odoo", "sub": "odooreader"}
+
+#. Restart Grafana.
+
+Grafana pages are always opened through ``/board_grafana/auth?path=<path>``
+(also full Grafana URLs are accepted). This route is only available to users
+with access to the module (never portal users): it creates a new token valid
+for 12 hours and redirects to Grafana with it. Other modules should use
+``env['board.grafana'].get_grafana_auth_url(path)`` (or
+``create_grafana_frame``) instead of the Grafana URL, which no longer works
+without a session.
+
+* ``expect_claims`` only accepts tokens for the configured user: even with
+  the private key, no other Grafana user (e.g. ``admin``) can be impersonated.
+* When the token expires, Grafana asks to log in: reload the panel.
+* *Regenerate key* invalidates the current key: update grafana.ini again.
+* *Dashboards > Grafana > Grafana server* opens Grafana in a new tab, also
+  signed in automatically. Grafana users that edit dashboards have to open
+  the Grafana login page (``<Grafana URL>/login``) themselves.
+* A Viewer can still send queries to the data sources through the Grafana
+  API, so keep the data source user read-only and restricted to the tables
+  the dashboards need.
+
 Side panel
 ----------
 

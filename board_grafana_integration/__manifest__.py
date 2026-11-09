@@ -12,6 +12,12 @@
     "depends": [
         "board",
     ],
+    "external_dependencies": {
+        "python": [
+            "cryptography",
+            "requests",
+        ],
+    },
     "data": [
         "security/ir.model.access.csv",
         "views/board_grafana_config_settings_view.xml",

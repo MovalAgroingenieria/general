@@ -12,6 +12,7 @@ var WIDTH_STORAGE_KEY = 'board_grafana_integration.panel_width';
 var DEFAULT_WIDTH = 600;
 var MIN_WIDTH = 320;
 var MAX_WIDTH_RATIO = 0.7;
+var AUTH_ROUTE = '/board_grafana/auth';
 
 var GrafanaPanel = Widget.extend({
     template: 'board_grafana_integration.Panel',
@@ -138,7 +139,9 @@ var GrafanaPanel = Widget.extend({
         var url = this._getCurrentUrl();
         event.preventDefault();
         if (url && url !== 'about:blank') {
-            window.open(url, '_blank');
+            // Opened through Odoo, which signs the user in to Grafana again
+            window.open(AUTH_ROUTE + '?path=' + encodeURIComponent(url),
+                '_blank');
         } else {
             this.grafana_model.call('action_go_to_grafana_server', [[]])
                 .then(function (action) {
