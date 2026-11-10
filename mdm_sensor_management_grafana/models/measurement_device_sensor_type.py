@@ -29,12 +29,12 @@ class MeasurementDeviceSensorTypeGrafana(models.Model):
             raise exceptions.UserError(
                 _("There are no Grafana panels created for this sensor type yet.\n"
                   "Use the 'Create Grafana Panel' button to create one."))
-        grafana_url = self.env['ir.values'].get_default(
-            'board.grafana.configuration', 'grafana_url')
+        grafana_model = self.env['board.grafana']
         # Open the most recently linked dashboard (last in the M2M list).
         dashboard = self.grafana_dashboard_ids[-1]
         dashboard_path = dashboard.dashboard_path.split('?')[0]
-        url = (grafana_url or '') + dashboard_path
+        # Opened through Odoo, which signs the user in to Grafana
+        url = grafana_model.get_grafana_auth_url(dashboard_path)
         return {
             'type': 'ir.actions.act_url',
             'url': url,
@@ -49,8 +49,8 @@ class MeasurementDeviceSensorTypeGrafana(models.Model):
                 _("There are no Grafana panels associated with this sensor type."))
         grafana_url = self.env['ir.values'].get_default(
             'board.grafana.configuration', 'grafana_url')
-        grafana_api_key = self.env['ir.values'].get_default(
-            'board.grafana.configuration', 'grafana_api_key')
+        grafana_api_key = self.env[
+            'board.grafana.configuration']._get_grafana_api_key()
         headers = {
             'Authorization': 'Bearer %s' % (grafana_api_key or ''),
             'Content-Type': 'application/json',

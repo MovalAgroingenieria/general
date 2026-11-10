@@ -366,9 +366,9 @@ class MdmGrafanaPanelWizard(models.TransientModel):
         # Build the Grafana URL directly from the UID to avoid stale ORM
         # cache on dashboard_path (which is written during import but may not
         # yet be reflected in the current environment's cache).
-        grafana_url = self.env['ir.values'].get_default(
-            'board.grafana.configuration', 'grafana_url')
-        url = '%s/d/%s' % (grafana_url or '', self.dashboard_uid)
+        # Opened through Odoo, which signs the user in to Grafana
+        url = self.env['board.grafana'].get_grafana_auth_url(
+            '/d/%s' % self.dashboard_uid)
 
         return {
             'type': 'ir.actions.act_url',
