@@ -13,7 +13,11 @@
                 <group string="Grafana configuration" name="grafana_configuration_group">
                     <group name="server">
                         <field name="grafana_url_raw"/>
-                        <field name="grafana_api_key" password="True"/>
+                        <label for="grafana_api_key_status"/>
+                        <div>
+                            <field name="grafana_api_key_status" class="oe_inline" nolabel="1"/>
+                            <button string="Edit" type="object" name="action_edit_grafana_api_key" class="oe_link"/>
+                        </div>
                         <field name="grafana_default_datasource"/>
                     </group>
                     <group name="defaults">

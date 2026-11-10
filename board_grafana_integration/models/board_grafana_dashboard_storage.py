@@ -106,8 +106,8 @@ class BoardGrafana(models.Model):
         # Get config params
         grafana_url = self.env['ir.values'].get_default(
             'board.grafana.configuration', 'grafana_url')
-        grafana_api_key = self.env['ir.values'].get_default(
-            'board.grafana.configuration', 'grafana_api_key')
+        grafana_api_key = self.env[
+            'board.grafana.configuration']._get_grafana_api_key()
         if not grafana_url or not grafana_api_key:
             raise exceptions.UserError(_("Grafana URL or API key not found."))
         # Construct headers
@@ -128,7 +128,9 @@ class BoardGrafana(models.Model):
             message += _("Dashboard '%s' imported successfully.") % self.name
             # Delete kiosk param for opening in Grafana (allow editing)
             dashboard_path = self.dashboard_path.split('?')[0]
-            imported_dashboard_url = grafana_url + dashboard_path
+            # Opened through Odoo, which signs the user in to Grafana
+            imported_dashboard_url = self.env[
+                'board.grafana'].get_grafana_auth_url(dashboard_path)
             # Add link to open in Grafana
             message += "<br/><br/>"
             message += _("<a href='%s' target='_blank'>Open in Grafana</a>") % \

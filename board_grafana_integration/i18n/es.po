@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-09 11:44+0000\n"
-"PO-Revision-Date: 2026-11-09 11:44+0000\n"
+"POT-Creation-Date: 2026-11-10 08:40+0000\n"
+"PO-Revision-Date: 2026-11-10 08:40+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -131,6 +131,11 @@ msgid "Drag to resize"
 msgstr "Arrastre para cambiar el tamaño"
 
 #. module: board_grafana_integration
+#: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_config_settings_view_form
+msgid "Edit"
+msgstr "Editar"
+
+#. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:141
 #, python-format
 msgid "Failed to import dashboard '%s'. HTTP %s: %s"
@@ -164,7 +169,9 @@ msgid "Grafana"
 msgstr "Grafana"
 
 #. module: board_grafana_integration
-#: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_api_key
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:145
+#: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_api_key_status
+#, python-format
 msgid "Grafana API Key"
 msgstr "Grafana llave API"
 
@@ -327,7 +334,14 @@ msgid "Login of the Grafana user (e.g. odooreader) that Odoo users are signed in
 msgstr "Usuario de Grafana (p. ej. odooreader) con el que los usuarios de Odoo inician sesión mediante un JWT. Debe existir en Grafana con el rol Viewer. Déjelo vacío para desactivar el inicio de sesión automático."
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:123
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:101
+#, python-format
+msgid "Not set yet."
+msgstr "Todavía no configurada."
+
+#. module: board_grafana_integration
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:142
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:175
 #, python-format
 msgid "Only administrators can change the settings"
 msgstr "Solo los administradores pueden cambiar la configuración"
@@ -365,6 +379,12 @@ msgstr "Regenerar clave"
 #, python-format
 msgid "Reload"
 msgstr "Recargar"
+
+#. module: board_grafana_integration
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:99
+#, python-format
+msgid "Set as a system parameter."
+msgstr "Configurada como parámetro del sistema."
 
 #. module: board_grafana_integration
 #: model:ir.actions.act_window,name:board_grafana_integration.grafana_configuration_action
@@ -420,8 +440,8 @@ msgstr "La fuente de datos por defecto."
 
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana.py:43
-#: code:addons/board_grafana_integration/models/board_grafana.py:188
-#: code:addons/board_grafana_integration/models/board_grafana.py:201
+#: code:addons/board_grafana_integration/models/board_grafana.py:186
+#: code:addons/board_grafana_integration/models/board_grafana.py:200
 #, python-format
 msgid "The grafana configuration parameters have not been set."
 msgstr "Los parámetros de configuración de Grafana no han sido establecidos."
@@ -445,6 +465,11 @@ msgstr "El UID del panel de control de bienvenida (opcional, si no se muestra la
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_dashboard_title
 msgid "The title of the embebbed dashboard."
 msgstr "El título del panel de control incrustado."
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_configuration_grafana_api_key_status
+msgid "Token of the Grafana service account used to import the dashboards. It is stored in the system parameter 'board_grafana_integration.api_key', only readable by administrators, and is edited from there."
+msgstr "Token de la cuenta de servicio de Grafana que se usa para importar los paneles de control. Se guarda en el parámetro del sistema 'board_grafana_integration.api_key', legible solo por los administradores, y se edita desde allí."
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_configuration_grafana_jwt_key_value

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-09 11:44+0000\n"
-"PO-Revision-Date: 2026-11-09 11:44+0000\n"
+"POT-Creation-Date: 2026-11-10 08:40+0000\n"
+"PO-Revision-Date: 2026-11-10 08:40+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -131,6 +131,11 @@ msgid "Drag to resize"
 msgstr ""
 
 #. module: board_grafana_integration
+#: model:ir.ui.view,arch_db:board_grafana_integration.board_grafana_config_settings_view_form
+msgid "Edit"
+msgstr ""
+
+#. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:141
 #, python-format
 msgid "Failed to import dashboard '%s'. HTTP %s: %s"
@@ -164,7 +169,9 @@ msgid "Grafana"
 msgstr ""
 
 #. module: board_grafana_integration
-#: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_api_key
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:145
+#: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_api_key_status
+#, python-format
 msgid "Grafana API Key"
 msgstr ""
 
@@ -327,7 +334,14 @@ msgid "Login of the Grafana user (e.g. odooreader) that Odoo users are signed in
 msgstr ""
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:123
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:101
+#, python-format
+msgid "Not set yet."
+msgstr ""
+
+#. module: board_grafana_integration
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:142
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:175
 #, python-format
 msgid "Only administrators can change the settings"
 msgstr ""
@@ -364,6 +378,12 @@ msgstr ""
 #: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:18
 #, python-format
 msgid "Reload"
+msgstr ""
+
+#. module: board_grafana_integration
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:99
+#, python-format
+msgid "Set as a system parameter."
 msgstr ""
 
 #. module: board_grafana_integration
@@ -420,8 +440,8 @@ msgstr ""
 
 #. module: board_grafana_integration
 #: code:addons/board_grafana_integration/models/board_grafana.py:43
-#: code:addons/board_grafana_integration/models/board_grafana.py:188
-#: code:addons/board_grafana_integration/models/board_grafana.py:201
+#: code:addons/board_grafana_integration/models/board_grafana.py:186
+#: code:addons/board_grafana_integration/models/board_grafana.py:200
 #, python-format
 msgid "The grafana configuration parameters have not been set."
 msgstr ""
@@ -444,6 +464,11 @@ msgstr ""
 #. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_dashboard_title
 msgid "The title of the embebbed dashboard."
+msgstr ""
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_configuration_grafana_api_key_status
+msgid "Token of the Grafana service account used to import the dashboards. It is stored in the system parameter 'board_grafana_integration.api_key', only readable by administrators, and is edited from there."
 msgstr ""
 
 #. module: board_grafana_integration

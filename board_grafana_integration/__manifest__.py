@@ -4,7 +4,7 @@
 {
     "name": "Board Grafana Integration",
     "summary": "Grafana integration for board module",
-    "version": '10.0.1.1.1',
+    "version": '10.0.1.2.0',
     "category": "Moval General Addons",
     "website": "http://www.moval.es",
     "author": "Moval Agroingeniería",

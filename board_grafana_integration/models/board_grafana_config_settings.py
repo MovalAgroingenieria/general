@@ -22,6 +22,7 @@ class BoardGrafanaConfigSettings(models.TransientModel):
     _name = "board.grafana.configuration"
 
     PARAM_JWT_PRIVATE_KEY = 'board_grafana_integration.jwt_private_key'
+    PARAM_API_KEY = 'board_grafana_integration.api_key'
     JWT_ISSUER = 'odoo'
     JWT_KEY_SIZE = 2048
 
@@ -33,8 +34,14 @@ class BoardGrafanaConfigSettings(models.TransientModel):
     grafana_url = fields.Char(
         compute="_compute_grafana_url")
 
-    grafana_api_key = fields.Char(
-        string="Grafana API Key")
+    grafana_api_key_status = fields.Char(
+        string="Grafana API Key",
+        readonly=True,
+        help="Token of the Grafana service account used to import the "
+             "dashboards. It is stored in the system parameter "
+             "'board_grafana_integration.api_key', only readable by "
+             "administrators, and is edited from there.",
+    )
 
     grafana_default_datasource = fields.Char(
         string="Default datasource",
@@ -84,6 +91,16 @@ class BoardGrafanaConfigSettings(models.TransientModel):
     def get_default_grafana_jwt_key_value(self, fields):
         return {'grafana_jwt_key_value': self._get_grafana_jwt_key_value()}
 
+    @api.model
+    def get_default_grafana_api_key_status(self, fields):
+        # Only whether it is set: the token itself must never reach the
+        # browser, and this method is readable by any user
+        if self._get_grafana_api_key():
+            status = _('Set as a system parameter.')
+        else:
+            status = _('Not set yet.')
+        return {'grafana_api_key_status': status}
+
     @api.multi
     def set_default_values(self):
         values = self.env["ir.values"].sudo()
@@ -91,8 +108,6 @@ class BoardGrafanaConfigSettings(models.TransientModel):
                            "grafana_url_raw", self.grafana_url_raw)
         values.set_default("board.grafana.configuration",
                            "grafana_url", self.grafana_url)
-        values.set_default("board.grafana.configuration",
-                           "grafana_api_key", self.grafana_api_key)
         values.set_default("board.grafana.configuration",
                            "grafana_default_datasource",
                            self.grafana_default_datasource)
@@ -114,6 +129,43 @@ class BoardGrafanaConfigSettings(models.TransientModel):
         if (self.grafana_jwt_login or "").strip() and \
                 not self._get_grafana_jwt_private_key():
             self._generate_grafana_jwt_private_key()
+
+    @api.multi
+    def set_grafana_api_key_groups(self):
+        self._ensure_grafana_api_key_param()
+
+    @api.multi
+    def action_edit_grafana_api_key(self):
+        if not self.env.user._is_superuser() and \
+                not self.env.user.has_group('base.group_system'):
+            raise exceptions.AccessError(
+                _("Only administrators can change the settings"))
+        param = self._ensure_grafana_api_key_param()
+        return {
+            'name': _('Grafana API Key'),
+            'type': 'ir.actions.act_window',
+            'res_model': param._name,
+            'res_id': param.id,
+            'view_mode': 'form',
+            'target': 'new',
+        }
+
+    @api.model
+    def _get_grafana_api_key(self):
+        # Private on purpose: the token must never reach the browser
+        param_model = self.env['ir.config_parameter'].sudo()
+        return (param_model.get_param(self.PARAM_API_KEY) or '').strip()
+
+    @api.model
+    def _ensure_grafana_api_key_param(self):
+        # Created even when empty, so that it can be edited as a system
+        # parameter, and its groups are always restored: a parameter created
+        # by hand is readable by every user
+        param_model = self.env['ir.config_parameter'].sudo()
+        param_model.set_param(
+            self.PARAM_API_KEY, self._get_grafana_api_key(),
+            groups=['base.group_system'])
+        return param_model.search([('key', '=', self.PARAM_API_KEY)])
 
     @api.multi
     def action_generate_grafana_jwt_key(self):

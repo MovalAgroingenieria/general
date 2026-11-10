@@ -21,6 +21,25 @@ After the configuration you will be able to transparently connect to this
 server and use the features of Grafana to extract metrics, analyze data or
 create dashboards and panels.
 
+Grafana API Key
+---------------
+
+The dashboards stored in Odoo are sent to Grafana with the token of a
+Grafana service account with the Editor role (Grafana 13 no longer supports
+the old API keys). The token is stored in the system parameter
+``board_grafana_integration.api_key``, which is only readable by
+administrators:
+
+#. In Grafana, create a service account with the Editor role and generate a
+   token for it.
+#. In *Dashboards > Grafana > Settings*, the *Grafana API Key* line shows
+   whether it is set. Press *Edit* to open the system parameter and paste
+   the token into its *Value*.
+
+It can also be edited in *Settings > Technical > Parameters > System
+Parameters*. If it is created by hand, keep the group *Administration /
+Settings* in it; applying the Grafana settings restores that group.
+
 Automatic login (JWT)
 ---------------------
 
@@ -72,6 +91,10 @@ without a session.
 * A Viewer can still send queries to the data sources through the Grafana
   API, so keep the data source user read-only and restricted to the tables
   the dashboards need.
+* Portal pages (``base_wua_portal_sensorreading_grafana``) are not covered:
+  a portal user holding a Viewer token could query the data sources through
+  the Grafana API, so their Grafana access has to be solved separately (for
+  example with another organization and a restricted data source).
 
 Side panel
 ----------
