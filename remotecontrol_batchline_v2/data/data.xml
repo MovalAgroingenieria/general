@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="remotecontrol_batchline_v2" model="remotecontrol">
+        <field name="name">Batchline v2</field>
+        <field name="remotecontrol_type">rest</field>
+        <field name="base_url"></field>
+        <field name="timeout">60</field>
+        <field name="verify_ssl" eval="True"/>
+        <field name="max_retries">3</field>
+        <field name="backoff">1.6</field>
+        <field name="readonly" eval="True"/>
+        <field name="connection_params">{"api_key": "", "timezone": "Europe/Madrid"}</field>
+        <field name="remotecontrol_help"><![CDATA[
+<h2>Batchline v2 · API key · MDM</h2>
+<p>Set Base URL to the deployment root (including its optional path prefix).
+Set connection_params to {"api_key": "YOUR_KEY", "timezone": "Europe/Madrid"}.
+SSL verification is enabled. No token is requested; every call sends X-API-KEY.</p>
+<p>Import elements creates an inventory attachment. Configure existing devices
+with {"device_id": "IDENTIFIER", "start_date": "2026-01-01"} and sensors with
+{"tag": "EXACT_TAG_NAME"}. Optional sensor start_date overrides the device.
+Daily Sync resumes on the last stored reading's local day, inclusively; otherwise
+it uses the configured start date or January 1. Computed sensors run separately.</p>
+<p>Supported GET endpoints: /api/alta/elementos and
+/api/alta/elementos/historico (inicio, fin, elemento, tag). Responses use
+identificador/descripcion/tags and fecha/valor, not the old PascalCase keys.</p>
+<p>Offsets and fractional seconds are supported. Naive times use the configured
+timezone; ambiguous/nonexistent DST times are rejected. Reading failures are
+isolated. Normal runs commit every 1000 attempts and at sensor end; dry-run
+tests do not commit. Imports retain JSON audit attachments and progress logs.</p>
+<p><strong>Dedicated pressure routes are not documented in the supplied Swagger.</strong>
+Legacy pressure procedures are inactive and explicitly blocked. Pressure tags
+published as elements use the normal device_id/tag workflow. No legacy pressure
+mapping is guessed. Low-network meters are excluded. No cron is enabled.</p>
+        ]]></field>
+    </record>
+
+    <record id="remotecontrol_batchline_v2_action_prepare_api_key" model="remotecontrol.action">
+        <field name="name">Batchline v2: Prepare API key</field>
+        <field name="remote_id" ref="remotecontrol_batchline_v2"/>
+        <field name="readonly" eval="True"/>
+        <field name="code"><![CDATA[
+from urlparse import urlsplit
+
+cfg = json.loads(self.remote_id.connection_params or '{}')
+if not isinstance(cfg, dict):
+    raise Exception('Batchline v2 connection_params must be a JSON object.')
+api_key = cfg.get('api_key')
+if not isinstance(api_key, basestring) or not api_key.strip():
+    raise Exception('Set api_key in Batchline v2 connection_params.')
+if '\r' in api_key or '\n' in api_key:
+    raise Exception('Invalid Batchline v2 API key header.')
+parts = urlsplit(base_url or '')
+if (parts.scheme not in ('http', 'https') or not parts.netloc or
+        parts.query or parts.fragment or parts.username or parts.password):
+    raise Exception('Set a valid Batchline v2 deployment Base URL.')
+pytz.timezone(cfg.get('timezone') or 'Europe/Madrid')
+bag['api_key_configured'] = True
+        ]]></field>
+    </record>
+
+    <record id="remotecontrol_batchline_v2_action_get_elements" model="remotecontrol.action">
+        <field name="name">Batchline v2: Import elements</field>
+        <field name="remote_id" ref="remotecontrol_batchline_v2"/>
+        <field name="readonly" eval="True"/>
+        <field name="code"><![CDATA[
+cfg = json.loads(self.remote_id.connection_params or '{}')
+api_key = cfg.get('api_key')
+if not isinstance(api_key, basestring) or not api_key.strip():
+    raise Exception('Set api_key in Batchline v2 connection_params.')
+headers = {'X-API-KEY': api_key.strip(), 'Accept': 'application/json'}
+url = (base_url or '').rstrip('/') + '/api/alta/elementos'
+resp = request_retry('GET', url, headers=headers, timeout=timeout)
+if resp.status_code >= 400:
+    raise Exception('Batchline v2 inventory HTTP %s.' % resp.status_code)
+try:
+    elements = resp.json()
+except ValueError:
+    raise Exception('Batchline v2 inventory response is not valid JSON.')
+if not isinstance(elements, list):
+    raise Exception('Batchline v2 inventory must be a JSON array.')
+for element in elements:
+    if (not isinstance(element, dict) or
+            not isinstance(element.get('identificador'), basestring) or
+            not element['identificador'].strip() or
+            not isinstance(element.get('descripcion'), basestring) or
+            not isinstance(element.get('tags'), list)):
+        raise Exception('Invalid Batchline v2 element schema.')
+    for tag in element['tags']:
+        if (not isinstance(tag, dict) or
+                not isinstance(tag.get('nombre'), basestring) or
+                not tag['nombre'].strip()):
+            raise Exception('Invalid Batchline v2 tag schema.')
+audit = {'executed_at': fields.Datetime.now(),
+         'total_elements': len(elements), 'elements': elements}
+fname = 'batchline_v2_elements_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace(' ', '_'))
+attachment = env['ir.attachment'].create({
+    'name': fname, 'datas_fname': fname,
+    'datas': base64.b64encode(json.dumps(
+        audit, ensure_ascii=True, indent=2).encode('utf-8')),
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol', 'res_id': self.remote_id.id,
+})
+self.remote_id.message_post(
+    body=u'[Batchline v2] Imported %s elements' % len(elements),
+    attachment_ids=[attachment.id])
+bag['total_elements'] = len(elements)
+bag['attachment_id'] = attachment.id
+        ]]></field>
+    </record>
+
+    <record id="remotecontrol_batchline_v2_action_get_devices" model="remotecontrol.action">
+        <field name="name">Batchline v2: Get devices (plan)</field>
+        <field name="remote_id" ref="remotecontrol_batchline_v2"/>
+        <field name="readonly" eval="True"/>
+        <field name="code"><![CDATA[
+from datetime import datetime
+
+remote = self.remote_id
+cfg = json.loads(remote.connection_params or '{}')
+local_tz = pytz.timezone(cfg.get('timezone') or 'Europe/Madrid')
+today = datetime.now(local_tz).strftime('%Y-%m-%d')
+domain = [('remotecontrol_params', '!=', False),
+          ('device_id.remotecontrol_id', '=', remote.id)]
+if selected_device_ids:
+    domain.append(('device_id', 'in', selected_device_ids))
+sensors = env['mdm.measurement.device.sensor'].search(domain)
+latest = {}
+if sensors:
+    env.cr.execute(
+        'SELECT DISTINCT ON (sensor_id) sensor_id, measurement_time '
+        'FROM mdm_measurement_device_sensor_reading '
+        'WHERE sensor_id IN %s AND active = TRUE '
+        'ORDER BY sensor_id, measurement_time DESC', (tuple(sensors.ids),))
+    latest = dict(env.cr.fetchall())
+plan = []
+errors = []
+for sensor in sensors:
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}')
+        device_cfg = json.loads(sensor.device_id.remotecontrol_params or '{}')
+        tag = sensor_cfg.get('tag')
+        device_code = device_cfg.get('device_id')
+        if not tag and sensor_cfg.get('sensor_type'):
+            raise ValueError('Legacy pressure configuration needs a '
+                             'documented element device_id and tag.')
+        if not tag:
+            continue
+        if (not isinstance(tag, basestring) or not tag.strip() or
+                not isinstance(device_code, basestring) or
+                not device_code.strip()):
+            raise ValueError('Missing valid device_id/tag configuration.')
+        if latest.get(sensor.id):
+            stamp = latest[sensor.id]
+            if isinstance(stamp, basestring):
+                stamp = fields.Datetime.from_string(stamp)
+            initial = pytz.UTC.localize(stamp).astimezone(
+                local_tz).strftime('%Y-%m-%d')
+        else:
+            initial = (sensor_cfg.get('start_date') or
+                       device_cfg.get('start_date') or today[:4] + '-01-01')
+        initial = datetime.strptime(initial, '%Y-%m-%d').strftime('%Y-%m-%d')
+        if initial > today:
+            raise ValueError('Start date is after the current local day.')
+        plan.append({'sensor_id': sensor.id,
+                     'device_id': sensor.device_id.id,
+                     'device_batchline_id': device_code.strip(),
+                     'sensor_tag': tag.strip(), 'initial_date': initial})
+    except Exception:
+        errors.append({'sensor_id': sensor.id,
+                       'error': 'Invalid sensor/device configuration or date.'})
+bag['sensors_plan'] = plan
+bag['plan_errors'] = errors
+bag['final_date'] = today
+        ]]></field>
+    </record>
+
+    <record id="remotecontrol_batchline_v2_action_get_readings" model="remotecontrol.action">
+        <field name="name">Batchline v2: Get readings</field>
+        <field name="remote_id" ref="remotecontrol_batchline_v2"/>
+        <field name="readonly" eval="True"/>
+        <field name="code"><![CDATA[
+import logging
+import math
+import sys
+from datetime import datetime
+
+from dateutil import parser
+
+logger = logging.getLogger('remotecontrol_batchline_v2')
+batch_size = 1000
+remote = self.remote_id
+cfg = json.loads(remote.connection_params or '{}')
+api_key = cfg.get('api_key')
+if not isinstance(api_key, basestring) or not api_key.strip():
+    raise Exception('Set api_key in Batchline v2 connection_params.')
+headers = {'X-API-KEY': api_key.strip(), 'Accept': 'application/json'}
+local_tz = pytz.timezone(cfg.get('timezone') or 'Europe/Madrid')
+final_date = bag.get('final_date') or datetime.now(local_tz).strftime('%Y-%m-%d')
+url = (base_url or '').rstrip('/') + '/api/alta/elementos/historico'
+is_test = bool(env.context.get('remotecontrol_dry_run'))
+frame = sys._getframe()
+while frame:
+    if frame.f_code.co_name in ('test_run', 'test_execute'):
+        is_test = True
+        break
+    frame = frame.f_back
+del frame
+total_upserts = 0
+total_errors = len(bag.get('plan_errors') or [])
+items = []
+plan = bag.get('sensors_plan') or []
+for sensor_index, sensor_plan in enumerate(plan, 1):
+    sensor_id = sensor_plan['sensor_id']
+    params = {'inicio': sensor_plan['initial_date'], 'fin': final_date,
+              'elemento': sensor_plan['device_batchline_id'],
+              'tag': sensor_plan['sensor_tag']}
+    item = {'sensor_id': sensor_id, 'device_id': sensor_plan['device_id'],
+            'params': params, 'upserts': 0, 'errors': 0, 'readings': []}
+    items.append(item)
+    try:
+        resp = request_retry('GET', url, headers=headers, params=params,
+                             timeout=timeout)
+        item['status'] = resp.status_code
+        if resp.status_code >= 400:
+            raise ValueError('Historical HTTP %s' % resp.status_code)
+        readings = resp.json()
+        if not isinstance(readings, list):
+            raise ValueError('Historical response must be a JSON array')
+        item['points_found'] = len(readings)
+        logger.info('[Batchline v2] Sensor %s/%s id=%s: 0/%s',
+                    sensor_index, len(plan), sensor_id, len(readings))
+        for reading_index, reading in enumerate(readings, 1):
+            try:
+                if not isinstance(reading, dict):
+                    raise ValueError('Reading must be a JSON object')
+                stamp = reading.get('fecha')
+                value = reading.get('valor')
+                if (not isinstance(stamp, basestring) or not stamp or
+                        value is None or isinstance(value, bool) or
+                        not isinstance(value, (int, long, float))):
+                    raise ValueError('Missing/invalid fecha or valor')
+                value = float(value)
+                if math.isnan(value) or math.isinf(value):
+                    raise ValueError('Nonfinite reading value')
+                date_time = parser.isoparse(stamp) if hasattr(
+                    parser, 'isoparse') else parser.parse(stamp)
+                if date_time.tzinfo is None:
+                    date_time = local_tz.localize(date_time, is_dst=None)
+                ts_utc = date_time.astimezone(pytz.UTC).strftime(
+                    '%Y-%m-%d %H:%M:%S')
+                with env.cr.savepoint():
+                    remote.upsert(
+                        'mdm.measurement.device.sensor.reading',
+                        {'sensor_id': sensor_id, 'measurement_time': ts_utc},
+                        {'value': value, 'remotecontrol_origin_id': remote.id})
+                item['upserts'] += 1
+                total_upserts += 1
+                item['readings'].append({'ts': ts_utc, 'value': value})
+            except Exception as exc:
+                env.clear()
+                item['errors'] += 1
+                total_errors += 1
+                try:
+                    error = unicode(exc)
+                except Exception:
+                    error = str(exc).decode('utf-8', 'replace')
+                error = error.replace(api_key.strip(), '[REDACTED]')
+                item['readings'].append({'index': reading_index,
+                                         'error': error})
+                logger.warning(u'[Batchline v2] Sensor %s reading %s: %s',
+                               sensor_id, reading_index, error)
+            if (reading_index % batch_size == 0 or
+                    reading_index == len(readings)):
+                if not is_test:
+                    env.cr.commit()
+                logger.info(
+                    '[Batchline v2] Sensor %s/%s id=%s: %s/%s '
+                    '(committed=%s upserts=%s errors=%s)', sensor_index,
+                    len(plan), sensor_id, reading_index, len(readings),
+                    not is_test, item['upserts'], item['errors'])
+    except Exception:
+        env.clear()
+        item['errors'] += 1
+        total_errors += 1
+        # Do not persist transport exceptions: they may contain credentials.
+        item['error'] = 'Historical request/response or batch failure.'
+        logger.warning('[Batchline v2] Sensor %s failed (HTTP %s)',
+                       sensor_id, item.get('status', 'unavailable'))
+audit = {'executed_at': fields.Datetime.now(), 'final_date': final_date,
+         'total_upserts': total_upserts, 'total_errors': total_errors,
+         'plan_errors': bag.get('plan_errors') or [], 'items': items}
+fname = 'batchline_v2_readings_%s.json' % (
+    fields.Datetime.now().replace(':', '').replace(' ', '_'))
+attachment = env['ir.attachment'].create({
+    'name': fname, 'datas_fname': fname,
+    'datas': base64.b64encode(json.dumps(
+        audit, ensure_ascii=True, indent=2).encode('utf-8')),
+    'mimetype': 'application/json',
+    'res_model': 'remotecontrol', 'res_id': remote.id,
+})
+remote.message_post(
+    body=u'[Batchline v2 readings] upserts=%s errors=%s' % (
+        total_upserts, total_errors), attachment_ids=[attachment.id])
+bag['upserts'] = total_upserts
+bag['errors'] = total_errors
+bag['audit_attachment_id'] = attachment.id
+        ]]></field>
+    </record>
+
+    <record id="remotecontrol_batchline_v2_action_compute_multi_sensor" model="remotecontrol.action">
+        <field name="name">Batchline v2: Calculate Computed Sensors</field>
+        <field name="remote_id" ref="remotecontrol_batchline_v2"/>
+        <field name="readonly" eval="True"/>
+        <field name="code"><![CDATA[
+domain = [('measurement_transformation_type', '=', 'multi_sensor'),
+          ('device_id.remotecontrol_id', '=', self.remote_id.id)]
+if selected_device_ids:
+    domain.append(('device_id', 'in', selected_device_ids))
+sensors = env['mdm.measurement.device.sensor'].search(domain)
+result = sensors.compute_multi_sensor_readings()
+bag['computed_sensors_computed'] = result.get('computed')
+bag['computed_sensors_errors'] = result.get('errors')
+bag['computed_sensors_error_details'] = result.get('error_details')
+self.remote_id.message_post(
+    body=u'[Batchline v2 computed sensors] computed=%s errors=%s' % (
+        result.get('computed'), result.get('errors')))
+        ]]></field>
+    </record>
+
+    <record id="remotecontrol_batchline_v2_action_pressure_unavailable" model="remotecontrol.action">
+        <field name="name">Batchline v2: Dedicated pressures unavailable</field>
+        <field name="remote_id" ref="remotecontrol_batchline_v2"/>
+        <field name="active" eval="False"/>
+        <field name="readonly" eval="True"/>
+        <field name="code"><![CDATA[
+raise Exception('Dedicated pressure list/history/provisioning endpoints are '
+                'not documented in the supplied Batchline v2 Swagger. '
+                'Configure published pressure elements using device_id/tag, '
+                'or obtain the missing API contract before enabling this flow.')
+        ]]></field>
+    </record>
+
+    <record id="remotecontrol_batchline_v2_procedure_get_elements" model="remotecontrol.procedure">
+        <field name="name">Batchline v2: Import elements</field>
+        <field name="remote_id" ref="remotecontrol_batchline_v2"/>
+        <field name="schedule_cron" eval="False"/>
+        <field name="procedure_for_readings" eval="False"/>
+        <field name="readonly" eval="True"/>
+    </record>
+    <record id="remotecontrol_batchline_v2_procedure" model="remotecontrol.procedure">
+        <field name="name">Batchline v2: Daily Sync</field>
+        <field name="remote_id" ref="remotecontrol_batchline_v2"/>
+        <field name="schedule_cron" eval="False"/>
+        <field name="procedure_for_readings" eval="True"/>
+        <field name="readonly" eval="True"/>
+    </record>
+    <record id="remotecontrol_batchline_v2_procedure_compute_multi_sensor" model="remotecontrol.procedure">
+        <field name="name">Batchline v2: Calculate Computed Sensors</field>
+        <field name="remote_id" ref="remotecontrol_batchline_v2"/>
+        <field name="schedule_cron" eval="False"/>
+        <field name="procedure_for_readings" eval="False"/>
+        <field name="readonly" eval="True"/>
+    </record>
+    <record id="remotecontrol_batchline_v2_procedure_pressures_import" model="remotecontrol.procedure">
+        <field name="name">Batchline v2: Import pressure devices (undocumented)</field>
+        <field name="remote_id" ref="remotecontrol_batchline_v2"/>
+        <field name="active" eval="False"/>
+        <field name="schedule_cron" eval="False"/>
+        <field name="procedure_for_readings" eval="False"/>
+        <field name="readonly" eval="True"/>
+    </record>
+    <record id="remotecontrol_batchline_v2_procedure_provision_pressures" model="remotecontrol.procedure">
+        <field name="name">Batchline v2: Provision pressure devices (undocumented)</field>
+        <field name="remote_id" ref="remotecontrol_batchline_v2"/>
+        <field name="active" eval="False"/>
+        <field name="schedule_cron" eval="False"/>
+        <field name="procedure_for_readings" eval="False"/>
+        <field name="readonly" eval="True"/>
+    </record>
+
+    <record id="remotecontrol_batchline_v2_step_10_auth_import" model="remotecontrol.step">
+        <field name="name">Prepare API key</field>
+        <field name="procedure_id" ref="remotecontrol_batchline_v2_procedure_get_elements"/>
+        <field name="action_id" ref="remotecontrol_batchline_v2_action_prepare_api_key"/>
+        <field name="sequence">10</field>
+    </record>
+    <record id="remotecontrol_batchline_v2_step_20_elements" model="remotecontrol.step">
+        <field name="name">Import elements</field>
+        <field name="procedure_id" ref="remotecontrol_batchline_v2_procedure_get_elements"/>
+        <field name="action_id" ref="remotecontrol_batchline_v2_action_get_elements"/>
+        <field name="sequence">20</field>
+    </record>
+    <record id="remotecontrol_batchline_v2_step_10_auth_daily" model="remotecontrol.step">
+        <field name="name">Prepare API key</field>
+        <field name="procedure_id" ref="remotecontrol_batchline_v2_procedure"/>
+        <field name="action_id" ref="remotecontrol_batchline_v2_action_prepare_api_key"/>
+        <field name="sequence">10</field>
+    </record>
+    <record id="remotecontrol_batchline_v2_step_20_devices" model="remotecontrol.step">
+        <field name="name">Get devices (plan)</field>
+        <field name="procedure_id" ref="remotecontrol_batchline_v2_procedure"/>
+        <field name="action_id" ref="remotecontrol_batchline_v2_action_get_devices"/>
+        <field name="sequence">20</field>
+    </record>
+    <record id="remotecontrol_batchline_v2_step_30_readings" model="remotecontrol.step">
+        <field name="name">Get readings</field>
+        <field name="procedure_id" ref="remotecontrol_batchline_v2_procedure"/>
+        <field name="action_id" ref="remotecontrol_batchline_v2_action_get_readings"/>
+        <field name="sequence">30</field>
+    </record>
+    <record id="remotecontrol_batchline_v2_step_10_compute" model="remotecontrol.step">
+        <field name="name">Calculate Computed Sensors</field>
+        <field name="procedure_id" ref="remotecontrol_batchline_v2_procedure_compute_multi_sensor"/>
+        <field name="action_id" ref="remotecontrol_batchline_v2_action_compute_multi_sensor"/>
+        <field name="sequence">10</field>
+    </record>
+    <record id="remotecontrol_batchline_v2_step_10_pressures_import" model="remotecontrol.step">
+        <field name="name">Missing pressure API documentation</field>
+        <field name="procedure_id" ref="remotecontrol_batchline_v2_procedure_pressures_import"/>
+        <field name="action_id" ref="remotecontrol_batchline_v2_action_pressure_unavailable"/>
+        <field name="sequence">10</field>
+    </record>
+    <record id="remotecontrol_batchline_v2_step_10_provision_pressures" model="remotecontrol.step">
+        <field name="name">Missing pressure API documentation</field>
+        <field name="procedure_id" ref="remotecontrol_batchline_v2_procedure_provision_pressures"/>
+        <field name="action_id" ref="remotecontrol_batchline_v2_action_pressure_unavailable"/>
+        <field name="sequence">10</field>
+    </record>
+</odoo>
