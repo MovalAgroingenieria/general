@@ -81,6 +81,12 @@ for 12 hours and redirects to Grafana with it. Other modules should use
 ``create_grafana_frame``) instead of the Grafana URL, which no longer works
 without a session.
 
+Modules that show Grafana to portal users can not use that route. They have
+to add their own one and build the path on the server, from the session of
+the portal user, so that its parameters can not be chosen by the browser,
+and then sign it with ``_get_grafana_signed_url(path)``. This is what
+``base_wua_portal_sensorreading_grafana`` does.
+
 * ``expect_claims`` only accepts tokens for the configured user: even with
   the private key, no other Grafana user (e.g. ``admin``) can be impersonated.
 * When the token expires, Grafana asks to log in: reload the panel.
@@ -90,11 +96,8 @@ without a session.
   the Grafana login page (``<Grafana URL>/login``) themselves.
 * A Viewer can still send queries to the data sources through the Grafana
   API, so keep the data source user read-only and restricted to the tables
-  the dashboards need.
-* Portal pages (``base_wua_portal_sensorreading_grafana``) are not covered:
-  a portal user holding a Viewer token could query the data sources through
-  the Grafana API, so their Grafana access has to be solved separately (for
-  example with another organization and a restricted data source).
+  the dashboards need. This also applies to the portal users that reach
+  Grafana through ``base_wua_portal_sensorreading_grafana``.
 
 Side panel
 ----------
