@@ -11,10 +11,9 @@ class MDMGisControllerGrafana(MDMGisController):
 
     def _build_grafana_multisensor_url(
             self, device, sensor_type, sensor_ids):
+        grafana_model = request.env['board.grafana']
         # Get grafana base url
-        grafana_url = request.env['ir.values'].get_default(
-            'board.grafana.configuration', 'grafana_url')
-        if not grafana_url:
+        if not grafana_model._get_grafana_url():
             return None
         # Get datasource
         grafana_default_datasource = request.env['ir.values'].get_default(
@@ -35,7 +34,7 @@ class MDMGisControllerGrafana(MDMGisController):
                 dashboard.dashboard_path):
             return None
         # Build URL with parameters
-        url = grafana_url + dashboard.dashboard_path
+        url = dashboard.dashboard_path
         url += '&var-datasource=' + db_name
         url += '&var-device_id=' + str(device.id)
         url += '&var-sensor_type_id=' + str(sensor_type.id)
@@ -44,7 +43,8 @@ class MDMGisControllerGrafana(MDMGisController):
             url += '&var-sensor_ids=' + str(sensor_id)
         url += '&var-uom_id=' + str(sensor_type.uom_id.id)
         url += '&refresh=30s'
-        return url
+        # Opened through Odoo, which signs the user in to Grafana
+        return grafana_model.get_grafana_auth_url(url)
 
     def _format_device_data(self, device, public=False):
         device_info = super(

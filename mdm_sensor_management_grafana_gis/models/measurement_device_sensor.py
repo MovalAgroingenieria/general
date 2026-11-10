@@ -22,10 +22,9 @@ class MeasurementDeviceSensor(models.Model):
     )
 
     def _compute_grafana_url_generic(self, sensor, dashboard_setting):
+        grafana_model = self.env['board.grafana']
         # Get grafana base url
-        grafana_url = self.env['ir.values'].get_default(
-            'board.grafana.configuration', 'grafana_url')
-        if not grafana_url:
+        if not grafana_model._get_grafana_url():
             return None
         # Get datasource
         grafana_default_datasource = self.env['ir.values'].get_default(
@@ -45,7 +44,7 @@ class MeasurementDeviceSensor(models.Model):
                 dashboard.dashboard_path):
             return None
         # Build URL with all parameters
-        url = grafana_url + dashboard.dashboard_path
+        url = dashboard.dashboard_path
         url += '&var-datasource=' + db_name
         url += '&var-sensor_id=' + str(sensor.id)
         url += '&var-sensor_name=' + sensor.name
@@ -56,7 +55,8 @@ class MeasurementDeviceSensor(models.Model):
             url += '&var-uom_id=' + str(sensor.uom_id.id)
             url += '&var-uom_name=' + sensor.uom_id.name
         url += '&refresh=30s'
-        return url
+        # Opened through Odoo, which signs the user in to Grafana
+        return grafana_model.get_grafana_auth_url(url)
 
     @api.multi
     def _compute_grafana_url(self):
