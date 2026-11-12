@@ -32,8 +32,15 @@
     padding: 16px;
 }
 
-/* "Back to Odoo" button (disabled for now). Discreet until hovered, so it
-   does not cover the dashboard. */
+/* "Back to Odoo" button, disabled for now (see board_grafana_kiosk.xml).
+   Also hidden here: browsers can keep a cached copy of the old template,
+   which still had it. */
+.o_grafana_kiosk_exit {
+    display: none;
+}
+
+/* Styles of the button, discreet until hovered so that it does not cover
+   the dashboard:
 .o_grafana_kiosk_exit {
     position: absolute;
     right: 12px;
@@ -47,3 +54,4 @@
 .o_grafana_kiosk_exit:focus {
     opacity: 1;
 }
+*/
