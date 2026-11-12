@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-10 08:41+0000\n"
-"PO-Revision-Date: 2026-11-10 08:41+0000\n"
+"POT-Creation-Date: 2026-11-12 13:37+0000\n"
+"PO-Revision-Date: 2026-11-12 13:37+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:134
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:136
 #, python-format
 msgid "<a href='%s' target='_blank'>Open in Grafana</a>"
 msgstr "<a href='%s' target='_blank'>Obrir a Grafana</a>"
@@ -44,7 +44,7 @@ msgstr "Cancel·la"
 #. module: board_grafana_integration
 #. openerp-web
 #: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:104
-#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:24
+#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:32
 #, python-format
 msgid "Close"
 msgstr "Tancar"
@@ -125,7 +125,7 @@ msgstr "Mostrar Nom"
 
 #. module: board_grafana_integration
 #. openerp-web
-#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:14
+#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:22
 #, python-format
 msgid "Drag to resize"
 msgstr "Arrossegueu per canviar la mida"
@@ -136,7 +136,7 @@ msgid "Edit"
 msgstr "Editar"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:141
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:143
 #, python-format
 msgid "Failed to import dashboard '%s'. HTTP %s: %s"
 msgstr "Error important el panell de control '%s'. HTTP %s: %s"
@@ -159,7 +159,7 @@ msgstr "Ample marc"
 #. module: board_grafana_integration
 #. openerp-web
 #: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:6
-#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:16
+#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:24
 #: model:ir.actions.act_window,name:board_grafana_integration.login_into_grafana_action
 #: model:ir.ui.menu,name:board_grafana_integration.menu_board_grafana_home
 #: model:ir.ui.menu,name:board_grafana_integration.menu_board_grafana_root
@@ -169,14 +169,14 @@ msgid "Grafana"
 msgstr "Grafana"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:145
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:166
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_api_key_status
 #, python-format
 msgid "Grafana API Key"
 msgstr "Grafana Clau API"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:145
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:147
 #, python-format
 msgid "Grafana Dashboard Import"
 msgstr "Importació panell de control Grafana"
@@ -210,10 +210,16 @@ msgid "Grafana frame"
 msgstr "Marc Grafana"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana.py:176
+#: code:addons/board_grafana_integration/models/board_grafana.py:184
+#: code:addons/board_grafana_integration/models/board_grafana.py:205
 #, python-format
 msgid "Grafana is not configured"
 msgstr "Grafana no està configurat"
+
+#. module: board_grafana_integration
+#: model:ir.actions.client,name:board_grafana_integration.grafana_kiosk_dashboard_action
+msgid "Grafana kiosk dashboard"
+msgstr "Panell de control Grafana en mode quiosc"
 
 #. module: board_grafana_integration
 #: model:ir.actions.server,name:board_grafana_integration.go_to_grafana_server_action
@@ -291,8 +297,8 @@ msgid "Invalid JSON for dashboard '%s': %s"
 msgstr "El JSON del panell de control '%s' no és vàlid: %s"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:160
-#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:175
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:162
+#: code:addons/board_grafana_integration/models/board_grafana_dashboard_storage.py:177
 #, python-format
 msgid "Invalid JSON. Dashboard '%s': %s"
 msgstr "El JSON del panell de control '%s' no és vàlid: %s"
@@ -306,6 +312,11 @@ msgstr "Contingut JSON"
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_jwt_key_value
 msgid "JWT public key"
 msgstr "Clau pública JWT"
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_kiosk_dashboard_uid
+msgid "Kiosk dashboard uid"
+msgstr "UID mode quiosc"
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana___last_update
@@ -334,24 +345,31 @@ msgid "Login of the Grafana user (e.g. odooreader) that Odoo users are signed in
 msgstr "Usuari de Grafana (p. ex. odooreader) amb què els usuaris d'Odoo inicien sessió mitjançant un JWT. Ha d'existir a Grafana amb el rol Viewer. Deixeu-lo buit per desactivar l'inici de sessió automàtic."
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:101
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:116
 #, python-format
 msgid "Not set yet."
 msgstr "Encara no configurada."
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:142
-#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:175
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:163
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:196
 #, python-format
 msgid "Only administrators can change the settings"
 msgstr "Només els administradors poden canviar la configuració"
 
 #. module: board_grafana_integration
 #. openerp-web
-#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:21
+#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:29
 #, python-format
 msgid "Open in a new tab"
 msgstr "Obrir en una pestanya nova"
+
+#. module: board_grafana_integration
+#. openerp-web
+#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:14
+#, python-format
+msgid "Open this dashboard in Grafana, outside Odoo"
+msgstr "Obrir aquest tauler a Grafana, fora d'Odoo"
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_dashboard_storage_integrated_panel_id
@@ -375,13 +393,13 @@ msgstr "Regenerar clau"
 
 #. module: board_grafana_integration
 #. openerp-web
-#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:18
+#: code:addons/board_grafana_integration/static/src/xml/board_grafana_panel.xml:26
 #, python-format
 msgid "Reload"
 msgstr "Recarrega"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:99
+#: code:addons/board_grafana_integration/models/board_grafana_config_settings.py:114
 #, python-format
 msgid "Set as a system parameter."
 msgstr "Configurada com a paràmetre del sistema."
@@ -398,6 +416,11 @@ msgid "Show navbar button"
 msgstr "Mostrar botó a la barra de navegació"
 
 #. module: board_grafana_integration
+#: model:ir.model.fields,field_description:board_grafana_integration.field_board_grafana_configuration_grafana_show_open_button
+msgid "Show open in Grafana button"
+msgstr "Mostrar botó d'obrir a Grafana"
+
+#. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_configuration_grafana_show_navbar_button
 msgid "Show the Grafana button in the top navigation bar, which opens Grafana in a side panel."
 msgstr "Mostra el botó de Grafana a la barra de navegació superior, que obri Grafana en un panell lateral."
@@ -408,10 +431,16 @@ msgid "Storage of Grafana Dashboards"
 msgstr "Magatzem de panells de control Grafana"
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana.py:177
+#: code:addons/board_grafana_integration/models/board_grafana.py:185
 #, python-format
 msgid "The Grafana URL has not been set. Please ask an administrator to configure it in Dashboards > Grafana > Settings."
 msgstr "No s'ha establert la URL de Grafana. Demaneu a un administrador que la configuri a Taulers > Grafana > Configuració."
+
+#. module: board_grafana_integration
+#: code:addons/board_grafana_integration/models/board_grafana.py:206
+#, python-format
+msgid "The Grafana URL or the kiosk dashboard has not been set. Please ask an administrator to configure them in Dashboards > Grafana > Settings."
+msgstr "No s'ha establert la URL de Grafana o el panell de control en mode quiosc. Demaneu a un administrador que els configuri a Taulers > Grafana > Configuració."
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_dashboard_json
@@ -439,12 +468,17 @@ msgid "The default datasource."
 msgstr "La font de dades per defecte."
 
 #. module: board_grafana_integration
-#: code:addons/board_grafana_integration/models/board_grafana.py:43
-#: code:addons/board_grafana_integration/models/board_grafana.py:186
-#: code:addons/board_grafana_integration/models/board_grafana.py:200
+#: code:addons/board_grafana_integration/models/board_grafana.py:47
+#: code:addons/board_grafana_integration/models/board_grafana.py:223
+#: code:addons/board_grafana_integration/models/board_grafana.py:237
 #, python-format
 msgid "The grafana configuration parameters have not been set."
 msgstr "Els paràmetres de configuració de Grafana no s'han establert."
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_configuration_grafana_kiosk_dashboard_uid
+msgid "The id of the dashboard shown full screen, in kiosk mode, by the 'Grafana kiosk dashboard' action. Set this action as the home action of the users that must see it when they log in."
+msgstr "L'UID del panell de control que mostra a pantalla completa, en mode quiosc, l'acció 'Panell de control Grafana en mode quiosc'. Establiu aquesta acció com a acció inicial dels usuaris que l'han de veure en iniciar la sessió."
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_dashboard_uid
@@ -475,6 +509,11 @@ msgstr "Token del compte de servei de Grafana que es fa servir per importar els 
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_configuration_grafana_jwt_key_value
 msgid "Value of the 'key_value' setting of the [auth.jwt] section of grafana.ini, so that Grafana accepts the JWT signed by Odoo. The RSA key pair is generated when the settings are applied; the private key never leaves Odoo."
 msgstr "Valor del paràmetre 'key_value' de la secció [auth.jwt] de grafana.ini, perquè Grafana accepti el JWT signat per Odoo. El parell de claus RSA es genera en aplicar la configuració; la clau privada no surt mai d'Odoo."
+
+#. module: board_grafana_integration
+#: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_configuration_grafana_show_open_button
+msgid "While the Grafana dashboard is displayed, show a button in the top navigation bar that opens it in Grafana, outside Odoo, in kiosk mode."
+msgstr "Mentre es mostra el panell de control de Grafana, mostra un botó a la barra de navegació superior que l'obri a Grafana, fora d'Odoo, en mode quiosc."
 
 #. module: board_grafana_integration
 #: model:ir.model.fields,help:board_grafana_integration.field_board_grafana_dashboard_storage_frame_width

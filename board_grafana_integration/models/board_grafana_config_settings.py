@@ -56,11 +56,26 @@ class BoardGrafanaConfigSettings(models.TransientModel):
         help="The id of the welcome dashboard "
              "(optional, else the dashboard list will be shown).")
 
+    grafana_kiosk_dashboard_uid = fields.Char(
+        string="Kiosk dashboard uid",
+        help="The id of the dashboard shown full screen, in kiosk mode, by "
+             "the 'Grafana kiosk dashboard' action. Set this action as the "
+             "home action of the users that must see it when they log in.",
+    )
+
     grafana_show_navbar_button = fields.Boolean(
         string="Show navbar button",
         default=False,
         help="Show the Grafana button in the top navigation bar, which "
              "opens Grafana in a side panel.",
+    )
+
+    grafana_show_open_button = fields.Boolean(
+        string="Show open in Grafana button",
+        default=False,
+        help="While the Grafana dashboard is displayed, show a button in "
+             "the top navigation bar that opens it in Grafana, outside "
+             "Odoo, in kiosk mode.",
     )
 
     grafana_jwt_login = fields.Char(
@@ -118,8 +133,14 @@ class BoardGrafanaConfigSettings(models.TransientModel):
                            "grafana_dashboard_uid",
                            self.grafana_dashboard_uid)
         values.set_default("board.grafana.configuration",
+                           "grafana_kiosk_dashboard_uid",
+                           (self.grafana_kiosk_dashboard_uid or "").strip())
+        values.set_default("board.grafana.configuration",
                            "grafana_show_navbar_button",
                            self.grafana_show_navbar_button)
+        values.set_default("board.grafana.configuration",
+                           "grafana_show_open_button",
+                           self.grafana_show_open_button)
         values.set_default("board.grafana.configuration",
                            "grafana_jwt_login",
                            (self.grafana_jwt_login or "").strip())

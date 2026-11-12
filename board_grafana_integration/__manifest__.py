@@ -24,11 +24,13 @@
         "views/board_grafana_view.xml",
         "views/base_menu.xml",
         "views/resources.xml",
+        "views/webclient_templates.xml",
         "views/board_grafana_dashboard_storage_view.xml",
         "data/welcome_grafana_dashboard.xml",
     ],
     "qweb": [
         "static/src/xml/board_grafana_panel.xml",
+        "static/src/xml/board_grafana_kiosk.xml",
     ],
     "installable": True,
     "application": False,

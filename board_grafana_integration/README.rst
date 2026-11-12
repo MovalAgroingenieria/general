@@ -94,6 +94,15 @@ and then sign it with ``_get_grafana_signed_url(path)``. This is what
 * *Dashboards > Grafana > Grafana server* opens Grafana in a new tab, also
   signed in automatically. Grafana users that edit dashboards have to open
   the Grafana login page (``<Grafana URL>/login``) themselves.
+* If *Show open in Grafana button* is enabled in *Dashboards > Grafana >
+  Settings* (disabled by default), while *Dashboards > Grafana > Grafana* is
+  displayed, the top bar shows an *Open this dashboard in Grafana* icon that
+  opens the dashboard being viewed (with its time range and variables) in
+  kiosk mode in a new tab, outside Odoo, also signed in automatically. From
+  Grafana 11.3, the time picker, the variables and the dashboard links are
+  also hidden. It requires Grafana to be served from the same domain as Odoo
+  (e.g. ``https://<domain>/grafana``); otherwise the browser does not allow
+  reading the page shown in the iframe and the welcome dashboard is opened.
 * A Viewer can still send queries to the data sources through the Grafana
   API, so keep the data source user read-only and restricted to the tables
   the dashboards need. This also applies to the portal users that reach
@@ -120,6 +129,29 @@ dashboard, or the dashboard list if none is set.
   covers the whole screen.
 * It can be open at the same time as the Open WebUI side panel
   (``openwebui_odoo_integration``); both panels are then shown side by side.
+
+Kiosk dashboard
+---------------
+
+The *Grafana kiosk dashboard* action shows a Grafana dashboard full screen,
+without the Odoo menus (nor the apps sidebar of ``backend_theme_v10``), in
+kiosk mode (from Grafana 11.3, also without time picker, variables and
+dashboard links). The users are signed in to Grafana automatically. It has
+no menu: it is meant to be the home action of the users.
+
+#. In *Dashboards > Grafana > Settings*, set *Kiosk dashboard uid* (the same
+   dashboard for all the users).
+#. In the users that must see it as soon as they log in, set *Home Action* to
+   *Grafana kiosk dashboard*.
+
+* Only internal users can use it, never portal users.
+* The users can not go back to Odoo from it, nor log out (only through
+  ``/web/session/logout``).
+* The home action is only applied when Odoo is opened without an action in
+  the URL (e.g. after logging in). The users that have it start full screen,
+  so the Odoo menus are not shown while it loads; Odoo shows them again if
+  another action is opened through the URL.
+* When the token expires (12 hours), Grafana asks to log in: reload the page.
 
 Credits
 =======

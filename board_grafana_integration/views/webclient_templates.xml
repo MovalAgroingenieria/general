@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- The users whose home action is the kiosk dashboard start full screen,
+         so that the Odoo menus are not shown while the home action loads.
+         Odoo removes the class with the first action if it is another one.
+         At the end, as web_responsive also sets the body classes. -->
+    <template id="webclient_bootstrap" inherit_id="web.webclient_bootstrap" name="Grafana kiosk dashboard full screen">
+        <xpath expr="//t[@t-call='web.layout']" position="inside">
+            <t t-if="request.env['board.grafana']._is_grafana_kiosk_home_action()" t-set="body_classname" t-value="(body_classname or '') + ' o_fullscreen'"/>
+        </xpath>
+    </template>
+
+</odoo>

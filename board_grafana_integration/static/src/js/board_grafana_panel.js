@@ -4,6 +4,7 @@ odoo.define('board_grafana_integration.panel', function (require) {
 var core = require('web.core');
 var Model = require('web.Model');
 var SystrayMenu = require('web.SystrayMenu');
+var WebClient = require('web.WebClient');
 var Widget = require('web.Widget');
 
 var QWeb = core.qweb;
@@ -13,6 +14,86 @@ var DEFAULT_WIDTH = 600;
 var MIN_WIDTH = 320;
 var MAX_WIDTH_RATIO = 0.7;
 var AUTH_ROUTE = '/board_grafana/auth';
+var ACTION_UPDATED_EVENT = 'board_grafana_integration:current_action_updated';
+// Query parameters not kept when a Grafana page is opened in a new tab:
+// the token of the previous sign-in and the kiosk mode, which is only added
+// on request
+var DROPPED_URL_PARAMS = [
+    'auth_token',
+    'kiosk',
+    '_dash.hideTimePicker',
+    '_dash.hideVariables',
+    '_dash.hideLinks',
+];
+// Kiosk mode: no Grafana menus, and (Grafana 11.3 or later) no time picker,
+// variables or dashboard links. "kiosk" goes without value, as documented
+// by Grafana. Same as KIOSK_URL_PARAMS of board.grafana (Python).
+var KIOSK_URL_PARAMS = [
+    'kiosk',
+    '_dash.hideTimePicker=true',
+    '_dash.hideVariables=true',
+    '_dash.hideLinks=true',
+];
+
+function getFrameUrl(iframe) {
+    var url = iframe.src;
+    // Grafana is served from the same domain as Odoo, so the page being
+    // displayed can be read. Otherwise the browser blocks it and the page
+    // first loaded in the iframe is used.
+    try {
+        var location_url = iframe.contentWindow.location.href;
+        if (location_url && location_url !== 'about:blank') {
+            url = location_url;
+        }
+    } catch (e) {
+        url = iframe.src;
+    }
+    return url;
+}
+
+function cleanGrafanaUrl(url, kiosk) {
+    // Grafana paths (e.g. "/d/<uid>") are kept relative to the Grafana URL
+    var is_path = url.charAt(0) === '/' && url.charAt(1) !== '/';
+    var parsed_url = new URL(url, window.location.href);
+    _.each(DROPPED_URL_PARAMS, function (param) {
+        parsed_url.searchParams.delete(param);
+    });
+    if (kiosk) {
+        parsed_url.search = (parsed_url.search ?
+            parsed_url.search + '&' : '?') + KIOSK_URL_PARAMS.join('&');
+    }
+    return is_path ?
+        parsed_url.pathname + parsed_url.search + parsed_url.hash :
+        parsed_url.href;
+}
+
+function getGrafanaAuthUrl(url, kiosk) {
+    var parsed_url = new URL(url, window.location.href);
+    var grafana_url = parsed_url.href;
+    // The page first loaded in the iframe is already the Odoo route
+    if (parsed_url.origin === window.location.origin &&
+            parsed_url.pathname === AUTH_ROUTE) {
+        grafana_url = parsed_url.searchParams.get('path') || '';
+    }
+    return AUTH_ROUTE + '?path=' +
+        encodeURIComponent(cleanGrafanaUrl(grafana_url, kiosk));
+}
+
+function openInGrafana(widget, url, kiosk) {
+    var def;
+    if (url && url !== 'about:blank') {
+        // Opened through Odoo, which signs the user in to Grafana again
+        window.open(getGrafanaAuthUrl(url, kiosk), '_blank');
+        def = $.when();
+    } else {
+        def = new Model('board.grafana')
+            .call('action_go_to_grafana_server', [[]])
+            .then(function (action) {
+                return widget.do_action(action);
+            });
+    }
+    return def;
+}
 
 var GrafanaPanel = Widget.extend({
     template: 'board_grafana_integration.Panel',
@@ -92,18 +173,7 @@ var GrafanaPanel = Widget.extend({
 
     _getCurrentUrl: function () {
         var iframe = this.$('.o_grafana_panel_frame')[0];
-        var url = false;
-        if (iframe) {
-            url = iframe.src;
-            // Grafana is served from the same domain as Odoo, so the page
-            // being displayed can be read. Otherwise the browser blocks it.
-            try {
-                url = iframe.contentWindow.location.href;
-            } catch (e) {
-                url = iframe.src;
-            }
-        }
-        return url;
+        return iframe ? getFrameUrl(iframe) : false;
     },
 
     _getStoredWidth: function () {
@@ -135,19 +205,8 @@ var GrafanaPanel = Widget.extend({
     },
 
     _onNewTab: function (event) {
-        var self = this;
-        var url = this._getCurrentUrl();
         event.preventDefault();
-        if (url && url !== 'about:blank') {
-            // Opened through Odoo, which signs the user in to Grafana again
-            window.open(AUTH_ROUTE + '?path=' + encodeURIComponent(url),
-                '_blank');
-        } else {
-            this.grafana_model.call('action_go_to_grafana_server', [[]])
-                .then(function (action) {
-                    self.do_action(action);
-                });
-        }
+        openInGrafana(this, this._getCurrentUrl());
     },
 
     _onResizeStart: function (event) {
@@ -212,11 +271,79 @@ var GrafanaSystrayItem = Widget.extend({
     },
 });
 
+// Shown only while the Grafana dashboard (board.grafana form) is displayed
+var GrafanaOpenSystrayItem = Widget.extend({
+    template: 'board_grafana_integration.OpenSystrayItem',
+    events: {
+        'click a': '_onClick',
+    },
+
+    init: function () {
+        this._super.apply(this, arguments);
+        this.action = false;
+        this.is_enabled = false;
+        core.bus.on(ACTION_UPDATED_EVENT, this, this._onCurrentActionUpdated);
+    },
+
+    start: function () {
+        var self = this;
+        this._updateVisibility();
+        // Hidden until the server confirms the setting and the access rights
+        new Model('board.grafana')
+            .call('is_grafana_open_button_visible', [])
+            .then(function (is_enabled) {
+                self.is_enabled = is_enabled;
+                self._updateVisibility();
+            });
+        return this._super.apply(this, arguments);
+    },
+
+    _isGrafanaAction: function (action) {
+        var action_descr = action && action.action_descr;
+        var widget = action && action.widget;
+        return Boolean(action_descr &&
+            action_descr.res_model === 'board.grafana' &&
+            widget && widget.active_view &&
+            widget.active_view.type === 'form');
+    },
+
+    _getFrame: function () {
+        var widget = this.action && this.action.widget;
+        return widget ? widget.$('iframe#grafana_frame')[0] : undefined;
+    },
+
+    _updateVisibility: function () {
+        if (this.$el) {
+            this.$el.toggleClass('o_hidden', !(this.is_enabled && this.action));
+        }
+    },
+
+    _onCurrentActionUpdated: function (action) {
+        this.action = this._isGrafanaAction(action) ? action : false;
+        this._updateVisibility();
+    },
+
+    _onClick: function (event) {
+        var iframe = this._getFrame();
+        event.preventDefault();
+        openInGrafana(this, iframe ? getFrameUrl(iframe) : false, true);
+    },
+});
+
+WebClient.include({
+    current_action_updated: function (action) {
+        this._super.apply(this, arguments);
+        core.bus.trigger(ACTION_UPDATED_EVENT, action);
+    },
+});
+
 SystrayMenu.Items.push(GrafanaSystrayItem);
+SystrayMenu.Items.push(GrafanaOpenSystrayItem);
 
 return {
     GrafanaPanel: GrafanaPanel,
     GrafanaSystrayItem: GrafanaSystrayItem,
+    GrafanaOpenSystrayItem: GrafanaOpenSystrayItem,
 };
 
 });

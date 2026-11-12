@@ -30,6 +30,10 @@ class BoardGrafana(models.Model):
     # The Grafana web client keeps the token while it is open and has no
     # way to refresh it: it must outlive a working day
     JWT_LIFETIME = 12 * 3600
+    # No Grafana menus and (Grafana 11.3 or later) no time picker, variables
+    # or dashboard links. Also used by the navbar button (JS).
+    KIOSK_URL_PARAMS = ('kiosk&_dash.hideTimePicker=true'
+                        '&_dash.hideVariables=true&_dash.hideLinks=true')
 
     def _default_grafana_frame(self):
         grafana_dashboard_height = self.env['ir.values'].get_default(
@@ -153,10 +157,18 @@ class BoardGrafana(models.Model):
 
     @api.model
     def is_grafana_navbar_button_visible(self):
+        return self._is_grafana_button_enabled('grafana_show_navbar_button')
+
+    @api.model
+    def is_grafana_open_button_visible(self):
+        return self._is_grafana_button_enabled('grafana_show_open_button')
+
+    @api.model
+    def _is_grafana_button_enabled(self, setting):
         # Follows the module ACLs, so portal users never get the button
-        show_navbar_button = self.env['ir.values'].get_default(
-            'board.grafana.configuration', 'grafana_show_navbar_button')
-        return bool(show_navbar_button) and self.check_access_rights(
+        show_button = self.env['ir.values'].get_default(
+            'board.grafana.configuration', setting)
+        return bool(show_button) and self.check_access_rights(
             'read', raise_exception=False)
 
     @api.model
@@ -168,16 +180,48 @@ class BoardGrafana(models.Model):
                 'allow="fullscreen" frameborder="0"></iframe>'
             ) % html_escape(url)
         else:
-            frame = (
-                '<div class="o_grafana_panel_alert">'
-                '<div class="alert alert-info" role="alert">'
-                '<h4>%s</h4><p>%s</p>'
-                '</div></div>') % (
-                html_escape(_('Grafana is not configured')),
-                html_escape(_('The Grafana URL has not been set. Please '
-                              'ask an administrator to configure it in '
-                              'Dashboards > Grafana > Settings.')))
+            frame = self._get_grafana_alert(
+                _('Grafana is not configured'),
+                _('The Grafana URL has not been set. Please ask an '
+                  'administrator to configure it in Dashboards > Grafana > '
+                  'Settings.'))
         return frame
+
+    @api.model
+    def get_grafana_kiosk_frame(self):
+        dashboard_uid = (self.env['ir.values'].get_default(
+            'board.grafana.configuration',
+            'grafana_kiosk_dashboard_uid') or '').strip()
+        if self._get_grafana_url() and dashboard_uid:
+            path = '/d/%s?%s' % (
+                urllib.quote(dashboard_uid.encode('utf-8'), safe=''),
+                self.KIOSK_URL_PARAMS)
+            frame = (
+                '<iframe class="o_grafana_kiosk_frame" src="%s" '
+                'allow="fullscreen" frameborder="0"></iframe>'
+            ) % html_escape(self.get_grafana_auth_url(path))
+        else:
+            frame = self._get_grafana_alert(
+                _('Grafana is not configured'),
+                _('The Grafana URL or the kiosk dashboard has not been set. '
+                  'Please ask an administrator to configure them in '
+                  'Dashboards > Grafana > Settings.'))
+        return frame
+
+    @api.model
+    def _is_grafana_kiosk_home_action(self):
+        action = self.env.ref(
+            'board_grafana_integration.grafana_kiosk_dashboard_action',
+            raise_if_not_found=False)
+        return bool(action) and self.env.user.action_id.id == action.id
+
+    @api.model
+    def _get_grafana_alert(self, title, message):
+        return (
+            '<div class="o_grafana_panel_alert">'
+            '<div class="alert alert-info" role="alert">'
+            '<h4>%s</h4><p>%s</p>'
+            '</div></div>') % (html_escape(title), html_escape(message))
 
     @api.multi
     def action_go_to_grafana_server(self):
