@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="remotecontrol_hidroconta_action_get_last_reading" model="remotecontrol.action">
+            <field name="name">Hidroconta: Get Last Reading</field>
+            <field name="remote_id" ref="remotecontrol_hidroconta"/>
+            <field name="sequence">50</field>
+            <field name="active">True</field>
+            <field name="rate_limit_seconds">0.0</field>
+            <field name="max_retries">1</field>
+            <field name="backoff">1.6</field>
+            <field name="readonly">True</field>
+            <field name="code"><![CDATA[
+# Latest value from Hidroconta /search (no history queries).
+if 'jsessionid' not in bag:
+    raise Exception('Please run "Hidroconta: Login" action first')
+if 'sensor_plan' not in bag:
+    raise Exception('Please run "Hidroconta: Build Sensor Plan" action first')
+
+Remote = self.remote_id
+Reading = env['mdm.measurement.device.sensor.reading']
+Sensor = env['mdm.measurement.device.sensor']
+config = json.loads(Remote.connection_params or '{}') or {}
+if not isinstance(config, dict):
+    raise Exception('connection_params must be a JSON object')
+installation_code = (config.get('installation_code') or '').strip()
+installation_id = config.get('installation_id')
+if not installation_code or installation_id in (None, ''):
+    raise Exception('Configure installation_code and installation_id in Hidroconta connection_params')
+try:
+    installation_id = int(installation_id)
+except Exception:
+    raise Exception('installation_id must be an integer')
+if installation_id <= 0:
+    raise Exception('installation_id must be positive')
+
+# Use the same historical subtype/subcode already configured in MDM.
+# Documented in Demeter API (historical event codes, page 48):
+#   4/0 -> analog input reading; 2/2 -> counter global (liters);
+#   2/4 -> counter instant flow (liters/second).
+# Consequently no per-sensor Last Reading configuration is required.
+source_by_historic_code = {
+    (4, 0): ('analogInputs', 'value'),
+    (2, 2): ('counters', 'counterGlobalValue'),
+    (2, 4): ('counters', 'flow'),
+}
+allowed_types = ('counters', 'analogInputs', 'iris', 'hydrants')
+plans = []
+needed_types = set()
+pre_errors = []
+for plan_item in bag['sensor_plan']:
+    sensor = Sensor.browse(plan_item['odoo_sensor_id'])
+    if not sensor.exists():
+        continue
+    device = sensor.device_id
+    try:
+        sensor_cfg = json.loads(sensor.remotecontrol_params or '{}') or {}
+        device_cfg = json.loads(device.remotecontrol_params or '{}') or {}
+        if not isinstance(sensor_cfg, dict) or not isinstance(device_cfg, dict):
+            raise ValueError('remotecontrol_params must be JSON objects')
+    except Exception as error:
+        pre_errors.append({'sensor_id': sensor.id, 'error': 'Invalid remotecontrol_params: %s' % error})
+        continue
+    try:
+        historic_key = (int(plan_item['subtype']), int(plan_item['subcode']))
+    except (KeyError, TypeError, ValueError):
+        pre_errors.append({'sensor_id': sensor.id,
+                           'error': 'Missing/invalid historical subtype/subcode'})
+        continue
+    mapping = source_by_historic_code.get(historic_key)
+    if not mapping:
+        pre_errors.append({'sensor_id': sensor.id,
+                           'error': 'Unsupported historical subtype/subcode: %s' % (historic_key,)})
+        continue
+    inferred_type, inferred_field = mapping
+    # Keep optional explicit overrides for exceptional integrations, but
+    # normal MDM sensors require no additional configuration.
+    element_type = (sensor_cfg.get('last_element_type') or
+                    device_cfg.get('last_element_type') or inferred_type).strip()
+    if element_type not in allowed_types:
+        pre_errors.append({'sensor_id': sensor.id,
+                           'error': 'Unsupported last_element_type: %s' % element_type})
+        continue
+    value_field = (sensor_cfg.get('last_value_field') or
+                   device_cfg.get('last_value_field') or inferred_field).strip()
+    # Some /history/data integrations identify a parent RTU rather than
+    # the element returned by /search; allow an explicit status ID or code.
+    match_id = sensor_cfg.get('last_element_id') or device_cfg.get('last_element_id')
+    if match_id in (None, ''):
+        match_id = plan_item.get('element_id')
+    match_code = (sensor_cfg.get('last_element_code') or
+                  device_cfg.get('last_element_code') or '').strip()
+    if match_id in (None, '') and not match_code:
+        pre_errors.append({'sensor_id': sensor.id, 'error': 'Missing element_id / last_element_code'})
+        continue
+    factor_raw = sensor_cfg.get(
+        'last_conversion_factor',
+        device_cfg.get('last_conversion_factor', plan_item.get('conversion_factor', 1.0)))
+    try:
+        factor = float(factor_raw)
+    except Exception:
+        pre_errors.append({'sensor_id': sensor.id, 'error': 'Invalid last_conversion_factor'})
+        continue
+    plans.append({
+        'sensor': sensor,
+        'element_id': str(match_id) if match_id not in (None, '') else '',
+        'element_code': match_code,
+        'element_type': element_type,
+        'value_field': value_field,
+        'conversion_factor': factor,
+    })
+    needed_types.add(element_type)
+if not plans:
+    raise Exception('No valid sensors configured for Get Last Reading: %s' % pre_errors[:5])
+
+# Same i= filter used by the existing WUA Hidroconta connector.
+# Validate ALL responses before inserting any readings.
+url = (base_url or '').rstrip('/') + '/Demeter2/v2/search'
+by_id = {}
+by_code = {}
+fetched_elements = 0
+for element_type in sorted(needed_types):
+    payload = {
+        'status': 'enabled',
+        'type': [element_type],
+        'searchText': 'i=' + installation_code,
+    }
+    response = request_retry('POST', url, json=payload,
+                             cookies={'JSESSIONID': bag['jsessionid']}, timeout=timeout)
+    if response.status_code >= 400:
+        raise Exception('Hidroconta /search (%s) failed: HTTP %d' %
+                        (element_type, response.status_code))
+    devices = response.json()
+    if not isinstance(devices, list):
+        raise Exception('Unexpected /search response for %s: expected a list' % element_type)
+    fetched_elements += len(devices)
+    for item in devices:
+        if not isinstance(item, dict):
+            raise Exception('Unexpected element in /search response')
+        try:
+            item_installation_id = int(item['installationId'])
+        except Exception:
+            raise Exception('/search item has no valid installationId')
+        if item_installation_id != installation_id:
+            raise Exception('Installation filter not applied: expected %s, got %s' %
+                            (installation_id, item_installation_id))
+        if item.get('elementType') != element_type:
+            raise Exception('Unexpected elementType for /search %s' % element_type)
+        item_id = item.get('elementId')
+        if item_id in (None, ''):
+            raise Exception('/search item missing elementId')
+        by_id.setdefault(str(item_id), []).append(item)
+        if item.get('code'):
+            by_code.setdefault(item['code'], []).append(item)
+        # WUA hydrants can contain a nested counter (counterGlobalValue/flow).
+        # Match the nested counter by its own id/code only if provided.
+        nested = item.get('counter')
+        if isinstance(nested, dict):
+            if nested.get('elementId') not in (None, ''):
+                by_id.setdefault(str(nested['elementId']), []).append(item)
+            if nested.get('code'):
+                by_code.setdefault(nested['code'], []).append(item)
+if not fetched_elements:
+    raise Exception('Empty /search response for installation %s; verify i= filter' %
+                    installation_code)
+
+local_timezone = pytz.timezone('Europe/Madrid')
+inserted = 0
+unchanged = 0
+missing = 0
+errors = pre_errors[:]
+samples = []
+for plan in plans:
+    sensor = plan['sensor']
+    # A configured external code is authoritative when the historical id
+    # differs from the live-status element id.
+    if plan['element_code']:
+        candidates = by_code.get(plan['element_code'], [])
+    else:
+        candidates = by_id.get(plan['element_id'], [])
+    if plan['element_type']:
+        candidates = [item for item in candidates
+                      if item['elementType'] == plan['element_type']]
+    # Avoid interpreting one RTU/counter code as multiple different sources.
+    unique = {}
+    for item in candidates:
+        unique[(item['elementType'], str(item['elementId']))] = item
+    candidates = list(unique.values())
+    if not candidates:
+        missing += 1
+        continue
+    if len(candidates) != 1:
+        errors.append({'sensor_id': sensor.id,
+                       'error': 'Ambiguous /search element: set last_element_type and last_element_id/code'})
+        continue
+    item = candidates[0]
+    value_field = plan['value_field']
+    raw_value = item
+    for key in value_field.split('.'):
+        if not isinstance(raw_value, dict):
+            raw_value = None
+            break
+        raw_value = raw_value.get(key)
+    if raw_value is None:
+        errors.append({'sensor_id': sensor.id,
+                       'error': 'Missing %s in /search response' % value_field})
+        continue
+    timestamp_local = item.get('lastStatusLocal')
+    if not timestamp_local:
+        errors.append({'sensor_id': sensor.id, 'error': 'Missing lastStatusLocal'})
+        continue
+    try:
+        parts = timestamp_local.split(' ')
+        day, month, year = parts[0].split('/')
+        naive = fields.Datetime.from_string('%s-%s-%s %s' %
+                                            (year, month, day, parts[1]))
+        aware = local_timezone.localize(naive, is_dst=None)
+        timestamp_utc = aware.astimezone(pytz.UTC).strftime('%Y-%m-%d %H:%M:%S')
+        value = float(raw_value) * plan['conversion_factor']
+    except Exception as error:
+        errors.append({'sensor_id': sensor.id, 'error': 'Invalid date/value: %s' % error})
+        continue
+    last = Reading.search([('sensor_id', '=', sensor.id)],
+                          order='measurement_time desc', limit=1)
+    if last and last.measurement_time and str(last.measurement_time) >= timestamp_utc:
+        unchanged += 1
+        continue
+    try:
+        Remote.upsert('mdm.measurement.device.sensor.reading',
+                      {'sensor_id': sensor.id, 'measurement_time': timestamp_utc},
+                      {'value': value})
+        inserted += 1
+        if len(samples) < 10:
+            samples.append({'sensor_id': sensor.id, 'element_id': item['elementId'],
+                            'element_type': item['elementType'], 'units': item.get('units'),
+                            'field': value_field, 'timestamp_utc': timestamp_utc,
+                            'value': value})
+    except Exception as error:
+        errors.append({'sensor_id': sensor.id, 'error': 'Upsert failed: %s' % error})
+if missing == len(plans):
+    errors.append({'error': 'No MDM sensor matched /search; verify element_id or last_element_id/last_element_code'})
+summary = {
+    'installation_code': installation_code,
+    'installation_id': installation_id,
+    'fetched_elements': fetched_elements,
+    'configured_sensors': len(bag['sensor_plan']),
+    'eligible_sensors': len(plans),
+    'inserted': inserted,
+    'unchanged': unchanged,
+    'missing': missing,
+    'errors': errors,
+    'sample_readings': samples,
+}
+bag['last_reading_summary'] = summary
+if inserted or errors:
+    Remote.message_log('Hidroconta Last Reading: %d inserted, %d unchanged, %d missing, %d errors' %
+                       (inserted, unchanged, missing, len(errors)))
+if config.get('last_reading_audit', False):
+    audit_json = json.dumps(summary, indent=2, ensure_ascii=False)
+    fname = 'hidroconta_last_reading_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
+    attachment = env['ir.attachment'].create({
+        'name': fname, 'datas_fname': fname,
+        'datas': base64.b64encode(audit_json.encode('utf-8')),
+        'mimetype': 'application/json',
+        'res_model': 'remotecontrol', 'res_id': Remote.id,
+    })
+    bag['attachment_id'] = attachment.id
+    bag['attachment_name'] = fname
+result = 'Hidroconta: %d new, %d unchanged, %d missing, %d errors' % (
+    inserted, unchanged, missing, len(errors))
+            ]]></field>
+        </record>
+
+        <record id="remotecontrol_hidroconta_procedure_get_last_reading" model="remotecontrol.procedure">
+            <field name="name">Hidroconta: Get Last Reading</field>
+            <field name="remote_id" ref="remotecontrol_hidroconta"/>
+            <field name="sequence">30</field>
+            <field name="active">True</field>
+            <field name="schedule_cron">False</field>
+            <field name="readonly">True</field>
+            <field name="procedure_for_readings" eval="False"/>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+        </record>
+
+        <record id="remotecontrol_hidroconta_step_last_reading_10_login" model="remotecontrol.step">
+            <field name="name">Login</field>
+            <field name="procedure_id" ref="remotecontrol_hidroconta_procedure_get_last_reading"/>
+            <field name="action_id" ref="remotecontrol_hidroconta_action_login"/>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="remotecontrol_hidroconta_step_last_reading_20_plan" model="remotecontrol.step">
+            <field name="name">Build Sensor Plan</field>
+            <field name="procedure_id" ref="remotecontrol_hidroconta_procedure_get_last_reading"/>
+            <field name="action_id" ref="remotecontrol_hidroconta_action_build_sensor_plan"/>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="remotecontrol_hidroconta_step_last_reading_30_readings" model="remotecontrol.step">
+            <field name="name">Get Last Reading</field>
+            <field name="procedure_id" ref="remotecontrol_hidroconta_procedure_get_last_reading"/>
+            <field name="action_id" ref="remotecontrol_hidroconta_action_get_last_reading"/>
+            <field name="sequence">30</field>
+        </record>
+    </data>
+</odoo>

@@ -6,7 +6,7 @@
     "name": "RemoteControl: Hidroconta",
     "summary": "Remotecontrol Hidroconta (REST) with default actions and "
                "procedures",
-    "version": "10.0.1.0.4",
+    "version": "10.0.1.0.6",
     "category": "Tools",
     "author": "Moval Agroingeniería",
     "website": "https://moval.es",
@@ -17,6 +17,7 @@
     ],
     "data": [
         "data/data.xml",
+        "data/data_last_reading.xml",
     ],
     "uninstall_hook": "uninstall_hook",
     "installable": True,
