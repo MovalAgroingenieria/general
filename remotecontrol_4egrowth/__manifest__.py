@@ -6,7 +6,7 @@
     "name": "RemoteControl: 4eGrowth",
     "summary": "Remotecontrol 4eGrowth (REST) with default actions and "
                "procedures",
-    "version": "10.0.1.0.11",
+    "version": "10.0.1.0.12",
     "category": "Tools",
     "author": "Moval Agroingeniería",
     "website": "http://www.moval.es",
