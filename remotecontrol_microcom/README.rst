@@ -22,6 +22,7 @@ Contributors
 * Alberto Hernández <ahernandez@moval.es>
 * Jesús Martínez <jmartinez@moval.es>
 * José Javier Méndez <jjmendez@moval.es>
+* Víctor Mora <vmora@moval.es>
 * Miguel Mora <mmora@moval.es>
 * Miguel Ángel Rodríguez <marodriguez@moval.es>
 * Juanu Sandoval <jsandoval@moval.es>

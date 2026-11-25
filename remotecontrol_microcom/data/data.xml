@@ -238,15 +238,15 @@ except Exception as encryption_error:
     raise Exception('Encryption error: %s' % str(encryption_error))
 
 try:
-    encoded_user = urllib.quote(auth_account, safe='')
-except AttributeError:
-    raise Exception('Encryption error: %s' % str(encryption_error))
+    encoded_user = urllib.quote(urllib.unquote(auth_account), safe='')
+except AttributeError as error:
+    raise Exception('Encoding error: %s' % str(error))
 
 base = (base_url or '').rstrip('/')
 
 auth_url = '%s/accounts/%s?authentication=%s' % (
     base,
-    auth_account,
+    encoded_user,
     encrypted_password
 )
 resp = request_retry('GET', auth_url)
@@ -364,19 +364,24 @@ bag['sensors_plan_count'] = len(plan)
             <field name="max_retries">3</field>
             <field name="backoff">1.6</field>
             <field name="readonly">True</field>
-            <field name="code"><![CDATA[import json
+            <field name="code"><![CDATA[import base64
+import json
+import logging
 import zlib
 import pytz
 from datetime import datetime
 
-try:
-    import StringIO
-except ImportError:
-    from io import BytesIO as StringIO
-
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding as crypto_padding
+
+_logger = logging.getLogger('remotecontrol_microcom')
+BATCH_SIZE = 1000
+
+
+class BatchCommitError(Exception):
+    pass
+
 
 Remote = self.remote_id
 plan = bag.get('sensors_plan') or []
@@ -385,15 +390,18 @@ token = bag.get('token') or ''
 if not token:
     raise Exception("No token available. Run 'Get Token' action first.")
 
-cfg = {}
 try:
-    cfg = json.loads(Remote.connection_params or '{}')
+    cfg = json.loads(Remote.connection_params or '{}') or {}
 except Exception:
     cfg = {}
 
 auth_pass_b64 = (cfg.get('authPass') or '').strip()
 if not auth_pass_b64:
     raise Exception("Missing authPass in connection_params for decryption")
+
+key = base64.b64decode(auth_pass_b64)
+if len(key) not in (16, 24, 32):
+    raise Exception("Invalid AES key length in authPass")
 
 total_upserts = 0
 total_errors = 0
@@ -403,219 +411,267 @@ now = datetime.utcnow()
 end_date_str = now.strftime('%d-%m-%Y;%H:%M:%S')
 date_header = now.strftime('%a, %d %b %Y %H:%M:%S GMT')
 base = (base_url or '').rstrip('/')
+madrid_tz = pytz.timezone('Europe/Madrid')
+utc_tz = pytz.timezone('UTC')
+total_sensors = len(plan)
 
-for sensor_plan in plan:
+_logger.info(
+    '[MICROCOM] Sync start: remote_id=%s sensors=%s batch_size=%s',
+    Remote.id, total_sensors, BATCH_SIZE,
+)
+
+for sensor_idx, sensor_plan in enumerate(plan, 1):
     sensor_id = sensor_plan['sensor_id']
     device_id = sensor_plan['device_id']
     station_id = sensor_plan['station_id']
     channel_id = sensor_plan['channel_id']
-    start_date = sensor_plan['start_date']
+    start_date = str(sensor_plan['start_date'])
     sensor_name = sensor_plan.get('sensor_name', '')
     device_name = sensor_plan.get('device_name', '')
-    if len(start_date) == 10:
-        try:
+
+    item = {
+        'sensor_id': sensor_id,
+        'device_id': device_id,
+        'station_id': station_id,
+        'channel_id': channel_id,
+        'sensor_name': sensor_name,
+        'device_name': device_name,
+        'points_found': 0,
+        'upserts': 0,
+        'errors': 0,
+    }
+
+    try:
+        if len(start_date) == 10:
             dt = datetime.strptime(start_date, '%Y-%m-%d')
             start_date_str = dt.strftime('%d-%m-%Y;%H:%M:%S')
-        except Exception:
-            start_date_str = start_date.replace('-', '/') + ';00:00:00'
-    else:
-        try:
+        else:
             dt = datetime.strptime(start_date[:19], '%Y-%m-%d %H:%M:%S')
             start_date_str = dt.strftime('%d-%m-%Y;%H:%M:%S')
-        except Exception:
-            start_date_str = start_date.replace('-', '/').replace(' ', ';')
 
-    url = '%s/historical/%s?Accept-Encoding=gzip&startDate=%s&endDate=%s&channelView=CUSTOM&channels=%s' % (
-        base,
-        station_id,
-        start_date_str,
-        end_date_str,
-        channel_id
-    )
-    headers = {
-        'User-Agent': 'ZeusClient ApiREST',
-        'Date': date_header,
-        'Authorization': 'Bearer %s' % token,
-    }
-    try:
-        resp = request_retry('GET', url, headers=headers)
+        # Se mantiene el contrato de Zeus para historical / CUSTOM.
+        url = '%s/historical/%s?Accept-Encoding=gzip&startDate=%s&endDate=%s&channelView=CUSTOM&channels=%s' % (
+            base, station_id, start_date_str, end_date_str, channel_id,
+        )
+        headers = {
+            'User-Agent': 'ZeusClient ApiREST',
+            'Date': date_header,
+            'Authorization': 'Bearer %s' % token,
+        }
+
+        _logger.info(
+            '[MICROCOM] Sensor %s/%s: device_id=%s sensor_id=%s channel=%s start=%s',
+            sensor_idx, total_sensors, device_id, sensor_id, channel_id,
+            start_date_str,
+        )
+
+        # timeout es una variable del contexto de ejecucion de acciones Odoo.
+        resp = request_retry('GET', url, headers=headers, timeout=timeout)
+        item['status'] = resp.status_code
+
         if resp.status_code >= 400:
-            items.append({
-                'sensor_id': sensor_id,
-                'device_id': device_id,
-                'station_id': station_id,
-                'channel_id': channel_id,
-                'status': resp.status_code,
-                'error': (resp.text or '')[:400],
-                'url': url.split('?')[0]  # Hide params
-            })
+            item['error'] = (resp.text or '')[:400]
+            item['errors'] = 1
             total_errors += 1
+            _logger.warning(
+                '[MICROCOM] Sensor %s/%s: HTTP %s',
+                sensor_idx, total_sensors, resp.status_code,
+            )
+            items.append(item)
             continue
+
+        # Descifrado y descompresion: misma convencion que la accion anterior.
+        response_text = (resp.text or '').strip()
+        if not response_text:
+            items.append(item)
+            _logger.info('[MICROCOM] Sensor %s/%s: empty response', sensor_idx, total_sensors)
+            continue
+
         try:
-            response_text = resp.text.strip()
-            if not response_text:
-                items.append({
-                    'sensor_id': sensor_id,
-                    'device_id': device_id,
-                    'station_id': station_id,
-                    'channel_id': channel_id,
-                    'status': 0,
-                    'points_found': 0,
-                    'upserts': 0,
-                    'errors': 0,
-                })
-                continue
-            iv_b64 = response_text[:24]
-            ciphertext_b64 = response_text[24:]
-            iv = base64.b64decode(iv_b64)
-            ciphertext = base64.b64decode(ciphertext_b64)
-            key = base64.b64decode(auth_pass_b64)
+            iv = base64.b64decode(response_text[:24])
+            ciphertext = base64.b64decode(response_text[24:])
             backend = default_backend()
             cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
             decryptor = cipher.decryptor()
             decrypted_padded = decryptor.update(ciphertext) + decryptor.finalize()
             unpadder = crypto_padding.PKCS7(128).unpadder()
             decrypted_bytes = unpadder.update(decrypted_padded) + unpadder.finalize()
-            decompressed_text = None
-            decompress_method = None
+
             try:
-                decompressed_text = zlib.decompress(decrypted_bytes, 16 + zlib.MAX_WBITS).decode('utf-8')
-                decompress_method = 'gzip'
-            except Exception as e1:
+                decompressed_text = zlib.decompress(
+                    decrypted_bytes, 16 + zlib.MAX_WBITS,
+                ).decode('utf-8')
+            except Exception:
                 try:
-                    decompressed_text = zlib.decompress(decrypted_bytes).decode('utf-8')
-                    decompress_method = 'zlib'
-                except Exception as e2:
+                    decompressed_text = zlib.decompress(
+                        decrypted_bytes,
+                    ).decode('utf-8')
+                except Exception:
                     try:
-                        decompressed_text = zlib.decompress(decrypted_bytes, -zlib.MAX_WBITS).decode('utf-8')
-                        decompress_method = 'deflate'
-                    except Exception as e3:
-                        try:
-                            decompressed_text = decrypted_bytes.decode('utf-8')
-                            decompress_method = 'none'
-                        except Exception as e4:
-                            raise Exception('All decompression methods failed. Gzip: %s, Zlib: %s, Raw: %s, NoComp: %s' % (
-                                str(e1), str(e2), str(e3), str(e4)
-                            ))
-            if decompressed_text and decompressed_text.startswith('H4sI'):
+                        decompressed_text = zlib.decompress(
+                            decrypted_bytes, -zlib.MAX_WBITS,
+                        ).decode('utf-8')
+                    except Exception:
+                        decompressed_text = decrypted_bytes.decode('utf-8')
+
+            if decompressed_text.startswith('H4sI'):
                 try:
                     inner_gzip_bytes = base64.b64decode(decompressed_text)
-                    decompressed_text = zlib.decompress(inner_gzip_bytes, 16 + zlib.MAX_WBITS).decode('utf-8')
-                    decompress_method = decompress_method + '+gzip_inner'
-                except Exception as e_inner:
+                    decompressed_text = zlib.decompress(
+                        inner_gzip_bytes, 16 + zlib.MAX_WBITS,
+                    ).decode('utf-8')
+                except Exception:
                     pass
-            try:
-                data = json.loads(decompressed_text)
-            except ValueError as json_error:
-                raise Exception('Not valid JSON. First 200 chars: %s' % decompressed_text[:200])
 
+            data = json.loads(decompressed_text)
         except Exception as decode_error:
-            items.append({
-                'sensor_id': sensor_id,
-                'device_id': device_id,
-                'station_id': station_id,
-                'channel_id': channel_id,
-                'status': -1,
-                'error': 'Decrypt/Decompress/Parse error: %s' % str(decode_error),
-                'response_preview': (resp.text or '')[:200]
-            })
+            item['status'] = -1
+            item['error'] = 'Decrypt/Decompress/Parse error: %s' % decode_error
+            item['errors'] = 1
             total_errors += 1
+            items.append(item)
+            _logger.error(
+                '[MICROCOM] Sensor %s/%s: decrypt/decompress/JSON error: %s',
+                sensor_idx, total_sensors, decode_error,
+            )
             continue
-        upserts = 0
-        errs = 0
-        readings_summary = []
 
         if not isinstance(data, list):
             data = [data] if data else []
+
+        total_readings = len(data)
+        item['points_found'] = total_readings
+        readings_preview = []
+        upserts = 0
+        errs = 0
+        pending_upserts = 0
+
+        _logger.info(
+            '[MICROCOM] Sensor %s/%s: %s readings downloaded',
+            sensor_idx, total_sensors, total_readings,
+        )
+
         for record in data:
+            if not isinstance(record, dict):
+                errs += 1
+                continue
+
             date_of_record = record.get('DateOfRecord')
             value_str = record.get('Value')
-
             if not date_of_record or value_str is None:
                 continue
+
             try:
                 value = float(value_str)
             except Exception:
                 errs += 1
                 continue
+
             try:
                 date_part, time_part = date_of_record.split(';')
                 day, month, year = date_part.split('-')
                 time_components = time_part.split(':')
                 hour = time_components[0]
                 minute = time_components[1]
-                second_raw = time_components[2] if len(time_components) > 2 else '00'
-                if '.' in second_raw:
-                    second = second_raw.split('.')[0]
-                else:
-                    second = second_raw
+                second = time_components[2].split('.')[0] if len(time_components) > 2 else '00'
                 date_time_read = datetime(
-                    int(year),
-                    int(month),
-                    int(day),
-                    int(hour),
-                    int(minute),
-                    int(second)
+                    int(year), int(month), int(day),
+                    int(hour), int(minute), int(second),
                 )
-                madrid_tz = pytz.timezone('Europe/Madrid')
                 date_time_read = madrid_tz.localize(date_time_read)
-                utc_tz = pytz.timezone('UTC')
                 date_time_read = date_time_read.astimezone(utc_tz)
                 measurement_time = date_time_read.strftime('%Y-%m-%d %H:%M:%S')
-
             except Exception as date_error:
                 errs += 1
-                readings_summary.append({
-                    'date': date_of_record,
-                    'value': value,
-                    'error': 'Date parse error: %s' % str(date_error)
-                })
+                if len(readings_preview) < 5:
+                    readings_preview.append({
+                        'date': date_of_record, 'value': value,
+                        'error': 'Date parse error: %s' % date_error,
+                    })
                 continue
+
             try:
-                Remote.upsert(
-                    'mdm.measurement.device.sensor.reading',
-                    {'sensor_id': sensor_id, 'measurement_time': measurement_time},
-                    {'value': value, 'remotecontrol_origin_id': Remote.id}
-                )
+                # Un fallo PostgreSQL queda aislado y no contamina la transaccion.
+                with env.cr.savepoint():
+                    Remote.upsert(
+                        'mdm.measurement.device.sensor.reading',
+                        {'sensor_id': sensor_id, 'measurement_time': measurement_time},
+                        {'value': value, 'remotecontrol_origin_id': Remote.id},
+                    )
                 upserts += 1
-                readings_summary.append({
-                    'time': measurement_time,
-                    'value': value
-                })
+                pending_upserts += 1
+                if len(readings_preview) < 5:
+                    readings_preview.append({
+                        'time': measurement_time, 'value': value,
+                    })
             except Exception as upsert_error:
+                env.clear()
                 errs += 1
-                readings_summary.append({
-                    'time': measurement_time,
-                    'value': value,
-                    'error': str(upsert_error)
-                })
-        total_upserts += upserts
-        total_errors += errs
-        items.append({
-            'sensor_id': sensor_id,
-            'device_id': device_id,
-            'station_id': station_id,
-            'channel_id': channel_id,
-            'sensor_name': sensor_name,
-            'device_name': device_name,
-            'status': resp.status_code,
-            'points_found': len(data),
+                if len(readings_preview) < 5:
+                    readings_preview.append({
+                        'time': measurement_time, 'value': value,
+                        'error': str(upsert_error),
+                    })
+                _logger.error(
+                    '[MICROCOM] Upsert error: device_id=%s sensor_id=%s time=%s: %s',
+                    device_id, sensor_id, measurement_time, upsert_error,
+                )
+                continue
+
+            if pending_upserts >= BATCH_SIZE:
+                # Los lotes guardados permanecen si falla un sensor posterior.
+                if not env.context.get('remotecontrol_test_run'):
+                    try:
+                        env.cr.commit()
+                    except Exception as commit_error:
+                        raise BatchCommitError(str(commit_error))
+                pending_upserts = 0
+                _logger.info(
+                    '[MICROCOM] Sensor %s/%s: committed=%s/%s errors=%s',
+                    sensor_idx, total_sensors, upserts, total_readings, errs,
+                )
+
+        # Guardar el ultimo lote parcial de este sensor.
+        if pending_upserts and not env.context.get('remotecontrol_test_run'):
+            try:
+                env.cr.commit()
+            except Exception as commit_error:
+                raise BatchCommitError(str(commit_error))
+            _logger.info(
+                '[MICROCOM] Sensor %s/%s: last batch committed; upserts=%s errors=%s',
+                sensor_idx, total_sensors, upserts, errs,
+            )
+
+        item.update({
             'upserts': upserts,
             'errors': errs,
-            'readings_preview': readings_summary[:5],  # First 5 readings
+            'readings_preview': readings_preview,
         })
+        total_upserts += upserts
+        total_errors += errs
+        items.append(item)
 
-    except Exception as e:
+        _logger.info(
+            '[MICROCOM] Sensor %s/%s finished: upserts=%s errors=%s',
+            sensor_idx, total_sensors, upserts, errs,
+        )
+
+    except BatchCommitError:
+        # No es seguro continuar si PostgreSQL no ha podido confirmar un lote.
+        _logger.exception('[MICROCOM] Batch COMMIT failed; aborting synchronization')
+        raise
+    except Exception as sensor_error:
+        item['status'] = -1
+        item['errors'] += 1
+        item['error'] = str(sensor_error)
         total_errors += 1
-        items.append({
-            'sensor_id': sensor_id,
-            'device_id': device_id,
-            'station_id': station_id,
-            'channel_id': channel_id,
-            'status': -1,
-            'error': str(e),
-        })
+        items.append(item)
+        _logger.exception(
+            '[MICROCOM] Sensor %s/%s failed: sensor_id=%s',
+            sensor_idx, total_sensors, sensor_id,
+        )
 
+# La auditoria se mantiene acotada a 5 lecturas de ejemplo por sensor.
 audit = {
     'executed_at': fields.Datetime.now(),
     'total_upserts': total_upserts,
@@ -635,8 +691,8 @@ except Exception as json_error:
     }
     audit_json = json.dumps(simple_audit, ensure_ascii=True, indent=2)
     b64 = base64.b64encode(audit_json.encode('utf-8'))
-fname = 'microcom_readings_fetch_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
 
+fname = 'microcom_readings_fetch_%s.json' % fields.Datetime.now().replace(':', '').replace('-', '').replace(' ', '_')
 att = env['ir.attachment'].create({
     'name': fname,
     'datas_fname': fname,
@@ -645,9 +701,15 @@ att = env['ir.attachment'].create({
     'res_model': 'remotecontrol',
     'res_id': Remote.id,
 })
+
 bag['upserts'] = total_upserts
 bag['errors'] = total_errors
 bag['audit_attachment_id'] = att.id
+
+_logger.info(
+    '[MICROCOM] Sync finished: sensors=%s upserts=%s errors=%s audit_id=%s',
+    len(items), total_upserts, total_errors, att.id,
+)
 ]]></field>
         </record>
 

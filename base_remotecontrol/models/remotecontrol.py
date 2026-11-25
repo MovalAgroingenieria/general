@@ -422,7 +422,8 @@ class RemoteControlAction(models.Model):
         result_bag = {}
         try:
             with self.env.cr.savepoint():
-                result_bag = self.execute(bag={})
+                result_bag = self.with_context(
+                    remotecontrol_test_run=True).execute(bag={})
                 raise Exception("__ROLLBACK__")
         except Exception as e:
             if unicode(e) == "__ROLLBACK__":
@@ -574,7 +575,8 @@ class RemoteControlProcedure(models.Model):
                 for step in self.step_ids.sorted(key=lambda s: s.sequence):
                     step_name = step.name or step.action_id.name
                     try:
-                        bag = step.action_id.execute(bag=bag)
+                        bag = step.action_id.with_context(
+                            remotecontrol_test_run=True).execute(bag=bag)
                         step_results.append(u"OK: %s" % step_name)
                     except Exception as e:
                         step_results.append(
